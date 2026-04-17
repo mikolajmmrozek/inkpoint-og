@@ -1,32 +1,26 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
 
-const slides = [
-  {
-    image: 'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=1800&q=90',
-    artist: 'Mikołaj',
-    specialty: 'Neotradycyjny & Kolor',
-    tag: '01 / 03',
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1562962230-16b87a0b2935?w=1800&q=90',
-    artist: 'Czarek',
-    specialty: 'Ilustracyjny & Indywidualny',
-    tag: '02 / 03',
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1554721834-bbbe4c1ab9c5?w=1800&q=90',
-    artist: 'Matys',
-    specialty: 'Tatuaż',
-    tag: '03 / 03',
-  },
+const FALLBACK_SLIDES = [
+  { name: 'Mikołaj', specialty: 'Neotradycyjny & Kolor', slug: 'mikolaj', photo_url: 'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=1800&q=90' },
+  { name: 'Czarek', specialty: 'Ilustracyjny & Indywidualny', slug: 'czarek', photo_url: 'https://images.unsplash.com/photo-1562962230-16b87a0b2935?w=1800&q=90' },
+  { name: 'Matys', specialty: 'Tatuaż', slug: 'matys', photo_url: 'https://images.unsplash.com/photo-1554721834-bbbe4c1ab9c5?w=1800&q=90' },
+  { name: 'Julia', specialty: 'Piercing', slug: 'julia', photo_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1800&q=90' },
 ];
 
 export default function HeroSlider() {
+  const [slides, setSlides] = useState(FALLBACK_SLIDES);
   const [current, setCurrent] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const intervalRef = useRef(null);
+
+  useEffect(() => {
+    base44.entities.Artist.filter({ is_active: true })
+      .then(data => { if (data.length > 0) setSlides(data); })
+      .catch(() => {});
+  }, []);
 
   const goTo = (index) => {
     if (isTransitioning) return;
@@ -37,12 +31,13 @@ export default function HeroSlider() {
 
   useEffect(() => {
     intervalRef.current = setInterval(() => {
-      goTo((current + 1) % slides.length);
+      setCurrent(c => (c + 1) % slides.length);
     }, 6000);
     return () => clearInterval(intervalRef.current);
-  }, [current]);
+  }, [slides.length]);
 
   const slide = slides[current];
+  const specialties = Array.isArray(slide?.specialty) ? slide.specialty.join(' & ') : (slide?.specialty || '');
 
   return (
     <section className="relative w-full h-screen overflow-hidden">
@@ -57,8 +52,8 @@ export default function HeroSlider() {
           className="absolute inset-0"
         >
           <img
-            src={slide.image}
-            alt={slide.artist}
+            src={slide?.photo_url || FALLBACK_SLIDES[current % FALLBACK_SLIDES.length]?.photo_url}
+            alt={slide?.name}
             className="w-full h-full object-cover"
             style={{ filter: 'brightness(0.35) contrast(1.1)' }}
           />
@@ -67,7 +62,6 @@ export default function HeroSlider() {
 
       {/* Gradient overlay */}
       <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(10,10,10,0.97) 0%, rgba(10,10,10,0.4) 60%, rgba(10,10,10,0.7) 100%)' }} />
-      {/* Fuchsia bottom gradient */}
       <div className="absolute bottom-0 left-0 right-0 h-64" style={{ background: 'linear-gradient(to top, rgba(255,0,127,0.12) 0%, transparent 100%)' }} />
 
       {/* Content */}
@@ -81,11 +75,11 @@ export default function HeroSlider() {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
             className="max-w-2xl"
           >
-            <p className="text-micro text-oxblood mb-6" style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: '#FF007F', letterSpacing: '0.2em' }}>
-              {slide.tag} — {slide.specialty}
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: '#FF007F', letterSpacing: '0.2em', marginBottom: '24px' }}>
+              {String(current + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')} — {specialties}
             </p>
 
-            <h1 style={{
+            <h2 style={{
               fontFamily: 'Bebas Neue, Barlow Condensed, system-ui',
               fontSize: 'clamp(4rem, 10vw, 9rem)',
               fontWeight: 400,
@@ -93,23 +87,23 @@ export default function HeroSlider() {
               color: '#F5F0EB',
               letterSpacing: '0.04em',
             }}>
-              {slide.artist.split(' ').map((word, i) => (
+              {(slide?.name || '').split(' ').map((word, i) => (
                 <span key={i} className="block">{word}</span>
               ))}
-            </h1>
+            </h2>
 
             <div className="mt-8 h-px w-16" style={{ background: 'linear-gradient(to right, #FF007F, transparent)', height: '1px' }} />
 
-            <p className="mt-6 text-parchment/60 text-base leading-relaxed max-w-sm" style={{ color: 'rgba(245,240,235,0.6)', fontSize: '15px' }}>
-              Każdy tatuaż to unikalna historia wyryta na skórze. Trwała, precyzyjna, Twoja.
+            <p className="mt-6 max-w-sm" style={{ color: 'rgba(245,240,235,0.6)', fontSize: '15px', lineHeight: 1.7 }}>
+              {slide?.bio ? slide.bio.slice(0, 120) + (slide.bio.length > 120 ? '…' : '') : 'Każdy tatuaż to unikalna historia wyryta na skórze. Trwała, precyzyjna, Twoja.'}
             </p>
 
             <div className="mt-10 flex gap-4 flex-wrap">
-              <Link to="/booking" className="btn-oxblood">
-                Umów Sesję
+              <Link to={`/artists/${slide?.slug || slide?.id || ''}`} className="btn-oxblood">
+                Zobacz Portfolio
               </Link>
-              <Link to="/artists" className="btn-ghost-parchment">
-                Poznaj Artystów
+              <Link to="/booking" className="btn-ghost-parchment">
+                Umów Sesję
               </Link>
             </div>
           </motion.div>
@@ -133,7 +127,7 @@ export default function HeroSlider() {
 
         {/* Scroll hint */}
         <div className="absolute bottom-10 right-8 md:right-16 flex flex-col items-center gap-3">
-          <p className="text-micro" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.2em', writingMode: 'vertical-rl' }}>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.2em', writingMode: 'vertical-rl' }}>
             SCROLL
           </p>
           <div className="w-px h-12 relative overflow-hidden" style={{ background: 'rgba(245,240,235,0.1)' }}>

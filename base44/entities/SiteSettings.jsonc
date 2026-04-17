@@ -1,0 +1,25 @@
+{
+  "name": "SiteSettings",
+  "type": "object",
+  "properties": {
+    "key": {
+      "type": "string",
+      "description": "Unique key, e.g. 'hero'"
+    },
+    "hero_video_url": {
+      "type": "string",
+      "description": "Looping background video URL"
+    },
+    "hero_tagline": {
+      "type": "string",
+      "description": "Main headline over the video"
+    },
+    "hero_subtext": {
+      "type": "string",
+      "description": "Subheadline / description"
+    }
+  },
+  "required": [
+    "key"
+  ]
+}

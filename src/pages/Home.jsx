@@ -1,4 +1,5 @@
 import PageLayout from '../components/layout/PageLayout';
+import StudioHero from '../components/home/StudioHero';
 import HeroSlider from '../components/home/HeroSlider';
 import HomeAbout from '../components/home/HomeAbout';
 import HomeCTA from '../components/home/HomeCTA';
@@ -17,6 +18,23 @@ const galleryImages = [
 export default function Home() {
   return (
     <PageLayout>
+      <StudioHero />
+
+      {/* Divider */}
+      <div className="px-8 md:px-16">
+        <div style={{ height: '0.5px', background: '#262626' }} />
+      </div>
+
+      {/* Artist slider section */}
+      <div className="px-8 md:px-16 pt-12 pb-4">
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>
+          NASZ ZESPÓŁ
+        </p>
+        <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(2rem, 5vw, 4rem)', fontWeight: 400, color: '#F5F0EB', lineHeight: 0.95, letterSpacing: '0.04em' }}>
+          Artyści
+        </h2>
+      </div>
+
       <HeroSlider />
 
       {/* Divider */}

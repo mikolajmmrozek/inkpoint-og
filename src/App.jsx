@@ -24,6 +24,7 @@ import DashboardArtists from './pages/dashboard/DashboardArtists';
 import DashboardBlog from './pages/dashboard/DashboardBlog';
 import DashboardMessages from './pages/dashboard/DashboardMessages';
 import DashboardHealthForms from './pages/dashboard/DashboardHealthForms';
+import DashboardSettings from './pages/dashboard/DashboardSettings';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -65,6 +66,7 @@ const AuthenticatedApp = () => {
         <Route path="blog" element={<DashboardBlog />} />
         <Route path="messages" element={<DashboardMessages />} />
         <Route path="health-forms" element={<DashboardHealthForms />} />
+        <Route path="settings" element={<DashboardSettings />} />
       </Route>
 
       <Route path="*" element={<PageNotFound />} />
