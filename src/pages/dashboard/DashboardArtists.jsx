@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Plus, Edit, Trash2, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useTheme } from './Dashboard';
 
 const inputStyle = {
   background: 'transparent',
@@ -16,6 +17,10 @@ const inputStyle = {
 };
 
 export default function DashboardArtists() {
+  const { theme } = useTheme();
+  const t = theme === 'light'
+    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F', modalBg: '#FFFFFF' }
+    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F', modalBg: '#0A0A0A' };
   const [artists, setArtists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null);
@@ -79,8 +84,8 @@ export default function DashboardArtists() {
     <div>
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#8B1A1A', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>ZARZĄDZANIE</p>
-          <h2 style={{ fontFamily: 'Cormorant Garamond', fontSize: '2.5rem', fontWeight: 700, color: '#F5F0EB', lineHeight: 1 }}>Artyści</h2>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>ZARZĄDZANIE</p>
+          <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>Artyści</h2>
         </div>
         <button onClick={openNew} className="flex items-center gap-2 btn-oxblood">
           <Plus size={14} /> DODAJ ARTYSTĘ
@@ -93,17 +98,17 @@ export default function DashboardArtists() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(10,10,10,0.95)' }}>
             <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="w-full max-w-2xl max-h-screen overflow-y-auto" style={{ border: '0.5px solid #262626', background: '#0A0A0A', padding: '40px' }}>
               <div className="flex justify-between items-center mb-8">
-                <h3 style={{ fontFamily: 'Cormorant Garamond', fontSize: '2rem', fontWeight: 600, color: '#F5F0EB' }}>
+                <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
                   {editing === 'new' ? 'Nowy Artysta' : 'Edytuj Artystę'}
                 </h3>
-                <button onClick={() => setEditing(null)} style={{ color: 'rgba(245,240,235,0.4)' }}><X size={20} /></button>
+                <button onClick={() => setEditing(null)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
               </div>
 
               <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Imię i Nazwisko *</label>
-                    <input style={inputStyle} value={form.name || ''} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                    <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Imię i Nazwisko *</label>
+                    <input style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={form.name || ''} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                   </div>
                   <div>
                     <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Slug (URL)</label>
@@ -179,27 +184,27 @@ export default function DashboardArtists() {
           <div className="w-8 h-px animate-pulse" style={{ background: '#8B1A1A' }} />
         </div>
       ) : (
-        <div style={{ border: '0.5px solid #262626' }}>
+        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
           {artists.length === 0 ? (
             <div className="py-20 text-center">
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.2)', letterSpacing: '0.1em' }}>BRAK ARTYSTÓW</p>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK ARTYSTÓW</p>
             </div>
           ) : artists.map((a, i) => (
-            <div key={a.id} className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors" style={{ borderBottom: i < artists.length - 1 ? '0.5px solid #262626' : 'none' }}>
+            <div key={a.id} className="flex items-center justify-between p-4 transition-colors" style={{ borderBottom: i < artists.length - 1 ? `0.5px solid ${t.border}` : 'none' }}>
               <div className="flex items-center gap-4">
-                {a.photo_url && <img src={a.photo_url} alt="" className="w-10 h-10 object-cover" style={{ filter: 'brightness(0.7)' }} />}
+                {a.photo_url && <img src={a.photo_url} alt="" className="w-10 h-10 object-cover" />}
                 <div>
-                  <p style={{ color: '#F5F0EB', fontSize: '14px', fontWeight: 500 }}>{a.name}</p>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.08em', marginTop: '2px' }}>
+                  <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{a.name}</p>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
                     {(a.specialty || []).join(', ')} · {a.years_experience} lat
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <button onClick={() => openEdit(a)} style={{ color: 'rgba(245,240,235,0.3)', background: 'none', border: 'none', cursor: 'pointer' }}>
+                <button onClick={() => openEdit(a)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
                   <Edit size={14} />
                 </button>
-                <button onClick={() => deleteArtist(a.id)} style={{ color: '#8B1A1A', background: 'none', border: 'none', cursor: 'pointer' }}>
+                <button onClick={() => deleteArtist(a.id)} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer' }}>
                   <Trash2 size={14} />
                 </button>
               </div>

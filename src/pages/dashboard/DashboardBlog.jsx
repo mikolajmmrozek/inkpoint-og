@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Plus, Edit, Trash2, Eye, EyeOff, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from './Dashboard';
 
 const inputStyle = {
   background: 'transparent',
@@ -16,6 +17,10 @@ const inputStyle = {
 };
 
 export default function DashboardBlog() {
+  const { theme } = useTheme();
+  const t = theme === 'light'
+    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F', modalBg: '#FFFFFF', inputBorder: '#D0D0D0' }
+    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F', modalBg: '#0A0A0A', inputBorder: '#262626' };
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null); // null | 'new' | post object
@@ -75,10 +80,10 @@ export default function DashboardBlog() {
     <div>
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#8B1A1A', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>
             ZARZĄDZANIE
           </p>
-          <h2 style={{ fontFamily: 'Cormorant Garamond', fontSize: '2.5rem', fontWeight: 700, color: '#F5F0EB', lineHeight: 1 }}>
+          <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>
             Blog
           </h2>
         </div>
@@ -95,20 +100,20 @@ export default function DashboardBlog() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            style={{ background: 'rgba(10,10,10,0.95)' }}
+            style={{ background: 'rgba(0,0,0,0.7)' }}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               className="w-full max-w-3xl max-h-screen overflow-y-auto"
-              style={{ border: '0.5px solid #262626', background: '#0A0A0A', padding: '40px' }}
+              style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '40px' }}
             >
               <div className="flex justify-between items-center mb-8">
-                <h3 style={{ fontFamily: 'Cormorant Garamond', fontSize: '2rem', fontWeight: 600, color: '#F5F0EB' }}>
+                <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
                   {editing === 'new' ? 'Nowy Post' : 'Edytuj Post'}
                 </h3>
-                <button onClick={() => setEditing(null)} style={{ color: 'rgba(245,240,235,0.4)' }}>
+                <button onClick={() => setEditing(null)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
                   <X size={20} />
                 </button>
               </div>
@@ -191,22 +196,22 @@ export default function DashboardBlog() {
           <div className="w-8 h-px animate-pulse" style={{ background: '#8B1A1A' }} />
         </div>
       ) : (
-        <div style={{ border: '0.5px solid #262626' }}>
+        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
           {posts.length === 0 ? (
             <div className="py-20 text-center">
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.2)', letterSpacing: '0.1em' }}>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
                 BRAK POSTÓW
               </p>
             </div>
           ) : posts.map((post, i) => (
-            <div key={post.id} className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors" style={{ borderBottom: i < posts.length - 1 ? '0.5px solid #262626' : 'none' }}>
+            <div key={post.id} className="flex items-center justify-between p-4 transition-colors" style={{ borderBottom: i < posts.length - 1 ? `0.5px solid ${t.border}` : 'none' }}>
               <div className="flex items-center gap-6 min-w-0">
                 {post.cover_image_url && (
-                  <img src={post.cover_image_url} alt="" className="w-12 h-12 object-cover flex-shrink-0" style={{ filter: 'brightness(0.6)' }} />
+                  <img src={post.cover_image_url} alt="" className="w-12 h-12 object-cover flex-shrink-0" />
                 )}
                 <div className="min-w-0">
-                  <p style={{ color: '#F5F0EB', fontSize: '14px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</p>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.08em', marginTop: '2px' }}>
+                  <p style={{ color: t.text, fontSize: '14px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</p>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
                     {post.author_name} · {post.published_at || 'Brak daty'}
                   </p>
                 </div>
@@ -215,13 +220,13 @@ export default function DashboardBlog() {
                 <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.1em', padding: '3px 8px', border: `0.5px solid ${post.is_published ? '#4A7C59' : '#262626'}`, color: post.is_published ? '#4A7C59' : 'rgba(245,240,235,0.3)' }}>
                   {post.is_published ? 'LIVE' : 'SZKIC'}
                 </span>
-                <button onClick={() => togglePublish(post)} style={{ color: 'rgba(245,240,235,0.3)', cursor: 'pointer', background: 'none', border: 'none' }}>
+                <button onClick={() => togglePublish(post)} style={{ color: t.muted, cursor: 'pointer', background: 'none', border: 'none' }}>
                   {post.is_published ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
-                <button onClick={() => openEdit(post)} style={{ color: 'rgba(245,240,235,0.3)', cursor: 'pointer', background: 'none', border: 'none' }}>
+                <button onClick={() => openEdit(post)} style={{ color: t.muted, cursor: 'pointer', background: 'none', border: 'none' }}>
                   <Edit size={14} />
                 </button>
-                <button onClick={() => deletePost(post.id)} style={{ color: '#8B1A1A', cursor: 'pointer', background: 'none', border: 'none' }}>
+                <button onClick={() => deletePost(post.id)} style={{ color: t.fuchsia, cursor: 'pointer', background: 'none', border: 'none' }}>
                   <Trash2 size={14} />
                 </button>
               </div>

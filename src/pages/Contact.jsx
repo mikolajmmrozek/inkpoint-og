@@ -37,7 +37,7 @@ export default function Contact() {
           <p className="text-micro text-oxblood mb-6" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em' }}>
             NAPISZ DO NAS
           </p>
-          <h1 style={{ fontFamily: 'Cormorant Garamond', fontSize: 'clamp(3rem, 7vw, 6rem)', fontWeight: 700, lineHeight: 0.9, color: '#F5F0EB' }}>
+          <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(4rem, 9vw, 8rem)', fontWeight: 400, lineHeight: 0.9, color: '#F5F0EB', letterSpacing: '0.04em' }}>
             Kontakt
           </h1>
         </motion.div>
@@ -54,7 +54,7 @@ export default function Contact() {
             {sent ? (
               <div className="py-16">
                 <div className="w-8 h-px mb-8" style={{ background: '#FF007F' }} />
-                <h3 style={{ fontFamily: 'Cormorant Garamond', fontSize: '2.5rem', fontWeight: 600, color: '#F5F0EB' }}>
+                <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: '#F5F0EB', letterSpacing: '0.04em' }}>
                   Wiadomość wysłana
                 </h3>
                 <p className="mt-4 text-sm" style={{ color: 'rgba(245,240,235,0.5)', fontSize: '14px' }}>

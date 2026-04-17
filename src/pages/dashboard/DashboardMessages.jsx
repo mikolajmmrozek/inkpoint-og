@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Trash2, Mail, MailOpen } from 'lucide-react';
+import { useTheme } from './Dashboard';
 
 export default function DashboardMessages() {
+  const { theme } = useTheme();
+  const t = theme === 'light'
+    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F', hover: 'rgba(0,0,0,0.03)' }
+    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F', hover: 'rgba(255,255,255,0.05)' };
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
@@ -32,51 +37,51 @@ export default function DashboardMessages() {
   return (
     <div>
       <div className="mb-8">
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#8B1A1A', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>
           SKRZYNKA ODBIORCZA
         </p>
-        <h2 style={{ fontFamily: 'Cormorant Garamond', fontSize: '2.5rem', fontWeight: 700, color: '#F5F0EB', lineHeight: 1 }}>
+        <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>
           Wiadomości
         </h2>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* List */}
-        <div style={{ border: '0.5px solid #262626' }}>
+        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
           {loading ? (
             <div className="flex items-center justify-center py-20">
-              <div className="w-8 h-px animate-pulse" style={{ background: '#8B1A1A' }} />
+              <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
             </div>
           ) : messages.length === 0 ? (
             <div className="py-20 text-center">
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.2)', letterSpacing: '0.1em' }}>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
                 BRAK WIADOMOŚCI
               </p>
             </div>
           ) : messages.map((msg, i) => (
             <div
               key={msg.id}
-              className="flex items-center gap-4 p-4 cursor-pointer hover:bg-white/5 transition-colors"
-              style={{ borderBottom: i < messages.length - 1 ? '0.5px solid #262626' : 'none', background: selected?.id === msg.id ? 'rgba(139,26,26,0.05)' : 'transparent' }}
+              className="flex items-center gap-4 p-4 cursor-pointer transition-colors"
+              style={{ borderBottom: i < messages.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selected?.id === msg.id ? 'rgba(255,0,127,0.05)' : 'transparent' }}
               onClick={() => markRead(msg)}
             >
               <div className="flex-shrink-0">
                 {msg.is_read ? (
-                  <MailOpen size={14} color="rgba(245,240,235,0.2)" />
+                  <MailOpen size={14} color={t.muted} />
                 ) : (
-                  <Mail size={14} color="#8B1A1A" />
+                  <Mail size={14} color={t.fuchsia} />
                 )}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
-                  <p style={{ color: msg.is_read ? 'rgba(245,240,235,0.5)' : '#F5F0EB', fontSize: '14px', fontWeight: msg.is_read ? 400 : 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <p style={{ color: msg.is_read ? t.muted : t.text, fontSize: '14px', fontWeight: msg.is_read ? 400 : 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {msg.name}
                   </p>
-                  <button onClick={(e) => { e.stopPropagation(); deleteMsg(msg.id); }} style={{ color: '#8B1A1A', background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0 }}>
+                  <button onClick={(e) => { e.stopPropagation(); deleteMsg(msg.id); }} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0 }}>
                     <Trash2 size={12} />
                   </button>
                 </div>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.05em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.05em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {msg.subject || msg.message?.slice(0, 50)}
                 </p>
               </div>
@@ -86,21 +91,21 @@ export default function DashboardMessages() {
 
         {/* Detail */}
         {selected ? (
-          <div style={{ border: '0.5px solid #262626', padding: '24px' }}>
-            <div className="mb-6 pb-6" style={{ borderBottom: '0.5px solid #262626' }}>
-              <h3 style={{ fontFamily: 'Cormorant Garamond', fontSize: '1.75rem', fontWeight: 600, color: '#F5F0EB' }}>
+          <div style={{ border: `0.5px solid ${t.border}`, padding: '24px', background: t.bg }}>
+            <div className="mb-6 pb-6" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+              <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.75rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
                 {selected.name}
               </h3>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.35)', letterSpacing: '0.08em', marginTop: '4px' }}>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '4px' }}>
                 {selected.email} {selected.phone ? `· ${selected.phone}` : ''}
               </p>
             </div>
             {selected.subject && (
-              <p className="mb-4" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#8B1A1A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              <p className="mb-4" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                 {selected.subject}
               </p>
             )}
-            <p style={{ color: 'rgba(245,240,235,0.7)', fontSize: '15px', lineHeight: 1.8 }}>
+            <p style={{ color: t.muted, fontSize: '15px', lineHeight: 1.8 }}>
               {selected.message}
             </p>
             <a
@@ -112,8 +117,8 @@ export default function DashboardMessages() {
             </a>
           </div>
         ) : (
-          <div className="flex items-center justify-center" style={{ border: '0.5px solid #1a1a1a' }}>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.1)', letterSpacing: '0.1em' }}>
+          <div className="flex items-center justify-center" style={{ border: `0.5px solid ${t.border}` }}>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
               WYBIERZ WIADOMOŚĆ
             </p>
           </div>

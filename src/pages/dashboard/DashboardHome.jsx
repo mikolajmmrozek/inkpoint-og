@@ -3,8 +3,10 @@ import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Calendar, Users, MessageSquare, FileText, TrendingUp, Clock } from 'lucide-react';
+import { useTheme } from './Dashboard';
 
 export default function DashboardHome() {
+  const { theme } = useTheme();
   const [stats, setStats] = useState({ bookings: 0, pending: 0, messages: 0, forms: 0 });
   const [recentBookings, setRecentBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,11 +28,15 @@ export default function DashboardHome() {
   }, []);
 
   const STATUS_COLORS = {
-    pending: '#8B1A1A',
-    confirmed: '#4A7C59',
-    completed: '#4A6FA5',
-    cancelled: '#5A5A5A',
+    pending: '#FF007F',
+    confirmed: '#16a34a',
+    completed: '#2563eb',
+    cancelled: '#9ca3af',
   };
+
+  const t = theme === 'light'
+    ? { label: '#FF007F', title: '#111111', muted: 'rgba(0,0,0,0.4)', cardBg: '#FFFFFF', cardBorder: '#E5E5E5', value: '#111111', rowHover: 'rgba(0,0,0,0.03)', rowBorder: '#E5E5E5' }
+    : { label: '#FF007F', title: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', cardBg: 'rgba(38,38,38,0.2)', cardBorder: '#262626', value: '#F5F0EB', rowHover: 'rgba(255,255,255,0.05)', rowBorder: '#262626' };
 
   const KPI = [
     { label: 'Wszystkie rezerwacje', value: stats.bookings, icon: Calendar, link: '/dashboard/bookings' },
@@ -42,10 +48,10 @@ export default function DashboardHome() {
   return (
     <div>
       <div className="mb-10">
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#8B1A1A', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.label, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
           PANEL GŁÓWNY
         </p>
-        <h1 style={{ fontFamily: 'Cormorant Garamond', fontSize: '3rem', fontWeight: 700, color: '#F5F0EB', lineHeight: 1 }}>
+        <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '3rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>
           Przegląd
         </h1>
       </div>
@@ -61,15 +67,15 @@ export default function DashboardHome() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1, duration: 0.5 }}
             >
-              <Link to={kpi.link} className="block p-6 transition-all duration-300 hover:border-oxblood" style={{ border: '0.5px solid #262626', background: 'rgba(38,38,38,0.2)' }}>
+              <Link to={kpi.link} className="block p-6 transition-all duration-300" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
                 <div className="flex items-start justify-between mb-4">
-                  <Icon size={16} color="#8B1A1A" />
-                  <TrendingUp size={12} color="rgba(245,240,235,0.15)" />
+                  <Icon size={16} color="#FF007F" />
+                  <TrendingUp size={12} color={t.muted} />
                 </div>
-                <p style={{ fontFamily: 'Cormorant Garamond', fontSize: '2.5rem', fontWeight: 700, color: '#F5F0EB', lineHeight: 1 }}>
+                <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.value, lineHeight: 1, letterSpacing: '0.04em' }}>
                   {loading ? '—' : kpi.value}
                 </p>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.35)', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px' }}>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px' }}>
                   {kpi.label}
                 </p>
               </Link>
@@ -81,44 +87,37 @@ export default function DashboardHome() {
       {/* Recent bookings */}
       <div>
         <div className="flex items-center justify-between mb-6">
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
             OSTATNIE REZERWACJE
           </p>
-          <Link to="/dashboard/bookings" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#8B1A1A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+          <Link to="/dashboard/bookings" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             WSZYSTKIE →
           </Link>
         </div>
 
-        <div style={{ border: '0.5px solid #262626' }}>
+        <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
           {loading ? (
             <div className="p-8 text-center">
-              <div className="w-8 h-px mx-auto animate-pulse" style={{ background: '#8B1A1A' }} />
+              <div className="w-8 h-px mx-auto animate-pulse" style={{ background: '#FF007F' }} />
             </div>
           ) : recentBookings.length === 0 ? (
             <div className="p-8 text-center">
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.2)', letterSpacing: '0.1em' }}>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
                 BRAK REZERWACJI
               </p>
             </div>
           ) : (
             recentBookings.map((b, i) => (
-              <div key={b.id} className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors" style={{ borderBottom: i < recentBookings.length - 1 ? '0.5px solid #262626' : 'none' }}>
-                <div className="flex items-center gap-6">
-                  <div>
-                    <p style={{ color: '#F5F0EB', fontSize: '14px', fontWeight: 500 }}>{b.client_name}</p>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.35)', letterSpacing: '0.08em', marginTop: '2px' }}>
-                      {b.artist_name} · {b.session_date}
-                    </p>
-                  </div>
+              <div key={b.id} className="flex items-center justify-between p-4 transition-colors" style={{ borderBottom: i < recentBookings.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }}>
+                <div>
+                  <p style={{ color: t.value, fontSize: '14px', fontWeight: 500 }}>{b.client_name}</p>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
+                    {b.artist_name} · {b.session_date}
+                  </p>
                 </div>
                 <span style={{
-                  fontFamily: 'JetBrains Mono',
-                  fontSize: '9px',
-                  letterSpacing: '0.1em',
-                  textTransform: 'uppercase',
-                  padding: '4px 10px',
-                  border: `0.5px solid ${STATUS_COLORS[b.status] || '#262626'}`,
-                  color: STATUS_COLORS[b.status] || 'rgba(245,240,235,0.4)',
+                  fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase',
+                  padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status] || t.cardBorder}`, color: STATUS_COLORS[b.status] || t.muted,
                 }}>
                   {b.status}
                 </span>
