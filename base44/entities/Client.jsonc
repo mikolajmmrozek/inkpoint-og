@@ -2,9 +2,17 @@
   "name": "Client",
   "type": "object",
   "properties": {
+    "first_name": {
+      "type": "string",
+      "description": "Imi\u0119 klienta"
+    },
+    "last_name": {
+      "type": "string",
+      "description": "Nazwisko klienta"
+    },
     "name": {
       "type": "string",
-      "description": "Imi\u0119 i nazwisko klienta"
+      "description": "Pe\u0142ne imi\u0119 i nazwisko"
     },
     "email": {
       "type": "string",
@@ -25,6 +33,6 @@
     }
   },
   "required": [
-    "name"
+    "first_name"
   ]
 }

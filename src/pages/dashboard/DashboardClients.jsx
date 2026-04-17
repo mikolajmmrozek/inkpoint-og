@@ -63,13 +63,15 @@ export default function DashboardClients() {
   });
 
   const openEdit = (c) => { setForm({ ...c }); setEditing(c); };
-  const openNew = () => { setForm({ name: '', email: '', phone: '', notes: '', total_sessions: 0 }); setEditing('new'); };
+  const openNew = () => { setForm({ first_name: '', last_name: '', email: '', phone: '', notes: '', total_sessions: 0 }); setEditing('new'); };
 
   const handleSave = async () => {
+    const name = `${form.first_name || ''} ${form.last_name || ''}`.trim();
+    const data = { ...form, name };
     if (editing === 'new') {
-      await base44.entities.Client.create(form);
+      await base44.entities.Client.create(data);
     } else {
-      await base44.entities.Client.update(editing.id, form);
+      await base44.entities.Client.update(editing.id, data);
     }
     setEditing(null);
     load();
@@ -240,7 +242,10 @@ export default function DashboardClients() {
               <button onClick={() => setEditing(null)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><X size={18} /></button>
             </div>
             <div className="space-y-5">
-              <div>{label('Imię i Nazwisko *')}<input {...inp('name')} /></div>
+              <div className="grid grid-cols-2 gap-5">
+                <div>{label('Imię *')}<input {...inp('first_name')} /></div>
+                <div>{label('Nazwisko *')}<input {...inp('last_name')} /></div>
+              </div>
               <div className="grid grid-cols-2 gap-5">
                 <div>{label('Email')}<input type="email" {...inp('email')} /></div>
                 <div>{label('Telefon')}<input {...inp('phone')} /></div>
@@ -251,7 +256,7 @@ export default function DashboardClients() {
               </div>
             </div>
             <div className="flex gap-4 mt-8 pt-6" style={{ borderTop: `0.5px solid ${t.border}` }}>
-              <button onClick={handleSave} disabled={!form.name} className="btn-oxblood flex-1" style={{ opacity: !form.name ? 0.5 : 1 }}>ZAPISZ</button>
+              <button onClick={handleSave} disabled={!form.first_name} className="btn-oxblood flex-1" style={{ opacity: !form.first_name ? 0.5 : 1 }}>ZAPISZ</button>
               <button onClick={() => setEditing(null)} className="btn-ghost-parchment">ANULUJ</button>
             </div>
           </div>
