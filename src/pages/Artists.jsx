@@ -7,30 +7,44 @@ import PageLayout from '../components/layout/PageLayout';
 const PLACEHOLDER_ARTISTS = [
   {
     id: '1',
-    name: 'Aleksandra Wiśniewska',
-    slug: 'aleksandra',
-    specialty: ['Blackwork', 'Fine Line', 'Dotwork'],
-    photo_url: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&q=80',
-    bio: 'Specjalizuje się w geometrycznych wzorach i delikatnej linii. Każdy projekt to indywidualna podróż przez formę i przestrzeń.',
-    years_experience: 9,
+    name: 'Mikołaj',
+    slug: 'mikolaj',
+    specialty: ['Neotradycyjny', 'Kolor'],
+    photo_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&q=80',
+    bio: 'Specjalista od neotradycyjnego tatuażu z mocnym kolorem. Każdy projekt to indywidualne dzieło pełne ekspresji.',
+    years_experience: null,
+    instagram: 'https://www.instagram.com/mikolaj.mrozek/',
   },
   {
     id: '2',
-    name: 'Marcin Kowalski',
-    slug: 'marcin',
-    specialty: ['Realism', 'Portrait', 'Black & Grey'],
-    photo_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&q=80',
-    bio: 'Mistrz realizmu i portretów. Jego prace wyróżniają się niebywałą precyzją i głębią tonalną, zatrzymując chwilę na zawsze.',
-    years_experience: 12,
+    name: 'Czarek',
+    slug: 'czarek',
+    specialty: ['Ilustracyjny', 'Projekty indywidualne'],
+    photo_url: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&q=80',
+    bio: 'Tworzy ilustracyjne tatuaże dopasowane do każdego klienta. Projekty szyte na miarę, z unikalnym charakterem.',
+    years_experience: null,
+    instagram: 'https://www.instagram.com/czaras_tattoo/',
   },
   {
     id: '3',
-    name: 'Zuzanna Karpińska',
-    slug: 'zuzanna',
-    specialty: ['Neo-Traditional', 'Geometric', 'Color'],
+    name: 'Matys',
+    slug: 'matys',
+    specialty: ['Tatuaż'],
     photo_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&q=80',
-    bio: 'Łączy tradycję z nowoczesnością. Jej prace tętnią kolorem i energią, czerpiąc z ikonografii różnych kultur.',
-    years_experience: 7,
+    bio: 'Tatuażysta Romans Tattoo. Styl do uzupełnienia — obserwuj Instagram po najnowsze prace.',
+    years_experience: null,
+    instagram: 'https://www.instagram.com/matysjkk/',
+  },
+  {
+    id: '4',
+    name: 'Julia',
+    slug: 'julia',
+    specialty: ['Piercing'],
+    photo_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&q=80',
+    bio: 'Piercer w Romans Tattoo. Profesjonalny piercing w sterylnych warunkach.',
+    years_experience: null,
+    instagram: 'https://www.instagram.com/julie.ttaapiercing_/',
+    isPiercer: true,
   },
 ];
 
@@ -100,9 +114,22 @@ export default function Artists() {
                       <p className="mt-2 text-sm text-parchment/50 line-clamp-2" style={{ color: 'rgba(245,240,235,0.5)', fontSize: '13px' }}>
                         {artist.bio}
                       </p>
-                      <p className="mt-4 text-micro group-hover:text-oxblood transition-colors" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em' }}>
-                        PORTFOLIO →
-                      </p>
+                      <div className="mt-4 flex items-center justify-between">
+                        <p className="text-micro group-hover:text-oxblood transition-colors" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em' }}>
+                          PORTFOLIO →
+                        </p>
+                        {artist.instagram && (
+                          <a
+                            href={artist.instagram}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={e => e.stopPropagation()}
+                            style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#C4196B', letterSpacing: '0.1em', textTransform: 'uppercase' }}
+                          >
+                            IG ↗
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </Link>

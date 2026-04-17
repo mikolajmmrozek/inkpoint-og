@@ -28,7 +28,7 @@ export default function HomeAbout() {
           </h2>
           <div className="mt-8 h-px w-12" style={{ background: '#262626', height: '0.5px' }} />
           <p className="mt-8 text-parchment/60 leading-relaxed" style={{ color: 'rgba(245,240,235,0.6)', fontSize: '16px', lineHeight: 1.8 }}>
-            INK Studio to przestrzeń, gdzie precyzja spotyka pasję. Nasi artyści łączą lata doświadczenia z nieustannym dążeniem do perfekcji, tworząc dzieła dostosowane do każdej skóry i każdej historii.
+            Romans Tattoo to studio tatuażu i piercingu w Wolsztynie, gdzie precyzja spotyka pasję. Nasi artyści łączą doświadczenie z nieustannym dążeniem do perfekcji, tworząc dzieła dopasowane do każdego klienta.
           </p>
           <p className="mt-4 text-parchment/60 leading-relaxed" style={{ color: 'rgba(245,240,235,0.6)', fontSize: '16px', lineHeight: 1.8 }}>
             Każda sesja zaczyna się od rozmowy. Słuchamy, projektujemy, tworzymy.
@@ -60,8 +60,8 @@ export default function HomeAbout() {
           <div className="absolute -bottom-6 -left-6 w-24 h-24" style={{ border: '0.5px solid #8B1A1A', zIndex: -1 }} />
           {/* Stats badge */}
           <div className="absolute top-8 -right-4 bg-obsidian p-6" style={{ background: '#0A0A0A', border: '0.5px solid #262626' }}>
-            <p className="font-display text-4xl font-700" style={{ fontFamily: 'Cormorant Garamond', fontWeight: 700, color: '#F5F0EB', fontSize: '2.5rem' }}>8+</p>
-            <p className="text-micro mt-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#8B1A1A', letterSpacing: '0.15em' }}>LAT DOŚWIADCZENIA</p>
+            <p className="font-display text-4xl font-700" style={{ fontFamily: 'Cormorant Garamond', fontWeight: 700, color: '#F5F0EB', fontSize: '2.5rem' }}>4+</p>
+            <p className="text-micro mt-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#C4196B', letterSpacing: '0.15em' }}>W WOLSZTYNIE</p>
           </div>
         </motion.div>
       </div>

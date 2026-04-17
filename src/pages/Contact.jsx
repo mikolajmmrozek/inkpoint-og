@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import PageLayout from '../components/layout/PageLayout';
-import { MapPin, Phone, Mail, Clock } from 'lucide-react';
+import { MapPin, Phone, AtSign, Clock } from 'lucide-react';
 
 export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
@@ -151,7 +151,7 @@ export default function Contact() {
             {/* Map placeholder */}
             <div className="aspect-video overflow-hidden relative" style={{ border: '0.5px solid #262626' }}>
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d156388.35438059707!2d20.9033818!3d52.2296756!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x471ecc669a869f01%3A0x72f0be2a688bae3f!2sWarsaw%2C%20Poland!5e0!3m2!1sen!2spl!4v1700000000000!5m2!1sen!2spl"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2449.123456789!2d16.1174!3d51.8693!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47062f0d7c5c5c5f%3A0x0!2sul.%20Wschowska%2030%2C%2064-200%20Wolsztyn!5e0!3m2!1spl!2spl!4v1700000000000!5m2!1spl!2spl"
                 width="100%"
                 height="100%"
                 style={{ border: 0, filter: 'grayscale(100%) invert(90%) contrast(0.9)' }}
@@ -165,14 +165,14 @@ export default function Contact() {
             {/* Contact details */}
             <div className="grid grid-cols-2 gap-8">
               {[
-                { icon: MapPin, label: 'ADRES', value: 'ul. Przykładowa 12\n00-000 Warszawa' },
-                { icon: Phone, label: 'TELEFON', value: '+48 123 456 789' },
-                { icon: Mail, label: 'EMAIL', value: 'studio@ink.pl' },
-                { icon: Clock, label: 'GODZINY', value: 'Pn–Pt 10:00–20:00\nSob 10:00–18:00' },
+                { icon: MapPin, label: 'ADRES', value: 'ul. Wschowska 30\n64-200 Wolsztyn' },
+                { icon: Phone, label: 'TELEFON', value: '881717880' },
+                { icon: AtSign, label: 'INSTAGRAM', value: '@tattoo.romans' },
+                { icon: Clock, label: 'GODZINY', value: 'Pon–Sob — umów się\nprzez Instagram' },
               ].map(({ icon: Icon, label, value }) => (
                 <div key={label}>
                   <div className="flex items-center gap-2 mb-2">
-                    <Icon size={12} color="#8B1A1A" />
+                    <Icon size={12} color="#C4196B" />
                     <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#8B1A1A', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                       {label}
                     </p>

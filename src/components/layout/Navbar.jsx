@@ -30,10 +30,10 @@ export default function Navbar() {
           {/* Logo */}
           <Link to="/" className="flex flex-col leading-none">
             <span className="font-display text-2xl font-700 text-parchment tracking-tight" style={{ fontFamily: 'Cormorant Garamond', fontWeight: 700, color: '#F5F0EB' }}>
-              INK
+              ROMANS
             </span>
-            <span className="text-micro text-oxblood" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.2em', color: '#8B1A1A' }}>
-              STUDIO
+            <span className="text-micro text-oxblood" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.2em', color: '#C4196B' }}>
+              TATTOO
             </span>
           </Link>
 

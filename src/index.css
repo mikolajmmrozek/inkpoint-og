@@ -12,25 +12,25 @@
     --card-foreground: 36 33% 94%;
     --popover: 0 0% 6%;
     --popover-foreground: 36 33% 94%;
-    --primary: 0 72% 32%;
+    --primary: 325 77% 51%;
     --primary-foreground: 36 33% 94%;
     --secondary: 0 0% 15%;
     --secondary-foreground: 36 33% 94%;
     --muted: 0 0% 10%;
     --muted-foreground: 0 0% 55%;
-    --accent: 0 72% 32%;
+    --accent: 325 77% 51%;
     --accent-foreground: 36 33% 94%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 36 33% 94%;
     --border: 0 0% 15%;
     --input: 0 0% 10%;
-    --ring: 0 72% 32%;
+    --ring: 325 77% 51%;
     --radius: 0.25rem;
 
     /* Custom tokens */
     --obsidian: #0A0A0A;
     --parchment: #F5F0EB;
-    --oxblood: #8B1A1A;
+    --oxblood: #C4196B;
     --steel: #262626;
     --font-display: 'Cormorant Garamond', serif;
     --font-body: 'Inter', sans-serif;
@@ -91,7 +91,7 @@
     background: #0A0A0A;
   }
   ::-webkit-scrollbar-thumb {
-    background: #8B1A1A;
+    background: #C4196B;
   }
 }
 
@@ -151,8 +151,8 @@
 
 /* Custom animations */
 @keyframes pulse-oxblood {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(139, 26, 26, 0.4); }
-  50% { box-shadow: 0 0 0 8px rgba(139, 26, 26, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(196, 25, 107, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(196, 25, 107, 0); }
 }
 
 @keyframes shimmer {
@@ -217,7 +217,7 @@
 
 /* Oxblood CTA button */
 .btn-oxblood {
-  background-color: #8B1A1A;
+  background-color: #C4196B;
   color: #F5F0EB;
   font-family: var(--font-mono);
   font-size: 12px;
@@ -230,7 +230,7 @@
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .btn-oxblood:hover {
-  background-color: #A52020;
+  background-color: #E01E7A;
   transform: translateY(-1px);
 }
 
