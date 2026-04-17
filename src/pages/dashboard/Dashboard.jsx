@@ -122,8 +122,13 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    if (!isLoadingAuth && (!user || user.role !== 'admin')) {
-      navigate('/');
+    if (!isLoadingAuth) {
+      if (!user) {
+        // Not logged in — redirect to login, then come back to dashboard
+        base44.auth.redirectToLogin(window.location.href);
+      } else if (user.role !== 'admin') {
+        // Logged in but not admin — show access denied, don't redirect silently
+      }
     }
   }, [user, isLoadingAuth]);
 
@@ -133,7 +138,22 @@ export default function Dashboard() {
     </div>
   );
 
-  if (!user || user.role !== 'admin') return null;
+  if (!user) return null; // redirecting to login
+
+  if (user.role !== 'admin') return (
+    <div className="h-screen flex items-center justify-center flex-col gap-6" style={{ background: '#0A0A0A' }}>
+      <div style={{ border: '0.5px solid #262626', padding: '48px', textAlign: 'center', maxWidth: '400px' }}>
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>DOSTĘP ZABRONIONY</p>
+        <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: '#F5F0EB', letterSpacing: '0.04em', marginBottom: '12px' }}>Brak uprawnień</h2>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', color: 'rgba(245,240,235,0.5)', lineHeight: 1.7, marginBottom: '32px' }}>
+          Twoje konto ({user.email}) nie ma dostępu do panelu administracyjnego. Skontaktuj się z właścicielem studia.
+        </p>
+        <button onClick={() => base44.auth.logout('/')} className="btn-ghost-parchment" style={{ fontSize: '10px' }}>
+          WYLOGUJ SIĘ
+        </button>
+      </div>
+    </div>
+  );
 
   const bg = theme === 'light' ? '#F8F8F8' : '#0A0A0A';
   const topBarBg = theme === 'light' ? '#FFFFFF' : '#0A0A0A';
