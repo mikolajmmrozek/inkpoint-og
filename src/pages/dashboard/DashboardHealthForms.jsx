@@ -386,13 +386,13 @@ export default function DashboardHealthForms() {
         </div>
       )}
 
-      {/* Main grid: list + detail */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* List */}
-        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+      {/* Dokument grid */}
+      <div>
+        {/* Header + Search */}
+        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, marginBottom: '12px' }}>
           <div className="px-4 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
             <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
-              WYPEŁNIONE ANKIETY ({filteredForms.length})
+              DOKUMENTY MEDYCZNE ({filteredForms.length})
             </p>
             <div className="flex items-center gap-2" style={{ border: `0.5px solid ${t.border}`, padding: '6px 10px' }}>
               <Search size={12} color={t.muted} />
@@ -405,43 +405,47 @@ export default function DashboardHealthForms() {
               />
             </div>
           </div>
-          {loading ? (
-            <div className="flex items-center justify-center py-20">
-              <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
-            </div>
-          ) : filteredForms.length === 0 ? (
-            <div className="py-16 text-center">
-              <p style={{ ...mono, fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK ANKIET</p>
-            </div>
-          ) : filteredForms.map((form, i) => (
-            <div key={form.id}
-              className="flex items-center gap-3 px-4 py-3 cursor-pointer"
-              style={{ borderBottom: i < filteredForms.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selected?.id === form.id ? 'rgba(255,0,127,0.05)' : 'transparent' }}
-              onClick={() => setSelected(form)}
-            >
-              <FileText size={13} color={form.is_minor ? '#FF007F' : t.fuchsia} />
-              <div className="flex-1 min-w-0">
-                <p style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>{getClientName(form)}</p>
-                <p style={{ ...mono, fontSize: '8px', color: t.muted, marginTop: '2px' }}>{form.client_email}</p>
-                <div className="flex items-center gap-2 mt-2">
+        </div>
+
+        {/* Cards grid */}
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
+          </div>
+        ) : filteredForms.length === 0 ? (
+          <div className="py-16 text-center">
+            <p style={{ ...mono, fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK DOKUMENTÓW</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            {filteredForms.map((form) => (
+              <button
+                key={form.id}
+                onClick={() => setSelected(form)}
+                style={{ border: `0.5px solid ${t.border}`, background: selected?.id === form.id ? 'rgba(255,0,127,0.08)' : t.bg, padding: '16px', textAlign: 'left', cursor: 'pointer' }}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <FileText size={16} color={form.is_minor ? '#FF007F' : t.fuchsia} />
+                  {BOOL_FIELDS.some(([k]) => form[k] === true) && (
+                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#FF007F', flexShrink: 0 }} title="Problemy zdrowotne" />
+                  )}
+                </div>
+                <p style={{ color: t.text, fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>{getClientName(form)}</p>
+                <p style={{ ...mono, fontSize: '8px', color: t.muted, marginBottom: '8px' }}>{form.client_email}</p>
+                <div className="flex items-center flex-wrap gap-2">
                   {form.is_minor && <span style={{ ...mono, fontSize: '7px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '1px 4px' }}>NIELETNI</span>}
                   {form.is_update_only && <span style={{ ...mono, fontSize: '7px', color: '#16a34a', border: '0.5px solid #16a34a', padding: '1px 4px' }}>AKTUALIZACJA</span>}
-                  <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>
-                    {form.procedure_type && `${form.procedure_type} · `}
+                  <p style={{ ...mono, fontSize: '8px', color: t.muted }}>
                     {form.form_filled_date ? format(new Date(form.form_filled_date), 'dd.MM.yyyy') : ''}
                   </p>
                 </div>
-              </div>
-              {/* Medical flag dot */}
-              {BOOL_FIELDS.some(([k]) => form[k] === true) && (
-                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#FF007F', flexShrink: 0 }} title="Problemy zdrowotne" />
-              )}
-            </div>
-          ))}
-        </div>
+              </button>
+            ))}
+          </div>
+        )}
 
-        {/* Detail */}
-        {selected ? (
+        {/* Detail panel */}
+        {selected && (
           <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, maxHeight: '80vh', overflowY: 'auto' }}>
             {/* Header with actions */}
             <div className="flex justify-between items-start p-5" style={{ borderBottom: `0.5px solid ${t.border}` }}>
@@ -511,10 +515,6 @@ export default function DashboardHealthForms() {
             )}
 
             <FormDetailPanel selected={selected} guardianForm={selectedGuardian} t={t} onClose={() => setSelected(null)} theme={theme} />
-          </div>
-        ) : (
-          <div className="flex items-center justify-center" style={{ border: `0.5px solid ${t.border}`, minHeight: '200px' }}>
-            <p style={{ ...mono, fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>WYBIERZ ANKIETĘ</p>
           </div>
         )}
       </div>

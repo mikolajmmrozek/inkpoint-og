@@ -38,9 +38,9 @@ export default function DashboardStats() {
     return m;
   }, [artists]);
 
-  // Completed bookings with price
+  // Completed bookings with price (only completed status)
   const paid = useMemo(() =>
-    bookings.filter(b => b.estimated_price && b.status !== 'cancelled'),
+    bookings.filter(b => b.estimated_price && b.status === 'completed'),
     [bookings]
   );
 
