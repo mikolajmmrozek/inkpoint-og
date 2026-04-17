@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue:wght@400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -18,9 +18,9 @@
     --secondary-foreground: 36 33% 94%;
     --muted: 0 0% 10%;
     --muted-foreground: 0 0% 55%;
-    --accent: 325 77% 51%;
+    --accent: 325 100% 50%;
     --accent-foreground: 36 33% 94%;
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 325 100% 50%;
     --destructive-foreground: 36 33% 94%;
     --border: 0 0% 15%;
     --input: 0 0% 10%;
@@ -32,7 +32,7 @@
     --parchment: #F5F0EB;
     --oxblood: #C4196B;
     --steel: #262626;
-    --font-display: 'Cormorant Garamond', serif;
+    --font-display: 'Bebas Neue', system-ui;
     --font-body: 'Inter', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
   }
