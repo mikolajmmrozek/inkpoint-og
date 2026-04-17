@@ -182,8 +182,18 @@ export default function DashboardClients() {
                       <div className="mb-4">
                         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>Sesje ({sessions.length})</p>
                         {sessions.map(s => (
-                          <p key={s.id} style={{ fontSize: '11px', color: t.text, marginBottom: '4px' }}>
-                            <strong>{s.session_date}</strong> · {s.artist_name} {s.tattoo_placement && `· ${s.tattoo_placement}`}
+                          <p key={s.id} style={{ fontSize: '11px', color: t.text, marginBottom: '4px', cursor: 'pointer' }}>
+                            <button
+                              onClick={() => {
+                                const link = document.createElement('a');
+                                link.href = `/dashboard/bookings`;
+                                link.click();
+                              }}
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', color: t.fuchsia, fontSize: 'inherit', fontWeight: 'bold', padding: 0 }}
+                            >
+                              {s.session_date}
+                            </button>
+                            {' · '} {s.artist_name} {s.tattoo_placement && `· ${s.tattoo_placement}`}
                           </p>
                         ))}
                       </div>
@@ -193,7 +203,17 @@ export default function DashboardClients() {
                         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>Ankiety ({forms.length})</p>
                         {forms.map(f => (
                           <p key={f.id} style={{ fontSize: '11px', color: t.text, marginBottom: '4px' }}>
-                            {format(new Date(f.form_filled_date), 'dd.MM.yyyy')} · {f.procedure_type}
+                            <button
+                              onClick={() => {
+                                const link = document.createElement('a');
+                                link.href = `/dashboard/health-forms`;
+                                link.click();
+                              }}
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', color: '#16a34a', fontSize: 'inherit', padding: 0 }}
+                            >
+                              {format(new Date(f.form_filled_date), 'dd.MM.yyyy')}
+                            </button>
+                            {' · '} {f.procedure_type}
                           </p>
                         ))}
                       </div>

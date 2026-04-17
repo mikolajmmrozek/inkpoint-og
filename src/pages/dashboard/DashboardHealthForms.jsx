@@ -357,9 +357,18 @@ export default function DashboardHealthForms() {
             {/* Header with actions */}
             <div className="flex justify-between items-start p-5" style={{ borderBottom: `0.5px solid ${t.border}` }}>
               <div>
-                <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.6rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
-                  {selected.client_name}
-                </h3>
+                <button
+                  onClick={() => {
+                    const link = document.createElement('a');
+                    link.href = `/dashboard/clients?email=${encodeURIComponent(selected.client_email)}`;
+                    link.click();
+                  }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0 }}
+                >
+                  <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.6rem', fontWeight: 400, color: t.fuchsia, letterSpacing: '0.04em', textDecoration: 'underline' }}>
+                    {selected.client_name}
+                  </h3>
+                </button>
                 <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '4px' }}>
                   {selected.client_email} · {selected.client_phone}
                 </p>
@@ -393,7 +402,7 @@ export default function DashboardHealthForms() {
                 <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>SESJE</p>
                 {selectedSessions.map(s => (
                   <div key={s.id} style={{ fontSize: '11px', color: t.text, marginBottom: '6px', paddingBottom: '6px', borderBottom: `0.5px solid ${t.border}` }}>
-                    <p><strong>{s.session_date}</strong> · {s.artist_name}</p>
+                    <p><strong style={{ color: t.fuchsia, cursor: 'pointer', textDecoration: 'underline' }}>{s.session_date}</strong> · {s.artist_name}</p>
                     <p style={{ color: t.muted, fontSize: '10px', marginTop: '2px' }}>{s.tattoo_description || s.tattoo_placement || 'Brak opisu'}</p>
                   </div>
                 ))}
