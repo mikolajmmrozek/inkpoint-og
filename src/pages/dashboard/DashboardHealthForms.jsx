@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { FileText, X, ExternalLink, Copy, Shield, AlertTriangle, Search, Download, Mail, Trash2 } from 'lucide-react';
+import { FileText, X, ExternalLink, Copy, Shield, AlertTriangle, Search, Download, Mail, Trash2, Settings } from 'lucide-react';
 import { format } from 'date-fns';
 import { useTheme } from './Dashboard';
 import html2canvas from 'html2canvas';
@@ -283,14 +283,54 @@ export default function DashboardHealthForms() {
     setSelected(null);
   };
 
+  const generalFormLink = `${window.location.origin}/health-form`;
+  const [copiedGeneral, setCopiedGeneral] = useState(false);
+
+  const copyGeneralLink = () => {
+    navigator.clipboard.writeText(generalFormLink);
+    setCopiedGeneral(true);
+    setTimeout(() => setCopiedGeneral(false), 2000);
+  };
+
   const mono = { fontFamily: 'JetBrains Mono' };
   const display = { fontFamily: 'Bebas Neue, system-ui', fontWeight: 400 };
 
   return (
     <div>
-      <div className="mb-6">
-        <p style={{ ...mono, fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>DANE MEDYCZNE</p>
-        <h2 style={{ ...display, fontSize: '2.5rem', color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>Ankiety Zdrowotne</h2>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <p style={{ ...mono, fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>DANE MEDYCZNE</p>
+          <h2 style={{ ...display, fontSize: '2.5rem', color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>Ankiety Zdrowotne</h2>
+        </div>
+        <button
+          onClick={() => navigate('/dashboard/settings')}
+          title="Edytuj szablon formularza"
+          className="flex items-center gap-2"
+          style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}
+        >
+          <Settings size={13} /> EDYTUJ SZABLON
+        </button>
+      </div>
+
+      {/* General form link section */}
+      <div className="mb-6 p-4" style={{ border: `0.5px solid ${t.border}`, background: 'rgba(255,0,127,0.03)' }}>
+        <p style={{ ...mono, fontSize: '8px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>
+          LINK OGÓLNY DO ANKIETY
+        </p>
+        <div className="flex items-center gap-2">
+          <div style={{ flex: 1, padding: '8px 10px', border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: '2px' }}>
+            <p style={{ ...mono, fontSize: '9px', color: t.muted, wordBreak: 'break-all' }}>{generalFormLink}</p>
+          </div>
+          <button
+            onClick={copyGeneralLink}
+            style={{ ...mono, fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${copiedGeneral ? '#16a34a' : t.border}`, color: copiedGeneral ? '#16a34a' : t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}
+          >
+            {copiedGeneral ? '✓ SKOPIOWANO' : 'KOPIUJ'}
+          </button>
+          <a href={generalFormLink} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', border: `0.5px solid ${t.border}`, color: t.muted, cursor: 'pointer' }}>
+            <ExternalLink size={13} />
+          </a>
+        </div>
       </div>
 
       {/* Pending links section */}
