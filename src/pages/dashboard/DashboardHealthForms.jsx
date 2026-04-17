@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { FileText, X, ExternalLink, Copy, Shield, AlertTriangle } from 'lucide-react';
+import { FileText, X, ExternalLink, Copy, Shield, AlertTriangle, Search, Download, Mail } from 'lucide-react';
 import { format } from 'date-fns';
 import { useTheme } from './Dashboard';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const BOOL_FIELDS = [
   ['has_heart_condition', 'Choroby serca', 'heart_condition_description'],
@@ -171,6 +173,9 @@ export default function DashboardHealthForms() {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [exporting, setExporting] = useState(false);
+  const [sendingEmail, setSendingEmail] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -201,6 +206,57 @@ export default function DashboardHealthForms() {
 
   // Bookings without completed health form
   const pendingBookings = bookings.filter(b => !b.health_form_completed && b.status !== 'cancelled');
+
+  // Filter forms by search query
+  const filteredForms = forms.filter(form => {
+    const q = searchQuery.toLowerCase();
+    return !q || 
+      form.client_name?.toLowerCase().includes(q) ||
+      form.client_email?.toLowerCase().includes(q) ||
+      (form.form_filled_date && format(new Date(form.form_filled_date), 'dd.MM.yyyy').includes(q));
+  });
+
+  // Get sessions for selected form's booking
+  const selectedSessions = selected ? bookings.filter(b => b.client_email === selected.client_email || b.client_name === selected.client_name) : [];
+
+  const exportPDF = async (form) => {
+    setExporting(true);
+    try {
+      const element = document.createElement('div');
+      element.innerHTML = `
+        <div style="font-family: Arial, sans-serif; padding: 20px; font-size: 12px;">
+          <h1 style="font-size: 20px; margin-bottom: 20px;">ANKIETA ZDROWOTNA</h1>
+          <p><strong>Imię i nazwisko:</strong> ${form.client_name}</p>
+          <p><strong>Email:</strong> ${form.client_email}</p>
+          <p><strong>Telefon:</strong> ${form.client_phone}</p>
+          <p><strong>Data urodzenia:</strong> ${form.date_of_birth}</p>
+          <p><strong>Data wypełnienia:</strong> ${format(new Date(form.form_filled_date), 'dd.MM.yyyy HH:mm')}</p>
+          <p><strong>Procedura:</strong> ${form.procedure_type}</p>
+          <p><strong>Miejsce:</strong> ${form.body_placement}</p>
+        </div>
+      `;
+      const canvas = await html2canvas(element);
+      const pdf = new jsPDF();
+      const imgData = canvas.toDataURL('image/png');
+      pdf.addImage(imgData, 'PNG', 10, 10, 190, 277);
+      pdf.save(`ankieta-${form.client_name}-${form.form_filled_date}.pdf`);
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const sendConfirmationEmail = async (form) => {
+    setSendingEmail(true);
+    try {
+      await base44.integrations.Core.SendEmail({
+        to: form.client_email,
+        subject: 'Potwierdzenie wypełnienia ankiety zdrowotnej',
+        body: `Dzień dobry ${form.client_name},\n\nPotwierdzamy, że Twoja ankieta zdrowotna została pomyślnie zarejestrowana w naszym systemie.\n\nDane na dzień: ${format(new Date(form.form_filled_date), 'dd.MM.yyyy')}\n\nDo zobaczenia w studiu!\n\nRomans Tattoo`
+      });
+    } finally {
+      setSendingEmail(false);
+    }
+  };
 
   const mono = { fontFamily: 'JetBrains Mono' };
   const display = { fontFamily: 'Bebas Neue, system-ui', fontWeight: 400 };
@@ -246,23 +302,33 @@ export default function DashboardHealthForms() {
       <div className="grid lg:grid-cols-2 gap-6">
         {/* List */}
         <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-          <div className="px-4 py-2" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-            <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-              WYPEŁNIONE ANKIETY ({forms.length})
+          <div className="px-4 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+            <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
+              WYPEŁNIONE ANKIETY ({filteredForms.length})
             </p>
+            <div className="flex items-center gap-2" style={{ border: `0.5px solid ${t.border}`, padding: '6px 10px' }}>
+              <Search size={12} color={t.muted} />
+              <input
+                type="text"
+                placeholder="Szukaj: imię, email, data..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                style={{ background: 'transparent', border: 'none', outline: 'none', color: t.text, fontSize: '11px', width: '100%', fontFamily: 'Inter' }}
+              />
+            </div>
           </div>
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
             </div>
-          ) : forms.length === 0 ? (
+          ) : filteredForms.length === 0 ? (
             <div className="py-16 text-center">
               <p style={{ ...mono, fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK ANKIET</p>
             </div>
-          ) : forms.map((form, i) => (
+          ) : filteredForms.map((form, i) => (
             <div key={form.id}
               className="flex items-center gap-3 px-4 py-3 cursor-pointer"
-              style={{ borderBottom: i < forms.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selected?.id === form.id ? 'rgba(255,0,127,0.05)' : 'transparent' }}
+              style={{ borderBottom: i < filteredForms.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selected?.id === form.id ? 'rgba(255,0,127,0.05)' : 'transparent' }}
               onClick={() => setSelected(form)}
             >
               <FileText size={13} color={form.is_minor ? '#FF007F' : t.fuchsia} />
@@ -287,7 +353,55 @@ export default function DashboardHealthForms() {
 
         {/* Detail */}
         {selected ? (
-          <FormDetailPanel selected={selected} guardianForm={selectedGuardian} t={t} onClose={() => setSelected(null)} theme={theme} />
+          <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, maxHeight: '80vh', overflowY: 'auto' }}>
+            {/* Header with actions */}
+            <div className="flex justify-between items-start p-5" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+              <div>
+                <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.6rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
+                  {selected.client_name}
+                </h3>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '4px' }}>
+                  {selected.client_email} · {selected.client_phone}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => exportPDF(selected)}
+                  disabled={exporting}
+                  title="Pobierz PDF"
+                  style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', opacity: exporting ? 0.5 : 1 }}
+                >
+                  <Download size={16} />
+                </button>
+                <button
+                  onClick={() => sendConfirmationEmail(selected)}
+                  disabled={sendingEmail}
+                  title="Wyślij email"
+                  style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', opacity: sendingEmail ? 0.5 : 1 }}
+                >
+                  <Mail size={16} />
+                </button>
+                <button onClick={() => setSelected(null)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+
+            {/* Sessions list */}
+            {selectedSessions.length > 0 && (
+              <div className="px-5 py-3" style={{ borderBottom: `0.5px solid ${t.border}`, background: 'rgba(255,0,127,0.03)' }}>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>SESJE</p>
+                {selectedSessions.map(s => (
+                  <div key={s.id} style={{ fontSize: '11px', color: t.text, marginBottom: '6px', paddingBottom: '6px', borderBottom: `0.5px solid ${t.border}` }}>
+                    <p><strong>{s.session_date}</strong> · {s.artist_name}</p>
+                    <p style={{ color: t.muted, fontSize: '10px', marginTop: '2px' }}>{s.tattoo_description || s.tattoo_placement || 'Brak opisu'}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <FormDetailPanel selected={selected} guardianForm={selectedGuardian} t={t} onClose={() => setSelected(null)} theme={theme} />
+          </div>
         ) : (
           <div className="flex items-center justify-center" style={{ border: `0.5px solid ${t.border}`, minHeight: '200px' }}>
             <p style={{ ...mono, fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>WYBIERZ ANKIETĘ</p>
