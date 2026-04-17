@@ -333,15 +333,16 @@ export default function DashboardHealthForms() {
             >
               <FileText size={13} color={form.is_minor ? '#FF007F' : t.fuchsia} />
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>{form.client_name}</p>
+                <p style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>{form.client_name}</p>
+                <p style={{ ...mono, fontSize: '8px', color: t.muted, marginTop: '2px' }}>{form.client_email}</p>
+                <div className="flex items-center gap-2 mt-2">
                   {form.is_minor && <span style={{ ...mono, fontSize: '7px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '1px 4px' }}>NIELETNI</span>}
                   {form.is_update_only && <span style={{ ...mono, fontSize: '7px', color: '#16a34a', border: '0.5px solid #16a34a', padding: '1px 4px' }}>AKTUALIZACJA</span>}
+                  <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>
+                    {form.procedure_type && `${form.procedure_type} · `}
+                    {form.form_filled_date ? format(new Date(form.form_filled_date), 'dd.MM.yyyy') : ''}
+                  </p>
                 </div>
-                <p style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px' }}>
-                  {form.procedure_type && `${form.procedure_type} · `}
-                  {form.form_filled_date ? format(new Date(form.form_filled_date), 'dd.MM.yyyy') : ''}
-                </p>
               </div>
               {/* Medical flag dot */}
               {BOOL_FIELDS.some(([k]) => form[k] === true) && (
