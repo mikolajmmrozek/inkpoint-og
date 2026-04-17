@@ -42,6 +42,7 @@ const DEFAULTS = {
     contact_instagram_url: 'https://www.instagram.com/tattoo.romans',
     contact_facebook: 'Romans Tattoo',
     contact_facebook_url: 'https://www.facebook.com/romanstattoo',
+    contact_google_maps_url: '',
   },
 };
 
@@ -349,6 +350,17 @@ export default function DashboardSettings() {
               </label>
               <input {...inp('contact_facebook_url')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
             </div>
+          </div>
+
+          {/* Google Maps */}
+          <div className="mb-8">
+            <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              Link do wizytówki Google Maps
+            </label>
+            <input {...inp('contact_google_maps_url')} placeholder="https://www.google.com/maps/place/..." style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            <p className="mt-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>
+              Skopiuj adres URL z wizytówki Google Twojej firmy z google.com/maps
+            </p>
           </div>
         </div>
         )}

@@ -13,6 +13,7 @@ const DEFAULTS = {
   contact_instagram_url: 'https://www.instagram.com/tattoo.romans',
   contact_facebook: 'Romans Tattoo',
   contact_facebook_url: 'https://www.facebook.com/romanstattoo',
+  contact_google_maps_url: '',
 };
 
 export default function Contact() {
@@ -172,16 +173,29 @@ export default function Contact() {
           >
             {/* Map placeholder */}
             <div className="aspect-video overflow-hidden relative" style={{ border: '0.5px solid #262626' }}>
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2449.123456789!2d16.1174!3d51.8693!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47062f0d7c5c5c5f%3A0x0!2sul.%20Wschowska%2030%2C%2064-200%20Wolsztyn!5e0!3m2!1spl!2spl!4v1700000000000!5m2!1spl!2spl"
-                width="100%"
-                height="100%"
-                style={{ border: 0, filter: 'grayscale(100%) invert(90%) contrast(0.9)' }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title="Mapa studia"
-              />
+              {contactData.contact_google_maps_url ? (
+                <iframe
+                  src={contactData.contact_google_maps_url.replace('/maps/place/', '/maps/embed?pb=') + '&output=embed'}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0, filter: 'grayscale(100%) invert(90%) contrast(0.9)' }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Wizytówka Google"
+                />
+              ) : (
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2449.123456789!2d16.1174!3d51.8693!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47062f0d7c5c5c5f%3A0x0!2sul.%20Wschowska%2030%2C%2064-200%20Wolsztyn!5e0!3m2!1spl!2spl!4v1700000000000!5m2!1spl!2spl"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0, filter: 'grayscale(100%) invert(90%) contrast(0.9)' }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Mapa studia"
+                />
+              )}
             </div>
 
             {/* Contact details */}
