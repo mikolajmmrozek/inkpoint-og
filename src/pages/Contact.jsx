@@ -1,13 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import PageLayout from '../components/layout/PageLayout';
 import { MapPin, Phone, Clock, Instagram, Facebook } from 'lucide-react';
 
+const DEFAULTS = {
+  contact_address_street: 'ul. Wschowska 30',
+  contact_address_city: '64-200 Wolsztyn',
+  contact_phone: '881717880',
+  contact_hours: 'Pon–Sob — umów się\nprzez Instagram',
+  contact_instagram: '@tattoo.romans',
+  contact_instagram_url: 'https://www.instagram.com/tattoo.romans',
+  contact_facebook: 'Romans Tattoo',
+  contact_facebook_url: 'https://www.facebook.com/romanstattoo',
+};
+
 export default function Contact() {
+  const [contactData, setContactData] = useState(DEFAULTS);
   const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+
+  useEffect(() => {
+    base44.entities.SiteSettings.filter({ key: 'contact' })
+      .then(res => {
+        if (res.length > 0) {
+          setContactData({ ...DEFAULTS, ...res[0] });
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -165,11 +187,11 @@ export default function Contact() {
             {/* Contact details */}
             <div className="grid grid-cols-2 gap-8">
               {[
-                { icon: MapPin, label: 'ADRES', value: 'ul. Wschowska 30\n64-200 Wolsztyn', link: null },
-                { icon: Phone, label: 'TELEFON', value: '881717880', link: null },
-                { icon: Instagram, label: 'INSTAGRAM', value: '@tattoo.romans', link: 'https://www.instagram.com/tattoo.romans' },
-                { icon: Facebook, label: 'FACEBOOK', value: 'Romans Tattoo', link: 'https://www.facebook.com/romanstattoo' },
-                { icon: Clock, label: 'GODZINY', value: 'Pon–Sob — umów się\nprzez Instagram', link: null },
+                { icon: MapPin, label: 'ADRES', value: `${contactData.contact_address_street}\n${contactData.contact_address_city}`, link: null },
+                { icon: Phone, label: 'TELEFON', value: contactData.contact_phone, link: null },
+                { icon: Instagram, label: 'INSTAGRAM', value: contactData.contact_instagram, link: contactData.contact_instagram_url },
+                { icon: Facebook, label: 'FACEBOOK', value: contactData.contact_facebook, link: contactData.contact_facebook_url },
+                { icon: Clock, label: 'GODZINY', value: contactData.contact_hours, link: null },
               ].map(({ icon: Icon, label, value, link }) => (
                 <div key={label}>
                   <div className="flex items-center gap-2 mb-2">

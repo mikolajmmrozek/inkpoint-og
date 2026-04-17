@@ -32,6 +32,17 @@ const DEFAULTS = {
     about_stats_number: '4+',
     about_stats_text: 'W WOLSZTYNIE',
   },
+  contact: {
+    key: 'contact',
+    contact_address_street: 'ul. Wschowska 30',
+    contact_address_city: '64-200 Wolsztyn',
+    contact_phone: '881717880',
+    contact_hours: 'Pon–Sob — umów się\nprzez Instagram',
+    contact_instagram: '@tattoo.romans',
+    contact_instagram_url: 'https://www.instagram.com/tattoo.romans',
+    contact_facebook: 'Romans Tattoo',
+    contact_facebook_url: 'https://www.facebook.com/romanstattoo',
+  },
 };
 
 export default function DashboardSettings() {
@@ -111,7 +122,7 @@ export default function DashboardSettings() {
 
       {/* Tabs */}
       <div className="flex gap-2 mb-6 flex-wrap">
-        {['hero', 'about'].map(tab => (
+        {['hero', 'about', 'contact'].map(tab => (
           <button
             key={tab}
             onClick={() => loadTab(tab)}
@@ -127,7 +138,7 @@ export default function DashboardSettings() {
               cursor: 'pointer',
             }}
           >
-            {tab === 'hero' ? 'Strona Główna — Hero' : 'Strona Główna — O Studiu'}
+            {tab === 'hero' ? 'Strona Główna — Hero' : tab === 'about' ? 'Strona Główna — O Studiu' : 'Strona Kontaktu'}
           </button>
         ))}
       </div>
@@ -266,6 +277,77 @@ export default function DashboardSettings() {
                 Opis badżu (np. W WOLSZTYNIE)
               </label>
               <input {...inp('about_stats_text')} style={{ ...inputStyle, color: t.muted, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            </div>
+          </div>
+        </div>
+        )}
+
+        {activeTab === 'contact' && (
+        <div>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '24px' }}>
+            DANE KONTAKTOWE
+          </p>
+
+          {/* Address */}
+          <div className="mb-8 grid grid-cols-2 gap-8">
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                Ulica
+              </label>
+              <input {...inp('contact_address_street')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            </div>
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                Miasto i kod
+              </label>
+              <input {...inp('contact_address_city')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            </div>
+          </div>
+
+          {/* Contact info */}
+          <div className="mb-8 grid grid-cols-2 gap-8">
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                Telefon
+              </label>
+              <input {...inp('contact_phone')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            </div>
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                Godziny (każda linia = nowy wiersz)
+              </label>
+              <textarea rows={2} {...inp('contact_hours')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            </div>
+          </div>
+
+          {/* Social */}
+          <div className="mb-8 grid grid-cols-2 gap-8">
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                Instagram nazwa
+              </label>
+              <input {...inp('contact_instagram')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            </div>
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                Instagram URL
+              </label>
+              <input {...inp('contact_instagram_url')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            </div>
+          </div>
+
+          <div className="mb-8 grid grid-cols-2 gap-8">
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                Facebook nazwa
+              </label>
+              <input {...inp('contact_facebook')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            </div>
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                Facebook URL
+              </label>
+              <input {...inp('contact_facebook_url')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
             </div>
           </div>
         </div>
