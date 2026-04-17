@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { FileText, X, ExternalLink, Copy, Shield, AlertTriangle, Search, Download, Mail } from 'lucide-react';
+import { FileText, X, ExternalLink, Copy, Shield, AlertTriangle, Search, Download, Mail, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useTheme } from './Dashboard';
 import html2canvas from 'html2canvas';
@@ -276,6 +276,13 @@ export default function DashboardHealthForms() {
     }
   };
 
+  const deleteForm = async (form) => {
+    if (!window.confirm(`Czy na pewno chcesz usunąć ankietę dla ${getClientName(form)}?`)) return;
+    await base44.entities.HealthForm.delete(form.id);
+    setForms(f => f.filter(x => x.id !== form.id));
+    setSelected(null);
+  };
+
   const mono = { fontFamily: 'JetBrains Mono' };
   const display = { fontFamily: 'Bebas Neue, system-ui', fontWeight: 400 };
 
@@ -408,6 +415,13 @@ export default function DashboardHealthForms() {
                   style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', opacity: sendingEmail ? 0.5 : 1 }}
                 >
                   <Mail size={16} />
+                </button>
+                <button
+                  onClick={() => deleteForm(selected)}
+                  title="Usuń ankietę"
+                  style={{ color: '#FF007F', background: 'none', border: 'none', cursor: 'pointer' }}
+                >
+                  <Trash2 size={16} />
                 </button>
                 <button onClick={() => setSelected(null)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
                   <X size={16} />
