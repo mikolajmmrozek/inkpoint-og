@@ -137,7 +137,7 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme }) {
       {selected.client_signature && (
         <div className="px-5 pb-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '12px', marginBottom: '8px' }}>PODPIS KLIENTA</p>
-          <img src={selected.client_signature} alt="Podpis" style={{ maxWidth: '240px', border: `0.5px solid ${t.border}`, background: theme === 'light' ? '#FFFFFF' : '#111', padding: '4px', filter: theme === 'light' ? 'brightness(0)' : 'none' }} />
+          <img src={selected.client_signature} alt="Podpis" style={{ maxWidth: '240px', border: `0.5px solid ${t.border}`, background: theme === 'light' ? '#FFFFFF' : '#111', padding: '4px' }} />
         </div>
       )}
 
