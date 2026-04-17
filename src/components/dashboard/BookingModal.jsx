@@ -63,7 +63,8 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
     } else {
       // Existing client — fill all fields
       setSelectedClient(client);
-      set('client_name', client.name);
+      const fullName = client.name || `${client.first_name || ''} ${client.last_name || ''}`.trim();
+      set('client_name', fullName);
       set('client_email', client.email || '');
       set('client_phone', client.phone || '');
     }
@@ -78,7 +79,10 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
       // Upsert client in Client database
       if (selectedClient?.id) {
         // Existing client — update session count
+        const [firstName, ...lastNameParts] = form.client_name.split(' ');
         await base44.entities.Client.update(selectedClient.id, {
+          first_name: firstName,
+          last_name: lastNameParts.join(' '),
           name: form.client_name,
           email: form.client_email,
           phone: form.client_phone,
@@ -86,7 +90,10 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
         });
       } else if (form.client_name) {
         // New client — create record
+        const [firstName, ...lastNameParts] = form.client_name.split(' ');
         await base44.entities.Client.create({
+          first_name: firstName,
+          last_name: lastNameParts.join(' '),
           name: form.client_name,
           email: form.client_email,
           phone: form.client_phone,
