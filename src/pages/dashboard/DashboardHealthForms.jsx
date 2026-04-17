@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { FileText, X, ExternalLink, Copy, Shield, AlertTriangle, Search, Download, Mail } from 'lucide-react';
 import { format } from 'date-fns';
@@ -162,6 +163,7 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme }) {
 }
 
 export default function DashboardHealthForms() {
+  const navigate = useNavigate();
   const { theme } = useTheme();
   const t = theme === 'light'
     ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F' }
@@ -417,7 +419,12 @@ export default function DashboardHealthForms() {
                 <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>SESJE</p>
                 {selectedSessions.map(s => (
                   <div key={s.id} style={{ fontSize: '11px', color: t.text, marginBottom: '6px', paddingBottom: '6px', borderBottom: `0.5px solid ${t.border}` }}>
-                    <p><strong style={{ color: t.fuchsia, cursor: 'pointer', textDecoration: 'underline' }}>{s.session_date}</strong> · {s.artist_name}</p>
+                    <button
+                      onClick={() => navigate('/dashboard/bookings')}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', width: '100%' }}
+                    >
+                      <p><strong style={{ color: t.fuchsia, textDecoration: 'underline' }}>{s.session_date}</strong> · {s.artist_name}</p>
+                    </button>
                     <p style={{ color: t.muted, fontSize: '10px', marginTop: '2px' }}>{s.tattoo_description || s.tattoo_placement || 'Brak opisu'}</p>
                   </div>
                 ))}
