@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import PageLayout from '../components/layout/PageLayout';
-import { MapPin, Phone, AtSign, Clock } from 'lucide-react';
+import { MapPin, Phone, Clock, Instagram, Facebook } from 'lucide-react';
 
 export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
@@ -165,11 +165,12 @@ export default function Contact() {
             {/* Contact details */}
             <div className="grid grid-cols-2 gap-8">
               {[
-                { icon: MapPin, label: 'ADRES', value: 'ul. Wschowska 30\n64-200 Wolsztyn' },
-                { icon: Phone, label: 'TELEFON', value: '881717880' },
-                { icon: AtSign, label: 'INSTAGRAM', value: '@tattoo.romans' },
-                { icon: Clock, label: 'GODZINY', value: 'Pon–Sob — umów się\nprzez Instagram' },
-              ].map(({ icon: Icon, label, value }) => (
+                { icon: MapPin, label: 'ADRES', value: 'ul. Wschowska 30\n64-200 Wolsztyn', link: null },
+                { icon: Phone, label: 'TELEFON', value: '881717880', link: null },
+                { icon: Instagram, label: 'INSTAGRAM', value: '@tattoo.romans', link: 'https://www.instagram.com/tattoo.romans' },
+                { icon: Facebook, label: 'FACEBOOK', value: 'Romans Tattoo', link: 'https://www.facebook.com/romanstattoo' },
+                { icon: Clock, label: 'GODZINY', value: 'Pon–Sob — umów się\nprzez Instagram', link: null },
+              ].map(({ icon: Icon, label, value, link }) => (
                 <div key={label}>
                   <div className="flex items-center gap-2 mb-2">
                     <Icon size={12} color="#C4196B" />
@@ -177,9 +178,15 @@ export default function Contact() {
                       {label}
                     </p>
                   </div>
-                  <p style={{ color: 'rgba(245,240,235,0.6)', fontSize: '13px', whiteSpace: 'pre-line', lineHeight: 1.7 }}>
-                    {value}
-                  </p>
+                  {link ? (
+                    <a href={link} target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(245,240,235,0.6)', fontSize: '13px', lineHeight: 1.7, textDecoration: 'underline', cursor: 'pointer', display: 'inline-block' }}>
+                      {value}
+                    </a>
+                  ) : (
+                    <p style={{ color: 'rgba(245,240,235,0.6)', fontSize: '13px', whiteSpace: 'pre-line', lineHeight: 1.7 }}>
+                      {value}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
