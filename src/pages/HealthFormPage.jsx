@@ -11,6 +11,7 @@ const STEPS = ['personal', 'medical', 'consents', 'signature'];
 
 export default function HealthFormPage() {
   const [lang, setLang] = useState('pl');
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [step, setStep] = useState('lang-select');
   const [booking, setBooking] = useState(null);
   const [previousForm, setPreviousForm] = useState(null);
@@ -225,33 +226,67 @@ export default function HealthFormPage() {
           </h1>
           <div className="h-px w-16 mb-12" style={{ background: '#FF007F', height: '0.5px' }} />
 
-          <p style={{ color: 'rgba(245,240,235,0.5)', fontSize: '14px', marginBottom: '24px' }}>
-            {t.langSelect}
-          </p>
-
-          <div className="grid grid-cols-2 gap-3 mb-8">
-            {LANGUAGES.map(l => (
+          {/* Language selector */}
+          <div className="mb-8 relative">
+            <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.5)', letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+              {t.langSelect}
+            </label>
+            <div style={{ position: 'relative' }}>
               <button
-                key={l.code}
-                onClick={() => { setLang(l.code); setStep('personal'); }}
+                onClick={() => setLangMenuOpen(!langMenuOpen)}
                 style={{
                   fontFamily: 'JetBrains Mono',
-                  fontSize: '11px',
-                  letterSpacing: '0.1em',
-                  padding: '16px',
-                  border: `0.5px solid #262626`,
+                  fontSize: '13px',
+                  letterSpacing: '0.08em',
+                  padding: '12px 16px',
+                  border: `0.5px solid ${langMenuOpen ? '#FF007F' : '#262626'}`,
                   color: '#F5F0EB',
                   background: 'transparent',
                   cursor: 'pointer',
+                  width: '100%',
+                  textAlign: 'left',
                   transition: 'all 0.3s',
                   textTransform: 'uppercase',
                 }}
-                onMouseEnter={e => { e.target.style.borderColor = '#FF007F'; e.target.style.color = '#FF007F'; }}
-                onMouseLeave={e => { e.target.style.borderColor = '#262626'; e.target.style.color = '#F5F0EB'; }}
               >
-                {l.flag} {l.label}
+                {LANGUAGES.find(l => l.code === lang)?.flag} {LANGUAGES.find(l => l.code === lang)?.label}
               </button>
-            ))}
+              {langMenuOpen && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  right: 0,
+                  background: '#0A0A0A',
+                  border: `0.5px solid #262626`,
+                  borderTop: 'none',
+                  zIndex: 10,
+                }}>
+                  {LANGUAGES.map(l => (
+                    <button
+                      key={l.code}
+                      onClick={() => { setLang(l.code); setLangMenuOpen(false); setStep('personal'); }}
+                      style={{
+                        fontFamily: 'JetBrains Mono',
+                        fontSize: '12px',
+                        letterSpacing: '0.08em',
+                        padding: '10px 16px',
+                        border: 'none',
+                        borderBottom: `0.5px solid #262626`,
+                        color: lang === l.code ? '#FF007F' : '#F5F0EB',
+                        background: lang === l.code ? 'rgba(255,0,127,0.08)' : 'transparent',
+                        cursor: 'pointer',
+                        width: '100%',
+                        textAlign: 'left',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      {l.flag} {l.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {previousForm && (
