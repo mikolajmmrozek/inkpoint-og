@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Search, User, X, Edit, Trash2 } from 'lucide-react';
 import { useTheme } from './Dashboard';
+import { Search, Edit2, Trash2, X, Plus } from 'lucide-react';
 
 const inputStyle = {
   background: 'transparent',
@@ -21,20 +21,14 @@ export default function DashboardClients() {
     : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F', modalBg: '#0A0A0A' };
 
   const [clients, setClients] = useState([]);
-  const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [selected, setSelected] = useState(null);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({});
 
   const load = async () => {
-    const [c, b] = await Promise.all([
-      base44.entities.Client.list('-created_date', 300),
-      base44.entities.Booking.list('-session_date', 300),
-    ]);
-    setClients(c);
-    setBookings(b);
+    const data = await base44.entities.Client.list('-created_date', 200);
+    setClients(data);
     setLoading(false);
   };
 
@@ -45,8 +39,8 @@ export default function DashboardClients() {
     return !q || c.name?.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q) || c.phone?.includes(q);
   });
 
-  const clientBookings = (clientName, clientEmail) =>
-    bookings.filter(b => b.client_name === clientName || (clientEmail && b.client_email === clientEmail));
+  const openEdit = (c) => { setForm({ ...c }); setEditing(c); };
+  const openNew = () => { setForm({ name: '', email: '', phone: '', notes: '', total_sessions: 0 }); setEditing('new'); };
 
   const handleSave = async () => {
     if (editing === 'new') {
@@ -61,11 +55,15 @@ export default function DashboardClients() {
   const handleDelete = async (id) => {
     await base44.entities.Client.delete(id);
     setClients(c => c.filter(x => x.id !== id));
-    if (selected?.id === id) setSelected(null);
   };
 
-  const openEdit = (client) => { setForm({ ...client }); setEditing(client); };
-  const openNew = () => { setForm({ name: '', email: '', phone: '', notes: '' }); setEditing('new'); };
+  const inp = (field) => ({
+    style: { ...inputStyle, color: t.text, borderBottomColor: t.border },
+    value: form[field] || '',
+    onChange: e => setForm(f => ({ ...f, [field]: e.target.value })),
+    onFocus: e => e.target.style.borderBottomColor = '#FF007F',
+    onBlur: e => e.target.style.borderBottomColor = t.border,
+  });
 
   const label = (text) => (
     <label className="block mb-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>{text}</label>
@@ -80,148 +78,99 @@ export default function DashboardClients() {
         </div>
         <div className="flex items-center gap-3">
           {/* Search */}
-          <div className="relative flex items-center">
-            <Search size={12} style={{ position: 'absolute', left: '10px', color: t.muted, pointerEvents: 'none' }} />
+          <div className="relative flex items-center" style={{ border: `0.5px solid ${t.border}`, padding: '8px 14px', gap: '8px', minWidth: '220px' }}>
+            <Search size={12} color={t.muted} />
             <input
-              type="text"
-              placeholder="Szukaj klienta..."
+              placeholder="Szukaj..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              style={{ ...inputStyle, borderBottom: `0.5px solid ${t.border}`, color: t.text, paddingLeft: '30px', paddingRight: '10px', width: '220px', fontSize: '12px' }}
-              onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
-              onBlur={e => e.target.style.borderBottomColor = t.border}
+              style={{ background: 'transparent', border: 'none', outline: 'none', color: t.text, fontSize: '13px', fontFamily: 'Inter', width: '100%' }}
             />
           </div>
-          <button onClick={openNew} className="btn-oxblood" style={{ padding: '10px 18px', fontSize: '10px' }}>
-            + NOWY KLIENT
+          <button onClick={openNew} className="flex items-center gap-2 btn-oxblood" style={{ padding: '10px 20px' }}>
+            <Plus size={13} /> NOWY KLIENT
           </button>
         </div>
       </div>
 
+      {/* Stats row */}
+      <div className="flex gap-4 mb-6 flex-wrap">
+        {[
+          { label: 'Łączna liczba klientów', value: clients.length },
+          { label: 'Powracający (2+ sesji)', value: clients.filter(c => (c.total_sessions || 0) >= 2).length },
+        ].map(s => (
+          <div key={s.label} className="px-5 py-4" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+            <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2rem', fontWeight: 400, color: t.fuchsia, lineHeight: 1 }}>{s.value}</p>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '4px' }}>{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Table */}
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
+        </div>
+      ) : (
+        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+          {/* Header */}
+          <div className="grid grid-cols-12 px-4 py-2" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+            {['Imię i Nazwisko', 'Email', 'Telefon', 'Sesje', ''].map((h, i) => (
+              <p key={i} className={i === 0 ? 'col-span-4' : i === 1 ? 'col-span-3' : i === 2 ? 'col-span-2' : i === 3 ? 'col-span-1' : 'col-span-2 text-right'} style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>{h}</p>
+            ))}
+          </div>
+          {filtered.length === 0 ? (
+            <div className="py-16 text-center">
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK KLIENTÓW</p>
+            </div>
+          ) : filtered.map((c, i) => (
+            <div key={c.id} className="grid grid-cols-12 px-4 py-3 items-center" style={{ borderBottom: i < filtered.length - 1 ? `0.5px solid ${t.border}` : 'none' }}>
+              <div className="col-span-4">
+                <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{c.name}</p>
+                {c.notes && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.notes}</p>}
+              </div>
+              <p className="col-span-3" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.04em' }}>{c.email || '—'}</p>
+              <p className="col-span-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>{c.phone || '—'}</p>
+              <div className="col-span-1">
+                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: (c.total_sessions || 0) >= 2 ? t.fuchsia : t.muted, fontWeight: 600 }}>{c.total_sessions || 0}</span>
+              </div>
+              <div className="col-span-2 flex justify-end gap-3">
+                <button onClick={() => openEdit(c)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Edit2 size={13} /></button>
+                <button onClick={() => handleDelete(c.id)} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={13} /></button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Edit modal */}
       {editing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }}>
-          <div className="w-full max-w-md" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '36px' }}>
-            <div className="flex justify-between items-center mb-6">
-              <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.75rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={() => setEditing(null)}>
+          <div className="w-full max-w-lg" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '36px' }} onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-8">
+              <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.8rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
                 {editing === 'new' ? 'Nowy Klient' : 'Edytuj Klienta'}
               </h3>
               <button onClick={() => setEditing(null)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><X size={18} /></button>
             </div>
             <div className="space-y-5">
-              <div>{label('Imię i Nazwisko *')}<input style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={form.name || ''} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} /></div>
-              <div>{label('Email')}<input type="email" style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={form.email || ''} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} /></div>
-              <div>{label('Telefon')}<input style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={form.phone || ''} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} /></div>
-              <div>{label('Notatki')}<textarea rows={3} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} value={form.notes || ''} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} /></div>
+              <div>{label('Imię i Nazwisko *')}<input {...inp('name')} /></div>
+              <div className="grid grid-cols-2 gap-5">
+                <div>{label('Email')}<input type="email" {...inp('email')} /></div>
+                <div>{label('Telefon')}<input {...inp('phone')} /></div>
+              </div>
+              <div>{label('Liczba sesji')}<input type="number" {...inp('total_sessions')} /></div>
+              <div>{label('Notatki')}
+                <textarea rows={3} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} value={form.notes || ''} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+              </div>
             </div>
-            <div className="flex gap-3 mt-6 pt-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
+            <div className="flex gap-4 mt-8 pt-6" style={{ borderTop: `0.5px solid ${t.border}` }}>
               <button onClick={handleSave} disabled={!form.name} className="btn-oxblood flex-1" style={{ opacity: !form.name ? 0.5 : 1 }}>ZAPISZ</button>
               <button onClick={() => setEditing(null)} className="btn-ghost-parchment">ANULUJ</button>
             </div>
           </div>
         </div>
       )}
-
-      <div className="flex gap-6 items-start">
-        {/* List */}
-        <div className="flex-1 min-w-0" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-          {loading ? (
-            <div className="flex items-center justify-center py-16">
-              <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="py-16 text-center">
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
-                {search ? 'BRAK WYNIKÓW' : 'BRAK KLIENTÓW'}
-              </p>
-            </div>
-          ) : filtered.map((client, i) => {
-            const sessions = clientBookings(client.name, client.email);
-            return (
-              <div
-                key={client.id}
-                className="flex items-center justify-between p-4 cursor-pointer transition-colors"
-                style={{ borderBottom: i < filtered.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selected?.id === client.id ? 'rgba(255,0,127,0.05)' : 'transparent' }}
-                onClick={() => setSelected(client)}
-              >
-                <div className="flex items-center gap-4 min-w-0">
-                  <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center" style={{ border: `0.5px solid ${t.border}` }}>
-                    <User size={12} color={t.fuchsia} />
-                  </div>
-                  <div className="min-w-0">
-                    <p style={{ color: t.text, fontSize: '14px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{client.name}</p>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.05em', marginTop: '2px' }}>
-                      {client.email}{client.phone ? ` · ${client.phone}` : ''}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 flex-shrink-0">
-                  {sessions.length > 0 && (
-                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.08em' }}>
-                      {sessions.length} {sessions.length === 1 ? 'sesja' : 'sesji'}
-                    </span>
-                  )}
-                  <button onClick={e => { e.stopPropagation(); openEdit(client); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
-                    <Edit size={13} />
-                  </button>
-                  <button onClick={e => { e.stopPropagation(); handleDelete(client.id); }} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer' }}>
-                    <Trash2 size={13} />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Detail panel */}
-        {selected && (() => {
-          const sessions = clientBookings(selected.name, selected.email);
-          return (
-            <div className="w-72 flex-shrink-0" style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '24px' }}>
-              <div className="flex justify-between items-start mb-4 pb-4" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-                <div>
-                  <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.5rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>{selected.name}</h3>
-                  {selected.email && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginTop: '2px' }}>{selected.email}</p>}
-                  {selected.phone && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginTop: '2px' }}>{selected.phone}</p>}
-                </div>
-                <button onClick={() => setSelected(null)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><X size={14} /></button>
-              </div>
-
-              {selected.notes && (
-                <div className="mb-4 pb-4" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '6px' }}>NOTATKI</p>
-                  <p style={{ color: t.muted, fontSize: '12px', lineHeight: 1.7 }}>{selected.notes}</p>
-                </div>
-              )}
-
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>
-                HISTORIA SESJI ({sessions.length})
-              </p>
-              {sessions.length === 0 ? (
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>BRAK SESJI</p>
-              ) : (
-                <div className="space-y-2">
-                  {sessions.map(b => (
-                    <div key={b.id} className="p-3" style={{ border: `0.5px solid ${t.border}` }}>
-                      <p style={{ color: t.text, fontSize: '12px', fontWeight: 500 }}>{b.session_date} {b.session_time ? `· ${b.session_time}` : ''}</p>
-                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginTop: '2px' }}>
-                        {b.artist_name}{b.tattoo_placement ? ` · ${b.tattoo_placement}` : ''}
-                      </p>
-                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: b.status === 'completed' ? '#16a34a' : t.fuchsia, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                        {b.status}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <button onClick={() => openEdit(selected)} className="btn-ghost-parchment w-full mt-4" style={{ fontSize: '9px', padding: '10px' }}>
-                EDYTUJ DANE KLIENTA
-              </button>
-            </div>
-          );
-        })()}
-      </div>
     </div>
   );
 }

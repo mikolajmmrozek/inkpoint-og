@@ -11,10 +11,10 @@ const NAV = [
   { path: '/dashboard', label: 'Przegląd', icon: BarChart2, exact: true },
   { path: '/dashboard/bookings', label: 'Rezerwacje', icon: Calendar },
   { path: '/dashboard/artists', label: 'Artyści', icon: Users },
-  { path: '/dashboard/clients', label: 'Klienci', icon: UserCircle },
   { path: '/dashboard/blog', label: 'Blog', icon: BookOpen },
   { path: '/dashboard/messages', label: 'Wiadomości', icon: MessageSquare },
   { path: '/dashboard/health-forms', label: 'Ankiety', icon: FileText },
+  { path: '/dashboard/clients', label: 'Klienci', icon: UserCircle },
   { path: '/dashboard/settings', label: 'Ustawienia', icon: Settings },
 ];
 

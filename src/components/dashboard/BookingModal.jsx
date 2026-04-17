@@ -22,6 +22,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
   const isNew = !booking;
   const [artists, setArtists] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [selectedClient, setSelectedClient] = useState(null); // existing client or null
   const [form, setForm] = useState(booking ? { ...booking } : {
     client_name: '',
     client_email: '',
@@ -52,14 +53,50 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
     set('artist_name', a?.name || '');
   };
 
+  const handleClientSelect = (client) => {
+    if (client._isNew) {
+      // New client — prefill name only, user fills in rest
+      setSelectedClient(null);
+      set('client_name', client.name);
+      set('client_email', '');
+      set('client_phone', '');
+    } else {
+      // Existing client — fill all fields
+      setSelectedClient(client);
+      set('client_name', client.name);
+      set('client_email', client.email || '');
+      set('client_phone', client.phone || '');
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
     const data = { ...form, estimated_price: form.estimated_price ? Number(form.estimated_price) : undefined };
+
     if (isNew) {
       await base44.entities.Booking.create(data);
+      // Upsert client in Client database
+      if (selectedClient?.id) {
+        // Existing client — update session count
+        await base44.entities.Client.update(selectedClient.id, {
+          name: form.client_name,
+          email: form.client_email,
+          phone: form.client_phone,
+          total_sessions: (selectedClient.total_sessions || 0) + 1,
+        });
+      } else if (form.client_name) {
+        // New client — create record
+        await base44.entities.Client.create({
+          name: form.client_name,
+          email: form.client_email,
+          phone: form.client_phone,
+          total_sessions: 1,
+        });
+      }
     } else {
       await base44.entities.Booking.update(booking.id, data);
     }
+
     setSaving(false);
     onSaved();
   };
@@ -105,11 +142,25 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
           {/* Client */}
           <div>
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>KLIENT</p>
-            <div className="grid grid-cols-2 gap-6">
+            {isNew && (
+              <div className="mb-4">
+                {label('Szukaj istniejącego klienta')}
+                <ClientSearch value={form.client_name ? { name: form.client_name } : null} onSelect={handleClientSelect} t={t} />
+              </div>
+            )}
+            <div className="grid grid-cols-2 gap-6 mt-2">
               <div>{label('Imię i Nazwisko *')}<input {...inp('client_name')} /></div>
-              <div>{label('Email *')}<input {...inp('client_email', 'email')} /></div>
+              <div>{label('Email')}<input {...inp('client_email', 'email')} /></div>
             </div>
             <div className="mt-4">{label('Telefon')}<input {...inp('client_phone')} /></div>
+            {selectedClient && (
+              <div className="mt-3 px-3 py-2 flex items-center gap-2" style={{ background: 'rgba(255,0,127,0.05)', border: '0.5px solid rgba(255,0,127,0.2)' }}>
+                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#FF007F', flexShrink: 0 }} />
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>
+                  ISTNIEJĄCY KLIENT · {selectedClient.total_sessions || 0} POPRZEDNICH SESJI
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Session */}
