@@ -80,10 +80,11 @@ export default function DashboardSettings() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      const dataToSave = { ...DEFAULTS[activeTab], ...form };
       if (recordId) {
-        await base44.entities.SiteSettings.update(recordId, form);
+        await base44.entities.SiteSettings.update(recordId, dataToSave);
       } else {
-        const rec = await base44.entities.SiteSettings.create(form);
+        const rec = await base44.entities.SiteSettings.create(dataToSave);
         setRecordId(rec.id);
       }
       setSaved(true);
