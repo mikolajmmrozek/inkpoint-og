@@ -33,7 +33,7 @@ const CONSENT_FIELDS = [
   ['confirm_regulations_read', 'Regulamin'],
 ];
 
-function FormDetailPanel({ selected, guardianForm, t, onClose }) {
+function FormDetailPanel({ selected, guardianForm, t, onClose, theme }) {
   const hasFlags = BOOL_FIELDS.some(([k]) => selected[k] === true);
 
   return (
@@ -287,7 +287,7 @@ export default function DashboardHealthForms() {
 
         {/* Detail */}
         {selected ? (
-          <FormDetailPanel selected={selected} guardianForm={selectedGuardian} t={t} onClose={() => setSelected(null)} />
+          <FormDetailPanel selected={selected} guardianForm={selectedGuardian} t={t} onClose={() => setSelected(null)} theme={theme} />
         ) : (
           <div className="flex items-center justify-center" style={{ border: `0.5px solid ${t.border}`, minHeight: '200px' }}>
             <p style={{ ...mono, fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>WYBIERZ ANKIETĘ</p>
