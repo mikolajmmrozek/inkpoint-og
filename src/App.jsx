@@ -30,6 +30,7 @@ import DashboardClients from './pages/dashboard/DashboardClients';
 import DashboardStats from './pages/dashboard/DashboardStats';
 import DashboardFormTemplate from './pages/dashboard/DashboardFormTemplate';
 import DashboardTermsEditor from './pages/dashboard/DashboardTermsEditor';
+import DashboardDocuments from './pages/dashboard/DashboardDocuments';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -77,6 +78,7 @@ const AuthenticatedApp = () => {
         <Route path="stats" element={<DashboardStats />} />
         <Route path="form-template" element={<DashboardFormTemplate />} />
         <Route path="terms-editor" element={<DashboardTermsEditor />} />
+        <Route path="documents" element={<DashboardDocuments />} />
       </Route>
 
       <Route path="*" element={<PageNotFound />} />

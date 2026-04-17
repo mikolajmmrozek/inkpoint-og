@@ -1,0 +1,28 @@
+{
+  "name": "Instruction",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "aftercare_tattoo",
+        "aftercare_piercing",
+        "before_tattoo",
+        "after_piercing"
+      ],
+      "description": "Typ instrukcji"
+    },
+    "title": {
+      "type": "string",
+      "description": "Tytu\u0142 instrukcji"
+    },
+    "content": {
+      "type": "string",
+      "description": "Tre\u015b\u0107 instrukcji (HTML lub tekst)"
+    }
+  },
+  "required": [
+    "type",
+    "title"
+  ]
+}

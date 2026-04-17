@@ -13,8 +13,9 @@ const NAV = [
   { path: '/dashboard/artists', label: 'Artyści', icon: Users },
   { path: '/dashboard/blog', label: 'Blog', icon: BookOpen },
   { path: '/dashboard/messages', label: 'Wiadomości', icon: MessageSquare },
-  { path: '/dashboard/health-forms', label: 'Ankiety', icon: FileText },
+  { path: '/dashboard/health-forms', label: 'Dokumenty', icon: FileText },
   { path: '/dashboard/clients', label: 'Klienci', icon: UserCircle },
+  { path: '/dashboard/documents', label: 'Zalecenia', icon: Settings },
   { path: '/dashboard/stats', label: 'Statystyki', icon: PieChart },
   { path: '/dashboard/settings', label: 'Ustawienia', icon: Settings },
 ];

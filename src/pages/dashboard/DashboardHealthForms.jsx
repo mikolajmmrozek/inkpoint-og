@@ -180,6 +180,9 @@ export default function DashboardHealthForms() {
   const [exporting, setExporting] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
   const [sendingLinkEmail, setSendingLinkEmail] = useState(null);
+  const [docTab, setDocTab] = useState('ankiety'); // 'ankiety', 'aftercare', 'regulamin'
+  const [instructions, setInstructions] = useState([]);
+  const [terms, setTerms] = useState([]);
 
   useEffect(() => {
     Promise.all([
@@ -187,11 +190,15 @@ export default function DashboardHealthForms() {
       base44.entities.GuardianConsentForm.list('-form_filled_date', 100),
       base44.entities.Booking.list('-session_date', 200),
       base44.entities.Client.list('-created_date', 500),
-    ]).then(([f, g, b, c]) => {
+      base44.entities.Instruction.list(),
+      base44.entities.TermsAndConditions.list(),
+    ]).then(([f, g, b, c, i, t]) => {
       setForms(f);
       setGuardianForms(g);
       setBookings(b);
       setClients(c);
+      setInstructions(i);
+      setTerms(t);
     }).finally(() => setLoading(false));
   }, []);
 
@@ -386,61 +393,151 @@ export default function DashboardHealthForms() {
         </div>
       )}
 
-      {/* Dokument grid */}
-      <div>
-        {/* Header + Search */}
-        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, marginBottom: '12px' }}>
-          <div className="px-4 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-            <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
-              DOKUMENTY MEDYCZNE ({filteredForms.length})
-            </p>
-            <div className="flex items-center gap-2" style={{ border: `0.5px solid ${t.border}`, padding: '6px 10px' }}>
-              <Search size={12} color={t.muted} />
-              <input
-                type="text"
-                placeholder="Szukaj: imię, email, data..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                style={{ background: 'transparent', border: 'none', outline: 'none', color: t.text, fontSize: '11px', width: '100%', fontFamily: 'Inter' }}
-              />
-            </div>
-          </div>
+      {/* Dokumenty - karty sekcji */}
+      <div className="mb-8">
+        <div className="flex gap-2 mb-4 flex-wrap">
+          {[{ key: 'ankiety', label: 'Ankiety' }, { key: 'aftercare', label: 'Zalecenia' }, { key: 'regulamin', label: 'Regulamin' }].map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setDocTab(tab.key)}
+              style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${docTab === tab.key ? t.fuchsia : t.border}`, color: docTab === tab.key ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer' }}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
 
-        {/* Cards grid */}
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
-          </div>
-        ) : filteredForms.length === 0 ? (
-          <div className="py-16 text-center">
-            <p style={{ ...mono, fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK DOKUMENTÓW</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-            {filteredForms.map((form) => (
-              <button
-                key={form.id}
-                onClick={() => setSelected(form)}
-                style={{ border: `0.5px solid ${t.border}`, background: selected?.id === form.id ? 'rgba(255,0,127,0.08)' : t.bg, padding: '16px', textAlign: 'left', cursor: 'pointer' }}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <FileText size={16} color={form.is_minor ? '#FF007F' : t.fuchsia} />
-                  {BOOL_FIELDS.some(([k]) => form[k] === true) && (
-                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#FF007F', flexShrink: 0 }} title="Problemy zdrowotne" />
-                  )}
+        {/* Ankiety tab */}
+        {docTab === 'ankiety' && (
+          <div>
+            <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, marginBottom: '12px' }}>
+              <div className="px-4 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+                <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
+                  ANKIETY ZDROWOTNE ({filteredForms.length})
+                </p>
+                <div className="flex items-center gap-2" style={{ border: `0.5px solid ${t.border}`, padding: '6px 10px' }}>
+                  <Search size={12} color={t.muted} />
+                  <input
+                    type="text"
+                    placeholder="Szukaj: imię, email, data..."
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    style={{ background: 'transparent', border: 'none', outline: 'none', color: t.text, fontSize: '11px', width: '100%', fontFamily: 'Inter' }}
+                  />
                 </div>
-                <p style={{ color: t.text, fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>{getClientName(form)}</p>
-                <p style={{ ...mono, fontSize: '8px', color: t.muted, marginBottom: '8px' }}>{form.client_email}</p>
-                <div className="flex items-center flex-wrap gap-2">
-                  {form.is_minor && <span style={{ ...mono, fontSize: '7px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '1px 4px' }}>NIELETNI</span>}
-                  {form.is_update_only && <span style={{ ...mono, fontSize: '7px', color: '#16a34a', border: '0.5px solid #16a34a', padding: '1px 4px' }}>AKTUALIZACJA</span>}
-                  <p style={{ ...mono, fontSize: '8px', color: t.muted }}>
-                    {form.form_filled_date ? format(new Date(form.form_filled_date), 'dd.MM.yyyy') : ''}
-                  </p>
+              </div>
+              {loading ? (
+                <div className="flex items-center justify-center py-20">
+                  <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
                 </div>
-              </button>
-            ))}
+              ) : filteredForms.length === 0 ? (
+                <div className="py-16 text-center">
+                  <p style={{ ...mono, fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK ANKIET</p>
+                </div>
+              ) : (
+                <div>
+                  {filteredForms.map((form, i) => (
+                    <div key={form.id}
+                      className="flex items-center gap-3 px-4 py-3 cursor-pointer"
+                      style={{ borderBottom: i < filteredForms.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selected?.id === form.id ? 'rgba(255,0,127,0.05)' : 'transparent' }}
+                      onClick={() => setSelected(form)}
+                    >
+                      <FileText size={13} color={form.is_minor ? '#FF007F' : t.fuchsia} />
+                      <div className="flex-1 min-w-0">
+                        <p style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>{getClientName(form)}</p>
+                        <p style={{ ...mono, fontSize: '8px', color: t.muted, marginTop: '2px' }}>{form.client_email}</p>
+                        <div className="flex items-center gap-2 mt-2">
+                          {form.is_minor && <span style={{ ...mono, fontSize: '7px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '1px 4px' }}>NIELETNI</span>}
+                          {form.is_update_only && <span style={{ ...mono, fontSize: '7px', color: '#16a34a', border: '0.5px solid #16a34a', padding: '1px 4px' }}>AKTUALIZACJA</span>}
+                          <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>
+                            {form.procedure_type && `${form.procedure_type} · `}
+                            {form.form_filled_date ? format(new Date(form.form_filled_date), 'dd.MM.yyyy') : ''}
+                          </p>
+                        </div>
+                      </div>
+                      {BOOL_FIELDS.some(([k]) => form[k] === true) && (
+                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#FF007F', flexShrink: 0 }} title="Problemy zdrowotne" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Aftercare tab */}
+        {docTab === 'aftercare' && (
+          <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+            <div className="px-4 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
+                ZALECENIA ({instructions.length})
+              </p>
+            </div>
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
+              </div>
+            ) : instructions.length === 0 ? (
+              <div className="py-16 text-center">
+                <p style={{ ...mono, fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK DOKUMENTÓW</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+                {instructions.map((instr) => (
+                  <div key={instr.id} style={{ border: `0.5px solid ${t.border}`, padding: '16px', background: 'rgba(255,0,127,0.02)' }}>
+                    <p style={{ ...display, fontSize: '1.2rem', color: t.title, letterSpacing: '0.04em', marginBottom: '8px' }}>
+                      {instr.title}
+                    </p>
+                    <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px' }}>
+                      {instr.type === 'aftercare_tattoo' ? 'Pielęgnacja tatuażu' : instr.type === 'aftercare_piercing' ? 'Pielęgnacja piercingu' : instr.type === 'before_tattoo' ? 'Przed tatuażem' : 'Po piercingu'}
+                    </p>
+                    {instr.content ? (
+                      <p style={{ color: t.text, fontSize: '12px', lineHeight: 1.6 }}>{instr.content}</p>
+                    ) : (
+                      <p style={{ ...mono, fontSize: '10px', color: t.muted, fontStyle: 'italic' }}>Brak treści</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Regulamin tab */}
+        {docTab === 'regulamin' && (
+          <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+            <div className="px-4 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                REGULAMIN STUDIA
+              </p>
+            </div>
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
+              </div>
+            ) : (
+              <div className="p-4">
+                {terms.length === 0 ? (
+                  <div className="py-16 text-center">
+                    <p style={{ ...mono, fontSize: '10px', color: t.muted, letterSpacing: '0.1em', marginBottom: '20px' }}>BRAK DOKUMENTU</p>
+                  </div>
+                ) : (
+                  terms.map((t_item) => (
+                    <div key={t_item.id} style={{ border: `0.5px solid ${t.border}`, padding: '20px', background: 'rgba(255,0,127,0.02)' }}>
+                      <p style={{ ...display, fontSize: '1.4rem', color: t.title, letterSpacing: '0.04em', marginBottom: '12px' }}>
+                        {t_item.title || 'Regulamin'}
+                      </p>
+                      {t_item.content ? (
+                        <div style={{ color: t.text, fontSize: '13px', lineHeight: 1.7 }}>{t_item.content}</div>
+                      ) : (
+                        <p style={{ ...mono, fontSize: '10px', color: t.muted, fontStyle: 'italic' }}>Brak treści</p>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
           </div>
         )}
 
