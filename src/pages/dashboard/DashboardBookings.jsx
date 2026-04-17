@@ -25,17 +25,23 @@ export default function DashboardBookings() {
     : { bg: 'rgba(10,10,10,0.8)', pageBg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F' };
 
   const [bookings, setBookings] = useState([]);
+  const [artists, setArtists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [filter, setFilter] = useState('all');
+  const [artistFilter, setArtistFilter] = useState('all');
   const [viewMode, setViewMode] = useState('calendar'); // 'calendar' | 'list'
   const [selectedDate, setSelectedDate] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editingBooking, setEditingBooking] = useState(null);
 
   const load = async () => {
-    const data = await base44.entities.Booking.list('-session_date', 200);
+    const [data, artistData] = await Promise.all([
+      base44.entities.Booking.list('-session_date', 200),
+      base44.entities.Artist.list(),
+    ]);
     setBookings(data);
+    setArtists(artistData);
     setLoading(false);
   };
 
@@ -77,9 +83,16 @@ export default function DashboardBookings() {
   // Bookings to show in list (filtered by date if calendar view + date selected)
   const listBookings = (() => {
     let base = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
+    if (artistFilter !== 'all') base = base.filter(b => b.artist_id === artistFilter);
     if (viewMode === 'calendar' && selectedDate) {
       base = base.filter(b => b.session_date && isSameDay(new Date(b.session_date), selectedDate));
     }
+    return base;
+  })();
+
+  const calendarBookings = (() => {
+    let base = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
+    if (artistFilter !== 'all') base = base.filter(b => b.artist_id === artistFilter);
     return base;
   })();
 
@@ -109,7 +122,18 @@ export default function DashboardBookings() {
               </button>
             ))}
           </div>
-          {/* Filter tabs */}
+          {/* Artist filter */}
+          <div className="flex gap-1 flex-wrap">
+            <button onClick={() => setArtistFilter('all')} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilter === 'all' ? t.fuchsia : t.border}`, color: artistFilter === 'all' ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer' }}>
+              Wszyscy
+            </button>
+            {artists.map(a => (
+              <button key={a.id} onClick={() => setArtistFilter(a.id)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilter === a.id ? t.fuchsia : t.border}`, color: artistFilter === a.id ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer' }}>
+                {a.name}
+              </button>
+            ))}
+          </div>
+          {/* Status filter */}
           <div className="flex gap-1 flex-wrap">
             {['all', ...STATUS_OPTIONS].map(s => (
               <button key={s} onClick={() => setFilter(s)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${filter === s ? t.fuchsia : t.border}`, color: filter === s ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer' }}>
@@ -135,7 +159,7 @@ export default function DashboardBookings() {
             {/* Calendar view */}
             {viewMode === 'calendar' && (
               <BookingCalendar
-                bookings={filter === 'all' ? bookings : bookings.filter(b => b.status === filter)}
+                bookings={calendarBookings}
                 onDayClick={handleDayClick}
                 selectedDate={selectedDate}
                 t={t}

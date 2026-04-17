@@ -132,6 +132,34 @@ export default function DashboardArtists() {
                   </div>
                 </div>
 
+                {/* Revenue split */}
+                <div style={{ border: `0.5px solid ${t.border}`, padding: '16px' }}>
+                  <label className="block mb-3" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Podział przychodu</label>
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1">
+                      <label className="block mb-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Artysta %</label>
+                      <input
+                        type="number" min="0" max="100"
+                        style={{ ...inputStyle, color: '#16a34a', borderBottomColor: t.border }}
+                        value={form.artist_cut_percent ?? 60}
+                        onChange={e => setForm(f => ({ ...f, artist_cut_percent: Math.min(100, Math.max(0, Number(e.target.value))) }))}
+                        onFocus={e => e.target.style.borderBottomColor = '#16a34a'}
+                        onBlur={e => e.target.style.borderBottomColor = t.border}
+                      />
+                    </div>
+                    <div style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: t.muted }}>+</div>
+                    <div className="flex-1">
+                      <label className="block mb-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Studio %</label>
+                      <input
+                        type="number" readOnly
+                        style={{ ...inputStyle, color: '#FF007F', borderBottomColor: t.border, cursor: 'default' }}
+                        value={100 - (form.artist_cut_percent ?? 60)}
+                      />
+                    </div>
+                    <div style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted }}>= 100%</div>
+                  </div>
+                </div>
+
                 <div>
                   <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Instagram</label>
                   <input style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={form.instagram || ''} onChange={e => setForm(f => ({ ...f, instagram: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />

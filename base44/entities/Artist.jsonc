@@ -51,6 +51,11 @@
     "is_active": {
       "type": "boolean",
       "default": true
+    },
+    "artist_cut_percent": {
+      "type": "number",
+      "default": 60,
+      "description": "Procentowy udzia\u0142 artysty w przychodzie z sesji (np. 60 = 60%)"
     }
   },
   "required": [
