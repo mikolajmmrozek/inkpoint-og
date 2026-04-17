@@ -53,15 +53,9 @@ export default function StepPersonal({ form, setField, t, inputStyle }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-5">
-        <div>
-          <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'rgba(245,240,235,0.5)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>{t.pesel}</label>
-          <input style={inputStyle} value={form.pesel || ''} onChange={e => setField('pesel', e.target.value)} />
-        </div>
-        <div>
-          <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'rgba(245,240,235,0.5)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>{t.idDocument}</label>
-          <input style={inputStyle} value={form.id_document || ''} onChange={e => setField('id_document', e.target.value)} />
-        </div>
+      <div>
+        <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'rgba(245,240,235,0.5)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>{t.pesel}</label>
+        <input style={inputStyle} value={form.pesel || ''} onChange={e => setField('pesel', e.target.value)} />
       </div>
 
       <div>

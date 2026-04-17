@@ -22,7 +22,8 @@ export default function HealthFormPage() {
 
   const [form, setForm] = useState({
     booking_id: '',
-    client_name: '',
+    client_first_name: '',
+    client_last_name: '',
     client_email: '',
     client_phone: '',
     date_of_birth: '',
@@ -30,7 +31,6 @@ export default function HealthFormPage() {
     address_city: '',
     address_postal_code: '',
     pesel: '',
-    id_document: '',
     has_heart_condition: null,
     has_kidney_condition: null,
     has_liver_condition: null,
@@ -86,7 +86,8 @@ export default function HealthFormPage() {
           setForm(f => ({
             ...f,
             booking_id: b.id,
-            client_name: (b.client_name || '').split(' ')[0],
+            client_first_name: (b.client_name || '').split(' ')[0],
+            client_last_name: (b.client_name || '').split(' ').slice(1).join(' ') || '',
             client_email: b.client_email || '',
             client_phone: b.client_phone || '',
             procedure_type: b.tattoo_description ? 'TATUAŻ' : '',
@@ -143,7 +144,7 @@ export default function HealthFormPage() {
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
-      const healthData = { ...form, is_minor: isMinor };
+      const healthData = { ...form, client_name: `${form.client_first_name} ${form.client_last_name}`.trim(), is_minor: isMinor };
       const created = await base44.entities.HealthForm.create(healthData);
 
       if (isMinor) {
