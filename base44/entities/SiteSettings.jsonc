@@ -4,7 +4,7 @@
   "properties": {
     "key": {
       "type": "string",
-      "description": "Unique key, e.g. 'hero', 'about'"
+      "description": "Unique key, e.g. 'hero', 'about', 'contact', 'branding'"
     },
     "hero_video_url": {
       "type": "string",
@@ -45,6 +45,58 @@
     "about_stats_text": {
       "type": "string",
       "description": "Stats badge label (e.g. W WOLSZTYNIE)"
+    },
+    "contact_email": {
+      "type": "string",
+      "description": "Main contact email address"
+    },
+    "contact_address_street": {
+      "type": "string",
+      "description": "Street address"
+    },
+    "contact_address_city": {
+      "type": "string",
+      "description": "City and postal code"
+    },
+    "contact_phone": {
+      "type": "string",
+      "description": "Contact phone number"
+    },
+    "contact_hours": {
+      "type": "string",
+      "description": "Business hours"
+    },
+    "contact_instagram": {
+      "type": "string",
+      "description": "Instagram handle"
+    },
+    "contact_instagram_url": {
+      "type": "string",
+      "description": "Instagram profile URL"
+    },
+    "contact_facebook": {
+      "type": "string",
+      "description": "Facebook page name"
+    },
+    "contact_facebook_url": {
+      "type": "string",
+      "description": "Facebook page URL"
+    },
+    "contact_google_maps_url": {
+      "type": "string",
+      "description": "Google Maps link"
+    },
+    "site_logo_url": {
+      "type": "string",
+      "description": "Site logo image URL"
+    },
+    "app_icon_url": {
+      "type": "string",
+      "description": "Application icon URL"
+    },
+    "app_description": {
+      "type": "string",
+      "description": "Short application description for meta tags"
     }
   },
   "required": [
