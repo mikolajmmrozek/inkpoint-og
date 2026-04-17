@@ -7,12 +7,12 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 const galleryImages = [
-  'https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=600&q=80',
-  'https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=600&q=80',
-  'https://images.unsplash.com/photo-1590246814883-57c511e4a0a4?w=600&q=80',
-  'https://images.unsplash.com/photo-1542727365-19732a80dcfd?w=600&q=80',
-  'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=600&q=80',
-  'https://images.unsplash.com/photo-1607452941212-2a3fa8fe5c8c?w=600&q=80',
+  'https://images.unsplash.com/photo-1561948955-570b270e7c36?w=600&q=80',
+  'https://images.unsplash.com/photo-1612459284270-5992c8b93696?w=600&q=80',
+  'https://images.unsplash.com/photo-1588771930296-7bb382e20b4e?w=600&q=80',
+  'https://images.unsplash.com/photo-1549317336-206569e8475c?w=600&q=80',
+  'https://images.unsplash.com/photo-1601412436519-e349b6da3af6?w=600&q=80',
+  'https://images.unsplash.com/photo-1598387993441-a364f854c3e1?w=600&q=80',
 ];
 
 export default function Home() {
