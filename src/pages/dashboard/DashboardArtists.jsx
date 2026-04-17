@@ -95,8 +95,8 @@ export default function DashboardArtists() {
       {/* Editor modal */}
       <AnimatePresence>
         {editing && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(10,10,10,0.95)' }}>
-            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="w-full max-w-2xl max-h-screen overflow-y-auto" style={{ border: '0.5px solid #262626', background: '#0A0A0A', padding: '40px' }}>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }}>
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="w-full max-w-2xl max-h-screen overflow-y-auto" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '40px' }}>
               <div className="flex justify-between items-center mb-8">
                 <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
                   {editing === 'new' ? 'Nowy Artysta' : 'Edytuj Artystę'}
@@ -111,35 +111,35 @@ export default function DashboardArtists() {
                     <input style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={form.name || ''} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                   </div>
                   <div>
-                    <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Slug (URL)</label>
-                    <input style={inputStyle} value={form.slug || ''} onChange={e => setForm(f => ({ ...f, slug: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                    <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Slug (URL)</label>
+                    <input style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={form.slug || ''} onChange={e => setForm(f => ({ ...f, slug: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Bio</label>
-                  <textarea rows={4} style={{ ...inputStyle, resize: 'none' }} value={form.bio || ''} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                  <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Bio</label>
+                  <textarea rows={4} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} value={form.bio || ''} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                 </div>
 
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Specjalizacje (przecinki)</label>
-                    <input style={inputStyle} value={Array.isArray(form.specialty) ? form.specialty.join(', ') : (form.specialty || '')} onChange={e => setForm(f => ({ ...f, specialty: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                    <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Specjalizacje (przecinki)</label>
+                    <input style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={Array.isArray(form.specialty) ? form.specialty.join(', ') : (form.specialty || '')} onChange={e => setForm(f => ({ ...f, specialty: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                   </div>
                   <div>
-                    <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Lata doświadczenia</label>
-                    <input type="number" style={inputStyle} value={form.years_experience || ''} onChange={e => setForm(f => ({ ...f, years_experience: Number(e.target.value) }))} onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                    <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Lata doświadczenia</label>
+                    <input type="number" style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={form.years_experience || ''} onChange={e => setForm(f => ({ ...f, years_experience: Number(e.target.value) }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Instagram</label>
-                  <input style={inputStyle} value={form.instagram || ''} onChange={e => setForm(f => ({ ...f, instagram: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                  <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Instagram</label>
+                  <input style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={form.instagram || ''} onChange={e => setForm(f => ({ ...f, instagram: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                 </div>
 
                 {/* Photo upload */}
                 <div>
-                  <label className="block mb-3" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Zdjęcie profilowe</label>
+                  <label className="block mb-3" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Zdjęcie profilowe</label>
                   {form.photo_url && <img src={form.photo_url} alt="" className="w-24 h-24 object-cover mb-3" style={{ filter: 'brightness(0.7)' }} />}
                   <label className="btn-ghost-parchment inline-block cursor-pointer" style={{ fontSize: '10px', padding: '8px 16px' }}>
                     {uploading ? 'PRZESYŁANIE...' : 'WYBIERZ ZDJĘCIE'}
@@ -149,7 +149,7 @@ export default function DashboardArtists() {
 
                 {/* Portfolio upload */}
                 <div>
-                  <label className="block mb-3" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                  <label className="block mb-3" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                     Portfolio ({(form.portfolio_images || []).length} zdjęć)
                   </label>
                   <div className="flex flex-wrap gap-2 mb-3">
@@ -168,7 +168,7 @@ export default function DashboardArtists() {
                   </label>
                 </div>
 
-                <div className="flex gap-4 pt-4" style={{ borderTop: '0.5px solid #262626' }}>
+                <div className="flex gap-4 pt-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
                   <button onClick={handleSave} className="btn-oxblood flex-1">ZAPISZ</button>
                   <button onClick={() => setEditing(null)} className="btn-ghost-parchment">ANULUJ</button>
                 </div>

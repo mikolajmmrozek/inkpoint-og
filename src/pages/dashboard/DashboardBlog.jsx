@@ -76,6 +76,15 @@ export default function DashboardBlog() {
     setUploading(false);
   };
 
+  const handleVideoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    setForm(f => ({ ...f, video_url: file_url }));
+    setUploading(false);
+  };
+
   return (
     <div>
       <div className="mb-8 flex items-center justify-between">
@@ -120,51 +129,57 @@ export default function DashboardBlog() {
 
               <div className="space-y-8">
                 <div>
-                  <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Tytuł *</label>
-                  <input style={inputStyle} value={form.title || ''} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                  <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Tytuł *</label>
+                  <input style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={form.title || ''} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                 </div>
 
                 <div>
-                  <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Skrót</label>
-                  <textarea rows={2} style={{ ...inputStyle, resize: 'none' }} value={form.excerpt || ''} onChange={e => setForm(f => ({ ...f, excerpt: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                  <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Skrót</label>
+                  <textarea rows={2} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} value={form.excerpt || ''} onChange={e => setForm(f => ({ ...f, excerpt: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                 </div>
 
                 <div>
-                  <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Treść (HTML)</label>
-                  <textarea rows={8} style={{ ...inputStyle, resize: 'vertical', fontFamily: 'JetBrains Mono', fontSize: '12px' }} value={form.content || ''} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                  <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Treść (HTML)</label>
+                  <textarea rows={8} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'vertical', fontFamily: 'JetBrains Mono', fontSize: '12px' }} value={form.content || ''} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                 </div>
 
                 <div className="grid grid-cols-2 gap-8">
                   <div>
-                    <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Autor</label>
-                    <input style={inputStyle} value={form.author_name || ''} onChange={e => setForm(f => ({ ...f, author_name: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                    <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Autor</label>
+                    <input style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={form.author_name || ''} onChange={e => setForm(f => ({ ...f, author_name: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                   </div>
                   <div>
-                    <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Tagi (przecinki)</label>
-                    <input style={inputStyle} value={Array.isArray(form.tags) ? form.tags.join(', ') : (form.tags || '')} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                    <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Tagi (przecinki)</label>
+                    <input style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={Array.isArray(form.tags) ? form.tags.join(', ') : (form.tags || '')} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-8">
-                  <div>
-                    <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>URL Video (opcjonalne)</label>
-                    <input style={inputStyle} value={form.video_url || ''} onChange={e => setForm(f => ({ ...f, video_url: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
-                  </div>
-                  <div>
-                    <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Data publikacji</label>
-                    <input type="date" style={{ ...inputStyle, colorScheme: 'dark' }} value={form.published_at || ''} onChange={e => setForm(f => ({ ...f, published_at: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
-                  </div>
+                <div>
+                  <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Data publikacji</label>
+                  <input type="date" style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: theme === 'light' ? 'light' : 'dark' }} value={form.published_at || ''} onChange={e => setForm(f => ({ ...f, published_at: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                 </div>
 
                 {/* Cover image upload */}
                 <div>
-                  <label className="block mb-3" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Zdjęcie tytułowe</label>
+                  <label className="block mb-3" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Zdjęcie tytułowe</label>
                   {form.cover_image_url && (
-                    <img src={form.cover_image_url} alt="Cover" className="w-32 h-20 object-cover mb-3" style={{ filter: 'brightness(0.7)' }} />
+                    <img src={form.cover_image_url} alt="Cover" className="w-32 h-20 object-cover mb-3" />
                   )}
                   <label className="btn-ghost-parchment inline-block cursor-pointer text-center" style={{ fontSize: '10px', padding: '10px 20px' }}>
                     {uploading ? 'PRZESYŁANIE...' : 'WYBIERZ PLIK'}
                     <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                  </label>
+                </div>
+
+                {/* Video upload */}
+                <div>
+                  <label className="block mb-3" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Wideo (opcjonalne)</label>
+                  {form.video_url && (
+                    <video src={form.video_url} controls className="w-full max-h-40 mb-3" style={{ background: '#000' }} />
+                  )}
+                  <label className="btn-ghost-parchment inline-block cursor-pointer text-center" style={{ fontSize: '10px', padding: '10px 20px' }}>
+                    {uploading ? 'PRZESYŁANIE...' : form.video_url ? 'ZMIEŃ WIDEO' : 'DODAJ WIDEO'}
+                    <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
                   </label>
                 </div>
 
@@ -173,14 +188,14 @@ export default function DashboardBlog() {
                   <button
                     onClick={() => setForm(f => ({ ...f, is_published: !f.is_published }))}
                     className="flex items-center gap-3 px-4 py-3 transition-all"
-                    style={{ border: `0.5px solid ${form.is_published ? '#4A7C59' : '#262626'}`, color: form.is_published ? '#4A7C59' : 'rgba(245,240,235,0.3)', background: 'transparent', cursor: 'pointer', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}
+                    style={{ border: `0.5px solid ${form.is_published ? '#16a34a' : t.border}`, color: form.is_published ? '#16a34a' : t.muted, background: 'transparent', cursor: 'pointer', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}
                   >
                     {form.is_published ? <Eye size={12} /> : <EyeOff size={12} />}
                     {form.is_published ? 'OPUBLIKOWANY' : 'SZKIC'}
                   </button>
                 </div>
 
-                <div className="flex gap-4 pt-4" style={{ borderTop: '0.5px solid #262626' }}>
+                <div className="flex gap-4 pt-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
                   <button onClick={handleSave} className="btn-oxblood flex-1">ZAPISZ</button>
                   <button onClick={() => setEditing(null)} className="btn-ghost-parchment">ANULUJ</button>
                 </div>
