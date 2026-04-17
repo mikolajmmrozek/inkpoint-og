@@ -35,7 +35,7 @@ export default function Booking() {
   const [submitting, setSubmitting] = useState(false);
   const [data, setData] = useState({
     artist_id: '', artist_name: '',
-    client_name: '', client_email: '', client_phone: '',
+    client_first_name: '', client_last_name: '', client_email: '', client_phone: '',
     tattoo_description: '', tattoo_placement: '',
     session_date: '', session_time: '',
     notes: '',
@@ -51,19 +51,23 @@ export default function Booking() {
 
   const canNext = () => {
     if (step === 0) return !!data.artist_id;
-    if (step === 1) return !!(data.client_name && data.client_email && data.tattoo_description && data.tattoo_placement);
+    if (step === 1) return !!(data.client_first_name && data.client_last_name && data.client_email && data.tattoo_description && data.tattoo_placement);
     if (step === 2) return !!(data.session_date && data.session_time);
     return true;
   };
 
   const handleSubmit = async () => {
     setSubmitting(true);
-    const booking = await base44.entities.Booking.create({ ...data, status: 'pending', health_form_completed: false });
+    const fullName = `${data.client_first_name} ${data.client_last_name}`.trim();
+    const bookingData = { ...data, client_name: fullName, status: 'pending', health_form_completed: false };
+    delete bookingData.client_first_name;
+    delete bookingData.client_last_name;
+    const booking = await base44.entities.Booking.create(bookingData);
     // Send confirmation email
     await base44.integrations.Core.SendEmail({
       to: data.client_email,
       subject: 'Potwierdzenie rezerwacji — INK Studio',
-      body: `Cześć ${data.client_name},\n\nDziękujemy za dokonanie rezerwacji w INK Studio!\n\nSzczegóły Twojej sesji:\n- Artysta: ${data.artist_name}\n- Data: ${data.session_date} o ${data.session_time}\n- Miejsce: ${data.tattoo_placement}\n\nPrzed sesją prosimy o wypełnienie ankiety zdrowotnej:\n${window.location.origin}/health-form?booking=${booking.id}\n\nDo zobaczenia!\nZespół INK Studio`,
+      body: `Cześć ${fullName},\n\nDziękujemy za dokonanie rezerwacji w INK Studio!\n\nSzczegóły Twojej sesji:\n- Artysta: ${data.artist_name}\n- Data: ${data.session_date} o ${data.session_time}\n- Miejsce: ${data.tattoo_placement}\n\nPrzed sesją prosimy o wypełnienie ankiety zdrowotnej:\n${window.location.origin}/health-form?booking=${booking.id}\n\nDo zobaczenia!\nZespół INK Studio`,
     });
     setSubmitting(false);
     setSubmitted(true);
@@ -176,9 +180,15 @@ export default function Booking() {
                 <div className="grid grid-cols-2 gap-8">
                   <div>
                     <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-                      Imię i Nazwisko *
+                      Imię *
                     </label>
-                    <input required style={inputStyle} value={data.client_name} onChange={e => update('client_name', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                    <input required style={inputStyle} value={data.client_first_name} onChange={e => update('client_first_name', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                  </div>
+                  <div>
+                    <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                      Nazwisko *
+                    </label>
+                    <input required style={inputStyle} value={data.client_last_name} onChange={e => update('client_last_name', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
                   </div>
                   <div>
                     <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
@@ -265,8 +275,8 @@ export default function Booking() {
                   Sprawdź szczegóły przed wysłaniem.
                 </p>
                 {[
-                  ['Artysta', data.artist_name],
-                  ['Imię i Nazwisko', data.client_name],
+                   ['Artysta', data.artist_name],
+                   ['Imię i Nazwisko', `${data.client_first_name} ${data.client_last_name}`],
                   ['Email', data.client_email],
                   ['Telefon', data.client_phone || '—'],
                   ['Termin', `${data.session_date} o ${data.session_time}`],
