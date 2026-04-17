@@ -1,0 +1,193 @@
+import { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { base44 } from '@/api/base44Client';
+import PageLayout from '../components/layout/PageLayout';
+import { X, ZoomIn } from 'lucide-react';
+
+const MOCK = {
+  name: 'Aleksandra Wiśniewska',
+  specialty: ['Blackwork', 'Fine Line', 'Dotwork'],
+  bio: 'Specjalizuje się w geometrycznych wzorach i delikatnej linii. Każdy projekt to indywidualna podróż przez formę i przestrzeń na skórze. Pracuje w studiu od 2015 roku, zdobywając nagrody na europejskich konwentach tatuażu.',
+  photo_url: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&q=80',
+  instagram: '@ola.tattoo',
+  years_experience: 9,
+  portfolio_images: [
+    { url: 'https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=800&q=85', caption: 'Blackwork mandala', style: 'Blackwork' },
+    { url: 'https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=800&q=85', caption: 'Fine line botanical', style: 'Fine Line' },
+    { url: 'https://images.unsplash.com/photo-1590246814883-57c511e4a0a4?w=800&q=85', caption: 'Geometric sleeve', style: 'Dotwork' },
+    { url: 'https://images.unsplash.com/photo-1542727365-19732a80dcfd?w=800&q=85', caption: 'Minimalist symbols', style: 'Fine Line' },
+    { url: 'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=800&q=85', caption: 'Abstract composition', style: 'Blackwork' },
+    { url: 'https://images.unsplash.com/photo-1607452941212-2a3fa8fe5c8c?w=800&q=85', caption: 'Floral design', style: 'Fine Line' },
+  ],
+};
+
+export default function ArtistProfile() {
+  const { slug } = useParams();
+  const [artist, setArtist] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [lightboxImg, setLightboxImg] = useState(null);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const all = await base44.entities.Artist.list();
+        const found = all.find(a => a.slug === slug || a.id === slug);
+        setArtist(found || MOCK);
+      } catch {
+        setArtist(MOCK);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [slug]);
+
+  if (loading) return (
+    <PageLayout>
+      <div className="h-screen flex items-center justify-center">
+        <div className="w-8 h-px animate-pulse" style={{ background: '#8B1A1A' }} />
+      </div>
+    </PageLayout>
+  );
+
+  const portfolioImages = artist?.portfolio_images || MOCK.portfolio_images;
+
+  return (
+    <PageLayout>
+      {/* Lightbox */}
+      <AnimatePresence>
+        {lightboxImg && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-8"
+            style={{ background: 'rgba(10,10,10,0.97)' }}
+            onClick={() => setLightboxImg(null)}
+          >
+            <button className="absolute top-8 right-8 text-parchment/60 hover:text-parchment" style={{ color: 'rgba(245,240,235,0.6)' }}>
+              <X size={24} />
+            </button>
+            <motion.img
+              src={lightboxImg}
+              alt="Portfolio"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="max-w-full max-h-full object-contain"
+              style={{ maxHeight: '90vh' }}
+              onClick={(e) => e.stopPropagation()}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="pt-24 min-h-screen">
+        {/* Back link */}
+        <div className="px-8 md:px-16 pt-12 pb-8">
+          <Link to="/artists" className="text-micro text-parchment/30 hover:text-parchment/70 transition-colors" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.15em' }}>
+            ← ARTYŚCI
+          </Link>
+        </div>
+
+        {/* Split layout */}
+        <div className="flex flex-col lg:flex-row gap-0">
+          {/* LEFT — Sticky bio */}
+          <div className="lg:w-96 lg:flex-shrink-0 px-8 md:px-16 lg:sticky lg:top-24 lg:self-start pb-16">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <div className="relative w-40 h-40 mb-8 overflow-hidden">
+                <img
+                  src={artist?.photo_url || MOCK.photo_url}
+                  alt={artist?.name}
+                  className="w-full h-full object-cover"
+                  style={{ filter: 'brightness(0.8) contrast(1.1)' }}
+                />
+              </div>
+
+              <div className="flex gap-2 flex-wrap mb-4">
+                {(artist?.specialty || MOCK.specialty).map(s => (
+                  <span key={s} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#8B1A1A', letterSpacing: '0.15em', border: '0.5px solid #8B1A1A', padding: '3px 8px', textTransform: 'uppercase' }}>
+                    {s}
+                  </span>
+                ))}
+              </div>
+
+              <h1 style={{ fontFamily: 'Cormorant Garamond', fontSize: '2.5rem', fontWeight: 700, color: '#F5F0EB', lineHeight: 1, marginBottom: '1rem' }}>
+                {artist?.name || MOCK.name}
+              </h1>
+
+              <div className="h-px w-8 mb-6" style={{ background: '#8B1A1A', height: '0.5px' }} />
+
+              <p className="text-sm leading-relaxed mb-8" style={{ color: 'rgba(245,240,235,0.6)', fontSize: '14px', lineHeight: 1.8 }}>
+                {artist?.bio || MOCK.bio}
+              </p>
+
+              {artist?.years_experience && (
+                <div className="mb-6">
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#8B1A1A', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px' }}>
+                    DOŚWIADCZENIE
+                  </p>
+                  <p style={{ fontFamily: 'Cormorant Garamond', fontSize: '2rem', fontWeight: 600, color: '#F5F0EB' }}>
+                    {artist.years_experience} lat
+                  </p>
+                </div>
+              )}
+
+              {artist?.instagram && (
+                <p className="mb-8" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em' }}>
+                  {artist.instagram}
+                </p>
+              )}
+
+              <Link to="/booking" className="btn-oxblood block text-center animate-pulse-oxblood">
+                Umów z Artystą
+              </Link>
+            </motion.div>
+          </div>
+
+          {/* RIGHT — Masonry portfolio */}
+          <div className="flex-1 px-8 md:px-16 lg:pl-12 pb-32">
+            <p className="text-micro mb-8" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.15em' }}>
+              PORTFOLIO — {portfolioImages.length} PRAC
+            </p>
+            <div className="masonry-grid">
+              {portfolioImages.map((img, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.08, duration: 0.6 }}
+                  className="relative overflow-hidden group cursor-pointer"
+                  onClick={() => setLightboxImg(img.url || img)}
+                >
+                  <img
+                    src={img.url || img}
+                    alt={img.caption || `Portfolio ${i + 1}`}
+                    className="w-full object-cover transition-all duration-700 group-hover:scale-103"
+                    style={{ filter: 'brightness(0.75) contrast(1.1)', display: 'block' }}
+                  />
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center" style={{ background: 'rgba(139,26,26,0.15)' }}>
+                    <ZoomIn size={20} color="#F5F0EB" />
+                  </div>
+                  {img.caption && (
+                    <div className="absolute bottom-0 left-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'linear-gradient(to top, rgba(10,10,10,0.9), transparent)' }}>
+                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#F5F0EB', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                        {img.caption}
+                      </p>
+                    </div>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </PageLayout>
+  );
+}

@@ -1,0 +1,59 @@
+{
+  "name": "Artist",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Full name of the artist"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL-friendly identifier"
+    },
+    "bio": {
+      "type": "string",
+      "description": "Artist biography"
+    },
+    "specialty": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Specialization tags"
+    },
+    "photo_url": {
+      "type": "string",
+      "description": "Profile photo URL"
+    },
+    "instagram": {
+      "type": "string"
+    },
+    "years_experience": {
+      "type": "number"
+    },
+    "portfolio_images": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "caption": {
+            "type": "string"
+          },
+          "style": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

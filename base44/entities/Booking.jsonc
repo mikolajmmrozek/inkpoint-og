@@ -1,0 +1,76 @@
+{
+  "name": "Booking",
+  "type": "object",
+  "properties": {
+    "client_name": {
+      "type": "string"
+    },
+    "client_email": {
+      "type": "string"
+    },
+    "client_phone": {
+      "type": "string"
+    },
+    "artist_id": {
+      "type": "string"
+    },
+    "artist_name": {
+      "type": "string"
+    },
+    "session_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "session_time": {
+      "type": "string"
+    },
+    "session_duration": {
+      "type": "number",
+      "description": "Duration in hours"
+    },
+    "tattoo_description": {
+      "type": "string"
+    },
+    "tattoo_placement": {
+      "type": "string"
+    },
+    "reference_images": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "estimated_price": {
+      "type": "number"
+    },
+    "deposit_paid": {
+      "type": "boolean",
+      "default": false
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "confirmed",
+        "completed",
+        "cancelled"
+      ],
+      "default": "pending"
+    },
+    "health_form_completed": {
+      "type": "boolean",
+      "default": false
+    },
+    "health_form_token": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "client_name",
+    "client_email",
+    "session_date"
+  ]
+}

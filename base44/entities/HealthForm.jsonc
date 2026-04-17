@@ -1,0 +1,75 @@
+{
+  "name": "HealthForm",
+  "type": "object",
+  "properties": {
+    "booking_id": {
+      "type": "string"
+    },
+    "client_name": {
+      "type": "string"
+    },
+    "client_email": {
+      "type": "string"
+    },
+    "date_of_birth": {
+      "type": "string",
+      "format": "date"
+    },
+    "has_allergies": {
+      "type": "boolean"
+    },
+    "allergies_description": {
+      "type": "string"
+    },
+    "has_skin_conditions": {
+      "type": "boolean"
+    },
+    "skin_conditions_description": {
+      "type": "string"
+    },
+    "has_blood_disorders": {
+      "type": "boolean"
+    },
+    "blood_disorders_description": {
+      "type": "string"
+    },
+    "takes_medication": {
+      "type": "boolean"
+    },
+    "medication_description": {
+      "type": "string"
+    },
+    "is_pregnant": {
+      "type": "boolean"
+    },
+    "has_diabetes": {
+      "type": "boolean"
+    },
+    "has_heart_condition": {
+      "type": "boolean"
+    },
+    "has_epilepsy": {
+      "type": "boolean"
+    },
+    "had_tattoo_before": {
+      "type": "boolean"
+    },
+    "had_reactions_before": {
+      "type": "boolean"
+    },
+    "reactions_description": {
+      "type": "string"
+    },
+    "signature_consent": {
+      "type": "boolean"
+    },
+    "signed_at": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "booking_id",
+    "client_name",
+    "client_email"
+  ]
+}

@@ -1,0 +1,212 @@
+import { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
+import { Plus, Edit, Trash2, X } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+
+const inputStyle = {
+  background: 'transparent',
+  border: 'none',
+  borderBottom: '0.5px solid #262626',
+  color: '#F5F0EB',
+  padding: '12px 0',
+  fontSize: '15px',
+  width: '100%',
+  outline: 'none',
+  fontFamily: 'Inter, sans-serif',
+};
+
+export default function DashboardArtists() {
+  const [artists, setArtists] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(null);
+  const [form, setForm] = useState({});
+  const [uploading, setUploading] = useState(false);
+
+  const load = async () => {
+    const data = await base44.entities.Artist.list('-created_date', 20);
+    setArtists(data);
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const openNew = () => {
+    setForm({ name: '', slug: '', bio: '', specialty: [], years_experience: '', instagram: '', is_active: true, portfolio_images: [] });
+    setEditing('new');
+  };
+
+  const openEdit = (a) => { setForm({ ...a }); setEditing(a); };
+
+  const handleSave = async () => {
+    const specialtyArr = typeof form.specialty === 'string' ? form.specialty.split(',').map(s => s.trim()).filter(Boolean) : (form.specialty || []);
+    const data = { ...form, specialty: specialtyArr };
+    if (editing === 'new') {
+      await base44.entities.Artist.create(data);
+    } else {
+      await base44.entities.Artist.update(editing.id, data);
+    }
+    setEditing(null);
+    load();
+  };
+
+  const deleteArtist = async (id) => {
+    await base44.entities.Artist.delete(id);
+    setArtists(a => a.filter(x => x.id !== id));
+  };
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    setForm(f => ({ ...f, photo_url: file_url }));
+    setUploading(false);
+  };
+
+  const handlePortfolioUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    setUploading(true);
+    const urls = await Promise.all(files.map(f => base44.integrations.Core.UploadFile({ file: f }).then(r => ({ url: r.file_url, caption: '', style: '' }))));
+    setForm(f => ({ ...f, portfolio_images: [...(f.portfolio_images || []), ...urls] }));
+    setUploading(false);
+  };
+
+  const removePortfolioImage = (idx) => {
+    setForm(f => ({ ...f, portfolio_images: f.portfolio_images.filter((_, i) => i !== idx) }));
+  };
+
+  return (
+    <div>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#8B1A1A', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>ZARZĄDZANIE</p>
+          <h2 style={{ fontFamily: 'Cormorant Garamond', fontSize: '2.5rem', fontWeight: 700, color: '#F5F0EB', lineHeight: 1 }}>Artyści</h2>
+        </div>
+        <button onClick={openNew} className="flex items-center gap-2 btn-oxblood">
+          <Plus size={14} /> DODAJ ARTYSTĘ
+        </button>
+      </div>
+
+      {/* Editor modal */}
+      <AnimatePresence>
+        {editing && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(10,10,10,0.95)' }}>
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="w-full max-w-2xl max-h-screen overflow-y-auto" style={{ border: '0.5px solid #262626', background: '#0A0A0A', padding: '40px' }}>
+              <div className="flex justify-between items-center mb-8">
+                <h3 style={{ fontFamily: 'Cormorant Garamond', fontSize: '2rem', fontWeight: 600, color: '#F5F0EB' }}>
+                  {editing === 'new' ? 'Nowy Artysta' : 'Edytuj Artystę'}
+                </h3>
+                <button onClick={() => setEditing(null)} style={{ color: 'rgba(245,240,235,0.4)' }}><X size={20} /></button>
+              </div>
+
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Imię i Nazwisko *</label>
+                    <input style={inputStyle} value={form.name || ''} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                  </div>
+                  <div>
+                    <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Slug (URL)</label>
+                    <input style={inputStyle} value={form.slug || ''} onChange={e => setForm(f => ({ ...f, slug: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Bio</label>
+                  <textarea rows={4} style={{ ...inputStyle, resize: 'none' }} value={form.bio || ''} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                </div>
+
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Specjalizacje (przecinki)</label>
+                    <input style={inputStyle} value={Array.isArray(form.specialty) ? form.specialty.join(', ') : (form.specialty || '')} onChange={e => setForm(f => ({ ...f, specialty: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                  </div>
+                  <div>
+                    <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Lata doświadczenia</label>
+                    <input type="number" style={inputStyle} value={form.years_experience || ''} onChange={e => setForm(f => ({ ...f, years_experience: Number(e.target.value) }))} onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Instagram</label>
+                  <input style={inputStyle} value={form.instagram || ''} onChange={e => setForm(f => ({ ...f, instagram: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                </div>
+
+                {/* Photo upload */}
+                <div>
+                  <label className="block mb-3" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Zdjęcie profilowe</label>
+                  {form.photo_url && <img src={form.photo_url} alt="" className="w-24 h-24 object-cover mb-3" style={{ filter: 'brightness(0.7)' }} />}
+                  <label className="btn-ghost-parchment inline-block cursor-pointer" style={{ fontSize: '10px', padding: '8px 16px' }}>
+                    {uploading ? 'PRZESYŁANIE...' : 'WYBIERZ ZDJĘCIE'}
+                    <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+                  </label>
+                </div>
+
+                {/* Portfolio upload */}
+                <div>
+                  <label className="block mb-3" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                    Portfolio ({(form.portfolio_images || []).length} zdjęć)
+                  </label>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {(form.portfolio_images || []).map((img, i) => (
+                      <div key={i} className="relative">
+                        <img src={img.url} alt="" className="w-16 h-16 object-cover" style={{ filter: 'brightness(0.7)' }} />
+                        <button onClick={() => removePortfolioImage(i)} className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: '#8B1A1A' }}>
+                          <X size={8} color="#F5F0EB" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <label className="btn-ghost-parchment inline-block cursor-pointer" style={{ fontSize: '10px', padding: '8px 16px' }}>
+                    {uploading ? 'PRZESYŁANIE...' : 'DODAJ DO PORTFOLIO'}
+                    <input type="file" accept="image/*" multiple onChange={handlePortfolioUpload} className="hidden" />
+                  </label>
+                </div>
+
+                <div className="flex gap-4 pt-4" style={{ borderTop: '0.5px solid #262626' }}>
+                  <button onClick={handleSave} className="btn-oxblood flex-1">ZAPISZ</button>
+                  <button onClick={() => setEditing(null)} className="btn-ghost-parchment">ANULUJ</button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Artists list */}
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="w-8 h-px animate-pulse" style={{ background: '#8B1A1A' }} />
+        </div>
+      ) : (
+        <div style={{ border: '0.5px solid #262626' }}>
+          {artists.length === 0 ? (
+            <div className="py-20 text-center">
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.2)', letterSpacing: '0.1em' }}>BRAK ARTYSTÓW</p>
+            </div>
+          ) : artists.map((a, i) => (
+            <div key={a.id} className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors" style={{ borderBottom: i < artists.length - 1 ? '0.5px solid #262626' : 'none' }}>
+              <div className="flex items-center gap-4">
+                {a.photo_url && <img src={a.photo_url} alt="" className="w-10 h-10 object-cover" style={{ filter: 'brightness(0.7)' }} />}
+                <div>
+                  <p style={{ color: '#F5F0EB', fontSize: '14px', fontWeight: 500 }}>{a.name}</p>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.08em', marginTop: '2px' }}>
+                    {(a.specialty || []).join(', ')} · {a.years_experience} lat
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <button onClick={() => openEdit(a)} style={{ color: 'rgba(245,240,235,0.3)', background: 'none', border: 'none', cursor: 'pointer' }}>
+                  <Edit size={14} />
+                </button>
+                <button onClick={() => deleteArtist(a.id)} style={{ color: '#8B1A1A', background: 'none', border: 'none', cursor: 'pointer' }}>
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
