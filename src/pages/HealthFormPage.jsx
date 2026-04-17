@@ -264,7 +264,7 @@ export default function HealthFormPage() {
               </p>
               <div className="flex gap-3">
                 <button
-                  onClick={() => { setLang(l.code); setStep('personal'); }}
+                  onClick={() => { setStep('personal'); }}
                   style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', padding: '10px 20px', border: '0.5px solid #262626', color: '#F5F0EB', background: 'transparent', cursor: 'pointer', flex: 1 }}
                 >
                   {t.dataChangedBtn}
