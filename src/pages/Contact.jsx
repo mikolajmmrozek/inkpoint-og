@@ -173,35 +173,22 @@ export default function Contact() {
           >
             {/* Map placeholder */}
             <div className="aspect-video overflow-hidden relative" style={{ border: '0.5px solid #262626' }}>
-              {contactData.contact_google_maps_url ? (
-                <iframe
-                  src={contactData.contact_google_maps_url.replace('/maps/place/', '/maps/embed?pb=') + '&output=embed'}
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0, filter: 'grayscale(100%) invert(90%) contrast(0.9)' }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title="Wizytówka Google"
-                />
-              ) : (
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2449.123456789!2d16.1174!3d51.8693!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47062f0d7c5c5c5f%3A0x0!2sul.%20Wschowska%2030%2C%2064-200%20Wolsztyn!5e0!3m2!1spl!2spl!4v1700000000000!5m2!1spl!2spl"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0, filter: 'grayscale(100%) invert(90%) contrast(0.9)' }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title="Mapa studia"
-                />
-              )}
+              <iframe
+                src={`https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2449!2d16.117!3d51.869!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0!2s${encodeURIComponent(contactData.contact_address_street + ', ' + contactData.contact_address_city)}!5e0!3m2!1spl!2spl!4v1700000000000`}
+                width="100%"
+                height="100%"
+                style={{ border: 0, filter: 'grayscale(100%) invert(90%) contrast(0.9)' }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Mapa studia"
+              />
             </div>
 
             {/* Contact details */}
             <div className="grid grid-cols-2 gap-8">
               {[
-                { icon: MapPin, label: 'ADRES', value: `${contactData.contact_address_street}\n${contactData.contact_address_city}`, link: null },
+                { icon: MapPin, label: 'ADRES', value: `${contactData.contact_address_street}\n${contactData.contact_address_city}`, link: `https://www.google.com/maps/search/${encodeURIComponent(contactData.contact_address_street + ' ' + contactData.contact_address_city)}` },
                 { icon: Phone, label: 'TELEFON', value: contactData.contact_phone, link: null },
                 { icon: Instagram, label: 'INSTAGRAM', value: contactData.contact_instagram, link: contactData.contact_instagram_url },
                 { icon: Facebook, label: 'FACEBOOK', value: contactData.contact_facebook, link: contactData.contact_facebook_url },
