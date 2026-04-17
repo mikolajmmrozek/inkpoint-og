@@ -11,14 +11,92 @@
     "client_email": {
       "type": "string"
     },
+    "client_phone": {
+      "type": "string"
+    },
     "date_of_birth": {
       "type": "string",
       "format": "date"
+    },
+    "address_street": {
+      "type": "string"
+    },
+    "address_city": {
+      "type": "string"
+    },
+    "address_postal_code": {
+      "type": "string"
+    },
+    "pesel": {
+      "type": "string"
+    },
+    "id_document": {
+      "type": "string"
+    },
+    "has_heart_condition": {
+      "type": "boolean"
+    },
+    "heart_condition_description": {
+      "type": "string"
+    },
+    "has_kidney_condition": {
+      "type": "boolean"
+    },
+    "kidney_condition_description": {
+      "type": "string"
+    },
+    "has_liver_condition": {
+      "type": "boolean"
+    },
+    "liver_condition_description": {
+      "type": "string"
+    },
+    "has_lung_condition": {
+      "type": "boolean"
+    },
+    "lung_condition_description": {
+      "type": "string"
+    },
+    "has_cancer": {
+      "type": "boolean"
+    },
+    "cancer_description": {
+      "type": "string"
+    },
+    "has_infectious_diseases": {
+      "type": "boolean"
+    },
+    "infectious_diseases_description": {
+      "type": "string"
+    },
+    "has_epilepsy": {
+      "type": "boolean"
+    },
+    "epilepsy_description": {
+      "type": "string"
+    },
+    "has_diabetes": {
+      "type": "boolean"
+    },
+    "diabetes_description": {
+      "type": "string"
+    },
+    "has_hemophilia": {
+      "type": "boolean"
+    },
+    "hemophilia_description": {
+      "type": "string"
     },
     "has_allergies": {
       "type": "boolean"
     },
     "allergies_description": {
+      "type": "string"
+    },
+    "has_inflammatory_conditions": {
+      "type": "boolean"
+    },
+    "inflammatory_conditions_description": {
       "type": "string"
     },
     "has_skin_conditions": {
@@ -27,49 +105,96 @@
     "skin_conditions_description": {
       "type": "string"
     },
-    "has_blood_disorders": {
+    "has_mental_conditions": {
       "type": "boolean"
     },
-    "blood_disorders_description": {
-      "type": "string"
-    },
-    "takes_medication": {
-      "type": "boolean"
-    },
-    "medication_description": {
+    "mental_conditions_description": {
       "type": "string"
     },
     "is_pregnant": {
       "type": "boolean"
     },
-    "has_diabetes": {
+    "is_under_alcohol_drug_influence": {
       "type": "boolean"
     },
-    "has_heart_condition": {
+    "is_allergic_to_metals_dyes_latex": {
       "type": "boolean"
     },
-    "has_epilepsy": {
-      "type": "boolean"
-    },
-    "had_tattoo_before": {
-      "type": "boolean"
-    },
-    "had_reactions_before": {
-      "type": "boolean"
-    },
-    "reactions_description": {
+    "allergies_metals_dyes_latex_description": {
       "type": "string"
     },
-    "signature_consent": {
+    "has_blood_clotting_disorders": {
       "type": "boolean"
     },
-    "signed_at": {
+    "blood_clotting_disorders_description": {
+      "type": "string"
+    },
+    "has_scars_skin_changes": {
+      "type": "boolean"
+    },
+    "scars_skin_changes_description": {
+      "type": "string"
+    },
+    "had_tattoo_piercing_before": {
+      "type": "boolean"
+    },
+    "previous_reactions_description": {
+      "type": "string"
+    },
+    "consent_tattoo_piercing": {
+      "type": "boolean"
+    },
+    "confirm_sober": {
+      "type": "boolean"
+    },
+    "consent_image_use": {
+      "type": "boolean"
+    },
+    "confirm_regulations_read": {
+      "type": "boolean"
+    },
+    "client_signature": {
+      "type": "string"
+    },
+    "form_filled_date": {
+      "type": "string"
+    },
+    "is_minor": {
+      "type": "boolean",
+      "default": false
+    },
+    "guardian_consent_form_id": {
+      "type": "string"
+    },
+    "previous_form_id": {
+      "type": "string",
+      "description": "ID of previous form if reusing unchanged medical data"
+    },
+    "is_update_only": {
+      "type": "boolean",
+      "default": false,
+      "description": "If true, medical data unchanged, only session info updated"
+    },
+    "procedure_type": {
+      "type": "string",
+      "enum": [
+        "TATUA\u017b",
+        "PIERCING"
+      ]
+    },
+    "body_placement": {
       "type": "string"
     }
   },
   "required": [
     "booking_id",
     "client_name",
-    "client_email"
+    "client_email",
+    "date_of_birth",
+    "client_signature",
+    "form_filled_date",
+    "consent_tattoo_piercing",
+    "confirm_sober",
+    "confirm_regulations_read"
   ]
 }

@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { X, Trash2, Edit } from 'lucide-react';
+import { X, Trash2, Edit, Copy, Check, ExternalLink } from 'lucide-react';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -10,6 +11,16 @@ const STATUS_COLORS = {
 const STATUS_OPTIONS = ['pending', 'confirmed', 'completed', 'cancelled'];
 
 export default function BookingDetailPanel({ booking, onClose, onStatusChange, onDelete, onEdit, t }) {
+  const [copied, setCopied] = useState(false);
+
+  const formUrl = `${window.location.origin}/health-form?booking_id=${booking.id}`;
+
+  const copyFormLink = () => {
+    navigator.clipboard.writeText(formUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 30 }}
@@ -72,6 +83,29 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
           ))}
         </div>
       </div>
+
+      {/* Health form link */}
+      {!booking.health_form_completed && (
+        <div className="mb-4 p-3" style={{ border: '0.5px solid rgba(255,0,127,0.3)', background: 'rgba(255,0,127,0.04)' }}>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
+            ANKIETA ZDROWOTNA
+          </p>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', marginBottom: '10px', lineHeight: 1.5 }}>
+            Wyślij klientowi link do wypełnienia ankiety przed sesją
+          </p>
+          <div className="flex gap-2">
+            <button onClick={copyFormLink}
+              className="flex items-center gap-1.5 flex-1 justify-center py-2"
+              style={{ border: '0.5px solid #FF007F', color: '#FF007F', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer' }}>
+              {copied ? <><Check size={11} /> SKOPIOWANO</> : <><Copy size={11} /> KOPIUJ LINK</>}
+            </button>
+            <a href={formUrl} target="_blank" rel="noopener noreferrer"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', padding: '8px 12px', border: `0.5px solid ${t.border}`, color: t.muted, fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textDecoration: 'none', textTransform: 'uppercase' }}>
+              <ExternalLink size={11} />
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* Actions */}
       <div className="flex gap-2">

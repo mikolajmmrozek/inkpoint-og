@@ -14,7 +14,7 @@ import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
 import Contact from './pages/Contact';
 import Booking from './pages/Booking';
-import HealthFormPage from './pages/HealthFormPage';
+import HealthFormPage from './pages/HealthFormPage.jsx';
 
 // Dashboard
 import Dashboard from './pages/dashboard/Dashboard';
@@ -23,7 +23,7 @@ import DashboardBookings from './pages/dashboard/DashboardBookings';
 import DashboardArtists from './pages/dashboard/DashboardArtists';
 import DashboardBlog from './pages/dashboard/DashboardBlog';
 import DashboardMessages from './pages/dashboard/DashboardMessages';
-import DashboardHealthForms from './pages/dashboard/DashboardHealthForms';
+import DashboardHealthForms from './pages/dashboard/DashboardHealthForms.jsx';
 import DashboardSettings from './pages/dashboard/DashboardSettings';
 import DashboardClients from './pages/dashboard/DashboardClients';
 import DashboardStats from './pages/dashboard/DashboardStats';

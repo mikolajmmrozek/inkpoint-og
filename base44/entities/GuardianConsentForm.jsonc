@@ -1,0 +1,54 @@
+{
+  "name": "GuardianConsentForm",
+  "type": "object",
+  "properties": {
+    "health_form_id": {
+      "type": "string"
+    },
+    "booking_id": {
+      "type": "string"
+    },
+    "minor_client_name": {
+      "type": "string"
+    },
+    "minor_date_of_birth": {
+      "type": "string",
+      "format": "date"
+    },
+    "guardian_name": {
+      "type": "string"
+    },
+    "guardian_phone": {
+      "type": "string"
+    },
+    "procedure_type": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "body_placement": {
+      "type": "string"
+    },
+    "num_procedures": {
+      "type": "number"
+    },
+    "guardian_signature": {
+      "type": "string"
+    },
+    "form_filled_date": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "health_form_id",
+    "minor_client_name",
+    "minor_date_of_birth",
+    "guardian_name",
+    "guardian_phone",
+    "procedure_type",
+    "body_placement",
+    "guardian_signature",
+    "form_filled_date"
+  ]
+}
