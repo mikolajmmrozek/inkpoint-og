@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { FileText, X, ExternalLink, Copy, Shield, AlertTriangle, Search, Download, Mail, Trash2, Settings } from 'lucide-react';
+import { FileText, X, ExternalLink, Copy, Shield, AlertTriangle, Search, Download, Mail, Trash2, Settings, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useTheme } from './Dashboard';
 import html2canvas from 'html2canvas';
@@ -179,6 +179,7 @@ export default function DashboardHealthForms() {
   const [searchQuery, setSearchQuery] = useState('');
   const [exporting, setExporting] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
+  const [sendingLinkEmail, setSendingLinkEmail] = useState(null);
 
   useEffect(() => {
     Promise.all([
@@ -276,6 +277,20 @@ export default function DashboardHealthForms() {
     }
   };
 
+  const sendHealthFormLink = async (booking) => {
+    setSendingLinkEmail(booking.id);
+    try {
+      const formLink = getFormLink(booking);
+      await base44.integrations.Core.SendEmail({
+        to: booking.client_email,
+        subject: 'Wypełnij ankietę zdrowotną — Romans Tattoo',
+        body: `Dzień dobry ${booking.client_name},\n\nBlesko się mamy! Aby przygotować się do Twojej sesji, prosimy o wypełnienie ankiety zdrowotnej.\n\nLink do ankiety:\n${formLink}\n\nAnkieta powinna być wypełniona przed dniem sesji: ${booking.session_date}\n\nJeśli masz pytania, skontaktuj się z nami.\n\nRomans Tattoo`
+      });
+    } finally {
+      setSendingLinkEmail(null);
+    }
+  };
+
   const deleteForm = async (form) => {
     if (!window.confirm(`Czy na pewno chcesz usunąć ankietę dla ${getClientName(form)}?`)) return;
     await base44.entities.HealthForm.delete(form.id);
@@ -349,6 +364,14 @@ export default function DashboardHealthForms() {
                 <p style={{ ...mono, fontSize: '9px', color: t.muted, marginTop: '2px' }}>{b.session_date} · {b.artist_name}</p>
               </div>
               <div className="flex items-center gap-2">
+                <button
+                  onClick={() => sendHealthFormLink(b)}
+                  disabled={sendingLinkEmail === b.id}
+                  title="Wyślij link do ankiety"
+                  style={{ color: sendingLinkEmail === b.id ? t.muted : t.fuchsia, background: 'none', border: 'none', cursor: sendingLinkEmail === b.id ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', opacity: sendingLinkEmail === b.id ? 0.5 : 1 }}
+                >
+                  {sendingLinkEmail === b.id ? <Loader2 size={12} className="animate-spin" /> : <Mail size={12} />}
+                </button>
                 <a href={getFormLink(b)} target="_blank" rel="noopener noreferrer"
                   style={{ color: t.muted, display: 'flex', alignItems: 'center' }}>
                   <ExternalLink size={12} />
