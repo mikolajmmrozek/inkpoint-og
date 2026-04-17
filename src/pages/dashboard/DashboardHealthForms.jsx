@@ -303,7 +303,7 @@ export default function DashboardHealthForms() {
           <h2 style={{ ...display, fontSize: '2.5rem', color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>Ankiety Zdrowotne</h2>
         </div>
         <button
-          onClick={() => navigate('/dashboard/settings')}
+          onClick={() => navigate('/dashboard/form-template')}
           title="Edytuj szablon formularza"
           className="flex items-center gap-2"
           style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}

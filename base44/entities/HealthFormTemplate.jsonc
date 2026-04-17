@@ -1,0 +1,56 @@
+{
+  "name": "HealthFormTemplate",
+  "type": "object",
+  "properties": {
+    "key": {
+      "type": "string",
+      "default": "default",
+      "description": "Unique template key"
+    },
+    "medical_fields": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "field_key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean",
+            "default": false
+          },
+          "has_description": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      },
+      "description": "Array of medical condition fields"
+    },
+    "consent_fields": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "field_key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      },
+      "description": "Array of consent fields"
+    }
+  },
+  "required": [
+    "key"
+  ]
+}

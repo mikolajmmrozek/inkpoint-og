@@ -1,0 +1,27 @@
+{
+  "name": "TermsAndConditions",
+  "type": "object",
+  "properties": {
+    "key": {
+      "type": "string",
+      "default": "default",
+      "description": "Unique terms key"
+    },
+    "title": {
+      "type": "string",
+      "description": "Page title"
+    },
+    "content": {
+      "type": "string",
+      "description": "Terms content in HTML or plain text"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date",
+      "description": "Last update date"
+    }
+  },
+  "required": [
+    "key"
+  ]
+}
