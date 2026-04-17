@@ -170,6 +170,7 @@ export default function DashboardHealthForms() {
   const [forms, setForms] = useState([]);
   const [guardianForms, setGuardianForms] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
@@ -182,16 +183,29 @@ export default function DashboardHealthForms() {
       base44.entities.HealthForm.list('-form_filled_date', 200),
       base44.entities.GuardianConsentForm.list('-form_filled_date', 100),
       base44.entities.Booking.list('-session_date', 200),
-    ]).then(([f, g, b]) => {
+      base44.entities.Client.list('-created_date', 500),
+    ]).then(([f, g, b, c]) => {
       setForms(f);
       setGuardianForms(g);
       setBookings(b);
+      setClients(c);
     }).finally(() => setLoading(false));
   }, []);
 
   const selectedGuardian = selected
     ? guardianForms.find(g => g.health_form_id === selected.id)
     : null;
+
+  const getClientName = (form) => {
+    if (form.client_first_name || form.client_last_name) {
+      return `${form.client_first_name || ''} ${form.client_last_name || ''}`.trim();
+    }
+    const client = clients.find(c => c.email === form.client_email || c.name === form.client_name);
+    if (client) {
+      return `${client.first_name || ''} ${client.last_name || ''}`.trim() || client.name;
+    }
+    return form.client_name;
+  };
 
   const getFormLink = (booking) => {
     const base = window.location.origin;
@@ -333,7 +347,7 @@ export default function DashboardHealthForms() {
             >
               <FileText size={13} color={form.is_minor ? '#FF007F' : t.fuchsia} />
               <div className="flex-1 min-w-0">
-                <p style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>{form.client_name}</p>
+                <p style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>{getClientName(form)}</p>
                 <p style={{ ...mono, fontSize: '8px', color: t.muted, marginTop: '2px' }}>{form.client_email}</p>
                 <div className="flex items-center gap-2 mt-2">
                   {form.is_minor && <span style={{ ...mono, fontSize: '7px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '1px 4px' }}>NIELETNI</span>}
@@ -367,7 +381,7 @@ export default function DashboardHealthForms() {
                   style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0 }}
                 >
                   <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.6rem', fontWeight: 400, color: t.fuchsia, letterSpacing: '0.04em', textDecoration: 'underline' }}>
-                    {selected.client_name}
+                    {getClientName(selected)}
                   </h3>
                 </button>
                 <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '4px' }}>

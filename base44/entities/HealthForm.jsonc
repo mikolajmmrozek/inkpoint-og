@@ -5,6 +5,12 @@
     "booking_id": {
       "type": "string"
     },
+    "client_first_name": {
+      "type": "string"
+    },
+    "client_last_name": {
+      "type": "string"
+    },
     "client_name": {
       "type": "string"
     },

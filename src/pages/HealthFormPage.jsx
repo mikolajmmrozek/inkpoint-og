@@ -24,6 +24,7 @@ export default function HealthFormPage() {
     booking_id: '',
     client_first_name: '',
     client_last_name: '',
+    client_name: '',
     client_email: '',
     client_phone: '',
     date_of_birth: '',
@@ -144,7 +145,8 @@ export default function HealthFormPage() {
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
-      const healthData = { ...form, client_name: `${form.client_first_name} ${form.client_last_name}`.trim(), is_minor: isMinor };
+      const fullName = `${form.client_first_name} ${form.client_last_name}`.trim();
+      const healthData = { ...form, client_name: fullName, is_minor: isMinor };
       const created = await base44.entities.HealthForm.create(healthData);
 
       if (isMinor) {
