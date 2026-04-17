@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import PageLayout from '../components/layout/PageLayout';
 import StudioHero from '../components/home/StudioHero';
 import HeroSlider from '../components/home/HeroSlider';
@@ -5,17 +6,36 @@ import HomeAbout from '../components/home/HomeAbout';
 import HomeCTA from '../components/home/HomeCTA';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-
-const galleryImages = [
-  'https://images.unsplash.com/photo-1561948955-570b270e7c36?w=600&q=80',
-  'https://images.unsplash.com/photo-1612459284270-5992c8b93696?w=600&q=80',
-  'https://images.unsplash.com/photo-1588771930296-7bb382e20b4e?w=600&q=80',
-  'https://images.unsplash.com/photo-1549317336-206569e8475c?w=600&q=80',
-  'https://images.unsplash.com/photo-1601412436519-e349b6da3af6?w=600&q=80',
-  'https://images.unsplash.com/photo-1598387993441-a364f854c3e1?w=600&q=80',
-];
+import { base44 } from '@/api/base44Client';
 
 export default function Home() {
+  const [galleryImages, setGalleryImages] = useState([]);
+
+  useEffect(() => {
+    const loadPortfolioImages = async () => {
+      try {
+        const artists = await base44.entities.Artist.filter({ is_active: true });
+        const allImages = [];
+        
+        artists.forEach(artist => {
+          if (artist.portfolio_images && Array.isArray(artist.portfolio_images)) {
+            artist.portfolio_images.forEach(img => {
+              if (img.url) allImages.push(img.url);
+            });
+          }
+        });
+
+        // Randomize and shuffle
+        const shuffled = allImages.sort(() => Math.random() - 0.5).slice(0, 12);
+        setGalleryImages(shuffled);
+      } catch (error) {
+        console.error('Error loading portfolio images:', error);
+      }
+    };
+
+    loadPortfolioImages();
+  }, []);
+
   return (
     <PageLayout>
       <StudioHero />
