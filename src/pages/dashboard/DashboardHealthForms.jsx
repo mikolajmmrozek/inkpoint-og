@@ -113,7 +113,7 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme }) {
                 </span>
               </div>
               {descField && val && selected[descField] && (
-                <p style={{ color: 'rgba(245,240,235,0.4)', fontSize: '11px', padding: '2px 0 6px 8px', fontStyle: 'italic' }}>{selected[descField]}</p>
+                <p style={{ color: theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.5)', fontSize: '11px', padding: '2px 0 6px 8px', fontStyle: 'italic' }}>{selected[descField]}</p>
               )}
             </div>
           );
