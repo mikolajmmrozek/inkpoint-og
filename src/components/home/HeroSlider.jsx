@@ -66,7 +66,9 @@ export default function HeroSlider() {
       </AnimatePresence>
 
       {/* Gradient overlay */}
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.3) 60%, rgba(10,10,10,0.7) 100%)' }} />
+      <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(10,10,10,0.97) 0%, rgba(10,10,10,0.4) 60%, rgba(10,10,10,0.7) 100%)' }} />
+      {/* Fuchsia bottom gradient */}
+      <div className="absolute bottom-0 left-0 right-0 h-64" style={{ background: 'linear-gradient(to top, rgba(255,0,127,0.12) 0%, transparent 100%)' }} />
 
       {/* Content */}
       <div className="relative h-full flex flex-col justify-center px-8 md:px-16 lg:px-24">
@@ -79,24 +81,24 @@ export default function HeroSlider() {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
             className="max-w-2xl"
           >
-            <p className="text-micro text-oxblood mb-6" style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: '#8B1A1A', letterSpacing: '0.2em' }}>
+            <p className="text-micro text-oxblood mb-6" style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: '#FF007F', letterSpacing: '0.2em' }}>
               {slide.tag} — {slide.specialty}
             </p>
 
             <h1 style={{
-              fontFamily: 'Cormorant Garamond',
-              fontSize: 'clamp(3.5rem, 8vw, 7rem)',
-              fontWeight: 700,
+              fontFamily: 'Bebas Neue, Barlow Condensed, system-ui',
+              fontSize: 'clamp(4rem, 10vw, 9rem)',
+              fontWeight: 400,
               lineHeight: 0.9,
               color: '#F5F0EB',
-              letterSpacing: '-0.02em',
+              letterSpacing: '0.04em',
             }}>
               {slide.artist.split(' ').map((word, i) => (
                 <span key={i} className="block">{word}</span>
               ))}
             </h1>
 
-            <div className="mt-8 h-px w-16" style={{ background: '#8B1A1A', height: '0.5px' }} />
+            <div className="mt-8 h-px w-16" style={{ background: 'linear-gradient(to right, #FF007F, transparent)', height: '1px' }} />
 
             <p className="mt-6 text-parchment/60 text-base leading-relaxed max-w-sm" style={{ color: 'rgba(245,240,235,0.6)', fontSize: '15px' }}>
               Każdy tatuaż to unikalna historia wyryta na skórze. Trwała, precyzyjna, Twoja.
@@ -123,7 +125,7 @@ export default function HeroSlider() {
               style={{
                 width: i === current ? '40px' : '16px',
                 height: '1px',
-                background: i === current ? '#8B1A1A' : 'rgba(245,240,235,0.3)',
+                background: i === current ? '#FF007F' : 'rgba(245,240,235,0.3)',
               }}
             />
           ))}
@@ -137,7 +139,7 @@ export default function HeroSlider() {
           <div className="w-px h-12 relative overflow-hidden" style={{ background: 'rgba(245,240,235,0.1)' }}>
             <motion.div
               className="w-full absolute top-0"
-              style={{ background: '#8B1A1A', height: '50%' }}
+              style={{ background: '#FF007F', height: '50%' }}
               animate={{ y: ['0%', '200%'] }}
               transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
             />

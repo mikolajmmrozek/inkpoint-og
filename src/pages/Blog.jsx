@@ -53,10 +53,10 @@ export default function Blog() {
     <PageLayout>
       <div className="pt-40 pb-20 px-8 md:px-16">
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-          <p className="text-micro text-oxblood mb-6" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#8B1A1A', letterSpacing: '0.2em' }}>
+          <p className="text-micro text-oxblood mb-6" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em' }}>
             WIEDZA & INSPIRACJE
           </p>
-          <h1 style={{ fontFamily: 'Cormorant Garamond', fontSize: 'clamp(3rem, 7vw, 6rem)', fontWeight: 700, lineHeight: 0.9, color: '#F5F0EB' }}>
+          <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(4rem, 9vw, 8rem)', fontWeight: 400, lineHeight: 0.9, color: '#F5F0EB', letterSpacing: '0.04em' }}>
             Blog
           </h1>
         </motion.div>
@@ -91,12 +91,12 @@ export default function Blog() {
                   <div className="p-8 md:p-12 flex flex-col justify-center" style={{ border: '0.5px solid #262626', borderLeft: 'none' }}>
                     <div className="flex gap-2 mb-6">
                       {(featured.tags || []).map(tag => (
-                        <span key={tag} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#8B1A1A', letterSpacing: '0.15em', border: '0.5px solid #8B1A1A', padding: '3px 8px', textTransform: 'uppercase' }}>
+                        <span key={tag} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', border: '0.5px solid #FF007F', padding: '3px 8px', textTransform: 'uppercase' }}>
                           {tag}
                         </span>
                       ))}
                     </div>
-                    <h2 style={{ fontFamily: 'Cormorant Garamond', fontSize: '2.2rem', fontWeight: 600, color: '#F5F0EB', lineHeight: 1.1 }}>
+                    <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.2rem', fontWeight: 600, color: '#F5F0EB', lineHeight: 1.1 }}>
                       {featured.title}
                     </h2>
                     <p className="mt-4 text-sm leading-relaxed" style={{ color: 'rgba(245,240,235,0.5)', fontSize: '14px', lineHeight: 1.8 }}>
@@ -141,12 +141,12 @@ export default function Blog() {
                     </div>
                     <div className="flex gap-2 mb-3">
                       {(post.tags || []).slice(0, 2).map(tag => (
-                        <span key={tag} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#8B1A1A', letterSpacing: '0.1em', border: '0.5px solid #8B1A1A', padding: '2px 6px', textTransform: 'uppercase' }}>
+                        <span key={tag} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.1em', border: '0.5px solid #FF007F', padding: '2px 6px', textTransform: 'uppercase' }}>
                           {tag}
                         </span>
                       ))}
                     </div>
-                    <h3 style={{ fontFamily: 'Cormorant Garamond', fontSize: '1.5rem', fontWeight: 600, color: '#F5F0EB', lineHeight: 1.1 }}>
+                    <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.5rem', fontWeight: 600, color: '#F5F0EB', lineHeight: 1.1 }}>
                       {post.title}
                     </h3>
                     <p className="mt-3 text-sm line-clamp-2" style={{ color: 'rgba(245,240,235,0.4)', fontSize: '13px' }}>

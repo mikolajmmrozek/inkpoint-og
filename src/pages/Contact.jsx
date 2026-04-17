@@ -34,7 +34,7 @@ export default function Contact() {
     <PageLayout>
       <div className="pt-40 pb-20 px-8 md:px-16">
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-          <p className="text-micro text-oxblood mb-6" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#8B1A1A', letterSpacing: '0.2em' }}>
+          <p className="text-micro text-oxblood mb-6" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em' }}>
             NAPISZ DO NAS
           </p>
           <h1 style={{ fontFamily: 'Cormorant Garamond', fontSize: 'clamp(3rem, 7vw, 6rem)', fontWeight: 700, lineHeight: 0.9, color: '#F5F0EB' }}>
@@ -53,7 +53,7 @@ export default function Contact() {
           >
             {sent ? (
               <div className="py-16">
-                <div className="w-8 h-px mb-8" style={{ background: '#8B1A1A' }} />
+                <div className="w-8 h-px mb-8" style={{ background: '#FF007F' }} />
                 <h3 style={{ fontFamily: 'Cormorant Garamond', fontSize: '2.5rem', fontWeight: 600, color: '#F5F0EB' }}>
                   Wiadomość wysłana
                 </h3>
@@ -73,7 +73,7 @@ export default function Contact() {
                       style={inputStyle}
                       value={form.name}
                       onChange={e => setForm({ ...form, name: e.target.value })}
-                      onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'}
+                      onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
                       onBlur={e => e.target.style.borderBottomColor = '#262626'}
                     />
                   </div>
@@ -87,7 +87,7 @@ export default function Contact() {
                       style={inputStyle}
                       value={form.email}
                       onChange={e => setForm({ ...form, email: e.target.value })}
-                      onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'}
+                      onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
                       onBlur={e => e.target.style.borderBottomColor = '#262626'}
                     />
                   </div>
@@ -101,7 +101,7 @@ export default function Contact() {
                     style={inputStyle}
                     value={form.phone}
                     onChange={e => setForm({ ...form, phone: e.target.value })}
-                    onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'}
+                    onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
                     onBlur={e => e.target.style.borderBottomColor = '#262626'}
                   />
                 </div>
@@ -114,7 +114,7 @@ export default function Contact() {
                     style={inputStyle}
                     value={form.subject}
                     onChange={e => setForm({ ...form, subject: e.target.value })}
-                    onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'}
+                    onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
                     onBlur={e => e.target.style.borderBottomColor = '#262626'}
                   />
                 </div>
@@ -129,7 +129,7 @@ export default function Contact() {
                     style={{ ...inputStyle, resize: 'none' }}
                     value={form.message}
                     onChange={e => setForm({ ...form, message: e.target.value })}
-                    onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'}
+                    onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
                     onBlur={e => e.target.style.borderBottomColor = '#262626'}
                   />
                 </div>
@@ -173,7 +173,7 @@ export default function Contact() {
                 <div key={label}>
                   <div className="flex items-center gap-2 mb-2">
                     <Icon size={12} color="#C4196B" />
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#8B1A1A', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                       {label}
                     </p>
                   </div>

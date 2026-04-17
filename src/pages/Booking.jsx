@@ -78,10 +78,10 @@ export default function Booking() {
           transition={{ duration: 0.8 }}
           className="text-center max-w-lg"
         >
-          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-8" style={{ border: '0.5px solid #8B1A1A' }}>
-            <Check size={24} color="#8B1A1A" />
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-8" style={{ border: '0.5px solid #FF007F' }}>
+            <Check size={24} color="#FF007F" />
           </div>
-          <h2 style={{ fontFamily: 'Cormorant Garamond', fontSize: '3rem', fontWeight: 700, color: '#F5F0EB' }}>
+          <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '3rem', fontWeight: 700, color: '#F5F0EB' }}>
             Rezerwacja potwierdzona
           </h2>
           <p className="mt-6 text-sm leading-relaxed" style={{ color: 'rgba(245,240,235,0.5)', fontSize: '15px' }}>
@@ -100,10 +100,10 @@ export default function Booking() {
       <div className="min-h-screen pt-32 pb-20 px-8 md:px-16 max-w-3xl mx-auto">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="mb-16">
-          <p className="text-micro text-oxblood mb-4" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#8B1A1A', letterSpacing: '0.2em' }}>
+          <p className="text-micro text-oxblood mb-4" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em' }}>
             UMÓW SESJĘ
           </p>
-          <h1 style={{ fontFamily: 'Cormorant Garamond', fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 700, lineHeight: 0.9, color: '#F5F0EB' }}>
+          <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 700, lineHeight: 0.9, color: '#F5F0EB' }}>
             Rezerwacja
           </h1>
         </motion.div>
@@ -113,16 +113,16 @@ export default function Booking() {
           <div className="flex items-center gap-0 mb-4">
             {STEPS.map((s, i) => (
               <div key={s} className="flex items-center flex-1">
-                <div className={`w-2 h-2 rounded-full flex-shrink-0 transition-all duration-500 ${i <= step ? 'bg-oxblood' : 'bg-steel'}`} style={{ background: i <= step ? '#8B1A1A' : '#262626' }} />
+                <div className={`w-2 h-2 rounded-full flex-shrink-0 transition-all duration-500 ${i <= step ? 'bg-oxblood' : 'bg-steel'}`} style={{ background: i <= step ? '#FF007F' : '#262626' }} />
                 {i < STEPS.length - 1 && (
-                  <div className="flex-1 h-px transition-all duration-700" style={{ background: i < step ? '#8B1A1A' : '#262626', height: '0.5px' }} />
+                  <div className="flex-1 h-px transition-all duration-700" style={{ background: i < step ? '#FF007F' : '#262626', height: '0.5px' }} />
                 )}
               </div>
             ))}
           </div>
           <div className="flex justify-between">
             {STEPS.map((s, i) => (
-              <p key={s} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: i === step ? '#8B1A1A' : 'rgba(245,240,235,0.25)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              <p key={s} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: i === step ? '#FF007F' : 'rgba(245,240,235,0.25)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                 {s}
               </p>
             ))}
@@ -150,17 +150,17 @@ export default function Booking() {
                     onClick={() => update('artist_id', artist.id) || update('artist_name', artist.name)}
                     className="w-full text-left p-6 transition-all duration-300"
                     style={{
-                      border: data.artist_id === artist.id ? '0.5px solid #8B1A1A' : '0.5px solid #262626',
+                      border: data.artist_id === artist.id ? '0.5px solid #FF007F' : '0.5px solid #262626',
                       background: data.artist_id === artist.id ? 'rgba(139,26,26,0.08)' : 'transparent',
                     }}
                     onClick={() => { update('artist_id', artist.id); update('artist_name', artist.name); }}
                   >
-                    <h3 style={{ fontFamily: 'Cormorant Garamond', fontSize: '1.4rem', fontWeight: 600, color: '#F5F0EB' }}>
+                    <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.4rem', fontWeight: 600, color: '#F5F0EB' }}>
                       {artist.name}
                     </h3>
                     <div className="flex gap-2 mt-2">
                       {(artist.specialty || []).map(s => (
-                        <span key={s} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#8B1A1A', letterSpacing: '0.1em' }}>
+                        <span key={s} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.1em' }}>
                           {s}
                         </span>
                       ))}
@@ -178,38 +178,38 @@ export default function Booking() {
                     <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                       Imię i Nazwisko *
                     </label>
-                    <input required style={inputStyle} value={data.client_name} onChange={e => update('client_name', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                    <input required style={inputStyle} value={data.client_name} onChange={e => update('client_name', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
                   </div>
                   <div>
                     <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                       Email *
                     </label>
-                    <input required type="email" style={inputStyle} value={data.client_email} onChange={e => update('client_email', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                    <input required type="email" style={inputStyle} value={data.client_email} onChange={e => update('client_email', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
                   </div>
                 </div>
                 <div>
                   <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                     Telefon
                   </label>
-                  <input style={inputStyle} value={data.client_phone} onChange={e => update('client_phone', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                  <input style={inputStyle} value={data.client_phone} onChange={e => update('client_phone', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
                 </div>
                 <div>
                   <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                     Miejsce na ciele *
                   </label>
-                  <input required style={inputStyle} value={data.tattoo_placement} onChange={e => update('tattoo_placement', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                  <input required style={inputStyle} value={data.tattoo_placement} onChange={e => update('tattoo_placement', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
                 </div>
                 <div>
                   <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                     Opis projektu / pomysłu *
                   </label>
-                  <textarea required rows={4} style={{ ...inputStyle, resize: 'none' }} value={data.tattoo_description} onChange={e => update('tattoo_description', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                  <textarea required rows={4} style={{ ...inputStyle, resize: 'none' }} value={data.tattoo_description} onChange={e => update('tattoo_description', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
                 </div>
                 <div>
                   <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                     Dodatkowe uwagi
                   </label>
-                  <textarea rows={2} style={{ ...inputStyle, resize: 'none' }} value={data.notes} onChange={e => update('notes', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                  <textarea rows={2} style={{ ...inputStyle, resize: 'none' }} value={data.notes} onChange={e => update('notes', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
                 </div>
               </div>
             )}
@@ -227,7 +227,7 @@ export default function Booking() {
                     style={{ ...inputStyle, colorScheme: 'dark' }}
                     value={data.session_date}
                     onChange={e => update('session_date', e.target.value)}
-                    onFocus={e => e.target.style.borderBottomColor = '#8B1A1A'}
+                    onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
                     onBlur={e => e.target.style.borderBottomColor = '#262626'}
                   />
                 </div>
@@ -242,11 +242,11 @@ export default function Booking() {
                         onClick={() => update('session_time', time)}
                         className="py-3 transition-all duration-200"
                         style={{
-                          border: data.session_time === time ? '0.5px solid #8B1A1A' : '0.5px solid #262626',
+                          border: data.session_time === time ? '0.5px solid #FF007F' : '0.5px solid #262626',
                           background: data.session_time === time ? 'rgba(139,26,26,0.08)' : 'transparent',
                           fontFamily: 'JetBrains Mono',
                           fontSize: '11px',
-                          color: data.session_time === time ? '#8B1A1A' : 'rgba(245,240,235,0.5)',
+                          color: data.session_time === time ? '#FF007F' : 'rgba(245,240,235,0.5)',
                           letterSpacing: '0.05em',
                         }}
                       >
@@ -274,7 +274,7 @@ export default function Booking() {
                   ['Opis', data.tattoo_description],
                 ].map(([label, value]) => (
                   <div key={label} className="flex gap-4 pb-4" style={{ borderBottom: '0.5px solid #262626' }}>
-                    <p className="w-36 flex-shrink-0" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#8B1A1A', letterSpacing: '0.1em', textTransform: 'uppercase', paddingTop: '2px' }}>
+                    <p className="w-36 flex-shrink-0" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.1em', textTransform: 'uppercase', paddingTop: '2px' }}>
                       {label}
                     </p>
                     <p style={{ color: '#F5F0EB', fontSize: '14px' }}>{value}</p>

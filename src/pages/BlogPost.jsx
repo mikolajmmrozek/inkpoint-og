@@ -29,7 +29,7 @@ export default function BlogPost() {
   if (loading) return (
     <PageLayout>
       <div className="h-screen flex items-center justify-center">
-        <div className="w-8 h-px animate-pulse" style={{ background: '#8B1A1A' }} />
+        <div className="w-8 h-px animate-pulse" style={{ background: '#FF007F' }} />
       </div>
     </PageLayout>
   );
@@ -68,13 +68,13 @@ export default function BlogPost() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
           <div className="flex gap-2 mb-6">
             {(post.tags || []).map(tag => (
-              <span key={tag} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#8B1A1A', letterSpacing: '0.15em', border: '0.5px solid #8B1A1A', padding: '3px 8px', textTransform: 'uppercase' }}>
+              <span key={tag} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', border: '0.5px solid #FF007F', padding: '3px 8px', textTransform: 'uppercase' }}>
                 {tag}
               </span>
             ))}
           </div>
 
-          <h1 style={{ fontFamily: 'Cormorant Garamond', fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 700, color: '#F5F0EB', lineHeight: 1 }}>
+          <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 700, color: '#F5F0EB', lineHeight: 1 }}>
             {post.title}
           </h1>
 

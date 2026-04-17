@@ -46,7 +46,7 @@ export default function ArtistProfile() {
   if (loading) return (
     <PageLayout>
       <div className="h-screen flex items-center justify-center">
-        <div className="w-8 h-px animate-pulse" style={{ background: '#8B1A1A' }} />
+        <div className="w-8 h-px animate-pulse" style={{ background: '#FF007F' }} />
       </div>
     </PageLayout>
   );
@@ -111,17 +111,17 @@ export default function ArtistProfile() {
 
               <div className="flex gap-2 flex-wrap mb-4">
                 {(artist?.specialty || MOCK.specialty).map(s => (
-                  <span key={s} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#8B1A1A', letterSpacing: '0.15em', border: '0.5px solid #8B1A1A', padding: '3px 8px', textTransform: 'uppercase' }}>
+                  <span key={s} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', border: '0.5px solid #FF007F', padding: '3px 8px', textTransform: 'uppercase' }}>
                     {s}
                   </span>
                 ))}
               </div>
 
-              <h1 style={{ fontFamily: 'Cormorant Garamond', fontSize: '2.5rem', fontWeight: 700, color: '#F5F0EB', lineHeight: 1, marginBottom: '1rem' }}>
+              <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 700, color: '#F5F0EB', lineHeight: 1, marginBottom: '1rem' }}>
                 {artist?.name || MOCK.name}
               </h1>
 
-              <div className="h-px w-8 mb-6" style={{ background: '#8B1A1A', height: '0.5px' }} />
+              <div className="h-px w-8 mb-6" style={{ background: '#FF007F', height: '0.5px' }} />
 
               <p className="text-sm leading-relaxed mb-8" style={{ color: 'rgba(245,240,235,0.6)', fontSize: '14px', lineHeight: 1.8 }}>
                 {artist?.bio || MOCK.bio}
@@ -129,10 +129,10 @@ export default function ArtistProfile() {
 
               {artist?.years_experience && (
                 <div className="mb-6">
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#8B1A1A', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px' }}>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px' }}>
                     DOŚWIADCZENIE
                   </p>
-                  <p style={{ fontFamily: 'Cormorant Garamond', fontSize: '2rem', fontWeight: 600, color: '#F5F0EB' }}>
+                  <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2rem', fontWeight: 600, color: '#F5F0EB' }}>
                     {artist.years_experience} lat
                   </p>
                 </div>

@@ -29,10 +29,10 @@ export default function Navbar() {
         <div className="px-8 md:px-16 flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex flex-col leading-none">
-            <span className="font-display text-2xl font-700 text-parchment tracking-tight" style={{ fontFamily: 'Cormorant Garamond', fontWeight: 700, color: '#F5F0EB' }}>
+            <span className="font-display text-2xl font-700 text-parchment tracking-tight" style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, color: '#F5F0EB', letterSpacing: '0.08em', fontSize: '1.6rem' }}>
               ROMANS
             </span>
-            <span className="text-micro text-oxblood" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.2em', color: '#C4196B' }}>
+            <span className="text-micro text-oxblood" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.2em', color: '#FF007F' }}>
               TATTOO
             </span>
           </Link>
@@ -46,7 +46,7 @@ export default function Navbar() {
                 className={`text-micro transition-all duration-300 hover:text-oxblood ${
                   location.pathname === link.href ? 'text-oxblood' : 'text-parchment/60'
                 }`}
-                style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: location.pathname === link.href ? '#8B1A1A' : 'rgba(245,240,235,0.6)' }}
+                style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: location.pathname === link.href ? '#FF007F' : 'rgba(245,240,235,0.6)' }}
               >
                 {link.label}
               </Link>
@@ -83,7 +83,7 @@ export default function Navbar() {
               <Link
                 to={link.href}
                 className="block font-display text-6xl font-300 text-parchment hover:text-oxblood transition-colors duration-300"
-                style={{ fontFamily: 'Cormorant Garamond', fontSize: 'clamp(2.5rem, 8vw, 5rem)', color: '#F5F0EB', fontWeight: 300 }}
+                style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(3rem, 10vw, 6rem)', color: '#F5F0EB', fontWeight: 400, letterSpacing: '0.05em' }}
               >
                 {link.label}
               </Link>

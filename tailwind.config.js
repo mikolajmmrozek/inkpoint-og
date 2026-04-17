@@ -52,11 +52,11 @@ module.exports = {
                 },
                 obsidian: '#0A0A0A',
                 parchment: '#F5F0EB',
-                oxblood: '#C4196B',
+                oxblood: '#FF007F',
                 steel: '#262626',
             },
             fontFamily: {
-                display: ['Cormorant Garamond', 'serif'],
+                display: ['Bebas Neue', 'Barlow Condensed', 'system-ui'],
                 body: ['Inter', 'sans-serif'],
                 mono: ['JetBrains Mono', 'monospace'],
             },

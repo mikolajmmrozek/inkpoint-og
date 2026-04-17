@@ -7,7 +7,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           {/* Brand */}
           <div>
-            <div className="font-display text-4xl font-700 mb-2" style={{ fontFamily: 'Cormorant Garamond', fontWeight: 700, color: '#F5F0EB', fontSize: '2.5rem' }}>
+            <div className="font-display text-4xl font-700 mb-2" style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, color: '#F5F0EB', fontSize: '2.8rem', letterSpacing: '0.06em' }}>
               ROMANS TATTOO
             </div>
             <p className="text-parchment/40 text-sm mt-4 leading-relaxed" style={{ color: 'rgba(245,240,235,0.4)', fontSize: '14px' }}>
@@ -26,7 +26,7 @@ export default function Footer() {
 
           {/* Links */}
           <div>
-            <p className="text-micro text-oxblood mb-6" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#8B1A1A', letterSpacing: '0.15em' }}>
+            <p className="text-micro text-oxblood mb-6" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.15em' }}>
               NAWIGACJA
             </p>
             <div className="space-y-3">
@@ -40,7 +40,7 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <p className="text-micro text-oxblood mb-6" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#8B1A1A', letterSpacing: '0.15em' }}>
+            <p className="text-micro text-oxblood mb-6" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.15em' }}>
               KONTAKT
             </p>
             <div className="space-y-2 text-sm text-parchment/50" style={{ color: 'rgba(245,240,235,0.5)', fontSize: '14px' }}>

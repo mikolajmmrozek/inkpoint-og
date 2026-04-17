@@ -4,7 +4,9 @@ import { Link } from 'react-router-dom';
 export default function HomeCTA() {
   return (
     <section className="py-32 px-8 md:px-16 relative overflow-hidden">
-      <div className="absolute inset-0" style={{ background: '#8B1A1A', opacity: 0.04 }} />
+      {/* Fuchsia gradient background */}
+      <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(255,0,127,0.08) 0%, rgba(10,10,10,0) 50%, rgba(255,0,127,0.05) 100%)' }} />
+      <div className="absolute bottom-0 left-0 right-0 h-1" style={{ background: 'linear-gradient(to right, transparent, #FF007F, transparent)' }} />
       <div className="relative max-w-4xl mx-auto text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -12,18 +14,19 @@ export default function HomeCTA() {
           viewport={{ once: true }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
-          <p className="text-micro text-oxblood mb-8" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#8B1A1A', letterSpacing: '0.2em' }}>
+          <p className="text-micro text-oxblood mb-8" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em' }}>
             ZACZNIJ SWOJĄ HISTORIĘ
           </p>
           <h2 style={{
-            fontFamily: 'Cormorant Garamond',
-            fontSize: 'clamp(2.5rem, 6vw, 5rem)',
-            fontWeight: 700,
-            lineHeight: 0.95,
+            fontFamily: 'Bebas Neue, Barlow Condensed, system-ui',
+            fontSize: 'clamp(3.5rem, 8vw, 7rem)',
+            fontWeight: 400,
+            lineHeight: 0.9,
             color: '#F5F0EB',
+            letterSpacing: '0.04em',
           }}>
             Gotowy na<br />
-            <em style={{ fontStyle: 'italic', color: '#8B1A1A' }}>permanentną zmianę?</em>
+            <span style={{ background: 'linear-gradient(135deg, #FF007F, #FF66B2)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>PERMANENTNĄ ZMIANĘ?</span>
           </h2>
           <p className="mt-8 text-parchment/60 max-w-xl mx-auto text-base leading-relaxed" style={{ color: 'rgba(245,240,235,0.6)', fontSize: '16px' }}>
             Umów się na bezpłatną konsultację. Porozmawiamy o Twoim pomyśle, dobierzemy artystę i ustalimy termin.
