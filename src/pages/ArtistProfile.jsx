@@ -3,7 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import PageLayout from '../components/layout/PageLayout';
-import { X, ZoomIn } from 'lucide-react';
+import Lightbox from '../components/ui/Lightbox';
+import { ZoomIn } from 'lucide-react';
 
 const MOCK = {
   name: 'Aleksandra Wiśniewska',
@@ -26,7 +27,7 @@ export default function ArtistProfile() {
   const { slug } = useParams();
   const [artist, setArtist] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [lightboxImg, setLightboxImg] = useState(null);
+  const [lightboxIndex, setLightboxIndex] = useState(null);
 
   useEffect(() => {
     const load = async () => {
@@ -55,34 +56,6 @@ export default function ArtistProfile() {
 
   return (
     <PageLayout>
-      {/* Lightbox */}
-      <AnimatePresence>
-        {lightboxImg && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-8"
-            style={{ background: 'rgba(10,10,10,0.97)' }}
-            onClick={() => setLightboxImg(null)}
-          >
-            <button className="absolute top-8 right-8 text-parchment/60 hover:text-parchment" style={{ color: 'rgba(245,240,235,0.6)' }}>
-              <X size={24} />
-            </button>
-            <motion.img
-              src={lightboxImg}
-              alt="Portfolio"
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="max-w-full max-h-full object-contain"
-              style={{ maxHeight: '90vh' }}
-              onClick={(e) => e.stopPropagation()}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <div className="pt-24 min-h-screen">
         {/* Back link */}
         <div className="px-8 md:px-16 pt-12 pb-8">
@@ -95,11 +68,7 @@ export default function ArtistProfile() {
         <div className="flex flex-col lg:flex-row gap-0">
           {/* LEFT — Sticky bio */}
           <div className="lg:w-96 lg:flex-shrink-0 px-8 md:px-16 lg:sticky lg:top-24 lg:self-start pb-16">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-            >
+            <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8 }}>
               <div className="relative w-40 h-40 mb-8 overflow-hidden">
                 <img
                   src={artist?.photo_url || MOCK.photo_url}
@@ -117,7 +86,7 @@ export default function ArtistProfile() {
                 ))}
               </div>
 
-              <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 700, color: '#F5F0EB', lineHeight: 1, marginBottom: '1rem' }}>
+              <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: '#F5F0EB', lineHeight: 1, marginBottom: '1rem' }}>
                 {artist?.name || MOCK.name}
               </h1>
 
@@ -132,16 +101,22 @@ export default function ArtistProfile() {
                   <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px' }}>
                     DOŚWIADCZENIE
                   </p>
-                  <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2rem', fontWeight: 600, color: '#F5F0EB' }}>
+                  <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2rem', fontWeight: 400, color: '#F5F0EB' }}>
                     {artist.years_experience} lat
                   </p>
                 </div>
               )}
 
               {artist?.instagram && (
-                <p className="mb-8" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em' }}>
+                <a
+                  href={artist.instagram.startsWith('http') ? artist.instagram : `https://instagram.com/${artist.instagram.replace('@','')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block mb-8 hover:opacity-70 transition-opacity"
+                  style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em' }}
+                >
                   {artist.instagram}
-                </p>
+                </a>
               )}
 
               <Link to="/booking" className="btn-oxblood block text-center animate-pulse-oxblood">
@@ -164,15 +139,15 @@ export default function ArtistProfile() {
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.08, duration: 0.6 }}
                   className="relative overflow-hidden group cursor-pointer"
-                  onClick={() => setLightboxImg(img.url || img)}
+                  onClick={() => setLightboxIndex(i)}
                 >
                   <img
                     src={img.url || img}
                     alt={img.caption || `Portfolio ${i + 1}`}
-                    className="w-full object-cover transition-all duration-700 group-hover:scale-103"
+                    className="w-full object-cover transition-all duration-700 group-hover:scale-105"
                     style={{ filter: 'brightness(0.75) contrast(1.1)', display: 'block' }}
                   />
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center" style={{ background: 'rgba(139,26,26,0.15)' }}>
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center" style={{ background: 'rgba(255,0,127,0.12)' }}>
                     <ZoomIn size={20} color="#F5F0EB" />
                   </div>
                   {img.caption && (
@@ -188,6 +163,19 @@ export default function ArtistProfile() {
           </div>
         </div>
       </div>
+
+      {/* Lightbox with navigation */}
+      <AnimatePresence>
+        {lightboxIndex !== null && (
+          <Lightbox
+            images={portfolioImages}
+            currentIndex={lightboxIndex}
+            onClose={() => setLightboxIndex(null)}
+            onNext={(idx) => setLightboxIndex(idx !== undefined ? idx : (lightboxIndex + 1) % portfolioImages.length)}
+            onPrev={() => setLightboxIndex((lightboxIndex - 1 + portfolioImages.length) % portfolioImages.length)}
+          />
+        )}
+      </AnimatePresence>
     </PageLayout>
   );
 }

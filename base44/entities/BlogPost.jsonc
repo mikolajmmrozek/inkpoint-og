@@ -13,10 +13,25 @@
     },
     "content": {
       "type": "string",
-      "description": "HTML content"
+      "description": "Plain text content"
     },
     "cover_image_url": {
       "type": "string"
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "caption": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Additional post images"
     },
     "video_url": {
       "type": "string"

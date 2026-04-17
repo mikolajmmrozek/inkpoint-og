@@ -36,7 +36,7 @@ export default function DashboardBlog() {
   useEffect(() => { load(); }, []);
 
   const openNew = () => {
-    setForm({ title: '', excerpt: '', content: '', author_name: '', tags: [], is_published: false, cover_image_url: '', video_url: '' });
+    setForm({ title: '', excerpt: '', content: '', author_name: '', tags: [], is_published: false, cover_image_url: '', video_url: '', images: [] });
     setEditing('new');
   };
 
@@ -83,6 +83,19 @@ export default function DashboardBlog() {
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
     setForm(f => ({ ...f, video_url: file_url }));
     setUploading(false);
+  };
+
+  const handlePostImagesUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    setUploading(true);
+    const uploaded = await Promise.all(files.map(f => base44.integrations.Core.UploadFile({ file: f }).then(r => ({ url: r.file_url, caption: '' }))));
+    setForm(f => ({ ...f, images: [...(f.images || []), ...uploaded] }));
+    setUploading(false);
+  };
+
+  const removePostImage = (idx) => {
+    setForm(f => ({ ...f, images: (f.images || []).filter((_, i) => i !== idx) }));
   };
 
   return (
@@ -139,8 +152,8 @@ export default function DashboardBlog() {
                 </div>
 
                 <div>
-                  <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Treść (HTML)</label>
-                  <textarea rows={8} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'vertical', fontFamily: 'JetBrains Mono', fontSize: '12px' }} value={form.content || ''} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+                  <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Treść</label>
+                  <textarea rows={10} placeholder="Napisz treść posta..." style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'vertical', lineHeight: 1.8 }} value={form.content || ''} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                 </div>
 
                 <div className="grid grid-cols-2 gap-8">
@@ -168,6 +181,29 @@ export default function DashboardBlog() {
                   <label className="btn-ghost-parchment inline-block cursor-pointer text-center" style={{ fontSize: '10px', padding: '10px 20px' }}>
                     {uploading ? 'PRZESYŁANIE...' : 'WYBIERZ PLIK'}
                     <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                  </label>
+                </div>
+
+                {/* Post images */}
+                <div>
+                  <label className="block mb-3" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                    Zdjęcia w poście ({(form.images || []).length})
+                  </label>
+                  {(form.images || []).length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {(form.images || []).map((img, i) => (
+                        <div key={i} className="relative">
+                          <img src={img.url} alt="" className="w-16 h-16 object-cover" />
+                          <button onClick={() => removePostImage(i)} className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: '#FF007F', border: 'none', cursor: 'pointer' }}>
+                            <span style={{ color: '#fff', fontSize: '10px', lineHeight: 1 }}>×</span>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <label className="btn-ghost-parchment inline-block cursor-pointer text-center" style={{ fontSize: '10px', padding: '10px 20px' }}>
+                    {uploading ? 'PRZESYŁANIE...' : 'DODAJ ZDJĘCIA'}
+                    <input type="file" accept="image/*" multiple onChange={handlePostImagesUpload} className="hidden" />
                   </label>
                 </div>
 
