@@ -5,6 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 
 import { TrendingUp, Users, Calendar, DollarSign } from 'lucide-react';
 
 const MONTHS_PL = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
+const MONTHS_FULL = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
 
 export default function DashboardStats() {
   const { theme } = useTheme();
@@ -17,6 +18,8 @@ export default function DashboardStats() {
   const [loading, setLoading] = useState(true);
   const [selectedArtistId, setSelectedArtistId] = useState('all');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [breakdownView, setBreakdownView] = useState('monthly'); // 'monthly' | 'daily'
 
   useEffect(() => {
     Promise.all([
@@ -86,6 +89,43 @@ export default function DashboardStats() {
       return { name, revenue, sessions: mb.length };
     });
   }, [filtered]);
+
+  // Monthly breakdown table (per artist per month)
+  const monthlyBreakdown = useMemo(() => {
+    return MONTHS_PL.map((name, mi) => {
+      const mb = filtered.filter(b => b.session_date && new Date(b.session_date).getMonth() === mi);
+      const revenue = mb.reduce((s, b) => s + Number(b.estimated_price || 0), 0);
+      // artist cut weighted
+      const artistEarnings = mb.reduce((s, b) => {
+        const a = artistMap[b.artist_id];
+        const cut = a?.artist_cut_percent ?? 60;
+        return s + Math.round(Number(b.estimated_price || 0) * cut / 100);
+      }, 0);
+      const studioEarnings = revenue - artistEarnings;
+      return { name, fullName: MONTHS_FULL[mi], revenue, artistEarnings, studioEarnings, sessions: mb.length, mi };
+    });
+  }, [filtered, artistMap]);
+
+  // Daily breakdown for selected month
+  const dailyBreakdown = useMemo(() => {
+    const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
+    return Array.from({ length: daysInMonth }, (_, di) => {
+      const day = di + 1;
+      const db = filtered.filter(b => {
+        if (!b.session_date) return false;
+        const d = new Date(b.session_date);
+        return d.getMonth() === selectedMonth && d.getDate() === day;
+      });
+      const revenue = db.reduce((s, b) => s + Number(b.estimated_price || 0), 0);
+      const artistEarnings = db.reduce((s, b) => {
+        const a = artistMap[b.artist_id];
+        const cut = a?.artist_cut_percent ?? 60;
+        return s + Math.round(Number(b.estimated_price || 0) * cut / 100);
+      }, 0);
+      const studioEarnings = revenue - artistEarnings;
+      return { day, revenue, artistEarnings, studioEarnings, sessions: db.length, bookings: db };
+    }).filter(d => d.sessions > 0);
+  }, [filtered, selectedYear, selectedMonth, artistMap]);
 
   const years = useMemo(() => {
     const ys = new Set(paid.map(b => b.session_date ? new Date(b.session_date).getFullYear() : null).filter(Boolean));
@@ -180,6 +220,82 @@ export default function DashboardStats() {
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
+          </div>
+
+          {/* Monthly / Daily breakdown */}
+          <div className="mb-8">
+            {/* Tab toggle */}
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+              <div className="flex gap-1">
+                {[{ key: 'monthly', label: 'Miesięczny' }, { key: 'daily', label: 'Dzienny' }].map(tab => (
+                  <button key={tab.key} onClick={() => setBreakdownView(tab.key)}
+                    style={{ ...mono, fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '7px 14px', border: `0.5px solid ${breakdownView === tab.key ? t.fuchsia : t.border}`, color: breakdownView === tab.key ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer' }}>
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+              {breakdownView === 'daily' && (
+                <select value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))}
+                  style={{ background: t.bg, border: `0.5px solid ${t.border}`, color: t.text, ...mono, fontSize: '10px', letterSpacing: '0.06em', padding: '7px 12px', cursor: 'pointer', outline: 'none', colorScheme: theme === 'light' ? 'light' : 'dark' }}>
+                  {MONTHS_FULL.map((m, i) => <option key={i} value={i}>{m}</option>)}
+                </select>
+              )}
+            </div>
+
+            <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+              {/* Table header */}
+              <div className="grid grid-cols-12 px-4 py-2" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+                <p className="col-span-3" style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{breakdownView === 'monthly' ? 'Miesiąc' : 'Dzień'}</p>
+                <p className="col-span-1" style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Sesje</p>
+                <p className="col-span-3" style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Łączny przychód</p>
+                <p className="col-span-3" style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Zarobek artysty</p>
+                <p className="col-span-2" style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Zarobek studia</p>
+              </div>
+
+              {breakdownView === 'monthly' ? (
+                monthlyBreakdown.filter(r => r.sessions > 0).length === 0 ? (
+                  <div className="py-10 text-center"><p style={{ ...mono, fontSize: '10px', color: t.muted }}>BRAK DANYCH</p></div>
+                ) : monthlyBreakdown.map((row, i) => row.sessions === 0 ? null : (
+                  <div key={row.mi} className="grid grid-cols-12 px-4 py-3 items-center" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+                    <p className="col-span-3" style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>{row.fullName}</p>
+                    <p className="col-span-1" style={{ ...mono, fontSize: '11px', color: t.muted }}>{row.sessions}</p>
+                    <p className="col-span-3" style={{ ...mono, fontSize: '11px', color: t.text }}>{row.revenue.toLocaleString('pl-PL')} PLN</p>
+                    <p className="col-span-3" style={{ ...mono, fontSize: '11px', color: '#16a34a', fontWeight: 600 }}>{row.artistEarnings.toLocaleString('pl-PL')} PLN</p>
+                    <p className="col-span-2" style={{ ...mono, fontSize: '11px', color: t.fuchsia, fontWeight: 600 }}>{row.studioEarnings.toLocaleString('pl-PL')} PLN</p>
+                  </div>
+                ))
+              ) : (
+                dailyBreakdown.length === 0 ? (
+                  <div className="py-10 text-center"><p style={{ ...mono, fontSize: '10px', color: t.muted }}>BRAK SESJI W TYM MIESIĄCU</p></div>
+                ) : dailyBreakdown.map(row => (
+                  <div key={row.day} style={{ borderBottom: `0.5px solid ${t.border}` }}>
+                    <div className="grid grid-cols-12 px-4 py-3 items-center">
+                      <p className="col-span-3" style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>
+                        {row.day} {MONTHS_FULL[selectedMonth]} {selectedYear}
+                      </p>
+                      <p className="col-span-1" style={{ ...mono, fontSize: '11px', color: t.muted }}>{row.sessions}</p>
+                      <p className="col-span-3" style={{ ...mono, fontSize: '11px', color: t.text }}>{row.revenue.toLocaleString('pl-PL')} PLN</p>
+                      <p className="col-span-3" style={{ ...mono, fontSize: '11px', color: '#16a34a', fontWeight: 600 }}>{row.artistEarnings.toLocaleString('pl-PL')} PLN</p>
+                      <p className="col-span-2" style={{ ...mono, fontSize: '11px', color: t.fuchsia, fontWeight: 600 }}>{row.studioEarnings.toLocaleString('pl-PL')} PLN</p>
+                    </div>
+                    {/* Sub-rows: individual bookings */}
+                    {row.bookings.map(b => (
+                      <div key={b.id} className="grid grid-cols-12 px-4 py-1.5 items-center" style={{ background: 'rgba(255,0,127,0.02)', borderTop: `0.5px solid ${t.border}` }}>
+                        <p className="col-span-3" style={{ ...mono, fontSize: '9px', color: t.muted, paddingLeft: '16px' }}>↳ {b.client_name}</p>
+                        <p className="col-span-1" />
+                        <p className="col-span-3" style={{ ...mono, fontSize: '9px', color: t.muted }}>{Number(b.estimated_price || 0).toLocaleString('pl-PL')} PLN · {b.artist_name}</p>
+                        <p className="col-span-3" style={{ ...mono, fontSize: '9px', color: 'rgba(22,163,74,0.7)' }}>
+                          {Math.round(Number(b.estimated_price || 0) * ((artistMap[b.artist_id]?.artist_cut_percent ?? 60) / 100)).toLocaleString('pl-PL')} PLN
+                        </p>
+                        <p className="col-span-2" style={{ ...mono, fontSize: '9px', color: 'rgba(255,0,127,0.6)' }}>
+                          {(Number(b.estimated_price || 0) - Math.round(Number(b.estimated_price || 0) * ((artistMap[b.artist_id]?.artist_cut_percent ?? 60) / 100))).toLocaleString('pl-PL')} PLN
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ))
+              )}
+            </div>
           </div>
 
           {/* Per-artist breakdown */}
