@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { FileText, X, ExternalLink, Copy, Shield, AlertTriangle, Search, Download, Mail, Trash2, Settings, Loader2 } from 'lucide-react';
+import { FileText, X, ExternalLink, Copy, Shield, AlertTriangle, Search, Download, Mail, Trash2, Settings, Loader2, Edit3 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useTheme } from './Dashboard';
 import html2canvas from 'html2canvas';
@@ -469,10 +469,17 @@ export default function DashboardHealthForms() {
         {/* Aftercare tab */}
         {docTab === 'aftercare' && (
           <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-            <div className="px-4 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
+            <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '0px' }}>
                 ZALECENIA ({instructions.length})
               </p>
+              <button
+                onClick={() => navigate('/dashboard/documents')}
+                className="flex items-center gap-2"
+                style={{ ...mono, fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}
+              >
+                <Edit3 size={12} /> EDYTUJ
+              </button>
             </div>
             {loading ? (
               <div className="flex items-center justify-center py-20">
@@ -507,10 +514,17 @@ export default function DashboardHealthForms() {
         {/* Regulamin tab */}
         {docTab === 'regulamin' && (
           <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-            <div className="px-4 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+            <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
               <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
                 REGULAMIN STUDIA
               </p>
+              <button
+                onClick={() => navigate('/dashboard/documents')}
+                className="flex items-center gap-2"
+                style={{ ...mono, fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}
+              >
+                <Edit3 size={12} /> EDYTUJ
+              </button>
             </div>
             {loading ? (
               <div className="flex items-center justify-center py-20">
