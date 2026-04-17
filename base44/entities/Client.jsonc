@@ -1,0 +1,30 @@
+{
+  "name": "Client",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Imi\u0119 i nazwisko klienta"
+    },
+    "email": {
+      "type": "string",
+      "description": "Adres e-mail klienta"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Numer telefonu"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notatki o kliencie (alergie, preferencje itp.)"
+    },
+    "total_sessions": {
+      "type": "number",
+      "default": 0,
+      "description": "Liczba sesji"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}
