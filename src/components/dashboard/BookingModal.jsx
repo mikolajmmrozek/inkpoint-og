@@ -25,6 +25,8 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
   const [selectedClient, setSelectedClient] = useState(null); // existing client or null
   const [form, setForm] = useState(booking ? { ...booking } : {
     client_name: '',
+    client_first_name: '',
+    client_last_name: '',
     client_email: '',
     client_phone: '',
     artist_id: '',
@@ -57,14 +59,16 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
     if (client._isNew) {
       // New client — prefill name only, user fills in rest
       setSelectedClient(null);
-      set('client_name', client.name);
+      const [first, ...last] = client.name.split(' ');
+      set('client_first_name', first || '');
+      set('client_last_name', last.join(' ') || '');
       set('client_email', '');
       set('client_phone', '');
     } else {
       // Existing client — fill all fields
       setSelectedClient(client);
-      const fullName = client.name || `${client.first_name || ''} ${client.last_name || ''}`.trim();
-      set('client_name', fullName);
+      set('client_first_name', client.first_name || '');
+      set('client_last_name', client.last_name || '');
       set('client_email', client.email || '');
       set('client_phone', client.phone || '');
     }
@@ -72,29 +76,30 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
 
   const handleSave = async () => {
     setSaving(true);
-    const data = { ...form, estimated_price: form.estimated_price ? Number(form.estimated_price) : undefined };
+    const fullName = `${form.client_first_name || ''} ${form.client_last_name || ''}`.trim();
+    const data = { ...form, client_name: fullName, estimated_price: form.estimated_price ? Number(form.estimated_price) : undefined };
+    delete data.client_first_name;
+    delete data.client_last_name;
 
     if (isNew) {
       await base44.entities.Booking.create(data);
       // Upsert client in Client database
       if (selectedClient?.id) {
         // Existing client — update session count
-        const [firstName, ...lastNameParts] = form.client_name.split(' ');
         await base44.entities.Client.update(selectedClient.id, {
-          first_name: firstName,
-          last_name: lastNameParts.join(' '),
-          name: form.client_name,
+          first_name: form.client_first_name,
+          last_name: form.client_last_name,
+          name: fullName,
           email: form.client_email,
           phone: form.client_phone,
           total_sessions: (selectedClient.total_sessions || 0) + 1,
         });
-      } else if (form.client_name) {
+      } else if (fullName) {
         // New client — create record
-        const [firstName, ...lastNameParts] = form.client_name.split(' ');
         await base44.entities.Client.create({
-          first_name: firstName,
-          last_name: lastNameParts.join(' '),
-          name: form.client_name,
+          first_name: form.client_first_name,
+          last_name: form.client_last_name,
+          name: fullName,
           email: form.client_email,
           phone: form.client_phone,
           total_sessions: 1,
@@ -156,9 +161,10 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
               </div>
             )}
             <div className="grid grid-cols-2 gap-6 mt-2">
-              <div>{label('Imię i Nazwisko *')}<input {...inp('client_name')} /></div>
-              <div>{label('Email')}<input {...inp('client_email', 'email')} /></div>
+              <div>{label('Imię *')}<input {...inp('client_first_name')} /></div>
+              <div>{label('Nazwisko *')}<input {...inp('client_last_name')} /></div>
             </div>
+            <div className="mt-4">{label('Email')}<input {...inp('client_email', 'email')} /></div>
             <div className="mt-4">{label('Telefon')}<input {...inp('client_phone')} /></div>
             {selectedClient && (
               <div className="mt-3 px-3 py-2 flex items-center gap-2" style={{ background: 'rgba(255,0,127,0.05)', border: '0.5px solid rgba(255,0,127,0.2)' }}>
@@ -246,7 +252,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
         </div>
 
         <div className="flex gap-4 mt-8 pt-6" style={{ borderTop: `0.5px solid ${t.border}` }}>
-          <button onClick={handleSave} disabled={saving || !form.client_name || !form.session_date} className="btn-oxblood flex-1" style={{ opacity: (!form.client_name || !form.session_date) ? 0.5 : 1 }}>
+          <button onClick={handleSave} disabled={saving || !form.client_first_name || !form.session_date} className="btn-oxblood flex-1" style={{ opacity: (!form.client_first_name || !form.session_date) ? 0.5 : 1 }}>
             {saving ? 'ZAPISYWANIE...' : isNew ? 'DODAJ REZERWACJĘ' : 'ZAPISZ ZMIANY'}
           </button>
           <button onClick={onClose} className="btn-ghost-parchment">ANULUJ</button>
