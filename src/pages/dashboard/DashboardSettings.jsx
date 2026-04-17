@@ -34,6 +34,7 @@ const DEFAULTS = {
   },
   contact: {
     key: 'contact',
+    contact_email: 'kontakt@romanstattoo.pl',
     contact_address_street: 'ul. Wschowska 30',
     contact_address_city: '64-200 Wolsztyn',
     contact_phone: '881717880',
@@ -43,6 +44,12 @@ const DEFAULTS = {
     contact_facebook: 'Romans Tattoo',
     contact_facebook_url: 'https://www.facebook.com/romanstattoo',
     contact_google_maps_url: '',
+  },
+  branding: {
+    key: 'branding',
+    site_logo_url: '',
+    app_icon_url: '',
+    app_description: 'Romans Tattoo — Studio tatuażu i piercingu w Wolsztynie',
   },
 };
 
@@ -124,7 +131,7 @@ export default function DashboardSettings() {
 
       {/* Tabs */}
       <div className="flex gap-2 mb-6 flex-wrap">
-        {['hero', 'about', 'contact'].map(tab => (
+        {['hero', 'about', 'contact', 'branding'].map(tab => (
           <button
             key={tab}
             onClick={() => loadTab(tab)}
@@ -140,7 +147,7 @@ export default function DashboardSettings() {
               cursor: 'pointer',
             }}
           >
-            {tab === 'hero' ? 'Strona Główna — Hero' : tab === 'about' ? 'Strona Główna — O Studiu' : 'Strona Kontaktu'}
+            {tab === 'hero' ? 'Strona Główna — Hero' : tab === 'about' ? 'Strona Główna — O Studiu' : tab === 'contact' ? 'Strona Kontaktu' : 'Branding'}
           </button>
         ))}
       </div>
@@ -290,6 +297,17 @@ export default function DashboardSettings() {
             DANE KONTAKTOWE
           </p>
 
+          {/* Email */}
+          <div className="mb-8">
+            <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              Email kontaktowy
+            </label>
+            <input {...inp('contact_email')} type="email" style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            <p className="mt-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>
+              Będzie używany w formularzach kontaktowych i wiadomościach e-mail
+            </p>
+          </div>
+
           {/* Address */}
           <div className="mb-8 grid grid-cols-2 gap-8">
             <div>
@@ -361,6 +379,87 @@ export default function DashboardSettings() {
             <input {...inp('contact_google_maps_url')} placeholder="https://www.google.com/maps/place/..." style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
             <p className="mt-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>
               Skopiuj adres URL z wizytówki Google Twojej firmy z google.com/maps
+            </p>
+          </div>
+        </div>
+        )}
+
+        {activeTab === 'branding' && (
+        <div>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '24px' }}>
+            BRANDING I WYGLĄD
+          </p>
+
+          {/* Logo */}
+          <div className="mb-8">
+            <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              Logo strony
+            </label>
+            {form.site_logo_url && (
+              <img src={form.site_logo_url} alt="Logo" className="max-h-20 mb-3 object-contain" />
+            )}
+            <div className="flex gap-3 items-center flex-wrap">
+              <label className="btn-ghost-parchment inline-block cursor-pointer text-center" style={{ fontSize: '10px', padding: '10px 20px' }}>
+                {uploading ? 'PRZESYŁANIE...' : form.site_logo_url ? 'ZMIEŃ LOGO' : 'DODAJ LOGO'}
+                <input type="file" accept="image/*" onChange={async (e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  setUploading(true);
+                  const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                  setForm(f => ({ ...f, site_logo_url: file_url }));
+                  setUploading(false);
+                }} className="hidden" />
+              </label>
+              {form.site_logo_url && (
+                <button
+                  onClick={() => setForm(f => ({ ...f, site_logo_url: '' }))}
+                  style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', background: 'none', border: 'none', cursor: 'pointer', textTransform: 'uppercase' }}
+                >
+                  USUŃ LOGO
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* App Icon */}
+          <div className="mb-8">
+            <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              Ikona aplikacji
+            </label>
+            {form.app_icon_url && (
+              <img src={form.app_icon_url} alt="Ikona" className="w-20 h-20 mb-3 object-contain border border-solid" style={{ borderColor: t.border }} />
+            )}
+            <div className="flex gap-3 items-center flex-wrap">
+              <label className="btn-ghost-parchment inline-block cursor-pointer text-center" style={{ fontSize: '10px', padding: '10px 20px' }}>
+                {uploading ? 'PRZESYŁANIE...' : form.app_icon_url ? 'ZMIEŃ IKONĘ' : 'DODAJ IKONĘ'}
+                <input type="file" accept="image/*" onChange={async (e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  setUploading(true);
+                  const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                  setForm(f => ({ ...f, app_icon_url: file_url }));
+                  setUploading(false);
+                }} className="hidden" />
+              </label>
+              {form.app_icon_url && (
+                <button
+                  onClick={() => setForm(f => ({ ...f, app_icon_url: '' }))}
+                  style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', background: 'none', border: 'none', cursor: 'pointer', textTransform: 'uppercase' }}
+                >
+                  USUŃ IKONĘ
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* App Description */}
+          <div className="mb-8">
+            <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              Opis aplikacji
+            </label>
+            <textarea rows={2} {...inp('app_description')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            <p className="mt-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>
+              Wyświetlany w meta tagach i opisie aplikacji
             </p>
           </div>
         </div>
