@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
+import { X } from 'lucide-react';
 
 const inputStyle = {
   background: 'transparent',
@@ -15,10 +16,22 @@ const inputStyle = {
 };
 
 const DEFAULTS = {
-  key: 'hero',
-  hero_tagline: 'ROMANS\nTATTOO',
-  hero_subtext: 'Studio tatuażu i piercingu w Wolsztynie.\nSztuka trwała — precyzyjna — Twoja.',
-  hero_video_url: '',
+  hero: {
+    key: 'hero',
+    hero_tagline: 'ROMANS\nTATTOO',
+    hero_subtext: 'Studio tatuażu i piercingu w Wolsztynie.\nSztuka trwała — precyzyjna — Twoja.',
+    hero_video_url: '',
+  },
+  about: {
+    key: 'about',
+    about_heading: 'Sztuka, która',
+    about_highlight_word: 'POZOSTAJE',
+    about_paragraph_1: 'Romans Tattoo to studio tatuażu i piercingu w Wolsztynie, gdzie precyzja spotyka pasję. Nasi artyści łączą doświadczenie z nieustannym dążeniem do perfekcji, tworząc dzieła dopasowane do każdego klienta.',
+    about_paragraph_2: 'Każda sesja zaczyna się od rozmowy. Słuchamy, projektujemy, tworzymy.',
+    about_image_url: 'https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=800&q=85',
+    about_stats_number: '4+',
+    about_stats_text: 'W WOLSZTYNIE',
+  },
 };
 
 export default function DashboardSettings() {
@@ -27,33 +40,45 @@ export default function DashboardSettings() {
     ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F' }
     : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F' };
 
-  const [form, setForm] = useState(DEFAULTS);
+  const [activeTab, setActiveTab] = useState('hero');
+  const [form, setForm] = useState(DEFAULTS.hero);
   const [recordId, setRecordId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  useEffect(() => {
-    base44.entities.SiteSettings.filter({ key: 'hero' })
+  const loadTab = (tabKey) => {
+    setActiveTab(tabKey);
+    base44.entities.SiteSettings.filter({ key: tabKey })
       .then(data => {
         if (data.length > 0) {
-          setForm({ ...DEFAULTS, ...data[0] });
+          setForm({ ...DEFAULTS[tabKey], ...data[0] });
           setRecordId(data[0].id);
+        } else {
+          setForm(DEFAULTS[tabKey]);
+          setRecordId(null);
         }
       });
+  };
+
+  useEffect(() => {
+    loadTab('hero');
   }, []);
 
   const handleSave = async () => {
     setSaving(true);
-    if (recordId) {
-      await base44.entities.SiteSettings.update(recordId, form);
-    } else {
-      const rec = await base44.entities.SiteSettings.create(form);
-      setRecordId(rec.id);
+    try {
+      if (recordId) {
+        await base44.entities.SiteSettings.update(recordId, form);
+      } else {
+        const rec = await base44.entities.SiteSettings.create(form);
+        setRecordId(rec.id);
+      }
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
   };
 
   const handleVideoUpload = async (e) => {
@@ -77,14 +102,38 @@ export default function DashboardSettings() {
     <div>
       <div className="mb-8">
         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>
-          STRONA GŁÓWNA
+          PERSONALIZACJA STRONY
         </p>
         <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>
           Ustawienia
         </h2>
       </div>
 
+      {/* Tabs */}
+      <div className="flex gap-2 mb-6 flex-wrap">
+        {['hero', 'about'].map(tab => (
+          <button
+            key={tab}
+            onClick={() => loadTab(tab)}
+            style={{
+              fontFamily: 'JetBrains Mono',
+              fontSize: '10px',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              padding: '10px 16px',
+              border: `0.5px solid ${activeTab === tab ? t.fuchsia : t.border}`,
+              color: activeTab === tab ? t.fuchsia : t.muted,
+              background: 'transparent',
+              cursor: 'pointer',
+            }}
+          >
+            {tab === 'hero' ? 'Strona Główna — Hero' : 'Strona Główna — O Studiu'}
+          </button>
+        ))}
+      </div>
+
       <div className="max-w-2xl space-y-10" style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '40px' }}>
+        {activeTab === 'hero' && (
         <div>
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '24px' }}>
             SEKCJA HERO — WIDEO
@@ -142,6 +191,85 @@ export default function DashboardSettings() {
             <textarea rows={3} {...inp('hero_subtext')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none', lineHeight: 1.8 }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
           </div>
         </div>
+        )}
+
+        {activeTab === 'about' && (
+        <div>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '24px' }}>
+            SEKCJA O STUDIU
+          </p>
+
+          {/* Heading */}
+          <div className="mb-8">
+            <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              Nagłówek główny
+            </label>
+            <input {...inp('about_heading')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+          </div>
+
+          {/* Highlight word */}
+          <div className="mb-8">
+            <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              Słowo do wyróżnienia (w kolorze fuchsia)
+            </label>
+            <input {...inp('about_highlight_word')} style={{ ...inputStyle, color: t.fuchsia, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+          </div>
+
+          {/* Paragraphs */}
+          <div className="mb-8">
+            <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              Pierwszy akapit
+            </label>
+            <textarea rows={4} {...inp('about_paragraph_1')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+          </div>
+
+          <div className="mb-8">
+            <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              Drugi akapit
+            </label>
+            <textarea rows={3} {...inp('about_paragraph_2')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+          </div>
+
+          {/* Image upload */}
+          <div className="mb-8">
+            <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              Zdjęcie sekcji
+            </label>
+            {form.about_image_url && (
+              <img src={form.about_image_url} alt="" className="w-full max-h-40 mb-3 object-cover" style={{ filter: 'brightness(0.6)' }} />
+            )}
+            <div className="flex gap-3 items-center flex-wrap">
+              <label className="btn-ghost-parchment inline-block cursor-pointer text-center" style={{ fontSize: '10px', padding: '10px 20px' }}>
+                {uploading ? 'PRZESYŁANIE...' : 'ZMIEŃ ZDJĘCIE'}
+                <input type="file" accept="image/*" onChange={async (e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  setUploading(true);
+                  const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                  setForm(f => ({ ...f, about_image_url: file_url }));
+                  setUploading(false);
+                }} className="hidden" />
+              </label>
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-2 gap-6 mb-8">
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                Liczba w badżu (np. 4+)
+              </label>
+              <input {...inp('about_stats_number')} style={{ ...inputStyle, color: t.fuchsia, borderBottomColor: t.border, fontSize: '18px' }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            </div>
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                Opis badżu (np. W WOLSZTYNIE)
+              </label>
+              <input {...inp('about_stats_text')} style={{ ...inputStyle, color: t.muted, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            </div>
+          </div>
+        </div>
+        )}
 
         <div className="pt-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
           <button onClick={handleSave} disabled={saving} className="btn-oxblood">

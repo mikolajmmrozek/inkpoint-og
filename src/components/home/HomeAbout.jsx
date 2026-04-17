@@ -1,7 +1,33 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
+
+const DEFAULTS = {
+  about_heading: 'Sztuka, która',
+  about_highlight_word: 'POZOSTAJE',
+  about_paragraph_1: 'Romans Tattoo to studio tatuażu i piercingu w Wolsztynie, gdzie precyzja spotyka pasję. Nasi artyści łączą doświadczenie z nieustannym dążeniem do perfekcji, tworząc dzieła dopasowane do każdego klienta.',
+  about_paragraph_2: 'Każda sesja zaczyna się od rozmowy. Słuchamy, projektujemy, tworzymy.',
+  about_image_url: 'https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=800&q=85',
+  about_stats_number: '4+',
+  about_stats_text: 'W WOLSZTYNIE',
+};
 
 export default function HomeAbout() {
+  const [data, setData] = useState(DEFAULTS);
+
+  useEffect(() => {
+    base44.entities.SiteSettings.filter({ key: 'about' })
+      .then(res => {
+        if (res.length > 0) {
+          setData({ ...DEFAULTS, ...res[0] });
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const headingLines = data.about_heading.split('\n');
+
   return (
     <section className="py-32 px-8 md:px-16">
       <div className="max-w-screen-xl mx-auto grid md:grid-cols-2 gap-16 md:gap-32 items-center">
@@ -23,16 +49,26 @@ export default function HomeAbout() {
             color: '#F5F0EB',
             letterSpacing: '0.04em',
           }}>
-            Sztuka, która<br />
-            <span style={{ color: '#FF007F' }}>POZOSTAJE</span><br />
+            {headingLines.map((line, i) => (
+              <div key={i}>
+                {line.includes(data.about_highlight_word) ? (
+                  <>
+                    {line.replace(data.about_highlight_word, '')}
+                    <span style={{ color: '#FF007F' }}>{data.about_highlight_word}</span>
+                  </>
+                ) : line}
+                {i < headingLines.length - 1 && <br />}
+              </div>
+            ))}
+            <br />
             na zawsze
           </h2>
           <div className="mt-8 h-px w-12" style={{ background: 'linear-gradient(to right, #FF007F, transparent)', height: '1px' }} />
           <p className="mt-8 text-parchment/60 leading-relaxed" style={{ color: 'rgba(245,240,235,0.6)', fontSize: '16px', lineHeight: 1.8 }}>
-            Romans Tattoo to studio tatuażu i piercingu w Wolsztynie, gdzie precyzja spotyka pasję. Nasi artyści łączą doświadczenie z nieustannym dążeniem do perfekcji, tworząc dzieła dopasowane do każdego klienta.
+            {data.about_paragraph_1}
           </p>
           <p className="mt-4 text-parchment/60 leading-relaxed" style={{ color: 'rgba(245,240,235,0.6)', fontSize: '16px', lineHeight: 1.8 }}>
-            Każda sesja zaczyna się od rozmowy. Słuchamy, projektujemy, tworzymy.
+            {data.about_paragraph_2}
           </p>
           <div className="mt-10">
             <Link to="/artists" className="btn-ghost-parchment">
@@ -51,7 +87,7 @@ export default function HomeAbout() {
         >
           <div className="relative aspect-[3/4] overflow-hidden">
             <img
-              src="https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=800&q=85"
+              src={data.about_image_url}
               alt="Tattoo process"
               className="w-full h-full object-cover liquid-hover"
               style={{ filter: 'brightness(0.7) contrast(1.1)' }}
@@ -63,8 +99,8 @@ export default function HomeAbout() {
           <div className="absolute -bottom-6 -left-6 w-24 h-24" style={{ border: '0.5px solid #FF007F', zIndex: -1 }} />
           {/* Stats badge */}
           <div className="absolute top-8 -right-4 bg-obsidian p-6" style={{ background: '#0A0A0A', border: '0.5px solid #262626' }}>
-            <p className="font-display text-4xl font-700" style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, color: '#FF007F', fontSize: '2.5rem', letterSpacing: '0.05em' }}>4+</p>
-            <p className="text-micro mt-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#C4196B', letterSpacing: '0.15em' }}>W WOLSZTYNIE</p>
+            <p className="font-display text-4xl font-700" style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, color: '#FF007F', fontSize: '2.5rem', letterSpacing: '0.05em' }}>{data.about_stats_number}</p>
+            <p className="text-micro mt-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#C4196B', letterSpacing: '0.15em' }}>{data.about_stats_text}</p>
           </div>
         </motion.div>
       </div>

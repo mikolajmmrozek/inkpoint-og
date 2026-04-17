@@ -4,7 +4,7 @@
   "properties": {
     "key": {
       "type": "string",
-      "description": "Unique key, e.g. 'hero'"
+      "description": "Unique key, e.g. 'hero', 'about'"
     },
     "hero_video_url": {
       "type": "string",
@@ -17,6 +17,34 @@
     "hero_subtext": {
       "type": "string",
       "description": "Subheadline / description"
+    },
+    "about_heading": {
+      "type": "string",
+      "description": "About section main heading"
+    },
+    "about_highlight_word": {
+      "type": "string",
+      "description": "Word to highlight in heading (e.g. POZOSTAJE)"
+    },
+    "about_paragraph_1": {
+      "type": "string",
+      "description": "First paragraph about studio"
+    },
+    "about_paragraph_2": {
+      "type": "string",
+      "description": "Second paragraph about studio"
+    },
+    "about_image_url": {
+      "type": "string",
+      "description": "About section image URL"
+    },
+    "about_stats_number": {
+      "type": "string",
+      "description": "Stats badge number (e.g. 4+)"
+    },
+    "about_stats_text": {
+      "type": "string",
+      "description": "Stats badge label (e.g. W WOLSZTYNIE)"
     }
   },
   "required": [
