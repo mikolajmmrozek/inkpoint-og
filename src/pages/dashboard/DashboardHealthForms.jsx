@@ -228,6 +228,8 @@ export default function DashboardHealthForms() {
     const q = searchQuery.toLowerCase();
     return !q || 
       form.client_name?.toLowerCase().includes(q) ||
+      form.client_first_name?.toLowerCase().includes(q) ||
+      form.client_last_name?.toLowerCase().includes(q) ||
       form.client_email?.toLowerCase().includes(q) ||
       (form.form_filled_date && format(new Date(form.form_filled_date), 'dd.MM.yyyy').includes(q));
   });
