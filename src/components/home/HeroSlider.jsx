@@ -45,7 +45,7 @@ export default function HeroSlider() {
   const specialties = Array.isArray(slide?.specialty) ? slide.specialty.join(' & ') : (slide?.specialty || '');
 
   return (
-    <section className="relative w-full overflow-hidden" style={{ height: '100dvh' }}>
+    <section className="relative w-full overflow-hidden h-screen md:h-[120vh] lg:h-[130vh]">
       {/* Background image */}
       <AnimatePresence mode="wait">
         <motion.div
