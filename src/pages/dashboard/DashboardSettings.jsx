@@ -44,7 +44,9 @@ const DEFAULTS = {
     contact_facebook: 'Romans Tattoo',
     contact_facebook_url: 'https://www.facebook.com/romanstattoo',
     contact_google_maps_url: '',
+    contact_youtube: '',
     contact_youtube_url: '',
+    contact_tiktok: '',
     contact_tiktok_url: '',
   },
   branding: {
@@ -373,13 +375,29 @@ export default function DashboardSettings() {
             </div>
           </div>
 
-          {/* YouTube & TikTok */}
+          {/* YouTube */}
           <div className="mb-8 grid grid-cols-2 gap-8">
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                YouTube nazwa
+              </label>
+              <input {...inp('contact_youtube')} placeholder="np. Romans Tattoo" style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            </div>
             <div>
               <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                 YouTube URL
               </label>
               <input {...inp('contact_youtube_url')} placeholder="https://www.youtube.com/@..." style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            </div>
+          </div>
+
+          {/* TikTok */}
+          <div className="mb-8 grid grid-cols-2 gap-8">
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                TikTok nazwa
+              </label>
+              <input {...inp('contact_tiktok')} placeholder="np. @tattoo.romans" style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
             </div>
             <div>
               <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>

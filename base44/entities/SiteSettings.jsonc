@@ -4,7 +4,7 @@
   "properties": {
     "key": {
       "type": "string",
-      "description": "Unique key, e.g. 'hero', 'about', 'contact', 'branding'"
+      "description": "Unique key"
     },
     "hero_video_url": {
       "type": "string"
@@ -63,9 +63,17 @@
     "contact_facebook_url": {
       "type": "string"
     },
+    "contact_youtube": {
+      "type": "string",
+      "description": "YouTube channel name"
+    },
     "contact_youtube_url": {
       "type": "string",
       "description": "YouTube channel URL"
+    },
+    "contact_tiktok": {
+      "type": "string",
+      "description": "TikTok profile name"
     },
     "contact_tiktok_url": {
       "type": "string",

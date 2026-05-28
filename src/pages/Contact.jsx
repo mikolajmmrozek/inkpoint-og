@@ -20,7 +20,9 @@ const DEFAULTS = {
   contact_facebook: 'Romans Tattoo',
   contact_facebook_url: 'https://www.facebook.com/romanstattoo',
   contact_google_maps_url: '',
+  contact_youtube: '',
   contact_youtube_url: '',
+  contact_tiktok: '',
   contact_tiktok_url: '',
   };
 
@@ -200,8 +202,8 @@ export default function Contact() {
                 { icon: Phone, label: 'TELEFON', value: contactData.contact_phone, link: null },
                 { icon: Instagram, label: 'INSTAGRAM', value: contactData.contact_instagram, link: contactData.contact_instagram_url },
                 { icon: Facebook, label: 'FACEBOOK', value: contactData.contact_facebook, link: contactData.contact_facebook_url },
-                ...(contactData.contact_youtube_url ? [{ icon: Youtube, label: 'YOUTUBE', value: 'YouTube', link: contactData.contact_youtube_url }] : []),
-                ...(contactData.contact_tiktok_url ? [{ icon: TikTokIcon, label: 'TIKTOK', value: 'TikTok', link: contactData.contact_tiktok_url }] : []),
+                ...(contactData.contact_youtube_url ? [{ icon: Youtube, label: 'YOUTUBE', value: contactData.contact_youtube || 'YouTube', link: contactData.contact_youtube_url }] : []),
+                ...(contactData.contact_tiktok_url ? [{ icon: TikTokIcon, label: 'TIKTOK', value: contactData.contact_tiktok || 'TikTok', link: contactData.contact_tiktok_url }] : []),
                 { icon: Clock, label: 'GODZINY', value: contactData.contact_hours, link: null },
               ].map(({ icon: Icon, label, value, link }) => (
                 <div key={label}>
