@@ -292,6 +292,15 @@ export default function HealthFormPage() {
             </div>
           </div>
 
+          <div className="mt-12">
+            <button
+              onClick={() => setStep('personal')}
+              style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', background: 'linear-gradient(135deg, #FF007F 0%, #CC0066 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', width: '100%' }}
+            >
+              {t.next} →
+            </button>
+          </div>
+
           {previousForm && (
             <div style={{ border: '0.5px solid rgba(255,0,127,0.3)', background: 'rgba(255,0,127,0.06)', padding: '20px', marginTop: '24px' }}>
               <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>
