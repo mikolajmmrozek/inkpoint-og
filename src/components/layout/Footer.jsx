@@ -30,7 +30,7 @@ export default function Footer() {
               NAWIGACJA
             </p>
             <div className="space-y-3">
-              {[['/', 'Home'], ['/artists', 'Artyści'], ['/blog', 'Blog'], ['/contact', 'Kontakt']].map(([href, label]) => (
+              {[['/', 'Home'], ['/artists', 'Artyści'], ['/faq', 'FAQ'], ['/blog', 'Blog'], ['/contact', 'Kontakt']].map(([href, label]) => (
                 <Link key={href} to={href} className="block text-parchment/50 hover:text-parchment transition-colors text-sm" style={{ color: 'rgba(245,240,235,0.5)', fontSize: '14px' }}>
                   {label}
                 </Link>
