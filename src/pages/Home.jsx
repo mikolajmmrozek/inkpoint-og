@@ -98,6 +98,8 @@ export default function Home() {
                 alt={`Portfolio ${i + 1}`}
                 className="w-full h-full object-cover liquid-hover"
                 style={{ filter: 'brightness(0.65) contrast(1.15)' }}
+                loading="lazy"
+                decoding="async"
               />
             </motion.div>
           ))}
