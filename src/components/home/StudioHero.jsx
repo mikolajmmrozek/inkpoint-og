@@ -22,7 +22,7 @@ export default function StudioHero() {
   const sublines = (settings.hero_subtext || DEFAULTS.hero_subtext).split('\n');
 
   return (
-    <section className="relative w-full overflow-hidden flex items-center" style={{ height: '100dvh' }}>
+    <section className="relative w-full flex items-start" style={{ minHeight: '100dvh' }}>
       {/* Video background */}
       {settings.hero_video_url ? (
         <video
