@@ -74,7 +74,11 @@ export default function DashboardBookings() {
   };
 
   const handleDayClick = (day) => {
-    setSelectedDate(day);
+    if (selectedDate && isSameDay(selectedDate, day)) {
+      setSelectedDate(null);
+    } else {
+      setSelectedDate(day);
+    }
     setSelected(null);
   };
 
