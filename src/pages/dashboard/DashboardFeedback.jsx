@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
@@ -52,11 +52,13 @@ export default function DashboardFeedback() {
   const { data: configData = [] } = useQuery({
     queryKey: ['feedbackConfig'],
     queryFn: () => base44.entities.FeedbackSurveyConfig.filter({ key: 'default' }),
-    onSuccess: (data) => {
-      if (data.length > 0 && !configForm) setConfigForm({ ...DEFAULT_CONFIG, ...data[0] });
-      else if (data.length === 0 && !configForm) setConfigForm({ ...DEFAULT_CONFIG });
-    },
   });
+
+  useEffect(() => {
+    if (configForm !== null) return;
+    if (configData.length > 0) setConfigForm({ ...DEFAULT_CONFIG, ...configData[0] });
+    else setConfigForm({ ...DEFAULT_CONFIG });
+  }, [configData]);
 
   const config = configData.length > 0 ? { ...DEFAULT_CONFIG, ...configData[0] } : DEFAULT_CONFIG;
 
