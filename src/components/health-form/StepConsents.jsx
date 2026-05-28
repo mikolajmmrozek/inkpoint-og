@@ -54,7 +54,7 @@ export default function StepConsents({ form, setField, t, showErrors }) {
   return (
     <div>
       {consents.map(c => (
-        <ConsentBlock key={c.field_key} title={c.label} text={c.label} fieldKey={c.field_key} required={c.required} form={form} setField={setField} showErrors={showErrors} />
+        <ConsentBlock key={c.field_key} title={c.label} text={c.description || c.label} fieldKey={c.field_key} required={c.required} form={form} setField={setField} showErrors={showErrors} />
       ))}
     </div>
   );
