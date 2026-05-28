@@ -19,6 +19,7 @@ export default function HealthFormPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [useQuickRefresh, setUseQuickRefresh] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
 
   const [form, setForm] = useState({
     booking_id: '',
@@ -351,11 +352,11 @@ export default function HealthFormPage() {
 
         {/* Form */}
         <form className="mb-12" onSubmit={e => e.preventDefault()}>
-          {step === 'personal' && <StepPersonal form={form} setField={setField} t={t} inputStyle={inputStyle} />}
-          {step === 'medical' && <StepMedical form={form} setField={setField} t={t} inputStyle={inputStyle} />}
-          {step === 'consents' && <StepConsents form={form} setField={setField} t={t} />}
-          {step === 'signature' && <SignatureCanvas value={form.client_signature} onChange={v => setField('client_signature', v)} label={t.signatureTitle} clearLabel={t.clearSignature} />}
-          {step === 'guardian' && <StepGuardian guardian={guardian} setGuardianField={setGuardianField} form={form} t={t} inputStyle={inputStyle} />}
+          {step === 'personal' && <StepPersonal form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} />}
+          {step === 'medical' && <StepMedical form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} />}
+          {step === 'consents' && <StepConsents form={form} setField={setField} t={t} showErrors={showErrors} />}
+          {step === 'signature' && <SignatureCanvas value={form.client_signature} onChange={v => setField('client_signature', v)} label={t.signatureTitle} clearLabel={t.clearSignature} showErrors={showErrors} />}
+          {step === 'guardian' && <StepGuardian guardian={guardian} setGuardianField={setGuardianField} form={form} t={t} inputStyle={inputStyle} showErrors={showErrors} />}
 
           {/* Navigation */}
           <div className="flex gap-4 mt-12">
@@ -372,9 +373,15 @@ export default function HealthFormPage() {
             {currentStepIndex < steps.length - 1 ? (
               <button
                 type="button"
-                onClick={() => canProceed() && setStep(steps[currentStepIndex + 1])}
-                disabled={!canProceed()}
-                style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', background: 'linear-gradient(135deg, #FF007F 0%, #CC0066 100%)', color: '#F5F0EB', border: 'none', cursor: canProceed() ? 'pointer' : 'not-allowed', flex: 1, opacity: canProceed() ? 1 : 0.5 }}
+                onClick={() => {
+                  if (canProceed()) {
+                    setShowErrors(false);
+                    setStep(steps[currentStepIndex + 1]);
+                  } else {
+                    setShowErrors(true);
+                  }
+                }}
+                style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', background: 'linear-gradient(135deg, #FF007F 0%, #CC0066 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', flex: 1, opacity: canProceed() ? 1 : 0.5 }}
               >
                 {t.next} →
               </button>

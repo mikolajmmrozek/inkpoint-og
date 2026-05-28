@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 
-export default function SignatureCanvas({ value, onChange, label, clearLabel }) {
+export default function SignatureCanvas({ value, onChange, label, clearLabel, showErrors }) {
   const canvasRef = useRef(null);
   const drawing = useRef(false);
   const [isEmpty, setIsEmpty] = useState(!value);
@@ -68,11 +68,11 @@ export default function SignatureCanvas({ value, onChange, label, clearLabel }) 
   return (
     <div>
       {label && (
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.5)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>
-          {label}
-        </p>
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: showErrors && !value ? '#FF007F' : 'rgba(245,240,235,0.5)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>
+            {label} * {showErrors && !value && '(wymagane)'}
+          </p>
       )}
-      <div style={{ border: '0.5px solid #262626', background: '#111', position: 'relative' }}>
+      <div style={{ border: showErrors && !value ? '0.5px solid #FF007F' : '0.5px solid #262626', background: '#111', position: 'relative' }}>
         <canvas
           ref={canvasRef}
           width={600}

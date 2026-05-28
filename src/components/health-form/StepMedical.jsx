@@ -26,7 +26,7 @@ function YesNoRow({ label, fieldKey, descKey, form, setField, t, inputStyle }) {
   );
 }
 
-export default function StepMedical({ form, setField, t, inputStyle }) {
+export default function StepMedical({ form, setField, t, inputStyle, showErrors }) {
   const fields = [
     { label: t.heart, fieldKey: 'has_heart_condition', descKey: 'heart_condition_description' },
     { label: t.kidney, fieldKey: 'has_kidney_condition', descKey: 'kidney_condition_description' },
@@ -54,7 +54,7 @@ export default function StepMedical({ form, setField, t, inputStyle }) {
       <p style={{ color: 'rgba(245,240,235,0.5)', fontSize: '13px', marginBottom: '20px', lineHeight: 1.7 }}>{t.medicalInfo}</p>
       <div>
         {fields.map(f => (
-          <YesNoRow key={f.fieldKey} {...f} form={form} setField={setField} t={t} inputStyle={inputStyle} />
+          <YesNoRow key={f.fieldKey} {...f} form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} />
         ))}
       </div>
     </div>
