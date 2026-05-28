@@ -102,7 +102,7 @@ export default function ArtistProfile() {
                     DOŚWIADCZENIE
                   </p>
                   <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2rem', fontWeight: 400, color: '#F5F0EB' }}>
-                    {artist.years_experience} lat
+                    {artist.years_experience} {artist.years_experience === 1 ? 'rok' : artist.years_experience === 2 ? 'lata' : 'lat'}
                   </p>
                 </div>
               )}
