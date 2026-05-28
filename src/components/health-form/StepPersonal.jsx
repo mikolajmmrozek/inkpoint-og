@@ -1,3 +1,5 @@
+import DatePickerCustom from './DatePickerCustom';
+
 export default function StepPersonal({ form, setField, t, inputStyle, showErrors }) {
   const isMinor = form.date_of_birth
     ? new Date().getFullYear() - new Date(form.date_of_birth).getFullYear() < 18
@@ -17,8 +19,7 @@ export default function StepPersonal({ form, setField, t, inputStyle, showErrors
       </div>
 
       <div>
-        <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: showErrors && !form.date_of_birth ? '#FF007F' : 'rgba(245,240,235,0.5)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>{t.dateOfBirth} * {showErrors && !form.date_of_birth && '(wymagane)'}</label>
-        <input type="date" style={{ ...inputStyle, colorScheme: 'dark', borderBottomColor: showErrors && !form.date_of_birth ? '#FF007F' : '#262626' }} value={form.date_of_birth || ''} onChange={e => setField('date_of_birth', e.target.value)} />
+        <DatePickerCustom value={form.date_of_birth} onChange={v => setField('date_of_birth', v)} showErrors={showErrors} t={t} />
         {isMinor && (
           <div className="mt-2 px-3 py-2 flex items-center gap-2" style={{ background: 'rgba(255,0,127,0.08)', border: '0.5px solid rgba(255,0,127,0.3)' }}>
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>⚠ {t.minorWarning}</p>
