@@ -7,96 +7,81 @@
       "description": "Unique key, e.g. 'hero', 'about', 'contact', 'branding'"
     },
     "hero_video_url": {
-      "type": "string",
-      "description": "Looping background video URL"
+      "type": "string"
     },
     "hero_tagline": {
-      "type": "string",
-      "description": "Main headline over the video"
+      "type": "string"
     },
     "hero_subtext": {
-      "type": "string",
-      "description": "Subheadline / description"
+      "type": "string"
     },
     "about_heading": {
-      "type": "string",
-      "description": "About section main heading"
+      "type": "string"
     },
     "about_highlight_word": {
-      "type": "string",
-      "description": "Word to highlight in heading (e.g. POZOSTAJE)"
+      "type": "string"
     },
     "about_paragraph_1": {
-      "type": "string",
-      "description": "First paragraph about studio"
+      "type": "string"
     },
     "about_paragraph_2": {
-      "type": "string",
-      "description": "Second paragraph about studio"
+      "type": "string"
     },
     "about_image_url": {
-      "type": "string",
-      "description": "About section image URL"
+      "type": "string"
     },
     "about_stats_number": {
-      "type": "string",
-      "description": "Stats badge number (e.g. 4+)"
+      "type": "string"
     },
     "about_stats_text": {
-      "type": "string",
-      "description": "Stats badge label (e.g. W WOLSZTYNIE)"
+      "type": "string"
     },
     "contact_email": {
-      "type": "string",
-      "description": "Main contact email address"
+      "type": "string"
     },
     "contact_address_street": {
-      "type": "string",
-      "description": "Street address"
+      "type": "string"
     },
     "contact_address_city": {
-      "type": "string",
-      "description": "City and postal code"
+      "type": "string"
     },
     "contact_phone": {
-      "type": "string",
-      "description": "Contact phone number"
+      "type": "string"
     },
     "contact_hours": {
-      "type": "string",
-      "description": "Business hours"
+      "type": "string"
     },
     "contact_instagram": {
-      "type": "string",
-      "description": "Instagram handle"
+      "type": "string"
     },
     "contact_instagram_url": {
-      "type": "string",
-      "description": "Instagram profile URL"
+      "type": "string"
     },
     "contact_facebook": {
-      "type": "string",
-      "description": "Facebook page name"
+      "type": "string"
     },
     "contact_facebook_url": {
+      "type": "string"
+    },
+    "contact_youtube_url": {
       "type": "string",
-      "description": "Facebook page URL"
+      "description": "YouTube channel URL"
+    },
+    "contact_tiktok_url": {
+      "type": "string",
+      "description": "TikTok profile URL"
     },
     "contact_google_maps_url": {
-      "type": "string",
-      "description": "Google Maps link"
+      "type": "string"
     },
     "site_logo_url": {
-      "type": "string",
-      "description": "Site logo image URL"
+      "type": "string"
     },
     "app_icon_url": {
-      "type": "string",
-      "description": "Application icon URL"
+      "type": "string"
     },
     "app_description": {
-      "type": "string",
-      "description": "Short application description for meta tags"
+      "type": "string"
     }
   },
   "required": [

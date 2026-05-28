@@ -44,6 +44,8 @@ const DEFAULTS = {
     contact_facebook: 'Romans Tattoo',
     contact_facebook_url: 'https://www.facebook.com/romanstattoo',
     contact_google_maps_url: '',
+    contact_youtube_url: '',
+    contact_tiktok_url: '',
   },
   branding: {
     key: 'branding',
@@ -368,6 +370,22 @@ export default function DashboardSettings() {
                 Facebook URL
               </label>
               <input {...inp('contact_facebook_url')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            </div>
+          </div>
+
+          {/* YouTube & TikTok */}
+          <div className="mb-8 grid grid-cols-2 gap-8">
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                YouTube URL
+              </label>
+              <input {...inp('contact_youtube_url')} placeholder="https://www.youtube.com/@..." style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            </div>
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                TikTok URL
+              </label>
+              <input {...inp('contact_tiktok_url')} placeholder="https://www.tiktok.com/@..." style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
             </div>
           </div>
 

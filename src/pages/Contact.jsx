@@ -2,7 +2,13 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import PageLayout from '../components/layout/PageLayout';
-import { MapPin, Phone, Clock, Instagram, Facebook } from 'lucide-react';
+import { MapPin, Phone, Clock, Instagram, Facebook, Youtube } from 'lucide-react';
+
+const TikTokIcon = ({ size = 12 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.27 8.27 0 0 0 4.84 1.55V6.79a4.85 4.85 0 0 1-1.07-.1z"/>
+  </svg>
+);
 
 const DEFAULTS = {
   contact_address_street: 'ul. Wschowska 30',
@@ -14,7 +20,9 @@ const DEFAULTS = {
   contact_facebook: 'Romans Tattoo',
   contact_facebook_url: 'https://www.facebook.com/romanstattoo',
   contact_google_maps_url: '',
-};
+  contact_youtube_url: '',
+  contact_tiktok_url: '',
+  };
 
 export default function Contact() {
   const [contactData, setContactData] = useState(DEFAULTS);
@@ -192,6 +200,8 @@ export default function Contact() {
                 { icon: Phone, label: 'TELEFON', value: contactData.contact_phone, link: null },
                 { icon: Instagram, label: 'INSTAGRAM', value: contactData.contact_instagram, link: contactData.contact_instagram_url },
                 { icon: Facebook, label: 'FACEBOOK', value: contactData.contact_facebook, link: contactData.contact_facebook_url },
+                ...(contactData.contact_youtube_url ? [{ icon: Youtube, label: 'YOUTUBE', value: 'YouTube', link: contactData.contact_youtube_url }] : []),
+                ...(contactData.contact_tiktok_url ? [{ icon: TikTokIcon, label: 'TIKTOK', value: 'TikTok', link: contactData.contact_tiktok_url }] : []),
                 { icon: Clock, label: 'GODZINY', value: contactData.contact_hours, link: null },
               ].map(({ icon: Icon, label, value, link }) => (
                 <div key={label}>
