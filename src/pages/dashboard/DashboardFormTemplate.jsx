@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
-import { Plus, Trash2, X } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 
 const DEFAULT_MEDICAL_FIELDS = [
   { field_key: 'has_heart_condition', label: 'Choroby serca', required: false, has_description: true },
@@ -25,6 +25,18 @@ const DEFAULT_MEDICAL_FIELDS = [
   { field_key: 'had_tattoo_piercing_before', label: 'Poprzednie tatuaże / piercинги', required: false, has_description: true },
 ];
 
+const DEFAULT_PROCEDURE_QUESTIONS = [
+  { field_key: 'procedure_q1', label: 'Pytanie 1' },
+  { field_key: 'procedure_q2', label: 'Pytanie 2' },
+];
+
+const DEFAULT_DECLARATION = {
+  content: 'Oświadczam, że zapoznałem(a) się ze wszystkimi informacjami i powyższymi pytaniami dotyczącymi zabiegu tatuażu/piercingu.',
+  field_key: 'declaration_of_will',
+  label: 'Zaakceptuję powyższe informacje',
+  required: true
+};
+
 const DEFAULT_CONSENT_FIELDS = [
   { field_key: 'consent_tattoo_piercing', label: 'Zgoda na zabieg', description: 'Oświadczam, że dobrowolnie wyrażam zgodę na wykonanie zabiegu tatuażu/piercingu zgodnie z moim życzeniem. Potwierdzam, że zapoznałem(a) się z procedurą, ryzykami i możliwymi powikłaniami oraz mam świadomość konsekwencji zdrowotnych związanych z tym zabiegiem.', required: true },
   { field_key: 'confirm_sober', label: 'Trzeźwość', description: 'Potwierdzam, że w momencie podpisania tej deklaracji nie jestem pod wpływem alkoholu, narkotyków, leków psychoaktywnych lub innych substancji mogących wpłynąć na moją zdolność do podejmowania świadomych decyzji. Rozumiem, że zabieg będzie wykonany wyłącznie w stanie pełnej trzeźwości.', required: true },
@@ -40,6 +52,8 @@ export default function DashboardFormTemplate() {
 
   const [template, setTemplate] = useState(null);
   const [medicalFields, setMedicalFields] = useState(DEFAULT_MEDICAL_FIELDS);
+  const [procedureQuestions, setProcedureQuestions] = useState(DEFAULT_PROCEDURE_QUESTIONS);
+  const [declaration, setDeclaration] = useState(DEFAULT_DECLARATION);
   const [consentFields, setConsentFields] = useState(DEFAULT_CONSENT_FIELDS);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -51,6 +65,8 @@ export default function DashboardFormTemplate() {
           const t = data[0];
           setTemplate(t);
           setMedicalFields(t.medical_fields || DEFAULT_MEDICAL_FIELDS);
+          setProcedureQuestions(t.procedure_questions || DEFAULT_PROCEDURE_QUESTIONS);
+          setDeclaration(t.declaration_of_will || DEFAULT_DECLARATION);
           setConsentFields(t.consent_fields || DEFAULT_CONSENT_FIELDS);
         }
       })
@@ -71,6 +87,20 @@ export default function DashboardFormTemplate() {
     setMedicalFields(updated);
   };
 
+  const addProcedureQuestion = () => {
+    setProcedureQuestions([...procedureQuestions, { field_key: `procedure_q_${Date.now()}`, label: '' }]);
+  };
+
+  const removeProcedureQuestion = (index) => {
+    setProcedureQuestions(procedureQuestions.filter((_, i) => i !== index));
+  };
+
+  const updateProcedureQuestion = (index, key, value) => {
+    const updated = [...procedureQuestions];
+    updated[index][key] = value;
+    setProcedureQuestions(updated);
+  };
+
   const addConsentField = () => {
     setConsentFields([...consentFields, { field_key: `consent_${Date.now()}`, label: '', description: '', required: false }]);
   };
@@ -88,7 +118,13 @@ export default function DashboardFormTemplate() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const data = { key: 'default', medical_fields: medicalFields, consent_fields: consentFields };
+      const data = {
+        key: 'default',
+        medical_fields: medicalFields,
+        procedure_questions: procedureQuestions,
+        declaration_of_will: declaration,
+        consent_fields: consentFields
+      };
       
       if (template?.id) {
         await base44.entities.HealthFormTemplate.update(template.id, data);
@@ -178,6 +214,66 @@ export default function DashboardFormTemplate() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Procedure questions */}
+        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '20px' }}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em' }}>Pytania o Zabieg</h3>
+            <button onClick={addProcedureQuestion} className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: 'pointer' }}>
+              <Plus size={12} /> DODAJ
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            {procedureQuestions.map((field, i) => (
+              <div key={i} style={{ border: `0.5px solid ${t.border}`, padding: '12px', background: 'rgba(255,0,127,0.02)' }}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1">
+                    <label style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Pytanie</label>
+                    <input
+                      type="text"
+                      value={field.label}
+                      onChange={e => updateProcedureQuestion(i, 'label', e.target.value)}
+                      placeholder="Opisz pytanie dotyczące zabiegu"
+                      style={inputStyle}
+                    />
+                  </div>
+                  <button onClick={() => removeProcedureQuestion(i)} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Declaration of will */}
+        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '20px' }}>
+          <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em', marginBottom: '16px' }}>Oświadczenie Woli</h3>
+          <div style={{ border: `0.5px solid ${t.border}`, padding: '12px', background: 'rgba(255,0,127,0.02)' }}>
+            <div className="space-y-3">
+              <div>
+                <label style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Treść oświadczenia</label>
+                <textarea
+                  value={declaration.content || ''}
+                  onChange={e => setDeclaration({ ...declaration, content: e.target.value })}
+                  placeholder="Treść oświadczenia woli"
+                  style={{ ...inputStyle, resize: 'none', minHeight: '80px' }}
+                />
+              </div>
+              <div>
+                <label style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Etykieta zgody</label>
+                <input
+                  type="text"
+                  value={declaration.label || ''}
+                  onChange={e => setDeclaration({ ...declaration, label: e.target.value })}
+                  placeholder="Np. Zaakceptuję powyższe informacje"
+                  style={inputStyle}
+                />
+              </div>
+            </div>
           </div>
         </div>
 

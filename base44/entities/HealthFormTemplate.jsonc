@@ -30,6 +30,44 @@
       },
       "description": "Array of medical condition fields"
     },
+    "procedure_questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "field_key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "description": "Array of procedure-related questions"
+    },
+    "declaration_of_will": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string"
+        },
+        "field_key": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "description": "Declaration of will content and field"
+    },
     "consent_fields": {
       "type": "array",
       "items": {
