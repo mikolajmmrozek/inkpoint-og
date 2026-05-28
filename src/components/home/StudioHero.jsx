@@ -49,7 +49,7 @@ export default function StudioHero() {
       <div className="absolute right-0 top-1/2 w-px h-40 -translate-y-1/2" style={{ background: 'linear-gradient(to bottom, transparent, #FF007F, transparent)' }} />
 
       {/* Content */}
-      <div className="relative z-10 w-full px-8 md:px-16 lg:px-24 flex flex-col items-start justify-center h-full pt-24 pb-20">
+      <div className="relative z-10 w-full px-8 md:px-16 lg:px-24 flex flex-col items-start justify-center pt-24 pb-40">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
