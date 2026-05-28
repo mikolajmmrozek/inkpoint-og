@@ -26,10 +26,10 @@ const DEFAULT_MEDICAL_FIELDS = [
 ];
 
 const DEFAULT_CONSENT_FIELDS = [
-  { field_key: 'consent_tattoo_piercing', label: 'Zgoda na zabieg', description: 'Oświadczam, że chcę poddać się opisanemu wyżej zabiegowi tatuażu/piercingu w pełni świadom ryzyka i możliwych powikłań.', required: true },
-  { field_key: 'confirm_sober', label: 'Trzeźwość', description: 'Potwierdzam, że nie jestem pod wpływem alkoholu ani narkotyków i jestem w pełni świadomy konsekwencji zabiegu.', required: true },
-  { field_key: 'consent_image_use', label: 'Zgoda na wizerunek', description: 'Wyrażam zgodę na fotografowanie wyniku zabiegu dla celów portfolio i dokumentacji.', required: false },
-  { field_key: 'confirm_regulations_read', label: 'Regulamin', description: 'Potwierdzam, że zapoznałem się z regulaminem studia i zasadami pielęgnacji po zabiegu.', required: true },
+  { field_key: 'consent_tattoo_piercing', label: 'Zgoda na zabieg', description: 'Oświadczam, że dobrowolnie wyrażam zgodę na wykonanie zabiegu tatuażu/piercingu zgodnie z moim życzeniem. Potwierdzam, że zapoznałem(a) się z procedurą, ryzykami i możliwymi powikłaniami oraz mam świadomość konsekwencji zdrowotnych związanych z tym zabiegiem.', required: true },
+  { field_key: 'confirm_sober', label: 'Trzeźwość', description: 'Potwierdzam, że w momencie podpisania tej deklaracji nie jestem pod wpływem alkoholu, narkotyków, leków psychoaktywnych lub innych substancji mogących wpłynąć na moją zdolność do podejmowania świadomych decyzji. Rozumiem, że zabieg będzie wykonany wyłącznie w stanie pełnej trzeźwości.', required: true },
+  { field_key: 'consent_image_use', label: 'Zgoda na fotografowanie', description: 'Wyrażam dobrowolną zgodę na fotografowanie/filmowanie wyniku zabiegu w celu dokumentacji artystycznej, analizy jakości pracy oraz promowania portfolio studia, z zaznaczeniem, że dane osobowe nie będą ujawniane bez mojej dodatkowej pisemnej zgody.', required: false },
+  { field_key: 'confirm_regulations_read', label: 'Zasady pielęgnacji i regulamin', description: 'Potwierdzam, że zapoznałem(a) się w pełni z instrukcją pielęgnacji pooperacyjnej, regulaminem studia oraz polityką reklamacji. Zobowiązuję się do przestrzegania wszystkich zaleceń medycznych i higienicznych przez okres wskazany przez personel studia.', required: true },
 ];
 
 export default function DashboardFormTemplate() {
