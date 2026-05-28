@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { GripVertical } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { Plus, Edit, Trash2, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -28,9 +30,19 @@ export default function DashboardArtists() {
   const [uploading, setUploading] = useState(false);
 
   const load = async () => {
-    const data = await base44.entities.Artist.list('-created_date', 20);
-    setArtists(data);
+    const data = await base44.entities.Artist.list('-created_date', 50);
+    const sorted = [...data].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+    setArtists(sorted);
     setLoading(false);
+  };
+
+  const handleDragEnd = async ({ source, destination }) => {
+    if (!destination || destination.index === source.index) return;
+    const next = [...artists];
+    const [moved] = next.splice(source.index, 1);
+    next.splice(destination.index, 0, moved);
+    setArtists(next);
+    await Promise.all(next.map((a, idx) => base44.entities.Artist.update(a.id, { order: idx })));
   };
 
   useEffect(() => { load(); }, []);
@@ -212,33 +224,48 @@ export default function DashboardArtists() {
           <div className="w-8 h-px animate-pulse" style={{ background: '#8B1A1A' }} />
         </div>
       ) : (
-        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-          {artists.length === 0 ? (
-            <div className="py-20 text-center">
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK ARTYSTÓW</p>
-            </div>
-          ) : artists.map((a, i) => (
-            <div key={a.id} className="flex items-center justify-between p-4 transition-colors" style={{ borderBottom: i < artists.length - 1 ? `0.5px solid ${t.border}` : 'none' }}>
-              <div className="flex items-center gap-4">
-                {a.photo_url && <img src={a.photo_url} alt="" className="w-10 h-10 object-cover" />}
-                <div>
-                  <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{a.name}</p>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
-                    {(a.specialty || []).join(', ')} · {a.years_experience} lat
-                  </p>
-                </div>
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="artists">
+            {(provided) => (
+              <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }} ref={provided.innerRef} {...provided.droppableProps}>
+                {artists.length === 0 ? (
+                  <div className="py-20 text-center">
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK ARTYSTÓW</p>
+                  </div>
+                ) : artists.map((a, i) => (
+                  <Draggable key={a.id} draggableId={a.id} index={i}>
+                    {(p) => (
+                      <div ref={p.innerRef} {...p.draggableProps} {...p.dragHandleProps}
+                        className="flex items-center justify-between p-4 transition-colors select-none cursor-grab active:cursor-grabbing"
+                        style={{ ...p.draggableProps.style, borderBottom: i < artists.length - 1 ? `0.5px solid ${t.border}` : 'none', background: t.bg }}
+                      >
+                        <div className="flex items-center gap-4">
+                          <GripVertical size={14} style={{ color: t.muted, flexShrink: 0 }} />
+                          {a.photo_url && <img src={a.photo_url} alt="" className="w-10 h-10 object-cover" />}
+                          <div>
+                            <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{a.name}</p>
+                            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
+                              {(a.specialty || []).join(', ')} · {a.years_experience} lat
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <button onClick={() => openEdit(a)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
+                            <Edit size={14} />
+                          </button>
+                          <button onClick={() => deleteArtist(a.id)} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer' }}>
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
               </div>
-              <div className="flex items-center gap-3">
-                <button onClick={() => openEdit(a)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
-                  <Edit size={14} />
-                </button>
-                <button onClick={() => deleteArtist(a.id)} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer' }}>
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       )}
     </div>
   );
