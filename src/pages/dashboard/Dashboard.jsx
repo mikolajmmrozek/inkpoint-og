@@ -16,6 +16,7 @@ const NAV = [
   { path: '/dashboard/health-forms', label: 'Dokumenty', icon: FileText },
   { path: '/dashboard/clients', label: 'Klienci', icon: UserCircle },
   { path: '/dashboard/documents', label: 'Zalecenia', icon: Settings },
+  { path: '/dashboard/faq', label: 'FAQ', icon: MessageSquare },
   { path: '/dashboard/stats', label: 'Statystyki', icon: PieChart },
   { path: '/dashboard/settings', label: 'Ustawienia', icon: Settings },
 ];

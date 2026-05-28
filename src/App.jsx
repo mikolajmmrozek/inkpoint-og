@@ -16,6 +16,7 @@ import Contact from './pages/Contact';
 import Booking from './pages/Booking';
 import HealthFormPage from './pages/HealthFormPage';
 import TermsAndConditions from './pages/TermsAndConditions';
+import FAQ from './pages/FAQ';
 
 // Dashboard
 import Dashboard from './pages/dashboard/Dashboard';
@@ -31,6 +32,7 @@ import DashboardStats from './pages/dashboard/DashboardStats';
 import DashboardFormTemplate from './pages/dashboard/DashboardFormTemplate';
 import DashboardTermsEditor from './pages/dashboard/DashboardTermsEditor';
 import DashboardDocuments from './pages/dashboard/DashboardDocuments';
+import DashboardFAQ from './pages/dashboard/DashboardFAQ';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -64,6 +66,7 @@ const AuthenticatedApp = () => {
       <Route path="/booking" element={<Booking />} />
       <Route path="/health-form" element={<HealthFormPage />} />
       <Route path="/terms" element={<TermsAndConditions />} />
+      <Route path="/faq" element={<FAQ />} />
 
       {/* Dashboard (admin only) */}
       <Route path="/dashboard" element={<Dashboard />}>
@@ -79,6 +82,7 @@ const AuthenticatedApp = () => {
         <Route path="form-template" element={<DashboardFormTemplate />} />
         <Route path="terms-editor" element={<DashboardTermsEditor />} />
         <Route path="documents" element={<DashboardDocuments />} />
+        <Route path="faq" element={<DashboardFAQ />} />
       </Route>
 
       <Route path="*" element={<PageNotFound />} />

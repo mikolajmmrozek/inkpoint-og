@@ -29,7 +29,7 @@ export default function HomeAbout() {
   const headingLines = data.about_heading.split('\n');
 
   return (
-    <section className="py-32 px-8 md:px-16">
+    <section className="py-16 px-8 md:px-16">
       <div className="max-w-screen-xl mx-auto grid md:grid-cols-2 gap-16 md:gap-32 items-center">
         {/* Text side */}
         <motion.div
@@ -65,8 +65,8 @@ export default function HomeAbout() {
             {data.about_paragraph_2}
           </p>
           <div className="mt-10">
-            <Link to="/artists" className="btn-ghost-parchment">
-              Poznaj Zespół
+            <Link to="/faq" className="btn-ghost-parchment">
+              Najczęstsze Pytania
             </Link>
           </div>
         </motion.div>

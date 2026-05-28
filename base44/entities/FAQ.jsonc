@@ -1,0 +1,23 @@
+{
+  "name": "FAQ",
+  "type": "object",
+  "properties": {
+    "question": {
+      "type": "string",
+      "description": "Pytanie"
+    },
+    "answer": {
+      "type": "string",
+      "description": "Odpowied\u017a"
+    },
+    "order": {
+      "type": "number",
+      "default": 0,
+      "description": "Kolejno\u015b\u0107 wy\u015bwietlania"
+    }
+  },
+  "required": [
+    "question",
+    "answer"
+  ]
+}
