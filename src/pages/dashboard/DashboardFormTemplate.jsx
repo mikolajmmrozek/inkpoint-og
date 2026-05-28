@@ -14,6 +14,15 @@ const DEFAULT_MEDICAL_FIELDS = [
   { field_key: 'has_diabetes', label: 'Cukrzyca', required: false, has_description: true },
   { field_key: 'has_hemophilia', label: 'Hemofilia', required: false, has_description: true },
   { field_key: 'has_allergies', label: 'Alergie', required: false, has_description: true },
+  { field_key: 'has_inflammatory_conditions', label: 'Schorzenia zapalne', required: false, has_description: true },
+  { field_key: 'has_skin_conditions', label: 'Schorzenia skóry', required: false, has_description: true },
+  { field_key: 'has_mental_conditions', label: 'Schorzenia psychiczne', required: false, has_description: true },
+  { field_key: 'is_pregnant', label: 'Ciąża', required: false, has_description: false },
+  { field_key: 'is_under_alcohol_drug_influence', label: 'Wpływ alkoholu/narkotyków', required: false, has_description: false },
+  { field_key: 'is_allergic_to_metals_dyes_latex', label: 'Alergia na metale/barwniki/lateks', required: false, has_description: true },
+  { field_key: 'has_blood_clotting_disorders', label: 'Zaburzenia krzepnięcia krwi', required: false, has_description: true },
+  { field_key: 'has_scars_skin_changes', label: 'Blizny / zmiany na skórze', required: false, has_description: true },
+  { field_key: 'had_tattoo_piercing_before', label: 'Poprzednie tatuaże / piercинги', required: false, has_description: true },
 ];
 
 const DEFAULT_CONSENT_FIELDS = [
