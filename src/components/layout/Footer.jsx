@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Instagram, Facebook } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -15,10 +16,12 @@ export default function Footer() {
               Wolsztyn, Polska.
             </p>
             <div className="flex gap-4 mt-6">
-              <a href="https://www.instagram.com/tattoo.romans/" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(245,240,235,0.4)', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              <a href="https://www.instagram.com/tattoo.romans/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 transition-opacity hover:opacity-80" style={{ color: '#FF007F', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                <Instagram size={13} />
                 Instagram
               </a>
-              <a href="https://www.facebook.com/tattoo.romans.wolsztyn" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(245,240,235,0.4)', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              <a href="https://www.facebook.com/tattoo.romans.wolsztyn" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 transition-opacity hover:opacity-80" style={{ color: '#FF007F', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                <Facebook size={13} />
                 Facebook
               </a>
             </div>
