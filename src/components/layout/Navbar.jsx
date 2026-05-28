@@ -17,8 +17,8 @@ export default function Navbar() {
   const navLinks = [
     { href: '/', label: 'Home' },
     { href: '/artists', label: 'Artyści' },
-    { href: '/faq', label: 'FAQ' },
     { href: '/blog', label: 'Blog' },
+    { href: '/faq', label: 'FAQ' },
     { href: '/contact', label: 'Kontakt' },
   ];
 
