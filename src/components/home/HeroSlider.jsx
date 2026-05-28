@@ -76,7 +76,7 @@ export default function HeroSlider() {
       <div className="absolute bottom-0 left-0 right-0 h-64" style={{ background: 'linear-gradient(to top, rgba(255,0,127,0.12) 0%, transparent 100%)' }} />
 
       {/* Content */}
-      <div className="relative h-full flex flex-col justify-center px-8 md:px-16 lg:px-24">
+      <div className="relative h-full flex flex-col justify-center px-8 md:px-16 lg:px-24 pb-24 md:pb-16">
         <AnimatePresence mode="wait">
           <motion.div
             key={current}
