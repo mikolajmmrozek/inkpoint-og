@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 export default function HomeCTA() {
   return (
-    <section className="py-32 px-8 md:px-16 relative overflow-hidden">
+    <section className="py-16 px-8 md:px-16 relative overflow-hidden">
       {/* Fuchsia gradient background */}
       <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(255,0,127,0.08) 0%, rgba(10,10,10,0) 50%, rgba(255,0,127,0.05) 100%)' }} />
       <div className="absolute bottom-0 left-0 right-0 h-1" style={{ background: 'linear-gradient(to right, transparent, #FF007F, transparent)' }} />
