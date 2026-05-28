@@ -20,7 +20,12 @@ export default function HeroSlider() {
 
   useEffect(() => {
     base44.entities.Artist.filter({ is_active: true })
-      .then(data => { if (data.length > 0) setSlides(data); })
+      .then(data => {
+        if (data.length > 0) {
+          const sorted = [...data].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+          setSlides(sorted);
+        }
+      })
       .catch(() => {});
   }, []);
 

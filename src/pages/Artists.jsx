@@ -53,8 +53,15 @@ export default function Artists() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.entities.Artist.list('-created_date', 20)
-      .then(data => setArtists(data.length > 0 ? data : PLACEHOLDER_ARTISTS))
+    base44.entities.Artist.list('-created_date', 50)
+      .then(data => {
+        if (data.length > 0) {
+          const sorted = [...data].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+          setArtists(sorted);
+        } else {
+          setArtists(PLACEHOLDER_ARTISTS);
+        }
+      })
       .catch(() => setArtists(PLACEHOLDER_ARTISTS))
       .finally(() => setLoading(false));
   }, []);
