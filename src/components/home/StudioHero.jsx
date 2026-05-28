@@ -22,7 +22,7 @@ export default function StudioHero() {
   const sublines = (settings.hero_subtext || DEFAULTS.hero_subtext).split('\n');
 
   return (
-    <section className="relative w-full h-screen overflow-hidden flex items-center">
+    <section className="relative w-full overflow-hidden flex items-center" style={{ height: '100dvh' }}>
       {/* Video background */}
       {settings.hero_video_url ? (
         <video
@@ -49,7 +49,7 @@ export default function StudioHero() {
       <div className="absolute right-0 top-1/2 w-px h-40 -translate-y-1/2" style={{ background: 'linear-gradient(to bottom, transparent, #FF007F, transparent)' }} />
 
       {/* Content */}
-      <div className="relative z-10 w-full px-8 md:px-16 lg:px-24 flex flex-col items-start justify-center h-full pt-24">
+      <div className="relative z-10 w-full px-8 md:px-16 lg:px-24 flex flex-col items-start justify-center h-full pt-24 pb-20">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
