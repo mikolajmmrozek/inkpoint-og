@@ -26,10 +26,10 @@ const DEFAULT_MEDICAL_FIELDS = [
 ];
 
 const DEFAULT_CONSENT_FIELDS = [
-  { field_key: 'consent_tattoo_piercing', label: 'Zgoda na zabieg', description: '', required: true },
-  { field_key: 'confirm_sober', label: 'Trzeźwość', description: '', required: true },
-  { field_key: 'consent_image_use', label: 'Zgoda na wizerunek', description: '', required: false },
-  { field_key: 'confirm_regulations_read', label: 'Regulamin', description: '', required: true },
+  { field_key: 'consent_tattoo_piercing', label: 'Zgoda na zabieg', description: 'Oświadczam, że chcę poddać się opisanemu wyżej zabiegowi tatuażu/piercingu w pełni świadom ryzyka i możliwych powikłań.', required: true },
+  { field_key: 'confirm_sober', label: 'Trzeźwość', description: 'Potwierdzam, że nie jestem pod wpływem alkoholu ani narkotyków i jestem w pełni świadomy konsekwencji zabiegu.', required: true },
+  { field_key: 'consent_image_use', label: 'Zgoda na wizerunek', description: 'Wyrażam zgodę na fotografowanie wyniku zabiegu dla celów portfolio i dokumentacji.', required: false },
+  { field_key: 'confirm_regulations_read', label: 'Regulamin', description: 'Potwierdzam, że zapoznałem się z regulaminem studia i zasadami pielęgnacji po zabiegu.', required: true },
 ];
 
 export default function DashboardFormTemplate() {
