@@ -245,7 +245,7 @@ export default function DashboardArtists() {
                           <div>
                             <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{a.name}</p>
                             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
-                              {(a.specialty || []).join(', ')} · {a.years_experience} lat
+                              {(a.specialty || []).join(', ')} · {a.years_experience} {a.years_experience === 1 ? 'rok' : [2,3,4].includes(a.years_experience) ? 'lata' : 'lat'}
                             </p>
                           </div>
                         </div>
