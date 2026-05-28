@@ -12,7 +12,7 @@ const optimizeUrl = (url) => {
   return url;
 };
 
-export default function HeroSlider() {
+export default function HeroSlider({ onReady }) {
   const [slides, setSlides] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [imagesReady, setImagesReady] = useState(false);
@@ -34,14 +34,15 @@ export default function HeroSlider() {
             const img = new Image();
             img.onload = img.onerror = () => {
               done++;
-              if (done === urls.length) setImagesReady(true);
+              if (done === urls.length) { setImagesReady(true); onReady?.(); }
             };
             img.src = url;
           });
         }
         setLoaded(true);
+        if (data.length === 0) onReady?.();
       })
-      .catch(() => { setLoaded(true); });
+      .catch(() => { setLoaded(true); onReady?.(); });
   }, []);
 
   const goTo = (index) => {
@@ -59,23 +60,7 @@ export default function HeroSlider() {
     return () => clearInterval(intervalRef.current);
   }, [slides.length]);
 
-  if (!loaded || slides.length === 0 || !imagesReady) {
-    return (
-      <section className="relative w-full overflow-hidden flex items-center justify-center" style={{ height: '100dvh', background: '#0A0A0A' }}>
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-px h-16 relative overflow-hidden" style={{ background: 'rgba(245,240,235,0.1)' }}>
-            <motion.div
-              className="w-full absolute top-0"
-              style={{ background: '#FF007F', height: '50%' }}
-              animate={{ y: ['0%', '200%'] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
-            />
-          </div>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.2em', textTransform: 'uppercase' }}>Ładowanie</p>
-        </div>
-      </section>
-    );
-  }
+  if (!loaded || slides.length === 0 || !imagesReady) return null;
 
   const slide = slides[current];
   const specialties = Array.isArray(slide?.specialty) ? slide.specialty.join(' & ') : (slide?.specialty || '');

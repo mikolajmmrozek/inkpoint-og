@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import PageLayout from '../components/layout/PageLayout';
 import StudioHero from '../components/home/StudioHero';
 import HeroSlider from '../components/home/HeroSlider';
 import HomeAbout from '../components/home/HomeAbout';
 import HomeCTA from '../components/home/HomeCTA';
-import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 
 export default function Home() {
+  const [appReady, setAppReady] = useState(false);
   const [galleryImages, setGalleryImages] = useState([]);
 
   useEffect(() => {
@@ -37,6 +38,29 @@ export default function Home() {
   }, []);
 
   return (
+    <>
+      <AnimatePresence>
+        {!appReady && (
+          <motion.div
+            key="splash"
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6 }}
+            className="fixed inset-0 z-50 flex flex-col items-center justify-center"
+            style={{ background: '#0A0A0A' }}
+          >
+            <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(3rem, 8vw, 6rem)', color: '#F5F0EB', letterSpacing: '0.06em', lineHeight: 0.9 }}>ROMANS</p>
+            <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(3rem, 8vw, 6rem)', color: '#FF007F', letterSpacing: '0.06em', lineHeight: 0.9 }}>TATTOO</p>
+            <div className="mt-8 w-px h-12 relative overflow-hidden" style={{ background: 'rgba(245,240,235,0.1)' }}>
+              <motion.div
+                className="w-full absolute top-0"
+                style={{ background: '#FF007F', height: '50%' }}
+                animate={{ y: ['0%', '200%'] }}
+                transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     <PageLayout>
       <StudioHero />
 
@@ -48,7 +72,7 @@ export default function Home() {
       {/* Artist slider section */}
 
 
-      <HeroSlider />
+      <HeroSlider onReady={() => setAppReady(true)} />
 
       {/* Divider */}
       <div className="px-8 md:px-16 my-0">
@@ -110,5 +134,6 @@ export default function Home() {
 
       <HomeCTA />
     </PageLayout>
+    </>
   );
 }
