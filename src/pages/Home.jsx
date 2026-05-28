@@ -5,6 +5,7 @@ import StudioHero from '../components/home/StudioHero';
 import HeroSlider from '../components/home/HeroSlider';
 import HomeAbout from '../components/home/HomeAbout';
 import HomeCTA from '../components/home/HomeCTA';
+import HomeTestimonials from '../components/home/HomeTestimonials';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 
@@ -103,6 +104,12 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      <div className="px-8 md:px-16">
+        <div className="w-full" style={{ height: '1px', background: 'linear-gradient(to right, transparent, #FF007F, transparent)' }} />
+      </div>
+
+      <HomeTestimonials />
 
       <div className="px-8 md:px-16">
         <div className="w-full" style={{ height: '1px', background: 'linear-gradient(to right, transparent, #FF007F, transparent)' }} />

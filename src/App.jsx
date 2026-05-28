@@ -33,6 +33,8 @@ import DashboardFormTemplate from './pages/dashboard/DashboardFormTemplate';
 import DashboardTermsEditor from './pages/dashboard/DashboardTermsEditor';
 import DashboardDocuments from './pages/dashboard/DashboardDocuments';
 import DashboardFAQ from './pages/dashboard/DashboardFAQ';
+import DashboardFeedback from './pages/dashboard/DashboardFeedback';
+import FeedbackSurvey from './pages/FeedbackSurvey';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -67,6 +69,7 @@ const AuthenticatedApp = () => {
       <Route path="/health-form" element={<HealthFormPage />} />
       <Route path="/terms" element={<TermsAndConditions />} />
       <Route path="/faq" element={<FAQ />} />
+      <Route path="/feedback" element={<FeedbackSurvey />} />
 
       {/* Dashboard (admin only) */}
       <Route path="/dashboard" element={<Dashboard />}>
@@ -83,6 +86,7 @@ const AuthenticatedApp = () => {
         <Route path="terms-editor" element={<DashboardTermsEditor />} />
         <Route path="documents" element={<DashboardDocuments />} />
         <Route path="faq" element={<DashboardFAQ />} />
+        <Route path="feedback" element={<DashboardFeedback />} />
       </Route>
 
       <Route path="*" element={<PageNotFound />} />

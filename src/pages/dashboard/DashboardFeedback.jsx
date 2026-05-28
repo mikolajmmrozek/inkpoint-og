@@ -1,0 +1,277 @@
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
+import { useTheme } from './Dashboard';
+import { Star, Mail, Eye, EyeOff, Trash2, Settings, X, Check } from 'lucide-react';
+
+function StarDisplay({ value, size = 12 }) {
+  return (
+    <span style={{ fontSize: size, letterSpacing: '1px' }}>
+      {[1, 2, 3, 4, 5].map(s => (
+        <span key={s} style={{ color: s <= value ? '#FF007F' : 'rgba(245,240,235,0.15)' }}>★</span>
+      ))}
+    </span>
+  );
+}
+
+const DEFAULT_CONFIG = {
+  key: 'default',
+  intro_text: 'Twoja opinia jest dla nas bardzo ważna. Zajmie to tylko chwilę.',
+  thank_you_text: 'Dziękujemy! Twoja opinia wkrótce się pojawi.',
+  email_subject: 'Jak minęła Twoja sesja? Podziel się opinią!',
+  email_body: 'Cześć {client_name},\n\nDziękujemy za wizytę w naszym studio!\nChcielibyśmy poznać Twoją opinię. Zajmie to tylko chwilę:\n\n{link}\n\nZ pozdrowieniami,\nZespół Romans Tattoo',
+  question_overall: 'Jak oceniasz ogólnie całą wizytę?',
+  question_artist: 'Jak oceniasz pracę artysty?',
+  question_studio: 'Jak oceniasz atmosferę i obsługę studia?',
+  question_cleanliness: 'Jak oceniasz czystość i sterylność?',
+  question_value: 'Jak oceniasz stosunek jakości do ceny?',
+  question_short_review: 'Napisz krótką opinię (będzie widoczna publicznie)',
+  question_full_review: 'Chcesz dodać coś więcej? (opcjonalne)',
+  show_rating_studio: true,
+  show_rating_cleanliness: true,
+  show_rating_value: true,
+  show_photo_upload: true,
+};
+
+export default function DashboardFeedback() {
+  const { theme } = useTheme();
+  const t = theme === 'light'
+    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F', pageBg: '#F8F8F8' }
+    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F', pageBg: '#0A0A0A' };
+
+  const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState('reviews'); // 'reviews' | 'config'
+  const [configForm, setConfigForm] = useState(null);
+  const [savingConfig, setSavingConfig] = useState(false);
+
+  const { data: feedbacks = [] } = useQuery({
+    queryKey: ['feedback'],
+    queryFn: () => base44.entities.Feedback.list('-created_date', 100),
+  });
+
+  const { data: configData = [] } = useQuery({
+    queryKey: ['feedbackConfig'],
+    queryFn: () => base44.entities.FeedbackSurveyConfig.filter({ key: 'default' }),
+    onSuccess: (data) => {
+      if (data.length > 0 && !configForm) setConfigForm({ ...DEFAULT_CONFIG, ...data[0] });
+      else if (data.length === 0 && !configForm) setConfigForm({ ...DEFAULT_CONFIG });
+    },
+  });
+
+  const config = configData.length > 0 ? { ...DEFAULT_CONFIG, ...configData[0] } : DEFAULT_CONFIG;
+
+  const togglePublish = useMutation({
+    mutationFn: ({ id, val }) => base44.entities.Feedback.update(id, { is_published: val }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['feedback'] }),
+  });
+
+  const deleteFeedback = useMutation({
+    mutationFn: (id) => base44.entities.Feedback.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['feedback'] }),
+  });
+
+  const avg = (arr) => arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1) : '—';
+
+  const ratings = feedbacks.map(f => f.rating_overall).filter(Boolean);
+  const artistRatings = feedbacks.map(f => f.rating_artist).filter(Boolean);
+  const studioRatings = feedbacks.map(f => f.rating_studio).filter(Boolean);
+
+  const handleSaveConfig = async () => {
+    setSavingConfig(true);
+    if (configData.length > 0) {
+      await base44.entities.FeedbackSurveyConfig.update(configData[0].id, configForm);
+    } else {
+      await base44.entities.FeedbackSurveyConfig.create(configForm);
+    }
+    queryClient.invalidateQueries({ queryKey: ['feedbackConfig'] });
+    setSavingConfig(false);
+  };
+
+  const inputStyle = {
+    background: 'transparent',
+    border: 'none',
+    borderBottom: `0.5px solid ${t.border}`,
+    color: t.text,
+    padding: '8px 0',
+    fontSize: '14px',
+    width: '100%',
+    outline: 'none',
+    fontFamily: 'Inter, sans-serif',
+  };
+
+  const cf = configForm || DEFAULT_CONFIG;
+
+  return (
+    <div>
+      {/* Header */}
+      <div className="mb-8">
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>ZARZĄDZANIE</p>
+        <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>Opinie</h2>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        {[
+          { label: 'Łączna liczba', value: feedbacks.length },
+          { label: 'Śr. ocena ogólna', value: avg(ratings) + (ratings.length ? ' ★' : '') },
+          { label: 'Śr. ocena artysty', value: avg(artistRatings) + (artistRatings.length ? ' ★' : '') },
+          { label: 'Opublikowane', value: feedbacks.filter(f => f.is_published).length },
+        ].map(stat => (
+          <div key={stat.label} style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '20px' }}>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>{stat.label}</p>
+            <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2rem', color: t.fuchsia, letterSpacing: '0.04em' }}>{stat.value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-0 mb-6" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+        {[{ id: 'reviews', label: 'Opinie' }, { id: 'config', label: 'Konfiguracja ankiety' }].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            style={{
+              fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase',
+              padding: '12px 20px', background: 'transparent', border: 'none', cursor: 'pointer',
+              color: activeTab === tab.id ? t.fuchsia : t.muted,
+              borderBottom: activeTab === tab.id ? '2px solid #FF007F' : '2px solid transparent',
+              marginBottom: '-0.5px',
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Reviews tab */}
+      {activeTab === 'reviews' && (
+        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+          {feedbacks.length === 0 ? (
+            <div className="py-20 text-center">
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK OPINII</p>
+            </div>
+          ) : feedbacks.map((fb, i) => (
+            <div key={fb.id} style={{ borderBottom: i < feedbacks.length - 1 ? `0.5px solid ${t.border}` : 'none', padding: '20px' }}>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3 mb-2 flex-wrap">
+                    <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{fb.client_name}</p>
+                    {fb.artist_name && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.08em' }}>{fb.artist_name}</p>}
+                    <StarDisplay value={fb.rating_overall} />
+                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{new Date(fb.created_date).toLocaleDateString('pl-PL')}</span>
+                  </div>
+                  {fb.short_review && (
+                    <p style={{ color: t.text, fontSize: '14px', lineHeight: 1.6, marginBottom: '8px' }}>"{fb.short_review}"</p>
+                  )}
+                  {fb.full_review && (
+                    <p style={{ color: t.muted, fontSize: '13px', lineHeight: 1.6, marginBottom: '8px' }}>{fb.full_review}</p>
+                  )}
+                  <div className="flex gap-4 flex-wrap mt-2">
+                    {fb.rating_artist > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>Artysta: {fb.rating_artist}★</span>}
+                    {fb.rating_studio > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>Studio: {fb.rating_studio}★</span>}
+                    {fb.rating_cleanliness > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>Czystość: {fb.rating_cleanliness}★</span>}
+                    {fb.rating_value > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>Cena/Jakość: {fb.rating_value}★</span>}
+                  </div>
+                  {fb.tattoo_photo_url && (
+                    <img src={fb.tattoo_photo_url} alt="" className="mt-3 w-20 h-20 object-cover" style={{ filter: 'brightness(0.8)' }} />
+                  )}
+                </div>
+                <div className="flex flex-col gap-2 flex-shrink-0">
+                  <button
+                    onClick={() => togglePublish.mutate({ id: fb.id, val: !fb.is_published })}
+                    title={fb.is_published ? 'Ukryj' : 'Opublikuj'}
+                    style={{ background: 'none', border: `0.5px solid ${t.border}`, cursor: 'pointer', padding: '6px', color: fb.is_published ? '#16a34a' : t.muted }}
+                  >
+                    {fb.is_published ? <Eye size={14} /> : <EyeOff size={14} />}
+                  </button>
+                  {fb.client_email && (
+                    <a
+                      href={`mailto:${fb.client_email}?subject=Twoja opinia w Romans Tattoo`}
+                      title="Napisz email"
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', border: `0.5px solid ${t.border}`, padding: '6px', color: t.muted, textDecoration: 'none' }}
+                    >
+                      <Mail size={14} />
+                    </a>
+                  )}
+                  <button
+                    onClick={() => deleteFeedback.mutate(fb.id)}
+                    title="Usuń"
+                    style={{ background: 'none', border: `0.5px solid ${t.border}`, cursor: 'pointer', padding: '6px', color: '#FF007F' }}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Config tab */}
+      {activeTab === 'config' && configForm && (
+        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '32px' }}>
+          <div className="space-y-6">
+            <div>
+              <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Tekst wprowadzający</label>
+              <textarea rows={2} style={{ ...inputStyle, resize: 'none' }} value={cf.intro_text} onChange={e => setConfigForm(f => ({ ...f, intro_text: e.target.value }))} />
+            </div>
+            <div>
+              <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Wiadomość po wysłaniu opinii</label>
+              <input style={inputStyle} value={cf.thank_you_text} onChange={e => setConfigForm(f => ({ ...f, thank_you_text: e.target.value }))} />
+            </div>
+            <div>
+              <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Temat maila zapraszającego</label>
+              <input style={inputStyle} value={cf.email_subject} onChange={e => setConfigForm(f => ({ ...f, email_subject: e.target.value }))} />
+            </div>
+            <div>
+              <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
+                Treść maila (użyj {'{client_name}'} i {'{link}'})
+              </label>
+              <textarea rows={5} style={{ ...inputStyle, resize: 'none' }} value={cf.email_body} onChange={e => setConfigForm(f => ({ ...f, email_body: e.target.value }))} />
+            </div>
+
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginTop: '24px' }}>Pytania w ankiecie</p>
+
+            {[
+              { key: 'question_overall', label: 'Pytanie — ocena ogólna' },
+              { key: 'question_artist', label: 'Pytanie — ocena artysty' },
+              { key: 'question_studio', label: 'Pytanie — ocena studia' },
+              { key: 'question_cleanliness', label: 'Pytanie — czystość' },
+              { key: 'question_value', label: 'Pytanie — cena/jakość' },
+              { key: 'question_short_review', label: 'Pytanie — krótka opinia' },
+              { key: 'question_full_review', label: 'Pytanie — pełna opinia' },
+            ].map(({ key, label }) => (
+              <div key={key}>
+                <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>{label}</label>
+                <input style={inputStyle} value={cf[key] || ''} onChange={e => setConfigForm(f => ({ ...f, [key]: e.target.value }))} />
+              </div>
+            ))}
+
+            <div className="flex flex-wrap gap-6 mt-4">
+              {[
+                { key: 'show_rating_studio', label: 'Ocena studia' },
+                { key: 'show_rating_cleanliness', label: 'Ocena czystości' },
+                { key: 'show_rating_value', label: 'Ocena cena/jakość' },
+                { key: 'show_photo_upload', label: 'Zdjęcie tatuażu' },
+              ].map(({ key, label }) => (
+                <label key={key} className="flex items-center gap-2 cursor-pointer">
+                  <div
+                    onClick={() => setConfigForm(f => ({ ...f, [key]: !f[key] }))}
+                    style={{ width: '16px', height: '16px', border: `0.5px solid ${cf[key] ? '#FF007F' : t.border}`, background: cf[key] ? 'rgba(255,0,127,0.15)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                  >
+                    {cf[key] && <Check size={10} color="#FF007F" />}
+                  </div>
+                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{label}</span>
+                </label>
+              ))}
+            </div>
+
+            <button onClick={handleSaveConfig} disabled={savingConfig} className="btn-oxblood mt-4">
+              {savingConfig ? 'ZAPISYWANIE...' : 'ZAPISZ KONFIGURACJĘ'}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

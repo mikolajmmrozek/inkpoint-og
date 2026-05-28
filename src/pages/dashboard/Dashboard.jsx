@@ -2,7 +2,7 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Calendar, Users, BookOpen, MessageSquare, FileText, LogOut, BarChart2, Menu, X, Sun, Moon, Settings, UserCircle, PieChart } from 'lucide-react';
+import { Calendar, Users, BookOpen, MessageSquare, FileText, LogOut, BarChart2, Menu, X, Sun, Moon, Settings, UserCircle, PieChart, Star } from 'lucide-react';
 
 export const ThemeContext = createContext({ theme: 'light', toggleTheme: () => {} });
 export const useTheme = () => useContext(ThemeContext);
@@ -17,6 +17,7 @@ const NAV = [
   { path: '/dashboard/clients', label: 'Klienci', icon: UserCircle },
   { path: '/dashboard/documents', label: 'Zalecenia', icon: Settings },
   { path: '/dashboard/faq', label: 'FAQ', icon: MessageSquare },
+  { path: '/dashboard/feedback', label: 'Opinie', icon: Star },
   { path: '/dashboard/stats', label: 'Statystyki', icon: PieChart },
   { path: '/dashboard/settings', label: 'Ustawienia', icon: Settings },
 ];

@@ -1,0 +1,73 @@
+{
+  "name": "FeedbackSurveyConfig",
+  "type": "object",
+  "properties": {
+    "key": {
+      "type": "string",
+      "default": "default"
+    },
+    "intro_text": {
+      "type": "string",
+      "description": "Intro text shown on survey page"
+    },
+    "thank_you_text": {
+      "type": "string",
+      "description": "Thank you message after submission"
+    },
+    "email_subject": {
+      "type": "string",
+      "description": "Email subject for survey invitation"
+    },
+    "email_body": {
+      "type": "string",
+      "description": "Email body template (use {client_name}, {link})"
+    },
+    "question_overall": {
+      "type": "string",
+      "default": "Jak oceniasz og\u00f3lnie ca\u0142\u0105 wizyt\u0119?"
+    },
+    "question_artist": {
+      "type": "string",
+      "default": "Jak oceniasz prac\u0119 artysty?"
+    },
+    "question_studio": {
+      "type": "string",
+      "default": "Jak oceniasz atmosfer\u0119 i obs\u0142ug\u0119 studia?"
+    },
+    "question_cleanliness": {
+      "type": "string",
+      "default": "Jak oceniasz czysto\u015b\u0107 i sterylno\u015b\u0107?"
+    },
+    "question_value": {
+      "type": "string",
+      "default": "Jak oceniasz stosunek jako\u015bci do ceny?"
+    },
+    "question_short_review": {
+      "type": "string",
+      "default": "Napisz kr\u00f3tk\u0105 opini\u0119 (b\u0119dzie widoczna publicznie)"
+    },
+    "question_full_review": {
+      "type": "string",
+      "default": "Chcesz doda\u0107 co\u015b wi\u0119cej? (opcjonalne)"
+    },
+    "show_rating_studio": {
+      "type": "boolean",
+      "default": true
+    },
+    "show_rating_cleanliness": {
+      "type": "boolean",
+      "default": true
+    },
+    "show_rating_value": {
+      "type": "boolean",
+      "default": true
+    },
+    "show_photo_upload": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "key"
+  ]
+}

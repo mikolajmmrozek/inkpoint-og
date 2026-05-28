@@ -51,6 +51,20 @@ export default function DashboardBookings() {
     await base44.entities.Booking.update(id, { status });
     setBookings(b => b.map(x => x.id === id ? { ...x, status } : x));
     if (selected?.id === id) setSelected(s => ({ ...s, status }));
+
+    // Send feedback survey email when booking is completed
+    if (status === 'completed') {
+      const booking = bookings.find(b => b.id === id);
+      if (booking?.client_email) {
+        const surveyLink = `${window.location.origin}/feedback?booking_id=${id}`;
+        const configRes = await base44.entities.FeedbackSurveyConfig.filter({ key: 'default' }).catch(() => []);
+        const cfg = configRes.length > 0 ? configRes[0] : {};
+        const subject = cfg.email_subject || 'Jak minęła Twoja sesja? Podziel się opinią!';
+        const bodyTemplate = cfg.email_body || 'Cześć {client_name},\n\nDziękujemy za wizytę!\n\nOcena: {link}';
+        const body = bodyTemplate.replace('{client_name}', booking.client_name || '').replace('{link}', surveyLink);
+        await base44.integrations.Core.SendEmail({ to: booking.client_email, subject, body }).catch(() => {});
+      }
+    }
   };
 
   const deleteBooking = async (id) => {

@@ -1,0 +1,70 @@
+{
+  "name": "Feedback",
+  "type": "object",
+  "properties": {
+    "booking_id": {
+      "type": "string"
+    },
+    "survey_token": {
+      "type": "string",
+      "description": "Unique token for survey link"
+    },
+    "client_name": {
+      "type": "string"
+    },
+    "client_email": {
+      "type": "string"
+    },
+    "artist_id": {
+      "type": "string"
+    },
+    "artist_name": {
+      "type": "string"
+    },
+    "rating_overall": {
+      "type": "number",
+      "description": "Overall rating 1-5"
+    },
+    "rating_artist": {
+      "type": "number",
+      "description": "Artist rating 1-5"
+    },
+    "rating_studio": {
+      "type": "number",
+      "description": "Studio rating 1-5"
+    },
+    "rating_cleanliness": {
+      "type": "number",
+      "description": "Cleanliness rating 1-5"
+    },
+    "rating_value": {
+      "type": "number",
+      "description": "Value for money rating 1-5"
+    },
+    "short_review": {
+      "type": "string",
+      "description": "Short public review (max 200 chars)"
+    },
+    "full_review": {
+      "type": "string",
+      "description": "Detailed review"
+    },
+    "tattoo_photo_url": {
+      "type": "string",
+      "description": "Optional photo of the tattoo/piercing"
+    },
+    "is_published": {
+      "type": "boolean",
+      "default": false
+    },
+    "admin_note": {
+      "type": "string",
+      "description": "Internal admin note"
+    }
+  },
+  "required": [
+    "client_name",
+    "client_email",
+    "rating_overall"
+  ]
+}
