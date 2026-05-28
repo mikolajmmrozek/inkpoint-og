@@ -46,14 +46,7 @@ export default function Home() {
       </div>
 
       {/* Artist slider section */}
-      <div className="px-8 md:px-16 pt-12 pb-4">
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>
-          NASZ ZESPÓŁ
-        </p>
-        <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(2rem, 5vw, 4rem)', fontWeight: 400, color: '#F5F0EB', lineHeight: 0.95, letterSpacing: '0.04em' }}>
-          Artyści
-        </h2>
-      </div>
+
 
       <HeroSlider />
 

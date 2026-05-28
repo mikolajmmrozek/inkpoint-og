@@ -77,6 +77,11 @@ export default function HeroSlider() {
 
       {/* Content */}
       <div className="relative h-full flex flex-col justify-center px-8 md:px-16 lg:px-24 pb-24 md:pb-16">
+        {/* Section label */}
+        <div className="absolute top-8 left-8 md:left-16">
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>NASZ ZESPÓŁ</p>
+          <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(1.5rem, 3vw, 2.5rem)', fontWeight: 400, color: '#F5F0EB', lineHeight: 0.95, letterSpacing: '0.04em' }}>Artyści</h2>
+        </div>
         <AnimatePresence mode="wait">
           <motion.div
             key={current}
