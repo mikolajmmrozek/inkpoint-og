@@ -54,6 +54,7 @@ export default function DashboardFormTemplate() {
   const [medicalFields, setMedicalFields] = useState(DEFAULT_MEDICAL_FIELDS);
   const [procedureQuestions, setProcedureQuestions] = useState(DEFAULT_PROCEDURE_QUESTIONS);
   const [declaration, setDeclaration] = useState(DEFAULT_DECLARATION);
+  const [declarationFields, setDeclarationFields] = useState([]);
   const [consentFields, setConsentFields] = useState(DEFAULT_CONSENT_FIELDS);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -67,6 +68,7 @@ export default function DashboardFormTemplate() {
           setMedicalFields(t.medical_fields || DEFAULT_MEDICAL_FIELDS);
           setProcedureQuestions(t.procedure_questions || DEFAULT_PROCEDURE_QUESTIONS);
           setDeclaration(t.declaration_of_will || DEFAULT_DECLARATION);
+          setDeclarationFields(t.declaration_fields || []);
           setConsentFields(t.consent_fields || DEFAULT_CONSENT_FIELDS);
         }
       })
@@ -115,6 +117,20 @@ export default function DashboardFormTemplate() {
     setConsentFields(updated);
   };
 
+  const addDeclarationField = () => {
+    setDeclarationFields([...declarationFields, { field_key: `decl_field_${Date.now()}`, label: '', placeholder: '' }]);
+  };
+
+  const removeDeclarationField = (index) => {
+    setDeclarationFields(declarationFields.filter((_, i) => i !== index));
+  };
+
+  const updateDeclarationField = (index, key, value) => {
+    const updated = [...declarationFields];
+    updated[index][key] = value;
+    setDeclarationFields(updated);
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -123,6 +139,7 @@ export default function DashboardFormTemplate() {
         medical_fields: medicalFields,
         procedure_questions: procedureQuestions,
         declaration_of_will: declaration,
+        declaration_fields: declarationFields,
         consent_fields: consentFields
       };
       
@@ -263,6 +280,44 @@ export default function DashboardFormTemplate() {
                   style={{ ...inputStyle, resize: 'none', minHeight: '80px' }}
                 />
               </div>
+
+              {/* Declaration fields */}
+              <div className="pt-4 border-t border-t-slate-300" style={{ borderTopColor: t.border }}>
+                <div className="flex items-center justify-between mb-3">
+                  <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Pola Dodatkowe</p>
+                  <button onClick={addDeclarationField} className="flex items-center gap-2" style={{ ...mono, fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 8px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: 'pointer' }}>
+                    <Plus size={10} /> DODAJ
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {declarationFields.map((field, i) => (
+                    <div key={i} style={{ border: `0.5px solid ${t.border}`, padding: '8px', background: 'rgba(255,0,127,0.01)' }}>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 space-y-2">
+                          <input
+                            type="text"
+                            value={field.label || ''}
+                            onChange={e => updateDeclarationField(i, 'label', e.target.value)}
+                            placeholder="Etykieta pola"
+                            style={{ ...inputStyle, fontSize: '12px' }}
+                          />
+                          <input
+                            type="text"
+                            value={field.placeholder || ''}
+                            onChange={e => updateDeclarationField(i, 'placeholder', e.target.value)}
+                            placeholder="Placeholder"
+                            style={{ ...inputStyle, fontSize: '12px' }}
+                          />
+                        </div>
+                        <button onClick={() => removeDeclarationField(i)} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer', padding: '2px', flexShrink: 0 }}>
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div>
                 <label style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Etykieta zgody</label>
                 <input
