@@ -3,11 +3,13 @@ import { base44 } from '@/api/base44Client';
 import { T, LANGUAGES } from '@/lib/healthFormTranslations';
 import StepPersonal from '@/components/health-form/StepPersonal';
 import StepMedical from '@/components/health-form/StepMedical';
+import StepProcedure from '@/components/health-form/StepProcedure';
+import StepDeclaration from '@/components/health-form/StepDeclaration';
 import StepConsents from '@/components/health-form/StepConsents';
 import StepGuardian from '@/components/health-form/StepGuardian';
 import SignatureCanvas from '@/components/health-form/SignatureCanvas';
 
-const STEPS = ['personal', 'medical', 'consents', 'signature'];
+const STEPS = ['personal', 'medical', 'procedure', 'declaration', 'consents', 'signature'];
 
 export default function HealthFormPage() {
   const [lang, setLang] = useState('pl');
@@ -346,14 +348,19 @@ export default function HealthFormPage() {
           </h1>
         </div>
 
-        {/* Progress bar */}
-        <div className="h-px mb-8" style={{ background: '#262626' }} />
-        <div className="h-px mb-8" style={{ background: '#FF007F', width: `${((currentStepIndex + 1) / steps.length) * 100}%` }} />
+        {/* Progress indicators */}
+        <div className="flex gap-2 mb-8">
+          {steps.map((s, i) => (
+            <div key={s} style={{ flex: 1, height: '2px', background: i <= currentStepIndex ? '#FF007F' : '#262626', transition: 'background 0.3s' }} />
+          ))}
+        </div>
 
         {/* Form */}
         <form className="mb-12" onSubmit={e => e.preventDefault()}>
           {step === 'personal' && <StepPersonal form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} />}
           {step === 'medical' && <StepMedical form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} />}
+          {step === 'procedure' && <StepProcedure form={form} setField={setField} t={t} inputStyle={inputStyle} />}
+          {step === 'declaration' && <StepDeclaration form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} />}
           {step === 'consents' && <StepConsents form={form} setField={setField} t={t} showErrors={showErrors} />}
           {step === 'signature' && <SignatureCanvas value={form.client_signature} onChange={v => setField('client_signature', v)} label={t.signatureTitle} clearLabel={t.clearSignature} showErrors={showErrors} />}
           {step === 'guardian' && <StepGuardian guardian={guardian} setGuardianField={setGuardianField} form={form} t={t} inputStyle={inputStyle} showErrors={showErrors} />}
