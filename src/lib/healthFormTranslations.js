@@ -15,7 +15,7 @@ export const LANGUAGES = [
 
 export const T = {
   pl: {
-    title: 'ANKIETA OSOBOWA',
+    title: 'ANKIETA ZDROWOTNA',
     studio: 'STUDIO TATUAŻU ROMANS',
     langSelect: 'Wybierz język formularza',
     stepPersonal: 'Dane osobowe',
@@ -101,7 +101,7 @@ export const T = {
     back: 'WSTECZ',
   },
   en: {
-    title: 'PERSONAL QUESTIONNAIRE',
+    title: 'HEALTH QUESTIONNAIRE',
     studio: 'ROMANS TATTOO STUDIO',
     langSelect: 'Select form language',
     stepPersonal: 'Personal Data',
@@ -187,7 +187,7 @@ export const T = {
     back: 'BACK',
   },
   de: {
-    title: 'PERSÖNLICHER FRAGEBOGEN',
+    title: 'GESUNDHEITSFRAGEBOGEN',
     studio: 'ROMANS TATTOO STUDIO',
     langSelect: 'Formularsprache wählen',
     stepPersonal: 'Persönliche Daten',
@@ -273,7 +273,7 @@ export const T = {
     back: 'ZURÜCK',
   },
   fr: {
-    title: 'QUESTIONNAIRE PERSONNEL',
+    title: 'QUESTIONNAIRE DE SANTÉ',
     studio: 'ROMANS TATTOO STUDIO',
     langSelect: 'Sélectionner la langue du formulaire',
     stepPersonal: 'Données Personnelles',
@@ -359,7 +359,7 @@ export const T = {
     back: 'RETOUR',
   },
   es: {
-    title: 'CUESTIONARIO PERSONAL',
+    title: 'CUESTIONARIO DE SALUD',
     studio: 'ROMANS TATTOO STUDIO',
     langSelect: 'Seleccionar idioma del formulario',
     stepPersonal: 'Datos Personales',
@@ -445,7 +445,7 @@ export const T = {
     back: 'ATRÁS',
   },
   it: {
-    title: 'QUESTIONARIO PERSONALE',
+    title: 'QUESTIONARIO SANITARIO',
     studio: 'ROMANS TATTOO STUDIO',
     langSelect: 'Seleziona la lingua del modulo',
     stepPersonal: 'Dati Personali',
@@ -531,7 +531,7 @@ export const T = {
     back: 'INDIETRO',
   },
   uk: {
-    title: 'ОСОБИСТА АНКЕТА',
+    title: 'АНКЕТА ПРО ЗДОРОВ\'Я',
     studio: 'ТАТУ-СТУДІЯ ROMANS',
     langSelect: 'Оберіть мову форми',
     stepPersonal: 'Особисті дані',
