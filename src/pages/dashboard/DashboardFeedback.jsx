@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
-import { Star, Mail, Eye, EyeOff, Trash2, Settings, X, Check } from 'lucide-react';
+import { Star, Mail, Eye, EyeOff, Trash2, X, Check, Plus, GripVertical } from 'lucide-react';
 
 function StarDisplay({ value, size = 12 }) {
   return (
@@ -14,23 +15,23 @@ function StarDisplay({ value, size = 12 }) {
   );
 }
 
+const DEFAULT_QUESTIONS = [
+  { id: 'rating_overall', label: 'Jak oceniasz ogólnie całą wizytę?', type: 'stars', required: true, enabled: true },
+  { id: 'rating_artist', label: 'Jak oceniasz pracę artysty?', type: 'stars', required: true, enabled: true },
+  { id: 'short_review', label: 'Napisz krótką opinię (będzie widoczna publicznie)', type: 'textarea', required: true, enabled: true },
+  { id: 'extra_studio', label: 'Jak oceniasz atmosferę i obsługę studia?', type: 'stars', required: false, enabled: true },
+  { id: 'extra_cleanliness', label: 'Jak oceniasz czystość i sterylność?', type: 'stars', required: false, enabled: true },
+  { id: 'extra_value', label: 'Jak oceniasz stosunek jakości do ceny?', type: 'stars', required: false, enabled: true },
+  { id: 'extra_comment', label: 'Chcesz dodać coś więcej? (opcjonalne)', type: 'textarea', required: false, enabled: true },
+];
+
 const DEFAULT_CONFIG = {
   key: 'default',
   intro_text: 'Twoja opinia jest dla nas bardzo ważna. Zajmie to tylko chwilę.',
   thank_you_text: 'Dziękujemy! Twoja opinia wkrótce się pojawi.',
   email_subject: 'Jak minęła Twoja sesja? Podziel się opinią!',
   email_body: 'Cześć {client_name},\n\nDziękujemy za wizytę w naszym studio!\nChcielibyśmy poznać Twoją opinię. Zajmie to tylko chwilę:\n\n{link}\n\nZ pozdrowieniami,\nZespół Romans Tattoo',
-  question_overall: 'Jak oceniasz ogólnie całą wizytę?',
-  question_artist: 'Jak oceniasz pracę artysty?',
-  question_studio: 'Jak oceniasz atmosferę i obsługę studia?',
-  question_cleanliness: 'Jak oceniasz czystość i sterylność?',
-  question_value: 'Jak oceniasz stosunek jakości do ceny?',
-  question_short_review: 'Napisz krótką opinię (będzie widoczna publicznie)',
-  question_full_review: 'Chcesz dodać coś więcej? (opcjonalne)',
-  show_rating_studio: true,
-  show_rating_cleanliness: true,
-  show_rating_value: true,
-  show_photo_upload: true,
+  questions: DEFAULT_QUESTIONS,
 };
 
 export default function DashboardFeedback() {
@@ -215,57 +216,81 @@ export default function DashboardFeedback() {
           <div className="space-y-6">
             <div>
               <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Tekst wprowadzający</label>
-              <textarea rows={2} style={{ ...inputStyle, resize: 'none' }} value={cf.intro_text} onChange={e => setConfigForm(f => ({ ...f, intro_text: e.target.value }))} />
+              <textarea rows={2} style={{ ...inputStyle, resize: 'none' }} value={cf.intro_text || ''} onChange={e => setConfigForm(f => ({ ...f, intro_text: e.target.value }))} />
             </div>
             <div>
               <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Wiadomość po wysłaniu opinii</label>
-              <input style={inputStyle} value={cf.thank_you_text} onChange={e => setConfigForm(f => ({ ...f, thank_you_text: e.target.value }))} />
+              <input style={inputStyle} value={cf.thank_you_text || ''} onChange={e => setConfigForm(f => ({ ...f, thank_you_text: e.target.value }))} />
             </div>
             <div>
               <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Temat maila zapraszającego</label>
-              <input style={inputStyle} value={cf.email_subject} onChange={e => setConfigForm(f => ({ ...f, email_subject: e.target.value }))} />
+              <input style={inputStyle} value={cf.email_subject || ''} onChange={e => setConfigForm(f => ({ ...f, email_subject: e.target.value }))} />
             </div>
             <div>
-              <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
-                Treść maila (użyj {'{client_name}'} i {'{link}'})
-              </label>
-              <textarea rows={5} style={{ ...inputStyle, resize: 'none' }} value={cf.email_body} onChange={e => setConfigForm(f => ({ ...f, email_body: e.target.value }))} />
+              <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Treść maila (użyj {'{client_name}'} i {'{link}'})</label>
+              <textarea rows={5} style={{ ...inputStyle, resize: 'none' }} value={cf.email_body || ''} onChange={e => setConfigForm(f => ({ ...f, email_body: e.target.value }))} />
             </div>
 
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginTop: '24px' }}>Pytania w ankiecie</p>
-
-            {[
-              { key: 'question_overall', label: 'Pytanie — ocena ogólna' },
-              { key: 'question_artist', label: 'Pytanie — ocena artysty' },
-              { key: 'question_studio', label: 'Pytanie — ocena studia' },
-              { key: 'question_cleanliness', label: 'Pytanie — czystość' },
-              { key: 'question_value', label: 'Pytanie — cena/jakość' },
-              { key: 'question_short_review', label: 'Pytanie — krótka opinia' },
-              { key: 'question_full_review', label: 'Pytanie — pełna opinia' },
-            ].map(({ key, label }) => (
-              <div key={key}>
-                <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>{label}</label>
-                <input style={inputStyle} value={cf[key] || ''} onChange={e => setConfigForm(f => ({ ...f, [key]: e.target.value }))} />
-              </div>
-            ))}
-
-            <div className="flex flex-wrap gap-6 mt-4">
-              {[
-                { key: 'show_rating_studio', label: 'Ocena studia' },
-                { key: 'show_rating_cleanliness', label: 'Ocena czystości' },
-                { key: 'show_rating_value', label: 'Ocena cena/jakość' },
-                { key: 'show_photo_upload', label: 'Zdjęcie tatuażu' },
-              ].map(({ key, label }) => (
-                <label key={key} className="flex items-center gap-2 cursor-pointer">
-                  <div
-                    onClick={() => setConfigForm(f => ({ ...f, [key]: !f[key] }))}
-                    style={{ width: '16px', height: '16px', border: `0.5px solid ${cf[key] ? '#FF007F' : t.border}`, background: cf[key] ? 'rgba(255,0,127,0.15)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-                  >
-                    {cf[key] && <Check size={10} color="#FF007F" />}
+            {/* Questions editor */}
+            <div>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>Pytania w ankiecie</p>
+              <div className="space-y-2 mb-4">
+                {(cf.questions || DEFAULT_QUESTIONS).map((q, idx) => (
+                  <div key={q.id} style={{ border: `0.5px solid ${t.border}`, padding: '12px 16px', background: t.bg }}>
+                    <div className="flex items-start gap-3">
+                      <div className="flex-1 space-y-2">
+                        <input
+                          style={{ ...inputStyle, fontSize: '13px' }}
+                          value={q.label}
+                          onChange={e => setConfigForm(f => ({ ...f, questions: f.questions.map((x, i) => i === idx ? { ...x, label: e.target.value } : x) }))}
+                        />
+                        <div className="flex gap-3 flex-wrap">
+                          <select
+                            value={q.type}
+                            onChange={e => setConfigForm(f => ({ ...f, questions: f.questions.map((x, i) => i === idx ? { ...x, type: e.target.value } : x) }))}
+                            style={{ background: 'transparent', border: `0.5px solid ${t.border}`, color: t.muted, fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', padding: '4px 8px', cursor: 'pointer' }}
+                          >
+                            <option value="stars">⭐ Gwiazdki</option>
+                            <option value="textarea">📝 Tekst (duży)</option>
+                            <option value="text">✏️ Tekst (mały)</option>
+                          </select>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <div onClick={() => setConfigForm(f => ({ ...f, questions: f.questions.map((x, i) => i === idx ? { ...x, required: !x.required } : x) }))} style={{ width: '14px', height: '14px', border: `0.5px solid ${q.required ? t.fuchsia : t.border}`, background: q.required ? 'rgba(255,0,127,0.15)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                              {q.required && <Check size={9} color="#FF007F" />}
+                            </div>
+                            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, textTransform: 'uppercase' }}>Wymagane</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <div onClick={() => setConfigForm(f => ({ ...f, questions: f.questions.map((x, i) => i === idx ? { ...x, enabled: !x.enabled } : x) }))} style={{ width: '14px', height: '14px', border: `0.5px solid ${q.enabled ? '#16a34a' : t.border}`, background: q.enabled ? 'rgba(22,163,74,0.15)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                              {q.enabled && <Check size={9} color="#16a34a" />}
+                            </div>
+                            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, textTransform: 'uppercase' }}>Widoczne</span>
+                          </label>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setConfigForm(f => ({ ...f, questions: f.questions.filter((_, i) => i !== idx) }))}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.fuchsia, flexShrink: 0, padding: '4px' }}
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
                   </div>
-                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{label}</span>
-                </label>
-              ))}
+                ))}
+              </div>
+              {/* Add question */}
+              <div className="flex gap-2">
+                {['stars', 'textarea', 'text'].map(type => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => setConfigForm(f => ({ ...f, questions: [...(f.questions || []), { id: `custom_${Date.now()}`, label: type === 'stars' ? 'Nowa ocena gwiazdkowa' : 'Nowe pytanie tekstowe', type, required: false, enabled: true }] }))}
+                    style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    <Plus size={10} /> {type === 'stars' ? 'Gwiazdki' : type === 'textarea' ? 'Tekst długi' : 'Tekst krótki'}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <button onClick={handleSaveConfig} disabled={savingConfig} className="btn-oxblood mt-4">
