@@ -50,18 +50,12 @@ export default function HomeAbout() {
             letterSpacing: '0.04em',
           }}>
             {headingLines.map((line, i) => (
-              <div key={i}>
-                {line.includes(data.about_highlight_word) ? (
-                  <>
-                    {line.replace(data.about_highlight_word, '')}
-                    <span style={{ color: '#FF007F' }}>{data.about_highlight_word}</span>
-                  </>
-                ) : line}
-                {i < headingLines.length - 1 && <br />}
-              </div>
+              <div key={i}>{line}</div>
             ))}
-            <br />
-            na zawsze
+            {data.about_highlight_word && (
+              <div style={{ color: '#FF007F' }}>{data.about_highlight_word}</div>
+            )}
+            <div>na zawsze</div>
           </h2>
           <div className="mt-8 h-px w-12" style={{ background: 'linear-gradient(to right, #FF007F, transparent)', height: '1px' }} />
           <p className="mt-8 text-parchment/60 leading-relaxed" style={{ color: 'rgba(245,240,235,0.6)', fontSize: '16px', lineHeight: 1.8 }}>
