@@ -127,14 +127,19 @@ export default function HeroSlider() {
             <button
               key={i}
               onClick={() => goTo(i)}
-              className="transition-all duration-500"
-              style={{
+              className="transition-all duration-500 flex items-center justify-center"
+              style={{ padding: '12px 4px', background: 'transparent' }}
+              >
+              <span style={{
+                display: 'block',
                 width: i === current ? '40px' : '16px',
                 height: '1px',
                 background: i === current ? '#FF007F' : 'rgba(245,240,235,0.3)',
-              }}
-            />
-          ))}
+                transition: 'all 0.5s',
+                }}
+                />
+                </button>
+                ))}
         </div>
 
         {/* Scroll hint */}
