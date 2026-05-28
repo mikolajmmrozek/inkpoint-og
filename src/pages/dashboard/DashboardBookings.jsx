@@ -167,7 +167,7 @@ export default function DashboardBookings() {
           <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
         </div>
       ) : (
-        <div className="flex flex-col lg:flex-row gap-6 items-start">
+        <div className="flex flex-col lg:flex-row gap-6">
           {/* Main area */}
           <div className="flex-1 min-w-0 space-y-6">
             {/* Calendar view */}
@@ -250,19 +250,25 @@ export default function DashboardBookings() {
             </div>
           </div>
 
-          {/* Detail panel */}
-          <AnimatePresence>
-            {selected && (
-              <BookingDetailPanel
-                booking={selected}
-                onClose={() => setSelected(null)}
-                onStatusChange={updateStatus}
-                onDelete={deleteBooking}
-                onEdit={() => handleEdit(selected)}
-                t={t}
-              />
-            )}
-          </AnimatePresence>
+          {/* Detail panel - right sidebar on desktop */}
+          <div className="w-full lg:w-80 flex-shrink-0">
+            <AnimatePresence>
+              {selected ? (
+                <BookingDetailPanel
+                  booking={selected}
+                  onClose={() => setSelected(null)}
+                  onStatusChange={updateStatus}
+                  onDelete={deleteBooking}
+                  onEdit={() => handleEdit(selected)}
+                  t={t}
+                />
+              ) : (
+                <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '24px', textAlign: 'center' }}>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>WYBIERZ SESJĘ</p>
+                </div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       )}
 
