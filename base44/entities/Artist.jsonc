@@ -56,6 +56,11 @@
       "type": "number",
       "default": 60,
       "description": "Procentowy udzia\u0142 artysty w przychodzie z sesji (np. 60 = 60%)"
+    },
+    "order": {
+      "type": "number",
+      "default": 999,
+      "description": "Display order (lower = first)"
     }
   },
   "required": [
