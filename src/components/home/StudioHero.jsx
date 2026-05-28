@@ -114,7 +114,7 @@ export default function StudioHero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.1, duration: 0.8 }}
-            className="flex gap-4 flex-wrap"
+            className="flex gap-4 flex-wrap pb-2"
           >
             <Link to="/booking" className="btn-oxblood animate-pulse-oxblood">
               Umów Sesję
