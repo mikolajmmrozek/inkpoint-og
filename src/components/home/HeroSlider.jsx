@@ -3,13 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 
-const FALLBACK_SLIDES = [
-  { name: 'Mikołaj', specialty: 'Neotradycyjny & Kolor', slug: 'mikolaj', photo_url: 'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=900&q=70&auto=format' },
-  { name: 'Czarek', specialty: 'Ilustracyjny & Indywidualny', slug: 'czarek', photo_url: 'https://images.unsplash.com/photo-1562962230-16b87a0b2935?w=900&q=70&auto=format' },
-  { name: 'Matys', specialty: 'Tatuaż', slug: 'matys', photo_url: 'https://images.unsplash.com/photo-1554721834-bbbe4c1ab9c5?w=900&q=70&auto=format' },
-  { name: 'Julia', specialty: 'Piercing', slug: 'julia', photo_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=900&q=70&auto=format' },
-];
-
 const optimizeUrl = (url) => {
   if (!url) return url;
   if (url.includes('unsplash.com') && !url.includes('auto=format')) {
@@ -20,15 +13,19 @@ const optimizeUrl = (url) => {
 };
 
 export default function HeroSlider() {
-  const [slides, setSlides] = useState(FALLBACK_SLIDES);
+  const [slides, setSlides] = useState([]);
+  const [loaded, setLoaded] = useState(false);
   const [current, setCurrent] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const intervalRef = useRef(null);
 
   useEffect(() => {
     base44.entities.Artist.filter({ is_active: true })
-      .then(data => { if (data.length > 0) setSlides(data); })
-      .catch(() => {});
+      .then(data => {
+        if (data.length > 0) setSlides(data);
+        setLoaded(true);
+      })
+      .catch(() => { setLoaded(true); });
   }, []);
 
   const goTo = (index) => {
@@ -39,11 +36,14 @@ export default function HeroSlider() {
   };
 
   useEffect(() => {
+    if (slides.length === 0) return;
     intervalRef.current = setInterval(() => {
       setCurrent(c => (c + 1) % slides.length);
     }, 6000);
     return () => clearInterval(intervalRef.current);
   }, [slides.length]);
+
+  if (!loaded || slides.length === 0) return null;
 
   const slide = slides[current];
   const specialties = Array.isArray(slide?.specialty) ? slide.specialty.join(' & ') : (slide?.specialty || '');
@@ -61,7 +61,7 @@ export default function HeroSlider() {
           className="absolute inset-0"
         >
           <img
-            src={optimizeUrl(slide?.photo_url || FALLBACK_SLIDES[current % FALLBACK_SLIDES.length]?.photo_url)}
+            src={optimizeUrl(slide?.photo_url)}
             alt={slide?.name}
             className="w-full h-full object-cover"
             style={{ filter: 'brightness(0.35) contrast(1.1)' }}
