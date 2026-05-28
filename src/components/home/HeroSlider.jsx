@@ -15,6 +15,7 @@ const optimizeUrl = (url) => {
 export default function HeroSlider() {
   const [slides, setSlides] = useState([]);
   const [loaded, setLoaded] = useState(false);
+  const [imagesReady, setImagesReady] = useState(false);
   const [current, setCurrent] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const intervalRef = useRef(null);
@@ -22,7 +23,22 @@ export default function HeroSlider() {
   useEffect(() => {
     base44.entities.Artist.filter({ is_active: true })
       .then(data => {
-        if (data.length > 0) setSlides(data);
+        if (data.length > 0) {
+          const artists = data;
+          setSlides(artists);
+          // Preload all images before showing
+          const urls = artists.map(a => optimizeUrl(a.photo_url)).filter(Boolean);
+          let done = 0;
+          if (urls.length === 0) { setImagesReady(true); setLoaded(true); return; }
+          urls.forEach(url => {
+            const img = new Image();
+            img.onload = img.onerror = () => {
+              done++;
+              if (done === urls.length) setImagesReady(true);
+            };
+            img.src = url;
+          });
+        }
         setLoaded(true);
       })
       .catch(() => { setLoaded(true); });
@@ -43,7 +59,7 @@ export default function HeroSlider() {
     return () => clearInterval(intervalRef.current);
   }, [slides.length]);
 
-  if (!loaded || slides.length === 0) return null;
+  if (!loaded || slides.length === 0 || !imagesReady) return null;
 
   const slide = slides[current];
   const specialties = Array.isArray(slide?.specialty) ? slide.specialty.join(' & ') : (slide?.specialty || '');
@@ -65,7 +81,7 @@ export default function HeroSlider() {
             alt={slide?.name}
             className="w-full h-full object-cover"
             style={{ filter: 'brightness(0.35) contrast(1.1)' }}
-            loading={current === 0 ? 'eager' : 'lazy'}
+            loading="eager"
             decoding="async"
           />
         </motion.div>
