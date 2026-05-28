@@ -1,3 +1,6 @@
+import { useEffect, useState } from 'react';
+import { base44 } from '@/api/base44Client';
+
 function ConsentBlock({ title, text, fieldKey, form, setField, required, showErrors }) {
   const checked = form[fieldKey];
   const isError = showErrors && required && !checked;
@@ -27,17 +30,31 @@ function ConsentBlock({ title, text, fieldKey, form, setField, required, showErr
 }
 
 export default function StepConsents({ form, setField, t, showErrors }) {
-  const consents = [
-    { title: t.consent1Title, text: t.consent1Text, fieldKey: 'consent_tattoo_piercing', required: true },
-    { title: t.consent2Title, text: t.consent2Text, fieldKey: 'confirm_sober', required: true },
-    { title: t.consent3Title, text: t.consent3Text, fieldKey: 'consent_image_use', required: false },
-    { title: t.consent4Title, text: t.consent4Text, fieldKey: 'confirm_regulations_read', required: true },
-  ];
+  const [consents, setConsents] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const template = await base44.entities.HealthFormTemplate.filter({ key: 'default' }).then(r => r[0]);
+        if (template?.consent_fields) {
+          setConsents(template.consent_fields);
+        }
+      } catch (e) {
+        console.error('Failed to load consent fields:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  if (loading) return <div style={{ color: 'rgba(245,240,235,0.5)' }}>Ładowanie...</div>;
 
   return (
     <div>
       {consents.map(c => (
-        <ConsentBlock key={c.fieldKey} {...c} form={form} setField={setField} showErrors={showErrors} />
+        <ConsentBlock key={c.field_key} title={c.label} text={c.label} fieldKey={c.field_key} required={c.required} form={form} setField={setField} showErrors={showErrors} />
       ))}
     </div>
   );
