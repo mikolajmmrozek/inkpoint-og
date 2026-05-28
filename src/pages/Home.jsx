@@ -84,7 +84,7 @@ export default function Home() {
           <motion.div
             className="flex gap-3"
             animate={{ x: ['0%', '-50%'] }}
-            transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
+            transition={{ duration: 48, repeat: Infinity, ease: 'linear' }}
             style={{ width: 'max-content' }}
           >
             {[...galleryImages, ...galleryImages].map((img, i) => (
