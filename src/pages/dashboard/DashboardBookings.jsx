@@ -108,7 +108,7 @@ export default function DashboardBookings() {
             Rezerwacje
           </h2>
         </div>
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
           {/* View toggle */}
           <div className="flex" style={{ border: `0.5px solid ${t.border}` }}>
             {[{ mode: 'calendar', icon: Calendar }, { mode: 'list', icon: List }].map(({ mode, icon: Icon }) => (
@@ -122,21 +122,21 @@ export default function DashboardBookings() {
               </button>
             ))}
           </div>
-          {/* Artist filter */}
-          <div className="flex gap-1 flex-wrap">
-            <button onClick={() => setArtistFilter('all')} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilter === 'all' ? t.fuchsia : t.border}`, color: artistFilter === 'all' ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer' }}>
+          {/* Artist filter - scrollable on mobile */}
+          <div className="flex gap-1 overflow-x-auto" style={{ scrollbarWidth: 'none', maxWidth: '100%' }}>
+            <button onClick={() => setArtistFilter('all')} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilter === 'all' ? t.fuchsia : t.border}`, color: artistFilter === 'all' ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
               Wszyscy
             </button>
             {artists.map(a => (
-              <button key={a.id} onClick={() => setArtistFilter(a.id)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilter === a.id ? t.fuchsia : t.border}`, color: artistFilter === a.id ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer' }}>
+              <button key={a.id} onClick={() => setArtistFilter(a.id)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilter === a.id ? t.fuchsia : t.border}`, color: artistFilter === a.id ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
                 {a.name}
               </button>
             ))}
           </div>
-          {/* Status filter */}
-          <div className="flex gap-1 flex-wrap">
+          {/* Status filter - scrollable on mobile */}
+          <div className="flex gap-1 overflow-x-auto" style={{ scrollbarWidth: 'none', maxWidth: '100%' }}>
             {['all', ...STATUS_OPTIONS].map(s => (
-              <button key={s} onClick={() => setFilter(s)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${filter === s ? t.fuchsia : t.border}`, color: filter === s ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer' }}>
+              <button key={s} onClick={() => setFilter(s)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${filter === s ? t.fuchsia : t.border}`, color: filter === s ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
                 {s === 'all' ? 'Wszystkie' : s}
               </button>
             ))}
@@ -153,7 +153,7 @@ export default function DashboardBookings() {
           <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
         </div>
       ) : (
-        <div className="flex gap-6 items-start">
+        <div className="flex flex-col lg:flex-row gap-6 items-start">
           {/* Main area */}
           <div className="flex-1 min-w-0 space-y-6">
             {/* Calendar view */}
@@ -208,7 +208,7 @@ export default function DashboardBookings() {
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 flex-shrink-0">
+                      <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
                         {!b.health_form_completed && (
                           <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.08em', border: '0.5px solid #FF007F', padding: '2px 5px' }}>
                             ANKIETA
@@ -218,6 +218,14 @@ export default function DashboardBookings() {
                           <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{b.estimated_price} PLN</span>
                         )}
                         <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 8px', border: `0.5px solid ${STATUS_COLORS[b.status] || t.border}`, color: STATUS_COLORS[b.status] || t.muted }}>
+                          {b.status}
+                        </span>
+                      </div>
+                      <div className="flex sm:hidden items-center gap-1.5 flex-shrink-0">
+                        {!b.health_form_completed && (
+                          <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#FF007F', flexShrink: 0 }} />
+                        )}
+                        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.06em', textTransform: 'uppercase', padding: '3px 6px', border: `0.5px solid ${STATUS_COLORS[b.status] || t.border}`, color: STATUS_COLORS[b.status] || t.muted }}>
                           {b.status}
                         </span>
                       </div>

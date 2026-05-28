@@ -22,14 +22,21 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 30 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 30 }}
-      transition={{ duration: 0.3 }}
-      className="w-80 flex-shrink-0"
-      style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '24px', position: 'sticky', top: '80px', maxHeight: 'calc(100vh - 120px)', overflowY: 'auto' }}
-    >
+    <>
+      {/* Mobile backdrop */}
+      <div
+        className="fixed inset-0 z-40 lg:hidden"
+        style={{ background: 'rgba(0,0,0,0.6)' }}
+        onClick={onClose}
+      />
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 40 }}
+        transition={{ duration: 0.3 }}
+        className="fixed inset-x-0 bottom-0 z-50 max-h-[85vh] overflow-y-auto lg:relative lg:inset-auto lg:z-auto lg:w-80 lg:flex-shrink-0 lg:max-h-[calc(100vh-120px)]"
+        style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '24px', top: 'auto' }}
+      >
       <div className="flex justify-between items-start mb-2">
         <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.5rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
           {booking.client_name}
@@ -125,5 +132,6 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
         </button>
       </div>
     </motion.div>
+    </>
   );
 }
