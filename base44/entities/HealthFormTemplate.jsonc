@@ -41,6 +41,9 @@
           "label": {
             "type": "string"
           },
+          "description": {
+            "type": "string"
+          },
           "required": {
             "type": "boolean",
             "default": true
