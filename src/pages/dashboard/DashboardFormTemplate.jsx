@@ -17,10 +17,10 @@ const DEFAULT_MEDICAL_FIELDS = [
 ];
 
 const DEFAULT_CONSENT_FIELDS = [
-  { field_key: 'consent_tattoo_piercing', label: 'Zgoda na zabieg', required: true },
-  { field_key: 'confirm_sober', label: 'Trzeźwość', required: true },
-  { field_key: 'consent_image_use', label: 'Zgoda na wizerunek', required: false },
-  { field_key: 'confirm_regulations_read', label: 'Regulamin', required: true },
+  { field_key: 'consent_tattoo_piercing', label: 'Zgoda na zabieg', description: '', required: true },
+  { field_key: 'confirm_sober', label: 'Trzeźwość', description: '', required: true },
+  { field_key: 'consent_image_use', label: 'Zgoda na wizerunek', description: '', required: false },
+  { field_key: 'confirm_regulations_read', label: 'Regulamin', description: '', required: true },
 ];
 
 export default function DashboardFormTemplate() {
@@ -63,7 +63,7 @@ export default function DashboardFormTemplate() {
   };
 
   const addConsentField = () => {
-    setConsentFields([...consentFields, { field_key: `consent_${Date.now()}`, label: '', required: false }]);
+    setConsentFields([...consentFields, { field_key: `consent_${Date.now()}`, label: '', description: '', required: false }]);
   };
 
   const removeConsentField = (index) => {
@@ -84,7 +84,8 @@ export default function DashboardFormTemplate() {
       if (template?.id) {
         await base44.entities.HealthFormTemplate.update(template.id, data);
       } else {
-        await base44.entities.HealthFormTemplate.create(data);
+        const created = await base44.entities.HealthFormTemplate.create(data);
+        setTemplate(created);
       }
 
       setSaved(true);
@@ -184,16 +185,27 @@ export default function DashboardFormTemplate() {
             {consentFields.map((field, i) => (
               <div key={i} style={{ border: `0.5px solid ${t.border}`, padding: '12px', background: 'rgba(255,0,127,0.02)' }}>
                 <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1">
-                    <label style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Etykieta</label>
-                    <input
-                      type="text"
-                      value={field.label}
-                      onChange={e => updateConsentField(i, 'label', e.target.value)}
-                      placeholder="Np. Zgoda na zabieg"
-                      style={inputStyle}
-                    />
-                    <label className="flex items-center gap-2 mt-3" style={{ ...mono, fontSize: '9px', color: t.text, cursor: 'pointer' }}>
+                  <div className="flex-1 space-y-3">
+                    <div>
+                      <label style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Etykieta</label>
+                      <input
+                        type="text"
+                        value={field.label}
+                        onChange={e => updateConsentField(i, 'label', e.target.value)}
+                        placeholder="Np. Zgoda na zabieg"
+                        style={inputStyle}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Treść zgody</label>
+                      <textarea
+                        value={field.description || ''}
+                        onChange={e => updateConsentField(i, 'description', e.target.value)}
+                        placeholder="Pełny tekst zgody do przeczytania przez użytkownika"
+                        style={{ ...inputStyle, resize: 'none', minHeight: '60px' }}
+                      />
+                    </div>
+                    <label className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', color: t.text, cursor: 'pointer' }}>
                       <input
                         type="checkbox"
                         checked={field.required}
