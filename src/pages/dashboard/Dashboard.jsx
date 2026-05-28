@@ -52,7 +52,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme }) {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 p-6 space-y-1">
+        <nav className="flex-1 p-6 space-y-1 overflow-y-auto">
           {NAV.map(nav => {
             const Icon = nav.icon;
             const active = isActive(nav);
