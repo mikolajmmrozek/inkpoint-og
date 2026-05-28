@@ -42,7 +42,7 @@ export default function Home() {
 
       {/* Divider */}
       <div className="px-8 md:px-16">
-        <div style={{ height: '0.5px', background: '#262626' }} />
+        <div style={{ height: '1px', background: 'linear-gradient(to right, transparent, #FF007F, transparent)' }} />
       </div>
 
       {/* Artist slider section */}
@@ -52,7 +52,7 @@ export default function Home() {
 
       {/* Divider */}
       <div className="px-8 md:px-16 my-0">
-        <div className="h-px w-full" style={{ background: '#262626', height: '0.5px' }} />
+        <div className="w-full" style={{ height: '1px', background: 'linear-gradient(to right, transparent, #FF007F, transparent)' }} />
       </div>
 
       <HomeAbout />
@@ -100,7 +100,7 @@ export default function Home() {
       </section>
 
       <div className="px-8 md:px-16">
-        <div className="h-px w-full" style={{ background: '#262626', height: '0.5px' }} />
+        <div className="w-full" style={{ height: '1px', background: 'linear-gradient(to right, transparent, #FF007F, transparent)' }} />
       </div>
 
       <HomeCTA />
