@@ -120,8 +120,15 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme, template }
                   {selected[fieldKey] === true ? 'TAK' : selected[fieldKey] === false ? 'NIE' : '—'}
                 </span>
               </div>
-              {selected[fieldKey] === true && descField && selected[descField] && (
-                <p style={{ color: theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.5)', fontSize: '11px', padding: '2px 0 6px 8px', fontStyle: 'italic' }}>{selected[descField]}</p>
+              {selected[fieldKey] !== undefined && selected[fieldKey] !== null && (
+                <p style={{ color: 'rgba(245,240,235,0.6)', fontSize: '10px', padding: '3px 0 6px 8px', borderLeft: '2px solid rgba(255,0,127,0.3)', paddingLeft: '10px' }}>
+                  <strong>Odpowiedź:</strong> {selected[fieldKey] === true ? 'Tak' : 'Nie'}
+                </p>
+              )}
+              {descField && selected[descField] && (
+                <p style={{ color: theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.5)', fontSize: '11px', padding: '2px 0 6px 8px', fontStyle: 'italic', borderLeft: '2px solid rgba(255,0,127,0.3)', paddingLeft: '10px' }}>
+                  <strong>Uwagi:</strong> {selected[descField]}
+                </p>
               )}
             </div>
           );
