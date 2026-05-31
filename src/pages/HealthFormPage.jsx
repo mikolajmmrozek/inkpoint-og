@@ -198,7 +198,13 @@ export default function HealthFormPage() {
       const fields = templateData?.medical_fields || [];
       return fields.every(f => form[f.field_key] !== null && form[f.field_key] !== undefined);
     }
+    if (step === 'procedure') {
+      const questions = templateData?.procedure_questions || [];
+      const required = questions.filter(q => q.required);
+      return required.every(q => form[q.field_key] !== null && form[q.field_key] !== undefined);
+    }
     if (step === 'declaration') {
+
       const declKey = templateData?.declaration_of_will?.field_key || 'declaration_of_will';
       return !!form[declKey];
     }
@@ -469,7 +475,7 @@ export default function HealthFormPage() {
           )}
           {step === 'personal' && <StepPersonal form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} />}
           {step === 'medical' && <StepMedical form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={templateData} />}
-          {step === 'procedure' && <StepProcedure form={form} setField={setField} t={t} inputStyle={inputStyle} templateData={templateData} />}
+          {step === 'procedure' && <StepProcedure form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={templateData} />}
           {step === 'declaration' && <StepDeclaration form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={templateData} />}
           {step === 'consents' && <StepConsents form={form} setField={setField} t={t} showErrors={showErrors} />}
           {step === 'signature' && <SignatureCanvas value={form.client_signature} onChange={v => setField('client_signature', v)} label={t.signatureTitle} clearLabel={t.clearSignature} showErrors={showErrors} />}
