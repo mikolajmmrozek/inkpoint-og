@@ -37,8 +37,8 @@ const CONSENT_FIELDS = [
 ];
 
 function FormDetailPanel({ selected, guardianForm, t, onClose, theme, template }) {
-  const flaggedMedical = BOOL_FIELDS.filter(([k, , descField]) => selected[k] === true || (descField && selected[descField]));
-  const flaggedProcedure = (template?.procedure_questions || []).filter(q => selected[q.field_key] === true || selected[`${q.field_key}_desc`]);
+  const allMedical = BOOL_FIELDS;
+  const allProcedure = (template?.procedure_questions || []);
 
   return (
     <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, maxHeight: '80vh', overflowY: 'auto' }}>
@@ -93,7 +93,7 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme, template }
       </div>
 
       {/* Medical flags warning */}
-      {flaggedMedical.length > 0 && (
+      {allMedical.filter(([k]) => selected[k] === true).length > 0 && (
         <div className="mx-5 mt-4 px-3 py-2 flex items-center gap-2" style={{ background: 'rgba(255,0,127,0.06)', border: '0.5px solid rgba(255,0,127,0.2)' }}>
           <AlertTriangle size={12} color="#FF007F" />
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>
@@ -102,37 +102,37 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme, template }
         </div>
       )}
 
-      {/* Medical fields — only TAK */}
+      {/* Medical fields — ALL answers */}
       <div className="px-5 py-4">
         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>WYWIAD MEDYCZNY</p>
-        {flaggedMedical.length === 0 ? (
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#16a34a', letterSpacing: '0.1em' }}>✓ Brak przeciwwskazań medycznych</p>
-        ) : flaggedMedical.map(([field, label, descField]) => (
+        {allMedical.map(([field, label, descField]) => (
           <div key={field}>
             <div className="flex items-center justify-between py-1.5" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.06em' }}>{label}</p>
-              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: '#FF007F' }}>TAK</span>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.text, letterSpacing: '0.06em' }}>{label}</p>
+              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: selected[field] === true ? '#FF007F' : selected[field] === false ? '#16a34a' : 'rgba(245,240,235,0.3)' }}>
+                {selected[field] === true ? 'TAK' : selected[field] === false ? 'NIE' : '—'}
+              </span>
             </div>
-            {descField && selected[descField] && (
+            {selected[field] === true && descField && selected[descField] && (
               <p style={{ color: theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.5)', fontSize: '11px', padding: '2px 0 6px 8px', fontStyle: 'italic' }}>{selected[descField]}</p>
             )}
           </div>
         ))}
       </div>
 
-      {/* Procedure questions — only TAK */}
-      {(flaggedProcedure.length > 0 || (template?.procedure_questions?.length > 0)) && (
+      {/* Procedure questions — ALL answers */}
+      {allProcedure.length > 0 && (
         <div className="px-5 pb-4">
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>PYTANIA PRZEDZABIEGOWE</p>
-          {flaggedProcedure.length === 0 ? (
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#16a34a', letterSpacing: '0.1em' }}>✓ Brak przeciwwskazań przedzabiegowych</p>
-          ) : flaggedProcedure.map(q => (
+          {allProcedure.map(q => (
             <div key={q.field_key}>
               <div className="flex items-center justify-between py-1.5" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#f97316', letterSpacing: '0.06em' }}>{q.label}</p>
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: '#f97316' }}>TAK</span>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.text, letterSpacing: '0.06em' }}>{q.label}</p>
+                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: selected[q.field_key] === true ? '#f97316' : selected[q.field_key] === false ? '#16a34a' : 'rgba(245,240,235,0.3)' }}>
+                  {selected[q.field_key] === true ? 'TAK' : selected[q.field_key] === false ? 'NIE' : '—'}
+                </span>
               </div>
-              {selected[`${q.field_key}_desc`] && (
+              {selected[q.field_key] === true && selected[`${q.field_key}_desc`] && (
                 <p style={{ color: theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.5)', fontSize: '11px', padding: '2px 0 6px 8px', fontStyle: 'italic' }}>{selected[`${q.field_key}_desc`]}</p>
               )}
             </div>
