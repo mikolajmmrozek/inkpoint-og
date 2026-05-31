@@ -3,16 +3,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
-const Row = ({ label, value }) => (
-  <div className="mb-3 pb-3" style={{ borderBottom: '0.5px solid #262626' }}>
+const Row = ({ label, value, t }) => (
+  <div className="mb-3 pb-3" style={{ borderBottom: `0.5px solid ${t?.border || '#262626'}` }}>
     <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '3px' }}>{label}</p>
-    <p style={{ color: 'rgba(245,240,235,0.7)', fontSize: '13px', lineHeight: 1.5, wordBreak: 'break-word' }}>{value || '—'}</p>
+    <p style={{ color: t?.text || 'rgba(245,240,235,0.7)', fontSize: '13px', lineHeight: 1.5, wordBreak: 'break-word' }}>{value || '—'}</p>
   </div>
 );
 
-const YesNo = ({ label, value, desc }) => (
-  <div className="flex items-start justify-between gap-3 py-2" style={{ borderBottom: '0.5px solid #1a1a1a' }}>
-    <p style={{ color: 'rgba(245,240,235,0.7)', fontSize: '13px', lineHeight: 1.4, flex: 1 }}>{label}</p>
+const YesNo = ({ label, value, desc, t }) => (
+  <div className="flex items-start justify-between gap-3 py-2" style={{ borderBottom: `0.5px solid ${t?.border || '#1a1a1a'}` }}>
+    <p style={{ color: t?.text || 'rgba(245,240,235,0.7)', fontSize: '13px', lineHeight: 1.4, flex: 1 }}>{label}</p>
     <div className="text-right flex-shrink-0">
       <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: value === true ? '#FF007F' : value === false ? '#16a34a' : 'rgba(245,240,235,0.3)' }}>
         {value === true ? 'TAK' : value === false ? 'NIE' : '—'}
@@ -22,7 +22,8 @@ const YesNo = ({ label, value, desc }) => (
   </div>
 );
 
-export default function HealthFormPreviewModal({ bookingId, clientName, onClose }) {
+export default function HealthFormPreviewModal({ bookingId, clientName, onClose, t }) {
+  t = t || { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F' };
   const [form, setForm] = useState(null);
   const [guardian, setGuardian] = useState(null);
   const [template, setTemplate] = useState(null);
@@ -79,14 +80,14 @@ export default function HealthFormPreviewModal({ bookingId, clientName, onClose 
           transition={{ duration: 0.25 }}
           onClick={e => e.stopPropagation()}
           className="w-full max-w-xl max-h-[85vh] overflow-y-auto"
-          style={{ background: '#0A0A0A', border: '0.5px solid #262626', padding: '28px' }}
+          style={{ background: t.bg, border: `0.5px solid ${t.border}`, padding: '28px' }}
         >
           <div className="flex justify-between items-start mb-6">
             <div>
               <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>ANKIETA ZDROWOTNA</p>
-              <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.8rem', color: '#F5F0EB', letterSpacing: '0.04em', lineHeight: 1 }}>{clientName}</h2>
+              <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em', lineHeight: 1 }}>{clientName}</h2>
             </div>
-            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(245,240,235,0.4)' }}>
+            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}>
               <X size={16} />
             </button>
           </div>
@@ -96,20 +97,20 @@ export default function HealthFormPreviewModal({ bookingId, clientName, onClose 
               <Loader2 size={20} className="animate-spin" style={{ color: '#FF007F' }} />
             </div>
           ) : !form ? (
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em' }}>BRAK DANYCH ANKIETY</p>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK DANYCH ANKIETY</p>
           ) : (
             <div>
               {/* Personal */}
               <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>— DANE OSOBOWE</p>
-              <Row label="Imię i nazwisko" value={form.client_name} />
-              <Row label="Data urodzenia" value={form.date_of_birth} />
-              <Row label="Email" value={form.client_email} />
-              <Row label="Telefon" value={form.client_phone} />
-              <Row label="Adres" value={[form.address_street, form.address_city, form.address_postal_code].filter(Boolean).join(', ')} />
-              <Row label="PESEL" value={form.pesel} />
-              <Row label="Zabieg" value={form.procedure_type} />
-              <Row label="Miejsce" value={form.body_placement} />
-              <Row label="Data wypełnienia" value={form.form_filled_date} />
+              <Row label="Imię i nazwisko" value={form.client_name} t={t} />
+              <Row label="Data urodzenia" value={form.date_of_birth} t={t} />
+              <Row label="Email" value={form.client_email} t={t} />
+              <Row label="Telefon" value={form.client_phone} t={t} />
+              <Row label="Adres" value={[form.address_street, form.address_city, form.address_postal_code].filter(Boolean).join(', ')} t={t} />
+              <Row label="PESEL" value={form.pesel} t={t} />
+              <Row label="Zabieg" value={form.procedure_type} t={t} />
+              <Row label="Miejsce" value={form.body_placement} t={t} />
+              <Row label="Data wypełnienia" value={form.form_filled_date} t={t} />
 
               {/* Medical — only flagged */}
               {(() => {
@@ -120,7 +121,7 @@ export default function HealthFormPreviewModal({ bookingId, clientName, onClose 
                     {flagged.length === 0 ? (
                       <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#16a34a', letterSpacing: '0.1em' }}>✓ Brak przeciwwskazań</p>
                     ) : flagged.map(([label, key, descKey]) => (
-                      <YesNo key={key} label={label} value={form[key]} desc={descKey ? form[descKey] : null} />
+                      <YesNo key={key} label={label} value={form[key]} desc={descKey ? form[descKey] : null} t={t} />
                     ))}
                   </>
                 );
@@ -134,7 +135,7 @@ export default function HealthFormPreviewModal({ bookingId, clientName, onClose 
                   <>
                     <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', margin: '20px 0 12px' }}>— PYTANIA PRZEDZABIEGOWE</p>
                     {flagged.map(q => (
-                      <YesNo key={q.field_key} label={q.label} value={form[q.field_key]} desc={form[`${q.field_key}_desc`]} />
+                      <YesNo key={q.field_key} label={q.label} value={form[q.field_key]} desc={form[`${q.field_key}_desc`]} t={t} />
                     ))}
                   </>
                 );
@@ -155,8 +156,8 @@ export default function HealthFormPreviewModal({ bookingId, clientName, onClose 
                     {missing.length === 0 ? (
                       <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#16a34a', letterSpacing: '0.1em' }}>✓ Wszystkie zgody udzielone</p>
                     ) : missing.map(([label]) => (
-                      <div key={label} className="flex items-center justify-between py-2" style={{ borderBottom: '0.5px solid #1a1a1a' }}>
-                        <p style={{ color: 'rgba(245,240,235,0.7)', fontSize: '13px' }}>{label}</p>
+                      <div key={label} className="flex items-center justify-between py-2" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+                        <p style={{ color: t.text, fontSize: '13px' }}>{label}</p>
                         <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F' }}>✗ BRAK</span>
                       </div>
                     ))}
@@ -176,8 +177,8 @@ export default function HealthFormPreviewModal({ bookingId, clientName, onClose 
               {guardian && (
                 <div className="mt-6 p-4" style={{ border: '0.5px solid rgba(255,0,127,0.3)', background: 'rgba(255,0,127,0.04)' }}>
                   <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>— ZGODA OPIEKUNA</p>
-                  <Row label="Opiekun" value={guardian.guardian_name} />
-                  <Row label="Telefon opiekuna" value={guardian.guardian_phone} />
+                  <Row label="Opiekun" value={guardian.guardian_name} t={t} />
+                  <Row label="Telefon opiekuna" value={guardian.guardian_phone} t={t} />
                   {guardian.guardian_signature && (
                     <img src={guardian.guardian_signature} alt="podpis opiekuna" style={{ background: '#fff', maxWidth: '200px', border: '0.5px solid #262626', marginTop: '8px' }} />
                   )}

@@ -175,6 +175,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
         bookingId={booking.id}
         clientName={booking.client_name}
         onClose={() => setShowFormPreview(false)}
+        t={t}
       />
     )}
     </>
