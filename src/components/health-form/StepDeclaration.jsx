@@ -35,7 +35,7 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
       {/* Declaration content */}
       <div style={{ borderTop: '0.5px solid #262626' }}>
         {(declaration.content || '').split(/\n+/).filter(p => p.trim()).map((para, i) => (
-          <p key={i} style={{ color: 'rgba(245,240,235,0.7)', fontSize: '13px', lineHeight: 1.7, wordBreak: 'break-word', overflowWrap: 'break-word', padding: '14px 0', borderBottom: '0.5px solid #262626' }}>
+          <p key={i} style={{ color: 'rgba(245,240,235,0.7)', fontSize: '13px', lineHeight: 1.7, wordBreak: 'break-word', overflowWrap: 'break-word', paddingTop: '14px', paddingBottom: '24px', borderBottom: '0.5px solid #262626' }}>
             {para.trim()}
           </p>
         ))}
