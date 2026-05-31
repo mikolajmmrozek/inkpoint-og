@@ -156,16 +156,19 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme }) {
         </div>
       )}
 
-      {/* Consents */}
+      {/* Consents — dynamic from template */}
       <div className="px-5 pb-4">
         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>ZGODY</p>
         <div className="flex flex-wrap gap-2">
-          {CONSENT_FIELDS.map(([field, label]) => (
-            <div key={field} className="flex items-center gap-1.5 px-2 py-1" style={{ border: `0.5px solid ${selected[field] ? '#16a34a' : t.border}` }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: selected[field] ? '#16a34a' : t.muted }} />
-              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: selected[field] ? '#16a34a' : t.muted, letterSpacing: '0.08em' }}>{label}</span>
-            </div>
-          ))}
+          {(() => {
+            const consentFields = localTemplate?.consent_fields || [];
+            return consentFields.map(field => (
+              <div key={field.field_key} className="flex items-center gap-1.5 px-2 py-1" style={{ border: `0.5px solid ${selected[field.field_key] ? '#16a34a' : t.border}` }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: selected[field.field_key] ? '#16a34a' : t.muted }} />
+                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: selected[field.field_key] ? '#16a34a' : t.muted, letterSpacing: '0.08em' }}>{field.label}</span>
+              </div>
+            ));
+          })()}
         </div>
       </div>
 
@@ -177,9 +180,45 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme }) {
         </div>
       )}
 
+      {/* Other Information — any unmapped fields */}
+      {(() => {
+        const knownFields = new Set([
+          'id', 'created_date', 'updated_date', 'created_by',
+          'booking_id', 'client_first_name', 'client_last_name', 'client_name', 'client_email', 'client_phone',
+          'date_of_birth', 'address_street', 'address_city', 'address_postal_code', 'pesel', 'id_document',
+          'procedure_type', 'body_placement', 'is_minor', 'is_update_only', 'previous_form_id',
+          'guardian_consent_form_id', 'client_signature', 'form_filled_date',
+        ]);
+        const medicalKeys = (localTemplate?.medical_fields || []).map(f => f.field_key);
+        const procKeys = (localTemplate?.procedure_questions || []).map(q => q.field_key);
+        const consentKeys = (localTemplate?.consent_fields || []).map(f => f.field_key);
+        const declKeys = (localTemplate?.declaration_fields || []).map(f => f.field_key);
+        
+        medicalKeys.forEach(k => { knownFields.add(k); knownFields.add(`${k}_desc`); });
+        procKeys.forEach(k => { knownFields.add(k); knownFields.add(`${k}_desc`); });
+        consentKeys.forEach(k => knownFields.add(k));
+        declKeys.forEach(k => knownFields.add(k));
+        knownFields.add(localTemplate?.declaration_of_will?.field_key);
+        
+        const otherFields = Object.entries(selected).filter(([k]) => !knownFields.has(k) && selected[k]);
+        if (otherFields.length === 0) return null;
+        
+        return (
+          <div className="px-5 pb-5" style={{ borderTop: `0.5px solid ${t.border}` }}>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginTop: '12px', marginBottom: '12px' }}>INNE INFORMACJE</p>
+            {otherFields.map(([key, value]) => (
+              <div key={key} className="py-2" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>{key}</p>
+                <p style={{ color: t.text, fontSize: '12px', marginTop: '4px', wordBreak: 'break-word' }}>{String(value)}</p>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
+
       {/* Guardian consent */}
       {guardianForm && (
-        <div className="px-5 pb-5" style={{ borderTop: `0.5px solid ${t.border}` }}>
+        <div className="px-5 pb-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
           <div className="flex items-center gap-2 mt-4 mb-3">
             <Shield size={12} color="#FF007F" />
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase' }}>ZGODA OPIEKUNA PRAWNEGO</p>
