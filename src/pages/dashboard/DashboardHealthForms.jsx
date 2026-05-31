@@ -8,25 +8,25 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
 const BOOL_FIELDS = [
-  ['has_heart_condition', 'Choroby serca', 'has_heart_condition_desc'],
-  ['has_kidney_condition', 'Choroby nerek', 'has_kidney_condition_desc'],
-  ['has_liver_condition', 'Choroby wątroby', 'has_liver_condition_desc'],
-  ['has_lung_condition', 'Choroby płuc', 'has_lung_condition_desc'],
-  ['has_cancer', 'Nowotwory', 'has_cancer_desc'],
-  ['has_infectious_diseases', 'Choroby zakaźne (HIV/WZW)', 'has_infectious_diseases_desc'],
-  ['has_epilepsy', 'Epilepsja', 'has_epilepsy_desc'],
-  ['has_diabetes', 'Cukrzyca', 'has_diabetes_desc'],
-  ['has_hemophilia', 'Hemofilia', 'has_hemophilia_desc'],
-  ['has_allergies', 'Alergie', 'has_allergies_desc'],
-  ['has_inflammatory_conditions', 'Choroby zapalne skóry', 'has_inflammatory_conditions_desc'],
-  ['has_skin_conditions', 'Inne choroby skóry', 'has_skin_conditions_desc'],
-  ['has_mental_conditions', 'Zaburzenia psychiczne', 'has_mental_conditions_desc'],
+  ['has_heart_condition', 'Choroby serca', 'heart_condition_description'],
+  ['has_kidney_condition', 'Choroby nerek', 'kidney_condition_description'],
+  ['has_liver_condition', 'Choroby wątroby', 'liver_condition_description'],
+  ['has_lung_condition', 'Choroby płuc', 'lung_condition_description'],
+  ['has_cancer', 'Nowotwory', 'cancer_description'],
+  ['has_infectious_diseases', 'Choroby zakaźne (HIV/WZW)', 'infectious_diseases_description'],
+  ['has_epilepsy', 'Epilepsja', 'epilepsy_description'],
+  ['has_diabetes', 'Cukrzyca', 'diabetes_description'],
+  ['has_hemophilia', 'Hemofilia', 'hemophilia_description'],
+  ['has_allergies', 'Alergie', 'allergies_description'],
+  ['has_inflammatory_conditions', 'Choroby zapalne skóry', 'inflammatory_conditions_description'],
+  ['has_skin_conditions', 'Inne choroby skóry', 'skin_conditions_description'],
+  ['has_mental_conditions', 'Zaburzenia psychiczne', 'mental_conditions_description'],
   ['is_pregnant', 'Ciąża', null],
   ['is_under_alcohol_drug_influence', 'Pod wpływem alkoholu/narkotyków', null],
-  ['is_allergic_to_metals_dyes_latex', 'Alergia na metale/barwniki/lateks', 'is_allergic_to_metals_dyes_latex_desc'],
-  ['has_blood_clotting_disorders', 'Zaburzenia krzepnięcia', 'has_blood_clotting_disorders_desc'],
-  ['has_scars_skin_changes', 'Bliznowce/zmiany skórne', 'has_scars_skin_changes_desc'],
-  ['had_tattoo_piercing_before', 'Wcześniejszy tatuaż/piercing', 'had_tattoo_piercing_before_desc'],
+  ['is_allergic_to_metals_dyes_latex', 'Alergia na metale/barwniki/lateks', 'allergies_metals_dyes_latex_description'],
+  ['has_blood_clotting_disorders', 'Zaburzenia krzepnięcia', 'blood_clotting_disorders_description'],
+  ['has_scars_skin_changes', 'Bliznowce/zmiany skórne', 'scars_skin_changes_description'],
+  ['had_tattoo_piercing_before', 'Wcześniejszy tatuaż/piercing', 'previous_reactions_description'],
 ];
 
 const CONSENT_FIELDS = [
@@ -36,8 +36,9 @@ const CONSENT_FIELDS = [
   ['confirm_regulations_read', 'Regulamin'],
 ];
 
-function FormDetailPanel({ selected, guardianForm, t, onClose, theme }) {
-  const hasFlags = BOOL_FIELDS.some(([k]) => selected[k] === true);
+function FormDetailPanel({ selected, guardianForm, t, onClose, theme, template }) {
+  const flaggedMedical = BOOL_FIELDS.filter(([k]) => selected[k] === true);
+  const flaggedProcedure = (template?.procedure_questions || []).filter(q => selected[q.field_key] === true);
 
   return (
     <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, maxHeight: '80vh', overflowY: 'auto' }}>
@@ -92,7 +93,7 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme }) {
       </div>
 
       {/* Medical flags warning */}
-      {hasFlags && (
+      {flaggedMedical.length > 0 && (
         <div className="mx-5 mt-4 px-3 py-2 flex items-center gap-2" style={{ background: 'rgba(255,0,127,0.06)', border: '0.5px solid rgba(255,0,127,0.2)' }}>
           <AlertTriangle size={12} color="#FF007F" />
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>
@@ -101,27 +102,43 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme }) {
         </div>
       )}
 
-      {/* Medical fields */}
+      {/* Medical fields — only TAK */}
       <div className="px-5 py-4">
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>DANE MEDYCZNE</p>
-        {BOOL_FIELDS.map(([field, label, descField]) => {
-          const val = selected[field];
-          if (val === undefined || val === null) return null;
-          return (
-            <div key={field}>
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>WYWIAD MEDYCZNY</p>
+        {flaggedMedical.length === 0 ? (
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#16a34a', letterSpacing: '0.1em' }}>✓ Brak przeciwwskazań medycznych</p>
+        ) : flaggedMedical.map(([field, label, descField]) => (
+          <div key={field}>
+            <div className="flex items-center justify-between py-1.5" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.06em' }}>{label}</p>
+              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: '#FF007F' }}>TAK</span>
+            </div>
+            {descField && selected[descField] && (
+              <p style={{ color: theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.5)', fontSize: '11px', padding: '2px 0 6px 8px', fontStyle: 'italic' }}>{selected[descField]}</p>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Procedure questions — only TAK */}
+      {(flaggedProcedure.length > 0 || (template?.procedure_questions?.length > 0)) && (
+        <div className="px-5 pb-4">
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>PYTANIA PRZEDZABIEGOWE</p>
+          {flaggedProcedure.length === 0 ? (
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#16a34a', letterSpacing: '0.1em' }}>✓ Brak przeciwwskazań przedzabiegowych</p>
+          ) : flaggedProcedure.map(q => (
+            <div key={q.field_key}>
               <div className="flex items-center justify-between py-1.5" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>{label}</p>
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: val === true ? '#FF007F' : '#16a34a' }}>
-                  {val === true ? 'TAK' : 'NIE'}
-                </span>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#f97316', letterSpacing: '0.06em' }}>{q.label}</p>
+                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: '#f97316' }}>TAK</span>
               </div>
-              {descField && val && selected[descField] && (
-                <p style={{ color: theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.5)', fontSize: '11px', padding: '2px 0 6px 8px', fontStyle: 'italic' }}>{selected[descField]}</p>
+              {selected[`${q.field_key}_desc`] && (
+                <p style={{ color: theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.5)', fontSize: '11px', padding: '2px 0 6px 8px', fontStyle: 'italic' }}>{selected[`${q.field_key}_desc`]}</p>
               )}
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Consents */}
       <div className="px-5 pb-4">
@@ -169,6 +186,7 @@ export default function DashboardHealthForms() {
     ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F' }
     : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F' };
 
+  const [template, setTemplate] = useState(null);
   const [forms, setForms] = useState([]);
   const [guardianForms, setGuardianForms] = useState([]);
   const [bookings, setBookings] = useState([]);
@@ -201,7 +219,9 @@ export default function DashboardHealthForms() {
       base44.entities.Client.list('-created_date', 500),
       base44.entities.Instruction.list(),
       base44.entities.TermsAndConditions.list(),
-    ]).then(([f, g, b, c, i, t]) => {
+      base44.entities.HealthFormTemplate.filter({ key: 'default' }),
+    ]).then(([f, g, b, c, i, t, tplArr]) => {
+      if (tplArr?.length > 0) setTemplate(tplArr[0]);
       setForms(f);
       setGuardianForms(g);
       setBookings(b);
@@ -504,9 +524,8 @@ export default function DashboardHealthForms() {
                         {form.is_minor && <span style={{ ...mono, fontSize: '7px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '1px 4px' }}>NIELETNI</span>}
                         {(() => {
                           const boolFieldKeys = BOOL_FIELDS.map(b => b[0]);
-                          const skipKeys = new Set(['is_minor','is_update_only','consent_tattoo_piercing','confirm_sober','consent_image_use','confirm_regulations_read','health_form_completed','deposit_paid',...boolFieldKeys]);
                           const hasMedical = boolFieldKeys.some(k => form[k] === true);
-                          const hasProcedureYes = Object.entries(form).some(([k, v]) => v === true && !skipKeys.has(k));
+                          const hasProcedureYes = (template?.procedure_questions || []).some(q => form[q.field_key] === true);
                           const noImageConsent = form.consent_image_use === false;
                           const allOk = !hasMedical && !hasProcedureYes && !noImageConsent && !form.is_minor;
                           return (
@@ -694,7 +713,7 @@ export default function DashboardHealthForms() {
               </div>
             )}
 
-            <FormDetailPanel selected={selected} guardianForm={selectedGuardian} t={t} onClose={() => setSelected(null)} theme={theme} />
+            <FormDetailPanel selected={selected} guardianForm={selectedGuardian} t={t} onClose={() => setSelected(null)} theme={theme} template={template} />
           </div>
         )}
       </div>
