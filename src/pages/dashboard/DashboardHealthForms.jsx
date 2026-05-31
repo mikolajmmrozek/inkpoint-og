@@ -113,48 +113,64 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme }) {
         </div>
       )}
 
-      {/* Medical fields — ALL answers */}
+      {/* Medical fields — ALL answers from selected form */}
       <div className="px-5 py-4">
         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>WYWIAD MEDYCZNY</p>
-        {allMedical.map(field => {
-          const fieldKey = field.field_key || field[0];
-          const label = field.label || field[1];
-          const descField = (field.has_description !== false) ? (field[2] || `${fieldKey}_desc`) : null;
-          return (
-            <div key={fieldKey}>
-              <div className="flex items-center justify-between py-1.5" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.text, letterSpacing: '0.06em' }}>{label}</p>
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: selected[fieldKey] === true ? '#FF007F' : selected[fieldKey] === false ? '#16a34a' : 'rgba(245,240,235,0.3)' }}>
-                  {selected[fieldKey] === true ? 'TAK' : selected[fieldKey] === false ? 'NIE' : '—'}
-                </span>
+        {Object.entries(selected)
+          .filter(([key]) => {
+            // Skip metadata and non-medical fields
+            const skipKeys = ['id', 'created_date', 'updated_date', 'created_by', 'booking_id', 'client_', 'date_of_birth', 'address_', 'pesel', 'id_document', 'consent_', 'confirm_', 'client_signature', 'form_filled_date', 'is_minor', 'guardian_', 'previous_', 'is_update_', 'procedure_type', 'body_placement'];
+            return !skipKeys.some(skip => key.startsWith(skip)) && !key.endsWith('_desc');
+          })
+          .filter(([key, val]) => typeof val === 'boolean')
+          .map(([fieldKey, value]) => {
+            const fieldConfig = (allMedical.find(f => (f.field_key || f[0]) === fieldKey) || [fieldKey, fieldKey.replace(/_/g, ' ')]);
+            const label = fieldConfig.label || fieldConfig[1] || fieldKey.replace(/_/g, ' ').toUpperCase();
+            const descField = `${fieldKey}_desc`;
+            return (
+              <div key={fieldKey}>
+                <div className="flex items-center justify-between py-1.5" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.text, letterSpacing: '0.06em' }}>{label}</p>
+                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: value === true ? '#FF007F' : value === false ? '#16a34a' : 'rgba(245,240,235,0.3)' }}>
+                    {value === true ? 'TAK' : value === false ? 'NIE' : '—'}
+                  </span>
+                </div>
+                {value === true && selected[descField] && (
+                  <p style={{ color: theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.5)', fontSize: '11px', padding: '2px 0 6px 8px', fontStyle: 'italic' }}>{selected[descField]}</p>
+                )}
               </div>
-              {selected[fieldKey] === true && descField && selected[descField] && (
-                <p style={{ color: theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.5)', fontSize: '11px', padding: '2px 0 6px 8px', fontStyle: 'italic' }}>{selected[descField]}</p>
-              )}
-            </div>
-          );
-        })}
+            );
+          })}
       </div>
 
-      {/* Procedure questions — ALL answers */}
-      {allProcedure.length > 0 && (
-        <div className="px-5 pb-4">
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>PYTANIA PRZEDZABIEGOWE</p>
-          {allProcedure.map(q => (
-            <div key={q.field_key}>
-              <div className="flex items-center justify-between py-1.5" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.text, letterSpacing: '0.06em' }}>{q.label}</p>
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: selected[q.field_key] === true ? '#f97316' : selected[q.field_key] === false ? '#16a34a' : 'rgba(245,240,235,0.3)' }}>
-                  {selected[q.field_key] === true ? 'TAK' : selected[q.field_key] === false ? 'NIE' : '—'}
-                </span>
-              </div>
-              {selected[q.field_key] === true && (q.has_description !== false) && selected[`${q.field_key}_desc`] && (
-                <p style={{ color: theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.5)', fontSize: '11px', padding: '2px 0 6px 8px', fontStyle: 'italic' }}>{selected[`${q.field_key}_desc`]}</p>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Procedure questions — ALL answers from selected form */}
+       {(() => {
+         const procedureFields = Object.entries(selected)
+           .filter(([key]) => !key.endsWith('_desc') && !['id', 'created_date', 'updated_date', 'created_by', 'booking_id', 'client_', 'date_of_birth', 'address_', 'pesel', 'id_document', 'consent_', 'confirm_', 'client_signature', 'form_filled_date', 'is_minor', 'guardian_', 'previous_', 'is_update_', 'procedure_type', 'body_placement'].some(skip => key.startsWith(skip)))
+           .filter(([key, val]) => typeof val === 'boolean' && !BOOL_FIELDS.some(f => (f[0] || f.field_key) === key))
+           .map(([fieldKey, value]) => {
+             const config = allProcedure.find(q => q.field_key === fieldKey);
+             return { fieldKey, value, config };
+           });
+         return procedureFields.length > 0 && (
+           <div className="px-5 pb-4">
+             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>PYTANIA PRZEDZABIEGOWE</p>
+             {procedureFields.map(({ fieldKey, value, config }) => (
+               <div key={fieldKey}>
+                 <div className="flex items-center justify-between py-1.5" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+                   <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.text, letterSpacing: '0.06em' }}>{config?.label || fieldKey}</p>
+                   <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: value === true ? '#f97316' : value === false ? '#16a34a' : 'rgba(245,240,235,0.3)' }}>
+                     {value === true ? 'TAK' : value === false ? 'NIE' : '—'}
+                   </span>
+                 </div>
+                 {value === true && selected[`${fieldKey}_desc`] && (
+                   <p style={{ color: theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.5)', fontSize: '11px', padding: '2px 0 6px 8px', fontStyle: 'italic' }}>{selected[`${fieldKey}_desc`]}</p>
+                 )}
+               </div>
+             ))}
+           </div>
+         );
+       })()}
 
       {/* Consents */}
       <div className="px-5 pb-4">
