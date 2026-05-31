@@ -22,6 +22,7 @@ export default function HealthFormPage() {
   const [submitted, setSubmitted] = useState(false);
   const [useQuickRefresh, setUseQuickRefresh] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
+  const [templateData, setTemplateData] = useState(null);
 
   const [form, setForm] = useState({
     booking_id: '',
@@ -83,6 +84,12 @@ export default function HealthFormPage() {
     const bookingId = params.get('booking_id');
 
     const load = async () => {
+      // Load template for validation and titles
+      try {
+        const tpl = await base44.entities.HealthFormTemplate.filter({ key: 'default' }).then(r => r[0]);
+        if (tpl) setTemplateData(tpl);
+      } catch (_) {}
+
       if (bookingId) {
         const b = await base44.entities.Booking.filter({ id: bookingId }).then(r => r[0]);
         if (b) {
@@ -133,8 +140,17 @@ export default function HealthFormPage() {
     if (step === 'personal') {
       return form.client_first_name && form.date_of_birth && form.address_street && form.address_city && form.address_postal_code && form.client_phone && form.procedure_type && form.body_placement;
     }
+    if (step === 'medical') {
+      const fields = templateData?.medical_fields || [];
+      return fields.every(f => form[f.field_key] !== null && form[f.field_key] !== undefined);
+    }
+    if (step === 'declaration') {
+      const declKey = templateData?.declaration_of_will?.field_key || 'declaration_of_will';
+      return !!form[declKey];
+    }
     if (step === 'consents') {
-      return form.consent_tattoo_piercing && form.confirm_sober && form.confirm_regulations_read;
+      const required = (templateData?.consent_fields || []).filter(f => f.required);
+      return required.length === 0 || required.every(f => !!form[f.field_key]);
     }
     if (step === 'signature') {
       return form.client_signature;
@@ -344,7 +360,7 @@ export default function HealthFormPage() {
             {currentStepIndex + 1} / {steps.length}
           </p>
           <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.2rem', fontWeight: 400, color: '#F5F0EB', letterSpacing: '0.04em' }}>
-            {t[`step${step.charAt(0).toUpperCase() + step.slice(1).replace('-', '')}`] || t.title}
+            {step === 'procedure' ? 'Pytania Przedzabiegowe' : step === 'declaration' ? 'Oświadczenie Woli' : (t[`step${step.charAt(0).toUpperCase() + step.slice(1).replace('-', '')}`] || t.title)}
           </h1>
         </div>
 
@@ -358,9 +374,9 @@ export default function HealthFormPage() {
         {/* Form */}
         <form className="mb-12" onSubmit={e => e.preventDefault()}>
           {step === 'personal' && <StepPersonal form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} />}
-          {step === 'medical' && <StepMedical form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} />}
-          {step === 'procedure' && <StepProcedure form={form} setField={setField} t={t} inputStyle={inputStyle} />}
-          {step === 'declaration' && <StepDeclaration form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} />}
+          {step === 'medical' && <StepMedical form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={templateData} />}
+          {step === 'procedure' && <StepProcedure form={form} setField={setField} t={t} inputStyle={inputStyle} templateData={templateData} />}
+          {step === 'declaration' && <StepDeclaration form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={templateData} />}
           {step === 'consents' && <StepConsents form={form} setField={setField} t={t} showErrors={showErrors} />}
           {step === 'signature' && <SignatureCanvas value={form.client_signature} onChange={v => setField('client_signature', v)} label={t.signatureTitle} clearLabel={t.clearSignature} showErrors={showErrors} />}
           {step === 'guardian' && <StepGuardian guardian={guardian} setGuardianField={setGuardianField} form={form} t={t} inputStyle={inputStyle} showErrors={showErrors} />}
@@ -378,29 +394,34 @@ export default function HealthFormPage() {
             )}
 
             {currentStepIndex < steps.length - 1 ? (
-              <button
-                type="button"
-                onClick={() => {
-                  if (canProceed()) {
-                    setShowErrors(false);
-                    setStep(steps[currentStepIndex + 1]);
-                  } else {
-                    setShowErrors(true);
-                  }
-                }}
-                style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', background: 'linear-gradient(135deg, #FF007F 0%, #CC0066 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', flex: 1, opacity: canProceed() ? 1 : 0.5 }}
-              >
-                {t.next} →
-              </button>
+              <div style={{ flex: 1 }}>
+                {showErrors && !canProceed() && (
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em', marginBottom: '8px' }}>⚠ Uzupełnij wszystkie wymagane pola przed przejściem dalej.</p>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (canProceed()) { setShowErrors(false); setStep(steps[currentStepIndex + 1]); }
+                    else { setShowErrors(true); }
+                  }}
+                  style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', background: 'linear-gradient(135deg, #FF007F 0%, #CC0066 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', width: '100%', opacity: canProceed() ? 1 : 0.5 }}
+                >
+                  {t.next} →
+                </button>
+              </div>
             ) : (
-              <button
-                type="button"
-                onClick={useQuickRefresh ? handleQuickRefresh : handleSubmit}
-                disabled={!canProceed() || submitting}
-                style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', background: 'linear-gradient(135deg, #FF007F 0%, #CC0066 100%)', color: '#F5F0EB', border: 'none', cursor: canProceed() && !submitting ? 'pointer' : 'not-allowed', flex: 1, opacity: canProceed() && !submitting ? 1 : 0.5 }}
-              >
-                {submitting ? t.submitting : t.submit}
-              </button>
+              <div style={{ flex: 1 }}>
+                {showErrors && !canProceed() && (
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em', marginBottom: '8px' }}>⚠ Formularz jest niekompletny — złóż podpis przed wysłaniem.</p>
+                )}
+                <button
+                  type="button"
+                  onClick={() => { if (canProceed() && !submitting) { useQuickRefresh ? handleQuickRefresh() : handleSubmit(); } else { setShowErrors(true); } }}
+                  style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', background: 'linear-gradient(135deg, #FF007F 0%, #CC0066 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', width: '100%', opacity: canProceed() && !submitting ? 1 : 0.5 }}
+                >
+                  {submitting ? t.submitting : t.submit}
+                </button>
+              </div>
             )}
           </div>
         </form>

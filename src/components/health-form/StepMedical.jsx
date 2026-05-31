@@ -29,17 +29,17 @@ function YesNoRow({ label, fieldKey, descKey, form, setField, t, inputStyle }) {
   );
 }
 
-export default function StepMedical({ form, setField, t, inputStyle, showErrors }) {
+export default function StepMedical({ form, setField, t, inputStyle, showErrors, templateData }) {
   const [fields, setFields] = useState([]);
+  const [sectionIntro, setSectionIntro] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
       try {
         const template = await base44.entities.HealthFormTemplate.filter({ key: 'default' }).then(r => r[0]);
-        if (template?.medical_fields) {
-          setFields(template.medical_fields);
-        }
+        if (template?.medical_fields) setFields(template.medical_fields);
+        if (template?.section_intros?.medical) setSectionIntro(template.section_intros.medical);
       } catch (e) {
         console.error('Failed to load medical fields:', e);
       } finally {
@@ -53,7 +53,7 @@ export default function StepMedical({ form, setField, t, inputStyle, showErrors 
 
   return (
     <div>
-      <p style={{ color: 'rgba(245,240,235,0.5)', fontSize: '13px', marginBottom: '20px', lineHeight: 1.7 }}>{t.medicalInfo}</p>
+      {sectionIntro && <p style={{ color: 'rgba(245,240,235,0.5)', fontSize: '13px', marginBottom: '20px', lineHeight: 1.7 }}>{sectionIntro}</p>}
       <div>
         {fields.map(f => (
           <YesNoRow key={f.field_key} label={f.label} fieldKey={f.field_key} descKey={f.has_description ? `${f.field_key}_desc` : null} form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} />

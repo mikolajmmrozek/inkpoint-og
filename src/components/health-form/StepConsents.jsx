@@ -33,6 +33,12 @@ export default function StepConsents({ form, setField, t, showErrors }) {
   const [consents, setConsents] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const allChecked = consents.length > 0 && consents.every(c => !!form[c.field_key]);
+  const toggleAll = () => {
+    const newVal = !allChecked;
+    consents.forEach(c => setField(c.field_key, newVal));
+  };
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -53,6 +59,16 @@ export default function StepConsents({ form, setField, t, showErrors }) {
 
   return (
     <div>
+      {consents.length > 1 && (
+        <button type="button" onClick={toggleAll} className="flex items-center gap-3 mb-4" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+          <div style={{ width: '16px', height: '16px', border: `0.5px solid ${allChecked ? '#16a34a' : '#262626'}`, background: allChecked ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            {allChecked && <span style={{ color: '#fff', fontSize: '10px', lineHeight: 1 }}>✓</span>}
+          </div>
+          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: allChecked ? '#16a34a' : 'rgba(245,240,235,0.5)' }}>
+            {allChecked ? 'ODZNACZ WSZYSTKIE' : 'ZAZNACZ WSZYSTKIE'}
+          </span>
+        </button>
+      )}
       {consents.map(c => (
         <ConsentBlock key={c.field_key} title={c.label} text={c.description || c.label} fieldKey={c.field_key} required={c.required} form={form} setField={setField} showErrors={showErrors} />
       ))}
