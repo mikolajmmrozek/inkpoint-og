@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { X, Trash2, Edit, Copy, Check, ExternalLink } from 'lucide-react';
+import { X, Trash2, Edit, Copy, Check, ExternalLink, Mail, FileText, Loader2 } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -12,6 +13,23 @@ const STATUS_OPTIONS = ['pending', 'confirmed', 'completed', 'cancelled'];
 
 export default function BookingDetailPanel({ booking, onClose, onStatusChange, onDelete, onEdit, t }) {
   const [copied, setCopied] = useState(false);
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+
+  const sendFormEmail = async () => {
+    setSendingEmail(true);
+    try {
+      await base44.integrations.Core.SendEmail({
+        to: booking.client_email,
+        subject: 'Wypełnij ankietę zdrowotną — Romans Tattoo',
+        body: `Dzień dobry ${booking.client_name},\n\nProsimy o wypełnienie ankiety zdrowotnej przed sesją (${booking.session_date}).\n\nLink do ankiety:\n${formUrl}\n\nDo zobaczenia w studiu!\n\nRomans Tattoo`
+      });
+      setEmailSent(true);
+      setTimeout(() => setEmailSent(false), 3000);
+    } finally {
+      setSendingEmail(false);
+    }
+  };
 
   const formUrl = `${window.location.origin}/health-form?booking_id=${booking.id}`;
 
@@ -91,23 +109,40 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
         </div>
       </div>
 
-      {/* Health form link */}
-      {!booking.health_form_completed && (
+      {/* Health form section */}
+      {booking.health_form_completed ? (
+        <div className="mb-4 p-3" style={{ border: '0.5px solid rgba(22,163,74,0.3)', background: 'rgba(22,163,74,0.04)' }}>
+          <div className="flex items-center gap-2 mb-2">
+            <FileText size={11} color="#16a34a" />
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+              ANKIETA ZDROWOTNA — WYPEŁNIONA
+            </p>
+          </div>
+          <a
+            href="/dashboard/health-forms"
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#16a34a', textDecoration: 'none', padding: '7px 10px', border: '0.5px solid rgba(22,163,74,0.4)', marginTop: '6px' }}
+          >
+            <ExternalLink size={10} /> PODGLĄD ANKIETY
+          </a>
+        </div>
+      ) : (
         <div className="mb-4 p-3" style={{ border: '0.5px solid rgba(255,0,127,0.3)', background: 'rgba(255,0,127,0.04)' }}>
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
-            ANKIETA ZDROWOTNA
-          </p>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', marginBottom: '10px', lineHeight: 1.5 }}>
-            Wyślij klientowi link do wypełnienia ankiety przed sesją
+            ANKIETA ZDROWOTNA — BRAK
           </p>
           <div className="flex gap-2">
             <button onClick={copyFormLink}
               className="flex items-center gap-1.5 flex-1 justify-center py-2"
               style={{ border: '0.5px solid #FF007F', color: '#FF007F', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer' }}>
-              {copied ? <><Check size={11} /> SKOPIOWANO</> : <><Copy size={11} /> KOPIUJ LINK</>}
+              {copied ? <><Check size={11} /> SKOPIOWANO</> : <><Copy size={11} /> LINK</>}
+            </button>
+            <button onClick={sendFormEmail} disabled={sendingEmail}
+              className="flex items-center gap-1.5 flex-1 justify-center py-2"
+              style={{ border: `0.5px solid ${emailSent ? '#16a34a' : t.border}`, color: emailSent ? '#16a34a' : t.muted, fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer', opacity: sendingEmail ? 0.6 : 1 }}>
+              {sendingEmail ? <Loader2 size={11} className="animate-spin" /> : emailSent ? <><Check size={11} /> WYSŁANO</> : <><Mail size={11} /> EMAIL</>}
             </button>
             <a href={formUrl} target="_blank" rel="noopener noreferrer"
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', padding: '8px 12px', border: `0.5px solid ${t.border}`, color: t.muted, fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textDecoration: 'none', textTransform: 'uppercase' }}>
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px 10px', border: `0.5px solid ${t.border}`, color: t.muted, textDecoration: 'none' }}>
               <ExternalLink size={11} />
             </a>
           </div>
