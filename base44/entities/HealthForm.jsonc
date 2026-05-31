@@ -202,5 +202,6 @@
     "consent_tattoo_piercing",
     "confirm_sober",
     "confirm_regulations_read"
-  ]
+  ],
+  "additionalProperties": true
 }
