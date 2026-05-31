@@ -62,6 +62,10 @@
           "required": {
             "type": "boolean",
             "default": false
+          },
+          "has_description": {
+            "type": "boolean",
+            "default": false
           }
         }
       },
