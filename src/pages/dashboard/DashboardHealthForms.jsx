@@ -37,7 +37,7 @@ const CONSENT_FIELDS = [
 ];
 
 function FormDetailPanel({ selected, guardianForm, t, onClose, theme, template }) {
-  const allMedical = BOOL_FIELDS;
+  const allMedical = (template?.medical_fields || BOOL_FIELDS);
   const allProcedure = (template?.procedure_questions || []);
 
   return (
@@ -105,19 +105,24 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme, template }
       {/* Medical fields — ALL answers */}
       <div className="px-5 py-4">
         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>WYWIAD MEDYCZNY</p>
-        {allMedical.map(([field, label, descField]) => (
-          <div key={field}>
-            <div className="flex items-center justify-between py-1.5" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.text, letterSpacing: '0.06em' }}>{label}</p>
-              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: selected[field] === true ? '#FF007F' : selected[field] === false ? '#16a34a' : 'rgba(245,240,235,0.3)' }}>
-                {selected[field] === true ? 'TAK' : selected[field] === false ? 'NIE' : '—'}
-              </span>
+        {allMedical.map(field => {
+          const fieldKey = field.field_key || field[0];
+          const label = field.label || field[1];
+          const descField = field.has_description ? `${fieldKey}_desc` : null;
+          return (
+            <div key={fieldKey}>
+              <div className="flex items-center justify-between py-1.5" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.text, letterSpacing: '0.06em' }}>{label}</p>
+                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: selected[fieldKey] === true ? '#FF007F' : selected[fieldKey] === false ? '#16a34a' : 'rgba(245,240,235,0.3)' }}>
+                  {selected[fieldKey] === true ? 'TAK' : selected[fieldKey] === false ? 'NIE' : '—'}
+                </span>
+              </div>
+              {selected[fieldKey] === true && descField && selected[descField] && (
+                <p style={{ color: theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.5)', fontSize: '11px', padding: '2px 0 6px 8px', fontStyle: 'italic' }}>{selected[descField]}</p>
+              )}
             </div>
-            {selected[field] === true && descField && selected[descField] && (
-              <p style={{ color: theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.5)', fontSize: '11px', padding: '2px 0 6px 8px', fontStyle: 'italic' }}>{selected[descField]}</p>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Procedure questions — ALL answers */}
