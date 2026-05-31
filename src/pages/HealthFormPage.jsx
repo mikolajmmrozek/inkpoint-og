@@ -38,6 +38,47 @@ export default function HealthFormPage() {
     address_city: '',
     address_postal_code: '',
     pesel: '',
+    id_document: '',
+    has_heart_condition: null,
+    heart_condition_description: '',
+    has_kidney_condition: null,
+    kidney_condition_description: '',
+    has_liver_condition: null,
+    liver_condition_description: '',
+    has_lung_condition: null,
+    lung_condition_description: '',
+    has_cancer: null,
+    cancer_description: '',
+    has_infectious_diseases: null,
+    infectious_diseases_description: '',
+    has_epilepsy: null,
+    epilepsy_description: '',
+    has_diabetes: null,
+    diabetes_description: '',
+    has_hemophilia: null,
+    hemophilia_description: '',
+    has_allergies: null,
+    allergies_description: '',
+    has_inflammatory_conditions: null,
+    inflammatory_conditions_description: '',
+    has_skin_conditions: null,
+    skin_conditions_description: '',
+    has_mental_conditions: null,
+    mental_conditions_description: '',
+    is_pregnant: null,
+    is_under_alcohol_drug_influence: null,
+    is_allergic_to_metals_dyes_latex: null,
+    allergies_metals_dyes_latex_description: '',
+    has_blood_clotting_disorders: null,
+    blood_clotting_disorders_description: '',
+    has_scars_skin_changes: null,
+    scars_skin_changes_description: '',
+    had_tattoo_piercing_before: null,
+    previous_reactions_description: '',
+    consent_tattoo_piercing: false,
+    confirm_sober: false,
+    consent_image_use: false,
+    confirm_regulations_read: false,
     client_signature: '',
     form_filled_date: new Date().toISOString().split('T')[0],
     procedure_type: '',
@@ -64,39 +105,10 @@ export default function HealthFormPage() {
     const editFormId = params.get('edit_form_id');
 
     const load = async () => {
-      // Load template and build dynamic initial form state
-      let tpl = null;
+      // Load template
       try {
         const tplArr = await base44.entities.HealthFormTemplate.filter({ key: 'default' });
-        tpl = tplArr[0];
-        if (tpl) {
-          setTemplateData(tpl);
-          // Build dynamic initial state from template
-          const dynamicState = { ...form };
-          if (tpl.medical_fields) {
-            tpl.medical_fields.forEach(f => {
-              dynamicState[f.field_key] = null;
-              if (f.has_description !== false) dynamicState[`${f.field_key}_desc`] = '';
-            });
-          }
-          if (tpl.procedure_questions) {
-            tpl.procedure_questions.forEach(q => {
-              dynamicState[q.field_key] = null;
-              if (q.has_description !== false) dynamicState[`${q.field_key}_desc`] = '';
-            });
-          }
-          if (tpl.declaration_fields) {
-            tpl.declaration_fields.forEach(f => {
-              dynamicState[f.field_key] = '';
-            });
-          }
-          if (tpl.consent_fields) {
-            tpl.consent_fields.forEach(f => {
-              dynamicState[f.field_key] = false;
-            });
-          }
-          setForm(dynamicState);
-        }
+        if (tplArr[0]) setTemplateData(tplArr[0]);
       } catch (_) {}
 
       if (editFormId) {
