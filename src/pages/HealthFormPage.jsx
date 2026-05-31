@@ -121,7 +121,7 @@ export default function HealthFormPage() {
   }, []);
 
   const isMinor = form.date_of_birth ? new Date().getFullYear() - new Date(form.date_of_birth).getFullYear() < 18 : false;
-  const steps = isMinor ? [...STEPS, 'signature', 'guardian'] : [...STEPS];
+  const steps = isMinor ? [...STEPS, 'guardian'] : [...STEPS];
 
   const setField = (key, value) => setForm(f => ({ ...f, [key]: value }));
   const setGuardianField = (key, value) => setGuardian(g => ({ ...g, [key]: value }));
