@@ -187,13 +187,13 @@ export default function DashboardFormTemplate() {
                 <div key={i} style={{ border: `0.5px solid ${dividerCol}`, padding: '10px', background: 'rgba(255,0,127,0.02)' }}>
                   <div className="flex items-start gap-3">
                     <div className="flex-1 space-y-2">
-                      <input type="text" value={field.label} onChange={e => { const u = [...medicalFields]; u[i].label = e.target.value; setMedicalFields(u); }} placeholder="Etykieta pytania" style={inputStyle} />
+                      <input type="text" value={field.label} onChange={e => setMedicalFields(u => u.map((f, j) => j === i ? { ...f, label: e.target.value } : f))} placeholder="Etykieta pytania" style={inputStyle} />
                       <div className="flex gap-4">
                         <label className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', color: fg, cursor: 'pointer' }}>
-                          <input type="checkbox" checked={field.required} onChange={e => { const u = [...medicalFields]; u[i].required = e.target.checked; setMedicalFields(u); }} /> Wymagane
+                          <input type="checkbox" checked={!!field.required} onChange={e => setMedicalFields(u => u.map((f, j) => j === i ? { ...f, required: e.target.checked } : f))} /> Wymagane
                         </label>
                         <label className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', color: fg, cursor: 'pointer' }}>
-                          <input type="checkbox" checked={field.has_description} onChange={e => { const u = [...medicalFields]; u[i].has_description = e.target.checked; setMedicalFields(u); }} /> Pole opisu
+                          <input type="checkbox" checked={field.has_description !== false} onChange={e => setMedicalFields(u => u.map((f, j) => j === i ? { ...f, has_description: e.target.checked } : f))} /> Pole opisu
                         </label>
                       </div>
                     </div>
@@ -242,13 +242,13 @@ export default function DashboardFormTemplate() {
                 <div key={i} style={{ border: `0.5px solid ${dividerCol}`, padding: '10px', background: 'rgba(255,0,127,0.02)' }}>
                   <div className="flex items-start gap-3">
                     <div className="flex-1 space-y-2">
-                      <input type="text" value={field.label} onChange={e => { const u = [...procedureQuestions]; u[i].label = e.target.value; setProcedureQuestions(u); }} placeholder="Treść pytania" style={inputStyle} />
+                      <input type="text" value={field.label} onChange={e => setProcedureQuestions(u => u.map((f, j) => j === i ? { ...f, label: e.target.value } : f))} placeholder="Treść pytania" style={inputStyle} />
                       <div className="flex gap-4">
                         <label className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', color: fg, cursor: 'pointer' }}>
-                          <input type="checkbox" checked={field.required || false} onChange={e => { const u = [...procedureQuestions]; u[i].required = e.target.checked; setProcedureQuestions(u); }} /> Wymagane
+                          <input type="checkbox" checked={!!field.required} onChange={e => setProcedureQuestions(u => u.map((f, j) => j === i ? { ...f, required: e.target.checked } : f))} /> Wymagane
                         </label>
                         <label className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', color: fg, cursor: 'pointer' }}>
-                          <input type="checkbox" checked={field.has_description || false} onChange={e => { const u = [...procedureQuestions]; u[i].has_description = e.target.checked; setProcedureQuestions(u); }} /> Pole opisu
+                          <input type="checkbox" checked={!!field.has_description} onChange={e => setProcedureQuestions(u => u.map((f, j) => j === i ? { ...f, has_description: e.target.checked } : f))} /> Pole opisu
                         </label>
                       </div>
                     </div>
