@@ -7,10 +7,10 @@ function ConsentBlock({ title, text, fieldKey, form, setField, required, showErr
   return (
     <div className="py-4" style={{ borderBottom: isError ? '0.5px solid #FF007F' : '0.5px solid #1a1a1a' }}>
       <div style={{ marginBottom: '10px' }}>
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: isError ? '#FF007F' : '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: isError ? '#FF007F' : '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
           {title}{required && ' *'} {isError && '(wymagane)'}
         </p>
-        <p style={{ color: 'rgba(245,240,235,0.6)', fontSize: '13px', lineHeight: 1.7 }}>{text}</p>
+        <p style={{ color: 'rgba(245,240,235,0.6)', fontSize: '13px', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{text}</p>
       </div>
       <button
         type="button"

@@ -30,7 +30,7 @@ export default function StepProcedure({ form, setField, t, inputStyle }) {
       {questions.map(q => (
         <div key={q.field_key} className="py-3" style={{ borderBottom: '0.5px solid #1a1a1a' }}>
           <div className="flex items-center justify-between gap-4">
-            <p style={{ color: 'rgba(245,240,235,0.8)', fontSize: '14px', lineHeight: 1.4 }}>{q.label}{q.required && ' *'}</p>
+            <p style={{ color: 'rgba(245,240,235,0.8)', fontSize: '14px', lineHeight: 1.4, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{q.label}{q.required && ' *'}</p>
             <div className="flex gap-2 flex-shrink-0">
               {[true, false].map(v => (
                 <button type="button" key={String(v)} onClick={() => setField(q.field_key, v)}
