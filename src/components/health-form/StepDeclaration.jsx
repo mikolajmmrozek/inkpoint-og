@@ -44,7 +44,7 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
         <div className="space-y-4">
           {customFields.map(field => (
             <div key={field.field_key}>
-              <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'rgba(245,240,235,0.5)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
+              <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'rgba(245,240,235,0.5)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                 {field.label}
               </label>
               <input
@@ -70,7 +70,7 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
           <div style={{ width: '18px', height: '18px', border: `0.5px solid ${form[declaration.field_key] ? '#16a34a' : isError ? '#FF007F' : '#262626'}`, background: form[declaration.field_key] ? '#16a34a' : isError ? 'rgba(255,0,127,0.1)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             {form[declaration.field_key] && <span style={{ color: '#fff', fontSize: '11px', lineHeight: 1, fontWeight: 'bold' }}>✓</span>}
           </div>
-          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.08em', textTransform: 'uppercase', color: form[declaration.field_key] ? '#16a34a' : isError ? '#FF007F' : 'rgba(245,240,235,0.4)' }}>
+          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.08em', textTransform: 'uppercase', color: form[declaration.field_key] ? '#16a34a' : isError ? '#FF007F' : 'rgba(245,240,235,0.4)', whiteSpace: 'pre-wrap', wordBreak: 'break-word', textAlign: 'left' }}>
             {declaration.label}
           </span>
         </button>
