@@ -37,8 +37,8 @@ const CONSENT_FIELDS = [
 ];
 
 function FormDetailPanel({ selected, guardianForm, t, onClose, theme, template }) {
-  const flaggedMedical = BOOL_FIELDS.filter(([k]) => selected[k] === true);
-  const flaggedProcedure = (template?.procedure_questions || []).filter(q => selected[q.field_key] === true);
+  const flaggedMedical = BOOL_FIELDS.filter(([k, , descField]) => selected[k] === true || (descField && selected[descField]));
+  const flaggedProcedure = (template?.procedure_questions || []).filter(q => selected[q.field_key] === true || selected[`${q.field_key}_desc`]);
 
   return (
     <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, maxHeight: '80vh', overflowY: 'auto' }}>
