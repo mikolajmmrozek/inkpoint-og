@@ -25,11 +25,16 @@ const YesNo = ({ label, value, desc }) => (
 export default function HealthFormPreviewModal({ bookingId, clientName, onClose }) {
   const [form, setForm] = useState(null);
   const [guardian, setGuardian] = useState(null);
+  const [template, setTemplate] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
-      const forms = await base44.entities.HealthForm.filter({ booking_id: bookingId }, '-form_filled_date', 1);
+      const [forms, tplArr] = await Promise.all([
+        base44.entities.HealthForm.filter({ booking_id: bookingId }, '-form_filled_date', 1),
+        base44.entities.HealthFormTemplate.filter({ key: 'default' }),
+      ]);
+      if (tplArr.length > 0) setTemplate(tplArr[0]);
       if (forms.length > 0) {
         setForm(forms[0]);
         if (forms[0].is_minor) {
@@ -106,25 +111,58 @@ export default function HealthFormPreviewModal({ bookingId, clientName, onClose 
               <Row label="Miejsce" value={form.body_placement} />
               <Row label="Data wypełnienia" value={form.form_filled_date} />
 
-              {/* Medical */}
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', margin: '20px 0 12px' }}>— WYWIAD MEDYCZNY</p>
-              {MEDICAL.map(([label, key, descKey]) => (
-                <YesNo key={key} label={label} value={form[key]} desc={descKey ? form[descKey] : null} />
-              ))}
+              {/* Medical — only flagged */}
+              {(() => {
+                const flagged = MEDICAL.filter(([, key, descKey]) => form[key] === true || (descKey && form[descKey]));
+                return (
+                  <>
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', margin: '20px 0 12px' }}>— WYWIAD MEDYCZNY</p>
+                    {flagged.length === 0 ? (
+                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#16a34a', letterSpacing: '0.1em' }}>✓ Brak przeciwwskazań</p>
+                    ) : flagged.map(([label, key, descKey]) => (
+                      <YesNo key={key} label={label} value={form[key]} desc={descKey ? form[descKey] : null} />
+                    ))}
+                  </>
+                );
+              })()}
 
-              {/* Consents */}
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', margin: '20px 0 12px' }}>— ZGODY</p>
-              {[
-                ['Zgoda na zabieg', form.consent_tattoo_piercing],
-                ['Trzeźwość', form.confirm_sober],
-                ['Zgoda na wizerunek', form.consent_image_use],
-                ['Regulamin', form.confirm_regulations_read],
-              ].map(([label, val]) => (
-                <div key={label} className="flex items-center justify-between py-2" style={{ borderBottom: '0.5px solid #1a1a1a' }}>
-                  <p style={{ color: 'rgba(245,240,235,0.7)', fontSize: '13px' }}>{label}</p>
-                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: val ? '#16a34a' : '#FF007F' }}>{val ? '✓' : '✗'}</span>
-                </div>
-              ))}
+              {/* Procedure questions — only flagged */}
+              {template?.procedure_questions?.length > 0 && (() => {
+                const flagged = template.procedure_questions.filter(q => form[q.field_key] === true || form[`${q.field_key}_desc`]);
+                if (flagged.length === 0) return null;
+                return (
+                  <>
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', margin: '20px 0 12px' }}>— PYTANIA PRZEDZABIEGOWE</p>
+                    {flagged.map(q => (
+                      <YesNo key={q.field_key} label={q.label} value={form[q.field_key]} desc={form[`${q.field_key}_desc`]} />
+                    ))}
+                  </>
+                );
+              })()}
+
+              {/* Consents — only missing */}
+              {(() => {
+                const consentFields = [
+                  ['Zgoda na zabieg', form.consent_tattoo_piercing],
+                  ['Trzeźwość', form.confirm_sober],
+                  ['Zgoda na wizerunek', form.consent_image_use],
+                  ['Regulamin', form.confirm_regulations_read],
+                ];
+                const missing = consentFields.filter(([, val]) => !val);
+                return (
+                  <>
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', margin: '20px 0 12px' }}>— ZGODY</p>
+                    {missing.length === 0 ? (
+                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#16a34a', letterSpacing: '0.1em' }}>✓ Wszystkie zgody udzielone</p>
+                    ) : missing.map(([label]) => (
+                      <div key={label} className="flex items-center justify-between py-2" style={{ borderBottom: '0.5px solid #1a1a1a' }}>
+                        <p style={{ color: 'rgba(245,240,235,0.7)', fontSize: '13px' }}>{label}</p>
+                        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F' }}>✗ BRAK</span>
+                      </div>
+                    ))}
+                  </>
+                );
+              })()}
 
               {/* Signature */}
               {form.client_signature && (
