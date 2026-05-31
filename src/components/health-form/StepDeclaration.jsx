@@ -34,7 +34,7 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
     <div className="space-y-6">
       {/* Declaration content */}
       <div style={{ border: '0.5px solid #262626', padding: '16px', background: 'rgba(255,0,127,0.02)' }}>
-        <p style={{ color: 'rgba(245,240,235,0.7)', fontSize: '13px', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+        <p style={{ color: 'rgba(245,240,235,0.7)', fontSize: '13px', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowWrap: 'break-word', maxWidth: '100%', display: 'block' }}>
           {declaration.content}
         </p>
       </div>
