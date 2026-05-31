@@ -172,21 +172,59 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme }) {
          );
        })()}
 
-      {/* Consents */}
-      <div className="px-5 pb-4">
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>ZGODY</p>
-        <div className="flex flex-wrap gap-2">
-          {CONSENT_FIELDS.map(([field, label]) => (
-            <div key={field} className="flex items-center gap-1.5 px-2 py-1" style={{ border: `0.5px solid ${selected[field] ? '#16a34a' : t.border}` }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: selected[field] ? '#16a34a' : t.muted }} />
-              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: selected[field] ? '#16a34a' : t.muted, letterSpacing: '0.08em' }}>{label}</span>
+      {/* Declaration of will */}
+      {selected.declaration_of_will !== undefined && selected.declaration_of_will !== null && (
+        <div className="px-5 pb-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px', marginTop: '12px' }}>OŚWIADCZENIE WOLI</p>
+          <div className="flex items-center gap-2">
+            <div style={{ width: '12px', height: '12px', border: `0.5px solid ${selected.declaration_of_will ? '#16a34a' : t.border}`, background: selected.declaration_of_will ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {selected.declaration_of_will && <span style={{ color: '#fff', fontSize: '9px' }}>✓</span>}
             </div>
-          ))}
+            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: selected.declaration_of_will ? '#16a34a' : t.muted, letterSpacing: '0.08em' }}>Potwierdzam przeczytanie i akceptację oświadczenia woli</span>
+          </div>
+        </div>
+      )}
+
+      {/* Declaration fields */}
+      {(() => {
+        const declFields = Object.entries(selected)
+          .filter(([key]) => key.startsWith('declaration_') && key !== 'declaration_of_will' && typeof selected[key] === 'string')
+          .map(([key, value]) => ({ key, value, label: localTemplate?.declaration_fields?.find(f => f.field_key === key)?.label || key }));
+        return declFields.length > 0 && (
+          <div className="px-5 pb-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px', marginTop: '12px' }}>POLA DEKLARACJI</p>
+            {declFields.map(({ key, value, label }) => (
+              <div key={key} className="py-2" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.08em', marginBottom: '4px' }}>{label}</p>
+                <p style={{ color: t.text, fontSize: '11px' }}>{value}</p>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
+
+      {/* Consents */}
+      <div className="px-5 pb-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px', marginTop: '12px' }}>ZGODY</p>
+        <div className="flex flex-wrap gap-2">
+          {(() => {
+            const allConsents = [
+              ...CONSENT_FIELDS,
+              ...(localTemplate?.consent_fields?.map(f => [f.field_key, f.label]) || [])
+            ];
+            const uniqueConsents = Array.from(new Map(allConsents.map(c => [c[0], c])).values());
+            return uniqueConsents.map(([field, label]) => (
+              <div key={field} className="flex items-center gap-1.5 px-2 py-1" style={{ border: `0.5px solid ${selected[field] ? '#16a34a' : t.border}` }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: selected[field] ? '#16a34a' : t.muted }} />
+                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: selected[field] ? '#16a34a' : t.muted, letterSpacing: '0.08em' }}>{label}</span>
+              </div>
+            ));
+          })()}
         </div>
       </div>
 
-      {/* Signature */}
-      {selected.client_signature && (
+      {/* Signature and additional info */}
+      {(selected.client_signature || selected.is_pregnant !== undefined || selected.is_under_alcohol_drug_influence !== undefined) && (
         <div className="px-5 pb-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '12px', marginBottom: '8px' }}>PODPIS KLIENTA</p>
           <img src={selected.client_signature} alt="Podpis" style={{ maxWidth: '240px', border: `0.5px solid ${t.border}`, background: theme === 'light' ? '#FFFFFF' : '#111', padding: '4px' }} />
