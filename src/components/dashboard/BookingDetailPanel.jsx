@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { X, Trash2, Edit, Copy, Check, ExternalLink, Mail, FileText, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import HealthFormPreviewModal from './HealthFormPreviewModal';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -13,6 +14,7 @@ const STATUS_OPTIONS = ['pending', 'confirmed', 'completed', 'cancelled'];
 
 export default function BookingDetailPanel({ booking, onClose, onStatusChange, onDelete, onEdit, t }) {
   const [copied, setCopied] = useState(false);
+  const [showFormPreview, setShowFormPreview] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
 
@@ -118,12 +120,12 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
               ANKIETA ZDROWOTNA — WYPEŁNIONA
             </p>
           </div>
-          <a
-            href="/dashboard/health-forms"
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#16a34a', textDecoration: 'none', padding: '7px 10px', border: '0.5px solid rgba(22,163,74,0.4)', marginTop: '6px' }}
+          <button
+            onClick={() => setShowFormPreview(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#16a34a', background: 'transparent', padding: '7px 10px', border: '0.5px solid rgba(22,163,74,0.4)', marginTop: '6px', cursor: 'pointer', width: '100%' }}
           >
-            <ExternalLink size={10} /> PODGLĄD ANKIETY
-          </a>
+            <FileText size={10} /> PODGLĄD ANKIETY
+          </button>
         </div>
       ) : (
         <div className="mb-4 p-3" style={{ border: '0.5px solid rgba(255,0,127,0.3)', background: 'rgba(255,0,127,0.04)' }}>
@@ -167,6 +169,14 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
         </button>
       </div>
     </motion.div>
+
+    {showFormPreview && (
+      <HealthFormPreviewModal
+        bookingId={booking.id}
+        clientName={booking.client_name}
+        onClose={() => setShowFormPreview(false)}
+      />
+    )}
     </>
   );
 }
