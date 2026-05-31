@@ -48,9 +48,9 @@ const DEFAULT_SECTION_INTROS = {
   consents: 'Prosimy o zapoznanie się z poniższymi zgodami i ich akceptację.',
 };
 
-function SectionCard({ title, color, open, onToggle, children }) {
+function SectionCard({ title, color, open, onToggle, children, fg, borderCol, cardBg, dividerCol }) {
   return (
-    <div style={{ border: `0.5px solid ${open ? color : '#262626'}`, background: 'rgba(10,10,10,0.8)', transition: 'border-color 0.2s' }}>
+    <div style={{ border: `0.5px solid ${open ? color : borderCol}`, background: cardBg, transition: 'border-color 0.2s' }}>
       <button
         type="button"
         onClick={onToggle}
@@ -58,14 +58,14 @@ function SectionCard({ title, color, open, onToggle, children }) {
         style={{ padding: '16px 20px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
       >
         <div className="flex items-center gap-3">
-          <div style={{ width: '6px', height: '6px', background: open ? color : '#262626', borderRadius: '50%', transition: 'background 0.2s' }} />
-          <span style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.5rem', color: '#F5F0EB', letterSpacing: '0.04em' }}>{title}</span>
+          <div style={{ width: '6px', height: '6px', background: open ? color : borderCol, borderRadius: '50%', transition: 'background 0.2s' }} />
+          <span style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.5rem', color: fg, letterSpacing: '0.04em' }}>{title}</span>
         </div>
         {open ? <ChevronDown size={16} color={color} /> : <ChevronRight size={16} color="#555" />}
       </button>
       {open && (
-        <div style={{ padding: '0 20px 20px' }}>
-          <div style={{ height: '0.5px', background: '#262626', marginBottom: '20px' }} />
+      <div style={{ padding: '0 20px 20px' }}>
+        <div style={{ height: '0.5px', background: dividerCol, marginBottom: '20px' }} />
           {children}
         </div>
       )}
@@ -76,6 +76,13 @@ function SectionCard({ title, color, open, onToggle, children }) {
 export default function DashboardFormTemplate() {
   const { theme } = useTheme();
   const fuchsia = '#FF007F';
+  const isDark = theme !== 'light';
+  const fg = isDark ? '#F5F0EB' : '#1a1a1a';
+  const fgMuted = isDark ? 'rgba(245,240,235,0.4)' : 'rgba(30,30,30,0.5)';
+  const fgFaint = isDark ? 'rgba(245,240,235,0.25)' : 'rgba(30,30,30,0.3)';
+  const borderCol = isDark ? '#262626' : '#d1d5db';
+  const dividerCol = isDark ? '#1a1a1a' : '#e5e7eb';
+  const cardBg = isDark ? 'rgba(10,10,10,0.8)' : 'rgba(255,255,255,0.9)';
 
   const [template, setTemplate] = useState(null);
   const [openSection, setOpenSection] = useState('medical');
@@ -132,8 +139,8 @@ export default function DashboardFormTemplate() {
 
   const inputStyle = {
     background: 'transparent', border: 'none',
-    borderBottom: '0.5px solid #262626',
-    padding: '8px 0', fontSize: '13px', color: '#F5F0EB',
+    borderBottom: `0.5px solid ${borderCol}`,
+    padding: '8px 0', fontSize: '13px', color: fg,
     outline: 'none', fontFamily: 'Inter', width: '100%',
   };
 
@@ -144,16 +151,16 @@ export default function DashboardFormTemplate() {
     <div>
       <div className="mb-6">
         <p style={{ ...mono, fontSize: '10px', color: fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>KONFIGURACJA</p>
-        <h2 style={{ ...display, fontSize: '2.5rem', color: '#F5F0EB', lineHeight: 1, letterSpacing: '0.04em' }}>Szablon Ankiety</h2>
+        <h2 style={{ ...display, fontSize: '2.5rem', color: fg, lineHeight: 1, letterSpacing: '0.04em' }}>Szablon Ankiety</h2>
       </div>
 
       <div className="space-y-3">
 
         {/* ── PYTANIA MEDYCZNE ── */}
-        <SectionCard title="Pytania Medyczne" color={fuchsia} open={openSection === 'medical'} onToggle={() => setOpenSection(openSection === 'medical' ? null : 'medical')}>
+        <SectionCard title="Pytania Medyczne" color={fuchsia} open={openSection === 'medical'} onToggle={() => setOpenSection(openSection === 'medical' ? null : 'medical')} fg={fg} borderCol={borderCol} cardBg={cardBg} dividerCol={dividerCol}>
           <div className="space-y-4">
             <div>
-              <label style={{ ...mono, fontSize: '8px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+              <label style={{ ...mono, fontSize: '8px', color: fgMuted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
                 Tekst wprowadzający (widoczny w ankiecie)
               </label>
               <textarea
@@ -164,10 +171,10 @@ export default function DashboardFormTemplate() {
               />
             </div>
 
-            <div style={{ height: '0.5px', background: '#1a1a1a' }} />
+            <div style={{ height: '0.5px', background: dividerCol }} />
 
             <div className="flex items-center justify-between">
-              <p style={{ ...mono, fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Lista pytań</p>
+              <p style={{ ...mono, fontSize: '9px', color: fgMuted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Lista pytań</p>
               <button onClick={() => setMedicalFields([...medicalFields, { field_key: `custom_${Date.now()}`, label: '', required: false, has_description: true }])}
                 className="flex items-center gap-2"
                 style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${fuchsia}`, color: fuchsia, background: 'transparent', cursor: 'pointer' }}>
@@ -177,15 +184,15 @@ export default function DashboardFormTemplate() {
 
             <div className="space-y-3">
               {medicalFields.map((field, i) => (
-                <div key={i} style={{ border: '0.5px solid #1a1a1a', padding: '10px', background: 'rgba(255,0,127,0.02)' }}>
+                <div key={i} style={{ border: `0.5px solid ${dividerCol}`, padding: '10px', background: 'rgba(255,0,127,0.02)' }}>
                   <div className="flex items-start gap-3">
                     <div className="flex-1 space-y-2">
                       <input type="text" value={field.label} onChange={e => { const u = [...medicalFields]; u[i].label = e.target.value; setMedicalFields(u); }} placeholder="Etykieta pytania" style={inputStyle} />
                       <div className="flex gap-4">
-                        <label className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', color: '#F5F0EB', cursor: 'pointer' }}>
+                        <label className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', color: fg, cursor: 'pointer' }}>
                           <input type="checkbox" checked={field.required} onChange={e => { const u = [...medicalFields]; u[i].required = e.target.checked; setMedicalFields(u); }} /> Wymagane
                         </label>
-                        <label className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', color: '#F5F0EB', cursor: 'pointer' }}>
+                        <label className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', color: fg, cursor: 'pointer' }}>
                           <input type="checkbox" checked={field.has_description} onChange={e => { const u = [...medicalFields]; u[i].has_description = e.target.checked; setMedicalFields(u); }} /> Pole opisu
                         </label>
                       </div>
@@ -201,10 +208,10 @@ export default function DashboardFormTemplate() {
         </SectionCard>
 
         {/* ── PYTANIA PRZEDZABIEGOWE ── */}
-        <SectionCard title="Pytania Przedzabiegowe" color={fuchsia} open={openSection === 'procedure'} onToggle={() => setOpenSection(openSection === 'procedure' ? null : 'procedure')}>
+        <SectionCard title="Pytania Przedzabiegowe" color={fuchsia} open={openSection === 'procedure'} onToggle={() => setOpenSection(openSection === 'procedure' ? null : 'procedure')} fg={fg} borderCol={borderCol} cardBg={cardBg} dividerCol={dividerCol}>
           <div className="space-y-4">
             <div>
-              <label style={{ ...mono, fontSize: '8px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+              <label style={{ ...mono, fontSize: '8px', color: fgMuted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
                 Tekst wprowadzający (widoczny w ankiecie)
               </label>
               <textarea
@@ -215,10 +222,10 @@ export default function DashboardFormTemplate() {
               />
             </div>
 
-            <div style={{ height: '0.5px', background: '#1a1a1a' }} />
+            <div style={{ height: '0.5px', background: dividerCol }} />
 
             <div className="flex items-center justify-between">
-              <p style={{ ...mono, fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Pytania</p>
+              <p style={{ ...mono, fontSize: '9px', color: fgMuted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Pytania</p>
               <button onClick={() => setProcedureQuestions([...procedureQuestions, { field_key: `procedure_q_${Date.now()}`, label: '', required: false }])}
                 className="flex items-center gap-2"
                 style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${fuchsia}`, color: fuchsia, background: 'transparent', cursor: 'pointer' }}>
@@ -227,16 +234,16 @@ export default function DashboardFormTemplate() {
             </div>
 
             {procedureQuestions.length === 0 && (
-              <p style={{ ...mono, fontSize: '10px', color: 'rgba(245,240,235,0.25)', letterSpacing: '0.05em' }}>Brak pytań. Kliknij DODAJ aby dodać pierwsze pytanie.</p>
+              <p style={{ ...mono, fontSize: '10px', color: fgFaint, letterSpacing: '0.05em' }}>Brak pytań. Kliknij DODAJ aby dodać pierwsze pytanie.</p>
             )}
 
             <div className="space-y-3">
               {procedureQuestions.map((field, i) => (
-                <div key={i} style={{ border: '0.5px solid #1a1a1a', padding: '10px', background: 'rgba(255,0,127,0.02)' }}>
+                <div key={i} style={{ border: `0.5px solid ${dividerCol}`, padding: '10px', background: 'rgba(255,0,127,0.02)' }}>
                   <div className="flex items-start gap-3">
                     <div className="flex-1 space-y-2">
                       <input type="text" value={field.label} onChange={e => { const u = [...procedureQuestions]; u[i].label = e.target.value; setProcedureQuestions(u); }} placeholder="Treść pytania" style={inputStyle} />
-                      <label className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', color: '#F5F0EB', cursor: 'pointer' }}>
+                      <label className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', color: fg, cursor: 'pointer' }}>
                         <input type="checkbox" checked={field.required || false} onChange={e => { const u = [...procedureQuestions]; u[i].required = e.target.checked; setProcedureQuestions(u); }} /> Wymagane
                       </label>
                     </div>
@@ -251,10 +258,10 @@ export default function DashboardFormTemplate() {
         </SectionCard>
 
         {/* ── OŚWIADCZENIE WOLI ── */}
-        <SectionCard title="Oświadczenie Woli" color={fuchsia} open={openSection === 'declaration'} onToggle={() => setOpenSection(openSection === 'declaration' ? null : 'declaration')}>
+        <SectionCard title="Oświadczenie Woli" color={fuchsia} open={openSection === 'declaration'} onToggle={() => setOpenSection(openSection === 'declaration' ? null : 'declaration')} fg={fg} borderCol={borderCol} cardBg={cardBg} dividerCol={dividerCol}>
           <div className="space-y-4">
             <div>
-              <label style={{ ...mono, fontSize: '8px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+              <label style={{ ...mono, fontSize: '8px', color: fgMuted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
                 Tekst wprowadzający (widoczny w ankiecie)
               </label>
               <textarea
@@ -265,10 +272,10 @@ export default function DashboardFormTemplate() {
               />
             </div>
 
-            <div style={{ height: '0.5px', background: '#1a1a1a' }} />
+            <div style={{ height: '0.5px', background: dividerCol }} />
 
             <div>
-              <label style={{ ...mono, fontSize: '8px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Treść oświadczenia</label>
+              <label style={{ ...mono, fontSize: '8px', color: fgMuted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Treść oświadczenia</label>
               <textarea
                 value={declaration.content || ''}
                 onChange={e => setDeclaration({ ...declaration, content: e.target.value })}
@@ -278,14 +285,14 @@ export default function DashboardFormTemplate() {
             </div>
 
             <div>
-              <label style={{ ...mono, fontSize: '8px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Etykieta zgody (tekst przycisku akceptacji)</label>
+              <label style={{ ...mono, fontSize: '8px', color: fgMuted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Etykieta zgody (tekst przycisku akceptacji)</label>
               <input type="text" value={declaration.label || ''} onChange={e => setDeclaration({ ...declaration, label: e.target.value })} placeholder="Np. Zaakceptuję powyższe informacje" style={inputStyle} />
             </div>
 
-            <div style={{ height: '0.5px', background: '#1a1a1a' }} />
+            <div style={{ height: '0.5px', background: dividerCol }} />
 
             <div className="flex items-center justify-between">
-              <p style={{ ...mono, fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Dodatkowe pola do wypełnienia</p>
+              <p style={{ ...mono, fontSize: '9px', color: fgMuted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Dodatkowe pola do wypełnienia</p>
               <button onClick={() => setDeclarationFields([...declarationFields, { field_key: `decl_field_${Date.now()}`, label: '', placeholder: '', required: false }])}
                 className="flex items-center gap-2"
                 style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${fuchsia}`, color: fuchsia, background: 'transparent', cursor: 'pointer' }}>
@@ -295,7 +302,7 @@ export default function DashboardFormTemplate() {
 
             <div className="space-y-3">
               {declarationFields.map((field, i) => (
-                <div key={i} style={{ border: '0.5px solid #1a1a1a', padding: '10px', background: 'rgba(255,0,127,0.02)' }}>
+                <div key={i} style={{ border: `0.5px solid ${dividerCol}`, padding: '10px', background: 'rgba(255,0,127,0.02)' }}>
                   <div className="flex items-start gap-3">
                     <div className="flex-1 space-y-2">
                       <input type="text" value={field.label || ''} onChange={e => { const u = [...declarationFields]; u[i].label = e.target.value; setDeclarationFields(u); }} placeholder="Etykieta pola" style={inputStyle} />
@@ -312,10 +319,10 @@ export default function DashboardFormTemplate() {
         </SectionCard>
 
         {/* ── ZGODY ── */}
-        <SectionCard title="Zgody" color={fuchsia} open={openSection === 'consents'} onToggle={() => setOpenSection(openSection === 'consents' ? null : 'consents')}>
+        <SectionCard title="Zgody" color={fuchsia} open={openSection === 'consents'} onToggle={() => setOpenSection(openSection === 'consents' ? null : 'consents')} fg={fg} borderCol={borderCol} cardBg={cardBg} dividerCol={dividerCol}>
           <div className="space-y-4">
             <div>
-              <label style={{ ...mono, fontSize: '8px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+              <label style={{ ...mono, fontSize: '8px', color: fgMuted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
                 Tekst wprowadzający (widoczny w ankiecie)
               </label>
               <textarea
@@ -326,10 +333,10 @@ export default function DashboardFormTemplate() {
               />
             </div>
 
-            <div style={{ height: '0.5px', background: '#1a1a1a' }} />
+            <div style={{ height: '0.5px', background: dividerCol }} />
 
             <div className="flex items-center justify-between">
-              <p style={{ ...mono, fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Zgody</p>
+              <p style={{ ...mono, fontSize: '9px', color: fgMuted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Zgody</p>
               <button onClick={() => setConsentFields([...consentFields, { field_key: `consent_${Date.now()}`, label: '', description: '', required: false }])}
                 className="flex items-center gap-2"
                 style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${fuchsia}`, color: fuchsia, background: 'transparent', cursor: 'pointer' }}>
@@ -339,12 +346,12 @@ export default function DashboardFormTemplate() {
 
             <div className="space-y-3">
               {consentFields.map((field, i) => (
-                <div key={i} style={{ border: '0.5px solid #1a1a1a', padding: '10px', background: 'rgba(255,0,127,0.02)' }}>
+                <div key={i} style={{ border: `0.5px solid ${dividerCol}`, padding: '10px', background: 'rgba(255,0,127,0.02)' }}>
                   <div className="flex items-start gap-3">
                     <div className="flex-1 space-y-2">
                       <input type="text" value={field.label} onChange={e => { const u = [...consentFields]; u[i].label = e.target.value; setConsentFields(u); }} placeholder="Etykieta zgody" style={inputStyle} />
                       <textarea value={field.description || ''} onChange={e => { const u = [...consentFields]; u[i].description = e.target.value; setConsentFields(u); }} placeholder="Pełny tekst zgody do przeczytania przez użytkownika" style={{ ...inputStyle, resize: 'none', minHeight: '60px' }} />
-                      <label className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', color: '#F5F0EB', cursor: 'pointer' }}>
+                      <label className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', color: fg, cursor: 'pointer' }}>
                         <input type="checkbox" checked={field.required} onChange={e => { const u = [...consentFields]; u[i].required = e.target.checked; setConsentFields(u); }} /> Wymagane
                       </label>
                     </div>
