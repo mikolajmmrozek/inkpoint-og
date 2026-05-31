@@ -37,8 +37,8 @@ const CONSENT_FIELDS = [
 ];
 
 function FormDetailPanel({ selected, guardianForm, t, onClose, theme, template }) {
-  const allMedical = (template?.medical_fields || BOOL_FIELDS);
-  const allProcedure = (template?.procedure_questions || []);
+  const allMedical = (Array.isArray(template?.medical_fields) ? template.medical_fields : BOOL_FIELDS);
+  const allProcedure = (Array.isArray(template?.procedure_questions) ? template.procedure_questions : []);
 
   return (
     <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, maxHeight: '80vh', overflowY: 'auto' }}>
