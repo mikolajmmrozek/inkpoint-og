@@ -36,9 +36,17 @@ const CONSENT_FIELDS = [
   ['confirm_regulations_read', 'Regulamin'],
 ];
 
-function FormDetailPanel({ selected, guardianForm, t, onClose, theme, template }) {
-  const allMedical = (Array.isArray(template?.medical_fields) ? template.medical_fields : BOOL_FIELDS);
-  const allProcedure = (Array.isArray(template?.procedure_questions) ? template.procedure_questions : []);
+function FormDetailPanel({ selected, guardianForm, t, onClose, theme }) {
+  const [localTemplate, setLocalTemplate] = useState(null);
+  
+  useEffect(() => {
+    base44.entities.HealthFormTemplate.filter({ key: 'default' }).then(r => {
+      if (r?.length > 0) setLocalTemplate(r[0]);
+    });
+  }, [selected?.id]);
+  
+  const allMedical = (Array.isArray(localTemplate?.medical_fields) ? localTemplate.medical_fields : BOOL_FIELDS);
+  const allProcedure = (Array.isArray(localTemplate?.procedure_questions) ? localTemplate.procedure_questions : []);
 
   return (
     <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, maxHeight: '80vh', overflowY: 'auto' }}>
@@ -721,7 +729,7 @@ export default function DashboardHealthForms() {
               </div>
             )}
 
-            <FormDetailPanel selected={selected} guardianForm={selectedGuardian} t={t} onClose={() => setSelected(null)} theme={theme} template={template} />
+            <FormDetailPanel selected={selected} guardianForm={selectedGuardian} t={t} onClose={() => setSelected(null)} theme={theme} />
           </div>
         )}
       </div>
