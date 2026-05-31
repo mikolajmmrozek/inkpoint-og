@@ -42,7 +42,7 @@ export default function StepGuardian({ guardian, setGuardianField, form, t, inpu
       </div>
 
       <div>
-        <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'rgba(245,240,235,0.5)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>{t.guardianNumProcedures}</label>
+        <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'rgba(245,240,235,0.5)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Liczba przekłuć lub tatuaży</label>
         <input type="number" min="1" style={{ ...inputStyle, width: '120px' }} value={guardian.num_procedures || 1} onChange={e => setGuardianField('num_procedures', Number(e.target.value))} />
       </div>
 
