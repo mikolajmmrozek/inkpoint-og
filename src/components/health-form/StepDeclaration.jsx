@@ -47,9 +47,9 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
               <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'rgba(245,240,235,0.5)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                 {field.label}
               </label>
-              <input
-                type="text"
-                style={inputStyle}
+              <textarea
+                rows={3}
+                style={{ ...inputStyle, resize: 'vertical', whiteSpace: 'pre-wrap' }}
                 value={form[field.field_key] || ''}
                 onChange={e => setField(field.field_key, e.target.value)}
                 placeholder={field.placeholder || field.label}
