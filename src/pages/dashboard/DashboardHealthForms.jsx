@@ -448,6 +448,19 @@ export default function DashboardHealthForms() {
                 <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
                   ANKIETY ZDROWOTNE ({filteredForms.length})
                 </p>
+                {/* Legenda kropek */}
+                <div className="flex flex-wrap gap-4 mb-2">
+                  {[['#FF007F', 'Problemy medyczne'], ['#f97316', 'Tak na pytanie przedzabiegowe'], ['#3b82f6', 'Brak zgody na wizerunek']].map(([color, label]) => (
+                    <div key={label} className="flex items-center gap-1.5">
+                      <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: color, flexShrink: 0 }} />
+                      <span style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>{label}</span>
+                    </div>
+                  ))}
+                  <div className="flex items-center gap-1.5">
+                    <span style={{ ...mono, fontSize: '7px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '1px 4px', letterSpacing: '0.06em' }}>NIEPEŁNOLETNI</span>
+                    <span style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>Niepełnoletni klient</span>
+                  </div>
+                </div>
                 <div className="flex items-center gap-2" style={{ border: `0.5px solid ${t.border}`, padding: '6px 10px' }}>
                   <Search size={12} color={t.muted} />
                   <input
@@ -488,9 +501,21 @@ export default function DashboardHealthForms() {
                           </p>
                         </div>
                       </div>
-                      {BOOL_FIELDS.some(([k]) => form[k] === true) && (
-                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#FF007F', flexShrink: 0 }} title="Problemy zdrowotne" />
-                      )}
+                      <div className="flex flex-col gap-1 items-end flex-shrink-0">
+                        {BOOL_FIELDS.some(([k]) => form[k] === true) && (
+                          <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#FF007F' }} title="Problemy medyczne" />
+                        )}
+                        {/* pytania przedzabiegowe - sprawdzamy pola procedure_ z true */}
+                        {Object.keys(form).some(k => k !== 'had_tattoo_piercing_before' && !BOOL_FIELDS.map(b=>b[0]).includes(k) && (k.startsWith('has_') || k.startsWith('is_')) && form[k] === true) === false && [
+                          'is_pregnant','is_under_alcohol_drug_influence','is_allergic_to_metals_dyes_latex'
+                        ].some(k => !BOOL_FIELDS.map(b=>b[0]).includes(k) && form[k] === true) ? null : null}
+                        {Object.entries(form).some(([k, v]) => v === true && !BOOL_FIELDS.map(b=>b[0]).includes(k) && k !== 'is_minor' && k !== 'is_update_only' && k !== 'consent_tattoo_piercing' && k !== 'confirm_sober' && k !== 'consent_image_use' && k !== 'confirm_regulations_read' && k !== 'health_form_completed' && k !== 'deposit_paid') && (
+                          <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#f97316' }} title="Tak na pytanie przedzabiegowe" />
+                        )}
+                        {form.consent_image_use === false && (
+                          <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#3b82f6' }} title="Brak zgody na wizerunek" />
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
