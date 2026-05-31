@@ -310,8 +310,8 @@ export default function DashboardFormTemplate() {
                 <div key={i} style={{ border: `0.5px solid ${dividerCol}`, padding: '10px', background: 'rgba(255,0,127,0.02)' }}>
                   <div className="flex items-start gap-3">
                     <div className="flex-1 space-y-2">
-                      <input type="text" value={field.label || ''} onChange={e => { const u = [...declarationFields]; u[i].label = e.target.value; setDeclarationFields(u); }} placeholder="Etykieta pola" style={inputStyle} />
-                      <input type="text" value={field.placeholder || ''} onChange={e => { const u = [...declarationFields]; u[i].placeholder = e.target.value; setDeclarationFields(u); }} placeholder="Placeholder" style={inputStyle} />
+                      <input type="text" value={field.label || ''} onChange={e => setDeclarationFields(u => u.map((f, j) => j === i ? { ...f, label: e.target.value } : f))} placeholder="Etykieta pola" style={inputStyle} />
+                      <input type="text" value={field.placeholder || ''} onChange={e => setDeclarationFields(u => u.map((f, j) => j === i ? { ...f, placeholder: e.target.value } : f))} placeholder="Placeholder" style={inputStyle} />
                     </div>
                     <button onClick={() => setDeclarationFields(declarationFields.filter((_, j) => j !== i))} style={{ color: fuchsia, background: 'none', border: 'none', cursor: 'pointer', padding: '2px', flexShrink: 0 }}>
                       <Trash2 size={14} />
@@ -354,10 +354,10 @@ export default function DashboardFormTemplate() {
                 <div key={i} style={{ border: `0.5px solid ${dividerCol}`, padding: '10px', background: 'rgba(255,0,127,0.02)' }}>
                   <div className="flex items-start gap-3">
                     <div className="flex-1 space-y-2">
-                      <input type="text" value={field.label} onChange={e => { const u = [...consentFields]; u[i].label = e.target.value; setConsentFields(u); }} placeholder="Etykieta zgody" style={inputStyle} />
-                      <textarea value={field.description || ''} onChange={e => { const u = [...consentFields]; u[i].description = e.target.value; setConsentFields(u); }} placeholder="Pełny tekst zgody do przeczytania przez użytkownika" style={{ ...inputStyle, resize: 'none', minHeight: '60px' }} />
+                      <input type="text" value={field.label} onChange={e => setConsentFields(u => u.map((f, j) => j === i ? { ...f, label: e.target.value } : f))} placeholder="Etykieta zgody" style={inputStyle} />
+                      <textarea value={field.description || ''} onChange={e => setConsentFields(u => u.map((f, j) => j === i ? { ...f, description: e.target.value } : f))} placeholder="Pełny tekst zgody do przeczytania przez użytkownika" style={{ ...inputStyle, resize: 'none', minHeight: '60px' }} />
                       <label className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', color: fg, cursor: 'pointer' }}>
-                        <input type="checkbox" checked={field.required} onChange={e => { const u = [...consentFields]; u[i].required = e.target.checked; setConsentFields(u); }} /> Wymagane
+                        <input type="checkbox" checked={!!field.required} onChange={e => setConsentFields(u => u.map((f, j) => j === i ? { ...f, required: e.target.checked } : f))} /> Wymagane
                       </label>
                     </div>
                     <button onClick={() => setConsentFields(consentFields.filter((_, j) => j !== i))} style={{ color: fuchsia, background: 'none', border: 'none', cursor: 'pointer', padding: '2px', flexShrink: 0 }}>
