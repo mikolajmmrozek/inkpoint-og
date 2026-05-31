@@ -180,6 +180,15 @@ export default function DashboardHealthForms() {
   const [exporting, setExporting] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
   const [sendingLinkEmail, setSendingLinkEmail] = useState(null);
+  const [dismissedReminders, setDismissedReminders] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('dismissedFormReminders') || '[]'); } catch { return []; }
+  });
+
+  const dismissReminder = (bookingId) => {
+    const next = [...dismissedReminders, bookingId];
+    setDismissedReminders(next);
+    localStorage.setItem('dismissedFormReminders', JSON.stringify(next));
+  };
   const [docTab, setDocTab] = useState('ankiety'); // 'ankiety', 'aftercare', 'regulamin'
   const [instructions, setInstructions] = useState([]);
   const [terms, setTerms] = useState([]);
@@ -229,7 +238,7 @@ export default function DashboardHealthForms() {
   };
 
   // Bookings without completed health form
-  const pendingBookings = bookings.filter(b => !b.health_form_completed && b.status !== 'cancelled');
+  const pendingBookings = bookings.filter(b => !b.health_form_completed && b.status !== 'cancelled' && !dismissedReminders.includes(b.id));
 
   // Filter forms by search query
   const filteredForms = forms.filter(form => {
@@ -372,7 +381,14 @@ export default function DashboardHealthForms() {
               </div>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => sendHealthFormLink(b)}
+                  onClick={() => dismissReminder(b.id)}
+                  title="Ukryj przypomnienie"
+                  style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', opacity: 0.6 }}
+                >
+                  <X size={12} />
+                </button>
+               <button
+                 onClick={() => sendHealthFormLink(b)}
                   disabled={sendingLinkEmail === b.id}
                   title="Wyślij link do ankiety"
                   style={{ color: sendingLinkEmail === b.id ? t.muted : t.fuchsia, background: 'none', border: 'none', cursor: sendingLinkEmail === b.id ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', opacity: sendingLinkEmail === b.id ? 0.5 : 1 }}
