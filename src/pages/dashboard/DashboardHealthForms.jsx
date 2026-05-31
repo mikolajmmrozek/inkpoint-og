@@ -111,7 +111,7 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme, template }
         {allMedical.map(field => {
           const fieldKey = field.field_key || field[0];
           const label = field.label || field[1];
-          const descField = field.has_description ? `${fieldKey}_desc` : null;
+          const descField = (field.has_description !== false) ? (field[2] || `${fieldKey}_desc`) : null;
           return (
             <div key={fieldKey}>
               <div className="flex items-center justify-between py-1.5" style={{ borderBottom: `0.5px solid ${t.border}` }}>
@@ -133,14 +133,14 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme, template }
         <div className="px-5 pb-4">
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>PYTANIA PRZEDZABIEGOWE</p>
           {allProcedure.map(q => (
-            <div key={q.field_key}>
-              <div className="flex items-center justify-between py-1.5" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.text, letterSpacing: '0.06em' }}>{q.label}</p>
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: selected[q.field_key] === true ? '#f97316' : selected[q.field_key] === false ? '#16a34a' : 'rgba(245,240,235,0.3)' }}>
-                  {selected[q.field_key] === true ? 'TAK' : selected[q.field_key] === false ? 'NIE' : '—'}
-                </span>
-              </div>
-              {selected[q.field_key] === true && selected[`${q.field_key}_desc`] && (
+           <div key={q.field_key}>
+             <div className="flex items-center justify-between py-1.5" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+               <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.text, letterSpacing: '0.06em' }}>{q.label}</p>
+               <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: selected[q.field_key] === true ? '#f97316' : selected[q.field_key] === false ? '#16a34a' : 'rgba(245,240,235,0.3)' }}>
+                 {selected[q.field_key] === true ? 'TAK' : selected[q.field_key] === false ? 'NIE' : '—'}
+               </span>
+             </div>
+             {selected[q.field_key] === true && (q.has_description !== false) && selected[`${q.field_key}_desc`] && (
                 <p style={{ color: theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.5)', fontSize: '11px', padding: '2px 0 6px 8px', fontStyle: 'italic' }}>{selected[`${q.field_key}_desc`]}</p>
               )}
             </div>
