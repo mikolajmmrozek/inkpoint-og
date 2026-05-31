@@ -23,6 +23,8 @@ export default function HealthFormPage() {
   const [useQuickRefresh, setUseQuickRefresh] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
   const [templateData, setTemplateData] = useState(null);
+  const [isFirstVisit, setIsFirstVisit] = useState(null);
+  const [prefillBanner, setPrefillBanner] = useState(false);
 
   const [form, setForm] = useState({
     booking_id: '',
@@ -124,6 +126,47 @@ export default function HealthFormPage() {
   const setField = (key, value) => setForm(f => ({ ...f, [key]: value }));
   const setGuardianField = (key, value) => setGuardian(g => ({ ...g, [key]: value }));
 
+  const handleEmailPrefill = async () => {
+    if (isFirstVisit !== false || !form.client_email) return;
+    try {
+      const prev = await base44.entities.HealthForm.filter({ client_email: form.client_email, is_update_only: false }, '-form_filled_date', 1);
+      if (prev.length > 0) {
+        const p = prev[0];
+        setForm(f => ({
+          ...f,
+          client_first_name: p.client_first_name || f.client_first_name,
+          client_last_name: p.client_last_name || f.client_last_name,
+          date_of_birth: p.date_of_birth || f.date_of_birth,
+          address_street: p.address_street || f.address_street,
+          address_city: p.address_city || f.address_city,
+          address_postal_code: p.address_postal_code || f.address_postal_code,
+          client_phone: p.client_phone || f.client_phone,
+          pesel: p.pesel || f.pesel,
+          has_heart_condition: p.has_heart_condition ?? f.has_heart_condition,
+          has_kidney_condition: p.has_kidney_condition ?? f.has_kidney_condition,
+          has_liver_condition: p.has_liver_condition ?? f.has_liver_condition,
+          has_lung_condition: p.has_lung_condition ?? f.has_lung_condition,
+          has_cancer: p.has_cancer ?? f.has_cancer,
+          has_infectious_diseases: p.has_infectious_diseases ?? f.has_infectious_diseases,
+          has_epilepsy: p.has_epilepsy ?? f.has_epilepsy,
+          has_diabetes: p.has_diabetes ?? f.has_diabetes,
+          has_hemophilia: p.has_hemophilia ?? f.has_hemophilia,
+          has_allergies: p.has_allergies ?? f.has_allergies,
+          has_inflammatory_conditions: p.has_inflammatory_conditions ?? f.has_inflammatory_conditions,
+          has_skin_conditions: p.has_skin_conditions ?? f.has_skin_conditions,
+          has_mental_conditions: p.has_mental_conditions ?? f.has_mental_conditions,
+          is_pregnant: p.is_pregnant ?? f.is_pregnant,
+          is_under_alcohol_drug_influence: p.is_under_alcohol_drug_influence ?? f.is_under_alcohol_drug_influence,
+          is_allergic_to_metals_dyes_latex: p.is_allergic_to_metals_dyes_latex ?? f.is_allergic_to_metals_dyes_latex,
+          has_blood_clotting_disorders: p.has_blood_clotting_disorders ?? f.has_blood_clotting_disorders,
+          has_scars_skin_changes: p.has_scars_skin_changes ?? f.has_scars_skin_changes,
+          had_tattoo_piercing_before: p.had_tattoo_piercing_before ?? f.had_tattoo_piercing_before,
+        }));
+        setPrefillBanner(true);
+      }
+    } catch (_) {}
+  };
+
   const inputStyle = {
     background: 'transparent',
     border: 'none',
@@ -138,7 +181,8 @@ export default function HealthFormPage() {
 
   const canProceed = () => {
     if (step === 'personal') {
-      return form.client_first_name && form.date_of_birth && form.address_street && form.address_city && form.address_postal_code && form.client_phone && form.procedure_type && form.body_placement;
+      const emailOk = isFirstVisit === true || (isFirstVisit === false && !!form.client_email);
+      return isFirstVisit !== null && form.client_first_name && form.date_of_birth && form.address_street && form.address_city && form.address_postal_code && form.client_phone && form.procedure_type && form.body_placement && emailOk;
     }
     if (step === 'medical') {
       const fields = templateData?.medical_fields || [];
@@ -373,7 +417,12 @@ export default function HealthFormPage() {
 
         {/* Form */}
         <form className="mb-12" onSubmit={e => e.preventDefault()}>
-          {step === 'personal' && <StepPersonal form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} />}
+          {prefillBanner && step === 'personal' && (
+            <div className="mb-4 px-3 py-2 flex items-center gap-2" style={{ background: 'rgba(22,163,74,0.1)', border: '0.5px solid rgba(22,163,74,0.4)' }}>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.08em' }}>✓ Wczytano dane z poprzedniej wizyty — sprawdź i uzupełnij.</p>
+            </div>
+          )}
+          {step === 'personal' && <StepPersonal form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} isFirstVisit={isFirstVisit} setIsFirstVisit={setIsFirstVisit} onEmailBlur={handleEmailPrefill} />}
           {step === 'medical' && <StepMedical form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={templateData} />}
           {step === 'procedure' && <StepProcedure form={form} setField={setField} t={t} inputStyle={inputStyle} templateData={templateData} />}
           {step === 'declaration' && <StepDeclaration form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={templateData} />}
