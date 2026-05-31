@@ -226,7 +226,7 @@ export default function DashboardFormTemplate() {
 
             <div className="flex items-center justify-between">
               <p style={{ ...mono, fontSize: '9px', color: fgMuted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Pytania</p>
-              <button onClick={() => setProcedureQuestions([...procedureQuestions, { field_key: `procedure_q_${Date.now()}`, label: '', required: false }])}
+              <button onClick={() => setProcedureQuestions([...procedureQuestions, { field_key: `procedure_q_${Date.now()}`, label: '', required: false, has_description: false }])}
                 className="flex items-center gap-2"
                 style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${fuchsia}`, color: fuchsia, background: 'transparent', cursor: 'pointer' }}>
                 <Plus size={11} /> DODAJ
@@ -243,9 +243,14 @@ export default function DashboardFormTemplate() {
                   <div className="flex items-start gap-3">
                     <div className="flex-1 space-y-2">
                       <input type="text" value={field.label} onChange={e => { const u = [...procedureQuestions]; u[i].label = e.target.value; setProcedureQuestions(u); }} placeholder="Treść pytania" style={inputStyle} />
-                      <label className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', color: fg, cursor: 'pointer' }}>
-                        <input type="checkbox" checked={field.required || false} onChange={e => { const u = [...procedureQuestions]; u[i].required = e.target.checked; setProcedureQuestions(u); }} /> Wymagane
-                      </label>
+                      <div className="flex gap-4">
+                        <label className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', color: fg, cursor: 'pointer' }}>
+                          <input type="checkbox" checked={field.required || false} onChange={e => { const u = [...procedureQuestions]; u[i].required = e.target.checked; setProcedureQuestions(u); }} /> Wymagane
+                        </label>
+                        <label className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', color: fg, cursor: 'pointer' }}>
+                          <input type="checkbox" checked={field.has_description || false} onChange={e => { const u = [...procedureQuestions]; u[i].has_description = e.target.checked; setProcedureQuestions(u); }} /> Pole opisu
+                        </label>
+                      </div>
                     </div>
                     <button onClick={() => setProcedureQuestions(procedureQuestions.filter((_, j) => j !== i))} style={{ color: fuchsia, background: 'none', border: 'none', cursor: 'pointer', padding: '2px', flexShrink: 0 }}>
                       <Trash2 size={14} />

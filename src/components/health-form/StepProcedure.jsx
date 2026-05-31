@@ -40,6 +40,15 @@ export default function StepProcedure({ form, setField, t, inputStyle }) {
               ))}
             </div>
           </div>
+          {form[q.field_key] === true && q.has_description && (
+            <input
+              type="text"
+              placeholder={t.describeIfYes}
+              style={{ ...inputStyle, marginTop: '8px', fontSize: '13px' }}
+              value={form[`${q.field_key}_desc`] || ''}
+              onChange={e => setField(`${q.field_key}_desc`, e.target.value)}
+            />
+          )}
         </div>
       ))}
     </div>
