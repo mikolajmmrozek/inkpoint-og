@@ -38,29 +38,6 @@ export default function HealthFormPage() {
     address_city: '',
     address_postal_code: '',
     pesel: '',
-    has_heart_condition: null,
-    has_kidney_condition: null,
-    has_liver_condition: null,
-    has_lung_condition: null,
-    has_cancer: null,
-    has_infectious_diseases: null,
-    has_epilepsy: null,
-    has_diabetes: null,
-    has_hemophilia: null,
-    has_allergies: null,
-    has_inflammatory_conditions: null,
-    has_skin_conditions: null,
-    has_mental_conditions: null,
-    is_pregnant: null,
-    is_under_alcohol_drug_influence: null,
-    is_allergic_to_metals_dyes_latex: null,
-    has_blood_clotting_disorders: null,
-    has_scars_skin_changes: null,
-    had_tattoo_piercing_before: null,
-    consent_tattoo_piercing: false,
-    confirm_sober: false,
-    consent_image_use: false,
-    confirm_regulations_read: false,
     client_signature: '',
     form_filled_date: new Date().toISOString().split('T')[0],
     procedure_type: '',
@@ -87,17 +64,46 @@ export default function HealthFormPage() {
     const editFormId = params.get('edit_form_id');
 
     const load = async () => {
-      // Load template for validation and titles
+      // Load template and build dynamic initial form state
+      let tpl = null;
       try {
-        const tpl = await base44.entities.HealthFormTemplate.filter({ key: 'default' }).then(r => r[0]);
-        if (tpl) setTemplateData(tpl);
+        const tplArr = await base44.entities.HealthFormTemplate.filter({ key: 'default' });
+        tpl = tplArr[0];
+        if (tpl) {
+          setTemplateData(tpl);
+          // Build dynamic initial state from template
+          const dynamicState = { ...form };
+          if (tpl.medical_fields) {
+            tpl.medical_fields.forEach(f => {
+              dynamicState[f.field_key] = null;
+              if (f.has_description !== false) dynamicState[`${f.field_key}_desc`] = '';
+            });
+          }
+          if (tpl.procedure_questions) {
+            tpl.procedure_questions.forEach(q => {
+              dynamicState[q.field_key] = null;
+              if (q.has_description !== false) dynamicState[`${q.field_key}_desc`] = '';
+            });
+          }
+          if (tpl.declaration_fields) {
+            tpl.declaration_fields.forEach(f => {
+              dynamicState[f.field_key] = '';
+            });
+          }
+          if (tpl.consent_fields) {
+            tpl.consent_fields.forEach(f => {
+              dynamicState[f.field_key] = false;
+            });
+          }
+          setForm(dynamicState);
+        }
       } catch (_) {}
 
       if (editFormId) {
         // Load existing form for editing
         const existingForm = await base44.entities.HealthForm.filter({ id: editFormId }).then(r => r[0]);
         if (existingForm) {
-          setForm(f => ({ ...f, ...existingForm, previous_form_id: existingForm.id, form_filled_date: new Date().toISOString().split('T')[0] }));
+          setForm(f => ({ ...f, ...existingForm, form_filled_date: new Date().toISOString().split('T')[0] }));
           const bk = existingForm.booking_id ? await base44.entities.Booking.filter({ id: existingForm.booking_id }).then(r => r[0]) : null;
           if (bk) setBooking(bk);
           setIsFirstVisit(false);
@@ -114,8 +120,6 @@ export default function HealthFormPage() {
             client_last_name: (b.client_name || '').split(' ').slice(1).join(' ') || '',
             client_email: b.client_email || '',
             client_phone: b.client_phone || '',
-            procedure_type: b.tattoo_description ? 'TATUAŻ' : '',
-            body_placement: b.tattoo_placement || '',
           }));
 
           // Check for previous form
