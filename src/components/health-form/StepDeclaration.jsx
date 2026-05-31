@@ -46,9 +46,11 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
         <div className="space-y-4">
           {customFields.map(field => (
             <div key={field.field_key}>
-              <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'rgba(245,240,235,0.5)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                {field.label}
-              </label>
+              {field.label && (
+                <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'rgba(245,240,235,0.5)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                  {field.label}
+                </label>
+              )}
               <textarea
                 rows={1}
                 style={{ ...inputStyle, resize: 'none', overflow: 'hidden', whiteSpace: 'pre-wrap' }}
