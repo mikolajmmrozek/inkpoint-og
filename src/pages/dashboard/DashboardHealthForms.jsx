@@ -525,7 +525,7 @@ export default function DashboardHealthForms() {
                         {(() => {
                           const boolFieldKeys = BOOL_FIELDS.map(b => b[0]);
                           const hasMedical = boolFieldKeys.some(k => form[k] === true);
-                          const hasProcedureYes = (template?.procedure_questions || []).some(q => form[q.field_key] === true);
+                          const hasProcedureYes = (template?.procedure_questions || []).some(q => form[q.field_key] === true || form[`${q.field_key}_desc`]);
                           const noImageConsent = form.consent_image_use === false;
                           const allOk = !hasMedical && !hasProcedureYes && !noImageConsent && !form.is_minor;
                           return (
