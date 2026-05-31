@@ -33,10 +33,12 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
   return (
     <div className="space-y-6">
       {/* Declaration content */}
-      <div style={{ border: '0.5px solid #262626', padding: '16px', background: 'rgba(255,0,127,0.02)' }}>
-        <p style={{ color: 'rgba(245,240,235,0.7)', fontSize: '13px', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowWrap: 'break-word', maxWidth: '100%', display: 'block' }}>
-          {declaration.content}
-        </p>
+      <div style={{ borderTop: '0.5px solid #262626' }}>
+        {(declaration.content || '').split(/\n+/).filter(p => p.trim()).map((para, i) => (
+          <p key={i} style={{ color: 'rgba(245,240,235,0.7)', fontSize: '13px', lineHeight: 1.7, wordBreak: 'break-word', overflowWrap: 'break-word', padding: '14px 0', borderBottom: '0.5px solid #262626' }}>
+            {para.trim()}
+          </p>
+        ))}
       </div>
 
       {/* Custom declaration fields */}
@@ -61,7 +63,7 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
       )}
 
       {/* Main declaration consent */}
-      <div style={{ paddingTop: '20px', borderTop: '0.5px solid #262626' }}>
+      <div style={{ paddingTop: '20px' }}>
         <button
           type="button"
           onClick={() => setField(declaration.field_key, !form[declaration.field_key])}
