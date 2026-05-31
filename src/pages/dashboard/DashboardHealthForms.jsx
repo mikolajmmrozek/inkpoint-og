@@ -307,6 +307,23 @@ export default function DashboardHealthForms() {
     }
   };
 
+  const [sendingEditLink, setSendingEditLink] = useState(false);
+
+  const sendEditLink = async (form) => {
+    setSendingEditLink(true);
+    try {
+      const link = `${window.location.origin}/health-form?edit_form_id=${form.id}`;
+      await base44.integrations.Core.SendEmail({
+        to: form.client_email,
+        subject: 'Popraw swoją ankietę zdrowotną — Romans Tattoo',
+        body: `Dzień dobry ${form.client_name},\n\nProsimy o poprawienie danych w Twojej ankiecie zdrowotnej.\n\nKliknij poniższy link, aby edytować ankietę:\n${link}\n\nJeśli masz pytania, skontaktuj się z nami.\n\nRomans Tattoo`
+      });
+      alert(`Link do edycji wysłany na ${form.client_email}`);
+    } finally {
+      setSendingEditLink(false);
+    }
+  };
+
   const deleteForm = async (form) => {
     if (!window.confirm(`Czy na pewno chcesz usunąć ankietę dla ${getClientName(form)}?`)) return;
     await base44.entities.HealthForm.delete(form.id);
@@ -609,6 +626,14 @@ export default function DashboardHealthForms() {
                   style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', opacity: sendingEmail ? 0.5 : 1 }}
                 >
                   <Mail size={16} />
+                </button>
+                <button
+                  onClick={() => sendEditLink(selected)}
+                  disabled={sendingEditLink}
+                  title="Wyślij link do edycji klientowi"
+                  style={{ color: '#f59e0b', background: 'none', border: 'none', cursor: 'pointer', opacity: sendingEditLink ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: '4px' }}
+                >
+                  <Edit3 size={16} />
                 </button>
                 <button
                   onClick={() => deleteForm(selected)}

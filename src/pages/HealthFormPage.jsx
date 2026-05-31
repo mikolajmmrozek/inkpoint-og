@@ -84,6 +84,7 @@ export default function HealthFormPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const bookingId = params.get('booking_id');
+    const editFormId = params.get('edit_form_id');
 
     const load = async () => {
       // Load template for validation and titles
@@ -92,7 +93,17 @@ export default function HealthFormPage() {
         if (tpl) setTemplateData(tpl);
       } catch (_) {}
 
-      if (bookingId) {
+      if (editFormId) {
+        // Load existing form for editing
+        const existingForm = await base44.entities.HealthForm.filter({ id: editFormId }).then(r => r[0]);
+        if (existingForm) {
+          setForm(f => ({ ...f, ...existingForm, previous_form_id: existingForm.id, form_filled_date: new Date().toISOString().split('T')[0] }));
+          const bk = existingForm.booking_id ? await base44.entities.Booking.filter({ id: existingForm.booking_id }).then(r => r[0]) : null;
+          if (bk) setBooking(bk);
+          setIsFirstVisit(false);
+          setStep('personal');
+        }
+      } else if (bookingId) {
         const b = await base44.entities.Booking.filter({ id: bookingId }).then(r => r[0]);
         if (b) {
           setBooking(b);
