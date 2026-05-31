@@ -56,7 +56,7 @@ export default function StepMedical({ form, setField, t, inputStyle, showErrors,
       {sectionIntro && <p style={{ color: 'rgba(245,240,235,0.5)', fontSize: '13px', marginBottom: '20px', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{sectionIntro}</p>}
       <div>
         {fields.map(f => (
-          <YesNoRow key={f.field_key} label={f.label} fieldKey={f.field_key} descKey={f.has_description ? `${f.field_key}_desc` : null} form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} />
+          <YesNoRow key={f.field_key} label={f.label} fieldKey={f.field_key} descKey={f.has_description !== false ? `${f.field_key}_desc` : null} form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} />
         ))}
       </div>
     </div>
