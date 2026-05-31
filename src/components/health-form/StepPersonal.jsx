@@ -1,6 +1,6 @@
 import DatePickerCustom from './DatePickerCustom';
 
-export default function StepPersonal({ form, setField, t, inputStyle, showErrors, isFirstVisit, setIsFirstVisit, onEmailBlur }) {
+export default function StepPersonal({ form, setField, t, inputStyle, showErrors }) {
   const isMinor = form.date_of_birth
     ? new Date().getFullYear() - new Date(form.date_of_birth).getFullYear() < 18
     : false;
@@ -15,40 +15,14 @@ export default function StepPersonal({ form, setField, t, inputStyle, showErrors
   return (
     <div className="space-y-6">
 
-      {/* Pierwsza wizyta */}
-      <div>
-        <label style={labelStyle(showErrors && isFirstVisit === null)}>
-          Czy to Twoja pierwsza wizyta w naszym studio? * {showErrors && isFirstVisit === null && '(wymagane)'}
-        </label>
-        <div className="flex gap-3">
-          {[true, false].map(v => (
-            <button type="button" key={String(v)} onClick={() => setIsFirstVisit(v)}
-              style={{
-                fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em',
-                textTransform: 'uppercase', padding: '10px 20px',
-                border: `0.5px solid ${isFirstVisit === v ? '#FF007F' : showErrors && isFirstVisit === null ? '#FF007F' : '#262626'}`,
-                color: isFirstVisit === v ? '#FF007F' : showErrors && isFirstVisit === null ? '#FF007F' : 'rgba(245,240,235,0.4)',
-                background: isFirstVisit === v ? 'rgba(255,0,127,0.08)' : 'transparent',
-                cursor: 'pointer'
-              }}>
-              {v ? 'TAK' : 'NIE'}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Email */}
       <div>
-        <label style={labelStyle(showErrors && !isFirstVisit && !form.client_email)}>
-          {t.email}{!isFirstVisit && isFirstVisit !== null ? ' *' : ''} {showErrors && isFirstVisit === false && !form.client_email && '(wymagane)'}
-        </label>
+        <label style={labelStyle(false)}>{t.email}</label>
         <input
           type="email"
-          style={{ ...inputStyle, borderBottomColor: showErrors && isFirstVisit === false && !form.client_email ? '#FF007F' : '#262626' }}
+          style={inputStyle}
           value={form.client_email || ''}
           onChange={e => setField('client_email', e.target.value)}
-          onBlur={onEmailBlur}
-          placeholder={isFirstVisit === false ? 'Podaj email z poprzedniej wizyty...' : ''}
         />
       </div>
 

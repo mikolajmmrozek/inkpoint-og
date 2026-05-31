@@ -181,8 +181,7 @@ export default function HealthFormPage() {
 
   const canProceed = () => {
     if (step === 'personal') {
-      const emailOk = isFirstVisit === true || (isFirstVisit === false && !!form.client_email);
-      return isFirstVisit !== null && form.client_first_name && form.date_of_birth && form.address_street && form.address_city && form.address_postal_code && form.client_phone && form.procedure_type && form.body_placement && emailOk;
+      return form.client_first_name && form.date_of_birth && form.address_street && form.address_city && form.address_postal_code && form.client_phone && form.procedure_type && form.body_placement;
     }
     if (step === 'medical') {
       const fields = templateData?.medical_fields || [];
@@ -331,7 +330,7 @@ export default function HealthFormPage() {
                   {LANGUAGES.map(l => (
                     <button
                       key={l.code}
-                      onClick={() => { setLang(l.code); setLangMenuOpen(false); setStep('personal'); }}
+                      onClick={() => { setLang(l.code); setLangMenuOpen(false); }}
                       style={{
                         fontFamily: 'JetBrains Mono',
                         fontSize: '12px',
@@ -355,10 +354,45 @@ export default function HealthFormPage() {
             </div>
           </div>
 
-          <div className="mt-12">
+          {/* Pierwsza wizyta */}
+          <div className="mt-8">
+            <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.5)', letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+              Czy to Twoja pierwsza wizyta w naszym studio? *
+            </label>
+            <div className="flex gap-3">
+              {[true, false].map(v => (
+                <button type="button" key={String(v)} onClick={() => setIsFirstVisit(v)}
+                  style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 20px', border: `0.5px solid ${isFirstVisit === v ? '#FF007F' : '#262626'}`, color: isFirstVisit === v ? '#FF007F' : 'rgba(245,240,235,0.4)', background: isFirstVisit === v ? 'rgba(255,0,127,0.08)' : 'transparent', cursor: 'pointer' }}>
+                  {v ? 'TAK' : 'NIE'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Email tylko dla powracających */}
+          {isFirstVisit === false && (
+            <div className="mt-4">
+              <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.5)', letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+                Adres e-mail z poprzedniej wizyty *
+              </label>
+              <input
+                type="email"
+                value={form.client_email || ''}
+                onChange={e => setField('client_email', e.target.value)}
+                placeholder="twoj@email.pl"
+                style={{ background: 'transparent', border: 'none', borderBottom: '0.5px solid #262626', color: '#F5F0EB', padding: '12px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif' }}
+              />
+            </div>
+          )}
+
+          <div className="mt-8">
             <button
-              onClick={() => setStep('personal')}
-              style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', background: 'linear-gradient(135deg, #FF007F 0%, #CC0066 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', width: '100%' }}
+              disabled={isFirstVisit === null || (isFirstVisit === false && !form.client_email)}
+              onClick={async () => {
+                if (isFirstVisit === false && form.client_email) await handleEmailPrefill();
+                setStep('personal');
+              }}
+              style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', background: 'linear-gradient(135deg, #FF007F 0%, #CC0066 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', width: '100%', opacity: isFirstVisit === null || (isFirstVisit === false && !form.client_email) ? 0.5 : 1 }}
             >
               {t.next} →
             </button>
@@ -417,12 +451,12 @@ export default function HealthFormPage() {
 
         {/* Form */}
         <form className="mb-12" onSubmit={e => e.preventDefault()}>
-          {prefillBanner && step === 'personal' && (
+          {prefillBanner && (
             <div className="mb-4 px-3 py-2 flex items-center gap-2" style={{ background: 'rgba(22,163,74,0.1)', border: '0.5px solid rgba(22,163,74,0.4)' }}>
               <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.08em' }}>✓ Wczytano dane z poprzedniej wizyty — sprawdź i uzupełnij.</p>
             </div>
           )}
-          {step === 'personal' && <StepPersonal form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} isFirstVisit={isFirstVisit} setIsFirstVisit={setIsFirstVisit} onEmailBlur={handleEmailPrefill} />}
+          {step === 'personal' && <StepPersonal form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} />}
           {step === 'medical' && <StepMedical form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={templateData} />}
           {step === 'procedure' && <StepProcedure form={form} setField={setField} t={t} inputStyle={inputStyle} templateData={templateData} />}
           {step === 'declaration' && <StepDeclaration form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={templateData} />}
