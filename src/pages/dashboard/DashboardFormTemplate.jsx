@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
 
 const DEFAULT_MEDICAL_FIELDS = [
   { field_key: 'has_heart_condition', label: 'Choroby serca', required: false, has_description: true },
@@ -25,10 +25,7 @@ const DEFAULT_MEDICAL_FIELDS = [
   { field_key: 'had_tattoo_piercing_before', label: 'Poprzednie tatuaże / piercинги', required: false, has_description: true },
 ];
 
-const DEFAULT_PROCEDURE_QUESTIONS = [
-  { field_key: 'procedure_q1', label: 'Pytanie 1' },
-  { field_key: 'procedure_q2', label: 'Pytanie 2' },
-];
+const DEFAULT_PROCEDURE_QUESTIONS = [];
 
 const DEFAULT_DECLARATION = {
   content: 'Oświadczam, że zapoznałem(a) się ze wszystkimi informacjami i powyższymi pytaniami dotyczącymi zabiegu tatuażu/piercingu.',
@@ -38,19 +35,52 @@ const DEFAULT_DECLARATION = {
 };
 
 const DEFAULT_CONSENT_FIELDS = [
-  { field_key: 'consent_tattoo_piercing', label: 'Zgoda na zabieg', description: 'Oświadczam, że dobrowolnie wyrażam zgodę na wykonanie zabiegu tatuażu/piercingu zgodnie z moim życzeniem. Potwierdzam, że zapoznałem(a) się z procedurą, ryzykami i możliwymi powikłaniami oraz mam świadomość konsekwencji zdrowotnych związanych z tym zabiegiem.', required: true },
-  { field_key: 'confirm_sober', label: 'Trzeźwość', description: 'Potwierdzam, że w momencie podpisania tej deklaracji nie jestem pod wpływem alkoholu, narkotyków, leków psychoaktywnych lub innych substancji mogących wpłynąć na moją zdolność do podejmowania świadomych decyzji. Rozumiem, że zabieg będzie wykonany wyłącznie w stanie pełnej trzeźwości.', required: true },
-  { field_key: 'consent_image_use', label: 'Zgoda na fotografowanie', description: 'Wyrażam dobrowolną zgodę na fotografowanie/filmowanie wyniku zabiegu w celu dokumentacji artystycznej, analizy jakości pracy oraz promowania portfolio studia, z zaznaczeniem, że dane osobowe nie będą ujawniane bez mojej dodatkowej pisemnej zgody.', required: false },
-  { field_key: 'confirm_regulations_read', label: 'Zasady pielęgnacji i regulamin', description: 'Potwierdzam, że zapoznałem(a) się w pełni z instrukcją pielęgnacji pooperacyjnej, regulaminem studia oraz polityką reklamacji. Zobowiązuję się do przestrzegania wszystkich zaleceń medycznych i higienicznych przez okres wskazany przez personel studia.', required: true },
+  { field_key: 'consent_tattoo_piercing', label: 'Zgoda na zabieg', description: 'Oświadczam, że dobrowolnie wyrażam zgodę na wykonanie zabiegu tatuażu/piercingu zgodnie z moim życzeniem.', required: true },
+  { field_key: 'confirm_sober', label: 'Trzeźwość', description: 'Potwierdzam, że w momencie podpisania tej deklaracji nie jestem pod wpływem alkoholu, narkotyków ani leków psychoaktywnych.', required: true },
+  { field_key: 'consent_image_use', label: 'Zgoda na fotografowanie', description: 'Wyrażam dobrowolną zgodę na fotografowanie/filmowanie wyniku zabiegu w celu dokumentacji artystycznej.', required: false },
+  { field_key: 'confirm_regulations_read', label: 'Zasady pielęgnacji i regulamin', description: 'Potwierdzam, że zapoznałem(a) się z instrukcją pielęgnacji, regulaminem studia oraz polityką reklamacji.', required: true },
 ];
+
+const DEFAULT_SECTION_INTROS = {
+  medical: 'Prosimy o udzielenie szczerych odpowiedzi. Informacje te są niezbędne do bezpiecznego przeprowadzenia zabiegu.',
+  procedure: 'Prosimy o odpowiedź na poniższe pytania dotyczące planowanego zabiegu.',
+  declaration: 'Prosimy o zapoznanie się z poniższym oświadczeniem i jego akceptację.',
+  consents: 'Prosimy o zapoznanie się z poniższymi zgodami i ich akceptację.',
+};
+
+function SectionCard({ title, color, open, onToggle, children }) {
+  return (
+    <div style={{ border: `0.5px solid ${open ? color : '#262626'}`, background: 'rgba(10,10,10,0.8)', transition: 'border-color 0.2s' }}>
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full flex items-center justify-between"
+        style={{ padding: '16px 20px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+      >
+        <div className="flex items-center gap-3">
+          <div style={{ width: '6px', height: '6px', background: open ? color : '#262626', borderRadius: '50%', transition: 'background 0.2s' }} />
+          <span style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.5rem', color: '#F5F0EB', letterSpacing: '0.04em' }}>{title}</span>
+        </div>
+        {open ? <ChevronDown size={16} color={color} /> : <ChevronRight size={16} color="#555" />}
+      </button>
+      {open && (
+        <div style={{ padding: '0 20px 20px' }}>
+          <div style={{ height: '0.5px', background: '#262626', marginBottom: '20px' }} />
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function DashboardFormTemplate() {
   const { theme } = useTheme();
-  const t = theme === 'light'
-    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F' }
-    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F' };
+  const fuchsia = '#FF007F';
 
   const [template, setTemplate] = useState(null);
+  const [openSection, setOpenSection] = useState('medical');
+
+  const [sectionIntros, setSectionIntros] = useState(DEFAULT_SECTION_INTROS);
   const [medicalFields, setMedicalFields] = useState(DEFAULT_MEDICAL_FIELDS);
   const [procedureQuestions, setProcedureQuestions] = useState(DEFAULT_PROCEDURE_QUESTIONS);
   const [declaration, setDeclaration] = useState(DEFAULT_DECLARATION);
@@ -63,110 +93,48 @@ export default function DashboardFormTemplate() {
     base44.entities.HealthFormTemplate.filter({ key: 'default' })
       .then(data => {
         if (data.length > 0) {
-          const t = data[0];
-          setTemplate(t);
-          setMedicalFields(t.medical_fields || DEFAULT_MEDICAL_FIELDS);
-          setProcedureQuestions(t.procedure_questions || DEFAULT_PROCEDURE_QUESTIONS);
-          setDeclaration(t.declaration_of_will || DEFAULT_DECLARATION);
-          setDeclarationFields(t.declaration_fields || []);
-          setConsentFields(t.consent_fields || DEFAULT_CONSENT_FIELDS);
+          const tpl = data[0];
+          setTemplate(tpl);
+          if (tpl.section_intros) setSectionIntros({ ...DEFAULT_SECTION_INTROS, ...tpl.section_intros });
+          if (tpl.medical_fields) setMedicalFields(tpl.medical_fields);
+          if (tpl.procedure_questions) setProcedureQuestions(tpl.procedure_questions);
+          if (tpl.declaration_of_will) setDeclaration(tpl.declaration_of_will);
+          if (tpl.declaration_fields) setDeclarationFields(tpl.declaration_fields);
+          if (tpl.consent_fields) setConsentFields(tpl.consent_fields);
         }
-      })
-      .catch(() => {});
+      });
   }, []);
-
-  const addMedicalField = () => {
-    setMedicalFields([...medicalFields, { field_key: `custom_${Date.now()}`, label: '', required: false, has_description: true }]);
-  };
-
-  const removeMedicalField = (index) => {
-    setMedicalFields(medicalFields.filter((_, i) => i !== index));
-  };
-
-  const updateMedicalField = (index, key, value) => {
-    const updated = [...medicalFields];
-    updated[index][key] = value;
-    setMedicalFields(updated);
-  };
-
-  const addProcedureQuestion = () => {
-    setProcedureQuestions([...procedureQuestions, { field_key: `procedure_q_${Date.now()}`, label: '' }]);
-  };
-
-  const removeProcedureQuestion = (index) => {
-    setProcedureQuestions(procedureQuestions.filter((_, i) => i !== index));
-  };
-
-  const updateProcedureQuestion = (index, key, value) => {
-    const updated = [...procedureQuestions];
-    updated[index][key] = value;
-    setProcedureQuestions(updated);
-  };
-
-  const addConsentField = () => {
-    setConsentFields([...consentFields, { field_key: `consent_${Date.now()}`, label: '', description: '', required: false }]);
-  };
-
-  const removeConsentField = (index) => {
-    setConsentFields(consentFields.filter((_, i) => i !== index));
-  };
-
-  const updateConsentField = (index, key, value) => {
-    const updated = [...consentFields];
-    updated[index][key] = value;
-    setConsentFields(updated);
-  };
-
-  const addDeclarationField = () => {
-    setDeclarationFields([...declarationFields, { field_key: `decl_field_${Date.now()}`, label: '', placeholder: '' }]);
-  };
-
-  const removeDeclarationField = (index) => {
-    setDeclarationFields(declarationFields.filter((_, i) => i !== index));
-  };
-
-  const updateDeclarationField = (index, key, value) => {
-    const updated = [...declarationFields];
-    updated[index][key] = value;
-    setDeclarationFields(updated);
-  };
 
   const handleSave = async () => {
     setSaving(true);
     try {
       const data = {
         key: 'default',
+        section_intros: sectionIntros,
         medical_fields: medicalFields,
         procedure_questions: procedureQuestions,
         declaration_of_will: declaration,
         declaration_fields: declarationFields,
-        consent_fields: consentFields
+        consent_fields: consentFields,
       };
-      
       if (template?.id) {
         await base44.entities.HealthFormTemplate.update(template.id, data);
       } else {
         const created = await base44.entities.HealthFormTemplate.create(data);
         setTemplate(created);
       }
-
       setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
+      setTimeout(() => setSaved(false), 2500);
     } finally {
       setSaving(false);
     }
   };
 
   const inputStyle = {
-    background: 'transparent',
-    border: 'none',
-    borderBottom: `0.5px solid ${t.border}`,
-    padding: '8px 0',
-    fontSize: '13px',
-    color: t.text,
-    outline: 'none',
-    fontFamily: 'Inter',
-    width: '100%',
+    background: 'transparent', border: 'none',
+    borderBottom: '0.5px solid #262626',
+    padding: '8px 0', fontSize: '13px', color: '#F5F0EB',
+    outline: 'none', fontFamily: 'Inter', width: '100%',
   };
 
   const mono = { fontFamily: 'JetBrains Mono' };
@@ -175,225 +143,230 @@ export default function DashboardFormTemplate() {
   return (
     <div>
       <div className="mb-6">
-        <p style={{ ...mono, fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>
-          KONFIGURACJA
-        </p>
-        <h2 style={{ ...display, fontSize: '2.5rem', color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>Szablon Ankiety</h2>
+        <p style={{ ...mono, fontSize: '10px', color: fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>KONFIGURACJA</p>
+        <h2 style={{ ...display, fontSize: '2.5rem', color: '#F5F0EB', lineHeight: 1, letterSpacing: '0.04em' }}>Szablon Ankiety</h2>
       </div>
 
-      <div className="space-y-8">
-        {/* Medical fields */}
-        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '20px' }}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em' }}>Pytania Medyczne</h3>
-            <button onClick={addMedicalField} className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: 'pointer' }}>
-              <Plus size={12} /> DODAJ
-            </button>
-          </div>
+      <div className="space-y-3">
 
+        {/* ── PYTANIA MEDYCZNE ── */}
+        <SectionCard title="Pytania Medyczne" color={fuchsia} open={openSection === 'medical'} onToggle={() => setOpenSection(openSection === 'medical' ? null : 'medical')}>
           <div className="space-y-4">
-            {medicalFields.map((field, i) => (
-              <div key={i} style={{ border: `0.5px solid ${t.border}`, padding: '12px', background: 'rgba(255,0,127,0.02)' }}>
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 space-y-3">
-                    <div>
-                      <label style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Etykieta</label>
-                      <input
-                        type="text"
-                        value={field.label}
-                        onChange={e => updateMedicalField(i, 'label', e.target.value)}
-                        placeholder="Np. Choroby serca"
-                        style={inputStyle}
-                      />
-                    </div>
-                    <div className="flex gap-4">
-                      <label className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', color: t.text, cursor: 'pointer' }}>
-                        <input
-                          type="checkbox"
-                          checked={field.required}
-                          onChange={e => updateMedicalField(i, 'required', e.target.checked)}
-                        />
-                        Wymagane
-                      </label>
-                      <label className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', color: t.text, cursor: 'pointer' }}>
-                        <input
-                          type="checkbox"
-                          checked={field.has_description}
-                          onChange={e => updateMedicalField(i, 'has_description', e.target.checked)}
-                        />
-                        Zezwól na opis
-                      </label>
-                    </div>
-                  </div>
-                  <button onClick={() => removeMedicalField(i)} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+            <div>
+              <label style={{ ...mono, fontSize: '8px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                Tekst wprowadzający (widoczny w ankiecie)
+              </label>
+              <textarea
+                value={sectionIntros.medical || ''}
+                onChange={e => setSectionIntros({ ...sectionIntros, medical: e.target.value })}
+                style={{ ...inputStyle, resize: 'none', minHeight: '60px' }}
+                placeholder="Np. Prosimy o udzielenie szczerych odpowiedzi..."
+              />
+            </div>
 
-        {/* Procedure questions */}
-        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '20px' }}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em' }}>Pytania o Zabieg</h3>
-            <button onClick={addProcedureQuestion} className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: 'pointer' }}>
-              <Plus size={12} /> DODAJ
-            </button>
-          </div>
+            <div style={{ height: '0.5px', background: '#1a1a1a' }} />
 
-          <div className="space-y-4">
-            {procedureQuestions.map((field, i) => (
-              <div key={i} style={{ border: `0.5px solid ${t.border}`, padding: '12px', background: 'rgba(255,0,127,0.02)' }}>
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1">
-                    <label style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Pytanie</label>
-                    <input
-                      type="text"
-                      value={field.label}
-                      onChange={e => updateProcedureQuestion(i, 'label', e.target.value)}
-                      placeholder="Opisz pytanie dotyczące zabiegu"
-                      style={inputStyle}
-                    />
-                  </div>
-                  <button onClick={() => removeProcedureQuestion(i)} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+            <div className="flex items-center justify-between">
+              <p style={{ ...mono, fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Lista pytań</p>
+              <button onClick={() => setMedicalFields([...medicalFields, { field_key: `custom_${Date.now()}`, label: '', required: false, has_description: true }])}
+                className="flex items-center gap-2"
+                style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${fuchsia}`, color: fuchsia, background: 'transparent', cursor: 'pointer' }}>
+                <Plus size={11} /> DODAJ
+              </button>
+            </div>
 
-        {/* Declaration of will */}
-        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '20px' }}>
-          <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em', marginBottom: '16px' }}>Oświadczenie Woli</h3>
-          <div style={{ border: `0.5px solid ${t.border}`, padding: '12px', background: 'rgba(255,0,127,0.02)' }}>
             <div className="space-y-3">
-              <div>
-                <label style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Treść oświadczenia</label>
-                <textarea
-                  value={declaration.content || ''}
-                  onChange={e => setDeclaration({ ...declaration, content: e.target.value })}
-                  placeholder="Treść oświadczenia woli"
-                  style={{ ...inputStyle, resize: 'none', minHeight: '80px' }}
-                />
-              </div>
-
-              {/* Declaration fields */}
-              <div className="pt-4 border-t border-t-slate-300" style={{ borderTopColor: t.border }}>
-                <div className="flex items-center justify-between mb-3">
-                  <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Pola Dodatkowe</p>
-                  <button onClick={addDeclarationField} className="flex items-center gap-2" style={{ ...mono, fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 8px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: 'pointer' }}>
-                    <Plus size={10} /> DODAJ
-                  </button>
-                </div>
-                <div className="space-y-2">
-                  {declarationFields.map((field, i) => (
-                    <div key={i} style={{ border: `0.5px solid ${t.border}`, padding: '8px', background: 'rgba(255,0,127,0.01)' }}>
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 space-y-2">
-                          <input
-                            type="text"
-                            value={field.label || ''}
-                            onChange={e => updateDeclarationField(i, 'label', e.target.value)}
-                            placeholder="Etykieta pola"
-                            style={{ ...inputStyle, fontSize: '12px' }}
-                          />
-                          <input
-                            type="text"
-                            value={field.placeholder || ''}
-                            onChange={e => updateDeclarationField(i, 'placeholder', e.target.value)}
-                            placeholder="Placeholder"
-                            style={{ ...inputStyle, fontSize: '12px' }}
-                          />
-                        </div>
-                        <button onClick={() => removeDeclarationField(i)} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer', padding: '2px', flexShrink: 0 }}>
-                          <Trash2 size={12} />
-                        </button>
+              {medicalFields.map((field, i) => (
+                <div key={i} style={{ border: '0.5px solid #1a1a1a', padding: '10px', background: 'rgba(255,0,127,0.02)' }}>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-1 space-y-2">
+                      <input type="text" value={field.label} onChange={e => { const u = [...medicalFields]; u[i].label = e.target.value; setMedicalFields(u); }} placeholder="Etykieta pytania" style={inputStyle} />
+                      <div className="flex gap-4">
+                        <label className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', color: '#F5F0EB', cursor: 'pointer' }}>
+                          <input type="checkbox" checked={field.required} onChange={e => { const u = [...medicalFields]; u[i].required = e.target.checked; setMedicalFields(u); }} /> Wymagane
+                        </label>
+                        <label className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', color: '#F5F0EB', cursor: 'pointer' }}>
+                          <input type="checkbox" checked={field.has_description} onChange={e => { const u = [...medicalFields]; u[i].has_description = e.target.checked; setMedicalFields(u); }} /> Pole opisu
+                        </label>
                       </div>
                     </div>
-                  ))}
+                    <button onClick={() => setMedicalFields(medicalFields.filter((_, j) => j !== i))} style={{ color: fuchsia, background: 'none', border: 'none', cursor: 'pointer', padding: '2px', flexShrink: 0 }}>
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </div>
-              </div>
-
-              <div>
-                <label style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Etykieta zgody</label>
-                <input
-                  type="text"
-                  value={declaration.label || ''}
-                  onChange={e => setDeclaration({ ...declaration, label: e.target.value })}
-                  placeholder="Np. Zaakceptuję powyższe informacje"
-                  style={inputStyle}
-                />
-              </div>
+              ))}
             </div>
           </div>
-        </div>
+        </SectionCard>
 
-        {/* Consent fields */}
-        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '20px' }}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em' }}>Zgody</h3>
-            <button onClick={addConsentField} className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: 'pointer' }}>
-              <Plus size={12} /> DODAJ
-            </button>
-          </div>
-
+        {/* ── PYTANIA PRZEDZABIEGOWE ── */}
+        <SectionCard title="Pytania Przedzabiegowe" color={fuchsia} open={openSection === 'procedure'} onToggle={() => setOpenSection(openSection === 'procedure' ? null : 'procedure')}>
           <div className="space-y-4">
-            {consentFields.map((field, i) => (
-              <div key={i} style={{ border: `0.5px solid ${t.border}`, padding: '12px', background: 'rgba(255,0,127,0.02)' }}>
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 space-y-3">
-                    <div>
-                      <label style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Etykieta</label>
-                      <input
-                        type="text"
-                        value={field.label}
-                        onChange={e => updateConsentField(i, 'label', e.target.value)}
-                        placeholder="Np. Zgoda na zabieg"
-                        style={inputStyle}
-                      />
-                    </div>
-                    <div>
-                      <label style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Treść zgody</label>
-                      <textarea
-                        value={field.description || ''}
-                        onChange={e => updateConsentField(i, 'description', e.target.value)}
-                        placeholder="Pełny tekst zgody do przeczytania przez użytkownika"
-                        style={{ ...inputStyle, resize: 'none', minHeight: '60px' }}
-                      />
-                    </div>
-                    <label className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', color: t.text, cursor: 'pointer' }}>
-                      <input
-                        type="checkbox"
-                        checked={field.required}
-                        onChange={e => updateConsentField(i, 'required', e.target.checked)}
-                      />
-                      Wymagane
-                    </label>
-                  </div>
-                  <button onClick={() => removeConsentField(i)} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+            <div>
+              <label style={{ ...mono, fontSize: '8px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                Tekst wprowadzający (widoczny w ankiecie)
+              </label>
+              <textarea
+                value={sectionIntros.procedure || ''}
+                onChange={e => setSectionIntros({ ...sectionIntros, procedure: e.target.value })}
+                style={{ ...inputStyle, resize: 'none', minHeight: '60px' }}
+                placeholder="Np. Prosimy o odpowiedź na poniższe pytania..."
+              />
+            </div>
 
-        {/* Save button */}
-        <div className="flex gap-4">
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="btn-oxblood"
-            style={{ flex: 1, opacity: saving ? 0.5 : 1 }}
-          >
-            {saving ? 'ZAPISYWANIE...' : saved ? '✓ ZAPISANO' : 'ZAPISZ SZABLON'}
-          </button>
-        </div>
+            <div style={{ height: '0.5px', background: '#1a1a1a' }} />
+
+            <div className="flex items-center justify-between">
+              <p style={{ ...mono, fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Pytania</p>
+              <button onClick={() => setProcedureQuestions([...procedureQuestions, { field_key: `procedure_q_${Date.now()}`, label: '', required: false }])}
+                className="flex items-center gap-2"
+                style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${fuchsia}`, color: fuchsia, background: 'transparent', cursor: 'pointer' }}>
+                <Plus size={11} /> DODAJ
+              </button>
+            </div>
+
+            {procedureQuestions.length === 0 && (
+              <p style={{ ...mono, fontSize: '10px', color: 'rgba(245,240,235,0.25)', letterSpacing: '0.05em' }}>Brak pytań. Kliknij DODAJ aby dodać pierwsze pytanie.</p>
+            )}
+
+            <div className="space-y-3">
+              {procedureQuestions.map((field, i) => (
+                <div key={i} style={{ border: '0.5px solid #1a1a1a', padding: '10px', background: 'rgba(255,0,127,0.02)' }}>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-1 space-y-2">
+                      <input type="text" value={field.label} onChange={e => { const u = [...procedureQuestions]; u[i].label = e.target.value; setProcedureQuestions(u); }} placeholder="Treść pytania" style={inputStyle} />
+                      <label className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', color: '#F5F0EB', cursor: 'pointer' }}>
+                        <input type="checkbox" checked={field.required || false} onChange={e => { const u = [...procedureQuestions]; u[i].required = e.target.checked; setProcedureQuestions(u); }} /> Wymagane
+                      </label>
+                    </div>
+                    <button onClick={() => setProcedureQuestions(procedureQuestions.filter((_, j) => j !== i))} style={{ color: fuchsia, background: 'none', border: 'none', cursor: 'pointer', padding: '2px', flexShrink: 0 }}>
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </SectionCard>
+
+        {/* ── OŚWIADCZENIE WOLI ── */}
+        <SectionCard title="Oświadczenie Woli" color={fuchsia} open={openSection === 'declaration'} onToggle={() => setOpenSection(openSection === 'declaration' ? null : 'declaration')}>
+          <div className="space-y-4">
+            <div>
+              <label style={{ ...mono, fontSize: '8px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                Tekst wprowadzający (widoczny w ankiecie)
+              </label>
+              <textarea
+                value={sectionIntros.declaration || ''}
+                onChange={e => setSectionIntros({ ...sectionIntros, declaration: e.target.value })}
+                style={{ ...inputStyle, resize: 'none', minHeight: '60px' }}
+                placeholder="Np. Prosimy o zapoznanie się..."
+              />
+            </div>
+
+            <div style={{ height: '0.5px', background: '#1a1a1a' }} />
+
+            <div>
+              <label style={{ ...mono, fontSize: '8px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Treść oświadczenia</label>
+              <textarea
+                value={declaration.content || ''}
+                onChange={e => setDeclaration({ ...declaration, content: e.target.value })}
+                style={{ ...inputStyle, resize: 'none', minHeight: '100px' }}
+                placeholder="Pełna treść oświadczenia woli..."
+              />
+            </div>
+
+            <div>
+              <label style={{ ...mono, fontSize: '8px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Etykieta zgody (tekst przycisku akceptacji)</label>
+              <input type="text" value={declaration.label || ''} onChange={e => setDeclaration({ ...declaration, label: e.target.value })} placeholder="Np. Zaakceptuję powyższe informacje" style={inputStyle} />
+            </div>
+
+            <div style={{ height: '0.5px', background: '#1a1a1a' }} />
+
+            <div className="flex items-center justify-between">
+              <p style={{ ...mono, fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Dodatkowe pola do wypełnienia</p>
+              <button onClick={() => setDeclarationFields([...declarationFields, { field_key: `decl_field_${Date.now()}`, label: '', placeholder: '', required: false }])}
+                className="flex items-center gap-2"
+                style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${fuchsia}`, color: fuchsia, background: 'transparent', cursor: 'pointer' }}>
+                <Plus size={11} /> DODAJ
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {declarationFields.map((field, i) => (
+                <div key={i} style={{ border: '0.5px solid #1a1a1a', padding: '10px', background: 'rgba(255,0,127,0.02)' }}>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-1 space-y-2">
+                      <input type="text" value={field.label || ''} onChange={e => { const u = [...declarationFields]; u[i].label = e.target.value; setDeclarationFields(u); }} placeholder="Etykieta pola" style={inputStyle} />
+                      <input type="text" value={field.placeholder || ''} onChange={e => { const u = [...declarationFields]; u[i].placeholder = e.target.value; setDeclarationFields(u); }} placeholder="Placeholder" style={inputStyle} />
+                    </div>
+                    <button onClick={() => setDeclarationFields(declarationFields.filter((_, j) => j !== i))} style={{ color: fuchsia, background: 'none', border: 'none', cursor: 'pointer', padding: '2px', flexShrink: 0 }}>
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </SectionCard>
+
+        {/* ── ZGODY ── */}
+        <SectionCard title="Zgody" color={fuchsia} open={openSection === 'consents'} onToggle={() => setOpenSection(openSection === 'consents' ? null : 'consents')}>
+          <div className="space-y-4">
+            <div>
+              <label style={{ ...mono, fontSize: '8px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                Tekst wprowadzający (widoczny w ankiecie)
+              </label>
+              <textarea
+                value={sectionIntros.consents || ''}
+                onChange={e => setSectionIntros({ ...sectionIntros, consents: e.target.value })}
+                style={{ ...inputStyle, resize: 'none', minHeight: '60px' }}
+                placeholder="Np. Prosimy o zapoznanie się z poniższymi zgodami..."
+              />
+            </div>
+
+            <div style={{ height: '0.5px', background: '#1a1a1a' }} />
+
+            <div className="flex items-center justify-between">
+              <p style={{ ...mono, fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Zgody</p>
+              <button onClick={() => setConsentFields([...consentFields, { field_key: `consent_${Date.now()}`, label: '', description: '', required: false }])}
+                className="flex items-center gap-2"
+                style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${fuchsia}`, color: fuchsia, background: 'transparent', cursor: 'pointer' }}>
+                <Plus size={11} /> DODAJ
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {consentFields.map((field, i) => (
+                <div key={i} style={{ border: '0.5px solid #1a1a1a', padding: '10px', background: 'rgba(255,0,127,0.02)' }}>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-1 space-y-2">
+                      <input type="text" value={field.label} onChange={e => { const u = [...consentFields]; u[i].label = e.target.value; setConsentFields(u); }} placeholder="Etykieta zgody" style={inputStyle} />
+                      <textarea value={field.description || ''} onChange={e => { const u = [...consentFields]; u[i].description = e.target.value; setConsentFields(u); }} placeholder="Pełny tekst zgody do przeczytania przez użytkownika" style={{ ...inputStyle, resize: 'none', minHeight: '60px' }} />
+                      <label className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', color: '#F5F0EB', cursor: 'pointer' }}>
+                        <input type="checkbox" checked={field.required} onChange={e => { const u = [...consentFields]; u[i].required = e.target.checked; setConsentFields(u); }} /> Wymagane
+                      </label>
+                    </div>
+                    <button onClick={() => setConsentFields(consentFields.filter((_, j) => j !== i))} style={{ color: fuchsia, background: 'none', border: 'none', cursor: 'pointer', padding: '2px', flexShrink: 0 }}>
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </SectionCard>
+
+        {/* Save */}
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="btn-oxblood w-full"
+          style={{ opacity: saving ? 0.5 : 1 }}
+        >
+          {saving ? 'ZAPISYWANIE...' : saved ? '✓ ZAPISANO' : 'ZAPISZ SZABLON'}
+        </button>
       </div>
     </div>
   );

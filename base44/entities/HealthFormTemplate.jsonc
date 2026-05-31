@@ -7,6 +7,24 @@
       "default": "default",
       "description": "Unique template key"
     },
+    "section_intros": {
+      "type": "object",
+      "description": "Intro texts shown at top of each section in the form",
+      "properties": {
+        "medical": {
+          "type": "string"
+        },
+        "procedure": {
+          "type": "string"
+        },
+        "declaration": {
+          "type": "string"
+        },
+        "consents": {
+          "type": "string"
+        }
+      }
+    },
     "medical_fields": {
       "type": "array",
       "items": {
@@ -67,6 +85,28 @@
         }
       },
       "description": "Declaration of will content and field"
+    },
+    "declaration_fields": {
+      "type": "array",
+      "description": "Additional custom input fields in declaration section",
+      "items": {
+        "type": "object",
+        "properties": {
+          "field_key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "placeholder": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
     },
     "consent_fields": {
       "type": "array",
