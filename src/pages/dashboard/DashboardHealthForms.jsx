@@ -493,7 +493,6 @@ export default function DashboardHealthForms() {
                         <p style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>{getClientName(form)}</p>
                         <p style={{ ...mono, fontSize: '8px', color: t.muted, marginTop: '2px' }}>{form.client_email}</p>
                         <div className="flex items-center gap-2 mt-2">
-                          {form.is_minor && <span style={{ ...mono, fontSize: '7px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '1px 4px' }}>NIELETNI</span>}
                           {form.is_update_only && <span style={{ ...mono, fontSize: '7px', color: '#16a34a', border: '0.5px solid #16a34a', padding: '1px 4px' }}>AKTUALIZACJA</span>}
                           <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>
                             {form.procedure_type && `${form.procedure_type} · `}
@@ -501,22 +500,25 @@ export default function DashboardHealthForms() {
                           </p>
                         </div>
                       </div>
-                      {(() => {
-                        const boolFieldKeys = BOOL_FIELDS.map(b => b[0]);
-                        const skipKeys = new Set(['is_minor','is_update_only','consent_tattoo_piercing','confirm_sober','consent_image_use','confirm_regulations_read','health_form_completed','deposit_paid',...boolFieldKeys]);
-                        const hasMedical = boolFieldKeys.some(k => form[k] === true);
-                        const hasProcedureYes = Object.entries(form).some(([k, v]) => v === true && !skipKeys.has(k));
-                        const noImageConsent = form.consent_image_use === false;
-                        const allOk = !hasMedical && !hasProcedureYes && !noImageConsent && !form.is_minor;
-                        return (
-                          <div className="flex flex-col gap-1 items-end flex-shrink-0">
-                            {hasMedical && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#FF007F' }} title="Problemy medyczne" />}
-                            {hasProcedureYes && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#f97316' }} title="Tak na pytanie przedzabiegowe" />}
-                            {noImageConsent && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#3b82f6' }} title="Brak zgody na wizerunek" />}
-                            {allOk && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#16a34a' }} title="Wszystko OK" />}
-                          </div>
-                        );
-                      })()}
+                      <div className="flex flex-col gap-1 items-end flex-shrink-0">
+                        {form.is_minor && <span style={{ ...mono, fontSize: '7px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '1px 4px' }}>NIELETNI</span>}
+                        {(() => {
+                          const boolFieldKeys = BOOL_FIELDS.map(b => b[0]);
+                          const skipKeys = new Set(['is_minor','is_update_only','consent_tattoo_piercing','confirm_sober','consent_image_use','confirm_regulations_read','health_form_completed','deposit_paid',...boolFieldKeys]);
+                          const hasMedical = boolFieldKeys.some(k => form[k] === true);
+                          const hasProcedureYes = Object.entries(form).some(([k, v]) => v === true && !skipKeys.has(k));
+                          const noImageConsent = form.consent_image_use === false;
+                          const allOk = !hasMedical && !hasProcedureYes && !noImageConsent && !form.is_minor;
+                          return (
+                            <>
+                              {hasMedical && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#FF007F' }} title="Problemy medyczne" />}
+                              {hasProcedureYes && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#f97316' }} title="Tak na pytanie przedzabiegowe" />}
+                              {noImageConsent && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#3b82f6' }} title="Brak zgody na wizerunek" />}
+                              {allOk && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#16a34a' }} title="Wszystko OK" />}
+                            </>
+                          );
+                        })()}
+                      </div>
                     </div>
                   ))}
                 </div>
