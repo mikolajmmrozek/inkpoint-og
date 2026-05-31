@@ -93,7 +93,10 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme, template }
       </div>
 
       {/* Medical flags warning */}
-      {allMedical.filter(([k]) => selected[k] === true).length > 0 && (
+      {allMedical.filter(field => {
+        const fieldKey = field.field_key || field[0];
+        return selected[fieldKey] === true;
+      }).length > 0 && (
         <div className="mx-5 mt-4 px-3 py-2 flex items-center gap-2" style={{ background: 'rgba(255,0,127,0.06)', border: '0.5px solid rgba(255,0,127,0.2)' }}>
           <AlertTriangle size={12} color="#FF007F" />
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>
