@@ -113,118 +113,64 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme }) {
         </div>
       )}
 
-      {/* Medical fields — ALL answers from selected form */}
+      {/* Medical fields — ALL answers */}
       <div className="px-5 py-4">
         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>WYWIAD MEDYCZNY</p>
-        {Object.entries(selected)
-          .filter(([key]) => {
-            // Skip metadata and non-medical fields
-            const skipKeys = ['id', 'created_date', 'updated_date', 'created_by', 'booking_id', 'client_', 'date_of_birth', 'address_', 'pesel', 'id_document', 'consent_', 'confirm_', 'client_signature', 'form_filled_date', 'is_minor', 'guardian_', 'previous_', 'is_update_', 'procedure_type', 'body_placement'];
-            return !skipKeys.some(skip => key.startsWith(skip)) && !key.endsWith('_desc');
-          })
-          .filter(([key, val]) => typeof val === 'boolean')
-          .map(([fieldKey, value]) => {
-            const fieldConfig = (allMedical.find(f => (f.field_key || f[0]) === fieldKey) || [fieldKey, fieldKey.replace(/_/g, ' ')]);
-            const label = fieldConfig.label || fieldConfig[1] || fieldKey.replace(/_/g, ' ').toUpperCase();
-            const descField = `${fieldKey}_desc`;
-            return (
-              <div key={fieldKey}>
-                <div className="flex items-center justify-between py-1.5" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.text, letterSpacing: '0.06em' }}>{label}</p>
-                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: value === true ? '#FF007F' : value === false ? '#16a34a' : 'rgba(245,240,235,0.3)' }}>
-                    {value === true ? 'TAK' : value === false ? 'NIE' : '—'}
-                  </span>
-                </div>
-                {value === true && selected[descField] && (
-                  <p style={{ color: theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.5)', fontSize: '11px', padding: '2px 0 6px 8px', fontStyle: 'italic' }}>{selected[descField]}</p>
-                )}
+        {allMedical.map(field => {
+          const fieldKey = field.field_key || field[0];
+          const label = field.label || field[1];
+          const descField = (field.has_description !== false) ? (field[2] || `${fieldKey}_desc`) : null;
+          return (
+            <div key={fieldKey}>
+              <div className="flex items-center justify-between py-1.5" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.text, letterSpacing: '0.06em' }}>{label}</p>
+                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: selected[fieldKey] === true ? '#FF007F' : selected[fieldKey] === false ? '#16a34a' : 'rgba(245,240,235,0.3)' }}>
+                  {selected[fieldKey] === true ? 'TAK' : selected[fieldKey] === false ? 'NIE' : '—'}
+                </span>
               </div>
-            );
-          })}
+              {selected[fieldKey] === true && descField && selected[descField] && (
+                <p style={{ color: theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.5)', fontSize: '11px', padding: '2px 0 6px 8px', fontStyle: 'italic' }}>{selected[descField]}</p>
+              )}
+            </div>
+          );
+        })}
       </div>
 
-      {/* Procedure questions — ALL answers from selected form */}
-       {(() => {
-         const procedureFields = Object.entries(selected)
-           .filter(([key]) => !key.endsWith('_desc') && !['id', 'created_date', 'updated_date', 'created_by', 'booking_id', 'client_', 'date_of_birth', 'address_', 'pesel', 'id_document', 'consent_', 'confirm_', 'client_signature', 'form_filled_date', 'is_minor', 'guardian_', 'previous_', 'is_update_', 'procedure_type', 'body_placement'].some(skip => key.startsWith(skip)))
-           .filter(([key, val]) => typeof val === 'boolean' && !BOOL_FIELDS.some(f => (f[0] || f.field_key) === key))
-           .map(([fieldKey, value]) => {
-             const config = allProcedure.find(q => q.field_key === fieldKey);
-             return { fieldKey, value, config };
-           });
-         return procedureFields.length > 0 && (
-           <div className="px-5 pb-4">
-             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>PYTANIA PRZEDZABIEGOWE</p>
-             {procedureFields.map(({ fieldKey, value, config }) => (
-               <div key={fieldKey}>
-                 <div className="flex items-center justify-between py-1.5" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-                   <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.text, letterSpacing: '0.06em' }}>{config?.label || fieldKey}</p>
-                   <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: value === true ? '#f97316' : value === false ? '#16a34a' : 'rgba(245,240,235,0.3)' }}>
-                     {value === true ? 'TAK' : value === false ? 'NIE' : '—'}
-                   </span>
-                 </div>
-                 {value === true && selected[`${fieldKey}_desc`] && (
-                   <p style={{ color: theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.5)', fontSize: '11px', padding: '2px 0 6px 8px', fontStyle: 'italic' }}>{selected[`${fieldKey}_desc`]}</p>
-                 )}
-               </div>
-             ))}
-           </div>
-         );
-       })()}
-
-      {/* Declaration of will */}
-      {selected.declaration_of_will !== undefined && selected.declaration_of_will !== null && (
-        <div className="px-5 pb-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px', marginTop: '12px' }}>OŚWIADCZENIE WOLI</p>
-          <div className="flex items-center gap-2">
-            <div style={{ width: '12px', height: '12px', border: `0.5px solid ${selected.declaration_of_will ? '#16a34a' : t.border}`, background: selected.declaration_of_will ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {selected.declaration_of_will && <span style={{ color: '#fff', fontSize: '9px' }}>✓</span>}
+      {/* Procedure questions — ALL answers */}
+      {allProcedure.length > 0 && (
+        <div className="px-5 pb-4">
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>PYTANIA PRZEDZABIEGOWE</p>
+          {allProcedure.map(q => (
+            <div key={q.field_key}>
+              <div className="flex items-center justify-between py-1.5" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.text, letterSpacing: '0.06em' }}>{q.label}</p>
+                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: selected[q.field_key] === true ? '#f97316' : selected[q.field_key] === false ? '#16a34a' : 'rgba(245,240,235,0.3)' }}>
+                  {selected[q.field_key] === true ? 'TAK' : selected[q.field_key] === false ? 'NIE' : '—'}
+                </span>
+              </div>
+              {selected[q.field_key] === true && (q.has_description !== false) && selected[`${q.field_key}_desc`] && (
+                <p style={{ color: theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.5)', fontSize: '11px', padding: '2px 0 6px 8px', fontStyle: 'italic' }}>{selected[`${q.field_key}_desc`]}</p>
+              )}
             </div>
-            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: selected.declaration_of_will ? '#16a34a' : t.muted, letterSpacing: '0.08em' }}>Potwierdzam przeczytanie i akceptację oświadczenia woli</span>
-          </div>
+          ))}
         </div>
       )}
 
-      {/* Declaration fields */}
-      {(() => {
-        const declFields = Object.entries(selected)
-          .filter(([key]) => key.startsWith('declaration_') && key !== 'declaration_of_will' && typeof selected[key] === 'string')
-          .map(([key, value]) => ({ key, value, label: localTemplate?.declaration_fields?.find(f => f.field_key === key)?.label || key }));
-        return declFields.length > 0 && (
-          <div className="px-5 pb-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px', marginTop: '12px' }}>POLA DEKLARACJI</p>
-            {declFields.map(({ key, value, label }) => (
-              <div key={key} className="py-2" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.08em', marginBottom: '4px' }}>{label}</p>
-                <p style={{ color: t.text, fontSize: '11px' }}>{value}</p>
-              </div>
-            ))}
-          </div>
-        );
-      })()}
-
       {/* Consents */}
-      <div className="px-5 pb-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px', marginTop: '12px' }}>ZGODY</p>
+      <div className="px-5 pb-4">
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>ZGODY</p>
         <div className="flex flex-wrap gap-2">
-          {(() => {
-            const allConsents = [
-              ...CONSENT_FIELDS,
-              ...(localTemplate?.consent_fields?.map(f => [f.field_key, f.label]) || [])
-            ];
-            const uniqueConsents = Array.from(new Map(allConsents.map(c => [c[0], c])).values());
-            return uniqueConsents.map(([field, label]) => (
-              <div key={field} className="flex items-center gap-1.5 px-2 py-1" style={{ border: `0.5px solid ${selected[field] ? '#16a34a' : t.border}` }}>
-                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: selected[field] ? '#16a34a' : t.muted }} />
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: selected[field] ? '#16a34a' : t.muted, letterSpacing: '0.08em' }}>{label}</span>
-              </div>
-            ));
-          })()}
+          {CONSENT_FIELDS.map(([field, label]) => (
+            <div key={field} className="flex items-center gap-1.5 px-2 py-1" style={{ border: `0.5px solid ${selected[field] ? '#16a34a' : t.border}` }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: selected[field] ? '#16a34a' : t.muted }} />
+              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: selected[field] ? '#16a34a' : t.muted, letterSpacing: '0.08em' }}>{label}</span>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Signature and additional info */}
-      {(selected.client_signature || selected.is_pregnant !== undefined || selected.is_under_alcohol_drug_influence !== undefined) && (
+      {/* Signature */}
+      {selected.client_signature && (
         <div className="px-5 pb-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '12px', marginBottom: '8px' }}>PODPIS KLIENTA</p>
           <img src={selected.client_signature} alt="Podpis" style={{ maxWidth: '240px', border: `0.5px solid ${t.border}`, background: theme === 'light' ? '#FFFFFF' : '#111', padding: '4px' }} />
