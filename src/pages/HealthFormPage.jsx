@@ -199,7 +199,7 @@ export default function HealthFormPage() {
       return form.client_signature;
     }
     if (step === 'guardian') {
-      return guardian.guardian_name && guardian.guardian_phone && guardian.procedure_type.length > 0 && guardian.body_placement && guardian.guardian_signature;
+      return guardian.guardian_name && guardian.guardian_phone && guardian.procedure_type.length > 0 && (guardian.body_placement || form.body_placement) && guardian.guardian_signature;
     }
     return true;
   };
