@@ -500,7 +500,7 @@ export default function DashboardHealthForms() {
                           </p>
                         </div>
                       </div>
-                      <div className="flex flex-col gap-1 items-end flex-shrink-0">
+                      <div className="flex flex-row gap-2 items-center flex-shrink-0">
                         {form.is_minor && <span style={{ ...mono, fontSize: '7px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '1px 4px' }}>NIELETNI</span>}
                         {(() => {
                           const boolFieldKeys = BOOL_FIELDS.map(b => b[0]);
