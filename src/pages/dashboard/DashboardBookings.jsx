@@ -126,7 +126,7 @@ export default function DashboardBookings() {
             Rezerwacje
           </h2>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap justify-end">
           {/* View toggle */}
           <div className="flex" style={{ border: `0.5px solid ${t.border}` }}>
             {[{ mode: 'calendar', icon: Calendar }, { mode: 'list', icon: List }].map(({ mode, icon: Icon }) => (
@@ -140,8 +140,8 @@ export default function DashboardBookings() {
               </button>
             ))}
           </div>
-          {/* Artist filter - scrollable on mobile */}
-          <div className="flex gap-1 overflow-x-auto" style={{ scrollbarWidth: 'none', maxWidth: '100%' }}>
+          {/* Artist filter */}
+          <div className="flex gap-1 flex-wrap">
             <button onClick={() => setArtistFilter('all')} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilter === 'all' ? t.fuchsia : t.border}`, color: artistFilter === 'all' ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
               Wszyscy
             </button>
@@ -151,8 +151,8 @@ export default function DashboardBookings() {
               </button>
             ))}
           </div>
-          {/* Status filter - scrollable on mobile */}
-          <div className="flex gap-1 overflow-x-auto" style={{ scrollbarWidth: 'none', maxWidth: '100%' }}>
+          {/* Status filter */}
+          <div className="flex gap-1 flex-wrap">
             {['all', ...STATUS_OPTIONS].map(s => (
               <button key={s} onClick={() => setFilter(s)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${filter === s ? t.fuchsia : t.border}`, color: filter === s ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
                 {s === 'all' ? 'Wszystkie' : s}
