@@ -39,7 +39,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
     tattoo_description: '',
     tattoo_placement: '',
     notes: '',
-    status: 'confirmed',
+    status: 'pending',
     deposit_paid: false,
     estimated_price: '',
     health_form_completed: false,
@@ -181,19 +181,8 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
           {/* Session */}
           <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>SESJA</p>
-            <div className="grid grid-cols-2 gap-6 mb-4">
+            <div className="mb-4">
               <div>{label('Data *')}<input {...inp('session_date', 'date')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }} /></div>
-              <div>
-                {label('Artysta')}
-                <select
-                  value={form.artist_id || ''}
-                  onChange={e => handleArtist(e.target.value)}
-                  style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
-                >
-                  <option value="">Wybierz artystę</option>
-                  {artists.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-                </select>
-              </div>
             </div>
             <div className="grid grid-cols-4 gap-6 mb-4">
               <div>
@@ -201,6 +190,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                 <select
                   value={form.session_time?.split(':')[0] || ''}
                   onChange={e => set('session_time', `${e.target.value}:${form.session_time?.split(':')[1] || '00'}`)}
+                  defaultValue="00"
                   style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
                 >
                   <option value="">HH</option>
@@ -238,17 +228,29 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                 </select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 gap-6 mb-4">
               <div>{label('Cena (PLN)')}<input {...inp('estimated_price', 'number')} /></div>
-              <div>{label('Status')}
+              <div>
+                {label('Artysta')}
                 <select
-                  value={form.status}
-                  onChange={e => set('status', e.target.value)}
+                  value={form.artist_id || ''}
+                  onChange={e => handleArtist(e.target.value)}
                   style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
                 >
-                  {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                  <option value="">Wybierz artystę</option>
+                  {artists.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
                 </select>
               </div>
+            </div>
+            <div>
+              {label('Status')}
+              <select
+                value={form.status}
+                onChange={e => set('status', e.target.value)}
+                style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
+              >
+                {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
             </div>
           </div>
 
