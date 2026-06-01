@@ -201,17 +201,7 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme, template }
         const otherFields = Object.entries(selected).filter(([k]) => !knownFields.has(k) && selected[k]);
         if (otherFields.length === 0) return null;
         
-        return (
-          <div className="px-5 pb-5" style={{ borderTop: `0.5px solid ${t.border}` }}>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginTop: '12px', marginBottom: '12px' }}>INNE INFORMACJE</p>
-            {otherFields.map(([key, value]) => (
-              <div key={key} className="py-2" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>{key}</p>
-                <p style={{ color: t.text, fontSize: '12px', marginTop: '4px', wordBreak: 'break-word' }}>{String(value)}</p>
-              </div>
-            ))}
-          </div>
-        );
+        return null;
       })()}
 
       {/* Guardian consent */}
