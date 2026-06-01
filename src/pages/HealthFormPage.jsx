@@ -199,7 +199,7 @@ export default function HealthFormPage() {
 
   const canProceed = () => {
     if (step === 'personal') {
-      return form.client_first_name && form.date_of_birth && form.address_street && form.address_city && form.address_postal_code && form.client_phone && form.procedure_type && form.body_placement;
+      return form.client_first_name && form.date_of_birth && form.address_street && form.address_city && form.address_postal_code && form.client_phone && form.procedure_type && form.body_placement && (!isMinor || form.pesel);
     }
     if (step === 'medical') {
       const fields = template?.medical_fields || [];

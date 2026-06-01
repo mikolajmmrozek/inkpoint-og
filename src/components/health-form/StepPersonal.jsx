@@ -73,8 +73,8 @@ export default function StepPersonal({ form, setField, t, inputStyle, showErrors
 
       {/* PESEL */}
       <div>
-        <label style={labelStyle(false)}>{t.pesel}</label>
-        <input style={inputStyle} value={form.pesel || ''} onChange={e => setField('pesel', e.target.value)} />
+        <label style={labelStyle(isMinor && showErrors && !form.pesel)}>{t.pesel}{isMinor ? ' *' : ''} {isMinor && showErrors && !form.pesel && '(wymagane)'}</label>
+        <input style={{ ...inputStyle, borderBottomColor: isMinor && showErrors && !form.pesel ? '#FF007F' : '#262626' }} value={form.pesel || ''} onChange={e => setField('pesel', e.target.value)} />
       </div>
 
       {/* Rodzaj zabiegu */}
