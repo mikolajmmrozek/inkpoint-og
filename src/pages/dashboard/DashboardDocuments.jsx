@@ -92,7 +92,7 @@ export default function DashboardDocuments() {
           {/* Zalecenia */}
           <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '24px' }}>
             <div className="flex items-center justify-between mb-6">
-              <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em' }}>Zalecenia & Instrukcje</h3>
+              <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em' }}>Dokumenty</h3>
               <button onClick={() => { setEditingInstr('new'); setInstrForm({ type: '', title: '', content: '' }); }} className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: 'pointer' }}>
                 <Plus size={12} /> DODAJ
               </button>
