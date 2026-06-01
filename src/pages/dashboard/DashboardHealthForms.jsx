@@ -448,7 +448,7 @@ export default function DashboardHealthForms() {
       <div class="row"><span class="lbl">Adres</span><span class="val">${[form.address_street, form.address_city, form.address_postal_code].filter(Boolean).join(', ') || '&mdash;'}</span></div>
       <div class="row"><span class="lbl">Zabieg</span><span class="val">${form.procedure_type || '&mdash;'}</span></div>
       <div class="row"><span class="lbl">Miejsce zabiegu</span><span class="val">${form.body_placement || '&mdash;'}</span></div>
-      <div class="row"><span class="lbl">Data wypełnienia</span><span class="val">${safeFormat(form.form_filled_date, 'dd.MM.yyyy HH:mm')}</span></div>
+      <div class="row"><span class="lbl">Data wypełnienia</span><span class="val">${safeFormat(form.form_filled_date, 'dd.MM.yyyy')}</span></div>
     </div>
   </div>
 
