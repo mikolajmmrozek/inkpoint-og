@@ -861,8 +861,7 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
               <div className="flex items-center gap-3">
                 <button onClick={() => exportPDF(selected, 'save')} disabled={exporting} title="Zapisz na urządzenie" style={{ color: t.muted, background: 'none', border: 'none', cursor: exporting ? 'not-allowed' : 'pointer', opacity: exporting ? 0.5 : 1 }}><Download size={15} /></button>
                 <button onClick={() => exportPDF(selected, 'print')} disabled={exporting} title="Drukuj" style={{ color: t.muted, background: 'none', border: 'none', cursor: exporting ? 'not-allowed' : 'pointer', opacity: exporting ? 0.5 : 1 }}><Printer size={15} /></button>
-                <button onClick={() => sendConfirmationEmail(selected)} disabled={sendingEmail} title="Wyślij email" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', opacity: sendingEmail ? 0.5 : 1 }}><Mail size={15} /></button>
-                <button onClick={() => sendEditLink(selected)} disabled={sendingEditLink} title="Wyślij link do edycji" style={{ color: '#f59e0b', background: 'none', border: 'none', cursor: 'pointer', opacity: sendingEditLink ? 0.5 : 1 }}><Edit3 size={15} /></button>
+
                 <button onClick={() => deleteForm(selected)} title="Usuń ankietę" style={{ color: '#FF007F', background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={15} /></button>
               </div>
               <button onClick={() => setSelected(null)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><X size={16} /></button>
