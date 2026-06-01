@@ -25,7 +25,7 @@ import DashboardBookings from './pages/dashboard/DashboardBookings';
 import DashboardArtists from './pages/dashboard/DashboardArtists';
 import DashboardBlog from './pages/dashboard/DashboardBlog';
 import DashboardMessages from './pages/dashboard/DashboardMessages';
-
+import DashboardHealthForms from './pages/dashboard/DashboardHealthForms';
 import DashboardSettings from './pages/dashboard/DashboardSettings';
 import DashboardClients from './pages/dashboard/DashboardClients';
 import DashboardStats from './pages/dashboard/DashboardStats';
@@ -78,6 +78,7 @@ const AuthenticatedApp = () => {
         <Route path="artists" element={<DashboardArtists />} />
         <Route path="blog" element={<DashboardBlog />} />
         <Route path="messages" element={<DashboardMessages />} />
+        <Route path="health-forms" element={<DashboardHealthForms />} />
         <Route path="settings" element={<DashboardSettings />} />
         <Route path="clients" element={<DashboardClients />} />
         <Route path="stats" element={<DashboardStats />} />
