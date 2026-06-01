@@ -63,7 +63,7 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme, template }
             )}
           </div>
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>
-            {selected.client_email} · {selected.client_phone}
+            {selected.client_email} · <a href={`tel:${selected.client_phone}`} style={{ color: t.fuchsia, textDecoration: 'none' }}>{selected.client_phone}</a>
           </p>
           {selected.form_filled_date && (
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, marginTop: '3px', letterSpacing: '0.06em' }}>
@@ -212,7 +212,7 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme, template }
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase' }}>ZGODA OPIEKUNA PRAWNEGO</p>
           </div>
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text }}>{guardianForm.guardian_name}</p>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginTop: '2px' }}>{guardianForm.guardian_phone}</p>
+          <a href={`tel:${guardianForm.guardian_phone}`} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, marginTop: '2px', display: 'block', textDecoration: 'none' }}>{guardianForm.guardian_phone}</a>
           {guardianForm.guardian_signature && (
             <img src={guardianForm.guardian_signature} alt="Podpis opiekuna" style={{ maxWidth: '240px', border: `0.5px solid ${t.border}`, background: theme === 'light' ? '#FFFFFF' : '#111', padding: '4px', marginTop: '8px' }} />
           )}
