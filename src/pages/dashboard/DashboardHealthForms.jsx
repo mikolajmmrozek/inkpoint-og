@@ -214,7 +214,7 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme, template }
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text }}>{guardianForm.guardian_name}</p>
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginTop: '2px' }}>{guardianForm.guardian_phone}</p>
           {guardianForm.guardian_signature && (
-            <img src={guardianForm.guardian_signature} alt="Podpis opiekuna" style={{ maxWidth: '240px', border: `0.5px solid ${t.border}`, background: '#111', padding: '4px', marginTop: '8px' }} />
+            <img src={guardianForm.guardian_signature} alt="Podpis opiekuna" style={{ maxWidth: '240px', border: `0.5px solid ${t.border}`, background: theme === 'light' ? '#FFFFFF' : '#111', padding: '4px', marginTop: '8px' }} />
           )}
         </div>
       )}
