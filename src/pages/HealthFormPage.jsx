@@ -100,7 +100,7 @@ export default function HealthFormPage() {
   const t = T[lang] || T.pl;
 
   const buildInitialState = (tpl) => {
-    let state = { ...form };
+    let state = {};
     if (tpl?.medical_fields) {
       tpl.medical_fields.forEach(f => {
         if (!(f.field_key in state)) state[f.field_key] = null;
