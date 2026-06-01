@@ -114,13 +114,30 @@ Deno.serve(async (req) => {
       </html>
     `;
 
-    // Send email
-    await base44.integrations.Core.SendEmail({
-      to: booking.client_email,
-      subject: `Potwierdzenie rezerwacji — ${dateStr}`,
-      body: htmlBody,
-      from_name: 'Romans Tattoo',
+    // Send email via Resend
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
+    if (!resendApiKey) {
+      return Response.json({ success: false, error: 'RESEND_API_KEY not configured' }, { status: 500 });
+    }
+
+    const resendResponse = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${resendApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'Romans Tattoo <noreply@mail.tattoostudio.pl>',
+        to: booking.client_email,
+        subject: `Potwierdzenie rezerwacji — ${dateStr}`,
+        html: htmlBody,
+      }),
     });
+
+    if (!resendResponse.ok) {
+      const error = await resendResponse.json();
+      return Response.json({ success: false, error: `Resend API error: ${error.message}` }, { status: 500 });
+    }
 
     return Response.json({ success: true, message: 'Email sent' });
   } catch (error) {
