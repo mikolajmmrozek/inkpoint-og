@@ -79,8 +79,9 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme, template }
           {safeFormat(selected.form_filled_date, 'dd.MM.yyyy HH:mm')}
             </p>
           )}
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, marginTop: '3px', letterSpacing: '0.1em', opacity: 0.7 }}>
-            #{selected.id?.slice(-8).toUpperCase()}
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, marginTop: '3px', letterSpacing: '0.1em', opacity: 0.7, cursor: 'pointer', userSelect: 'all' }}
+            title="Kliknij aby zaznaczyć">
+            {selected.id?.slice(-8).toUpperCase()}
           </p>
         </div>
         <button onClick={onClose} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
@@ -317,7 +318,7 @@ export default function DashboardHealthForms() {
 
   // Filter forms by search query
   const filteredForms = forms.filter(form => {
-    const q = searchQuery.toLowerCase();
+    const q = searchQuery.toLowerCase().replace(/^#/, '');
     return !q || 
       form.client_name?.toLowerCase().includes(q) ||
       form.client_first_name?.toLowerCase().includes(q) ||
@@ -719,7 +720,7 @@ export default function DashboardHealthForms() {
                             <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>
                               {form.procedure_type && `${form.procedure_type} · `}
                               {form.form_filled_date ? safeFormat(form.form_filled_date, 'dd.MM.yyyy') : ''}
-                              {' · #'}{form.id?.slice(-8).toUpperCase()}
+                              {' · '}{form.id?.slice(-8).toUpperCase()}
                             </p>
                           </div>
                         </div>
