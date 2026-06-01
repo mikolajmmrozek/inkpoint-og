@@ -79,6 +79,9 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme, template }
           {safeFormat(selected.form_filled_date, 'dd.MM.yyyy HH:mm')}
             </p>
           )}
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, marginTop: '3px', letterSpacing: '0.1em', opacity: 0.7 }}>
+            #{selected.id?.slice(-8).toUpperCase()}
+          </p>
         </div>
         <button onClick={onClose} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
           <X size={16} />
@@ -417,6 +420,7 @@ export default function DashboardHealthForms() {
 <body>
 <div class="page">
   <h1>ANKIETA ZDROWOTNA</h1>
+  <p style="font-size:7pt;color:#888;letter-spacing:.1em;margin-bottom:2px">NR ANKIETY: #${form.id?.slice(-8).toUpperCase()}</p>
   <div class="line"></div>
 
   <div class="sec">
@@ -713,6 +717,7 @@ export default function DashboardHealthForms() {
                             <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>
                               {form.procedure_type && `${form.procedure_type} · `}
                               {form.form_filled_date ? safeFormat(form.form_filled_date, 'dd.MM.yyyy') : ''}
+                              {' · #'}{form.id?.slice(-8).toUpperCase()}
                             </p>
                           </div>
                         </div>
