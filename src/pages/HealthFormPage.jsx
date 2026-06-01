@@ -99,23 +99,61 @@ export default function HealthFormPage() {
 
   const t = T[lang] || T.pl;
 
+  const buildInitialState = (tpl) => {
+    let state = { ...form };
+    if (tpl?.medical_fields) {
+      tpl.medical_fields.forEach(f => {
+        if (!(f.field_key in state)) state[f.field_key] = null;
+        const descKey = f[2] || `${f.field_key}_desc`;
+        if (f.has_description !== false && !(descKey in state)) {
+          state[descKey] = '';
+        }
+      });
+    }
+    if (tpl?.procedure_questions) {
+      tpl.procedure_questions.forEach(q => {
+        if (!(q.field_key in state)) state[q.field_key] = null;
+        const descKey = `${q.field_key}_desc`;
+        if (q.has_description !== false && !(descKey in state)) {
+          state[descKey] = '';
+        }
+      });
+    }
+    if (tpl?.declaration_fields) {
+      tpl.declaration_fields.forEach(f => {
+        if (!(f.field_key in state)) state[f.field_key] = '';
+      });
+    }
+    if (tpl?.consent_fields) {
+      tpl.consent_fields.forEach(f => {
+        if (!(f.field_key in state)) state[f.field_key] = false;
+      });
+    }
+    if (tpl?.declaration_of_will?.field_key && !(tpl.declaration_of_will.field_key in state)) {
+      state[tpl.declaration_of_will.field_key] = false;
+    }
+    return state;
+  };
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const bookingId = params.get('booking_id');
     const editFormId = params.get('edit_form_id');
 
     const load = async () => {
-      // Load template
+      let template = null;
       try {
         const tplArr = await base44.entities.HealthFormTemplate.filter({ key: 'default' });
-        if (tplArr[0]) setTemplateData(tplArr[0]);
+        if (tplArr[0]) {
+          template = tplArr[0];
+          setTemplateData(template);
+        }
       } catch (_) {}
 
       if (editFormId) {
-        // Load existing form for editing
         const existingForm = await base44.entities.HealthForm.filter({ id: editFormId }).then(r => r[0]);
         if (existingForm) {
-          setForm(f => ({ ...f, ...existingForm, form_filled_date: new Date().toISOString().split('T')[0] }));
+          setForm(f => ({ ...buildInitialState(template), ...existingForm, form_filled_date: new Date().toISOString().split('T')[0] }));
           const bk = existingForm.booking_id ? await base44.entities.Booking.filter({ id: existingForm.booking_id }).then(r => r[0]) : null;
           if (bk) setBooking(bk);
           setIsFirstVisit(false);
@@ -126,15 +164,13 @@ export default function HealthFormPage() {
         if (b) {
           setBooking(b);
           setForm(f => ({
-            ...f,
+            ...buildInitialState(template),
             booking_id: b.id,
             client_first_name: (b.client_name || '').split(' ')[0],
             client_last_name: (b.client_name || '').split(' ').slice(1).join(' ') || '',
             client_email: b.client_email || '',
             client_phone: b.client_phone || '',
           }));
-
-          // Check for previous form
           const prevForms = await base44.entities.HealthForm.filter({ booking_id: bookingId, is_update_only: false }, '-form_filled_date', 1);
           if (prevForms.length > 0) {
             setPreviousForm(prevForms[0]);
@@ -220,7 +256,6 @@ export default function HealthFormPage() {
       return required.every(q => form[q.field_key] !== null && form[q.field_key] !== undefined);
     }
     if (step === 'declaration') {
-
       const declKey = templateData?.declaration_of_will?.field_key || 'declaration_of_will';
       return !!form[declKey];
     }
@@ -254,7 +289,6 @@ export default function HealthFormPage() {
         });
       }
 
-      // Mark booking as form completed
       if (booking) {
         await base44.entities.Booking.update(booking.id, { health_form_completed: true });
       }
@@ -311,7 +345,6 @@ export default function HealthFormPage() {
     );
   }
 
-  // Language selection
   if (step === 'lang-select') {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{ background: '#0A0A0A' }}>
@@ -324,7 +357,6 @@ export default function HealthFormPage() {
           </h1>
           <div className="h-px w-16 mb-12" style={{ background: '#FF007F', height: '0.5px' }} />
 
-          {/* Language selector */}
           <div className="mb-8 relative">
             <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.5)', letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
               {t.langSelect}
@@ -387,7 +419,6 @@ export default function HealthFormPage() {
             </div>
           </div>
 
-          {/* Pierwsza wizyta */}
           <div className="mt-8">
             <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.5)', letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
               Czy to Twoja pierwsza wizyta w naszym studio? *
@@ -402,7 +433,6 @@ export default function HealthFormPage() {
             </div>
           </div>
 
-          {/* Email tylko dla powracających */}
           {isFirstVisit === false && (
             <div className="mt-4">
               <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.5)', letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
@@ -465,7 +495,6 @@ export default function HealthFormPage() {
   return (
     <div className="min-h-screen p-6" style={{ background: '#0A0A0A' }}>
       <div className="max-w-2xl mx-auto">
-        {/* Header */}
         <div className="mb-8">
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
             {currentStepIndex + 1} / {steps.length}
@@ -475,14 +504,12 @@ export default function HealthFormPage() {
           </h1>
         </div>
 
-        {/* Progress indicators */}
         <div className="flex gap-2 mb-8">
           {steps.map((s, i) => (
             <div key={s} style={{ flex: 1, height: '2px', background: i <= currentStepIndex ? '#FF007F' : '#262626', transition: 'background 0.3s' }} />
           ))}
         </div>
 
-        {/* Form */}
         <form className="mb-12" onSubmit={e => e.preventDefault()}>
           {prefillBanner && (
             <div className="mb-4 px-3 py-2 flex items-center gap-2" style={{ background: 'rgba(22,163,74,0.1)', border: '0.5px solid rgba(22,163,74,0.4)' }}>
@@ -497,7 +524,6 @@ export default function HealthFormPage() {
           {step === 'signature' && <SignatureCanvas value={form.client_signature} onChange={v => setField('client_signature', v)} label={t.signatureTitle} clearLabel={t.clearSignature} showErrors={showErrors} />}
           {step === 'guardian' && <StepGuardian guardian={guardian} setGuardianField={setGuardianField} form={form} t={t} inputStyle={inputStyle} showErrors={showErrors} />}
 
-          {/* Navigation */}
           <div className="flex gap-4 mt-12">
             {currentStepIndex > 0 && (
               <button
