@@ -181,8 +181,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
           {/* Session */}
           <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>SESJA</p>
-            <div className="grid grid-cols-2 gap-6 mb-4">
-              <div>{label('Data *')}<input {...inp('session_date', 'date')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }} /></div>
+            <div className="mb-4">
               <div>
                 {label('Artysta')}
                 <select
@@ -194,6 +193,9 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                   {artists.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
                 </select>
               </div>
+            </div>
+            <div className="mb-4">
+              <div>{label('Data *')}<input {...inp('session_date', 'date')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }} /></div>
             </div>
             <div className="grid grid-cols-4 gap-6 mb-4">
               <div>
