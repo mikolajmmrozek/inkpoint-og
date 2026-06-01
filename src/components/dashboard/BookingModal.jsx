@@ -25,25 +25,36 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
   const [artists, setArtists] = useState([]);
   const [saving, setSaving] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null); // existing client or null
-  const [form, setForm] = useState(booking ? { ...booking } : {
-    client_name: '',
-    client_first_name: '',
-    client_last_name: '',
-    client_email: '',
-    client_phone: '',
-    artist_id: '',
-    artist_name: '',
-    session_date: defaultDate || '',
-    session_time: '',
-    session_duration: 2,
-    tattoo_description: '',
-    tattoo_placement: '',
-    notes: '',
-    status: 'pending',
-    deposit_paid: false,
-    estimated_price: '',
-    health_form_completed: false,
-  });
+  const initForm = () => {
+    if (booking) {
+      const [first, ...last] = (booking.client_name || '').split(' ');
+      return {
+        ...booking,
+        client_first_name: first || '',
+        client_last_name: last.join(' ') || '',
+      };
+    }
+    return {
+      client_name: '',
+      client_first_name: '',
+      client_last_name: '',
+      client_email: '',
+      client_phone: '',
+      artist_id: '',
+      artist_name: '',
+      session_date: defaultDate || '',
+      session_time: '',
+      session_duration: 2,
+      tattoo_description: '',
+      tattoo_placement: '',
+      notes: '',
+      status: 'pending',
+      deposit_paid: false,
+      estimated_price: '',
+      health_form_completed: false,
+    };
+  };
+  const [form, setForm] = useState(initForm());
 
   useEffect(() => {
     base44.entities.Artist.list().then(setArtists).catch(() => {});
