@@ -153,6 +153,48 @@
     "has_other_chronic_diseases_desc": {
       "type": "string"
     },
+    "procedure_q1": {
+      "type": "boolean"
+    },
+    "procedure_q2": {
+      "type": "boolean"
+    },
+    "procedure_q2_desc": {
+      "type": "string"
+    },
+    "procedure_q_1780258468164": {
+      "type": "boolean"
+    },
+    "procedure_q_1780258468164_desc": {
+      "type": "string"
+    },
+    "procedure_q_1780258502043": {
+      "type": "boolean"
+    },
+    "procedure_q_1780258539127": {
+      "type": "boolean"
+    },
+    "procedure_q_1780258600027": {
+      "type": "boolean"
+    },
+    "procedure_q_1780258600027_desc": {
+      "type": "string"
+    },
+    "procedure_q_1780258617059": {
+      "type": "boolean"
+    },
+    "procedure_q_1780258617059_desc": {
+      "type": "string"
+    },
+    "procedure_q_1780258627893": {
+      "type": "boolean"
+    },
+    "procedure_q_1780258627893_desc": {
+      "type": "string"
+    },
+    "declaration_of_will": {
+      "type": "boolean"
+    },
     "consent_tattoo_piercing": {
       "type": "boolean"
     },
@@ -163,6 +205,18 @@
       "type": "boolean"
     },
     "confirm_regulations_read": {
+      "type": "boolean"
+    },
+    "consent_1779995760853": {
+      "type": "boolean"
+    },
+    "consent_1779995809081": {
+      "type": "boolean"
+    },
+    "consent_1779995841314": {
+      "type": "boolean"
+    },
+    "consent_1779995923833": {
       "type": "boolean"
     },
     "client_signature": {
