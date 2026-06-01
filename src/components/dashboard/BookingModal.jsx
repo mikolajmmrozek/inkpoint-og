@@ -240,7 +240,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
               </div>
             </div>
             <div>
-              {label('Cena (PLN)')}<input {...inp('estimated_price', 'number')} />
+              {label('Cena (PLN)')}<input {...inp('estimated_price', 'number')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} />
             </div>
             <div className="mt-4">
               {label('Status')}
