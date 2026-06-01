@@ -182,6 +182,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
           <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>SESJA</p>
             <div className="grid grid-cols-2 gap-6 mb-4">
+              <div>{label('Data *')}<input {...inp('session_date', 'date')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }} /></div>
               <div>
                 {label('Artysta')}
                 <select
@@ -193,18 +194,8 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                   {artists.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
                 </select>
               </div>
-              <div>{label('Status')}
-                <select
-                  value={form.status}
-                  onChange={e => set('status', e.target.value)}
-                  style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
-                >
-                  {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
             </div>
-            <div className="grid grid-cols-3 gap-6 mb-4">
-              <div>{label('Data *')}<input {...inp('session_date', 'date')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }} /></div>
+            <div className="grid grid-cols-4 gap-6 mb-4">
               <div>
                 {label('Godzina')}
                 <select
@@ -226,10 +217,8 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                   {MINUTES.map(m => <option key={m} value={m}>{m}</option>)}
                 </select>
               </div>
-            </div>
-            <div className="grid grid-cols-3 gap-6">
               <div>
-                {label('Czas trwania — godziny')}
+                {label('Czas (h)')}
                 <select
                   value={Math.floor((form.session_duration || 0) / 60).toString().padStart(2, '0')}
                   onChange={e => set('session_duration', Number(e.target.value) * 60 + (form.session_duration || 0) % 60)}
@@ -239,7 +228,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                 </select>
               </div>
               <div>
-                {label('minuty')}
+                {label('min')}
                 <select
                   value={((form.session_duration || 0) % 60).toString().padStart(2, '0')}
                   onChange={e => set('session_duration', Math.floor((form.session_duration || 0) / 60) * 60 + Number(e.target.value))}
@@ -248,7 +237,18 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                   {MINUTES.map(m => <option key={m} value={m}>{m}</option>)}
                 </select>
               </div>
-              <div>{label('Szacowana cena (PLN)')}<input {...inp('estimated_price', 'number')} /></div>
+            </div>
+            <div className="grid grid-cols-2 gap-6">
+              <div>{label('Cena (PLN)')}<input {...inp('estimated_price', 'number')} /></div>
+              <div>{label('Status')}
+                <select
+                  value={form.status}
+                  onChange={e => set('status', e.target.value)}
+                  style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
+                >
+                  {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
             </div>
           </div>
 
