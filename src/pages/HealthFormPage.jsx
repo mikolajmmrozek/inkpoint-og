@@ -39,6 +39,7 @@ const HARDCODED_TEMPLATE = {
     { field_key: 'has_blood_clotting_disorders', label: 'Zaburzenia krzepnięcia krwi', required: false, has_description: false },
     { field_key: 'has_scars_skin_changes', label: 'Bliznowce lub zmiany skórne', required: false, has_description: false },
     { field_key: 'had_tattoo_piercing_before', label: 'Wcześniejszy tatuaż/piercing', required: false, has_description: true },
+    { field_key: 'has_other_chronic_diseases', label: 'Inne choroby przewlekłe', required: false, has_description: true },
   ],
   procedure_questions: [
     { field_key: 'procedure_q1', label: 'Czy jesteś w ciąży? (jeśli dotyczy)', required: false, has_description: false },

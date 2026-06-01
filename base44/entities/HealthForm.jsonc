@@ -147,6 +147,12 @@
     "previous_reactions_description": {
       "type": "string"
     },
+    "has_other_chronic_diseases": {
+      "type": "boolean"
+    },
+    "has_other_chronic_diseases_desc": {
+      "type": "string"
+    },
     "consent_tattoo_piercing": {
       "type": "boolean"
     },
