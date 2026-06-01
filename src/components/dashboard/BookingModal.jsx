@@ -39,7 +39,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
     tattoo_description: '',
     tattoo_placement: '',
     notes: '',
-    status: 'confirmed',
+    status: 'pending',
     deposit_paid: false,
     estimated_price: '',
     health_form_completed: false,
