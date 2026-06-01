@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { FileText, X, ExternalLink, Copy, Shield, AlertTriangle, Search, Download, Mail, Trash2, Settings, Loader2, Edit3, Printer } from 'lucide-react';
@@ -263,9 +263,6 @@ export default function DashboardHealthForms() {
     setDismissedReminders(next);
     localStorage.setItem('dismissedFormReminders', JSON.stringify(next));
   };
-  const [docTab, setDocTab] = useState('ankiety'); // 'ankiety', 'aftercare', 'regulamin'
-  const [instructions, setInstructions] = useState([]);
-  const [terms, setTerms] = useState([]);
 
   useEffect(() => {
     Promise.all([
@@ -273,17 +270,13 @@ export default function DashboardHealthForms() {
       base44.entities.GuardianConsentForm.list('-form_filled_date', 100),
       base44.entities.Booking.list('-session_date', 200),
       base44.entities.Client.list('-created_date', 500),
-      base44.entities.Instruction.list(),
-      base44.entities.TermsAndConditions.list(),
       base44.entities.HealthFormTemplate.filter({ key: 'default' }),
-    ]).then(([f, g, b, c, i, t, tplArr]) => {
+    ]).then(([f, g, b, c, tplArr]) => {
       if (tplArr?.length > 0) setTemplate(tplArr[0]);
       setForms(f);
       setGuardianForms(g);
       setBookings(b);
       setClients(c);
-      setInstructions(i);
-      setTerms(t);
     }).finally(() => setLoading(false));
   }, []);
 
@@ -476,7 +469,7 @@ export default function DashboardHealthForms() {
     <li style="margin-bottom:2px">Nie będę mógł oddać krwi przez 4 miesiące od wykonania tatuażu lub przełkucia.</li>
     <li style="margin-bottom:2px">Nie będę korzystać z kąpieli słonecznych przez 2 miesiące od zabiegu.</li>
     <li style="margin-bottom:2px">Nie będę korzystać z basenu ani otwartych zbiorników wodnych do czasu pełnego wygojenia (min. 2 miesiące).</li>
-    <li style="margin-bottom:2px">Proces jest czasochłonny i bolesny; będę stosować się do zaleceń pielęgnacyjnych studia „ROMANS”.</li>
+    <li style="margin-bottom:2px">Proces jest czasochłonny i bolesny; będę stosować się do zaleceń pielęgnacyjnych studia „ROMANS".</li>
     <li style="margin-bottom:2px">Tatuowane/przełkuwane miejsce może puchnąć, utrudniając motorykę ciała przez pewien czas.</li>
     <li style="margin-bottom:2px">Cena tatuażu/przełkucia zależy od wielkości/rodzaju; czas pracy artysty nie wpływa na cenę.</li>
   </ol></td></tr></table>${declCustomFields.length > 0 ? `<table style="margin-top:6px;margin-bottom:4px">${declCustomFields.map(f => form[f.field_key] ? `<tr><td class="lbl" style="width:45%">${f.label}</td><td class="val">${form[f.field_key]}</td></tr>` : '').join('')}</table>` : ''}<p class="decl-ok" style="margin-top:8px;color:${decl && form[decl.field_key] ? '#16a34a' : '#c8003c'}">${decl && form[decl.field_key] ? '✓ AKCEPTUJĘ POWYŻSZE INFORMACJE' : '✕ NIE ZAAKCEPTOWANO'}</p></div>
@@ -486,12 +479,12 @@ export default function DashboardHealthForms() {
   ${form.client_signature ? `<div class="sec"><div class="sec-title">Podpis klienta</div><div class="sig"><img src="${form.client_signature}" alt="Podpis" /></div></div>` : ''}
 
   ${guardianForm ? `<div class="sec"><div class="sec-title">Zgoda opiekuna prawnego</div><table>
-    ${row('Imi\u0119 i nazwisko opiekuna', guardianForm.guardian_name)}
+    ${row('Imię i nazwisko opiekuna', guardianForm.guardian_name)}
     ${row('Telefon opiekuna', guardianForm.guardian_phone)}
     ${row('Typ zabiegu', Array.isArray(guardianForm.procedure_type) ? guardianForm.procedure_type.join(', ') : guardianForm.procedure_type)}
     ${row('Miejsce zabiegu', guardianForm.body_placement)}
-    ${row('Liczba zabieg\u00f3w', guardianForm.num_procedures)}
-  </table><div class="decl" style="margin-top:10px">Wyra\u017cam zgod\u0119 jako prawny opiekun na wykonanie zabiegu tatua\u017cu/piercingu osobie niepe\u0142noletniej wskazanej powy\u017cej. O\u015bwiadczam, \u017ce zapozna\u0142em/-am si\u0119 z mo\u017cliwymi powik\u0142aniami i ryzykiem zwi\u0105zanym z wykonywanym zabiegiem oraz z zasadami piel\u0119gnacji po zabiegu.</div>${guardianForm.guardian_signature ? `<p style="margin-top:8px;font-weight:600;font-size:9pt;color:#444">Podpis opiekuna:</p><div class="sig"><img src="${guardianForm.guardian_signature}" alt="Podpis opiekuna" /></div>` : ''}</div>` : ''}
+    ${row('Liczba zabiegów', guardianForm.num_procedures)}
+  </table><div class="decl" style="margin-top:10px">Wyrażam zgodę jako prawny opiekun na wykonanie zabiegu tatuażu/piercingu osobie niepełnoletniej wskazanej powyżej. Oświadczam, że zapoznałem/-am się z możliwymi powikłaniami i ryzykiem związanym z wykonywanym zabiegiem oraz z zasadami pielęgnacji po zabiegu.</div>${guardianForm.guardian_signature ? `<p style="margin-top:8px;font-weight:600;font-size:9pt;color:#444">Podpis opiekuna:</p><div class="sig"><img src="${guardianForm.guardian_signature}" alt="Podpis opiekuna" /></div>` : ''}</div>` : ''}
 
 </div>
 ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeout(function(){window.print();},500);})</script>" : ''}
@@ -639,7 +632,7 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
                   <X size={12} />
                 </button>
                <button
-                 onClick={() => sendHealthFormLink(b)}
+                  onClick={() => sendHealthFormLink(b)}
                   disabled={sendingLinkEmail === b.id}
                   title="Wyślij link do ankiety"
                   style={{ color: sendingLinkEmail === b.id ? t.muted : t.fuchsia, background: 'none', border: 'none', cursor: sendingLinkEmail === b.id ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', opacity: sendingLinkEmail === b.id ? 0.5 : 1 }}
@@ -660,193 +653,86 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
         </div>
       )}
 
-      {/* Dokumenty - karty sekcji */}
+      {/* Ankiety zdrowotne */}
       <div className="mb-8">
-        <div className="flex gap-2 mb-4 flex-wrap">
-          {[{ key: 'ankiety', label: 'Ankiety' }, { key: 'aftercare', label: 'Zalecenia' }, { key: 'regulamin', label: 'Regulamin' }].map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setDocTab(tab.key)}
-              style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${docTab === tab.key ? t.fuchsia : t.border}`, color: docTab === tab.key ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer' }}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Ankiety tab */}
-        {docTab === 'ankiety' && (
-          <div>
-            <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, marginBottom: '12px' }}>
-              <div className="px-4 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-                <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
-                  ANKIETY ZDROWOTNE ({filteredForms.length})
-                </p>
-                {/* Legenda kropek */}
-                <div className="flex flex-wrap gap-4 mb-2">
-                  {[['#FF007F', 'Problemy medyczne'], ['#f97316', 'Tak na pytanie przedzabiegowe'], ['#3b82f6', 'Brak zgody na wizerunek'], ['#16a34a', 'Wszystko OK']].map(([color, label]) => (
-                    <div key={label} className="flex items-center gap-1.5">
-                      <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: color, flexShrink: 0 }} />
-                      <span style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>{label}</span>
-                    </div>
-                  ))}
-                  <div className="flex items-center gap-1.5">
-                    <span style={{ ...mono, fontSize: '7px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '1px 4px', letterSpacing: '0.06em' }}>NIEPEŁNOLETNI</span>
-                    <span style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>Niepełnoletni klient</span>
-                  </div>
+        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, marginBottom: '12px' }}>
+          <div className="px-4 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+            <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
+              ANKIETY ZDROWOTNE ({filteredForms.length})
+            </p>
+            {/* Legenda kropek */}
+            <div className="flex flex-wrap gap-4 mb-2">
+              {[['#FF007F', 'Problemy medyczne'], ['#f97316', 'Tak na pytanie przedzabiegowe'], ['#3b82f6', 'Brak zgody na wizerunek'], ['#16a34a', 'Wszystko OK']].map(([color, label]) => (
+                <div key={label} className="flex items-center gap-1.5">
+                  <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: color, flexShrink: 0 }} />
+                  <span style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>{label}</span>
                 </div>
-                <div className="flex items-center gap-2" style={{ border: `0.5px solid ${t.border}`, padding: '6px 10px' }}>
-                  <Search size={12} color={t.muted} />
-                  <input
-                    type="text"
-                    placeholder="Szukaj: imię, email, data, #ID..."
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    style={{ background: 'transparent', border: 'none', outline: 'none', color: t.text, fontSize: '11px', width: '100%', fontFamily: 'Inter' }}
-                  />
-                </div>
+              ))}
+              <div className="flex items-center gap-1.5">
+                <span style={{ ...mono, fontSize: '7px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '1px 4px', letterSpacing: '0.06em' }}>NIEPEŁNOLETNI</span>
+                <span style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>Niepełnoletni klient</span>
               </div>
-              {loading ? (
-                <div className="flex items-center justify-center py-20">
-                  <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
-                </div>
-              ) : filteredForms.length === 0 ? (
-                <div className="py-16 text-center">
-                  <p style={{ ...mono, fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK ANKIET</p>
-                </div>
-              ) : (
-                <div>
-                  {groupedClients.map((group, i) => {
-                    const form = group[0];
-                    const boolFieldKeys = BOOL_FIELDS.map(b => b[0]);
-                    const hasMedical = boolFieldKeys.some(k => form[k] === true);
-                    const hasProcedureYes = (template?.procedure_questions || []).some(q => form[q.field_key] === true || (form[`${q.field_key}_desc`] && form[`${q.field_key}_desc`].trim()));
-                    const noImageConsent = form.consent_image_use === false;
-                    const allOk = !hasMedical && !hasProcedureYes && !noImageConsent && !form.is_minor;
-                    return (
-                      <div key={form.client_email || form.id}
-                        className="flex items-center gap-3 px-4 py-3 cursor-pointer"
-                        style={{ borderBottom: i < groupedClients.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selected?.client_email === form.client_email ? 'rgba(255,0,127,0.05)' : 'transparent' }}
-                        onClick={() => setSelected(form)}
-                      >
-                        <FileText size={13} color={form.is_minor ? '#FF007F' : t.fuchsia} />
-                        <div className="flex-1 min-w-0">
-                          <p style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>{getClientName(form)}</p>
-                          <p style={{ ...mono, fontSize: '8px', color: t.muted, marginTop: '2px' }}>{form.client_email}</p>
-                          <div className="flex items-center gap-2 mt-2">
-                            {group.length > 1 && <span style={{ ...mono, fontSize: '7px', color: t.fuchsia, border: `0.5px solid ${t.fuchsia}`, padding: '1px 4px' }}>{group.length} ANKIET</span>}
-                            <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>
-                              {form.procedure_type && `${form.procedure_type} · `}
-                              {form.form_filled_date ? safeFormat(form.form_filled_date, 'dd.MM.yyyy') : ''}
-                              {' · '}{form.id?.slice(-8).toUpperCase()}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex flex-row gap-2 items-center flex-shrink-0">
-                          {form.is_minor && <span style={{ ...mono, fontSize: '7px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '1px 4px' }}>NIELETNI</span>}
-                          {hasMedical && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#FF007F' }} title="Problemy medyczne" />}
-                          {hasProcedureYes && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#f97316' }} title="Tak na pytanie przedzabiegowe" />}
-                          {noImageConsent && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#3b82f6' }} title="Brak zgody na wizerunek" />}
-                          {allOk && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#16a34a' }} title="Wszystko OK" />}
-                        </div>
+            </div>
+            <div className="flex items-center gap-2" style={{ border: `0.5px solid ${t.border}`, padding: '6px 10px' }}>
+              <Search size={12} color={t.muted} />
+              <input
+                type="text"
+                placeholder="Szukaj: imię, email, data, #ID..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                style={{ background: 'transparent', border: 'none', outline: 'none', color: t.text, fontSize: '11px', width: '100%', fontFamily: 'Inter' }}
+              />
+            </div>
+          </div>
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
+            </div>
+          ) : filteredForms.length === 0 ? (
+            <div className="py-16 text-center">
+              <p style={{ ...mono, fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK ANKIET</p>
+            </div>
+          ) : (
+            <div>
+              {groupedClients.map((group, i) => {
+                const form = group[0];
+                const boolFieldKeys = BOOL_FIELDS.map(b => b[0]);
+                const hasMedical = boolFieldKeys.some(k => form[k] === true);
+                const hasProcedureYes = (template?.procedure_questions || []).some(q => form[q.field_key] === true || (form[`${q.field_key}_desc`] && form[`${q.field_key}_desc`].trim()));
+                const noImageConsent = form.consent_image_use === false;
+                const allOk = !hasMedical && !hasProcedureYes && !noImageConsent && !form.is_minor;
+                return (
+                  <div key={form.client_email || form.id}
+                    className="flex items-center gap-3 px-4 py-3 cursor-pointer"
+                    style={{ borderBottom: i < groupedClients.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selected?.client_email === form.client_email ? 'rgba(255,0,127,0.05)' : 'transparent' }}
+                    onClick={() => setSelected(form)}
+                  >
+                    <FileText size={13} color={form.is_minor ? '#FF007F' : t.fuchsia} />
+                    <div className="flex-1 min-w-0">
+                      <p style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>{getClientName(form)}</p>
+                      <p style={{ ...mono, fontSize: '8px', color: t.muted, marginTop: '2px' }}>{form.client_email}</p>
+                      <div className="flex items-center gap-2 mt-2">
+                        {group.length > 1 && <span style={{ ...mono, fontSize: '7px', color: t.fuchsia, border: `0.5px solid ${t.fuchsia}`, padding: '1px 4px' }}>{group.length} ANKIET</span>}
+                        <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>
+                          {form.procedure_type && `${form.procedure_type} · `}
+                          {form.form_filled_date ? safeFormat(form.form_filled_date, 'dd.MM.yyyy') : ''}
+                          {' · '}{form.id?.slice(-8).toUpperCase()}
+                        </p>
                       </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Aftercare tab */}
-        {docTab === 'aftercare' && (
-          <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-            <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '0px' }}>
-                ZALECENIA ({instructions.length})
-              </p>
-              <button
-                onClick={() => navigate('/dashboard/documents')}
-                className="flex items-center gap-2"
-                style={{ ...mono, fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}
-              >
-                <Edit3 size={12} /> EDYTUJ
-              </button>
-            </div>
-            {loading ? (
-              <div className="flex items-center justify-center py-20">
-                <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
-              </div>
-            ) : instructions.length === 0 ? (
-              <div className="py-16 text-center">
-                <p style={{ ...mono, fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK DOKUMENTÓW</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-                {instructions.map((instr) => (
-                  <div key={instr.id} style={{ border: `0.5px solid ${t.border}`, padding: '16px', background: 'rgba(255,0,127,0.02)' }}>
-                    <p style={{ ...display, fontSize: '1.2rem', color: t.title, letterSpacing: '0.04em', marginBottom: '8px' }}>
-                      {instr.title}
-                    </p>
-                    <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px' }}>
-                      {instr.type === 'aftercare_tattoo' ? 'Pielęgnacja tatuażu' : instr.type === 'aftercare_piercing' ? 'Pielęgnacja piercingu' : instr.type === 'before_tattoo' ? 'Przed tatuażem' : 'Po piercingu'}
-                    </p>
-                    {instr.content ? (
-                      <p style={{ color: t.text, fontSize: '12px', lineHeight: 1.6 }}>{instr.content}</p>
-                    ) : (
-                      <p style={{ ...mono, fontSize: '10px', color: t.muted, fontStyle: 'italic' }}>Brak treści</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Regulamin tab */}
-        {docTab === 'regulamin' && (
-          <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-            <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-                REGULAMIN STUDIA
-              </p>
-              <button
-                onClick={() => navigate('/dashboard/documents')}
-                className="flex items-center gap-2"
-                style={{ ...mono, fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}
-              >
-                <Edit3 size={12} /> EDYTUJ
-              </button>
-            </div>
-            {loading ? (
-              <div className="flex items-center justify-center py-20">
-                <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
-              </div>
-            ) : (
-              <div className="p-4">
-                {terms.length === 0 ? (
-                  <div className="py-16 text-center">
-                    <p style={{ ...mono, fontSize: '10px', color: t.muted, letterSpacing: '0.1em', marginBottom: '20px' }}>BRAK DOKUMENTU</p>
-                  </div>
-                ) : (
-                  terms.map((t_item) => (
-                    <div key={t_item.id} style={{ border: `0.5px solid ${t.border}`, padding: '20px', background: 'rgba(255,0,127,0.02)' }}>
-                      <p style={{ ...display, fontSize: '1.4rem', color: t.title, letterSpacing: '0.04em', marginBottom: '12px' }}>
-                        {t_item.title || 'Regulamin'}
-                      </p>
-                      {t_item.content ? (
-                        <div style={{ color: t.text, fontSize: '13px', lineHeight: 1.7 }}>{t_item.content}</div>
-                      ) : (
-                        <p style={{ ...mono, fontSize: '10px', color: t.muted, fontStyle: 'italic' }}>Brak treści</p>
-                      )}
                     </div>
-                  ))
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
+                    <div className="flex flex-row gap-2 items-center flex-shrink-0">
+                      {form.is_minor && <span style={{ ...mono, fontSize: '7px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '1px 4px' }}>NIELETNI</span>}
+                      {hasMedical && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#FF007F' }} title="Problemy medyczne" />}
+                      {hasProcedureYes && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#f97316' }} title="Tak na pytanie przedzabiegowe" />}
+                      {noImageConsent && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#3b82f6' }} title="Brak zgody na wizerunek" />}
+                      {allOk && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#16a34a' }} title="Wszystko OK" />}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Modal overlay */}
