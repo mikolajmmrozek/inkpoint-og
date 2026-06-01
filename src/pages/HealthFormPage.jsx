@@ -100,54 +100,36 @@ export default function HealthFormPage() {
   const t = T[lang] || T.pl;
 
   const buildInitialState = (tpl) => {
-    let state = {
-      booking_id: '',
-      client_first_name: '',
-      client_last_name: '',
-      client_name: '',
-      client_email: '',
-      client_phone: '',
-      date_of_birth: '',
-      address_street: '',
-      address_city: '',
-      address_postal_code: '',
-      pesel: '',
-      id_document: '',
-      consent_tattoo_piercing: false,
-      confirm_sober: false,
-      consent_image_use: false,
-      confirm_regulations_read: false,
-      client_signature: '',
-      form_filled_date: new Date().toISOString().split('T')[0],
-      procedure_type: '',
-      body_placement: '',
-      is_update_only: false,
-      previous_form_id: null,
-    };
-    // Dodaj wszystkie pytania TAK/NIE z szablonu
+    let state = { ...form };
     if (tpl?.medical_fields) {
       tpl.medical_fields.forEach(f => {
-        state[f.field_key] = null;
-        if (f.has_description !== false) state[`${f.field_key}_desc`] = '';
+        if (!(f.field_key in state)) state[f.field_key] = null;
+        const descKey = f[2] || `${f.field_key}_desc`;
+        if (f.has_description !== false && !(descKey in state)) {
+          state[descKey] = '';
+        }
       });
     }
     if (tpl?.procedure_questions) {
       tpl.procedure_questions.forEach(q => {
-        state[q.field_key] = null;
-        if (q.has_description !== false) state[`${q.field_key}_desc`] = '';
+        if (!(q.field_key in state)) state[q.field_key] = null;
+        const descKey = `${q.field_key}_desc`;
+        if (q.has_description !== false && !(descKey in state)) {
+          state[descKey] = '';
+        }
       });
     }
     if (tpl?.declaration_fields) {
       tpl.declaration_fields.forEach(f => {
-        state[f.field_key] = '';
+        if (!(f.field_key in state)) state[f.field_key] = '';
       });
     }
     if (tpl?.consent_fields) {
       tpl.consent_fields.forEach(f => {
-        state[f.field_key] = false;
+        if (!(f.field_key in state)) state[f.field_key] = false;
       });
     }
-    if (tpl?.declaration_of_will?.field_key) {
+    if (tpl?.declaration_of_will?.field_key && !(tpl.declaration_of_will.field_key in state)) {
       state[tpl.declaration_of_will.field_key] = false;
     }
     return state;
