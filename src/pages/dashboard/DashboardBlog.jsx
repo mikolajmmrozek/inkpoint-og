@@ -100,7 +100,7 @@ export default function DashboardBlog() {
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
         <div>
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>
             ZARZĄDZANIE
@@ -255,33 +255,35 @@ export default function DashboardBlog() {
               </p>
             </div>
           ) : posts.map((post, i) => (
-            <div key={post.id} className="flex items-center justify-between p-4 transition-colors" style={{ borderBottom: i < posts.length - 1 ? `0.5px solid ${t.border}` : 'none' }}>
-              <div className="flex items-center gap-6 min-w-0">
-                {post.cover_image_url && (
-                  <img src={post.cover_image_url} alt="" className="w-12 h-12 object-cover flex-shrink-0" />
-                )}
-                <div className="min-w-0">
-                  <p style={{ color: t.text, fontSize: '14px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</p>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
-                    {post.author_name} · {post.published_at || 'Brak daty'}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 flex-shrink-0">
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.1em', padding: '3px 8px', border: `0.5px solid ${post.is_published ? '#4A7C59' : '#262626'}`, color: post.is_published ? '#4A7C59' : 'rgba(245,240,235,0.3)' }}>
-                  {post.is_published ? 'LIVE' : 'SZKIC'}
-                </span>
-                <button onClick={() => togglePublish(post)} style={{ color: t.muted, cursor: 'pointer', background: 'none', border: 'none' }}>
-                  {post.is_published ? <EyeOff size={14} /> : <Eye size={14} />}
-                </button>
-                <button onClick={() => openEdit(post)} style={{ color: t.muted, cursor: 'pointer', background: 'none', border: 'none' }}>
-                  <Edit size={14} />
-                </button>
-                <button onClick={() => deletePost(post.id)} style={{ color: t.fuchsia, cursor: 'pointer', background: 'none', border: 'none' }}>
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            </div>
+           <div key={post.id} className="flex flex-col md:flex-row md:items-center md:justify-between p-4 transition-colors" style={{ borderBottom: i < posts.length - 1 ? `0.5px solid ${t.border}` : 'none' }}>
+             {/* Mobile: title first */}
+             <div className="flex items-center gap-3 mb-3 md:mb-0 md:gap-6 min-w-0 flex-1">
+               {post.cover_image_url && (
+                 <img src={post.cover_image_url} alt="" className="w-10 h-10 md:w-12 md:h-12 object-cover flex-shrink-0" />
+               )}
+               <div className="min-w-0 flex-1">
+                 <p style={{ color: t.text, fontSize: '13px', md: '14px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</p>
+                 <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', md: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
+                   {post.author_name} · {post.published_at || 'Brak daty'}
+                 </p>
+               </div>
+             </div>
+             {/* Mobile: actions in a row */}
+             <div className="flex items-center gap-2 md:gap-3 flex-shrink-0 w-full md:w-auto justify-between md:justify-end">
+               <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', md: '8px', letterSpacing: '0.1em', padding: '2px 6px', md: 'padding: 3px 8px', border: `0.5px solid ${post.is_published ? '#4A7C59' : '#262626'}`, color: post.is_published ? '#4A7C59' : 'rgba(245,240,235,0.3)' }}>
+                 {post.is_published ? 'LIVE' : 'SZKIC'}
+               </span>
+               <button onClick={() => togglePublish(post)} style={{ color: t.muted, cursor: 'pointer', background: 'none', border: 'none', padding: '4px', minWidth: '32px', minHeight: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                 {post.is_published ? <EyeOff size={13} /> : <Eye size={13} />}
+               </button>
+               <button onClick={() => openEdit(post)} style={{ color: t.muted, cursor: 'pointer', background: 'none', border: 'none', padding: '4px', minWidth: '32px', minHeight: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                 <Edit size={13} />
+               </button>
+               <button onClick={() => deletePost(post.id)} style={{ color: t.fuchsia, cursor: 'pointer', background: 'none', border: 'none', padding: '4px', minWidth: '32px', minHeight: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                 <Trash2 size={13} />
+               </button>
+             </div>
+           </div>
           ))}
         </div>
       )}
