@@ -323,7 +323,9 @@ export default function DashboardHealthForms() {
       form.client_first_name?.toLowerCase().includes(q) ||
       form.client_last_name?.toLowerCase().includes(q) ||
       form.client_email?.toLowerCase().includes(q) ||
-      (form.form_filled_date && format(new Date(form.form_filled_date), 'dd.MM.yyyy').includes(q));
+      (form.form_filled_date && format(new Date(form.form_filled_date), 'dd.MM.yyyy').includes(q)) ||
+      form.id?.toLowerCase().includes(q) ||
+      form.id?.slice(-8).toLowerCase().includes(q);
   });
 
   // Get sessions for selected form's booking
@@ -678,7 +680,7 @@ export default function DashboardHealthForms() {
                   <Search size={12} color={t.muted} />
                   <input
                     type="text"
-                    placeholder="Szukaj: imię, email, data..."
+                    placeholder="Szukaj: imię, email, data, #ID..."
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
                     style={{ background: 'transparent', border: 'none', outline: 'none', color: t.text, fontSize: '11px', width: '100%', fontFamily: 'Inter' }}
