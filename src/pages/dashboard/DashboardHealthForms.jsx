@@ -387,27 +387,30 @@ export default function DashboardHealthForms() {
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Inter',Arial,sans-serif;font-size:10pt;color:#111;background:#fff}
-  .page{max-width:180mm;margin:0 auto;padding:14mm 0}
-  h1{font-size:22pt;font-weight:800;letter-spacing:-0.5px;margin-bottom:4px}
-  .line{height:2px;background:#c8003c;margin-bottom:16px}
-  .sec{margin-bottom:16px;page-break-inside:avoid}
-  .sec-title{font-size:7.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:#c8003c;margin-bottom:7px;padding-bottom:3px;border-bottom:.5px solid #ddd}
+  body{font-family:'Inter',Arial,sans-serif;font-size:8pt;color:#111;background:#fff}
+  .page{max-width:185mm;margin:0 auto;padding:8mm 0}
+  h1{font-size:16pt;font-weight:800;letter-spacing:-0.5px;margin-bottom:3px}
+  .line{height:1.5px;background:#c8003c;margin-bottom:10px}
+  .sec{margin-bottom:10px;page-break-inside:avoid}
+  .sec-title{font-size:6pt;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:#c8003c;margin-bottom:5px;padding-bottom:2px;border-bottom:.5px solid #ddd}
   table{width:100%;border-collapse:collapse}
-  td{padding:2.5px 0;vertical-align:top;font-size:9.5pt;line-height:1.4}
-  td.lbl{font-weight:600;color:#444;width:40%;padding-right:8px}
+  td{padding:1.5px 0;vertical-align:top;font-size:8pt;line-height:1.35}
+  td.lbl{font-weight:600;color:#444;width:38%;padding-right:6px}
   td.val{color:#111}
-  td.q{width:80%;padding:2px 0}
-  td.ans{width:20%;font-weight:700;text-align:right;padding:2px 0;white-space:nowrap}
-  .desc{font-style:italic;color:#666;font-size:8pt;padding:1px 0 4px 12px}
-  .decl{font-size:8pt;color:#333;line-height:1.7;background:#f9f9f9;padding:10px 12px;border-left:2px solid #c8003c;margin-bottom:8px;white-space:pre-wrap}
-  .decl-ok{font-weight:700;font-size:10pt}
-  .ci{display:flex;gap:8px;align-items:flex-start;margin-bottom:7px}
-  .cm{font-size:13pt;font-weight:700;line-height:1.2;flex-shrink:0;width:16px}
-  .cb strong{font-size:9.5pt}
-  .cdesc{font-size:8pt;color:#555;margin-top:2px;line-height:1.5}
-  .sig{border:1px solid #ccc;padding:4px;display:inline-block;margin-top:6px;background:#fff}
-  .sig img{max-width:200px;max-height:75px;display:block}
+  td.q{width:82%;padding:1.5px 0}
+  td.ans{width:18%;font-weight:700;text-align:right;padding:1.5px 0;white-space:nowrap;font-size:7pt}
+  .desc{font-style:italic;color:#666;font-size:7pt;padding:1px 0 3px 10px}
+  .decl-ok{font-weight:700;font-size:8.5pt}
+  .ci{display:flex;gap:6px;align-items:flex-start;margin-bottom:4px}
+  .cm{font-size:10pt;font-weight:700;line-height:1.1;flex-shrink:0;width:14px}
+  .cb strong{font-size:8pt}
+  .cdesc{font-size:7pt;color:#555;margin-top:1px;line-height:1.4}
+  .sig{border:.5px solid #ccc;padding:3px;display:inline-block;margin-top:4px;background:#fff}
+  .sig img{max-width:180px;max-height:55px;display:block}
+  .personal-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+  .personal-grid .row{display:flex;gap:4px;padding:1.5px 0;border-bottom:.5px solid #f0f0f0}
+  .personal-grid .row .lbl{font-weight:600;color:#444;font-size:7.5pt;width:45%;flex-shrink:0}
+  .personal-grid .row .val{color:#111;font-size:7.5pt}
   @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.page{padding:0}}
 </style>
 </head>
@@ -418,28 +421,28 @@ export default function DashboardHealthForms() {
 
   <div class="sec">
     <div class="sec-title">Dane osobowe</div>
-    <table>
-      ${row('Imię i nazwisko', clientName)}
-      ${row('Email', form.client_email)}
-      ${row('Telefon', form.client_phone)}
-      ${row('Data urodzenia', form.date_of_birth)}
-      ${form.pesel ? row('PESEL', form.pesel) : ''}
-      ${form.id_document ? row('Dokument tożsamości', form.id_document) : ''}
-      ${row('Adres', [form.address_street, form.address_city, form.address_postal_code].filter(Boolean).join(', '))}
-      ${row('Zabieg', form.procedure_type)}
-      ${row('Miejsce zabiegu', form.body_placement)}
-      ${row('Data wypełnienia', safeFormat(form.form_filled_date, 'dd.MM.yyyy HH:mm'))}
-    </table>
+    <div class="personal-grid">
+      <div class="row"><span class="lbl">Imię i nazwisko</span><span class="val">${clientName}</span></div>
+      <div class="row"><span class="lbl">Email</span><span class="val">${form.client_email || '&mdash;'}</span></div>
+      <div class="row"><span class="lbl">Telefon</span><span class="val">${form.client_phone || '&mdash;'}</span></div>
+      <div class="row"><span class="lbl">Data urodzenia</span><span class="val">${form.date_of_birth || '&mdash;'}</span></div>
+      ${form.pesel ? `<div class="row"><span class="lbl">PESEL</span><span class="val">${form.pesel}</span></div>` : ''}
+      ${form.id_document ? `<div class="row"><span class="lbl">Dokument</span><span class="val">${form.id_document}</span></div>` : ''}
+      <div class="row"><span class="lbl">Adres</span><span class="val">${[form.address_street, form.address_city, form.address_postal_code].filter(Boolean).join(', ') || '&mdash;'}</span></div>
+      <div class="row"><span class="lbl">Zabieg</span><span class="val">${form.procedure_type || '&mdash;'}</span></div>
+      <div class="row"><span class="lbl">Miejsce zabiegu</span><span class="val">${form.body_placement || '&mdash;'}</span></div>
+      <div class="row"><span class="lbl">Data wypełnienia</span><span class="val">${safeFormat(form.form_filled_date, 'dd.MM.yyyy HH:mm')}</span></div>
+    </div>
   </div>
 
-  <div class="sec">
+  <div class="sec" style="page-break-before:avoid">
     <div class="sec-title">Wywiad medyczny</div>
-    <table>${medRows}</table>
+    <table style="border-top:.5px solid #eee">${medRows}</table>
   </div>
 
   ${procQs.length > 0 ? `<div class="sec"><div class="sec-title">Pytania przedzabiegowe</div><table>${procRows}</table></div>` : ''}
 
-  <div class="sec"><div class="sec-title">Oświadczenie woli</div><p style="font-size:8.5pt;color:#333;margin-bottom:5px">W pełni rozumiem, że:</p><ol style="margin:0;padding-left:16px;font-size:7.5pt;color:#333;line-height:1.55">
+  <div class="sec"><div class="sec-title">Oświadczenie woli</div><p style="font-size:7.5pt;color:#333;margin-bottom:4px;font-weight:600">W pełni rozumiem, że:</p><ol style="margin:0;padding-left:12px;font-size:6.5pt;color:#444;line-height:1.4;column-count:2;column-gap:12px">
     <li>Tatuaż zostaje na całe życie i nie ma sposobu, żeby go usunąć tak, aby nie pozostał żaden ślad.</li>
     <li>Wpływ tatuażu na zdrowie nie został do tej pory dokładnie zbadany.</li>
     <li>Tatuaż lub przełkucie może mieć wpływ na interakcje społeczne.</li>
