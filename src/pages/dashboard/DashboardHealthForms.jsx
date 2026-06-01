@@ -76,7 +76,7 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme, template }
           </p>
           {selected.form_filled_date && (
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, marginTop: '3px', letterSpacing: '0.06em' }}>
-          {safeFormat(selected.form_filled_date, 'dd.MM.yyyy HH:mm')}
+          {safeFormat(selected.form_filled_date, 'dd.MM.yyyy')}
             </p>
           )}
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, marginTop: '3px', letterSpacing: '0.1em', opacity: 0.7, cursor: 'pointer', userSelect: 'all' }}
