@@ -213,7 +213,11 @@ export default function Contact() {
                       {label}
                     </p>
                   </div>
-                  {link ? (
+                  {label === 'TELEFON' ? (
+                    <a href={`tel:${value}`} style={{ color: 'rgba(245,240,235,0.6)', fontSize: '13px', lineHeight: 1.7, textDecoration: 'underline', cursor: 'pointer', display: 'inline-block' }}>
+                      {value}
+                    </a>
+                  ) : link ? (
                     <a href={link} target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(245,240,235,0.6)', fontSize: '13px', lineHeight: 1.7, textDecoration: 'underline', cursor: 'pointer', display: 'inline-block' }}>
                       {value}
                     </a>
