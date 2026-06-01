@@ -16,6 +16,7 @@ const inputStyle = {
 };
 
 const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
+const HOURS_DUR = Array.from({ length: 13 }, (_, i) => String(i).padStart(2, '0'));
 const MINUTES = ['00', '15', '30', '45'];
 const STATUS_OPTIONS = ['pending','confirmed','completed','cancelled'];
 
@@ -226,8 +227,27 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                 </select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-6">
-              <div>{label('Czas trwania (h)')}<input {...inp('session_duration', 'number')} /></div>
+            <div className="grid grid-cols-3 gap-6">
+              <div>
+                {label('Czas trwania — godziny')}
+                <select
+                  value={Math.floor((form.session_duration || 0) / 60).toString().padStart(2, '0')}
+                  onChange={e => set('session_duration', Number(e.target.value) * 60 + (form.session_duration || 0) % 60)}
+                  style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
+                >
+                  {HOURS_DUR.map(h => <option key={h} value={h}>{h}</option>)}
+                </select>
+              </div>
+              <div>
+                {label('minuty')}
+                <select
+                  value={((form.session_duration || 0) % 60).toString().padStart(2, '0')}
+                  onChange={e => set('session_duration', Math.floor((form.session_duration || 0) / 60) * 60 + Number(e.target.value))}
+                  style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
+                >
+                  {MINUTES.map(m => <option key={m} value={m}>{m}</option>)}
+                </select>
+              </div>
               <div>{label('Szacowana cena (PLN)')}<input {...inp('estimated_price', 'number')} /></div>
             </div>
           </div>
