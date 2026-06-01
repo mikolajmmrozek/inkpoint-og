@@ -184,7 +184,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
             <div className="mb-4">
               <div>{label('Data *')}<input {...inp('session_date', 'date')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }} /></div>
             </div>
-            <div className="grid grid-cols-4 gap-6 mb-4">
+            <div className="space-y-4 mb-4">
               <div>
                 {label('Godzina')}
                 <select
