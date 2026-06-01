@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import PageLayout from '../components/layout/PageLayout';
 import Lightbox from '../components/ui/Lightbox';
-import { ZoomIn } from 'lucide-react';
+import { ZoomIn, Instagram } from 'lucide-react';
 
 const MOCK = {
   name: 'Aleksandra Wiśniewska',
@@ -112,10 +112,11 @@ export default function ArtistProfile() {
                   href={artist.instagram.startsWith('http') ? artist.instagram : `https://instagram.com/${artist.instagram.replace('@','')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block mb-8 hover:opacity-70 transition-opacity"
+                  className="flex items-center gap-2 mb-8 hover:opacity-70 transition-opacity w-fit"
                   style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.1em', fontWeight: 500, cursor: 'pointer' }}
                 >
-                  {artist.instagram}
+                  <Instagram size={16} />
+                  Instagram
                 </a>
               )}
 
