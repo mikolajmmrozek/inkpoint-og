@@ -352,6 +352,7 @@ export default function DashboardHealthForms() {
       const procQs = template?.procedure_questions || [];
       const consentFields = template?.consent_fields || [];
       const decl = template?.declaration_of_will;
+      const declCustomFields = template?.declaration_fields || [];
 
       const row = (label, val) => val ? `<tr><td class="lbl">${label}</td><td class="val">${val}</td></tr>` : '';
 
@@ -438,19 +439,19 @@ export default function DashboardHealthForms() {
 
   ${procQs.length > 0 ? `<div class="sec"><div class="sec-title">Pytania przedzabiegowe</div><table>${procRows}</table></div>` : ''}
 
-  ${decl?.content ? `<div class="sec"><div class="sec-title">Oświadczenie woli</div><div class="decl">${decl.content}</div><p class="decl-ok" style="color:${form[decl.field_key] ? '#16a34a' : '#c8003c'}">${form[decl.field_key] ? '✓ POTWIERDZAM' : '✕ NIE POTWIERDZONO'}</p></div>` : ''}
+  ${(decl?.content || declCustomFields.length > 0) ? `<div class="sec"><div class="sec-title">Oświadczenie woli</div>${decl?.content ? `<div class="decl">${decl.content}</div>` : ''}${declCustomFields.length > 0 ? `<table style="margin-bottom:8px;margin-top:4px">${declCustomFields.map(f => form[f.field_key] ? `<tr><td class="lbl" style="width:45%">${f.label}</td><td class="val">${form[f.field_key]}</td></tr>` : '').join('')}</table>` : ''}<p class="decl-ok" style="color:${decl && form[decl.field_key] ? '#16a34a' : '#c8003c'}">${decl && form[decl.field_key] ? '✓ POTWIERDZAM' : '✕ NIE POTWIERDZONO'}</p></div>` : ''}
 
   ${consentFields.length > 0 ? `<div class="sec"><div class="sec-title">Zgody</div>${consentItems}</div>` : ''}
 
   ${form.client_signature ? `<div class="sec"><div class="sec-title">Podpis klienta</div><div class="sig"><img src="${form.client_signature}" alt="Podpis" /></div></div>` : ''}
 
   ${guardianForm ? `<div class="sec"><div class="sec-title">Zgoda opiekuna prawnego</div><table>
-    ${row('Imię i nazwisko opiekuna', guardianForm.guardian_name)}
+    ${row('Imi\u0119 i nazwisko opiekuna', guardianForm.guardian_name)}
     ${row('Telefon opiekuna', guardianForm.guardian_phone)}
     ${row('Typ zabiegu', Array.isArray(guardianForm.procedure_type) ? guardianForm.procedure_type.join(', ') : guardianForm.procedure_type)}
     ${row('Miejsce zabiegu', guardianForm.body_placement)}
-    ${row('Liczba zabiegów', guardianForm.num_procedures)}
-  </table>${guardianForm.guardian_signature ? `<p style="margin-top:8px;font-weight:600;font-size:9pt;color:#444">Podpis opiekuna:</p><div class="sig"><img src="${guardianForm.guardian_signature}" alt="Podpis opiekuna" /></div>` : ''}</div>` : ''}
+    ${row('Liczba zabieg\u00f3w', guardianForm.num_procedures)}
+  </table><div class="decl" style="margin-top:10px">Wyra\u017cam zgod\u0119 jako prawny opiekun na wykonanie zabiegu tatua\u017cu/piercingu osobie niepe\u0142noletniej wskazanej powy\u017cej. O\u015bwiadczam, \u017ce zapozna\u0142em/-am si\u0119 z mo\u017cliwymi powik\u0142aniami i ryzykiem zwi\u0105zanym z wykonywanym zabiegiem oraz z zasadami piel\u0119gnacji po zabiegu.</div>${guardianForm.guardian_signature ? `<p style="margin-top:8px;font-weight:600;font-size:9pt;color:#444">Podpis opiekuna:</p><div class="sig"><img src="${guardianForm.guardian_signature}" alt="Podpis opiekuna" /></div>` : ''}</div>` : ''}
 
 </div>
 <script>window.addEventListener('load',function(){setTimeout(function(){window.print();},500);})</script>
