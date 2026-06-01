@@ -439,7 +439,26 @@ export default function DashboardHealthForms() {
 
   ${procQs.length > 0 ? `<div class="sec"><div class="sec-title">Pytania przedzabiegowe</div><table>${procRows}</table></div>` : ''}
 
-  ${(decl?.content || declCustomFields.length > 0) ? `<div class="sec"><div class="sec-title">Oświadczenie woli</div>${decl?.content ? `<div class="decl">${decl.content}</div>` : ''}${declCustomFields.length > 0 ? `<table style="margin-bottom:8px;margin-top:4px">${declCustomFields.map(f => form[f.field_key] ? `<tr><td class="lbl" style="width:45%">${f.label}</td><td class="val">${form[f.field_key]}</td></tr>` : '').join('')}</table>` : ''}<p class="decl-ok" style="color:${decl && form[decl.field_key] ? '#16a34a' : '#c8003c'}">${decl && form[decl.field_key] ? '✓ POTWIERDZAM' : '✕ NIE POTWIERDZONO'}</p></div>` : ''}
+  <div class="sec"><div class="sec-title">Oświadczenie woli</div><p style="font-size:8.5pt;color:#333;margin-bottom:5px">W pełni rozumiem, że:</p><ol style="margin:0;padding-left:16px;font-size:7.5pt;color:#333;line-height:1.55">
+    <li>Tatuaż zostaje na całe życie i nie ma sposobu, żeby go usunąć tak, aby nie pozostał żaden ślad.</li>
+    <li>Wpływ tatuażu na zdrowie nie został do tej pory dokładnie zbadany.</li>
+    <li>Tatuaż lub przełkucie może mieć wpływ na interakcje społeczne.</li>
+    <li>Tatuaż może ulec zmianie z biegiem czasu &mdash; kolorystyka po zagojeniu jest uzależniona od koloru skóry, a proces starzenia będzie miał wpływ na intensywność barw i formę.</li>
+    <li>Tatuaż może odbiegać od wykonywanego projektu, szkicu czy symulacji komputerowej w zależności od typu i koloru skóry oraz umiejscowienia wzoru.</li>
+    <li>Motyw tatuowany lub przełkucie może stać się z czasem niemodny, niepożądany bądź śmieszny.</li>
+    <li>Tatuator ma prawo dopasować wzór wielkością, formą oraz kolorem do anatomii tatuowanego miejsca.</li>
+    <li>Piercer ma prawo dopasować wybrany kolczyk do anatomii przesuwanego miejsca.</li>
+    <li>Tatuator pracuje w swojej manierze artystycznej &mdash; tatuaż może zawierać cechy charakterystyczne dla jego stylu.</li>
+    <li>Wizja artystyczna ma prawo odbiegać od oczekiwań klienta &mdash; ustalony wzór nie jest dokładną symulacją gotowego projektu.</li>
+    <li>Tatuaż lub kolczyk może wywołać reakcję alergiczną.</li>
+    <li>Tatuaż może spowodować efekt rozmycia pod skórą &mdash; jest to uzależnione od rodzaju skóry.</li>
+    <li>Nie będę mógł oddać krwi w stacji krwiodawstwa przez okres 4 miesięcy od momentu wykonania tatuażu lub przełkucia.</li>
+    <li>Nie będę korzystać z kąpieli słonecznych przez okres 2 miesięcy od momentu zrobienia tatuażu lub piercingu.</li>
+    <li>Nie będę mógł korzystać z kąpieli w basenie i w otwartych zbiornikach wodnych aż do momentu całkowitego wygojenia tatuażu lub przełkutego miejsca oraz pełnej regeneracji skóry przez okres dwóch miesięcy.</li>
+    <li>Proces tatuowania i piercingu jest czasochłonny oraz bolesny; będę stosować się do zaleceń dotyczących pielęgnacji, o których zostałem poinformowany przez pracownika studia „ROMANS”.</li>
+    <li>Tatuowane lub przełkuwane miejsce może puchnąć, utrudniając motorykę ciała przez pewien czas po zabiegu.</li>
+    <li>Cena tatuażu oraz przełkucia uzależniona jest od jego wielkości/rodzaju. Czas pracy tatuatora/piercera nie wpływa na cenę.</li>
+  </ol>${declCustomFields.length > 0 ? `<table style="margin-top:6px;margin-bottom:4px">${declCustomFields.map(f => form[f.field_key] ? `<tr><td class="lbl" style="width:45%">${f.label}</td><td class="val">${form[f.field_key]}</td></tr>` : '').join('')}</table>` : ''}<p class="decl-ok" style="margin-top:8px;color:${decl && form[decl.field_key] ? '#16a34a' : '#c8003c'}">${decl && form[decl.field_key] ? '✓ AKCEPTUJĘ POWYŻSZE INFORMACJE' : '✕ NIE ZAAKCEPTOWANO'}</p></div>
 
   ${consentFields.length > 0 ? `<div class="sec"><div class="sec-title">Zgody</div>${consentItems}</div>` : ''}
 
