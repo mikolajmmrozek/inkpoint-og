@@ -36,17 +36,15 @@ const CONSENT_FIELDS = [
   ['confirm_regulations_read', 'Regulamin'],
 ];
 
-function FormDetailPanel({ selected, guardianForm, t, onClose, theme }) {
-  const [localTemplate, setLocalTemplate] = useState(null);
-  
+function FormDetailPanel({ selected, guardianForm, t, onClose, theme, template }) {
   useEffect(() => {
-    base44.entities.HealthFormTemplate.filter({ key: 'default' }).then(r => {
-      if (r?.length > 0) setLocalTemplate(r[0]);
-    });
-  }, [selected?.id]);
+    if (template) {
+      // Template already provided via props
+    }
+  }, [template]);
   
-  const allMedical = (Array.isArray(localTemplate?.medical_fields) ? localTemplate.medical_fields : BOOL_FIELDS);
-  const allProcedure = (Array.isArray(localTemplate?.procedure_questions) ? localTemplate.procedure_questions : []);
+  const allMedical = (Array.isArray(template?.medical_fields) ? template.medical_fields : BOOL_FIELDS);
+  const allProcedure = (Array.isArray(template?.procedure_questions) ? template.procedure_questions : []);
 
   return (
     <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, maxHeight: '80vh', overflowY: 'auto' }}>
@@ -161,7 +159,7 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme }) {
         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>ZGODY</p>
         <div className="flex flex-wrap gap-2">
           {(() => {
-            const consentFields = localTemplate?.consent_fields || [];
+            const consentFields = template?.consent_fields || [];
             return consentFields.map(field => (
               <div key={field.field_key} className="flex items-center gap-1.5 px-2 py-1" style={{ border: `0.5px solid ${selected[field.field_key] ? '#16a34a' : t.border}` }}>
                 <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: selected[field.field_key] ? '#16a34a' : t.muted }} />
@@ -189,16 +187,16 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme }) {
           'procedure_type', 'body_placement', 'is_minor', 'is_update_only', 'previous_form_id',
           'guardian_consent_form_id', 'client_signature', 'form_filled_date',
         ]);
-        const medicalKeys = (localTemplate?.medical_fields || []).map(f => f.field_key);
-        const procKeys = (localTemplate?.procedure_questions || []).map(q => q.field_key);
-        const consentKeys = (localTemplate?.consent_fields || []).map(f => f.field_key);
-        const declKeys = (localTemplate?.declaration_fields || []).map(f => f.field_key);
+        const medicalKeys = (template?.medical_fields || []).map(f => f.field_key);
+        const procKeys = (template?.procedure_questions || []).map(q => q.field_key);
+        const consentKeys = (template?.consent_fields || []).map(f => f.field_key);
+        const declKeys = (template?.declaration_fields || []).map(f => f.field_key);
         
         medicalKeys.forEach(k => { knownFields.add(k); knownFields.add(`${k}_desc`); });
         procKeys.forEach(k => { knownFields.add(k); knownFields.add(`${k}_desc`); });
         consentKeys.forEach(k => knownFields.add(k));
         declKeys.forEach(k => knownFields.add(k));
-        knownFields.add(localTemplate?.declaration_of_will?.field_key);
+        knownFields.add(template?.declaration_of_will?.field_key);
         
         const otherFields = Object.entries(selected).filter(([k]) => !knownFields.has(k) && selected[k]);
         if (otherFields.length === 0) return null;
@@ -768,7 +766,7 @@ export default function DashboardHealthForms() {
               </div>
             )}
 
-            <FormDetailPanel selected={selected} guardianForm={selectedGuardian} t={t} onClose={() => setSelected(null)} theme={theme} />
+            <FormDetailPanel selected={selected} guardianForm={selectedGuardian} t={t} onClose={() => setSelected(null)} theme={theme} template={template} />
           </div>
         )}
       </div>
