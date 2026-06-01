@@ -7,6 +7,15 @@ import { useTheme } from './Dashboard';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
+const safeFormat = (dateStr, fmt) => {
+  try {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return format(d, fmt);
+  } catch { return dateStr || ''; }
+};
+
 const BOOL_FIELDS = [
   ['has_heart_condition', 'Choroby serca', 'heart_condition_description'],
   ['has_kidney_condition', 'Choroby nerek', 'kidney_condition_description'],
@@ -66,8 +75,8 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme, template }
             {selected.client_email} · <a href={`tel:${selected.client_phone}`} style={{ color: t.fuchsia, textDecoration: 'none' }}>{selected.client_phone}</a>
           </p>
           {selected.form_filled_date && (
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, marginTop: '3px', letterSpacing: '0.06em' }}>
-              {format(new Date(selected.form_filled_date), 'dd.MM.yyyy HH:mm')}
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, marginTop: '3px', letterSpacing: '0.06em' }}>
+          {safeFormat(selected.form_filled_date, 'dd.MM.yyyy HH:mm')}
             </p>
           )}
         </div>
@@ -342,7 +351,7 @@ export default function DashboardHealthForms() {
           <p><strong>Email:</strong> ${form.client_email}</p>
           <p><strong>Telefon:</strong> ${form.client_phone}</p>
           <p><strong>Data urodzenia:</strong> ${form.date_of_birth}</p>
-          <p><strong>Data wypełnienia:</strong> ${format(new Date(form.form_filled_date), 'dd.MM.yyyy HH:mm')}</p>
+          <p><strong>Data wypełnienia:</strong> ${safeFormat(form.form_filled_date, 'dd.MM.yyyy HH:mm')}</p>
           <p><strong>Procedura:</strong> ${form.procedure_type}</p>
           <p><strong>Miejsce:</strong> ${form.body_placement}</p>
         </div>
@@ -351,7 +360,7 @@ export default function DashboardHealthForms() {
       const pdf = new jsPDF();
       const imgData = canvas.toDataURL('image/png');
       pdf.addImage(imgData, 'PNG', 10, 10, 190, 277);
-      pdf.save(`ankieta-${form.client_name}-${form.form_filled_date}.pdf`);
+      pdf.save(`ankieta-${form.client_name}-${safeFormat(form.form_filled_date, 'yyyy-MM-dd')}.pdf`);
     } finally {
       setExporting(false);
     }
@@ -363,7 +372,7 @@ export default function DashboardHealthForms() {
       await base44.integrations.Core.SendEmail({
         to: form.client_email,
         subject: 'Potwierdzenie wypełnienia ankiety zdrowotnej',
-        body: `Dzień dobry ${form.client_name},\n\nPotwierdzamy, że Twoja ankieta zdrowotna została pomyślnie zarejestrowana w naszym systemie.\n\nDane na dzień: ${format(new Date(form.form_filled_date), 'dd.MM.yyyy')}\n\nDo zobaczenia w studiu!\n\nRomans Tattoo`
+        body: `Dzień dobry ${form.client_name},\n\nPotwierdzamy, że Twoja ankieta zdrowotna została pomyślnie zarejestrowana w naszym systemie.\n\nDane na dzień: ${safeFormat(form.form_filled_date, 'dd.MM.yyyy')}\n\nDo zobaczenia w studiu!\n\nRomans Tattoo`
       });
     } finally {
       setSendingEmail(false);
@@ -580,7 +589,7 @@ export default function DashboardHealthForms() {
                             {group.length > 1 && <span style={{ ...mono, fontSize: '7px', color: t.fuchsia, border: `0.5px solid ${t.fuchsia}`, padding: '1px 4px' }}>{group.length} ANKIET</span>}
                             <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>
                               {form.procedure_type && `${form.procedure_type} · `}
-                              {form.form_filled_date ? format(new Date(form.form_filled_date), 'dd.MM.yyyy') : ''}
+                              {form.form_filled_date ? safeFormat(form.form_filled_date, 'dd.MM.yyyy') : ''}
                             </p>
                           </div>
                         </div>
@@ -717,7 +726,7 @@ export default function DashboardHealthForms() {
                   <button key={f.id} onClick={() => setSelected(f)}
                     style={{ ...mono, fontSize: '8px', letterSpacing: '0.06em', padding: '3px 8px', border: `0.5px solid ${selected.id === f.id ? t.fuchsia : t.border}`, color: selected.id === f.id ? t.fuchsia : t.muted, background: selected.id === f.id ? 'rgba(255,0,127,0.08)' : 'transparent', cursor: 'pointer' }}
                   >
-                    {f.form_filled_date ? format(new Date(f.form_filled_date), 'dd.MM.yyyy') : f.id.slice(-4)}{f.is_update_only ? ' ↻' : ''}
+                    {f.form_filled_date ? safeFormat(f.form_filled_date, 'dd.MM.yyyy') : f.id.slice(-4)}{f.is_update_only ? ' ↻' : ''}
                   </button>
                 ))}
               </div>
