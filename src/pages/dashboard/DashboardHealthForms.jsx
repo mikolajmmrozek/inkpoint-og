@@ -663,7 +663,7 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
       {/* Dokumenty - karty sekcji */}
       <div className="mb-8">
         <div className="flex gap-2 mb-4 flex-wrap">
-          {[{ key: 'ankiety', label: 'Ankiety' }, { key: 'dokumenty', label: 'Dokumenty' }].map(tab => (
+          {[{ key: 'ankiety', label: 'Ankiety' }, { key: 'aftercare', label: 'Zalecenia' }, { key: 'regulamin', label: 'Regulamin' }].map(tab => (
             <button
               key={tab.key}
               onClick={() => setDocTab(tab.key)}
@@ -758,11 +758,58 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
           </div>
         )}
 
-        {/* Dokumenty tab - wszystkie dokumenty w jednym miejscu */}
-        {docTab === 'dokumenty' && (
+        {/* Aftercare tab */}
+        {docTab === 'aftercare' && (
           <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
             <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>DOKUMENTY</p>
+              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '0px' }}>
+                ZALECENIA ({instructions.length})
+              </p>
+              <button
+                onClick={() => navigate('/dashboard/documents')}
+                className="flex items-center gap-2"
+                style={{ ...mono, fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}
+              >
+                <Edit3 size={12} /> EDYTUJ
+              </button>
+            </div>
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
+              </div>
+            ) : instructions.length === 0 ? (
+              <div className="py-16 text-center">
+                <p style={{ ...mono, fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK DOKUMENTÓW</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+                {instructions.map((instr) => (
+                  <div key={instr.id} style={{ border: `0.5px solid ${t.border}`, padding: '16px', background: 'rgba(255,0,127,0.02)' }}>
+                    <p style={{ ...display, fontSize: '1.2rem', color: t.title, letterSpacing: '0.04em', marginBottom: '8px' }}>
+                      {instr.title}
+                    </p>
+                    <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px' }}>
+                      {instr.type === 'aftercare_tattoo' ? 'Pielęgnacja tatuażu' : instr.type === 'aftercare_piercing' ? 'Pielęgnacja piercingu' : instr.type === 'before_tattoo' ? 'Przed tatuażem' : 'Po piercingu'}
+                    </p>
+                    {instr.content ? (
+                      <p style={{ color: t.text, fontSize: '12px', lineHeight: 1.6 }}>{instr.content}</p>
+                    ) : (
+                      <p style={{ ...mono, fontSize: '10px', color: t.muted, fontStyle: 'italic' }}>Brak treści</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Regulamin tab */}
+        {docTab === 'regulamin' && (
+          <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+            <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                REGULAMIN STUDIA
+              </p>
               <button
                 onClick={() => navigate('/dashboard/documents')}
                 className="flex items-center gap-2"
@@ -776,56 +823,24 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
                 <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
               </div>
             ) : (
-              <div className="p-6 space-y-8">
-                {/* Ankiety */}
-                <div>
-                  <p style={{ ...display, fontSize: '1.4rem', color: t.title, letterSpacing: '0.04em', marginBottom: '16px' }}>Ankiety Zdrowotne</p>
-                  <div style={{ border: `0.5px solid ${t.border}`, padding: '16px', background: 'rgba(255,0,127,0.02)', textAlign: 'center' }}>
-                    <p style={{ ...mono, fontSize: '11px', color: t.text, letterSpacing: '0.1em' }}>Ankiety zdrowotne ({filteredForms.length}) wyświetlane są w karcie "Ankiety"</p>
+              <div className="p-4">
+                {terms.length === 0 ? (
+                  <div className="py-16 text-center">
+                    <p style={{ ...mono, fontSize: '10px', color: t.muted, letterSpacing: '0.1em', marginBottom: '20px' }}>BRAK DOKUMENTU</p>
                   </div>
-                </div>
-
-                {/* Zalecenia */}
-                {instructions.length > 0 && (
-                  <div>
-                    <p style={{ ...display, fontSize: '1.4rem', color: t.title, letterSpacing: '0.04em', marginBottom: '16px' }}>Zalecenia Pielęgnacyjne</p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {instructions.map((instr) => (
-                        <div key={instr.id} style={{ border: `0.5px solid ${t.border}`, padding: '16px', background: 'rgba(255,0,127,0.02)' }}>
-                          <p style={{ ...display, fontSize: '1.2rem', color: t.title, letterSpacing: '0.04em', marginBottom: '8px' }}>
-                            {instr.title}
-                          </p>
-                          <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px' }}>
-                            {instr.type === 'aftercare_tattoo' ? 'Pielęgnacja tatuażu' : instr.type === 'aftercare_piercing' ? 'Pielęgnacja piercingu' : instr.type === 'before_tattoo' ? 'Przed tatuażem' : 'Po piercingu'}
-                          </p>
-                          {instr.content ? (
-                            <p style={{ color: t.text, fontSize: '12px', lineHeight: 1.6 }}>{instr.content}</p>
-                          ) : (
-                            <p style={{ ...mono, fontSize: '10px', color: t.muted, fontStyle: 'italic' }}>Brak treści</p>
-                          )}
-                        </div>
-                      ))}
+                ) : (
+                  terms.map((t_item) => (
+                    <div key={t_item.id} style={{ border: `0.5px solid ${t.border}`, padding: '20px', background: 'rgba(255,0,127,0.02)' }}>
+                      <p style={{ ...display, fontSize: '1.4rem', color: t.title, letterSpacing: '0.04em', marginBottom: '12px' }}>
+                        {t_item.title || 'Regulamin'}
+                      </p>
+                      {t_item.content ? (
+                        <div style={{ color: t.text, fontSize: '13px', lineHeight: 1.7 }}>{t_item.content}</div>
+                      ) : (
+                        <p style={{ ...mono, fontSize: '10px', color: t.muted, fontStyle: 'italic' }}>Brak treści</p>
+                      )}
                     </div>
-                  </div>
-                )}
-
-                {/* Regulamin */}
-                {terms.length > 0 && (
-                  <div>
-                    <p style={{ ...display, fontSize: '1.4rem', color: t.title, letterSpacing: '0.04em', marginBottom: '16px' }}>Regulamin Studia</p>
-                    {terms.map((t_item) => (
-                      <div key={t_item.id} style={{ border: `0.5px solid ${t.border}`, padding: '20px', background: 'rgba(255,0,127,0.02)' }}>
-                        <p style={{ ...display, fontSize: '1.2rem', color: t.title, letterSpacing: '0.04em', marginBottom: '12px' }}>
-                          {t_item.title || 'Regulamin'}
-                        </p>
-                        {t_item.content ? (
-                          <div style={{ color: t.text, fontSize: '13px', lineHeight: 1.7 }}>{t_item.content}</div>
-                        ) : (
-                          <p style={{ ...mono, fontSize: '10px', color: t.muted, fontStyle: 'italic' }}>Brak treści</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                  ))
                 )}
               </div>
             )}
