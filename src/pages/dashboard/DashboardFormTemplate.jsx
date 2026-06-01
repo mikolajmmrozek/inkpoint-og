@@ -311,8 +311,7 @@ export default function DashboardFormTemplate() {
                   <div className="flex items-start gap-3">
                     <div className="flex-1 space-y-2">
                       <input type="text" value={field.label || ''} onChange={e => setDeclarationFields(u => u.map((f, j) => j === i ? { ...f, label: e.target.value } : f))} placeholder="Etykieta pola" style={inputStyle} />
-                      <textarea value={field.description || ''} onChange={e => setDeclarationFields(u => u.map((f, j) => j === i ? { ...f, description: e.target.value } : f))} placeholder="Pełna treść / opis (opcjonalnie)" style={{ ...inputStyle, resize: 'none', minHeight: '60px' }} />
-                      <input type="text" value={field.placeholder || ''} onChange={e => setDeclarationFields(u => u.map((f, j) => j === i ? { ...f, placeholder: e.target.value } : f))} placeholder="Placeholder pola tekstowego" style={inputStyle} />
+                      <input type="text" value={field.placeholder || ''} onChange={e => setDeclarationFields(u => u.map((f, j) => j === i ? { ...f, placeholder: e.target.value } : f))} placeholder="Placeholder" style={inputStyle} />
                     </div>
                     <button onClick={() => setDeclarationFields(declarationFields.filter((_, j) => j !== i))} style={{ color: fuchsia, background: 'none', border: 'none', cursor: 'pointer', padding: '2px', flexShrink: 0 }}>
                       <Trash2 size={14} />
