@@ -129,7 +129,7 @@ export default function ArtistProfile() {
           {/* RIGHT — Masonry portfolio */}
           <div className="flex-1 px-8 md:px-16 md:pl-12 pb-32">
             <p className="text-micro mb-8" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.15em' }}>
-              PORTFOLIO — {portfolioImages.length} PRAC
+              PORTFOLIO
             </p>
             <div className="masonry-grid">
               {portfolioImages.map((img, i) => (
