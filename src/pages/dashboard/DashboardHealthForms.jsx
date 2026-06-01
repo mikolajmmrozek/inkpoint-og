@@ -346,7 +346,7 @@ export default function DashboardHealthForms() {
     ? (groupedClients.find(g => (g[0].client_email || g[0].client_name) === (selected.client_email || selected.client_name)) || [selected])
     : [];
 
-  const exportPDF = async (form) => {
+  const exportPDF = async (form, mode = 'print') => {
     setExporting(true);
     try {
       const guardianForm = guardianForms.find(g => g.health_form_id === form.id);
@@ -494,7 +494,7 @@ export default function DashboardHealthForms() {
   </table><div class="decl" style="margin-top:10px">Wyra\u017cam zgod\u0119 jako prawny opiekun na wykonanie zabiegu tatua\u017cu/piercingu osobie niepe\u0142noletniej wskazanej powy\u017cej. O\u015bwiadczam, \u017ce zapozna\u0142em/-am si\u0119 z mo\u017cliwymi powik\u0142aniami i ryzykiem zwi\u0105zanym z wykonywanym zabiegiem oraz z zasadami piel\u0119gnacji po zabiegu.</div>${guardianForm.guardian_signature ? `<p style="margin-top:8px;font-weight:600;font-size:9pt;color:#444">Podpis opiekuna:</p><div class="sig"><img src="${guardianForm.guardian_signature}" alt="Podpis opiekuna" /></div>` : ''}</div>` : ''}
 
 </div>
-<script>window.addEventListener('load',function(){setTimeout(function(){window.print();},500);})</script>
+${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeout(function(){window.print();},500);})</script>" : ''}
 </body></html>`;
 
       const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
@@ -851,7 +851,8 @@ export default function DashboardHealthForms() {
             {/* Action bar */}
             <div className="flex justify-between items-center px-5 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
               <div className="flex items-center gap-3">
-                <button onClick={() => exportPDF(selected)} disabled={exporting} title="Pobierz PDF" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', opacity: exporting ? 0.5 : 1 }}><Download size={15} /></button>
+                <button onClick={() => exportPDF(selected, 'save')} disabled={exporting} title="Zapisz PDF" style={{ ...mono, fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: exporting ? 'not-allowed' : 'pointer', opacity: exporting ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: '4px' }}><Download size={12} /> ZAPISZ</button>
+                <button onClick={() => exportPDF(selected, 'print')} disabled={exporting} title="Drukuj" style={{ ...mono, fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: exporting ? 'not-allowed' : 'pointer', opacity: exporting ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: '4px' }}><Download size={12} /> DRUKUJ</button>
                 <button onClick={() => sendConfirmationEmail(selected)} disabled={sendingEmail} title="Wyślij email" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', opacity: sendingEmail ? 0.5 : 1 }}><Mail size={15} /></button>
                 <button onClick={() => sendEditLink(selected)} disabled={sendingEditLink} title="Wyślij link do edycji" style={{ color: '#f59e0b', background: 'none', border: 'none', cursor: 'pointer', opacity: sendingEditLink ? 0.5 : 1 }}><Edit3 size={15} /></button>
                 <button onClick={() => deleteForm(selected)} title="Usuń ankietę" style={{ color: '#FF007F', background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={15} /></button>
