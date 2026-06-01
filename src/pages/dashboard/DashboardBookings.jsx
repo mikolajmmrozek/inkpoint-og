@@ -117,8 +117,8 @@ export default function DashboardBookings() {
   return (
     <div>
       {/* Header */}
-      <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
-        <div>
+      <div className="mb-6">
+        <div className="mb-6">
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>
             ZARZĄDZANIE
           </p>
@@ -126,7 +126,7 @@ export default function DashboardBookings() {
             Rezerwacje
           </h2>
         </div>
-        <div className="flex items-center gap-2 flex-wrap justify-end">
+        <div className="flex items-center gap-2 flex-wrap">
           {/* View toggle */}
           <div className="flex" style={{ border: `0.5px solid ${t.border}` }}>
             {[{ mode: 'calendar', icon: Calendar }, { mode: 'list', icon: List }].map(({ mode, icon: Icon }) => (
