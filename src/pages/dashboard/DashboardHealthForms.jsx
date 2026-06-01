@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { FileText, X, ExternalLink, Copy, Shield, AlertTriangle, Search, Download, Mail, Trash2, Settings, Loader2, Edit3 } from 'lucide-react';
+import { FileText, X, ExternalLink, Copy, Shield, AlertTriangle, Search, Download, Mail, Trash2, Settings, Loader2, Edit3, Printer } from 'lucide-react';
 import { format } from 'date-fns';
 import { useTheme } from './Dashboard';
 import html2canvas from 'html2canvas';
@@ -499,8 +499,16 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
 
       const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
       const url = URL.createObjectURL(blob);
-      window.open(url, '_blank');
-      setTimeout(() => URL.revokeObjectURL(url), 15000);
+      if (mode === 'save') {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ankieta_${clientName.replace(/\s+/g, '_')}_${form.id?.slice(-8)}.html`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+      } else {
+        window.open(url, '_blank');
+        setTimeout(() => URL.revokeObjectURL(url), 15000);
+      }
     } finally {
       setExporting(false);
     }
@@ -851,8 +859,8 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
             {/* Action bar */}
             <div className="flex justify-between items-center px-5 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
               <div className="flex items-center gap-3">
-                <button onClick={() => exportPDF(selected, 'save')} disabled={exporting} title="Zapisz PDF" style={{ ...mono, fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: exporting ? 'not-allowed' : 'pointer', opacity: exporting ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: '4px' }}><Download size={12} /> ZAPISZ</button>
-                <button onClick={() => exportPDF(selected, 'print')} disabled={exporting} title="Drukuj" style={{ ...mono, fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: exporting ? 'not-allowed' : 'pointer', opacity: exporting ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: '4px' }}><Download size={12} /> DRUKUJ</button>
+                <button onClick={() => exportPDF(selected, 'save')} disabled={exporting} title="Zapisz na urządzenie" style={{ color: t.muted, background: 'none', border: 'none', cursor: exporting ? 'not-allowed' : 'pointer', opacity: exporting ? 0.5 : 1 }}><Download size={15} /></button>
+                <button onClick={() => exportPDF(selected, 'print')} disabled={exporting} title="Drukuj" style={{ color: t.muted, background: 'none', border: 'none', cursor: exporting ? 'not-allowed' : 'pointer', opacity: exporting ? 0.5 : 1 }}><Printer size={15} /></button>
                 <button onClick={() => sendConfirmationEmail(selected)} disabled={sendingEmail} title="Wyślij email" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', opacity: sendingEmail ? 0.5 : 1 }}><Mail size={15} /></button>
                 <button onClick={() => sendEditLink(selected)} disabled={sendingEditLink} title="Wyślij link do edycji" style={{ color: '#f59e0b', background: 'none', border: 'none', cursor: 'pointer', opacity: sendingEditLink ? 0.5 : 1 }}><Edit3 size={15} /></button>
                 <button onClick={() => deleteForm(selected)} title="Usuń ankietę" style={{ color: '#FF007F', background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={15} /></button>
