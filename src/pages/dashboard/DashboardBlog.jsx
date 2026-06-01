@@ -100,7 +100,7 @@ export default function DashboardBlog() {
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
+      <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>
             ZARZĄDZANIE
@@ -109,7 +109,7 @@ export default function DashboardBlog() {
             Blog
           </h2>
         </div>
-        <button onClick={openNew} className="flex items-center gap-2 btn-oxblood">
+        <button onClick={openNew} className="flex items-center gap-2 btn-oxblood w-full md:w-auto justify-center">
           <Plus size={14} /> NOWY POST
         </button>
       </div>
@@ -269,18 +269,18 @@ export default function DashboardBlog() {
                </div>
              </div>
              {/* Mobile: actions in a row */}
-             <div className="flex items-center gap-2 md:gap-3 flex-shrink-0 w-full md:w-auto justify-between md:justify-end">
-               <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', md: '8px', letterSpacing: '0.1em', padding: '2px 6px', md: 'padding: 3px 8px', border: `0.5px solid ${post.is_published ? '#4A7C59' : '#262626'}`, color: post.is_published ? '#4A7C59' : 'rgba(245,240,235,0.3)' }}>
+             <div className="flex items-center gap-1 md:gap-3 flex-shrink-0 w-full md:w-auto justify-end" style={{ marginTop: '8px', paddingRight: '4px' }}>
+               <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', md: '8px', letterSpacing: '0.1em', padding: '2px 6px', border: `0.5px solid ${post.is_published ? '#4A7C59' : '#262626'}`, color: post.is_published ? '#4A7C59' : 'rgba(245,240,235,0.3)' }}>
                  {post.is_published ? 'LIVE' : 'SZKIC'}
                </span>
-               <button onClick={() => togglePublish(post)} style={{ color: t.muted, cursor: 'pointer', background: 'none', border: 'none', padding: '4px', minWidth: '32px', minHeight: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                 {post.is_published ? <EyeOff size={13} /> : <Eye size={13} />}
+               <button onClick={() => togglePublish(post)} style={{ color: t.muted, cursor: 'pointer', background: 'none', border: 'none', padding: '6px', minWidth: '28px', minHeight: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                 {post.is_published ? <EyeOff size={12} /> : <Eye size={12} />}
                </button>
-               <button onClick={() => openEdit(post)} style={{ color: t.muted, cursor: 'pointer', background: 'none', border: 'none', padding: '4px', minWidth: '32px', minHeight: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                 <Edit size={13} />
+               <button onClick={() => openEdit(post)} style={{ color: t.muted, cursor: 'pointer', background: 'none', border: 'none', padding: '6px', minWidth: '28px', minHeight: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                 <Edit size={12} />
                </button>
-               <button onClick={() => deletePost(post.id)} style={{ color: t.fuchsia, cursor: 'pointer', background: 'none', border: 'none', padding: '4px', minWidth: '32px', minHeight: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                 <Trash2 size={13} />
+               <button onClick={() => deletePost(post.id)} style={{ color: t.fuchsia, cursor: 'pointer', background: 'none', border: 'none', padding: '6px', minWidth: '28px', minHeight: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                 <Trash2 size={12} />
                </button>
              </div>
            </div>
