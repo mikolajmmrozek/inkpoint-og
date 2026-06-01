@@ -9,86 +9,6 @@ import StepConsents from '@/components/health-form/StepConsents';
 import StepGuardian from '@/components/health-form/StepGuardian';
 import SignatureCanvas from '@/components/health-form/SignatureCanvas';
 
-// Hardcoded template — matches current DB template (key: 'default').
-// Used to initialize form state synchronously. Still overridden by DB version on load.
-const HARDCODED_TEMPLATE = {
-  key: 'default',
-  section_intros: {
-    medical: 'Czy cierpisz na którąś z poniższych chorób?',
-    procedure: 'Prosimy o odpowiedź na poniższe pytania.',
-    declaration: 'Prosimy o zapoznanie się z poniższym oświadczeniem i jego akceptację.',
-    consents: 'Prosimy o zapoznanie się z poniższymi zgodami i ich akceptację.',
-  },
-  medical_fields: [
-    { field_key: 'has_heart_condition', label: 'Choroby serca', required: true, has_description: false },
-    { field_key: 'has_kidney_condition', label: 'Choroby nerek', required: true, has_description: false },
-    { field_key: 'has_liver_condition', label: 'Choroby wątroby', required: true, has_description: false },
-    { field_key: 'has_lung_condition', label: 'Choroby płuc', required: true, has_description: false },
-    { field_key: 'has_cancer', label: 'Nowotwory', required: true, has_description: false },
-    { field_key: 'has_infectious_diseases', label: 'HIV', required: true, has_description: false },
-    { field_key: 'has_epilepsy', label: 'Epilepsja', required: true, has_description: false },
-    { field_key: 'has_diabetes', label: 'Choroby autoimmunologiczne (np. cukrzyca, choroby tarczycy)', required: true, has_description: false },
-    { field_key: 'has_hemophilia', label: 'Hemofilia', required: true, has_description: false },
-    { field_key: 'has_allergies', label: 'Alergie', required: true, has_description: true },
-    { field_key: 'has_inflammatory_conditions', label: 'Czy przechodziłeś/aś w ostatnim tygodniu infekcję?', required: true, has_description: true },
-    { field_key: 'has_skin_conditions', label: 'Schorzenia skóry', required: true, has_description: true },
-    { field_key: 'has_mental_conditions', label: 'Schorzenia psychiczne', required: true, has_description: false },
-    { field_key: 'is_pregnant', label: 'Ciąża', required: false, has_description: false },
-    { field_key: 'is_under_alcohol_drug_influence', label: 'Pod wpływem alkoholu/narkotyków', required: false, has_description: false },
-    { field_key: 'is_allergic_to_metals_dyes_latex', label: 'Alergia na metale, barwniki lub lateks', required: false, has_description: true },
-    { field_key: 'has_blood_clotting_disorders', label: 'Zaburzenia krzepnięcia krwi', required: false, has_description: false },
-    { field_key: 'has_scars_skin_changes', label: 'Bliznowce lub zmiany skórne', required: false, has_description: false },
-    { field_key: 'had_tattoo_piercing_before', label: 'Wcześniejszy tatuaż/piercing', required: false, has_description: true },
-    { field_key: 'has_other_chronic_diseases', label: 'Inne choroby przewlekłe', required: false, has_description: true },
-  ],
-  procedure_questions: [
-    { field_key: 'procedure_q1', label: 'Czy jesteś w ciąży? (jeśli dotyczy)', required: false, has_description: false },
-    { field_key: 'procedure_q2', label: 'Czy masz zaplanowaną operację/zabieg?', required: true, has_description: true },
-    { field_key: 'procedure_q_1780258468164', label: 'Czy przyjmowałeś/aś leki (ost. 24h)', required: true, has_description: true },
-    { field_key: 'procedure_q_1780258502043', label: 'Czy zażywałeś narkotyki (ost. 24h)', required: true, has_description: false },
-    { field_key: 'procedure_q_1780258539127', label: 'Czy spożywałeś alkohol (ost. 24h)', required: true, has_description: false },
-    { field_key: 'procedure_q_1780258600027', label: 'Czy Twoja skóra ciężko się goi?', required: true, has_description: true },
-    { field_key: 'procedure_q_1780258617059', label: 'Czy uprawiasz sport?', required: true, has_description: true },
-    { field_key: 'procedure_q_1780258627893', label: 'Czy wykonujesz pracę, która powoduje kontakt z pyłami/płynami/wysoką temperaturą/szkodliwymi substancjami?', required: true, has_description: true },
-  ],
-  declaration_of_will: {
-    field_key: 'declaration_of_will',
-    label: 'Akceptuję powyższe informacje',
-    content: 'W pełni rozumiem, że:',
-    required: true,
-  },
-  declaration_fields: [
-    { field_key: 'decl_field_1780257758865', label: '', placeholder: 'Tatuaż zostaje na całe życie i nie ma sposobu, żeby go usunąć tak, aby nie pozostał żaden ślad.', required: false },
-    { field_key: 'decl_field_1780258975442', label: '', placeholder: 'Wpływ tatuażu na zdrowie nie został do tej pory dokładnie zbadany.', required: false },
-    { field_key: 'decl_field_1780258984575', label: '', placeholder: 'Tatuaż lub przekłucie może mieć wpływ na interakcje społeczne.', required: false },
-    { field_key: 'decl_field_1780259014792', label: '', placeholder: 'Tatuaż może ulec zmianie z biegiem czasu.', required: false },
-    { field_key: 'decl_field_1780259028157', label: '', placeholder: 'Tatuaż może odbiegać od wykonywanego projektu.', required: false },
-    { field_key: 'decl_field_1780259040176', label: '', placeholder: 'Motyw tatuowany na ciele może stać się z czasem niemodny.', required: false },
-    { field_key: 'decl_field_1780259084574', label: '', placeholder: 'Tatuator ma prawo dopasować wzór wielkością, formą oraz kolorem.', required: false },
-    { field_key: 'decl_field_1780259106807', label: '', placeholder: 'Piercer ma prawo dopasować wybrany kolczyk do anatomii.', required: false },
-    { field_key: 'decl_field_1780259107508', label: '', placeholder: 'Tatuator pracuje w swojej manierze artystycznej.', required: false },
-    { field_key: 'decl_field_1780259107725', label: '', placeholder: 'Wizja artystyczna ma prawo odbiegać od oczekiwań klienta.', required: false },
-    { field_key: 'decl_field_1780259107941', label: '', placeholder: 'Tatuaż lub kolczyk może wywołać reakcję alergiczną.', required: false },
-    { field_key: 'decl_field_1780259108158', label: '', placeholder: 'Tatuaż może spowodować efekt rozmycia pod skórą.', required: false },
-    { field_key: 'decl_field_1780259158007', label: '', placeholder: 'Nie będę mógł oddać krwi przez okres 4 miesięcy od wykonania tatuażu.', required: false },
-    { field_key: 'decl_field_1780259158089', label: '', placeholder: 'Nie będę korzystać z kąpieli słonecznych przez 2 miesiące.', required: false },
-    { field_key: 'decl_field_1780259158241', label: '', placeholder: 'Nie będę mógł korzystać z kąpieli w basenie przez 2 miesiące.', required: false },
-    { field_key: 'decl_field_1780259158408', label: '', placeholder: 'Będę stosować się do zaleceń pielęgnacyjnych.', required: false },
-    { field_key: 'decl_field_1780259158575', label: '', placeholder: 'Tatuowane miejsce może puchnąć.', required: false },
-    { field_key: 'decl_field_1780259158924', label: '', placeholder: 'Cena tatuażu uzależniona jest od jego wielkości/rodzaju.', required: false },
-  ],
-  consent_fields: [
-    { field_key: 'consent_tattoo_piercing', label: 'Zgoda na zabieg', description: 'JA NIŻEJ PODPISANY/A DECYDUJĘ SIĘ DOBROWOLNIE I W PEŁNI ŚWIADOMIE NA WYKONANIE TATUAŻU/PRZEKŁUCIA W STUDIO TATUAŻU „ROMANS"', required: true },
-    { field_key: 'confirm_sober', label: 'Trzeźwość i używki', description: 'Oświadczam iż nie jestem pod wpływem środków odurzających ani pod wpływem alkoholu.', required: true },
-    { field_key: 'consent_image_use', label: 'Zgoda na wykonanie materiałów promocyjnych.', description: 'Zgadzam się na publikację zdjęcia wykonywanego tatuażu/przekłucia w materiałach promujących studio „ROMANS".', required: false },
-    { field_key: 'confirm_regulations_read', label: 'Regulamin', description: 'Zapoznałem/am się z regulaminem studio oraz będę stosować się do niego.', required: true },
-    { field_key: 'consent_1779995760853', label: 'Pielęgnacja i zalecenia', description: 'Zostałem poinformowany o sposobie pielęgnacji nowo wykonanego tatuażu/przekłucia.', required: true },
-    { field_key: 'consent_1779995809081', label: 'Dane osobowe', description: 'Wyrażam zgodę na przetwarzanie moich danych osobowych zgodnie z RODO.', required: true },
-    { field_key: 'consent_1779995841314', label: 'Przygotowanie stanowiska', description: 'Stanowisko zabiegu zostało przygotowane dla mnie i w mojej obecności.', required: true },
-    { field_key: 'consent_1779995923833', label: 'Zgodność danych', description: 'Oświadczam, że podane dane osobowe oraz odpowiedzi na temat stanu zdrowia są zgodne z prawdą.', required: true },
-  ],
-};
-
 // Fields that should NEVER be copied from a previous form
 const SKIP_PREFILL_FIELDS = new Set([
   'id', 'created_date', 'updated_date', 'created_by_id', 'created_by',
@@ -156,15 +76,11 @@ export default function HealthFormPage() {
   const [submitted, setSubmitted] = useState(false);
   const [useQuickRefresh, setUseQuickRefresh] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
-  const [template, setTemplate] = useState(HARDCODED_TEMPLATE);
+  const [template, setTemplate] = useState(null);
   const [isFirstVisit, setIsFirstVisit] = useState(null);
   const [prefillBanner, setPrefillBanner] = useState(false);
 
-  // Initialize form synchronously from hardcoded template — no async needed
-  const [form, setForm] = useState(() => ({
-    ...getBaseForm(),
-    ...buildInitialState(HARDCODED_TEMPLATE),
-  }));
+  const [form, setForm] = useState(getBaseForm);
 
   const [guardian, setGuardian] = useState({
     guardian_name: '',
@@ -191,17 +107,14 @@ export default function HealthFormPage() {
     const editFormId = params.get('edit_form_id');
 
     const load = async () => {
-      // Load latest template from DB (updates from hardcoded baseline)
-      let latestTemplate = HARDCODED_TEMPLATE;
+      let latestTemplate = {};
       try {
         const tplArr = await base44.entities.HealthFormTemplate.filter({ key: 'default' });
-        if (tplArr[0]) {
-          latestTemplate = tplArr[0];
-          setTemplate(latestTemplate);
-          // Merge any new fields from latest template into current form state
-          setForm(f => ({ ...getBaseForm(), ...buildInitialState(latestTemplate), ...f }));
-        }
+        if (tplArr[0]) latestTemplate = tplArr[0];
       } catch (_) {}
+
+      setTemplate(latestTemplate);
+      setForm(() => ({ ...getBaseForm(), ...buildInitialState(latestTemplate) }));
 
       // Load booking if bookingId provided
       if (bookingId) {
@@ -290,7 +203,14 @@ export default function HealthFormPage() {
     }
     if (step === 'medical') {
       const fields = template?.medical_fields || [];
-      return fields.every(f => form[f.field_key] !== null && form[f.field_key] !== undefined);
+      return fields.every(f => {
+        if (form[f.field_key] === null || form[f.field_key] === undefined) return false;
+        if (f.has_description && form[f.field_key] === true) {
+          const desc = form[`${f.field_key}_desc`];
+          if (!desc || !desc.trim()) return false;
+        }
+        return true;
+      });
     }
     if (step === 'procedure') {
       const questions = template?.procedure_questions || [];
@@ -524,7 +444,7 @@ export default function HealthFormPage() {
           {step === 'medical' && <StepMedical form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={template} />}
           {step === 'procedure' && <StepProcedure form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={template} />}
           {step === 'declaration' && <StepDeclaration form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={template} />}
-          {step === 'consents' && <StepConsents form={form} setField={setField} t={t} showErrors={showErrors} />}
+          {step === 'consents' && <StepConsents form={form} setField={setField} t={t} showErrors={showErrors} templateData={template} />}
           {step === 'signature' && <SignatureCanvas value={form.client_signature} onChange={v => setField('client_signature', v)} label={t.signatureTitle} clearLabel={t.clearSignature} showErrors={showErrors} />}
           {step === 'guardian' && <StepGuardian guardian={guardian} setGuardianField={setGuardianField} form={form} t={t} inputStyle={inputStyle} showErrors={showErrors} />}
 

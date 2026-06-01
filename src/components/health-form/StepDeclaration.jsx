@@ -1,31 +1,7 @@
-import { useEffect, useState } from 'react';
-import { base44 } from '@/api/base44Client';
+export default function StepDeclaration({ form, setField, t, inputStyle, showErrors, templateData }) {
+  const declaration = templateData?.declaration_of_will || null;
+  const customFields = templateData?.declaration_fields || [];
 
-export default function StepDeclaration({ form, setField, t, inputStyle, showErrors }) {
-  const [declaration, setDeclarationData] = useState(null);
-  const [customFields, setCustomFields] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const template = await base44.entities.HealthFormTemplate.filter({ key: 'default' }).then(r => r[0]);
-        if (template?.declaration_of_will) {
-          setDeclarationData(template.declaration_of_will);
-        }
-        if (template?.declaration_fields) {
-          setCustomFields(template.declaration_fields);
-        }
-      } catch (e) {
-        console.error('Failed to load declaration:', e);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, []);
-
-  if (loading) return <div style={{ color: 'rgba(245,240,235,0.5)' }}>Ładowanie...</div>;
   if (!declaration) return <div style={{ color: 'rgba(245,240,235,0.4)', fontSize: '14px' }}>Brak konfiguracji oświadczenia. Uzupełnij dane w ustawieniach szablonu.</div>;
 
   const isError = showErrors && declaration.required && !form[declaration.field_key];

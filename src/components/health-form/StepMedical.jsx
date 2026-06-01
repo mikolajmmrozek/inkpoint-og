@@ -1,6 +1,3 @@
-import { useEffect, useState } from 'react';
-import { base44 } from '@/api/base44Client';
-
 function YesNoRow({ label, fieldKey, descKey, form, setField, t, inputStyle }) {
   const val = form[fieldKey];
   return (
@@ -30,26 +27,8 @@ function YesNoRow({ label, fieldKey, descKey, form, setField, t, inputStyle }) {
 }
 
 export default function StepMedical({ form, setField, t, inputStyle, showErrors, templateData }) {
-  const [fields, setFields] = useState([]);
-  const [sectionIntro, setSectionIntro] = useState('');
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const template = await base44.entities.HealthFormTemplate.filter({ key: 'default' }).then(r => r[0]);
-        if (template?.medical_fields) setFields(template.medical_fields);
-        if (template?.section_intros?.medical) setSectionIntro(template.section_intros.medical);
-      } catch (e) {
-        console.error('Failed to load medical fields:', e);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, []);
-
-  if (loading) return <div style={{ color: 'rgba(245,240,235,0.5)' }}>Ładowanie...</div>;
+  const fields = templateData?.medical_fields || [];
+  const sectionIntro = templateData?.section_intros?.medical || '';
 
   return (
     <div>
