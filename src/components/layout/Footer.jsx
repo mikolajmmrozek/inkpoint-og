@@ -81,7 +81,7 @@ export default function Footer() {
             <div className="space-y-2 text-sm text-parchment/50" style={{ color: 'rgba(245,240,235,0.5)', fontSize: '14px' }}>
               <p>ul. Wschowska 30</p>
               <p>64-200 Wolsztyn</p>
-              <p className="mt-4">881717880</p>
+              <a href="tel:881717880" className="mt-4 hover:text-parchment/80 transition-colors" style={{ color: 'rgba(245,240,235,0.5)' }}>881717880</a>
             </div>
           </div>
         </div>
