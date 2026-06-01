@@ -17,6 +17,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
   const [showFormPreview, setShowFormPreview] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [previewFormId, setPreviewFormId] = useState(null);
 
   const sendFormEmail = async () => {
     setSendingEmail(true);
@@ -79,7 +80,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
         ['Telefon', booking.client_phone || '—'],
         ['Artysta', booking.artist_name || '—'],
         ['Data sesji', `${booking.session_date || '—'} ${booking.session_time || ''}`],
-        ['Czas trwania', booking.session_duration ? `${booking.session_duration}h` : '—'],
+        ['Czas trwania', booking.session_duration ? `${Math.floor((booking.session_duration || 0) / 60)}h ${(booking.session_duration || 0) % 60}m` : '—'],
         ['Miejsce', booking.tattoo_placement || '—'],
         ['Opis projektu', booking.tattoo_description || '—'],
         ['Cena', booking.estimated_price ? `${booking.estimated_price} PLN` : '—'],
@@ -122,10 +123,16 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
             </p>
           </div>
           <button
-            onClick={() => setShowFormPreview(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#16a34a', background: 'transparent', padding: '7px 10px', border: '0.5px solid rgba(22,163,74,0.4)', marginTop: '6px', cursor: 'pointer', width: '100%' }}
+           onClick={async () => {
+             const forms = await base44.entities.HealthForm.filter({ booking_id: booking.id });
+             if (forms.length) {
+               setPreviewFormId(forms[0].id);
+               setShowFormPreview(true);
+             }
+           }}
+           style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#16a34a', background: 'transparent', padding: '7px 10px', border: '0.5px solid rgba(22,163,74,0.4)', marginTop: '6px', cursor: 'pointer', width: '100%' }}
           >
-            <FileText size={10} /> PODGLĄD ANKIETY
+           <FileText size={10} /> PODGLĄD ANKIETY
           </button>
         </div>
       ) : (
@@ -171,11 +178,11 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
       </div>
     </motion.div>
 
-    {showFormPreview && (
+    {showFormPreview && previewFormId && (
       <HealthFormPreviewModal
-        bookingId={booking.id}
+        healthFormId={previewFormId}
         clientName={booking.client_name}
-        onClose={() => setShowFormPreview(false)}
+        onClose={() => { setShowFormPreview(false); setPreviewFormId(null); }}
         t={t}
       />
     )}
