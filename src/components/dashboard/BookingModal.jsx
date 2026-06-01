@@ -15,7 +15,7 @@ const inputStyle = {
   fontFamily: 'Inter, sans-serif',
 };
 
-const HOURS = Array.from({ length: 11 }, (_, i) => String(9 + i).padStart(2, '0'));
+const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
 const MINUTES = ['00', '15', '30', '45'];
 const STATUS_OPTIONS = ['pending','confirmed','completed','cancelled'];
 
