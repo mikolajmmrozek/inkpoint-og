@@ -83,6 +83,13 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
     delete data.client_first_name;
     delete data.client_last_name;
 
+    // Generate unique session_id if new booking
+    if (isNew && !data.session_id) {
+      const date = new Date(form.session_date).toISOString().split('T')[0].replace(/-/g, '');
+      const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+      data.session_id = `SES-${date}-${random}`;
+    }
+
     if (isNew) {
       await base44.entities.Booking.create(data);
       // Upsert client in Client database

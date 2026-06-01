@@ -2,6 +2,10 @@
   "name": "Booking",
   "type": "object",
   "properties": {
+    "session_id": {
+      "type": "string",
+      "description": "Unikalny ID sesji (np. SES-20260601-001)"
+    },
     "client_name": {
       "type": "string"
     },
