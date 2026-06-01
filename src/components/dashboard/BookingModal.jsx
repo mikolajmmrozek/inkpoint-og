@@ -15,7 +15,8 @@ const inputStyle = {
   fontFamily: 'Inter, sans-serif',
 };
 
-const TIME_SLOTS = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'];
+const HOURS = Array.from({ length: 11 }, (_, i) => String(9 + i).padStart(2, '0'));
+const MINUTES = ['00', '15', '30', '45'];
 const STATUS_OPTIONS = ['pending','confirmed','completed','cancelled'];
 
 export default function BookingModal({ booking, defaultDate, onClose, onSaved, t }) {
@@ -201,17 +202,27 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                 </select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-6 mb-4">
+            <div className="grid grid-cols-3 gap-6 mb-4">
               <div>{label('Data *')}<input {...inp('session_date', 'date')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }} /></div>
               <div>
                 {label('Godzina')}
                 <select
-                  value={form.session_time || ''}
-                  onChange={e => set('session_time', e.target.value)}
+                  value={form.session_time?.split(':')[0] || ''}
+                  onChange={e => set('session_time', `${e.target.value}:${form.session_time?.split(':')[1] || '00'}`)}
                   style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
                 >
-                  <option value="">Wybierz godzinę</option>
-                  {TIME_SLOTS.map(t => <option key={t} value={t}>{t}</option>)}
+                  <option value="">HH</option>
+                  {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
+                </select>
+              </div>
+              <div>
+                {label('Minuty')}
+                <select
+                  value={form.session_time?.split(':')[1] || '00'}
+                  onChange={e => set('session_time', `${form.session_time?.split(':')[0] || '09'}:${e.target.value}`)}
+                  style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
+                >
+                  {MINUTES.map(m => <option key={m} value={m}>{m}</option>)}
                 </select>
               </div>
             </div>
