@@ -239,17 +239,18 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                 </select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-6">
-              <div>{label('Cena (PLN)')}<input {...inp('estimated_price', 'number')} /></div>
-              <div>{label('Status')}
-               <select
-                 value={form.status || 'pending'}
-                  onChange={e => set('status', e.target.value)}
-                  style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
-                >
-                  {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
+            <div>
+              {label('Cena (PLN)')}<input {...inp('estimated_price', 'number')} />
+            </div>
+            <div className="mt-4">
+              {label('Status')}
+              <select
+                value={form.status || 'pending'}
+                onChange={e => set('status', e.target.value)}
+                style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
+              >
+                {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
             </div>
           </div>
 
