@@ -42,11 +42,17 @@
     "has_heart_condition": {
       "type": "boolean"
     },
+    "has_heart_condition_desc": {
+      "type": "string"
+    },
     "heart_condition_description": {
       "type": "string"
     },
     "has_kidney_condition": {
       "type": "boolean"
+    },
+    "has_kidney_condition_desc": {
+      "type": "string"
     },
     "kidney_condition_description": {
       "type": "string"
@@ -54,11 +60,17 @@
     "has_liver_condition": {
       "type": "boolean"
     },
+    "has_liver_condition_desc": {
+      "type": "string"
+    },
     "liver_condition_description": {
       "type": "string"
     },
     "has_lung_condition": {
       "type": "boolean"
+    },
+    "has_lung_condition_desc": {
+      "type": "string"
     },
     "lung_condition_description": {
       "type": "string"
@@ -66,11 +78,17 @@
     "has_cancer": {
       "type": "boolean"
     },
+    "has_cancer_desc": {
+      "type": "string"
+    },
     "cancer_description": {
       "type": "string"
     },
     "has_infectious_diseases": {
       "type": "boolean"
+    },
+    "has_infectious_diseases_desc": {
+      "type": "string"
     },
     "infectious_diseases_description": {
       "type": "string"
@@ -78,11 +96,17 @@
     "has_epilepsy": {
       "type": "boolean"
     },
+    "has_epilepsy_desc": {
+      "type": "string"
+    },
     "epilepsy_description": {
       "type": "string"
     },
     "has_diabetes": {
       "type": "boolean"
+    },
+    "has_diabetes_desc": {
+      "type": "string"
     },
     "diabetes_description": {
       "type": "string"
@@ -90,11 +114,17 @@
     "has_hemophilia": {
       "type": "boolean"
     },
+    "has_hemophilia_desc": {
+      "type": "string"
+    },
     "hemophilia_description": {
       "type": "string"
     },
     "has_allergies": {
       "type": "boolean"
+    },
+    "has_allergies_desc": {
+      "type": "string"
     },
     "allergies_description": {
       "type": "string"
@@ -102,11 +132,17 @@
     "has_inflammatory_conditions": {
       "type": "boolean"
     },
+    "has_inflammatory_conditions_desc": {
+      "type": "string"
+    },
     "inflammatory_conditions_description": {
       "type": "string"
     },
     "has_skin_conditions": {
       "type": "boolean"
+    },
+    "has_skin_conditions_desc": {
+      "type": "string"
     },
     "skin_conditions_description": {
       "type": "string"
@@ -114,17 +150,29 @@
     "has_mental_conditions": {
       "type": "boolean"
     },
+    "has_mental_conditions_desc": {
+      "type": "string"
+    },
     "mental_conditions_description": {
       "type": "string"
     },
     "is_pregnant": {
       "type": "boolean"
     },
+    "is_pregnant_desc": {
+      "type": "string"
+    },
     "is_under_alcohol_drug_influence": {
       "type": "boolean"
     },
+    "is_under_alcohol_drug_influence_desc": {
+      "type": "string"
+    },
     "is_allergic_to_metals_dyes_latex": {
       "type": "boolean"
+    },
+    "is_allergic_to_metals_dyes_latex_desc": {
+      "type": "string"
     },
     "allergies_metals_dyes_latex_description": {
       "type": "string"
@@ -132,17 +180,26 @@
     "has_blood_clotting_disorders": {
       "type": "boolean"
     },
+    "has_blood_clotting_disorders_desc": {
+      "type": "string"
+    },
     "blood_clotting_disorders_description": {
       "type": "string"
     },
     "has_scars_skin_changes": {
       "type": "boolean"
     },
+    "has_scars_skin_changes_desc": {
+      "type": "string"
+    },
     "scars_skin_changes_description": {
       "type": "string"
     },
     "had_tattoo_piercing_before": {
       "type": "boolean"
+    },
+    "had_tattoo_piercing_before_desc": {
+      "type": "string"
     },
     "previous_reactions_description": {
       "type": "string"
