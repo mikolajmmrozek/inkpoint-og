@@ -74,6 +74,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
       </div>
 
       {[
+        ['ID Sesji', booking.session_id || '—'],
         ['Email', booking.client_email],
         ['Telefon', booking.client_phone || '—'],
         ['Artysta', booking.artist_name || '—'],
