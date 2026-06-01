@@ -26,7 +26,7 @@ export default function HealthFormPage() {
   const [isFirstVisit, setIsFirstVisit] = useState(null);
   const [prefillBanner, setPrefillBanner] = useState(false);
 
-  const [form, setForm] = useState({
+  const getInitialForm = () => ({
     booking_id: '',
     client_first_name: '',
     client_last_name: '',
@@ -86,6 +86,8 @@ export default function HealthFormPage() {
     is_update_only: false,
     previous_form_id: null,
   });
+
+  const [form, setForm] = useState(getInitialForm());
 
   const [guardian, setGuardian] = useState({
     guardian_name: '',
@@ -153,29 +155,14 @@ export default function HealthFormPage() {
       if (editFormId) {
         const existingForm = await base44.entities.HealthForm.filter({ id: editFormId }).then(r => r[0]);
         if (existingForm) {
-          setForm(f => ({ ...buildInitialState(template), ...existingForm, form_filled_date: new Date().toISOString().split('T')[0] }));
+          setForm(f => ({ ...getInitialForm(), ...buildInitialState(template), ...existingForm, form_filled_date: new Date().toISOString().split('T')[0] }));
           const bk = existingForm.booking_id ? await base44.entities.Booking.filter({ id: existingForm.booking_id }).then(r => r[0]) : null;
           if (bk) setBooking(bk);
           setIsFirstVisit(false);
           setStep('personal');
         }
-      } else if (bookingId) {
-        const b = await base44.entities.Booking.filter({ id: bookingId }).then(r => r[0]);
-        if (b) {
-          setBooking(b);
-          setForm(f => ({
-            ...buildInitialState(template),
-            booking_id: b.id,
-            client_first_name: (b.client_name || '').split(' ')[0],
-            client_last_name: (b.client_name || '').split(' ').slice(1).join(' ') || '',
-            client_email: b.client_email || '',
-            client_phone: b.client_phone || '',
-          }));
-          const prevForms = await base44.entities.HealthForm.filter({ booking_id: bookingId, is_update_only: false }, '-form_filled_date', 1);
-          if (prevForms.length > 0) {
-            setPreviousForm(prevForms[0]);
-          }
-        }
+      } else {
+        setForm(f => ({ ...getInitialForm(), ...buildInitialState(template) }));
       }
       setLoading(false);
     };
