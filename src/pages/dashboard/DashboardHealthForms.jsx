@@ -183,7 +183,7 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme, template }
       {selected.client_signature && (
         <div className="px-5 pb-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '12px', marginBottom: '8px' }}>PODPIS KLIENTA</p>
-          <img src={selected.client_signature} alt="Podpis" style={{ maxWidth: '240px', border: `0.5px solid ${t.border}`, background: theme === 'light' ? '#FFFFFF' : '#111', padding: '4px' }} />
+          <img src={selected.client_signature} alt="Podpis" style={{ maxWidth: '240px', border: `0.5px solid ${t.border}`, background: '#FFFFFF', padding: '4px' }} />
         </div>
       )}
 
@@ -223,7 +223,7 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme, template }
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text }}>{guardianForm.guardian_name}</p>
           <a href={`tel:${guardianForm.guardian_phone}`} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, marginTop: '2px', display: 'block', textDecoration: 'none' }}>{guardianForm.guardian_phone}</a>
           {guardianForm.guardian_signature && (
-            <img src={guardianForm.guardian_signature} alt="Podpis opiekuna" style={{ maxWidth: '240px', border: `0.5px solid ${t.border}`, background: theme === 'light' ? '#FFFFFF' : '#111', padding: '4px', marginTop: '8px' }} />
+            <img src={guardianForm.guardian_signature} alt="Podpis opiekuna" style={{ maxWidth: '240px', border: `0.5px solid ${t.border}`, background: '#FFFFFF', padding: '4px', marginTop: '8px' }} />
           )}
         </div>
       )}
@@ -343,24 +343,233 @@ export default function DashboardHealthForms() {
   const exportPDF = async (form) => {
     setExporting(true);
     try {
-      const element = document.createElement('div');
-      element.innerHTML = `
-        <div style="font-family: Arial, sans-serif; padding: 20px; font-size: 12px;">
-          <h1 style="font-size: 20px; margin-bottom: 20px;">ANKIETA ZDROWOTNA</h1>
-          <p><strong>Imię i nazwisko:</strong> ${form.client_name}</p>
-          <p><strong>Email:</strong> ${form.client_email}</p>
-          <p><strong>Telefon:</strong> ${form.client_phone}</p>
-          <p><strong>Data urodzenia:</strong> ${form.date_of_birth}</p>
-          <p><strong>Data wypełnienia:</strong> ${safeFormat(form.form_filled_date, 'dd.MM.yyyy HH:mm')}</p>
-          <p><strong>Procedura:</strong> ${form.procedure_type}</p>
-          <p><strong>Miejsce:</strong> ${form.body_placement}</p>
-        </div>
-      `;
-      const canvas = await html2canvas(element);
-      const pdf = new jsPDF();
-      const imgData = canvas.toDataURL('image/png');
-      pdf.addImage(imgData, 'PNG', 10, 10, 190, 277);
-      pdf.save(`ankieta-${form.client_name}-${safeFormat(form.form_filled_date, 'yyyy-MM-dd')}.pdf`);
+      const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+      const W = 210, margin = 15, contentW = W - margin * 2;
+      let y = margin;
+      const pageH = 297;
+
+      const checkPage = (needed = 10) => {
+        if (y + needed > pageH - margin) { doc.addPage(); y = margin; }
+      };
+
+      const sectionLine = () => {
+        checkPage(10);
+        doc.setDrawColor(220, 220, 220);
+        doc.setLineWidth(0.3);
+        doc.line(margin, y, W - margin, y);
+        y += 5;
+      };
+
+      const sectionHeading = (text) => {
+        checkPage(12);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor(180, 0, 100);
+        doc.text(text.toUpperCase(), margin, y);
+        doc.setTextColor(0, 0, 0);
+        y += 6;
+      };
+
+      const dataRow = (lbl, val) => {
+        checkPage(6);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8.5);
+        doc.setTextColor(80, 80, 80);
+        doc.text(lbl + ':', margin, y);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        const valLines = doc.splitTextToSize(String(val || '—'), contentW - 52);
+        doc.text(valLines, margin + 52, y);
+        y += Math.max(valLines.length * 4.5, 5);
+      };
+
+      // ── TITLE ──
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(18);
+      doc.setTextColor(0, 0, 0);
+      doc.text('ANKIETA ZDROWOTNA', margin, y);
+      y += 4;
+      doc.setDrawColor(200, 0, 100);
+      doc.setLineWidth(0.8);
+      doc.line(margin, y, W - margin, y);
+      y += 8;
+
+      // ── DANE OSOBOWE ──
+      sectionHeading('Dane osobowe');
+      dataRow('Imię i nazwisko', form.client_name || `${form.client_first_name || ''} ${form.client_last_name || ''}`.trim());
+      dataRow('Email', form.client_email);
+      dataRow('Telefon', form.client_phone);
+      dataRow('Data urodzenia', form.date_of_birth);
+      dataRow('PESEL', form.pesel);
+      dataRow('Dokument tożsamości', form.id_document);
+      dataRow('Adres', [form.address_street, form.address_city, form.address_postal_code].filter(Boolean).join(', '));
+      dataRow('Zabieg', form.procedure_type);
+      dataRow('Miejsce zabiegu', form.body_placement);
+      dataRow('Data wypełnienia', safeFormat(form.form_filled_date, 'dd.MM.yyyy HH:mm'));
+      y += 3;
+
+      // ── WYWIAD MEDYCZNY ──
+      sectionLine();
+      sectionHeading('Wywiad medyczny');
+      const medFields = template?.medical_fields
+        ? template.medical_fields.map(f => ({ key: f.field_key, label: f.label, descKey: f.has_description !== false ? `${f.field_key}_desc` : null }))
+        : BOOL_FIELDS.map(f => ({ key: f[0], label: f[1], descKey: f[2] }));
+      medFields.forEach(({ key, label: lbl, descKey }) => {
+        checkPage(6);
+        const ans = form[key];
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+        doc.setTextColor(0, 0, 0);
+        const lblLines = doc.splitTextToSize(lbl, contentW - 20);
+        doc.text(lblLines, margin, y);
+        doc.setFont('helvetica', 'bold');
+        if (ans === true) doc.setTextColor(200, 0, 100);
+        else if (ans === false) doc.setTextColor(22, 163, 74);
+        else doc.setTextColor(150, 150, 150);
+        doc.text(ans === true ? 'TAK' : ans === false ? 'NIE' : '—', W - margin - 12, y);
+        doc.setTextColor(0, 0, 0);
+        y += lblLines.length * 4.5;
+        if (ans === true && descKey && form[descKey]) {
+          doc.setFont('helvetica', 'italic');
+          doc.setFontSize(8);
+          doc.setTextColor(100, 100, 100);
+          const dLines = doc.splitTextToSize('  → ' + form[descKey], contentW - 8);
+          doc.text(dLines, margin + 5, y);
+          doc.setTextColor(0, 0, 0);
+          y += dLines.length * 4 + 1;
+        }
+      });
+      y += 3;
+
+      // ── PYTANIA PRZEDZABIEGOWE ──
+      const procQs = template?.procedure_questions || [];
+      if (procQs.length > 0) {
+        sectionLine();
+        sectionHeading('Pytania przedzabiegowe');
+        procQs.forEach(q => {
+          checkPage(6);
+          const ans = form[q.field_key];
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(8.5);
+          doc.setTextColor(0, 0, 0);
+          const qLines = doc.splitTextToSize(q.label, contentW - 20);
+          doc.text(qLines, margin, y);
+          doc.setFont('helvetica', 'bold');
+          if (ans === true) doc.setTextColor(249, 115, 22);
+          else if (ans === false) doc.setTextColor(22, 163, 74);
+          else doc.setTextColor(150, 150, 150);
+          doc.text(ans === true ? 'TAK' : ans === false ? 'NIE' : '—', W - margin - 12, y);
+          doc.setTextColor(0, 0, 0);
+          y += qLines.length * 4.5;
+          if (ans === true && form[`${q.field_key}_desc`]) {
+            doc.setFont('helvetica', 'italic');
+            doc.setFontSize(8);
+            doc.setTextColor(100, 100, 100);
+            const dLines = doc.splitTextToSize('  → ' + form[`${q.field_key}_desc`], contentW - 8);
+            doc.text(dLines, margin + 5, y);
+            doc.setTextColor(0, 0, 0);
+            y += dLines.length * 4 + 1;
+          }
+        });
+        y += 3;
+      }
+
+      // ── OŚWIADCZENIE WOLI ──
+      const decl = template?.declaration_of_will;
+      if (decl?.content) {
+        sectionLine();
+        sectionHeading('Oświadczenie woli');
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(60, 60, 60);
+        const declLines = doc.splitTextToSize(decl.content, contentW);
+        checkPage(declLines.length * 4 + 14);
+        doc.text(declLines, margin, y);
+        y += declLines.length * 4 + 4;
+        const confirmed = form[decl.field_key];
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        if (confirmed) doc.setTextColor(22, 163, 74);
+        else doc.setTextColor(200, 0, 0);
+        doc.text(confirmed ? '✓ POTWIERDZAM' : '✕ NIE POTWIERDZONO', margin, y);
+        doc.setTextColor(0, 0, 0);
+        y += 6;
+      }
+
+      // ── ZGODY ──
+      const consentFields = template?.consent_fields || [];
+      if (consentFields.length > 0) {
+        sectionLine();
+        sectionHeading('Zgody');
+        consentFields.forEach(cf => {
+          checkPage(10);
+          const agreed = form[cf.field_key];
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(10);
+          if (agreed) doc.setTextColor(22, 163, 74);
+          else doc.setTextColor(200, 0, 0);
+          doc.text(agreed ? '✓' : '✕', margin, y);
+          doc.setTextColor(0, 0, 0);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(8.5);
+          const lbLines = doc.splitTextToSize(cf.label, contentW - 10);
+          doc.text(lbLines, margin + 8, y);
+          y += lbLines.length * 4.5;
+          if (cf.description) {
+            doc.setFont('helvetica', 'italic');
+            doc.setFontSize(8);
+            doc.setTextColor(100, 100, 100);
+            const dLines = doc.splitTextToSize(cf.description, contentW - 10);
+            doc.text(dLines, margin + 8, y);
+            doc.setTextColor(0, 0, 0);
+            y += dLines.length * 4 + 1;
+          }
+        });
+        y += 3;
+      }
+
+      // ── PODPIS KLIENTA ──
+      if (form.client_signature) {
+        sectionLine();
+        checkPage(50);
+        sectionHeading('Podpis klienta');
+        doc.setFillColor(255, 255, 255);
+        doc.rect(margin, y, 80, 32, 'F');
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.3);
+        doc.rect(margin, y, 80, 32, 'S');
+        doc.addImage(form.client_signature, 'PNG', margin, y, 80, 32);
+        y += 38;
+      }
+
+      // ── ZGODA OPIEKUNA ──
+      const guardianForm = guardianForms.find(g => g.health_form_id === form.id);
+      if (guardianForm) {
+        sectionLine();
+        checkPage(20);
+        sectionHeading('Zgoda opiekuna prawnego');
+        dataRow('Imię i nazwisko opiekuna', guardianForm.guardian_name);
+        dataRow('Telefon opiekuna', guardianForm.guardian_phone);
+        dataRow('Typ zabiegu', Array.isArray(guardianForm.procedure_type) ? guardianForm.procedure_type.join(', ') : guardianForm.procedure_type);
+        dataRow('Miejsce zabiegu', guardianForm.body_placement);
+        dataRow('Liczba zabiegów', guardianForm.num_procedures);
+        if (guardianForm.guardian_signature) {
+          checkPage(50);
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(8.5);
+          doc.setTextColor(80, 80, 80);
+          doc.text('Podpis opiekuna:', margin, y);
+          y += 4;
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin, y, 80, 32, 'F');
+          doc.setDrawColor(200, 200, 200);
+          doc.rect(margin, y, 80, 32, 'S');
+          doc.addImage(guardianForm.guardian_signature, 'PNG', margin, y, 80, 32);
+          y += 38;
+        }
+      }
+
+      doc.save(`ankieta-${(form.client_name || 'klient').replace(/\s+/g, '-')}-${safeFormat(form.form_filled_date, 'yyyy-MM-dd')}.pdf`);
     } finally {
       setExporting(false);
     }
