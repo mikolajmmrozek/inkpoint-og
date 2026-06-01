@@ -317,6 +317,20 @@ export default function DashboardHealthForms() {
   // Get sessions for selected form's booking
   const selectedSessions = selected ? bookings.filter(b => b.client_email === selected.client_email || b.client_name === selected.client_name) : [];
 
+  // Group forms by client email
+  const groupedClients = Object.values(
+    filteredForms.reduce((acc, form) => {
+      const key = form.client_email || form.client_name || form.id;
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(form);
+      return acc;
+    }, {})
+  ).map(group => group.sort((a, b) => new Date(b.form_filled_date) - new Date(a.form_filled_date)));
+
+  const selectedClientForms = selected
+    ? (groupedClients.find(g => (g[0].client_email || g[0].client_name) === (selected.client_email || selected.client_name)) || [selected])
+    : [];
+
   const exportPDF = async (form) => {
     setExporting(true);
     try {
@@ -545,44 +559,41 @@ export default function DashboardHealthForms() {
                 </div>
               ) : (
                 <div>
-                  {filteredForms.map((form, i) => (
-                    <div key={form.id}
-                      className="flex items-center gap-3 px-4 py-3 cursor-pointer"
-                      style={{ borderBottom: i < filteredForms.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selected?.id === form.id ? 'rgba(255,0,127,0.05)' : 'transparent' }}
-                      onClick={() => setSelected(form)}
-                    >
-                      <FileText size={13} color={form.is_minor ? '#FF007F' : t.fuchsia} />
-                      <div className="flex-1 min-w-0">
-                        <p style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>{getClientName(form)}</p>
-                        <p style={{ ...mono, fontSize: '8px', color: t.muted, marginTop: '2px' }}>{form.client_email}</p>
-                        <div className="flex items-center gap-2 mt-2">
-                          {form.is_update_only && <span style={{ ...mono, fontSize: '7px', color: '#16a34a', border: '0.5px solid #16a34a', padding: '1px 4px' }}>AKTUALIZACJA</span>}
-                          <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>
-                            {form.procedure_type && `${form.procedure_type} · `}
-                            {form.form_filled_date ? format(new Date(form.form_filled_date), 'dd.MM.yyyy') : ''}
-                          </p>
+                  {groupedClients.map((group, i) => {
+                    const form = group[0];
+                    const boolFieldKeys = BOOL_FIELDS.map(b => b[0]);
+                    const hasMedical = boolFieldKeys.some(k => form[k] === true);
+                    const hasProcedureYes = (template?.procedure_questions || []).some(q => form[q.field_key] === true || (form[`${q.field_key}_desc`] && form[`${q.field_key}_desc`].trim()));
+                    const noImageConsent = form.consent_image_use === false;
+                    const allOk = !hasMedical && !hasProcedureYes && !noImageConsent && !form.is_minor;
+                    return (
+                      <div key={form.client_email || form.id}
+                        className="flex items-center gap-3 px-4 py-3 cursor-pointer"
+                        style={{ borderBottom: i < groupedClients.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selected?.client_email === form.client_email ? 'rgba(255,0,127,0.05)' : 'transparent' }}
+                        onClick={() => setSelected(form)}
+                      >
+                        <FileText size={13} color={form.is_minor ? '#FF007F' : t.fuchsia} />
+                        <div className="flex-1 min-w-0">
+                          <p style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>{getClientName(form)}</p>
+                          <p style={{ ...mono, fontSize: '8px', color: t.muted, marginTop: '2px' }}>{form.client_email}</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            {group.length > 1 && <span style={{ ...mono, fontSize: '7px', color: t.fuchsia, border: `0.5px solid ${t.fuchsia}`, padding: '1px 4px' }}>{group.length} ANKIET</span>}
+                            <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>
+                              {form.procedure_type && `${form.procedure_type} · `}
+                              {form.form_filled_date ? format(new Date(form.form_filled_date), 'dd.MM.yyyy') : ''}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex flex-row gap-2 items-center flex-shrink-0">
+                          {form.is_minor && <span style={{ ...mono, fontSize: '7px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '1px 4px' }}>NIELETNI</span>}
+                          {hasMedical && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#FF007F' }} title="Problemy medyczne" />}
+                          {hasProcedureYes && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#f97316' }} title="Tak na pytanie przedzabiegowe" />}
+                          {noImageConsent && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#3b82f6' }} title="Brak zgody na wizerunek" />}
+                          {allOk && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#16a34a' }} title="Wszystko OK" />}
                         </div>
                       </div>
-                      <div className="flex flex-row gap-2 items-center flex-shrink-0">
-                        {form.is_minor && <span style={{ ...mono, fontSize: '7px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '1px 4px' }}>NIELETNI</span>}
-                        {(() => {
-                          const boolFieldKeys = BOOL_FIELDS.map(b => b[0]);
-                          const hasMedical = boolFieldKeys.some(k => form[k] === true);
-                          const hasProcedureYes = (template?.procedure_questions || []).some(q => form[q.field_key] === true || (form[`${q.field_key}_desc`] && form[`${q.field_key}_desc`].trim()));
-                          const noImageConsent = form.consent_image_use === false;
-                          const allOk = !hasMedical && !hasProcedureYes && !noImageConsent && !form.is_minor;
-                          return (
-                            <>
-                              {hasMedical && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#FF007F' }} title="Problemy medyczne" />}
-                              {hasProcedureYes && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#f97316' }} title="Tak na pytanie przedzabiegowe" />}
-                              {noImageConsent && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#3b82f6' }} title="Brak zgody na wizerunek" />}
-                              {allOk && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#16a34a' }} title="Wszystko OK" />}
-                            </>
-                          );
-                        })()}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -678,76 +689,47 @@ export default function DashboardHealthForms() {
           </div>
         )}
 
-        {/* Detail panel */}
-        {selected && (
-          <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, maxHeight: '80vh', overflowY: 'auto' }}>
-            {/* Header with actions */}
-            <div className="flex justify-between items-start p-5" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-              <div>
-                <button
-                  onClick={() => {
-                    const link = document.createElement('a');
-                    link.href = `/dashboard/clients?email=${encodeURIComponent(selected.client_email)}`;
-                    link.click();
-                  }}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0 }}
-                >
-                  <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.6rem', fontWeight: 400, color: t.fuchsia, letterSpacing: '0.04em', textDecoration: 'underline' }}>
-                    {getClientName(selected)}
-                  </h3>
-                </button>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '4px' }}>
-                  {selected.client_email} · {selected.client_phone}
-                </p>
+      </div>
+
+      {/* Modal overlay */}
+      {selected && (
+        <div
+          style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '40px', paddingBottom: '40px', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', overflowY: 'auto' }}
+          onClick={e => { if (e.target === e.currentTarget) setSelected(null); }}
+        >
+          <div style={{ width: '100%', maxWidth: '680px', margin: '0 16px', background: theme === 'light' ? '#FFFFFF' : '#0A0A0A', border: `0.5px solid ${t.border}` }}>
+            {/* Action bar */}
+            <div className="flex justify-between items-center px-5 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+              <div className="flex items-center gap-3">
+                <button onClick={() => exportPDF(selected)} disabled={exporting} title="Pobierz PDF" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', opacity: exporting ? 0.5 : 1 }}><Download size={15} /></button>
+                <button onClick={() => sendConfirmationEmail(selected)} disabled={sendingEmail} title="Wyślij email" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', opacity: sendingEmail ? 0.5 : 1 }}><Mail size={15} /></button>
+                <button onClick={() => sendEditLink(selected)} disabled={sendingEditLink} title="Wyślij link do edycji" style={{ color: '#f59e0b', background: 'none', border: 'none', cursor: 'pointer', opacity: sendingEditLink ? 0.5 : 1 }}><Edit3 size={15} /></button>
+                <button onClick={() => deleteForm(selected)} title="Usuń ankietę" style={{ color: '#FF007F', background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={15} /></button>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => exportPDF(selected)}
-                  disabled={exporting}
-                  title="Pobierz PDF"
-                  style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', opacity: exporting ? 0.5 : 1 }}
-                >
-                  <Download size={16} />
-                </button>
-                <button
-                  onClick={() => sendConfirmationEmail(selected)}
-                  disabled={sendingEmail}
-                  title="Wyślij email"
-                  style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', opacity: sendingEmail ? 0.5 : 1 }}
-                >
-                  <Mail size={16} />
-                </button>
-                <button
-                  onClick={() => sendEditLink(selected)}
-                  disabled={sendingEditLink}
-                  title="Wyślij link do edycji klientowi"
-                  style={{ color: '#f59e0b', background: 'none', border: 'none', cursor: 'pointer', opacity: sendingEditLink ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: '4px' }}
-                >
-                  <Edit3 size={16} />
-                </button>
-                <button
-                  onClick={() => deleteForm(selected)}
-                  title="Usuń ankietę"
-                  style={{ color: '#FF007F', background: 'none', border: 'none', cursor: 'pointer' }}
-                >
-                  <Trash2 size={16} />
-                </button>
-                <button onClick={() => setSelected(null)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
-                  <X size={16} />
-                </button>
-              </div>
+              <button onClick={() => setSelected(null)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><X size={16} /></button>
             </div>
 
-            {/* Sessions list */}
+            {/* Form selector — when client has multiple forms */}
+            {selectedClientForms.length > 1 && (
+              <div className="flex items-center gap-2 px-5 py-2 flex-wrap" style={{ borderBottom: `0.5px solid ${t.border}`, background: 'rgba(255,0,127,0.03)' }}>
+                <p style={{ ...mono, fontSize: '7px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginRight: '4px' }}>ANKIETY:</p>
+                {selectedClientForms.map(f => (
+                  <button key={f.id} onClick={() => setSelected(f)}
+                    style={{ ...mono, fontSize: '8px', letterSpacing: '0.06em', padding: '3px 8px', border: `0.5px solid ${selected.id === f.id ? t.fuchsia : t.border}`, color: selected.id === f.id ? t.fuchsia : t.muted, background: selected.id === f.id ? 'rgba(255,0,127,0.08)' : 'transparent', cursor: 'pointer' }}
+                  >
+                    {f.form_filled_date ? format(new Date(f.form_filled_date), 'dd.MM.yyyy') : f.id.slice(-4)}{f.is_update_only ? ' ↻' : ''}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Sessions */}
             {selectedSessions.length > 0 && (
               <div className="px-5 py-3" style={{ borderBottom: `0.5px solid ${t.border}`, background: 'rgba(255,0,127,0.03)' }}>
                 <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>SESJE</p>
                 {selectedSessions.map(s => (
                   <div key={s.id} style={{ fontSize: '11px', color: t.text, marginBottom: '6px', paddingBottom: '6px', borderBottom: `0.5px solid ${t.border}` }}>
-                    <button
-                      onClick={() => navigate('/dashboard/bookings')}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', width: '100%' }}
-                    >
+                    <button onClick={() => navigate('/dashboard/bookings')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', width: '100%' }}>
                       <p><strong style={{ color: t.fuchsia, textDecoration: 'underline' }}>{s.session_date}</strong> · {s.artist_name}</p>
                     </button>
                     <p style={{ color: t.muted, fontSize: '10px', marginTop: '2px' }}>{s.tattoo_description || s.tattoo_placement || 'Brak opisu'}</p>
@@ -756,10 +738,12 @@ export default function DashboardHealthForms() {
               </div>
             )}
 
-            <FormDetailPanel selected={selected} guardianForm={selectedGuardian} t={t} onClose={() => setSelected(null)} theme={theme} template={template} />
+            <div style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+              <FormDetailPanel selected={selected} guardianForm={selectedGuardian} t={t} onClose={() => setSelected(null)} theme={theme} template={template} />
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
