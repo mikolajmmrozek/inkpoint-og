@@ -138,8 +138,8 @@ export default function DashboardClients() {
         </div>
       ) : (
         <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-          {/* Header */}
-          <div className="grid grid-cols-12 px-4 py-2" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+          {/* Header — hidden on mobile */}
+          <div className="hidden md:grid grid-cols-12 px-4 py-2" style={{ borderBottom: `0.5px solid ${t.border}` }}>
             {['Imię i Nazwisko', 'Email', 'Telefon', 'Sesje', ''].map((h, i) => (
               <p key={i} className={i === 0 ? 'col-span-4' : i === 1 ? 'col-span-3' : i === 2 ? 'col-span-2' : i === 3 ? 'col-span-1' : 'col-span-2 text-right'} style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>{h}</p>
             ))}
@@ -153,8 +153,18 @@ export default function DashboardClients() {
             const { sessions, forms } = getClientData(c);
             return (
               <div key={c.id}>
+                {/* Mobile row — minimal */}
+                <div className="md:hidden px-4 py-3 flex items-center justify-between cursor-pointer" style={{ borderBottom: `0.5px solid ${t.border}`, background: isExpanded ? 'rgba(255,0,127,0.03)' : 'transparent' }} onClick={() => setExpandedClient(isExpanded ? null : c.id)}>
+                  <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{c.name}</p>
+                  <div className="flex gap-2">
+                    <button onClick={(e) => { e.stopPropagation(); openEdit(c); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><Edit2 size={13} /></button>
+                    <button onClick={(e) => { e.stopPropagation(); handleDelete(c.id); }} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><Trash2 size={13} /></button>
+                  </div>
+                </div>
+
+                {/* Desktop row — full grid */}
                 <div 
-                  className="grid grid-cols-12 px-4 py-3 items-center cursor-pointer"
+                  className="hidden md:grid grid-cols-12 px-4 py-3 items-center cursor-pointer"
                   style={{ borderBottom: `0.5px solid ${t.border}`, background: isExpanded ? 'rgba(255,0,127,0.03)' : 'transparent' }}
                   onClick={() => setExpandedClient(isExpanded ? null : c.id)}
                 >
