@@ -305,13 +305,19 @@ export default function DashboardStats() {
             </p>
             <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
               {/* Table header */}
-              <div className="grid grid-cols-12 px-4 py-2" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+              <div className="hidden md:grid grid-cols-12 px-4 py-2" style={{ borderBottom: `0.5px solid ${t.border}` }}>
                 {['Artysta', 'Udział %', 'Sesje', 'Klienci', 'Łączny przychód', 'Zarobek artysty', 'Zarobek studia'].map((h, i) => (
                   <p
                     key={i}
                     className={i === 0 ? 'col-span-3' : i === 1 ? 'col-span-1' : i === 2 ? 'col-span-1' : i === 3 ? 'col-span-1' : 'col-span-2'}
                     style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}
                   >{h}</p>
+                ))}
+              </div>
+              {/* Mobile header */}
+              <div className="md:hidden grid grid-cols-6 px-4 py-2" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+                {['Artysta', 'Udział %', 'Sesje', 'Przychód', 'Artysta', 'Studio'].map((h, i) => (
+                  <p key={i} style={{ ...mono, fontSize: '7px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{h}</p>
                 ))}
               </div>
 
@@ -323,31 +329,43 @@ export default function DashboardStats() {
                 const visible = selectedArtistId === 'all' || selectedArtistId === s.artist.id;
                 if (!visible) return null;
                 return (
-                  <div key={s.artist.id} className="grid grid-cols-12 px-4 py-4 items-center" style={{ borderBottom: i < artistStats.length - 1 ? `0.5px solid ${t.border}` : 'none' }}>
-                    {/* Name */}
-                    <div className="col-span-3 flex items-center gap-3">
-                      {s.artist.photo_url && <img src={s.artist.photo_url} alt="" className="w-8 h-8 object-cover flex-shrink-0" style={{ filter: 'brightness(0.8)' }} />}
-                      <div>
-                        <p style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>{s.artist.name}</p>
-                        <p style={{ ...mono, fontSize: '8px', color: t.muted, marginTop: '2px' }}>{(s.artist.specialty || []).slice(0, 2).join(', ')}</p>
+                  <>
+                    {/* Desktop row */}
+                    <div key={s.artist.id} className="hidden md:grid grid-cols-12 px-4 py-4 items-center" style={{ borderBottom: i < artistStats.length - 1 ? `0.5px solid ${t.border}` : 'none' }}>
+                      {/* Name */}
+                      <div className="col-span-3 flex items-center gap-3">
+                        {s.artist.photo_url && <img src={s.artist.photo_url} alt="" className="w-8 h-8 object-cover flex-shrink-0" style={{ filter: 'brightness(0.8)' }} />}
+                        <div>
+                          <p style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>{s.artist.name}</p>
+                          <p style={{ ...mono, fontSize: '8px', color: t.muted, marginTop: '2px' }}>{(s.artist.specialty || []).slice(0, 2).join(', ')}</p>
+                        </div>
                       </div>
+                      {/* Cut % */}
+                      <div className="col-span-1">
+                        <span style={{ ...mono, fontSize: '10px', color: t.fuchsia, letterSpacing: '0.05em' }}>{s.cut}%</span>
+                        <p style={{ ...mono, fontSize: '7px', color: t.muted }}>artysta</p>
+                      </div>
+                      {/* Sessions */}
+                      <p className="col-span-1" style={{ ...mono, fontSize: '11px', color: t.text }}>{s.sessions}</p>
+                      {/* Clients */}
+                      <p className="col-span-1" style={{ ...mono, fontSize: '11px', color: t.text }}>{s.clients}</p>
+                      {/* Total revenue */}
+                      <p className="col-span-2" style={{ ...mono, fontSize: '11px', color: t.text }}>{s.totalRevenue.toLocaleString('pl-PL')} PLN</p>
+                      {/* Artist earnings */}
+                      <p className="col-span-2" style={{ ...mono, fontSize: '11px', color: '#16a34a', fontWeight: 600 }}>{s.artistEarnings.toLocaleString('pl-PL')} PLN</p>
+                      {/* Studio earnings */}
+                      <p className="col-span-2" style={{ ...mono, fontSize: '11px', color: t.fuchsia, fontWeight: 600 }}>{s.studioEarnings.toLocaleString('pl-PL')} PLN</p>
                     </div>
-                    {/* Cut % */}
-                    <div className="col-span-1">
-                      <span style={{ ...mono, fontSize: '10px', color: t.fuchsia, letterSpacing: '0.05em' }}>{s.cut}%</span>
-                      <p style={{ ...mono, fontSize: '7px', color: t.muted }}>artysta</p>
+                    {/* Mobile row — no photo, compact */}
+                    <div key={`mobile-${s.artist.id}`} className="md:hidden grid grid-cols-6 px-4 py-3 items-center text-center" style={{ borderBottom: `0.5px solid ${t.border}`, fontSize: '12px' }}>
+                      <p style={{ color: t.text, fontSize: '11px', fontWeight: 500, gridColumn: '1' }}>{s.artist.name}</p>
+                      <p style={{ ...mono, fontSize: '9px', color: t.fuchsia }}>{s.cut}%</p>
+                      <p style={{ ...mono, fontSize: '9px', color: t.text }}>{s.sessions}</p>
+                      <p style={{ ...mono, fontSize: '9px', color: t.text, overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.totalRevenue.toLocaleString('pl-PL')}</p>
+                      <p style={{ ...mono, fontSize: '9px', color: '#16a34a', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.artistEarnings.toLocaleString('pl-PL')}</p>
+                      <p style={{ ...mono, fontSize: '9px', color: t.fuchsia, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.studioEarnings.toLocaleString('pl-PL')}</p>
                     </div>
-                    {/* Sessions */}
-                    <p className="col-span-1" style={{ ...mono, fontSize: '11px', color: t.text }}>{s.sessions}</p>
-                    {/* Clients */}
-                    <p className="col-span-1" style={{ ...mono, fontSize: '11px', color: t.text }}>{s.clients}</p>
-                    {/* Total revenue */}
-                    <p className="col-span-2" style={{ ...mono, fontSize: '11px', color: t.text }}>{s.totalRevenue.toLocaleString('pl-PL')} PLN</p>
-                    {/* Artist earnings */}
-                    <p className="col-span-2" style={{ ...mono, fontSize: '11px', color: '#16a34a', fontWeight: 600 }}>{s.artistEarnings.toLocaleString('pl-PL')} PLN</p>
-                    {/* Studio earnings */}
-                    <p className="col-span-2" style={{ ...mono, fontSize: '11px', color: t.fuchsia, fontWeight: 600 }}>{s.studioEarnings.toLocaleString('pl-PL')} PLN</p>
-                  </div>
+                  </>
                 );
               })}
 
