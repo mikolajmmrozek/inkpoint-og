@@ -66,17 +66,18 @@ export default function ArtistProfile() {
 
         {/* Split layout */}
         <div className="flex flex-col lg:flex-row gap-0">
-          {/* LEFT — Sticky bio with image background */}
-          <div className="lg:w-96 lg:flex-shrink-0 px-8 md:px-16 lg:sticky lg:top-24 lg:self-start pb-16 relative">
-            <div className="absolute inset-0 -z-10 pointer-events-none overflow-hidden">
-              <img
-                src={artist?.photo_url || MOCK.photo_url}
-                alt={artist?.name}
-                className="w-full h-full object-cover"
-                style={{ filter: 'brightness(0.35) contrast(1.2)' }}
-              />
-            </div>
-            <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8 }} className="relative z-10">
+          {/* LEFT — Sticky bio */}
+          <div className="lg:w-96 lg:flex-shrink-0 px-8 md:px-16 lg:sticky lg:top-24 lg:self-start pb-16">
+            <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8 }}>
+              <div className="relative w-full h-96 mb-8 overflow-hidden">
+                <img
+                  src={artist?.photo_url || MOCK.photo_url}
+                  alt={artist?.name}
+                  className="w-full h-full object-cover"
+                  style={{ filter: 'brightness(0.8) contrast(1.1)' }}
+                />
+              </div>
+
               <div className="flex gap-2 flex-wrap mb-4">
                 {(artist?.specialty || MOCK.specialty).map(s => (
                   <span key={s} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', border: '0.5px solid #FF007F', padding: '3px 8px', textTransform: 'uppercase' }}>
