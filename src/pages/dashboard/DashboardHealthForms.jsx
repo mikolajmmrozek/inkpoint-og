@@ -393,37 +393,47 @@ export default function DashboardHealthForms() {
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Inter',Arial,sans-serif;font-size:8pt;color:#111;background:#fff}
-  .page{max-width:185mm;margin:0 auto;padding:8mm 0}
-  h1{font-size:16pt;font-weight:800;letter-spacing:-0.5px;margin-bottom:3px}
-  .line{height:1.5px;background:#c8003c;margin-bottom:10px}
-  .sec{margin-bottom:10px;page-break-inside:avoid}
-  .sec-title{font-size:6pt;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:#c8003c;margin-bottom:5px;padding-bottom:2px;border-bottom:.5px solid #ddd}
+  html,body{height:auto}
+  body{font-family:'Inter',Arial,sans-serif;font-size:7.5pt;color:#111;background:#fff}
+  .page{max-width:185mm;margin:0 auto;padding:6mm 0}
+  .title-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px}
+  h1{font-size:14pt;font-weight:800;letter-spacing:-0.5px}
+  .form-id{font-size:7pt;color:#888;letter-spacing:.1em;font-family:monospace}
+  .line{height:1.5px;background:#c8003c;margin-bottom:7px}
+  .sec{margin-bottom:7px;page-break-inside:avoid}
+  .sec-title{font-size:5.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:#c8003c;margin-bottom:3px;padding-bottom:2px;border-bottom:.5px solid #ddd}
   table{width:100%;border-collapse:collapse}
-  td{padding:1.5px 0;vertical-align:top;font-size:8pt;line-height:1.35}
+  td{padding:1px 0;vertical-align:top;font-size:7.5pt;line-height:1.3}
   td.lbl{font-weight:600;color:#444;width:38%;padding-right:6px}
   td.val{color:#111}
-  td.q{width:82%;padding:1.5px 0}
-  td.ans{width:18%;font-weight:700;text-align:right;padding:1.5px 0;white-space:nowrap;font-size:7pt}
-  .desc{font-style:italic;color:#666;font-size:7pt;padding:1px 0 3px 10px}
-  .decl-ok{font-weight:700;font-size:8.5pt}
-  .ci{display:flex;gap:6px;align-items:flex-start;margin-bottom:4px}
-  .cm{font-size:10pt;font-weight:700;line-height:1.1;flex-shrink:0;width:14px}
-  .cb strong{font-size:8pt}
-  .cdesc{font-size:7pt;color:#555;margin-top:1px;line-height:1.4}
-  .sig{border:.5px solid #ccc;padding:3px;display:inline-block;margin-top:4px;background:#fff}
-  .sig img{max-width:180px;max-height:55px;display:block}
-  .personal-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
-  .personal-grid .row{display:flex;gap:4px;padding:1.5px 0;border-bottom:.5px solid #f0f0f0}
-  .personal-grid .row .lbl{font-weight:600;color:#444;font-size:7.5pt;width:45%;flex-shrink:0}
-  .personal-grid .row .val{color:#111;font-size:7.5pt}
-  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.page{padding:0}}
+  td.q{width:82%;padding:1px 0}
+  td.ans{width:18%;font-weight:700;text-align:right;padding:1px 0;white-space:nowrap;font-size:6.5pt}
+  .desc{font-style:italic;color:#666;font-size:6.5pt;padding:0 0 2px 8px}
+  .decl-ok{font-weight:700;font-size:8pt}
+  .ci{display:flex;gap:5px;align-items:flex-start;margin-bottom:3px}
+  .cm{font-size:9pt;font-weight:700;line-height:1.1;flex-shrink:0;width:13px}
+  .cb strong{font-size:7.5pt}
+  .cdesc{font-size:6.5pt;color:#555;margin-top:1px;line-height:1.3}
+  .sig{border:.5px solid #ccc;padding:3px;display:inline-block;margin-top:3px;background:#fff}
+  .sig img{max-width:160px;max-height:48px;display:block}
+  .personal-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+  .personal-grid .row{display:flex;gap:4px;padding:1px 0;border-bottom:.5px solid #f0f0f0}
+  .personal-grid .row .lbl{font-weight:600;color:#444;font-size:7pt;width:45%;flex-shrink:0}
+  .personal-grid .row .val{color:#111;font-size:7pt}
+  @media print{
+    body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .page{padding:0}
+    html,body{height:auto !important;overflow:visible !important}
+    @page{margin:10mm 12mm;size:A4}
+  }
 </style>
 </head>
 <body>
 <div class="page">
-  <h1>ANKIETA ZDROWOTNA</h1>
-  <p style="font-size:7pt;color:#888;letter-spacing:.1em;margin-bottom:2px">NR ANKIETY: #${form.id?.slice(-8).toUpperCase()}</p>
+  <div class="title-row">
+    <h1>ANKIETA ZDROWOTNA</h1>
+    <span class="form-id">${form.id?.slice(-8).toUpperCase()}</span>
+  </div>
   <div class="line"></div>
 
   <div class="sec">
