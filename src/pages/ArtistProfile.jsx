@@ -113,7 +113,7 @@ export default function ArtistProfile() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block mb-8 hover:opacity-70 transition-opacity"
-                  style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em' }}
+                  style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.1em', fontWeight: 500, cursor: 'pointer' }}
                 >
                   {artist.instagram}
                 </a>
