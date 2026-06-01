@@ -3,10 +3,11 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const { booking } = await req.json();
+    const { event, data } = await req.json();
+    const booking = data;
 
-    if (!booking || booking.status !== 'confirmed') {
-      return Response.json({ success: false, error: 'Invalid booking status' }, { status: 400 });
+    if (!booking) {
+      return Response.json({ success: false, error: 'No booking data' }, { status: 400 });
     }
 
     // Get studio settings
