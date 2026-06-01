@@ -65,9 +65,9 @@ export default function ArtistProfile() {
         </div>
 
         {/* Split layout */}
-        <div className="flex flex-col lg:flex-row gap-0">
+        <div className="flex flex-col md:flex-row gap-0">
           {/* LEFT — Sticky bio */}
-          <div className="lg:w-96 lg:flex-shrink-0 px-8 md:px-16 lg:sticky lg:top-24 lg:self-start pb-16">
+          <div className="md:w-96 md:flex-shrink-0 px-8 md:px-16 md:sticky md:top-24 md:self-start pb-16">
             <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8 }}>
               <div className="relative w-full h-96 mb-8 overflow-hidden">
                 <img
@@ -127,7 +127,7 @@ export default function ArtistProfile() {
           </div>
 
           {/* RIGHT — Masonry portfolio */}
-          <div className="flex-1 px-8 md:px-16 lg:pl-12 pb-32">
+          <div className="flex-1 px-8 md:px-16 md:pl-12 pb-32">
             <p className="text-micro mb-8" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.15em' }}>
               PORTFOLIO — {portfolioImages.length} PRAC
             </p>
