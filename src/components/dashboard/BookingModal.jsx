@@ -201,11 +201,10 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
               <div>
                 {label('Godzina')}
                 <select
-                  value={form.session_time?.split(':')[0] || ''}
+                  value={form.session_time?.split(':')[0] || '00'}
                   onChange={e => set('session_time', `${e.target.value}:${form.session_time?.split(':')[1] || '00'}`)}
                   style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
                 >
-                  <option value="">HH</option>
                   {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
                 </select>
               </div>
