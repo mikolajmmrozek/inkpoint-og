@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
-import { Star, Mail, Eye, EyeOff, Trash2, X, Check, Plus, GripVertical } from 'lucide-react';
+import { Star, Mail, Eye, EyeOff, Trash2, X, Check, Plus, GripVertical, Copy, ExternalLink } from 'lucide-react';
 
 function StarDisplay({ value, size = 12 }) {
   return (
@@ -42,6 +42,15 @@ export default function DashboardFeedback() {
 
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('reviews'); // 'reviews' | 'config'
+  const [copied, setCopied] = useState(false);
+
+  const surveyUrl = `${window.location.origin}/feedback`;
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(surveyUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
   const [configForm, setConfigForm] = useState(null);
   const [savingConfig, setSavingConfig] = useState(false);
 
@@ -110,6 +119,24 @@ export default function DashboardFeedback() {
       <div className="mb-8">
         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>ZARZĄDZANIE</p>
         <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>Opinie</h2>
+        <div className="flex items-center gap-3 mt-4 flex-wrap">
+          <a
+            href={surveyUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-oxblood"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '11px', padding: '10px 20px', textDecoration: 'none' }}
+          >
+            <ExternalLink size={13} /> WYSTAW OPINIĘ
+          </a>
+          <button
+            onClick={handleCopyLink}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '9px 20px', border: `0.5px solid ${t.border}`, color: copied ? '#16a34a' : t.muted, background: 'transparent', cursor: 'pointer', transition: 'color 0.2s' }}
+          >
+            {copied ? <Check size={13} /> : <Copy size={13} />}
+            {copied ? 'SKOPIOWANO!' : 'KOPIUJ LINK'}
+          </button>
+        </div>
       </div>
 
       {/* Stats */}
