@@ -292,17 +292,27 @@ export default function HealthFormPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: '#0A0A0A' }}>
-        <div className="max-w-lg text-center">
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>
-            {t.studio}
-          </p>
-          <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: '#F5F0EB', lineHeight: 1, letterSpacing: '0.04em', marginBottom: '20px' }}>
-            {t.successTitle}
-          </h1>
-          <p style={{ color: 'rgba(245,240,235,0.6)', fontSize: '16px', lineHeight: 1.8 }}>
-            {t.successText}
-          </p>
+      <div className="min-h-screen flex flex-col items-center justify-center p-4" style={{ background: '#0A0A0A' }}>
+        <div className="max-w-lg text-center flex-1 flex items-center justify-center">
+          <div>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>
+              {t.studio}
+            </p>
+            <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: '#F5F0EB', lineHeight: 1, letterSpacing: '0.04em', marginBottom: '20px' }}>
+              {t.successTitle}
+            </h1>
+            <p style={{ color: 'rgba(245,240,235,0.6)', fontSize: '16px', lineHeight: 1.8 }}>
+              {t.successText}
+            </p>
+            <a href="/" style={{ display: 'inline-block', marginTop: '32px', fontFamily: 'JetBrains Mono', fontSize: '13px', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#FF007F', textDecoration: 'none', padding: '12px 28px', border: '0.5px solid #FF007F' }} onMouseEnter={e => e.target.style.background = '#FF007F'} onMouseEnter={e => e.target.style.color = '#0A0A0A'} onMouseLeave={e => e.target.style.background = 'transparent'} onMouseLeave={e => e.target.style.color = '#FF007F'}>
+              POWRÓT NA STRONĘ GŁÓWNĄ
+            </a>
+          </div>
+        </div>
+        <div style={{ paddingBottom: '40px', textAlign: 'center' }}>
+          <a href="/health-form" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.3)', textDecoration: 'none', letterSpacing: '0.08em' }} onMouseEnter={e => e.target.style.color = 'rgba(245,240,235,0.6)'} onMouseLeave={e => e.target.style.color = 'rgba(245,240,235,0.3)'}>
+            NOWA ANKIETA
+          </a>
         </div>
       </div>
     );
