@@ -462,7 +462,7 @@ ${JSON.stringify(template, null, 2)}`,
           {/* First visit? */}
           <div className="mb-6">
             <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.5)', letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
-              Czy to Twoja pierwsza wizyta w naszym studio? *
+              {t.firstVisitQuestion || 'Czy to Twoja pierwsza wizyta w naszym studio?'} *
             </label>
             <div className="flex gap-3">
               {[true, false].map(v => (
@@ -471,7 +471,7 @@ ${JSON.stringify(template, null, 2)}`,
                   onClick={() => setIsFirstVisit(v)}
                   style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 20px', border: `0.5px solid ${isFirstVisit === v ? '#FF007F' : '#262626'}`, color: isFirstVisit === v ? '#FF007F' : 'rgba(245,240,235,0.4)', background: isFirstVisit === v ? 'rgba(255,0,127,0.08)' : 'transparent', cursor: 'pointer', flex: 1 }}
                 >
-                  {v ? 'TAK' : 'NIE'}
+                  {v ? t.yes : t.no}
                 </button>
               ))}
             </div>
@@ -481,13 +481,13 @@ ${JSON.stringify(template, null, 2)}`,
           {isFirstVisit === false && (
             <div className="mb-6">
               <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.5)', letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
-                Adres e-mail z poprzedniej wizyty *
+                {t.returningEmailLabel || 'Adres e-mail z poprzedniej wizyty'} *
               </label>
               <input
                 type="email"
                 value={form.client_email || ''}
                 onChange={e => setField('client_email', e.target.value)}
-                placeholder="twoj@email.pl"
+                placeholder={t.returningEmailPlaceholder || 'twoj@email.pl'}
                 style={inputStyle}
               />
             </div>
