@@ -405,14 +405,14 @@ ${JSON.stringify(template, null, 2)}`,
             <p style={{ color: 'rgba(245,240,235,0.6)', fontSize: '16px', lineHeight: 1.8 }}>
               {t.successText}
             </p>
-            <a href="/" style={{ display: 'inline-block', marginTop: '32px', fontFamily: 'JetBrains Mono', fontSize: '13px', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#FF007F', textDecoration: 'none', padding: '12px 28px', border: '0.5px solid #FF007F' }} onMouseEnter={e => e.target.style.background = '#FF007F'} onMouseEnter={e => e.target.style.color = '#0A0A0A'} onMouseLeave={e => e.target.style.background = 'transparent'} onMouseLeave={e => e.target.style.color = '#FF007F'}>
-              POWRÓT NA STRONĘ GŁÓWNĄ
+            <a href="/" style={{ display: 'inline-block', marginTop: '32px', fontFamily: 'JetBrains Mono', fontSize: '13px', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#FF007F', textDecoration: 'none', padding: '12px 28px', border: '0.5px solid #FF007F' }} onMouseEnter={e => { e.target.style.background = '#FF007F'; e.target.style.color = '#0A0A0A'; }} onMouseLeave={e => { e.target.style.background = 'transparent'; e.target.style.color = '#FF007F'; }}>
+              {t.returnToHome || 'POWRÓT NA STRONĘ GŁÓWNĄ'}
             </a>
           </div>
         </div>
         <div style={{ paddingBottom: '40px', textAlign: 'center' }}>
           <a href="/health-form" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.3)', textDecoration: 'none', letterSpacing: '0.08em' }} onMouseEnter={e => e.target.style.color = 'rgba(245,240,235,0.6)'} onMouseLeave={e => e.target.style.color = 'rgba(245,240,235,0.3)'}>
-            NOWA ANKIETA
+            {t.newSurvey || 'NOWA ANKIETA'}
           </a>
         </div>
       </div>
@@ -517,8 +517,8 @@ ${JSON.stringify(template, null, 2)}`,
   const stepTitle = {
     personal: t.stepPersonal,
     medical: t.stepMedical,
-    procedure: 'Pytania Przedzabiegowe',
-    declaration: 'Oświadczenie Woli',
+    procedure: t.stepProcedure || 'Pytania Przedzabiegowe',
+    declaration: t.stepDeclaration || 'Oświadczenie Woli',
     consents: t.stepConsents,
     signature: t.stepSignature,
     guardian: t.stepGuardian,
