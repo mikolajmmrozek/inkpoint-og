@@ -35,6 +35,7 @@ import DashboardDocuments from './pages/dashboard/DashboardDocuments';
 import DashboardFAQ from './pages/dashboard/DashboardFAQ';
 import DashboardFeedback from './pages/dashboard/DashboardFeedback';
 import FeedbackSurvey from './pages/FeedbackSurvey';
+import ScrollToTop from './components/ScrollToTop';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -99,6 +100,7 @@ function App() {
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
+          <ScrollToTop />
           <AuthenticatedApp />
         </Router>
         <Toaster />
