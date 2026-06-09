@@ -115,7 +115,12 @@ export default function HealthFormPage() {
     const langName = { en: 'English', de: 'German', uk: 'Ukrainian', fr: 'French', es: 'Spanish', it: 'Italian', pt: 'Portuguese', ru: 'Russian', cs: 'Czech', sk: 'Slovak', hu: 'Hungarian' }[lang] || lang;
     setTranslating(true);
     base44.integrations.Core.InvokeLLM({
-      prompt: `Translate all text content in this JSON health form template to ${langName}. Keep JSON structure and field_key values EXACTLY the same. Only translate human-readable strings: label, description, content, intro texts in section_intros. Do not translate field_key values. Return only valid JSON.
+      prompt: `Translate all human-readable text in this JSON health form template to ${langName}. 
+Rules:
+- Keep JSON structure and all field_key values EXACTLY unchanged
+- Only translate: label, description, content, and all string values inside section_intros
+- Do NOT translate: field_key, key, or any boolean/number values
+- Return the complete JSON object with the same structure
 
 Template:
 ${JSON.stringify(template, null, 2)}`,
@@ -124,8 +129,13 @@ ${JSON.stringify(template, null, 2)}`,
         additionalProperties: true,
       },
     }).then(result => {
-      setTranslationCache(prev => ({ ...prev, [lang]: result }));
-      setTranslatedTemplate(result);
+      // Unwrap if LLM returned { translated: {...} } or similar wrapper
+      const unwrapped = (result && typeof result === 'object' && !result.medical_fields && Object.keys(result).length === 1)
+        ? Object.values(result)[0]
+        : result;
+      const final = (unwrapped && unwrapped.medical_fields) ? unwrapped : result;
+      setTranslationCache(prev => ({ ...prev, [lang]: final }));
+      setTranslatedTemplate(final);
     }).catch(() => {
       // fallback to original
     }).finally(() => setTranslating(false));
