@@ -495,15 +495,22 @@ ${JSON.stringify(template, null, 2)}`,
             </div>
           )}
 
+          {translating && (
+            <div className="flex items-center gap-3 mb-4 px-3 py-2" style={{ border: '0.5px solid rgba(255,0,127,0.3)', background: 'rgba(255,0,127,0.05)' }}>
+              <div className="w-4 h-px animate-pulse" style={{ background: '#FF007F' }} />
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.1em' }}>{t.translating}</p>
+            </div>
+          )}
+
           <button
-            disabled={isFirstVisit === null || (isFirstVisit === false && !form.client_email)}
+            disabled={isFirstVisit === null || (isFirstVisit === false && !form.client_email) || translating}
             onClick={async () => {
               if (isFirstVisit === false && form.client_email) await handleEmailPrefill();
               setStep('personal');
             }}
-            style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', background: 'linear-gradient(135deg, #FF007F 0%, #CC0066 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', width: '100%', opacity: isFirstVisit === null || (isFirstVisit === false && !form.client_email) ? 0.5 : 1 }}
+            style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', background: 'linear-gradient(135deg, #FF007F 0%, #CC0066 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', width: '100%', opacity: isFirstVisit === null || (isFirstVisit === false && !form.client_email) || translating ? 0.5 : 1 }}
           >
-            {t.next} →
+            {translating ? t.translating : `${t.next} →`}
           </button>
         </div>
       </div>
