@@ -258,7 +258,9 @@ ${JSON.stringify(template, null, 2)}`,
         });
         setForm(f => ({ ...f, ...prefilled }));
         setPrefillBanner(true);
+        return true;
       }
+      return false;
     } catch (_) {}
   };
 
@@ -545,7 +547,7 @@ ${JSON.stringify(template, null, 2)}`,
         <form className="mb-12" onSubmit={e => e.preventDefault()}>
           {prefillBanner && (
             <div className="mb-4 px-3 py-2 flex items-center gap-2" style={{ background: 'rgba(22,163,74,0.1)', border: '0.5px solid rgba(22,163,74,0.4)' }}>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.08em' }}>✓ Wczytano dane z poprzedniej wizyty — sprawdź i uzupełnij.</p>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.08em' }}>✓ {t.prefillBannerText || 'Wczytano dane z poprzedniej wizyty — sprawdź i uzupełnij.'}</p>
             </div>
           )}
 

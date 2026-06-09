@@ -42,8 +42,22 @@ export default function StepGuardian({ guardian, setGuardianField, form, t, inpu
       </div>
 
       <div>
-        <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'rgba(245,240,235,0.5)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Liczba przekłuć lub tatuaży</label>
-        <input type="number" min="1" style={{ ...inputStyle, width: '120px' }} value={guardian.num_procedures || 1} onChange={e => setGuardianField('num_procedures', Number(e.target.value))} />
+        <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'rgba(245,240,235,0.5)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>{t.guardianNumProcedures}</label>
+        <input
+          type="text"
+          inputMode="numeric"
+          style={{ ...inputStyle, width: '120px' }}
+          value={guardian.num_procedures ?? ''}
+          onChange={e => {
+            const val = e.target.value;
+            if (val === '' || val === '0') {
+              setGuardianField('num_procedures', val === '' ? '' : 0);
+            } else {
+              const n = parseInt(val, 10);
+              if (!isNaN(n)) setGuardianField('num_procedures', n);
+            }
+          }}
+        />
       </div>
 
       <div className="py-4 px-4" style={{ border: '0.5px solid #262626', background: 'rgba(38,38,38,0.1)' }}>
