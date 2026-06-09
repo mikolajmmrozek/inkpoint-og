@@ -82,6 +82,8 @@ export default function HealthFormPage() {
   const [translationCache, setTranslationCache] = useState({});
   const [isFirstVisit, setIsFirstVisit] = useState(null);
   const [prefillBanner, setPrefillBanner] = useState(false);
+  const [draftBanner, setDraftBanner] = useState(false);
+  const [foundDraft, setFoundDraft] = useState(null);
 
   const [form, setForm] = useState(getBaseForm);
   const [draftId, setDraftId] = useState(null);
@@ -243,6 +245,17 @@ ${JSON.stringify(template, null, 2)}`,
   const handleEmailPrefill = async () => {
     if (!form.client_email) return;
     try {
+      // Check for an existing draft first
+      const drafts = await base44.entities.HealthForm.filter(
+        { client_email: form.client_email, is_draft: true },
+        '-updated_date',
+        1
+      );
+      if (drafts.length > 0) {
+        setFoundDraft(drafts[0]);
+        return 'draft';
+      }
+
       const prev = await base44.entities.HealthForm.filter(
         { client_email: form.client_email, is_update_only: false },
         '-form_filled_date',
@@ -262,6 +275,27 @@ ${JSON.stringify(template, null, 2)}`,
       }
       return false;
     } catch (_) {}
+  };
+
+  // Resume a saved draft
+  const resumeDraft = (draft) => {
+    setForm(() => ({
+      ...getBaseForm(),
+      ...buildInitialState(template),
+      ...draft,
+      form_filled_date: new Date().toISOString().split('T')[0],
+    }));
+    setDraftId(draft.id);
+    setDraftBanner(true);
+    setFoundDraft(null);
+    setStep('personal');
+  };
+
+  // Discard draft and start fresh
+  const discardDraft = async (draft) => {
+    await base44.entities.HealthForm.delete(draft.id).catch(() => {});
+    setFoundDraft(null);
+    setStep('personal');
   };
 
   const inputStyle = {
@@ -419,6 +453,54 @@ ${JSON.stringify(template, null, 2)}`,
     );
   }
 
+  // ── DRAFT RESUME SCREEN ───────────────────────────────────────────────
+
+  if (foundDraft) {
+    const draftDate = foundDraft.updated_date
+      ? new Date(foundDraft.updated_date).toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+      : '';
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: '#0A0A0A' }}>
+        <div style={{ width: '100%', maxWidth: '480px' }}>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>
+            {t.studio}
+          </p>
+          <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: '#F5F0EB', lineHeight: 1, letterSpacing: '0.04em', marginBottom: '12px' }}>
+            Znaleziono zapisany formularz
+          </h1>
+          <div style={{ height: '0.5px', background: '#FF007F', width: '64px', marginBottom: '32px' }} />
+
+          <div className="mb-8 px-4 py-4" style={{ border: '0.5px solid rgba(255,0,127,0.3)', background: 'rgba(255,0,127,0.05)' }}>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '6px' }}>NIEZAKOŃCZONA ANKIETA</p>
+            <p style={{ color: '#F5F0EB', fontSize: '14px', marginBottom: '4px' }}>
+              {foundDraft.client_first_name} {foundDraft.client_last_name}
+            </p>
+            {draftDate && (
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.05em' }}>
+                Ostatnio zapisano: {draftDate}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            <button
+              onClick={() => resumeDraft(foundDraft)}
+              style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '14px 32px', background: 'linear-gradient(135deg, #FF007F 0%, #CC0066 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', width: '100%' }}
+            >
+              ↩ KONTYNUUJ POPRZEDNIĄ ANKIETĘ
+            </button>
+            <button
+              onClick={() => discardDraft(foundDraft)}
+              style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '13px 32px', background: 'transparent', color: 'rgba(245,240,235,0.5)', border: '0.5px solid #262626', cursor: 'pointer', width: '100%' }}
+            >
+              + WYPEŁNIJ NOWĄ ANKIETĘ
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ── LANG SELECT ───────────────────────────────────────────────────────
 
   if (step === 'lang-select') {
@@ -505,7 +587,10 @@ ${JSON.stringify(template, null, 2)}`,
           <button
             disabled={isFirstVisit === null || (isFirstVisit === false && !form.client_email) || translating}
             onClick={async () => {
-              if (isFirstVisit === false && form.client_email) await handleEmailPrefill();
+              if (isFirstVisit === false && form.client_email) {
+                const result = await handleEmailPrefill();
+                if (result === 'draft') return; // show draft screen instead
+              }
               setStep('personal');
             }}
             style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', background: 'linear-gradient(135deg, #FF007F 0%, #CC0066 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', width: '100%', opacity: isFirstVisit === null || (isFirstVisit === false && !form.client_email) || translating ? 0.5 : 1 }}
@@ -552,6 +637,11 @@ ${JSON.stringify(template, null, 2)}`,
         </div>
 
         <form className="mb-12" onSubmit={e => e.preventDefault()}>
+          {draftBanner && (
+            <div className="mb-4 px-3 py-2 flex items-center gap-2" style={{ background: 'rgba(255,0,127,0.07)', border: '0.5px solid rgba(255,0,127,0.35)' }}>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>↩ Kontynuujesz poprzednio zapisaną ankietę — sprawdź dane i uzupełnij brakujące informacje.</p>
+            </div>
+          )}
           {prefillBanner && (
             <div className="mb-4 px-3 py-2 flex items-center gap-2" style={{ background: 'rgba(22,163,74,0.1)', border: '0.5px solid rgba(22,163,74,0.4)' }}>
               <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.08em' }}>✓ {t.prefillBannerText || 'Wczytano dane z poprzedniej wizyty — sprawdź i uzupełnij.'}</p>
