@@ -79,7 +79,7 @@ export default function HealthFormPage() {
   const [template, setTemplate] = useState(null);
   const [translatedTemplate, setTranslatedTemplate] = useState(null);
   const [translating, setTranslating] = useState(false);
-  const translationCache = useState({})[0]; // cache: {lang: translatedTemplate}
+  const [translationCache, setTranslationCache] = useState({});
   const [isFirstVisit, setIsFirstVisit] = useState(null);
   const [prefillBanner, setPrefillBanner] = useState(false);
 
@@ -122,7 +122,7 @@ ${JSON.stringify(template, null, 2)}`,
         additionalProperties: true,
       },
     }).then(result => {
-      translationCache[lang] = result;
+      setTranslationCache(prev => ({ ...prev, [lang]: result }));
       setTranslatedTemplate(result);
     }).catch(() => {
       // fallback to original
