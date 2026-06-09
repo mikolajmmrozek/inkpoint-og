@@ -6,14 +6,21 @@ const globalCache = {};
 // In-flight promise dedup
 const inFlight = {};
 
+const LANG_NAMES = {
+  en: 'English', de: 'German', uk: 'Ukrainian', fr: 'French', es: 'Spanish',
+  it: 'Italian', pt: 'Portuguese', ru: 'Russian', cs: 'Czech', sk: 'Slovak', hu: 'Hungarian'
+};
+
 export async function translateText(text, targetLang) {
   if (!text || !targetLang || targetLang === 'pl') return text;
   const key = `${text}__${targetLang}`;
   if (globalCache[key]) return globalCache[key];
   if (inFlight[key]) return inFlight[key];
 
+  const langName = LANG_NAMES[targetLang] || targetLang;
+
   inFlight[key] = base44.integrations.Core.InvokeLLM({
-    prompt: `Detect the language of the following text, then translate it to ${targetLang}. Return ONLY the translated text, no explanations, no quotes.\n\nText: ${text}`,
+    prompt: `Translate the following text to ${langName}. Return ONLY the translated text, no explanations, no quotes.\n\nText: ${text}`,
   }).then(result => {
     const translated = typeof result === 'string' ? result.trim() : text;
     globalCache[key] = translated;
@@ -50,10 +57,7 @@ export async function prewarmTranslations(template, targetLang) {
   const toTranslate = [...texts].filter(t => !globalCache[`${t}__${targetLang}`]);
   if (toTranslate.length === 0) return;
 
-  const langName = {
-    en: 'English', de: 'German', uk: 'Ukrainian', fr: 'French', es: 'Spanish',
-    it: 'Italian', pt: 'Portuguese', ru: 'Russian', cs: 'Czech', sk: 'Slovak', hu: 'Hungarian'
-  }[targetLang] || targetLang;
+  const langName = LANG_NAMES[targetLang] || targetLang;
 
   try {
     const result = await base44.integrations.Core.InvokeLLM({

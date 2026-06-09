@@ -1,21 +1,23 @@
 import { useTranslatedText } from '@/hooks/useTranslatedText';
 
-function YesNoRow({ label, fieldKey, descKey, form, setField, t, inputStyle, lang }) {
+function YesNoRow({ label, fieldKey, descKey, form, setField, t, inputStyle, lang, required, showErrors }) {
   const translatedLabel = useTranslatedText(label, lang);
   const val = form[fieldKey];
+  const isError = showErrors && required && (val === null || val === undefined);
   return (
     <div className="py-3" style={{ borderBottom: '0.5px solid #1a1a1a' }}>
       <div className="flex items-center justify-between gap-4">
-        <p style={{ color: 'rgba(245,240,235,0.8)', fontSize: '14px', lineHeight: 1.4, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{translatedLabel}</p>
+        <p style={{ color: 'rgba(245,240,235,0.8)', fontSize: '14px', lineHeight: 1.4, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{translatedLabel}{required && <span style={{ color: '#FF007F' }}> *</span>}</p>
         <div className="flex gap-2 flex-shrink-0">
           {[true, false].map(v => (
             <button type="button" key={String(v)} onClick={() => setField(fieldKey, v)}
-              style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 14px', border: `0.5px solid ${val === v ? (v ? '#FF007F' : '#16a34a') : '#262626'}`, color: val === v ? (v ? '#FF007F' : '#16a34a') : 'rgba(245,240,235,0.3)', background: 'transparent', cursor: 'pointer' }}>
+              style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 14px', border: `0.5px solid ${val === v ? (v ? '#FF007F' : '#16a34a') : isError ? '#FF007F' : '#262626'}`, color: val === v ? (v ? '#FF007F' : '#16a34a') : 'rgba(245,240,235,0.3)', background: 'transparent', cursor: 'pointer' }}>
               {v ? t.yes : t.no}
             </button>
           ))}
         </div>
       </div>
+      {isError && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', marginTop: '4px', letterSpacing: '0.08em' }}>⚠ {t?.required || 'WYMAGANE'}</p>}
       {val === true && descKey && (
         <input
           type="text"
@@ -49,7 +51,7 @@ export default function StepMedical({ form, setField, t, inputStyle, showErrors,
       )}
       <div>
         {fields.map(f => (
-          <YesNoRow key={f.field_key} label={f.label} fieldKey={f.field_key} descKey={f.has_description !== false ? `${f.field_key}_desc` : null} form={form} setField={setField} t={t} inputStyle={inputStyle} lang={lang} />
+          <YesNoRow key={f.field_key} label={f.label} fieldKey={f.field_key} descKey={f.has_description !== false ? `${f.field_key}_desc` : null} form={form} setField={setField} t={t} inputStyle={inputStyle} lang={lang} required={f.required} showErrors={showErrors} />
         ))}
       </div>
     </div>

@@ -113,6 +113,7 @@ export const T = {
     newSurvey: 'NOWA ANKIETA',
     next: 'DALEJ',
     back: 'WSTECZ',
+    fillRequired: 'Uzupełnij wszystkie wymagane pola przed przejściem dalej.',
   },
   en: {
     title: 'HEALTH QUESTIONNAIRE',
@@ -213,6 +214,7 @@ export const T = {
     newSurvey: 'NEW SURVEY',
     next: 'NEXT',
     back: 'BACK',
+    fillRequired: 'Please fill in all required fields before proceeding.',
   },
   de: {
     title: 'GESUNDHEITSFRAGEBOGEN',
@@ -313,6 +315,7 @@ export const T = {
     newSurvey: 'NEUER FRAGEBOGEN',
     next: 'WEITER',
     back: 'ZURÜCK',
+    fillRequired: 'Bitte füllen Sie alle Pflichtfelder aus, bevor Sie fortfahren.',
   },
   fr: {
     title: 'QUESTIONNAIRE DE SANTÉ',
@@ -413,6 +416,7 @@ export const T = {
     newSurvey: 'NOUVEAU QUESTIONNAIRE',
     next: 'SUIVANT',
     back: 'RETOUR',
+    fillRequired: 'Veuillez remplir tous les champs obligatoires avant de continuer.',
   },
   es: {
     title: 'CUESTIONARIO DE SALUD',
@@ -513,6 +517,7 @@ export const T = {
     newSurvey: 'NUEVA ENCUESTA',
     next: 'SIGUIENTE',
     back: 'ATRÁS',
+    fillRequired: 'Por favor, rellene todos los campos obligatorios antes de continuar.',
   },
   it: {
     title: 'QUESTIONARIO SANITARIO',
@@ -613,6 +618,7 @@ export const T = {
     newSurvey: 'NUOVO QUESTIONARIO',
     next: 'AVANTI',
     back: 'INDIETRO',
+    fillRequired: 'Si prega di compilare tutti i campi obbligatori prima di procedere.',
   },
   uk: {
     title: 'АНКЕТА ПРО ЗДОРОВ\'Я',
@@ -713,6 +719,7 @@ export const T = {
     newSurvey: 'НОВА АНКЕТА',
     next: 'ДАЛІ',
     back: 'НАЗАД',
+    fillRequired: 'Будь ласка, заповніть всі обов\'язкові поля перед продовженням.',
   },
   pt: {
     title: 'QUESTIONÁRIO DE SAÚDE',
@@ -813,6 +820,7 @@ export const T = {
     newSurvey: 'NOVO QUESTIONÁRIO',
     next: 'PRÓXIMO',
     back: 'VOLTAR',
+    fillRequired: 'Por favor, preencha todos os campos obrigatórios antes de continuar.',
   },
   ru: {
     title: 'АНКЕТА ЗДОРОВЬЯ',
@@ -913,6 +921,7 @@ export const T = {
     newSurvey: 'НОВАЯ АНКЕТА',
     next: 'ДАЛЕЕ',
     back: 'НАЗАД',
+    fillRequired: 'Пожалуйста, заполните все обязательные поля перед продолжением.',
   },
   cs: {
     title: 'ZDRAVOTNÍ DOTAZNÍK',
@@ -1013,6 +1022,7 @@ export const T = {
     newSurvey: 'NOVÝ DOTAZNÍK',
     next: 'DALŠÍ',
     back: 'ZPĚT',
+    fillRequired: 'Vyplňte prosím všechna povinná pole před pokračováním.',
   },
   sk: {
     title: 'ZDRAVOTNÝ DOTAZNÍK',
@@ -1113,6 +1123,7 @@ export const T = {
     newSurvey: 'NOVÝ DOTAZNÍK',
     next: 'ĎALEJ',
     back: 'SPÄŤ',
+    fillRequired: 'Pred pokračovaním vyplňte všetky povinné polia.',
   },
   hu: {
     title: 'EGÉSZSÉGÜGYI KÉRDŐÍV',
@@ -1213,5 +1224,6 @@ export const T = {
     newSurvey: 'ÚJ KÉRDŐÍV',
     next: 'KÖVETKEZŐ',
     back: 'VISSZA',
+    fillRequired: 'Kérjük, töltse ki az összes kötelező mezőt a folytatás előtt.',
   },
 };

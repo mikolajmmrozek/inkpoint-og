@@ -8,6 +8,7 @@ import StepProcedure from '@/components/health-form/StepProcedure';
 import StepDeclaration from '@/components/health-form/StepDeclaration';
 import StepConsents from '@/components/health-form/StepConsents';
 import StepGuardian from '@/components/health-form/StepGuardian';
+import LangDropdown from '@/components/health-form/LangDropdown';
 import SignatureCanvas from '@/components/health-form/SignatureCanvas';
 
 // Fields that should NEVER be copied from a previous form
@@ -660,7 +661,7 @@ export default function HealthFormPage() {
             <div style={{ flex: 1 }}>
               {showErrors && !canProceed() && (
                 <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em', marginBottom: '8px' }}>
-                  ⚠ Uzupełnij wszystkie wymagane pola przed przejściem dalej.
+                  ⚠ {t.fillRequired || 'Uzupełnij wszystkie wymagane pola przed przejściem dalej.'}
                 </p>
               )}
               {submitError && (
@@ -698,29 +699,9 @@ export default function HealthFormPage() {
           </div>
         </form>
 
-        {/* Language switcher — bottom of every step */}
-        <div className="flex items-center justify-center gap-2 pb-8 flex-wrap">
-          {LANGUAGES.map(l => (
-            <button
-              key={l.code}
-              onClick={() => setLang(l.code)}
-              title={l.label}
-              style={{
-                fontFamily: 'JetBrains Mono',
-                fontSize: '10px',
-                padding: '4px 10px',
-                border: `0.5px solid ${lang === l.code ? '#FF007F' : '#262626'}`,
-                color: lang === l.code ? '#FF007F' : 'rgba(245,240,235,0.35)',
-                background: lang === l.code ? 'rgba(255,0,127,0.07)' : 'transparent',
-                cursor: 'pointer',
-                letterSpacing: '0.05em',
-              }}
-            >
-              {l.flag} {l.code.toUpperCase()}
-            </button>
-          ))}
+        {/* Language switcher — dropdown at bottom */}
+        <LangDropdown lang={lang} setLang={setLang} template={template} />
 
-        </div>
       </div>
     </div>
   );
