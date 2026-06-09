@@ -21,7 +21,7 @@ export default function StepProcedure({ form, setField, t, inputStyle, showError
             </div>
           </div>
           {showErrors && q.required && (form[q.field_key] === null || form[q.field_key] === undefined) && (
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', marginTop: '4px', letterSpacing: '0.08em' }}>⚠ WYMAGANE</p>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', marginTop: '4px', letterSpacing: '0.08em' }}>⚠ {t?.required || 'WYMAGANE'}</p>
           )}
           {form[q.field_key] === true && q.has_description && (
             <input

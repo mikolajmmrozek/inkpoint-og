@@ -29,11 +29,11 @@ export default function StepPersonal({ form, setField, t, inputStyle, showErrors
       {/* Imię / nazwisko */}
       <div className="grid grid-cols-2 gap-5">
         <div>
-          <label style={labelStyle(showErrors && !form.client_first_name)}>{t.firstName} * {showErrors && !form.client_first_name && '(wymagane)'}</label>
+          <label style={labelStyle(showErrors && !form.client_first_name)}>{t.firstName} * {showErrors && !form.client_first_name && `(${t.required?.toLowerCase() || 'wymagane'})`}</label>
           <input style={{ ...inputStyle, borderBottomColor: showErrors && !form.client_first_name ? '#FF007F' : '#262626' }} value={form.client_first_name || ''} onChange={e => setField('client_first_name', e.target.value)} />
         </div>
         <div>
-          <label style={labelStyle(showErrors && !form.client_last_name)}>{t.lastName} * {showErrors && !form.client_last_name && '(wymagane)'}</label>
+          <label style={labelStyle(showErrors && !form.client_last_name)}>{t.lastName} * {showErrors && !form.client_last_name && `(${t.required?.toLowerCase() || 'wymagane'})`}</label>
           <input style={{ ...inputStyle, borderBottomColor: showErrors && !form.client_last_name ? '#FF007F' : '#262626' }} value={form.client_last_name || ''} onChange={e => setField('client_last_name', e.target.value)} />
         </div>
       </div>
@@ -50,30 +50,30 @@ export default function StepPersonal({ form, setField, t, inputStyle, showErrors
 
       {/* Adres */}
       <div>
-        <label style={labelStyle(showErrors && !form.address_street)}>{t.street} * {showErrors && !form.address_street && '(wymagane)'}</label>
+        <label style={labelStyle(showErrors && !form.address_street)}>{t.street} * {showErrors && !form.address_street && `(${t.required?.toLowerCase() || 'wymagane'})`}</label>
         <input style={{ ...inputStyle, borderBottomColor: showErrors && !form.address_street ? '#FF007F' : '#262626' }} value={form.address_street || ''} onChange={e => setField('address_street', e.target.value)} />
       </div>
 
       <div className="grid grid-cols-2 gap-5">
         <div>
-          <label style={labelStyle(showErrors && !form.address_city)}>{t.city} * {showErrors && !form.address_city && '(wymagane)'}</label>
+          <label style={labelStyle(showErrors && !form.address_city)}>{t.city} * {showErrors && !form.address_city && `(${t.required?.toLowerCase() || 'wymagane'})`}</label>
           <input style={{ ...inputStyle, borderBottomColor: showErrors && !form.address_city ? '#FF007F' : '#262626' }} value={form.address_city || ''} onChange={e => setField('address_city', e.target.value)} />
         </div>
         <div>
-          <label style={labelStyle(showErrors && !form.address_postal_code)}>{t.postalCode} * {showErrors && !form.address_postal_code && '(wymagane)'}</label>
+          <label style={labelStyle(showErrors && !form.address_postal_code)}>{t.postalCode} * {showErrors && !form.address_postal_code && `(${t.required?.toLowerCase() || 'wymagane'})`}</label>
           <input style={{ ...inputStyle, borderBottomColor: showErrors && !form.address_postal_code ? '#FF007F' : '#262626' }} value={form.address_postal_code || ''} onChange={e => setField('address_postal_code', e.target.value)} />
         </div>
       </div>
 
       {/* Telefon */}
       <div>
-        <label style={labelStyle(showErrors && !form.client_phone)}>{t.phone} * {showErrors && !form.client_phone && '(wymagane)'}</label>
+        <label style={labelStyle(showErrors && !form.client_phone)}>{t.phone} * {showErrors && !form.client_phone && `(${t.required?.toLowerCase() || 'wymagane'})`}</label>
         <input type="tel" style={{ ...inputStyle, borderBottomColor: showErrors && !form.client_phone ? '#FF007F' : '#262626' }} value={form.client_phone || ''} onChange={e => setField('client_phone', e.target.value)} />
       </div>
 
       {/* PESEL */}
       <div>
-        <label style={labelStyle(isMinor && showErrors && !form.pesel)}>{t.pesel}{isMinor ? ' *' : ''} {isMinor && showErrors && !form.pesel && '(wymagane)'}</label>
+        <label style={labelStyle(isMinor && showErrors && !form.pesel)}>{t.pesel}{isMinor ? ' *' : ''} {isMinor && showErrors && !form.pesel && `(${t.required?.toLowerCase() || 'wymagane'})`}</label>
         <input style={{ ...inputStyle, borderBottomColor: isMinor && showErrors && !form.pesel ? '#FF007F' : '#262626' }} value={form.pesel || ''} onChange={e => setField('pesel', e.target.value)} />
       </div>
 
@@ -99,7 +99,7 @@ export default function StepPersonal({ form, setField, t, inputStyle, showErrors
 
       {/* Miejsce zabiegu */}
       <div>
-        <label style={labelStyle(showErrors && !form.body_placement)}>{t.bodyPlacement} * {showErrors && !form.body_placement && '(wymagane)'}</label>
+        <label style={labelStyle(showErrors && !form.body_placement)}>{t.bodyPlacement} * {showErrors && !form.body_placement && `(${t.required?.toLowerCase() || 'wymagane'})`}</label>
         <input style={{ ...inputStyle, borderBottomColor: showErrors && !form.body_placement ? '#FF007F' : '#262626' }} value={form.body_placement || ''} onChange={e => setField('body_placement', e.target.value)} />
       </div>
     </div>

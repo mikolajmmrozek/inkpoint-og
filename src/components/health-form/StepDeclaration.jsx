@@ -55,7 +55,7 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
             {declaration.label}
           </span>
         </button>
-        {isError && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', marginTop: '6px', letterSpacing: '0.08em' }}>⚠ WYMAGANE</p>}
+        {isError && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', marginTop: '6px', letterSpacing: '0.08em' }}>⚠ {t?.required || 'WYMAGANE'}</p>}
       </div>
     </div>
   );

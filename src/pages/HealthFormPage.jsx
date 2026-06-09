@@ -77,6 +77,9 @@ export default function HealthFormPage() {
   const [useQuickRefresh, setUseQuickRefresh] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
   const [template, setTemplate] = useState(null);
+  const [translatedTemplate, setTranslatedTemplate] = useState(null);
+  const [translating, setTranslating] = useState(false);
+  const translationCache = useState({})[0]; // cache: {lang: translatedTemplate}
   const [isFirstVisit, setIsFirstVisit] = useState(null);
   const [prefillBanner, setPrefillBanner] = useState(false);
 
@@ -95,6 +98,36 @@ export default function HealthFormPage() {
   });
 
   const t = T[lang] || T.pl;
+  const activeTemplate = translatedTemplate || template;
+
+  // Auto-translate template when language changes
+  useEffect(() => {
+    if (!template || lang === 'pl') {
+      setTranslatedTemplate(null);
+      return;
+    }
+    if (translationCache[lang]) {
+      setTranslatedTemplate(translationCache[lang]);
+      return;
+    }
+    const langName = { en: 'English', de: 'German', uk: 'Ukrainian', fr: 'French', es: 'Spanish', it: 'Italian', pt: 'Portuguese', ru: 'Russian', cs: 'Czech', sk: 'Slovak', hu: 'Hungarian' }[lang] || lang;
+    setTranslating(true);
+    base44.integrations.Core.InvokeLLM({
+      prompt: `Translate all text content in this JSON health form template to ${langName}. Keep JSON structure and field_key values EXACTLY the same. Only translate human-readable strings: label, description, content, intro texts in section_intros. Do not translate field_key values. Return only valid JSON.
+
+Template:
+${JSON.stringify(template, null, 2)}`,
+      response_json_schema: {
+        type: 'object',
+        additionalProperties: true,
+      },
+    }).then(result => {
+      translationCache[lang] = result;
+      setTranslatedTemplate(result);
+    }).catch(() => {
+      // fallback to original
+    }).finally(() => setTranslating(false));
+  }, [lang, template]);
   const isMinor = form.date_of_birth
     ? new Date().getFullYear() - new Date(form.date_of_birth).getFullYear() < 18
     : false;
@@ -517,10 +550,16 @@ export default function HealthFormPage() {
           )}
 
           {step === 'personal' && <StepPersonal form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} />}
-          {step === 'medical' && <StepMedical form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={template} />}
-          {step === 'procedure' && <StepProcedure form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={template} />}
-          {step === 'declaration' && <StepDeclaration form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={template} />}
-          {step === 'consents' && <StepConsents form={form} setField={setField} t={t} showErrors={showErrors} templateData={template} />}
+          {translating && (
+            <div className="flex items-center gap-3 mb-4 px-3 py-2" style={{ border: '0.5px solid rgba(255,0,127,0.3)', background: 'rgba(255,0,127,0.05)' }}>
+              <div className="w-4 h-px animate-pulse" style={{ background: '#FF007F' }} />
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.1em' }}>{t.translating}</p>
+            </div>
+          )}
+          {step === 'medical' && <StepMedical form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={activeTemplate} />}
+          {step === 'procedure' && <StepProcedure form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={activeTemplate} />}
+          {step === 'declaration' && <StepDeclaration form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={activeTemplate} />}
+          {step === 'consents' && <StepConsents form={form} setField={setField} t={t} showErrors={showErrors} templateData={activeTemplate} />}
           {step === 'signature' && <SignatureCanvas value={form.client_signature} onChange={v => setField('client_signature', v)} label={t.signatureTitle} clearLabel={t.clearSignature} showErrors={showErrors} />}
           {step === 'guardian' && <StepGuardian guardian={guardian} setGuardianField={setGuardianField} form={form} t={t} inputStyle={inputStyle} showErrors={showErrors} />}
 
