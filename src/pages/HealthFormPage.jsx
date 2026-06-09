@@ -735,6 +735,34 @@ ${JSON.stringify(template, null, 2)}`,
             </div>
           </div>
         </form>
+
+        {/* Language switcher — bottom of every step */}
+        <div className="flex items-center justify-center gap-2 pb-8 flex-wrap">
+          {LANGUAGES.map(l => (
+            <button
+              key={l.code}
+              onClick={() => setLang(l.code)}
+              title={l.label}
+              style={{
+                fontFamily: 'JetBrains Mono',
+                fontSize: '10px',
+                padding: '4px 10px',
+                border: `0.5px solid ${lang === l.code ? '#FF007F' : '#262626'}`,
+                color: lang === l.code ? '#FF007F' : 'rgba(245,240,235,0.35)',
+                background: lang === l.code ? 'rgba(255,0,127,0.07)' : 'transparent',
+                cursor: 'pointer',
+                letterSpacing: '0.05em',
+              }}
+            >
+              {l.flag} {l.code.toUpperCase()}
+            </button>
+          ))}
+          {translating && (
+            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.1em' }}>
+              {t.translating}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
