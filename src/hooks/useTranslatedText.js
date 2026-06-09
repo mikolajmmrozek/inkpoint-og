@@ -27,6 +27,55 @@ export async function translateText(text, targetLang) {
   return inFlight[key];
 }
 
+// Pre-warm: translate all texts from a template at once (batched LLM call)
+export async function prewarmTranslations(template, targetLang) {
+  if (!template || !targetLang || targetLang === 'pl') return;
+
+  // Collect all unique translatable texts from the template
+  const texts = new Set();
+  const addText = (t) => { if (t && typeof t === 'string' && t.trim()) texts.add(t.trim()); };
+
+  Object.values(template.section_intros || {}).forEach(addText);
+  (template.medical_fields || []).forEach(f => addText(f.label));
+  (template.procedure_questions || []).forEach(q => addText(q.label));
+  if (template.declaration_of_will) {
+    addText(template.declaration_of_will.label);
+    // Split content into paragraphs (same way StepDeclaration does)
+    (template.declaration_of_will.content || '').split(/\n+/).filter(p => p.trim()).forEach(p => addText(p.trim()));
+  }
+  (template.declaration_fields || []).forEach(f => { addText(f.label); addText(f.placeholder); });
+  (template.consent_fields || []).forEach(f => { addText(f.label); addText(f.description); });
+
+  // Filter out already cached texts
+  const toTranslate = [...texts].filter(t => !globalCache[`${t}__${targetLang}`]);
+  if (toTranslate.length === 0) return;
+
+  const langName = {
+    en: 'English', de: 'German', uk: 'Ukrainian', fr: 'French', es: 'Spanish',
+    it: 'Italian', pt: 'Portuguese', ru: 'Russian', cs: 'Czech', sk: 'Slovak', hu: 'Hungarian'
+  }[targetLang] || targetLang;
+
+  try {
+    const result = await base44.integrations.Core.InvokeLLM({
+      prompt: `Translate the following texts to ${langName}. 
+Return a JSON object where each key is the original text (EXACTLY as provided) and value is the translation.
+Do NOT change the keys. Translate only the values.
+Texts:
+${JSON.stringify(toTranslate)}`,
+      response_json_schema: { type: 'object', additionalProperties: { type: 'string' } },
+    });
+    if (result && typeof result === 'object') {
+      Object.entries(result).forEach(([original, translated]) => {
+        if (translated && typeof translated === 'string') {
+          globalCache[`${original}__${targetLang}`] = translated.trim();
+        }
+      });
+    }
+  } catch (_) {
+    // fallback: individual hooks will handle their own translation
+  }
+}
+
 // React hook for a single translated string
 export function useTranslatedText(text, targetLang) {
   const [translated, setTranslated] = useState(text);

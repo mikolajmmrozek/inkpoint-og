@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { T, LANGUAGES } from '@/lib/healthFormTranslations';
+import { prewarmTranslations } from '@/hooks/useTranslatedText';
 import StepPersonal from '@/components/health-form/StepPersonal';
 import StepMedical from '@/components/health-form/StepMedical';
 import StepProcedure from '@/components/health-form/StepProcedure';
@@ -73,6 +74,7 @@ export default function HealthFormPage() {
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [prewarming, setPrewarming] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [useQuickRefresh, setUseQuickRefresh] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
@@ -567,17 +569,22 @@ export default function HealthFormPage() {
           )}
 
           <button
-            disabled={isFirstVisit === null || (isFirstVisit === false && !form.client_email)}
+            disabled={isFirstVisit === null || (isFirstVisit === false && !form.client_email) || prewarming}
             onClick={async () => {
               if (isFirstVisit === false && form.client_email) {
                 const result = await handleEmailPrefill();
-                if (result === 'draft') return; // show draft screen instead
+                if (result === 'draft') return;
+              }
+              if (lang !== 'pl' && template) {
+                setPrewarming(true);
+                await prewarmTranslations(template, lang);
+                setPrewarming(false);
               }
               setStep('personal');
             }}
-            style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', background: 'linear-gradient(135deg, #FF007F 0%, #CC0066 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', width: '100%', opacity: isFirstVisit === null || (isFirstVisit === false && !form.client_email) ? 0.5 : 1 }}
+            style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', background: 'linear-gradient(135deg, #FF007F 0%, #CC0066 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', width: '100%', opacity: isFirstVisit === null || (isFirstVisit === false && !form.client_email) || prewarming ? 0.5 : 1 }}
           >
-            {t.next} →
+            {prewarming ? '⟳ ŁADOWANIE TŁUMACZEŃ...' : `${t.next} →`}
           </button>
         </div>
       </div>
