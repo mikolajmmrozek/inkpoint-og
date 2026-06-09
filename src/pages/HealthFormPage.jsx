@@ -219,12 +219,24 @@ ${JSON.stringify(template, null, 2)}`,
         try {
           const existing = await base44.entities.HealthForm.filter({ id: editFormId }).then(r => r[0]);
           if (existing) {
-            setForm(() => ({
+            // Build initial state, then overlay existing data.
+            // For any boolean field that is still null after merge (field added to template after form was saved),
+            // default it to false so validation doesn't block the user.
+            const merged = {
               ...getBaseForm(),
               ...buildInitialState(latestTemplate),
               ...existing,
               form_filled_date: new Date().toISOString().split('T')[0],
-            }));
+            };
+            // Fill missing boolean fields with false
+            const allBoolKeys = [
+              ...(latestTemplate?.medical_fields || []).map(f => f.field_key),
+              ...(latestTemplate?.procedure_questions || []).map(q => q.field_key),
+            ];
+            allBoolKeys.forEach(k => {
+              if (merged[k] === null || merged[k] === undefined) merged[k] = false;
+            });
+            setForm(() => merged);
             if (existing.booking_id) {
               const bk = await base44.entities.Booking.filter({ id: existing.booking_id }).then(r => r[0]);
               if (bk) setBooking(bk);
@@ -279,12 +291,21 @@ ${JSON.stringify(template, null, 2)}`,
 
   // Resume a saved draft
   const resumeDraft = (draft) => {
-    setForm(() => ({
+    const merged = {
       ...getBaseForm(),
       ...buildInitialState(template),
       ...draft,
       form_filled_date: new Date().toISOString().split('T')[0],
-    }));
+    };
+    // Fill missing boolean fields with false (for fields added to template after draft was saved)
+    const allBoolKeys = [
+      ...(template?.medical_fields || []).map(f => f.field_key),
+      ...(template?.procedure_questions || []).map(q => q.field_key),
+    ];
+    allBoolKeys.forEach(k => {
+      if (merged[k] === null || merged[k] === undefined) merged[k] = false;
+    });
+    setForm(() => merged);
     setDraftId(draft.id);
     setDraftBanner(true);
     setFoundDraft(null);
