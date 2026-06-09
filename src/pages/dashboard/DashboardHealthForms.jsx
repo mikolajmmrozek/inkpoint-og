@@ -683,6 +683,13 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
               </div>
               <div className="flex items-center gap-2">
                 <span style={{ ...mono, fontSize: '7px', color: '#f97316', border: '0.5px solid #f97316', padding: '2px 6px' }}>DRAFT</span>
+                <a
+                  href={`/health-form?edit_form_id=${form.id}`}
+                  title="Kontynuuj wypełnianie"
+                  style={{ ...mono, fontSize: '8px', color: '#f97316', border: '0.5px solid #f97316', padding: '3px 8px', textDecoration: 'none', letterSpacing: '0.08em', cursor: 'pointer' }}
+                >
+                  KONTYNUUJ
+                </a>
                 <button
                   onClick={() => deleteForm(form)}
                   title="Usuń draft"
