@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import { useTranslatedText } from '@/hooks/useTranslatedText';
 
-function ConsentBlock({ title, text, fieldKey, form, setField, required, showErrors, t }) {
+function ConsentBlock({ title, text, fieldKey, form, setField, required, showErrors, t, lang }) {
+  const translatedTitle = useTranslatedText(title, lang);
+  const translatedText = useTranslatedText(text, lang);
   const checked = form[fieldKey];
   const isError = showErrors && required && !checked;
   return (
     <div className="py-4" style={{ borderBottom: isError ? '0.5px solid #FF007F' : '0.5px solid #1a1a1a' }}>
       <div style={{ marginBottom: '10px' }}>
         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-          {title}{required && ' *'} {isError && `(${(t?.required || 'WYMAGANE').toLowerCase()})`}
+          {translatedTitle}{required && ' *'} {isError && `(${(t?.required || 'WYMAGANE').toLowerCase()})`}
         </p>
-        <p style={{ color: 'rgba(245,240,235,0.6)', fontSize: '13px', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{text}</p>
+        <p style={{ color: 'rgba(245,240,235,0.6)', fontSize: '13px', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{translatedText}</p>
       </div>
       <button
         type="button"
@@ -28,7 +30,7 @@ function ConsentBlock({ title, text, fieldKey, form, setField, required, showErr
   );
 }
 
-export default function StepConsents({ form, setField, t, showErrors, templateData }) {
+export default function StepConsents({ form, setField, t, showErrors, templateData, lang }) {
   const consents = templateData?.consent_fields || [];
 
   const allChecked = consents.length > 0 && consents.every(c => !!form[c.field_key]);
@@ -50,7 +52,7 @@ export default function StepConsents({ form, setField, t, showErrors, templateDa
         </button>
       )}
       {consents.map(c => (
-        <ConsentBlock key={c.field_key} title={c.label} text={c.description || c.label} fieldKey={c.field_key} required={c.required} form={form} setField={setField} showErrors={showErrors} t={t} />
+        <ConsentBlock key={c.field_key} title={c.label} text={c.description || c.label} fieldKey={c.field_key} required={c.required} form={form} setField={setField} showErrors={showErrors} t={t} lang={lang} />
       ))}
     </div>
   );

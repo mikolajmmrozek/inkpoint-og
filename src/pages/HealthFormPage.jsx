@@ -77,9 +77,6 @@ export default function HealthFormPage() {
   const [useQuickRefresh, setUseQuickRefresh] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
   const [template, setTemplate] = useState(null);
-  const [translatedTemplate, setTranslatedTemplate] = useState(null);
-  const [translating, setTranslating] = useState(false);
-  const [translationCache, setTranslationCache] = useState({});
   const [isFirstVisit, setIsFirstVisit] = useState(null);
   const [prefillBanner, setPrefillBanner] = useState(false);
   const [draftBanner, setDraftBanner] = useState(false);
@@ -100,46 +97,7 @@ export default function HealthFormPage() {
   });
 
   const t = T[lang] || T.pl;
-  const activeTemplate = translatedTemplate || template;
-
-  // Auto-translate template when language changes
-  useEffect(() => {
-    if (!template || lang === 'pl') {
-      setTranslatedTemplate(null);
-      return;
-    }
-    if (translationCache[lang]) {
-      setTranslatedTemplate(translationCache[lang]);
-      return;
-    }
-    const langName = { en: 'English', de: 'German', uk: 'Ukrainian', fr: 'French', es: 'Spanish', it: 'Italian', pt: 'Portuguese', ru: 'Russian', cs: 'Czech', sk: 'Slovak', hu: 'Hungarian' }[lang] || lang;
-    setTranslating(true);
-    base44.integrations.Core.InvokeLLM({
-      prompt: `Translate all human-readable text in this JSON health form template to ${langName}. 
-Rules:
-- Keep JSON structure and all field_key values EXACTLY unchanged
-- Only translate: label, description, content, and all string values inside section_intros
-- Do NOT translate: field_key, key, or any boolean/number values
-- Return the complete JSON object with the same structure
-
-Template:
-${JSON.stringify(template, null, 2)}`,
-      response_json_schema: {
-        type: 'object',
-        additionalProperties: true,
-      },
-    }).then(result => {
-      // Unwrap if LLM returned { translated: {...} } or similar wrapper
-      const unwrapped = (result && typeof result === 'object' && !result.medical_fields && Object.keys(result).length === 1)
-        ? Object.values(result)[0]
-        : result;
-      const final = (unwrapped && unwrapped.medical_fields) ? unwrapped : result;
-      setTranslationCache(prev => ({ ...prev, [lang]: final }));
-      setTranslatedTemplate(final);
-    }).catch(() => {
-      // fallback to original
-    }).finally(() => setTranslating(false));
-  }, [lang, template]);
+  const activeTemplate = template;
   const isMinor = form.date_of_birth
     ? new Date().getFullYear() - new Date(form.date_of_birth).getFullYear() < 18
     : false;
@@ -608,15 +566,8 @@ ${JSON.stringify(template, null, 2)}`,
             </div>
           )}
 
-          {translating && (
-            <div className="flex items-center gap-3 mb-4 px-3 py-2" style={{ border: '0.5px solid rgba(255,0,127,0.3)', background: 'rgba(255,0,127,0.05)' }}>
-              <div className="w-4 h-px animate-pulse" style={{ background: '#FF007F' }} />
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.1em' }}>{t.translating}</p>
-            </div>
-          )}
-
           <button
-            disabled={isFirstVisit === null || (isFirstVisit === false && !form.client_email) || translating}
+            disabled={isFirstVisit === null || (isFirstVisit === false && !form.client_email)}
             onClick={async () => {
               if (isFirstVisit === false && form.client_email) {
                 const result = await handleEmailPrefill();
@@ -624,9 +575,9 @@ ${JSON.stringify(template, null, 2)}`,
               }
               setStep('personal');
             }}
-            style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', background: 'linear-gradient(135deg, #FF007F 0%, #CC0066 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', width: '100%', opacity: isFirstVisit === null || (isFirstVisit === false && !form.client_email) || translating ? 0.5 : 1 }}
+            style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', background: 'linear-gradient(135deg, #FF007F 0%, #CC0066 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', width: '100%', opacity: isFirstVisit === null || (isFirstVisit === false && !form.client_email) ? 0.5 : 1 }}
           >
-            {translating ? t.translating : `${t.next} →`}
+            {t.next} →
           </button>
         </div>
       </div>
@@ -680,16 +631,10 @@ ${JSON.stringify(template, null, 2)}`,
           )}
 
           {step === 'personal' && <StepPersonal form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} />}
-          {translating && (
-            <div className="flex items-center gap-3 mb-4 px-3 py-2" style={{ border: '0.5px solid rgba(255,0,127,0.3)', background: 'rgba(255,0,127,0.05)' }}>
-              <div className="w-4 h-px animate-pulse" style={{ background: '#FF007F' }} />
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.1em' }}>{t.translating}</p>
-            </div>
-          )}
-          {step === 'medical' && <StepMedical form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={activeTemplate} />}
-          {step === 'procedure' && <StepProcedure form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={activeTemplate} />}
-          {step === 'declaration' && <StepDeclaration form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={activeTemplate} />}
-          {step === 'consents' && <StepConsents form={form} setField={setField} t={t} showErrors={showErrors} templateData={activeTemplate} />}
+          {step === 'medical' && <StepMedical form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={activeTemplate} lang={lang} />}
+          {step === 'procedure' && <StepProcedure form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={activeTemplate} lang={lang} />}
+          {step === 'declaration' && <StepDeclaration form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={activeTemplate} lang={lang} />}
+          {step === 'consents' && <StepConsents form={form} setField={setField} t={t} showErrors={showErrors} templateData={activeTemplate} lang={lang} />}
           {step === 'signature' && <SignatureCanvas value={form.client_signature} onChange={v => setField('client_signature', v)} label={t.signatureTitle} clearLabel={t.clearSignature} showErrors={showErrors} />}
           {step === 'guardian' && <StepGuardian guardian={guardian} setGuardianField={setGuardianField} form={form} t={t} inputStyle={inputStyle} showErrors={showErrors} />}
 
@@ -767,11 +712,7 @@ ${JSON.stringify(template, null, 2)}`,
               {l.flag} {l.code.toUpperCase()}
             </button>
           ))}
-          {translating && (
-            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.1em' }}>
-              {t.translating}
-            </span>
-          )}
+
         </div>
       </div>
     </div>

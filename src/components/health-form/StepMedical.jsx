@@ -1,9 +1,12 @@
-function YesNoRow({ label, fieldKey, descKey, form, setField, t, inputStyle }) {
+import { useTranslatedText } from '@/hooks/useTranslatedText';
+
+function YesNoRow({ label, fieldKey, descKey, form, setField, t, inputStyle, lang }) {
+  const translatedLabel = useTranslatedText(label, lang);
   const val = form[fieldKey];
   return (
     <div className="py-3" style={{ borderBottom: '0.5px solid #1a1a1a' }}>
       <div className="flex items-center justify-between gap-4">
-        <p style={{ color: 'rgba(245,240,235,0.8)', fontSize: '14px', lineHeight: 1.4, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{label}</p>
+        <p style={{ color: 'rgba(245,240,235,0.8)', fontSize: '14px', lineHeight: 1.4, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{translatedLabel}</p>
         <div className="flex gap-2 flex-shrink-0">
           {[true, false].map(v => (
             <button type="button" key={String(v)} onClick={() => setField(fieldKey, v)}
@@ -26,16 +29,27 @@ function YesNoRow({ label, fieldKey, descKey, form, setField, t, inputStyle }) {
   );
 }
 
-export default function StepMedical({ form, setField, t, inputStyle, showErrors, templateData }) {
+function TranslatedText({ text, lang, style }) {
+  const translated = useTranslatedText(text, lang);
+  return <p style={style}>{translated}</p>;
+}
+
+export default function StepMedical({ form, setField, t, inputStyle, showErrors, templateData, lang }) {
   const fields = templateData?.medical_fields || [];
   const sectionIntro = templateData?.section_intros?.medical || '';
 
   return (
     <div>
-      {sectionIntro && <p style={{ color: 'rgba(245,240,235,0.5)', fontSize: '13px', marginBottom: '20px', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{sectionIntro}</p>}
+      {sectionIntro && (
+        <TranslatedText
+          text={sectionIntro}
+          lang={lang}
+          style={{ color: 'rgba(245,240,235,0.5)', fontSize: '13px', marginBottom: '20px', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+        />
+      )}
       <div>
         {fields.map(f => (
-          <YesNoRow key={f.field_key} label={f.label} fieldKey={f.field_key} descKey={f.has_description !== false ? `${f.field_key}_desc` : null} form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} />
+          <YesNoRow key={f.field_key} label={f.label} fieldKey={f.field_key} descKey={f.has_description !== false ? `${f.field_key}_desc` : null} form={form} setField={setField} t={t} inputStyle={inputStyle} lang={lang} />
         ))}
       </div>
     </div>
