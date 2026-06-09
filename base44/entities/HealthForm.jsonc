@@ -307,6 +307,11 @@
     },
     "body_placement": {
       "type": "string"
+    },
+    "is_draft": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if form is incomplete / in progress"
     }
   },
   "required": [

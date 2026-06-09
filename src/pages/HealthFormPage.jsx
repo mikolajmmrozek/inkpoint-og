@@ -81,6 +81,8 @@ export default function HealthFormPage() {
   const [prefillBanner, setPrefillBanner] = useState(false);
 
   const [form, setForm] = useState(getBaseForm);
+  const [draftId, setDraftId] = useState(null);
+  const [submitError, setSubmitError] = useState(null);
 
   const [guardian, setGuardian] = useState({
     guardian_name: '',
@@ -100,6 +102,48 @@ export default function HealthFormPage() {
 
   const setField = (key, value) => setForm(f => ({ ...f, [key]: value }));
   const setGuardianField = (key, value) => setGuardian(g => ({ ...g, [key]: value }));
+
+  // Save draft after each step change
+  const saveDraft = async (currentForm, currentDraftId) => {
+    const fullName = `${currentForm.client_first_name} ${currentForm.client_last_name}`.trim();
+    const draftData = { ...currentForm, client_name: fullName || 'Draft', is_draft: true };
+    if (currentDraftId) {
+      await base44.entities.HealthForm.update(currentDraftId, draftData).catch(() => {});
+      return currentDraftId;
+    } else if (currentForm.client_first_name || currentForm.client_email) {
+      const created = await base44.entities.HealthForm.create(draftData).catch(() => null);
+      if (created?.id) {
+        setDraftId(created.id);
+        return created.id;
+      }
+    }
+    return currentDraftId;
+  };
+
+  // Create or update client record
+  const upsertClient = async (currentForm) => {
+    if (!currentForm.client_email && !currentForm.client_phone) return;
+    const fullName = `${currentForm.client_first_name} ${currentForm.client_last_name}`.trim();
+    const existing = currentForm.client_email
+      ? await base44.entities.Client.filter({ email: currentForm.client_email }, '-created_date', 1).catch(() => [])
+      : [];
+    if (existing.length > 0) {
+      await base44.entities.Client.update(existing[0].id, {
+        first_name: currentForm.client_first_name || existing[0].first_name,
+        last_name: currentForm.client_last_name || existing[0].last_name,
+        name: fullName || existing[0].name,
+        phone: currentForm.client_phone || existing[0].phone,
+      }).catch(() => {});
+    } else {
+      await base44.entities.Client.create({
+        first_name: currentForm.client_first_name || '',
+        last_name: currentForm.client_last_name || '',
+        name: fullName,
+        email: currentForm.client_email || '',
+        phone: currentForm.client_phone || '',
+      }).catch(() => {});
+    }
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -235,14 +279,26 @@ export default function HealthFormPage() {
 
   const handleSubmit = async () => {
     setSubmitting(true);
+    setSubmitError(null);
     try {
       const fullName = `${form.client_first_name} ${form.client_last_name}`.trim();
-      const created = await base44.entities.HealthForm.create({ ...form, client_name: fullName, is_minor: isMinor });
+      const formData = { ...form, client_name: fullName, is_minor: isMinor, is_draft: false };
+
+      let savedForm;
+      if (draftId) {
+        savedForm = await base44.entities.HealthForm.update(draftId, formData);
+        // update returns void in some SDK versions, so use draftId
+        if (!savedForm?.id) savedForm = { id: draftId };
+      } else {
+        savedForm = await base44.entities.HealthForm.create(formData);
+      }
 
       if (isMinor) {
+        const guardianBody = guardian.body_placement || form.body_placement || '';
         await base44.entities.GuardianConsentForm.create({
           ...guardian,
-          health_form_id: created.id,
+          body_placement: guardianBody,
+          health_form_id: savedForm.id,
           booking_id: form.booking_id,
           minor_client_name: fullName,
           minor_date_of_birth: form.date_of_birth,
@@ -253,7 +309,12 @@ export default function HealthFormPage() {
         await base44.entities.Booking.update(booking.id, { health_form_completed: true });
       }
 
+      // Create/update client record automatically
+      await upsertClient(form);
+
       setSubmitted(true);
+    } catch (err) {
+      setSubmitError('Wystąpił błąd podczas zapisywania. Spróbuj ponownie.');
     } finally {
       setSubmitting(false);
     }
@@ -261,20 +322,25 @@ export default function HealthFormPage() {
 
   const handleQuickRefresh = async () => {
     setSubmitting(true);
+    setSubmitError(null);
     try {
       const fullName = `${form.client_first_name} ${form.client_last_name}`.trim();
-      await base44.entities.HealthForm.create({
-        ...form,
-        client_name: fullName,
-        is_update_only: true,
-        is_minor: false,
-      });
+      const formData = { ...form, client_name: fullName, is_update_only: true, is_minor: false, is_draft: false };
+
+      if (draftId) {
+        await base44.entities.HealthForm.update(draftId, formData);
+      } else {
+        await base44.entities.HealthForm.create(formData);
+      }
 
       if (booking) {
         await base44.entities.Booking.update(booking.id, { health_form_completed: true });
       }
 
+      await upsertClient(form);
       setSubmitted(true);
+    } catch (err) {
+      setSubmitError('Wystąpił błąd podczas zapisywania. Spróbuj ponownie.');
     } finally {
       setSubmitting(false);
     }
@@ -476,12 +542,20 @@ export default function HealthFormPage() {
                   ⚠ Uzupełnij wszystkie wymagane pola przed przejściem dalej.
                 </p>
               )}
+              {submitError && (
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em', marginBottom: '8px' }}>
+                  ⚠ {submitError}
+                </p>
+              )}
               {currentStepIndex < steps.length - 1 ? (
                 <button
                   type="button"
-                  onClick={() => {
-                    if (canProceed()) { setShowErrors(false); setStep(steps[currentStepIndex + 1]); }
-                    else setShowErrors(true);
+                  onClick={async () => {
+                    if (canProceed()) {
+                      setShowErrors(false);
+                      await saveDraft(form, draftId);
+                      setStep(steps[currentStepIndex + 1]);
+                    } else setShowErrors(true);
                   }}
                   style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', background: 'linear-gradient(135deg, #FF007F 0%, #CC0066 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', width: '100%', opacity: canProceed() ? 1 : 0.7 }}
                 >

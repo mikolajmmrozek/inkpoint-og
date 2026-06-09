@@ -309,8 +309,12 @@ export default function DashboardHealthForms() {
   // Bookings without completed health form
   const pendingBookings = bookings.filter(b => !b.health_form_completed && b.status !== 'cancelled' && !dismissedReminders.includes(b.id));
 
+  // Separate drafts from completed forms
+  const completedForms = forms.filter(f => !f.is_draft);
+  const draftForms = forms.filter(f => f.is_draft);
+
   // Filter forms by search query
-  const filteredForms = forms.filter(form => {
+  const filteredForms = completedForms.filter(form => {
     const q = searchQuery.toLowerCase().replace(/^#/, '');
     return !q || 
       form.client_name?.toLowerCase().includes(q) ||
@@ -320,6 +324,14 @@ export default function DashboardHealthForms() {
       (form.form_filled_date && format(new Date(form.form_filled_date), 'dd.MM.yyyy').includes(q)) ||
       form.id?.toLowerCase().includes(q) ||
       form.id?.slice(-8).toLowerCase().includes(q);
+  });
+
+  const filteredDrafts = draftForms.filter(form => {
+    const q = searchQuery.toLowerCase().replace(/^#/, '');
+    return !q ||
+      form.client_name?.toLowerCase().includes(q) ||
+      form.client_first_name?.toLowerCase().includes(q) ||
+      form.client_email?.toLowerCase().includes(q);
   });
 
   // Get sessions for selected form's booking
@@ -653,12 +665,43 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
         </div>
       )}
 
+      {/* Drafts section */}
+      {filteredDrafts.length > 0 && (
+        <div className="mb-6" style={{ border: `0.5px solid rgba(255,165,0,0.4)`, background: 'rgba(255,165,0,0.03)' }}>
+          <div className="px-4 py-3" style={{ borderBottom: `0.5px solid rgba(255,165,0,0.3)` }}>
+            <p style={{ ...mono, fontSize: '8px', color: '#f97316', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              NIEDOKOŃCZONE ANKIETY (DRAFT) — {filteredDrafts.length}
+            </p>
+          </div>
+          {filteredDrafts.map((form, i) => (
+            <div key={form.id} className="flex items-center justify-between px-4 py-3"
+              style={{ borderBottom: i < filteredDrafts.length - 1 ? `0.5px solid rgba(255,165,0,0.2)` : 'none' }}>
+              <div>
+                <p style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>{form.client_name || form.client_first_name || '—'}</p>
+                <p style={{ ...mono, fontSize: '8px', color: t.muted, marginTop: '2px' }}>{form.client_email || 'brak email'}</p>
+                <p style={{ ...mono, fontSize: '8px', color: 'rgba(255,165,0,0.7)', marginTop: '2px' }}>Ostatnia aktywność: {safeFormat(form.updated_date || form.created_date, 'dd.MM.yyyy HH:mm')}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span style={{ ...mono, fontSize: '7px', color: '#f97316', border: '0.5px solid #f97316', padding: '2px 6px' }}>DRAFT</span>
+                <button
+                  onClick={() => deleteForm(form)}
+                  title="Usuń draft"
+                  style={{ color: '#FF007F', background: 'none', border: 'none', cursor: 'pointer' }}
+                >
+                  <Trash2 size={13} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Ankiety zdrowotne */}
       <div className="mb-8">
         <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, marginBottom: '12px' }}>
           <div className="px-4 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
             <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
-              ANKIETY ZDROWOTNE ({filteredForms.length})
+              ANKIETY ZDROWOTNE ({filteredForms.length}) — UKOŃCZONE
             </p>
             {/* Legenda kropek */}
             <div className="flex flex-wrap gap-4 mb-2">
