@@ -35,8 +35,10 @@ export default function DashboardDocuments() {
   }, []);
 
   const handleSaveInstr = async () => {
-    if (editingInstr) {
-      await base44.entities.Instruction.update(editingInstr.id, instrForm);
+    // editingInstr is either 'new', a type key (string like 'aftercare_tattoo'), or a real UUID
+    const existingRecord = instructions.find(i => i.id === editingInstr);
+    if (existingRecord) {
+      await base44.entities.Instruction.update(existingRecord.id, instrForm);
     } else {
       await base44.entities.Instruction.create(instrForm);
     }
