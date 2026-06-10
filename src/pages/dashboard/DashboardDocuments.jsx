@@ -116,12 +116,17 @@ export default function DashboardDocuments() {
 
   const handleShare = (docData, label) => {
     const text = `${docData?.title || label}\n\n${(docData?.content || '').replace(/<[^>]+>/g, '')}`;
-    if (navigator.share) {
-      navigator.share({ title: docData?.title || label, text });
-    } else {
-      navigator.clipboard.writeText(text);
-      alert('Treść skopiowana do schowka');
-    }
+    navigator.clipboard.writeText(text).then(() => {
+      alert('Treść dokumentu skopiowana do schowka');
+    }).catch(() => {
+      const el = document.createElement('textarea');
+      el.value = text;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      alert('Treść dokumentu skopiowana do schowka');
+    });
   };
 
   // ── Document card ──────────────────────────────────────────────────────
