@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
-import { Plus, Trash2, X } from 'lucide-react';
+import { Plus, Trash2, X, Pencil, FileText } from 'lucide-react';
 
 const INSTRUCTION_TYPES = [
   { key: 'aftercare_tattoo', label: 'Pielęgnacja tatuażu' },
@@ -13,14 +13,19 @@ const INSTRUCTION_TYPES = [
 export default function DashboardDocuments() {
   const { theme } = useTheme();
   const t = theme === 'light'
-    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F', modalBg: '#FFFFFF' }
-    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F', modalBg: '#0A0A0A' };
+    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F', modalBg: '#FFFFFF', cardBg: 'rgba(255,0,127,0.02)' }
+    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F', modalBg: '#0A0A0A', cardBg: 'rgba(255,0,127,0.02)' };
 
   const [instructions, setInstructions] = useState([]);
   const [terms, setTerms] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
+
+  // View modal
+  const [viewDoc, setViewDoc] = useState(null); // { kind: 'instr'|'terms', data, typeKey? }
+
+  // Edit modal
   const [editingInstr, setEditingInstr] = useState(null);
   const [editingTerms, setEditingTerms] = useState(false);
   const [instrForm, setInstrForm] = useState({ type: '', title: '', content: '' });
@@ -46,9 +51,12 @@ export default function DashboardDocuments() {
       } else {
         await base44.entities.Instruction.create(instrForm);
       }
-      setInstructions(await base44.entities.Instruction.list());
+      const updated = await base44.entities.Instruction.list();
+      setInstructions(updated);
       setEditingInstr(null);
+      setSaveError(null);
       setInstrForm({ type: '', title: '', content: '' });
+      setViewDoc(null);
     } catch (err) {
       setSaveError(err?.message || 'Błąd zapisu. Spróbuj ponownie.');
     } finally {
@@ -60,6 +68,7 @@ export default function DashboardDocuments() {
     if (!window.confirm('Usunąć dokument?')) return;
     await base44.entities.Instruction.delete(id);
     setInstructions(i => i.filter(x => x.id !== id));
+    setViewDoc(null);
   };
 
   const handleSaveTerms = async () => {
@@ -68,12 +77,15 @@ export default function DashboardDocuments() {
     try {
       if (terms?.id) {
         await base44.entities.TermsAndConditions.update(terms.id, { ...termsForm, last_updated: new Date().toISOString().split('T')[0] });
-        setTerms({ ...terms, ...termsForm, last_updated: new Date().toISOString().split('T')[0] });
+        const updated = { ...terms, ...termsForm, last_updated: new Date().toISOString().split('T')[0] };
+        setTerms(updated);
       } else {
         const created = await base44.entities.TermsAndConditions.create({ key: 'default', ...termsForm, last_updated: new Date().toISOString().split('T')[0] });
         setTerms(created);
       }
       setEditingTerms(false);
+      setSaveError(null);
+      setViewDoc(null);
     } catch (err) {
       setSaveError(err?.message || 'Błąd zapisu. Spróbuj ponownie.');
     } finally {
@@ -95,6 +107,109 @@ export default function DashboardDocuments() {
     width: '100%',
   };
 
+  // ── Document card ──────────────────────────────────────────────────────
+  const DocCard = ({ label, title, content, onView, onCreate }) => (
+    <div
+      style={{ border: `0.5px solid ${t.border}`, padding: '20px', background: t.cardBg, cursor: content !== undefined ? 'pointer' : 'default' }}
+      onClick={content !== undefined ? onView : undefined}
+    >
+      <div className="flex items-start gap-3">
+        <FileText size={16} style={{ color: t.fuchsia, flexShrink: 0, marginTop: '2px' }} />
+        <div className="flex-1 min-w-0">
+          <p style={{ ...display, fontSize: '1.1rem', color: t.title, letterSpacing: '0.04em' }}>{label}</p>
+          {title && <p style={{ ...mono, fontSize: '9px', color: t.fuchsia, marginTop: '2px' }}>{title}</p>}
+          <p style={{ color: t.muted, fontSize: '12px', lineHeight: 1.5, marginTop: '6px', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+            {content ? content.replace(/<[^>]+>/g, '').substring(0, 100) + (content.length > 100 ? '…' : '') : 'Brak treści — kliknij aby dodać'}
+          </p>
+        </div>
+      </div>
+      {!content && (
+        <button
+          onClick={e => { e.stopPropagation(); onCreate(); }}
+          style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 14px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: 'pointer', marginTop: '12px' }}
+        >
+          + UTWÓRZ
+        </button>
+      )}
+    </div>
+  );
+
+  // ── View modal ─────────────────────────────────────────────────────────
+  const ViewModal = () => {
+    if (!viewDoc) return null;
+    const isInstr = viewDoc.kind === 'instr';
+    const docData = isInstr ? viewDoc.data : terms;
+    const label = isInstr ? (INSTRUCTION_TYPES.find(x => x.key === viewDoc.typeKey)?.label || 'Dokument') : 'Regulamin Studia';
+
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.8)' }} onClick={() => setViewDoc(null)}>
+        <div className="w-full max-w-2xl flex flex-col" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, maxHeight: '90vh' }} onClick={e => e.stopPropagation()}>
+          {/* Header */}
+          <div className="flex items-center justify-between p-6" style={{ borderBottom: `0.5px solid ${t.border}`, flexShrink: 0 }}>
+            <div>
+              <p style={{ ...mono, fontSize: '9px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px' }}>
+                DOKUMENT STUDIA
+              </p>
+              <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em', lineHeight: 1 }}>{label}</h3>
+            </div>
+            <button onClick={() => setViewDoc(null)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
+              <X size={18} />
+            </button>
+          </div>
+
+          {/* Content */}
+          <div className="overflow-y-auto p-6 flex-1">
+            {docData?.title && (
+              <p style={{ ...mono, fontSize: '11px', color: t.fuchsia, letterSpacing: '0.1em', marginBottom: '12px' }}>{docData.title}</p>
+            )}
+            {docData?.last_updated && (
+              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.08em', marginBottom: '16px' }}>
+                Ostatnia aktualizacja: {docData.last_updated}
+              </p>
+            )}
+            {docData?.content ? (
+              <div
+                style={{ color: t.text, fontSize: '13px', lineHeight: 1.8, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+                dangerouslySetInnerHTML={{ __html: docData.content }}
+              />
+            ) : (
+              <p style={{ color: t.muted, fontSize: '13px', fontStyle: 'italic' }}>Brak treści.</p>
+            )}
+          </div>
+
+          {/* Footer actions */}
+          <div className="flex gap-3 p-6" style={{ borderTop: `0.5px solid ${t.border}`, flexShrink: 0 }}>
+            <button
+              onClick={() => {
+                if (isInstr) {
+                  setInstrForm(docData || { type: viewDoc.typeKey, title: '', content: '' });
+                  setEditingInstr(docData?.id || viewDoc.typeKey);
+                } else {
+                  setTermsForm(terms || { title: '', content: '' });
+                  setEditingTerms(true);
+                }
+                setViewDoc(null);
+              }}
+              className="flex items-center gap-2 btn-oxblood"
+              style={{ padding: '10px 20px' }}
+            >
+              <Pencil size={12} /> EDYTUJ
+            </button>
+            {isInstr && docData?.id && (
+              <button
+                onClick={() => handleDeleteInstr(docData.id)}
+                className="flex items-center gap-2"
+                style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 20px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}
+              >
+                <Trash2 size={12} /> USUŃ
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div>
       <div className="mb-8">
@@ -108,38 +223,30 @@ export default function DashboardDocuments() {
         </div>
       ) : (
         <div className="space-y-8">
-          {/* Zalecenia */}
+          {/* Zalecenia / Instrukcje */}
           <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '24px' }}>
             <div className="flex items-center justify-between mb-6">
-              <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em' }}>Dokumenty</h3>
-              <button onClick={() => { setEditingInstr('new'); setInstrForm({ type: '', title: '', content: '' }); }} className="flex items-center gap-2" style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: 'pointer' }}>
-                <Plus size={12} /> DODAJ
+              <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em' }}>Zalecenia i Instrukcje</h3>
+              <button
+                onClick={() => { setEditingInstr('new'); setInstrForm({ type: '', title: '', content: '' }); setSaveError(null); }}
+                className="flex items-center gap-2"
+                style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: 'pointer' }}
+              >
+                <Plus size={12} /> DODAJ NOWY
               </button>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {INSTRUCTION_TYPES.map(type => {
                 const instr = instructions.find(i => i.type === type.key);
                 return (
-                  <div key={type.key} style={{ border: `0.5px solid ${t.border}`, padding: '16px', background: 'rgba(255,0,127,0.02)' }}>
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <p style={{ ...display, fontSize: '1.2rem', color: t.title, letterSpacing: '0.04em' }}>{type.label}</p>
-                        {instr?.title && <p style={{ ...mono, fontSize: '9px', color: t.fuchsia, marginTop: '4px' }}>{instr.title}</p>}
-                      </div>
-                      {instr && (
-                        <button onClick={() => handleDeleteInstr(instr.id)} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer' }}>
-                          <Trash2 size={14} />
-                        </button>
-                      )}
-                    </div>
-                    <p style={{ color: t.text, fontSize: '12px', lineHeight: 1.6, minHeight: '60px', marginBottom: '12px' }}>
-                      {instr?.content ? instr.content.substring(0, 120) + (instr.content.length > 120 ? '...' : '') : 'Brak treści'}
-                    </p>
-                    <button onClick={() => { setEditingInstr(instr?.id || type.key); setInstrForm(instr || { type: type.key, title: '', content: '' }); }} style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}>
-                      {instr ? 'EDYTUJ' : 'UTWÓRZ'}
-                    </button>
-                  </div>
+                  <DocCard
+                    key={type.key}
+                    label={type.label}
+                    title={instr?.title}
+                    content={instr?.content}
+                    onView={() => setViewDoc({ kind: 'instr', data: instr, typeKey: type.key })}
+                    onCreate={() => { setInstrForm({ type: type.key, title: '', content: '' }); setEditingInstr(type.key); setSaveError(null); }}
+                  />
                 );
               })}
             </div>
@@ -147,36 +254,33 @@ export default function DashboardDocuments() {
 
           {/* Regulamin */}
           <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '24px' }}>
-            <div className="flex items-center justify-between mb-6">
-              <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em' }}>Regulamin Studia</h3>
-              <button onClick={() => { setEditingTerms(true); setTermsForm(terms || { title: '', content: '' }); }} style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: 'pointer' }}>
-                EDYTUJ
-              </button>
-            </div>
-            <div style={{ border: `0.5px solid ${t.border}`, padding: '16px', background: 'rgba(255,0,127,0.02)' }}>
-              <p style={{ ...display, fontSize: '1.2rem', color: t.title, letterSpacing: '0.04em', marginBottom: '8px' }}>
-                {terms?.title || 'Regulamin'}
-              </p>
-              <p style={{ color: t.text, fontSize: '12px', lineHeight: 1.6 }}>
-                {terms?.content ? terms.content.substring(0, 200) + (terms.content.length > 200 ? '...' : '') : 'Brak treści'}
-              </p>
-            </div>
+            <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em', marginBottom: '16px' }}>Regulamin Studia</h3>
+            <DocCard
+              label="Regulamin Studia"
+              title={terms?.title}
+              content={terms?.content}
+              onView={() => setViewDoc({ kind: 'terms' })}
+              onCreate={() => { setTermsForm({ title: '', content: '' }); setEditingTerms(true); setSaveError(null); }}
+            />
           </div>
         </div>
       )}
 
+      {/* View modal */}
+      <ViewModal />
+
       {/* Modal edycji instrukcji */}
       {editingInstr && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={() => setEditingInstr(null)}>
-          <div className="w-full max-w-2xl max-h-screen overflow-y-auto" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '32px' }} onClick={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.8)' }} onClick={() => { setEditingInstr(null); setSaveError(null); }}>
+          <div className="w-full max-w-2xl flex flex-col" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, maxHeight: '90vh' }} onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center p-6" style={{ borderBottom: `0.5px solid ${t.border}`, flexShrink: 0 }}>
               <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em' }}>
                 {editingInstr === 'new' ? 'Nowa instrukcja' : 'Edytuj instrukcję'}
               </h3>
-              <button onClick={() => setEditingInstr(null)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><X size={18} /></button>
+              <button onClick={() => { setEditingInstr(null); setSaveError(null); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><X size={18} /></button>
             </div>
 
-            <div className="space-y-6">
+            <div className="overflow-y-auto p-6 flex-1 space-y-6">
               {editingInstr === 'new' && (
                 <div>
                   <label style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Typ *</label>
@@ -186,35 +290,23 @@ export default function DashboardDocuments() {
                     style={{ ...inputStyle, colorScheme: theme === 'light' ? 'light' : 'dark' }}
                   >
                     <option value="">Wybierz typ</option>
-                    {INSTRUCTION_TYPES.map(t => <option key={t.key} value={t.key}>{t.label}</option>)}
+                    {INSTRUCTION_TYPES.map(tp => <option key={tp.key} value={tp.key}>{tp.label}</option>)}
                   </select>
                 </div>
               )}
-
               <div>
                 <label style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Tytuł</label>
-                <input
-                  type="text"
-                  value={instrForm.title}
-                  onChange={e => setInstrForm({ ...instrForm, title: e.target.value })}
-                  style={inputStyle}
-                />
+                <input type="text" value={instrForm.title} onChange={e => setInstrForm({ ...instrForm, title: e.target.value })} style={inputStyle} />
               </div>
-
               <div>
                 <label style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Treść</label>
-                <textarea
-                  rows={10}
-                  value={instrForm.content}
-                  onChange={e => setInstrForm({ ...instrForm, content: e.target.value })}
-                  style={{ ...inputStyle, borderBottom: 'none', border: `0.5px solid ${t.border}`, padding: '12px', resize: 'vertical' }}
-                />
+                <textarea rows={12} value={instrForm.content} onChange={e => setInstrForm({ ...instrForm, content: e.target.value })} style={{ ...inputStyle, borderBottom: 'none', border: `0.5px solid ${t.border}`, padding: '12px', resize: 'vertical' }} />
               </div>
+            </div>
 
-              {saveError && (
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>⚠ {saveError}</p>
-              )}
-              <div className="flex gap-4 pt-6" style={{ borderTop: `0.5px solid ${t.border}` }}>
+            <div className="p-6 space-y-3" style={{ borderTop: `0.5px solid ${t.border}`, flexShrink: 0 }}>
+              {saveError && <p style={{ ...mono, fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>⚠ {saveError}</p>}
+              <div className="flex gap-4">
                 <button onClick={handleSaveInstr} disabled={saving} className="btn-oxblood flex-1" style={{ padding: '12px', opacity: saving ? 0.5 : 1 }}>{saving ? 'ZAPISYWANIE...' : 'ZAPISZ'}</button>
                 <button onClick={() => { setEditingInstr(null); setSaveError(null); }} className="btn-ghost-parchment">ANULUJ</button>
               </div>
@@ -225,38 +317,27 @@ export default function DashboardDocuments() {
 
       {/* Modal edycji regulaminu */}
       {editingTerms && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={() => setEditingTerms(false)}>
-          <div className="w-full max-w-2xl max-h-screen overflow-y-auto" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '32px' }} onClick={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.8)' }} onClick={() => { setEditingTerms(false); setSaveError(null); }}>
+          <div className="w-full max-w-2xl flex flex-col" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, maxHeight: '90vh' }} onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center p-6" style={{ borderBottom: `0.5px solid ${t.border}`, flexShrink: 0 }}>
               <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em' }}>Edytuj Regulamin</h3>
-              <button onClick={() => setEditingTerms(false)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><X size={18} /></button>
+              <button onClick={() => { setEditingTerms(false); setSaveError(null); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><X size={18} /></button>
             </div>
 
-            <div className="space-y-6">
+            <div className="overflow-y-auto p-6 flex-1 space-y-6">
               <div>
                 <label style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Tytuł</label>
-                <input
-                  type="text"
-                  value={termsForm.title}
-                  onChange={e => setTermsForm({ ...termsForm, title: e.target.value })}
-                  style={inputStyle}
-                />
+                <input type="text" value={termsForm.title} onChange={e => setTermsForm({ ...termsForm, title: e.target.value })} style={inputStyle} />
               </div>
-
               <div>
                 <label style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Treść (HTML lub tekst)</label>
-                <textarea
-                  rows={15}
-                  value={termsForm.content}
-                  onChange={e => setTermsForm({ ...termsForm, content: e.target.value })}
-                  style={{ ...inputStyle, borderBottom: 'none', border: `0.5px solid ${t.border}`, padding: '12px', resize: 'vertical' }}
-                />
+                <textarea rows={15} value={termsForm.content} onChange={e => setTermsForm({ ...termsForm, content: e.target.value })} style={{ ...inputStyle, borderBottom: 'none', border: `0.5px solid ${t.border}`, padding: '12px', resize: 'vertical' }} />
               </div>
+            </div>
 
-              {saveError && (
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>⚠ {saveError}</p>
-              )}
-              <div className="flex gap-4 pt-6" style={{ borderTop: `0.5px solid ${t.border}` }}>
+            <div className="p-6 space-y-3" style={{ borderTop: `0.5px solid ${t.border}`, flexShrink: 0 }}>
+              {saveError && <p style={{ ...mono, fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>⚠ {saveError}</p>}
+              <div className="flex gap-4">
                 <button onClick={handleSaveTerms} disabled={saving} className="btn-oxblood flex-1" style={{ padding: '12px', opacity: saving ? 0.5 : 1 }}>{saving ? 'ZAPISYWANIE...' : 'ZAPISZ'}</button>
                 <button onClick={() => { setEditingTerms(false); setSaveError(null); }} className="btn-ghost-parchment">ANULUJ</button>
               </div>
