@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
-import { Plus, Trash2, X, Pencil, FileText } from 'lucide-react';
+import { Plus, Trash2, X, Pencil, FileText, Eye, Printer, Share2 } from 'lucide-react';
 
 const INSTRUCTION_TYPES = [
   { key: 'aftercare_tattoo', label: 'Pielęgnacja tatuażu' },
@@ -107,30 +107,59 @@ export default function DashboardDocuments() {
     width: '100%',
   };
 
+  const handlePrint = (docData, label) => {
+    const w = window.open('', '_blank');
+    w.document.write(`<html><head><title>${label}</title><style>body{font-family:Inter,sans-serif;padding:40px;max-width:800px;margin:0 auto}h1{font-size:28px;margin-bottom:8px}pre{white-space:pre-wrap;font-size:14px;line-height:1.8}</style></head><body><h1>${docData?.title || label}</h1><hr/><pre>${(docData?.content || '').replace(/<[^>]+>/g, '')}</pre></body></html>`);
+    w.document.close();
+    w.print();
+  };
+
+  const handleShare = (docData, label) => {
+    const text = `${docData?.title || label}\n\n${(docData?.content || '').replace(/<[^>]+>/g, '')}`;
+    if (navigator.share) {
+      navigator.share({ title: docData?.title || label, text });
+    } else {
+      navigator.clipboard.writeText(text);
+      alert('Treść skopiowana do schowka');
+    }
+  };
+
   // ── Document card ──────────────────────────────────────────────────────
-  const DocCard = ({ label, title, content, onView, onCreate }) => (
-    <div
-      style={{ border: `0.5px solid ${t.border}`, padding: '20px', background: t.cardBg, cursor: content !== undefined ? 'pointer' : 'default' }}
-      onClick={content !== undefined ? onView : undefined}
-    >
-      <div className="flex items-start gap-3">
-        <FileText size={16} style={{ color: t.fuchsia, flexShrink: 0, marginTop: '2px' }} />
-        <div className="flex-1 min-w-0">
-          <p style={{ ...display, fontSize: '1.1rem', color: t.title, letterSpacing: '0.04em' }}>{label}</p>
-          {title && <p style={{ ...mono, fontSize: '9px', color: t.fuchsia, marginTop: '2px' }}>{title}</p>}
-          <p style={{ color: t.muted, fontSize: '12px', lineHeight: 1.5, marginTop: '6px', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-            {content ? content.replace(/<[^>]+>/g, '').substring(0, 100) + (content.length > 100 ? '…' : '') : 'Brak treści — kliknij aby dodać'}
-          </p>
+  const DocCard = ({ label, title, content, onView, onEdit, onDelete, onPrint, onShare }) => (
+    <div style={{ border: `0.5px solid ${t.border}`, padding: '16px 20px', background: t.cardBg }}>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3 min-w-0">
+          <FileText size={14} style={{ color: content ? t.fuchsia : t.muted, flexShrink: 0 }} />
+          <div className="min-w-0">
+            <p style={{ ...display, fontSize: '1.1rem', color: t.title, letterSpacing: '0.04em', lineHeight: 1.1 }}>{label}</p>
+            {title && <p style={{ ...mono, fontSize: '9px', color: t.fuchsia, marginTop: '3px' }}>{title}</p>}
+            {!content && <p style={{ ...mono, fontSize: '8px', color: t.muted, marginTop: '3px', letterSpacing: '0.08em' }}>BRAK TREŚCI</p>}
+          </div>
+        </div>
+        <div className="flex items-center gap-1 flex-shrink-0">
+          {content && (
+            <>
+              <button onClick={onView} title="Podgląd" style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: '6px' }}>
+                <Eye size={14} />
+              </button>
+              <button onClick={onPrint} title="Drukuj PDF" style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: '6px' }}>
+                <Printer size={14} />
+              </button>
+              <button onClick={onShare} title="Udostępnij" style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: '6px' }}>
+                <Share2 size={14} />
+              </button>
+            </>
+          )}
+          <button onClick={onEdit} title="Edytuj" style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.fuchsia, padding: '6px' }}>
+            <Pencil size={14} />
+          </button>
+          {onDelete && content && (
+            <button onClick={onDelete} title="Usuń" style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: '6px' }}>
+              <Trash2 size={14} />
+            </button>
+          )}
         </div>
       </div>
-      {!content && (
-        <button
-          onClick={e => { e.stopPropagation(); onCreate(); }}
-          style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 14px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: 'pointer', marginTop: '12px' }}
-        >
-          + UTWÓRZ
-        </button>
-      )}
     </div>
   );
 
@@ -195,6 +224,20 @@ export default function DashboardDocuments() {
             >
               <Pencil size={12} /> EDYTUJ
             </button>
+            <button
+              onClick={() => handlePrint(docData, label)}
+              className="flex items-center gap-2"
+              style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 20px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}
+            >
+              <Printer size={12} /> DRUKUJ
+            </button>
+            <button
+              onClick={() => handleShare(docData, label)}
+              className="flex items-center gap-2"
+              style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 20px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}
+            >
+              <Share2 size={12} /> UDOSTĘPNIJ
+            </button>
             {isInstr && docData?.id && (
               <button
                 onClick={() => handleDeleteInstr(docData.id)}
@@ -245,7 +288,10 @@ export default function DashboardDocuments() {
                     title={instr?.title}
                     content={instr?.content}
                     onView={() => setViewDoc({ kind: 'instr', data: instr, typeKey: type.key })}
-                    onCreate={() => { setInstrForm({ type: type.key, title: '', content: '' }); setEditingInstr(type.key); setSaveError(null); }}
+                    onEdit={() => { setInstrForm(instr || { type: type.key, title: '', content: '' }); setEditingInstr(instr?.id || type.key); setSaveError(null); }}
+                    onDelete={instr ? () => handleDeleteInstr(instr.id) : null}
+                    onPrint={() => handlePrint(instr, type.label)}
+                    onShare={() => handleShare(instr, type.label)}
                   />
                 );
               })}
@@ -260,7 +306,9 @@ export default function DashboardDocuments() {
               title={terms?.title}
               content={terms?.content}
               onView={() => setViewDoc({ kind: 'terms' })}
-              onCreate={() => { setTermsForm({ title: '', content: '' }); setEditingTerms(true); setSaveError(null); }}
+              onEdit={() => { setTermsForm(terms || { title: '', content: '' }); setEditingTerms(true); setSaveError(null); }}
+              onPrint={() => handlePrint(terms, 'Regulamin Studia')}
+              onShare={() => handleShare(terms, 'Regulamin Studia')}
             />
           </div>
         </div>
