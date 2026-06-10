@@ -19,6 +19,8 @@ export default function DashboardDocuments() {
   const [instructions, setInstructions] = useState([]);
   const [terms, setTerms] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
   const [editingInstr, setEditingInstr] = useState(null);
   const [editingTerms, setEditingTerms] = useState(false);
   const [instrForm, setInstrForm] = useState({ type: '', title: '', content: '' });
@@ -35,16 +37,23 @@ export default function DashboardDocuments() {
   }, []);
 
   const handleSaveInstr = async () => {
-    // editingInstr is either 'new', a type key (string like 'aftercare_tattoo'), or a real UUID
-    const existingRecord = instructions.find(i => i.id === editingInstr);
-    if (existingRecord) {
-      await base44.entities.Instruction.update(existingRecord.id, instrForm);
-    } else {
-      await base44.entities.Instruction.create(instrForm);
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const existingRecord = instructions.find(i => i.id === editingInstr);
+      if (existingRecord) {
+        await base44.entities.Instruction.update(existingRecord.id, instrForm);
+      } else {
+        await base44.entities.Instruction.create(instrForm);
+      }
+      setInstructions(await base44.entities.Instruction.list());
+      setEditingInstr(null);
+      setInstrForm({ type: '', title: '', content: '' });
+    } catch (err) {
+      setSaveError(err?.message || 'Błąd zapisu. Spróbuj ponownie.');
+    } finally {
+      setSaving(false);
     }
-    setInstructions(await base44.entities.Instruction.list());
-    setEditingInstr(null);
-    setInstrForm({ type: '', title: '', content: '' });
   };
 
   const handleDeleteInstr = async (id) => {
@@ -54,14 +63,22 @@ export default function DashboardDocuments() {
   };
 
   const handleSaveTerms = async () => {
-    if (terms?.id) {
-      await base44.entities.TermsAndConditions.update(terms.id, { ...termsForm, last_updated: new Date().toISOString().split('T')[0] });
-      setTerms({ ...terms, ...termsForm, last_updated: new Date().toISOString().split('T')[0] });
-    } else {
-      const created = await base44.entities.TermsAndConditions.create({ key: 'default', ...termsForm, last_updated: new Date().toISOString().split('T')[0] });
-      setTerms(created);
+    setSaving(true);
+    setSaveError(null);
+    try {
+      if (terms?.id) {
+        await base44.entities.TermsAndConditions.update(terms.id, { ...termsForm, last_updated: new Date().toISOString().split('T')[0] });
+        setTerms({ ...terms, ...termsForm, last_updated: new Date().toISOString().split('T')[0] });
+      } else {
+        const created = await base44.entities.TermsAndConditions.create({ key: 'default', ...termsForm, last_updated: new Date().toISOString().split('T')[0] });
+        setTerms(created);
+      }
+      setEditingTerms(false);
+    } catch (err) {
+      setSaveError(err?.message || 'Błąd zapisu. Spróbuj ponownie.');
+    } finally {
+      setSaving(false);
     }
-    setEditingTerms(false);
   };
 
   const mono = { fontFamily: 'JetBrains Mono' };
@@ -194,9 +211,12 @@ export default function DashboardDocuments() {
                 />
               </div>
 
+              {saveError && (
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>⚠ {saveError}</p>
+              )}
               <div className="flex gap-4 pt-6" style={{ borderTop: `0.5px solid ${t.border}` }}>
-                <button onClick={handleSaveInstr} className="btn-oxblood flex-1" style={{ padding: '12px' }}>ZAPISZ</button>
-                <button onClick={() => setEditingInstr(null)} className="btn-ghost-parchment">ANULUJ</button>
+                <button onClick={handleSaveInstr} disabled={saving} className="btn-oxblood flex-1" style={{ padding: '12px', opacity: saving ? 0.5 : 1 }}>{saving ? 'ZAPISYWANIE...' : 'ZAPISZ'}</button>
+                <button onClick={() => { setEditingInstr(null); setSaveError(null); }} className="btn-ghost-parchment">ANULUJ</button>
               </div>
             </div>
           </div>
@@ -233,9 +253,12 @@ export default function DashboardDocuments() {
                 />
               </div>
 
+              {saveError && (
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>⚠ {saveError}</p>
+              )}
               <div className="flex gap-4 pt-6" style={{ borderTop: `0.5px solid ${t.border}` }}>
-                <button onClick={handleSaveTerms} className="btn-oxblood flex-1" style={{ padding: '12px' }}>ZAPISZ</button>
-                <button onClick={() => setEditingTerms(false)} className="btn-ghost-parchment">ANULUJ</button>
+                <button onClick={handleSaveTerms} disabled={saving} className="btn-oxblood flex-1" style={{ padding: '12px', opacity: saving ? 0.5 : 1 }}>{saving ? 'ZAPISYWANIE...' : 'ZAPISZ'}</button>
+                <button onClick={() => { setEditingTerms(false); setSaveError(null); }} className="btn-ghost-parchment">ANULUJ</button>
               </div>
             </div>
           </div>
