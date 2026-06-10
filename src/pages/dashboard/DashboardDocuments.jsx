@@ -25,6 +25,12 @@ export default function DashboardDocuments() {
   // View modal
   const [viewDoc, setViewDoc] = useState(null); // { kind: 'instr'|'terms', data, typeKey? }
 
+  // Share modal
+  const [shareDoc, setShareDoc] = useState(null); // { docData, label }
+  const [shareEmail, setShareEmail] = useState('');
+  const [shareSending, setShareSending] = useState(false);
+  const [shareResult, setShareResult] = useState(null); // 'ok' | 'error'
+
   // Edit modal
   const [editingInstr, setEditingInstr] = useState(null);
   const [editingTerms, setEditingTerms] = useState(false);
@@ -115,18 +121,29 @@ export default function DashboardDocuments() {
   };
 
   const handleShare = (docData, label) => {
-    const text = `${docData?.title || label}\n\n${(docData?.content || '').replace(/<[^>]+>/g, '')}`;
-    navigator.clipboard.writeText(text).then(() => {
-      alert('Treść dokumentu skopiowana do schowka');
-    }).catch(() => {
-      const el = document.createElement('textarea');
-      el.value = text;
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand('copy');
-      document.body.removeChild(el);
-      alert('Treść dokumentu skopiowana do schowka');
-    });
+    setShareDoc({ docData, label });
+    setShareEmail('');
+    setShareResult(null);
+  };
+
+  const handleSendShareEmail = async () => {
+    if (!shareEmail) return;
+    setShareSending(true);
+    setShareResult(null);
+    try {
+      const { docData, label } = shareDoc;
+      const plainText = (docData?.content || '').replace(/<[^>]+>/g, '');
+      await base44.integrations.Core.SendEmail({
+        to: shareEmail,
+        subject: docData?.title || label,
+        body: `${docData?.title || label}\n\n${plainText}`,
+      });
+      setShareResult('ok');
+    } catch {
+      setShareResult('error');
+    } finally {
+      setShareSending(false);
+    }
   };
 
   // ── Document card ──────────────────────────────────────────────────────
@@ -321,6 +338,51 @@ export default function DashboardDocuments() {
 
       {/* View modal */}
       <ViewModal />
+
+      {/* Share modal */}
+      {shareDoc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.8)' }} onClick={() => setShareDoc(null)}>
+          <div className="w-full max-w-md flex flex-col" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg }} onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center p-6" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+              <div>
+                <p style={{ ...mono, fontSize: '9px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px' }}>WYŚLIJ DOKUMENT</p>
+                <h3 style={{ ...display, fontSize: '1.6rem', color: t.title, letterSpacing: '0.04em', lineHeight: 1 }}>{shareDoc.label}</h3>
+              </div>
+              <button onClick={() => setShareDoc(null)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><X size={18} /></button>
+            </div>
+            <div className="p-6 space-y-5">
+              <div>
+                <label style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Adres e-mail odbiorcy *</label>
+                <input
+                  type="email"
+                  value={shareEmail}
+                  onChange={e => { setShareEmail(e.target.value); setShareResult(null); }}
+                  placeholder="np. klient@email.pl"
+                  style={inputStyle}
+                  disabled={shareSending}
+                />
+              </div>
+              {shareResult === 'ok' && (
+                <p style={{ ...mono, fontSize: '9px', color: '#16a34a', letterSpacing: '0.08em' }}>✓ Dokument wysłany pomyślnie</p>
+              )}
+              {shareResult === 'error' && (
+                <p style={{ ...mono, fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>⚠ Błąd wysyłki. Sprawdź adres e-mail i spróbuj ponownie.</p>
+              )}
+              <div className="flex gap-3">
+                <button
+                  onClick={handleSendShareEmail}
+                  disabled={!shareEmail || shareSending}
+                  className="btn-oxblood flex-1"
+                  style={{ padding: '12px', opacity: !shareEmail || shareSending ? 0.5 : 1 }}
+                >
+                  {shareSending ? 'WYSYŁANIE...' : 'WYŚLIJ MAILEM'}
+                </button>
+                <button onClick={() => setShareDoc(null)} className="btn-ghost-parchment">ANULUJ</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal edycji instrukcji */}
       {editingInstr && (
