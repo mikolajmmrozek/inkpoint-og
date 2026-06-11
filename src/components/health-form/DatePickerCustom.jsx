@@ -1,4 +1,4 @@
-export default function DatePickerCustom({ value, onChange, showErrors, t }) {
+export default function DatePickerCustom({ value, onChange, showErrors, t, textPrimary, textMuted, borderColor }) {
   const parsedDate = value ? new Date(value) : null;
   const day = parsedDate?.getDate() || '';
   const month = parsedDate?.getMonth() + 1 || '';
@@ -20,11 +20,15 @@ export default function DatePickerCustom({ value, onChange, showErrors, t }) {
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
   const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
 
+  const tc = textPrimary || '#F5F0EB';
+  const tm = textMuted || 'rgba(245,240,235,0.5)';
+  const bc = borderColor || '#262626';
+
   const selectStyle = {
     background: 'transparent',
     border: 'none',
-    borderBottom: showErrors && !value ? '1px solid #FF007F' : '0.5px solid #262626',
-    color: '#F5F0EB',
+    borderBottom: showErrors && !value ? '1px solid #FF007F' : `0.5px solid ${bc}`,
+    color: tc,
     padding: '8px 8px',
     fontSize: '14px',
     outline: 'none',
@@ -34,7 +38,7 @@ export default function DatePickerCustom({ value, onChange, showErrors, t }) {
 
   return (
     <div>
-      <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: showErrors && !value ? '#FF007F' : 'rgba(245,240,235,0.5)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+      <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: showErrors && !value ? '#FF007F' : tm, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
         {t.dateOfBirth} * {showErrors && !value && '(wymagane)'}
       </label>
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>

@@ -40,7 +40,7 @@ export default function StepPersonal({ form, setField, t, inputStyle, showErrors
 
       {/* Data urodzenia */}
       <div>
-        <DatePickerCustom value={form.date_of_birth} onChange={v => setField('date_of_birth', v)} showErrors={showErrors} t={t} />
+        <DatePickerCustom value={form.date_of_birth} onChange={v => setField('date_of_birth', v)} showErrors={showErrors} t={t} textPrimary={textPrimary} textMuted={textMuted} borderColor={borderColor} />
         {isMinor && (
           <div className="mt-2 px-3 py-2 flex items-center gap-2" style={{ background: 'rgba(255,0,127,0.08)', border: '0.5px solid rgba(255,0,127,0.3)' }}>
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>⚠ {t.minorWarning}</p>
