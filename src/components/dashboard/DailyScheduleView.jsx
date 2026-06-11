@@ -213,7 +213,7 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
               }}
             >
               {a.photo_url ? (
-                <img src={a.photo_url} alt={a.name} style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover', border: mobileArtistIdx === i ? '1.5px solid #FF007F' : `1px solid ${t.border}`, flexShrink: 0 }} />
+                <img src={a.photo_url} alt={a.name} loading="lazy" width={22} height={22} style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover', border: mobileArtistIdx === i ? '1.5px solid #FF007F' : `1px solid ${t.border}`, flexShrink: 0 }} />
               ) : (
                 <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255,0,127,0.15)', border: mobileArtistIdx === i ? '1.5px solid #FF007F' : `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <span style={{ fontSize: '9px', color: '#FF007F', fontFamily: 'Bebas Neue, system-ui' }}>{a.name.charAt(0)}</span>
@@ -234,7 +234,7 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
           return (
             <div key={a.id} className="flex flex-col items-center" style={{ flex: 1, padding: '10px 12px', borderLeft: `0.5px solid ${t.border}`, gap: '6px' }}>
               {a.photo_url ? (
-                <img src={a.photo_url} alt={a.name} style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: `1.5px solid ${t.border}`, flexShrink: 0 }} />
+                <img src={a.photo_url} alt={a.name} loading="lazy" width={36} height={36} style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: `1.5px solid ${t.border}`, flexShrink: 0 }} />
               ) : (
                 <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255,0,127,0.12)', border: `1px solid rgba(255,0,127,0.3)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <span style={{ fontSize: '14px', color: '#FF007F', fontFamily: 'Bebas Neue, system-ui' }}>{a.name.charAt(0)}</span>
