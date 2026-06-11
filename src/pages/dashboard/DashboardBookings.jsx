@@ -10,6 +10,7 @@ import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
 import BookingModal from '@/components/dashboard/BookingModal';
 import DailyScheduleView from '@/components/dashboard/DailyScheduleView.jsx';
 
+
 const STATUS_COLORS = {
   pending: '#FF007F',
   confirmed: '#16a34a',
