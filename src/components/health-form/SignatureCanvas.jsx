@@ -1,9 +1,15 @@
 import { useRef, useEffect, useState } from 'react';
 
-export default function SignatureCanvas({ value, onChange, label, clearLabel, showErrors }) {
+export default function SignatureCanvas({ value, onChange, label, clearLabel, showErrors, theme, textMuted, borderColor }) {
   const canvasRef = useRef(null);
   const drawing = useRef(false);
   const [isEmpty, setIsEmpty] = useState(!value);
+
+  const canvasBg = theme === 'light' ? '#ffffff' : '#111111';
+  const strokeColor = theme === 'light' ? '#111111' : '#F5F0EB';
+  const placeholderColor = theme === 'light' ? 'rgba(0,0,0,0.15)' : 'rgba(245,240,235,0.15)';
+  const bc = borderColor || '#262626';
+  const tm = textMuted || 'rgba(245,240,235,0.5)';
 
   useEffect(() => {
     if (value && canvasRef.current) {
@@ -42,7 +48,7 @@ export default function SignatureCanvas({ value, onChange, label, clearLabel, sh
     if (!drawing.current) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
-    ctx.strokeStyle = '#F5F0EB';
+    ctx.strokeStyle = strokeColor;
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
     const { x, y } = getPos(e, canvas);
@@ -68,11 +74,11 @@ export default function SignatureCanvas({ value, onChange, label, clearLabel, sh
   return (
     <div>
       {label && (
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: showErrors && !value ? '#FF007F' : 'rgba(245,240,235,0.5)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>
-            {label} * {showErrors && !value && '(wymagane)'}
-          </p>
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: showErrors && !value ? '#FF007F' : tm, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>
+          {label} * {showErrors && !value && '(wymagane)'}
+        </p>
       )}
-      <div style={{ border: showErrors && !value ? '0.5px solid #FF007F' : '0.5px solid #262626', background: '#111', position: 'relative' }}>
+      <div style={{ border: showErrors && !value ? '0.5px solid #FF007F' : `0.5px solid ${bc}`, background: canvasBg, position: 'relative' }}>
         <canvas
           ref={canvasRef}
           width={600}
@@ -88,13 +94,13 @@ export default function SignatureCanvas({ value, onChange, label, clearLabel, sh
         />
         {isEmpty && (
           <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.15)', letterSpacing: '0.1em' }}>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: placeholderColor, letterSpacing: '0.1em' }}>
               ✍ {label || 'Sign here'}
             </p>
           </div>
         )}
       </div>
-      <button type="button" onClick={clear} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer', marginTop: '6px', padding: 0 }}>
+      <button type="button" onClick={clear} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: tm, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer', marginTop: '6px', padding: 0 }}>
         ↺ {clearLabel || 'Clear'}
       </button>
     </div>

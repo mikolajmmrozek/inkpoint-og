@@ -1,17 +1,17 @@
 import { useTranslatedText } from '@/hooks/useTranslatedText';
 
-function ProcedureRow({ q, form, setField, t, inputStyle, showErrors, lang }) {
+function ProcedureRow({ q, form, setField, t, inputStyle, showErrors, lang, textPrimary, textMuted, borderColor }) {
   const translatedLabel = useTranslatedText(q.label, lang);
   return (
-    <div key={q.field_key} className="py-3" style={{ borderBottom: '0.5px solid #1a1a1a' }}>
+    <div className="py-3" style={{ borderBottom: `0.5px solid ${borderColor}` }}>
       <div className="flex items-center justify-between gap-4">
-        <p style={{ color: 'rgba(245,240,235,0.8)', fontSize: '14px', lineHeight: 1.4, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+        <p style={{ color: textPrimary, fontSize: '14px', lineHeight: 1.4, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
           {translatedLabel}{q.required && <span style={{ color: '#FF007F' }}> *</span>}
         </p>
         <div className="flex gap-2 flex-shrink-0">
           {[true, false].map(v => (
             <button type="button" key={String(v)} onClick={() => setField(q.field_key, v)}
-              style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 14px', border: `0.5px solid ${form[q.field_key] === v ? (v ? '#FF007F' : '#16a34a') : (showErrors && q.required && (form[q.field_key] === undefined || form[q.field_key] === null) ? '#FF007F' : '#262626')}`, color: form[q.field_key] === v ? (v ? '#FF007F' : '#16a34a') : 'rgba(245,240,235,0.3)', background: 'transparent', cursor: 'pointer' }}>
+              style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 14px', border: `0.5px solid ${form[q.field_key] === v ? (v ? '#FF007F' : '#16a34a') : (showErrors && q.required && (form[q.field_key] === undefined || form[q.field_key] === null) ? '#FF007F' : borderColor)}`, color: form[q.field_key] === v ? (v ? '#FF007F' : '#16a34a') : textMuted, background: 'transparent', cursor: 'pointer' }}>
               {v ? t.yes : t.no}
             </button>
           ))}
@@ -33,17 +33,17 @@ function ProcedureRow({ q, form, setField, t, inputStyle, showErrors, lang }) {
   );
 }
 
-export default function StepProcedure({ form, setField, t, inputStyle, showErrors, templateData, lang }) {
+export default function StepProcedure({ form, setField, t, inputStyle, showErrors, templateData, lang, textPrimary, textMuted, borderColor }) {
   const questions = templateData?.procedure_questions || [];
 
   if (questions.length === 0) {
-    return <p style={{ color: 'rgba(245,240,235,0.4)', fontSize: '14px' }}>Brak pytań przedzabiegowych.</p>;
+    return <p style={{ color: textMuted, fontSize: '14px' }}>Brak pytań przedzabiegowych.</p>;
   }
 
   return (
     <div>
       {questions.map(q => (
-        <ProcedureRow key={q.field_key} q={q} form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} lang={lang} />
+        <ProcedureRow key={q.field_key} q={q} form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} lang={lang} textPrimary={textPrimary} textMuted={textMuted} borderColor={borderColor} />
       ))}
     </div>
   );
