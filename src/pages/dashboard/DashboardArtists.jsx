@@ -5,6 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { Plus, Edit, Trash2, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTheme } from './Dashboard';
+import { compressImage } from '@/utils/compressImage';
 
 const inputStyle = {
   background: 'transparent',
@@ -75,7 +76,8 @@ export default function DashboardArtists() {
     const file = e.target.files[0];
     if (!file) return;
     setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    const compressed = await compressImage(file, { maxWidth: 256, maxHeight: 256, quality: 0.72 });
+    const { file_url } = await base44.integrations.Core.UploadFile({ file: compressed });
     setForm(f => ({ ...f, photo_url: file_url }));
     setUploading(false);
   };
@@ -83,7 +85,12 @@ export default function DashboardArtists() {
   const handlePortfolioUpload = async (e) => {
     const files = Array.from(e.target.files);
     setUploading(true);
-    const urls = await Promise.all(files.map(f => base44.integrations.Core.UploadFile({ file: f }).then(r => ({ url: r.file_url, caption: '', style: '' }))));
+    const urls = await Promise.all(
+      files.map(async (f) => {
+        const compressed = await compressImage(f, { maxWidth: 800, maxHeight: 800, quality: 0.75 });
+        return base44.integrations.Core.UploadFile({ file: compressed }).then(r => ({ url: r.file_url, caption: '', style: '' }));
+      })
+    );
     setForm(f => ({ ...f, portfolio_images: [...(f.portfolio_images || []), ...urls] }));
     setUploading(false);
   };
