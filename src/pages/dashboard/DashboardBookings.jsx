@@ -93,6 +93,18 @@ export default function DashboardBookings() {
     setShowModal(true);
   };
 
+  const handleNewBookingRequest = ({ artist, time, date }) => {
+    // Pre-fill a "ghost" booking object to prefill the modal
+    setEditingBooking({
+      _prefill: true,
+      artist_id: artist.id,
+      artist_name: artist.name,
+      session_date: date,
+      session_time: time,
+    });
+    setShowModal(true);
+  };
+
   const handleModalSaved = () => {
     setShowModal(false);
     setEditingBooking(null);
@@ -201,6 +213,7 @@ export default function DashboardBookings() {
                 selectedDate={selectedDate || new Date()}
                 onDateChange={(day) => setSelectedDate(day)}
                 onBookingClick={(b) => setSelected(b)}
+                onNewBookingRequest={handleNewBookingRequest}
                 t={t}
               />
             )}

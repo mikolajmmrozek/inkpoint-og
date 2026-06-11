@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { format, addDays, subDays } from 'date-fns';
+import { format, addDays, subDays, isToday } from 'date-fns';
 import { pl } from 'date-fns/locale';
 
 const STATUS_COLORS = {
@@ -36,7 +36,8 @@ function BookingTile({ booking, onClick, colWidth, t }) {
 
   return (
     <div
-      onClick={() => onClick(booking)}
+      data-booking-tile="true"
+      onClick={(e) => { e.stopPropagation(); onClick(booking); }}
       style={{
         position: 'absolute',
         top: `${top}px`,
@@ -79,13 +80,18 @@ function BookingTile({ booking, onClick, colWidth, t }) {
   );
 }
 
-export default function DailyScheduleView({ bookings, artists, selectedDate, onDateChange, onBookingClick, t }) {
+export default function DailyScheduleView({ bookings, artists, selectedDate, onDateChange, onBookingClick, onNewBookingRequest, t }) {
   const [mobileArtistIdx, setMobileArtistIdx] = useState(0);
+  const [nowMinutes, setNowMinutes] = useState(() => {
+    const n = new Date();
+    return n.getHours() * 60 + n.getMinutes();
+  });
+  const scrollRef = useRef(null);
 
   const dateStr = format(selectedDate, 'yyyy-MM-dd');
   const dayBookings = bookings.filter(b => b.session_date === dateStr);
-
   const activeArtists = artists.filter(a => a.is_active !== false);
+  const showNowLine = isToday(selectedDate);
 
   // Hours to show on left axis
   const hours = [];
@@ -93,6 +99,38 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
     hours.push(h);
   }
   const totalHeight = (DAY_END - DAY_START) * PX_PER_MIN;
+
+  // Update now line every minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const n = new Date();
+      setNowMinutes(n.getHours() * 60 + n.getMinutes());
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Auto-scroll to current time when view opens
+  useEffect(() => {
+    if (scrollRef.current && showNowLine) {
+      const nowTop = Math.max(0, (nowMinutes - DAY_START)) * PX_PER_MIN;
+      const scrollTarget = Math.max(0, nowTop - 100);
+      scrollRef.current.scrollTop = scrollTarget;
+    }
+  }, [showNowLine]);
+
+  const handleColumnClick = (e, artist) => {
+    // Don't trigger if clicking on a booking tile
+    if (e.target.closest('[data-booking-tile]')) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const offsetY = e.clientY - rect.top + e.currentTarget.parentElement.scrollTop;
+    const clickedMin = Math.round((offsetY / PX_PER_MIN + DAY_START) / 15) * 15;
+    const h = String(Math.floor(clickedMin / 60)).padStart(2, '0');
+    const m = String(clickedMin % 60).padStart(2, '0');
+    const time = `${h}:${m}`;
+    onNewBookingRequest?.({ artist, time, date: dateStr });
+  };
+
+  const nowTop = showNowLine ? Math.max(0, (nowMinutes - DAY_START)) * PX_PER_MIN : null;
 
   const TimeAxis = () => (
     <div style={{ position: 'relative', height: `${totalHeight}px`, width: '44px', flexShrink: 0 }}>
@@ -115,6 +153,12 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
           {String(h).padStart(2, '0')}:00
         </div>
       ))}
+      {/* Now indicator on time axis */}
+      {showNowLine && nowTop !== null && (
+        <div style={{ position: 'absolute', top: `${nowTop}px`, right: 0, left: 0, display: 'flex', alignItems: 'center', pointerEvents: 'none', zIndex: 3 }}>
+          <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#FF007F', marginRight: '2px', flexShrink: 0 }} />
+        </div>
+      )}
     </div>
   );
 
@@ -134,13 +178,20 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
           }}
         />
       ))}
+      {/* Now line */}
+      {showNowLine && nowTop !== null && (
+        <div style={{ position: 'absolute', top: `${nowTop}px`, left: 0, right: 0, borderTop: '1px solid #FF007F', pointerEvents: 'none', zIndex: 2, opacity: 0.7 }} />
+      )}
     </>
   );
 
   const ArtistColumn = ({ artist }) => {
     const artistBookings = dayBookings.filter(b => b.artist_id === artist.id);
     return (
-      <div style={{ flex: 1, minWidth: 0, position: 'relative', height: `${totalHeight}px`, borderLeft: `0.5px solid ${t.border}` }}>
+      <div
+        onClick={(e) => handleColumnClick(e, artist)}
+        style={{ flex: 1, minWidth: 0, position: 'relative', height: `${totalHeight}px`, borderLeft: `0.5px solid ${t.border}`, cursor: 'crosshair' }}
+      >
         <GridLines />
         {artistBookings.map(b => (
           <BookingTile key={b.id} booking={b} onClick={onBookingClick} t={t} />
@@ -253,7 +304,7 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
       </div>
 
       {/* Timeline body */}
-      <div className="overflow-y-auto" style={{ maxHeight: '600px' }}>
+      <div ref={scrollRef} className="overflow-y-auto" style={{ maxHeight: '600px' }}>
         {/* Desktop view */}
         <div className="hidden md:flex">
           <TimeAxis />

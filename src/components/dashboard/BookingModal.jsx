@@ -21,7 +21,7 @@ const MINUTES = ['00', '15', '30', '45'];
 const STATUS_OPTIONS = ['pending','confirmed','completed','cancelled'];
 
 export default function BookingModal({ booking, defaultDate, onClose, onSaved, t }) {
-  const isNew = !booking;
+  const isNew = !booking || booking._prefill;
   const [artists, setArtists] = useState([]);
   const [saving, setSaving] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null); // existing client or null
@@ -33,7 +33,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
   };
 
   const initForm = () => {
-    if (booking) {
+    if (booking && !booking._prefill) {
       const [first, ...last] = (booking.client_name || '').split(' ');
       return {
         ...booking,
@@ -42,16 +42,17 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
         session_end_time: booking.session_end_time || calcEndTime(booking.session_time, booking.session_duration),
       };
     }
+    const prefill = booking?._prefill ? booking : null;
     return {
       client_name: '',
       client_first_name: '',
       client_last_name: '',
       client_email: '',
       client_phone: '',
-      artist_id: '',
-      artist_name: '',
-      session_date: defaultDate || '',
-      session_time: '',
+      artist_id: prefill?.artist_id || '',
+      artist_name: prefill?.artist_name || '',
+      session_date: prefill?.session_date || defaultDate || '',
+      session_time: prefill?.session_time || '',
       session_end_time: '',
       session_duration: 0,
       tattoo_description: '',
