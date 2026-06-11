@@ -178,12 +178,13 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
             <button
               key={a.id}
               onClick={() => setMobileArtistIdx(i)}
+              className="flex items-center gap-2"
               style={{
                 fontFamily: 'JetBrains Mono',
                 fontSize: '9px',
                 letterSpacing: '0.08em',
                 textTransform: 'uppercase',
-                padding: '10px 16px',
+                padding: '8px 14px',
                 border: 'none',
                 borderBottom: mobileArtistIdx === i ? '2px solid #FF007F' : '2px solid transparent',
                 color: mobileArtistIdx === i ? '#FF007F' : t.muted,
@@ -193,7 +194,19 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
                 flexShrink: 0,
               }}
             >
-              {a.name} {count > 0 && <span style={{ color: '#FF007F' }}>({count})</span>}
+              {a.photo_url ? (
+                <img
+                  src={a.photo_url}
+                  alt={a.name}
+                  style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover', border: mobileArtistIdx === i ? '1.5px solid #FF007F' : `1px solid ${t.border}`, flexShrink: 0 }}
+                />
+              ) : (
+                <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255,0,127,0.15)', border: mobileArtistIdx === i ? '1.5px solid #FF007F' : `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ fontSize: '9px', color: '#FF007F', fontFamily: 'Bebas Neue, system-ui' }}>{a.name.charAt(0)}</span>
+                </div>
+              )}
+              {a.name.split(' ')[0]}
+              {count > 0 && <span style={{ color: '#FF007F' }}>({count})</span>}
             </button>
           );
         })}
@@ -207,19 +220,33 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
           return (
             <div
               key={a.id}
+              className="flex flex-col items-center"
               style={{
                 flex: 1,
                 padding: '10px 12px',
                 borderLeft: `0.5px solid ${t.border}`,
-                textAlign: 'center',
+                gap: '6px',
               }}
             >
-              <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1rem', color: t.title, letterSpacing: '0.06em', lineHeight: 1 }}>
-                {a.name}
-              </p>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: count > 0 ? '#FF007F' : t.muted, marginTop: '2px', letterSpacing: '0.06em' }}>
-                {count} {count === 1 ? 'SESJA' : count >= 2 && count <= 4 ? 'SESJE' : 'SESJI'}
-              </p>
+              {a.photo_url ? (
+                <img
+                  src={a.photo_url}
+                  alt={a.name}
+                  style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: `1.5px solid ${t.border}`, flexShrink: 0 }}
+                />
+              ) : (
+                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255,0,127,0.12)', border: `1px solid rgba(255,0,127,0.3)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ fontSize: '14px', color: '#FF007F', fontFamily: 'Bebas Neue, system-ui' }}>{a.name.charAt(0)}</span>
+                </div>
+              )}
+              <div className="text-center">
+                <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1rem', color: t.title, letterSpacing: '0.06em', lineHeight: 1 }}>
+                  {a.name}
+                </p>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: count > 0 ? '#FF007F' : t.muted, marginTop: '2px', letterSpacing: '0.06em' }}>
+                  {count} {count === 1 ? 'SESJA' : count >= 2 && count <= 4 ? 'SESJE' : 'SESJI'}
+                </p>
+              </div>
             </div>
           );
         })}

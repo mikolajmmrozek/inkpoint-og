@@ -242,11 +242,23 @@ export default function DashboardBookings() {
                             })()}
                           </div>
                         )}
-                        <div className="min-w-0">
-                          <p style={{ color: t.text, fontSize: '14px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.client_name}</p>
-                          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {b.artist_name}{b.tattoo_placement ? ` · ${b.tattoo_placement}` : ''}{viewMode === 'list' ? ` · ${b.session_date || ''}` : ''}
-                          </p>
+                        <div className="flex items-center gap-2 min-w-0">
+                          {(() => {
+                            const artist = artists.find(a => a.id === b.artist_id);
+                            return artist?.photo_url ? (
+                              <img src={artist.photo_url} alt={artist.name} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${t.border}`, flexShrink: 0 }} />
+                            ) : b.artist_name ? (
+                              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(255,0,127,0.12)', border: `1px solid rgba(255,0,127,0.25)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                <span style={{ fontSize: '10px', color: '#FF007F', fontFamily: 'Bebas Neue, system-ui' }}>{b.artist_name.charAt(0)}</span>
+                              </div>
+                            ) : null;
+                          })()}
+                          <div className="min-w-0">
+                            <p style={{ color: t.text, fontSize: '14px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.client_name}</p>
+                            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {b.artist_name}{b.tattoo_placement ? ` · ${b.tattoo_placement}` : ''}{viewMode === 'list' ? ` · ${b.session_date || ''}` : ''}
+                            </p>
+                          </div>
                         </div>
                       </div>
                       <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
