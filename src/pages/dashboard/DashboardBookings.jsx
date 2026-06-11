@@ -99,11 +99,11 @@ export default function DashboardBookings() {
     load();
   };
 
-  // Bookings to show in list (filtered by date if calendar view + date selected)
+  // Bookings to show in list (filtered by date if calendar or day view + date selected)
   const listBookings = (() => {
     let base = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
     if (artistFilter !== 'all') base = base.filter(b => b.artist_id === artistFilter);
-    if (viewMode === 'calendar' && selectedDate) {
+    if ((viewMode === 'calendar' || viewMode === 'day') && selectedDate) {
       base = base.filter(b => b.session_date && isSameDay(new Date(b.session_date), selectedDate));
     }
     return base;
