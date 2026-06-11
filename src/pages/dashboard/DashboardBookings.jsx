@@ -99,11 +99,11 @@ export default function DashboardBookings() {
     load();
   };
 
-  // Bookings to show in list (filtered by date if calendar or day view + date selected)
+  // Bookings to show in list (filtered by date for calendar/day/list views)
   const listBookings = (() => {
     let base = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
     if (artistFilter !== 'all') base = base.filter(b => b.artist_id === artistFilter);
-    if ((viewMode === 'calendar' || viewMode === 'day') && selectedDate) {
+    if (selectedDate && (viewMode === 'calendar' || viewMode === 'day' || viewMode === 'list')) {
       base = base.filter(b => b.session_date && isSameDay(new Date(b.session_date), selectedDate));
     }
     return base;
@@ -199,10 +199,23 @@ export default function DashboardBookings() {
 
             {/* List */}
             <div>
-              {viewMode === 'calendar' && selectedDate && (
-                <p className="mb-3" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-                  {format(selectedDate, 'dd MMMM yyyy', { locale: pl }).toUpperCase()} — {listBookings.length} SESJI
-                </p>
+              {(viewMode === 'calendar' || viewMode === 'list') && selectedDate && (
+                <div className="flex items-center justify-between mb-3" style={{ border: `0.5px solid ${t.border}`, padding: '10px 16px', background: t.bg }}>
+                  <button onClick={() => setSelectedDate(d => subDays(d, 1))} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}>
+                    <ChevronLeft size={16} />
+                  </button>
+                  <div className="text-center">
+                    <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.2rem', color: t.title, letterSpacing: '0.08em', lineHeight: 1 }}>
+                      {format(selectedDate, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase()}
+                    </p>
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: listBookings.length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
+                      {listBookings.length} {listBookings.length === 1 ? 'SESJA' : listBookings.length >= 2 && listBookings.length <= 4 ? 'SESJE' : 'SESJI'}
+                    </p>
+                  </div>
+                  <button onClick={() => setSelectedDate(d => addDays(d, 1))} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}>
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
               )}
 
               {listBookings.length === 0 ? (
