@@ -8,7 +8,7 @@ import { useTheme } from './Dashboard';
 import BookingCalendar from '@/components/dashboard/BookingCalendar';
 import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
 import BookingModal from '@/components/dashboard/BookingModal';
-import DailyScheduleView from '@/components/dashboard/DailyScheduleView';
+import DailyScheduleView from '@/components/dashboard/DailyScheduleView.jsx';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
