@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { AnimatePresence } from 'framer-motion';
 import { Plus, Calendar, List, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -75,6 +75,18 @@ export default function DashboardBookings() {
     setSelected(null);
   };
 
+  const handleBookingClick = useCallback((b) => setSelected(b), []);
+  const handleNewBookingRequest = useCallback(({ artist, time, date }) => {
+    setEditingBooking({
+      _prefill: true,
+      artist_id: artist.id,
+      artist_name: artist.name,
+      session_date: date,
+      session_time: time,
+    });
+    setShowModal(true);
+  }, []);
+
   const handleDayClick = (day) => {
     if (selectedDate && isSameDay(selectedDate, day)) {
       setViewMode('day');
@@ -91,18 +103,6 @@ export default function DashboardBookings() {
 
   const handleEdit = (booking) => {
     setEditingBooking(booking);
-    setShowModal(true);
-  };
-
-  const handleNewBookingRequest = ({ artist, time, date }) => {
-    // Pre-fill a "ghost" booking object to prefill the modal
-    setEditingBooking({
-      _prefill: true,
-      artist_id: artist.id,
-      artist_name: artist.name,
-      session_date: date,
-      session_time: time,
-    });
     setShowModal(true);
   };
 
@@ -213,7 +213,7 @@ export default function DashboardBookings() {
                 artists={artists}
                 selectedDate={selectedDate || new Date()}
                 onDateChange={(day) => setSelectedDate(day)}
-                onBookingClick={(b) => setSelected(b)}
+                onBookingClick={handleBookingClick}
                 onNewBookingRequest={handleNewBookingRequest}
                 t={t}
               />

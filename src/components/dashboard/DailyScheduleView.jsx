@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, memo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback, memo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, addDays, subDays, isToday } from 'date-fns';
 import { pl } from 'date-fns/locale';
@@ -46,25 +46,17 @@ const NowLine = memo(function NowLine() {
   );
 });
 
+// Static grid — rendered once, border color passed via CSS variable trick via inline SVG background
+// We keep the memo but use a stable border via context comparison
 const GridLines = memo(function GridLines({ border }) {
   return (
     <>
       {HOURS.map(h => (
-        <div
-          key={h}
-          style={{
-            position: 'absolute',
-            top: `${(h * 60 - DAY_START) * PX_PER_MIN}px`,
-            left: 0, right: 0,
-            borderTop: `0.5px solid ${border}`,
-            pointerEvents: 'none',
-            zIndex: 0,
-          }}
-        />
+        <div key={h} style={{ position: 'absolute', top: `${(h * 60 - DAY_START) * PX_PER_MIN}px`, left: 0, right: 0, borderTop: `0.5px solid ${border}`, pointerEvents: 'none', zIndex: 0 }} />
       ))}
     </>
   );
-});
+}, (prev, next) => prev.border === next.border);
 
 const BookingTile = memo(function BookingTile({ booking, onClick, t }) {
   const startMin = toMinutes(booking.session_time);
@@ -125,28 +117,19 @@ const TimeAxis = memo(function TimeAxis({ muted }) {
   return (
     <div style={{ position: 'relative', height: `${TOTAL_HEIGHT}px`, width: '44px', flexShrink: 0 }}>
       {HOURS.map(h => (
-        <div
-          key={h}
-          style={{
-            position: 'absolute',
-            top: `${(h * 60 - DAY_START) * PX_PER_MIN}px`,
-            right: '8px',
-            fontFamily: 'JetBrains Mono', fontSize: '8px', color: muted,
-            letterSpacing: '0.05em', lineHeight: 1,
-            transform: 'translateY(-50%)', whiteSpace: 'nowrap',
-          }}
-        >
+        <div key={h} style={{ position: 'absolute', top: `${(h * 60 - DAY_START) * PX_PER_MIN}px`, right: '8px', fontFamily: 'JetBrains Mono', fontSize: '8px', color: muted, letterSpacing: '0.05em', lineHeight: 1, transform: 'translateY(-50%)', whiteSpace: 'nowrap' }}>
           {String(h).padStart(2, '0')}:00
         </div>
       ))}
     </div>
   );
-});
+}, (prev, next) => prev.muted === next.muted);
 
 const ArtistColumn = memo(function ArtistColumn({ artist, artistBookings, onColumnClick, onBookingClick, border, t }) {
+  const handleClick = useCallback((e) => onColumnClick(e, artist), [onColumnClick, artist]);
   return (
     <div
-      onClick={(e) => onColumnClick(e, artist)}
+      onClick={handleClick}
       style={{ flex: 1, minWidth: 0, position: 'relative', height: `${TOTAL_HEIGHT}px`, borderLeft: `0.5px solid ${border}`, cursor: 'crosshair' }}
     >
       <GridLines border={border} />
@@ -187,7 +170,7 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
     }
   }, [showNowLine]);
 
-  const handleColumnClick = (e, artist) => {
+  const handleColumnClick = useCallback((e, artist) => {
     if (e.target.closest('[data-booking-tile]')) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const offsetY = e.clientY - rect.top + e.currentTarget.parentElement.scrollTop;
@@ -195,7 +178,7 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
     const h = String(Math.floor(clickedMin / 60)).padStart(2, '0');
     const m = String(clickedMin % 60).padStart(2, '0');
     onNewBookingRequest?.({ artist, time: `${h}:${m}`, date: dateStr });
-  };
+  }, [onNewBookingRequest, dateStr]);
 
   return (
     <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
