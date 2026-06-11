@@ -283,7 +283,7 @@ export default function DashboardBookings() {
                           </div>
                         </div>
                       </div>
-                      <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
+                      <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
                         {!b.health_form_completed && (
                           <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.08em', border: '0.5px solid #FF007F', padding: '2px 5px' }}>
                             ANKIETA
@@ -296,13 +296,11 @@ export default function DashboardBookings() {
                           {b.status}
                         </span>
                       </div>
-                      <div className="flex sm:hidden items-center gap-1.5 flex-shrink-0">
+                      <div className="flex lg:hidden items-center gap-1.5 flex-shrink-0">
                         {!b.health_form_completed && (
                           <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#FF007F', flexShrink: 0 }} />
                         )}
-                        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.06em', textTransform: 'uppercase', padding: '3px 6px', border: `0.5px solid ${STATUS_COLORS[b.status] || t.border}`, color: STATUS_COLORS[b.status] || t.muted }}>
-                          {b.status}
-                        </span>
+                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: STATUS_COLORS[b.status] || t.muted, flexShrink: 0 }} />
                       </div>
                     </div>
                   ))}
