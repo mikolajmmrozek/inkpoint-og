@@ -20,7 +20,7 @@ function toMinutes(timeStr) {
   return h * 60 + m;
 }
 
-function BookingTile({ booking, onClick, colWidth }) {
+function BookingTile({ booking, onClick, colWidth, t }) {
   const startMin = toMinutes(booking.session_time);
   if (startMin === null) return null;
 
@@ -61,17 +61,17 @@ function BookingTile({ booking, onClick, colWidth }) {
         {booking.session_time}–{endTime}
       </p>
       {height >= 40 && (
-        <p style={{ fontSize: '11px', color: '#F5F0EB', fontWeight: 500, lineHeight: 1.3, marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <p style={{ fontSize: '11px', color: t.text, fontWeight: 500, lineHeight: 1.3, marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {booking.client_name}
         </p>
       )}
       {height >= 60 && booking.tattoo_placement && (
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'rgba(245,240,235,0.5)', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {booking.tattoo_placement}
         </p>
       )}
       {height >= 80 && booking.estimated_price && (
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'rgba(245,240,235,0.4)', marginTop: '1px' }}>
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, marginTop: '1px' }}>
           {booking.estimated_price} PLN
         </p>
       )}
@@ -143,7 +143,7 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
       <div style={{ flex: 1, minWidth: 0, position: 'relative', height: `${totalHeight}px`, borderLeft: `0.5px solid ${t.border}` }}>
         <GridLines />
         {artistBookings.map(b => (
-          <BookingTile key={b.id} booking={b} onClick={onBookingClick} />
+          <BookingTile key={b.id} booking={b} onClick={onBookingClick} t={t} />
         ))}
       </div>
     );
