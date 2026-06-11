@@ -230,15 +230,13 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                 <select
                   value={form.session_time?.split(':')[0] || '00'}
                   onChange={e => {
-                    const newStart = `${e.target.value}:${form.session_time?.split(':')[1] || '00'}`;
-                    set('session_time', newStart);
-                    // Recalculate duration from end time
-                    const endH = parseInt(form.session_end_time?.split(':')[0] || '0');
-                    const endM = parseInt(form.session_end_time?.split(':')[1] || '0');
                     const startH = parseInt(e.target.value);
                     const startM = parseInt(form.session_time?.split(':')[1] || '0');
+                    const newStart = `${e.target.value}:${form.session_time?.split(':')[1] || '00'}`;
+                    const endH = parseInt(form.session_end_time?.split(':')[0] || '0');
+                    const endM = parseInt(form.session_end_time?.split(':')[1] || '0');
                     const dur = (endH * 60 + endM) - (startH * 60 + startM);
-                    if (dur > 0) set('session_duration', dur);
+                    setForm(f => ({ ...f, session_time: newStart, ...(dur > 0 ? { session_duration: dur } : {}) }));
                   }}
                   style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
                 >
@@ -250,14 +248,13 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                 <select
                   value={form.session_time?.split(':')[1] || '00'}
                   onChange={e => {
+                    const startH = parseInt(form.session_time?.split(':')[0] || '0');
+                    const startM = parseInt(e.target.value);
                     const newStart = `${form.session_time?.split(':')[0] || '09'}:${e.target.value}`;
-                    set('session_time', newStart);
                     const endH = parseInt(form.session_end_time?.split(':')[0] || '0');
                     const endM = parseInt(form.session_end_time?.split(':')[1] || '0');
-                    const startH = parseInt(form.session_time?.split(':')[0] || '9');
-                    const startM = parseInt(e.target.value);
                     const dur = (endH * 60 + endM) - (startH * 60 + startM);
-                    if (dur > 0) set('session_duration', dur);
+                    setForm(f => ({ ...f, session_time: newStart, ...(dur > 0 ? { session_duration: dur } : {}) }));
                   }}
                   style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
                 >
@@ -269,14 +266,13 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                 <select
                   value={form.session_end_time?.split(':')[0] || '00'}
                   onChange={e => {
-                    const newEnd = `${e.target.value}:${form.session_end_time?.split(':')[1] || '00'}`;
-                    set('session_end_time', newEnd);
-                    const startH = parseInt(form.session_time?.split(':')[0] || '0');
-                    const startM = parseInt(form.session_time?.split(':')[1] || '0');
                     const endH = parseInt(e.target.value);
                     const endM = parseInt(form.session_end_time?.split(':')[1] || '0');
+                    const newEnd = `${e.target.value}:${form.session_end_time?.split(':')[1] || '00'}`;
+                    const startH = parseInt(form.session_time?.split(':')[0] || '0');
+                    const startM = parseInt(form.session_time?.split(':')[1] || '0');
                     const dur = (endH * 60 + endM) - (startH * 60 + startM);
-                    if (dur > 0) set('session_duration', dur);
+                    setForm(f => ({ ...f, session_end_time: newEnd, ...(dur > 0 ? { session_duration: dur } : {}) }));
                   }}
                   style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
                 >
@@ -288,14 +284,13 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                 <select
                   value={form.session_end_time?.split(':')[1] || '00'}
                   onChange={e => {
-                    const newEnd = `${form.session_end_time?.split(':')[0] || '00'}:${e.target.value}`;
-                    set('session_end_time', newEnd);
-                    const startH = parseInt(form.session_time?.split(':')[0] || '0');
-                    const startM = parseInt(form.session_time?.split(':')[1] || '0');
                     const endH = parseInt(form.session_end_time?.split(':')[0] || '0');
                     const endM = parseInt(e.target.value);
+                    const newEnd = `${form.session_end_time?.split(':')[0] || '00'}:${e.target.value}`;
+                    const startH = parseInt(form.session_time?.split(':')[0] || '0');
+                    const startM = parseInt(form.session_time?.split(':')[1] || '0');
                     const dur = (endH * 60 + endM) - (startH * 60 + startM);
-                    if (dur > 0) set('session_duration', dur);
+                    setForm(f => ({ ...f, session_end_time: newEnd, ...(dur > 0 ? { session_duration: dur } : {}) }));
                   }}
                   style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
                 >
