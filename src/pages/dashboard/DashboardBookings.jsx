@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { AnimatePresence } from 'framer-motion';
-import { Plus, Calendar, List } from 'lucide-react';
+import { Plus, Calendar, List, Clock } from 'lucide-react';
 import { format, isSameDay } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import { useTheme } from './Dashboard';
 import BookingCalendar from '@/components/dashboard/BookingCalendar';
 import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
 import BookingModal from '@/components/dashboard/BookingModal';
+import DailyScheduleView from '@/components/dashboard/DailyScheduleView';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -30,8 +31,8 @@ export default function DashboardBookings() {
   const [selected, setSelected] = useState(null);
   const [filter, setFilter] = useState('all');
   const [artistFilter, setArtistFilter] = useState('all');
-  const [viewMode, setViewMode] = useState('calendar'); // 'calendar' | 'list'
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [viewMode, setViewMode] = useState('calendar'); // 'calendar' | 'list' | 'day'
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [showModal, setShowModal] = useState(false);
   const [editingBooking, setEditingBooking] = useState(null);
 
@@ -75,7 +76,7 @@ export default function DashboardBookings() {
 
   const handleDayClick = (day) => {
     if (selectedDate && isSameDay(selectedDate, day)) {
-      setSelectedDate(null);
+      setViewMode('day');
     } else {
       setSelectedDate(day);
     }
@@ -129,10 +130,10 @@ export default function DashboardBookings() {
         <div className="flex items-center gap-2 flex-wrap">
           {/* View toggle */}
           <div className="flex" style={{ border: `0.5px solid ${t.border}` }}>
-            {[{ mode: 'calendar', icon: Calendar }, { mode: 'list', icon: List }].map(({ mode, icon: Icon }) => (
+            {[{ mode: 'calendar', icon: Calendar }, { mode: 'day', icon: Clock }, { mode: 'list', icon: List }].map(({ mode, icon: Icon }) => (
               <button
                 key={mode}
-                onClick={() => { setViewMode(mode); setSelectedDate(null); }}
+                onClick={() => { setViewMode(mode); if (mode !== 'day' && mode !== 'calendar') setSelectedDate(new Date()); }}
                 className="p-2.5 transition-all"
                 style={{ background: viewMode === mode ? 'rgba(255,0,127,0.1)' : 'transparent', color: viewMode === mode ? '#FF007F' : t.muted, border: 'none', cursor: 'pointer' }}
               >
@@ -180,6 +181,18 @@ export default function DashboardBookings() {
                 bookings={calendarBookings}
                 onDayClick={handleDayClick}
                 selectedDate={selectedDate}
+                t={t}
+              />
+            )}
+
+            {/* Day view */}
+            {viewMode === 'day' && (
+              <DailyScheduleView
+                bookings={calendarBookings}
+                artists={artists}
+                selectedDate={selectedDate || new Date()}
+                onDateChange={(day) => setSelectedDate(day)}
+                onBookingClick={(b) => setSelected(b)}
                 t={t}
               />
             )}
