@@ -116,8 +116,8 @@ export default function HealthFormPage() {
   // Theme colors
   const bg = theme === 'light' ? '#F8F8F8' : '#0A0A0A';
   const cardBg = theme === 'light' ? '#FFFFFF' : '#0A0A0A';
-  const textPrimary = theme === 'light' ? '#111111' : '#F5F0EB';
-  const textMuted = theme === 'light' ? 'rgba(0,0,0,0.45)' : 'rgba(245,240,235,0.6)';
+  const textPrimary = theme === 'light' ? '#0A0A0A' : '#F5F0EB';
+  const textMuted = theme === 'light' ? 'rgba(0,0,0,0.6)' : 'rgba(245,240,235,0.6)';
   const borderColor = theme === 'light' ? '#E5E5E5' : '#262626';
   const inputBorderBottom = theme === 'light' ? '#CCCCCC' : '#262626';
   const inputColor = theme === 'light' ? '#111111' : '#F5F0EB';
