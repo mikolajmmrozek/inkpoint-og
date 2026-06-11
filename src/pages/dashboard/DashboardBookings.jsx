@@ -160,22 +160,18 @@ export default function DashboardBookings() {
               </button>
             ))}
           </div>
-          {/* Right-aligned actions */}
-          <div className="flex items-center gap-2 ml-auto">
-            <button
-              onClick={() => setSelectedDate(new Date())}
-              className="btn-oxblood flex items-center gap-2"
-              style={{
-                padding: '10px 20px',
-                opacity: isSameDay(selectedDate, new Date()) ? 0.5 : 1,
-              }}
-            >
-              DZISIAJ
-            </button>
-            <button onClick={handleNewBooking} className="flex items-center gap-2 btn-oxblood" style={{ padding: '10px 20px' }}>
-              <Plus size={13} /> NOWA SESJA
-            </button>
-          </div>
+          {/* Today button */}
+          <button
+            onClick={() => setSelectedDate(new Date())}
+            className="btn-oxblood flex items-center gap-2"
+            style={{ padding: '10px 20px', opacity: isSameDay(selectedDate, new Date()) ? 0.5 : 1 }}
+          >
+            DZISIAJ
+          </button>
+          {/* New booking */}
+          <button onClick={handleNewBooking} className="flex items-center gap-2 btn-oxblood" style={{ padding: '10px 20px' }}>
+            <Plus size={13} /> NOWA SESJA
+          </button>
         </div>
       </div>
 
