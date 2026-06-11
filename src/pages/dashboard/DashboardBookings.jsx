@@ -141,19 +141,6 @@ export default function DashboardBookings() {
               </button>
             ))}
           </div>
-          {/* Today button */}
-          <button
-            onClick={() => setSelectedDate(new Date())}
-            style={{
-              fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase',
-              padding: '6px 12px', border: `0.5px solid ${isSameDay(selectedDate, new Date()) ? t.fuchsia : t.border}`,
-              color: isSameDay(selectedDate, new Date()) ? t.fuchsia : t.muted,
-              background: isSameDay(selectedDate, new Date()) ? 'rgba(255,0,127,0.08)' : 'transparent',
-              cursor: 'pointer', flexShrink: 0,
-            }}
-          >
-            DZISIAJ
-          </button>
           {/* Artist filter */}
           <div className="flex gap-1 flex-wrap">
             <button onClick={() => setArtistFilter('all')} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilter === 'all' ? t.fuchsia : t.border}`, color: artistFilter === 'all' ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
@@ -173,10 +160,22 @@ export default function DashboardBookings() {
               </button>
             ))}
           </div>
-          {/* New booking */}
-          <button onClick={handleNewBooking} className="flex items-center gap-2 btn-oxblood" style={{ padding: '10px 20px' }}>
-            <Plus size={13} /> NOWA SESJA
-          </button>
+          {/* Right-aligned actions */}
+          <div className="flex items-center gap-2 ml-auto">
+            <button
+              onClick={() => setSelectedDate(new Date())}
+              className="btn-oxblood flex items-center gap-2"
+              style={{
+                padding: '10px 20px',
+                opacity: isSameDay(selectedDate, new Date()) ? 0.5 : 1,
+              }}
+            >
+              DZISIAJ
+            </button>
+            <button onClick={handleNewBooking} className="flex items-center gap-2 btn-oxblood" style={{ padding: '10px 20px' }}>
+              <Plus size={13} /> NOWA SESJA
+            </button>
+          </div>
         </div>
       </div>
 
