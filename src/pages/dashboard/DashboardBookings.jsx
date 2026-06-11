@@ -216,7 +216,17 @@ export default function DashboardBookings() {
                         {b.session_time && (
                           <div className="flex-shrink-0 text-center" style={{ minWidth: '48px' }}>
                             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: STATUS_COLORS[b.status] || t.fuchsia, letterSpacing: '0.05em' }}>{b.session_time}</p>
-                            {b.session_duration && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted }}>{b.session_duration}h</p>}
+                            {b.session_time && (() => {
+                              if (b.session_end_time) return <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted }}>→ {b.session_end_time}</p>;
+                              if (b.session_duration) {
+                                const [h, m] = b.session_time.split(':').map(Number);
+                                const endTotal = h * 60 + m + b.session_duration;
+                                const endH = String(Math.floor(endTotal / 60)).padStart(2, '0');
+                                const endM = String(endTotal % 60).padStart(2, '0');
+                                return <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted }}>→ {endH}:{endM}</p>;
+                              }
+                              return null;
+                            })()}
                           </div>
                         )}
                         <div className="min-w-0">

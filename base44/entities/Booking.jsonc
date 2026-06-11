@@ -28,9 +28,13 @@
     "session_time": {
       "type": "string"
     },
+    "session_end_time": {
+      "type": "string",
+      "description": "End time of the session (HH:MM)"
+    },
     "session_duration": {
       "type": "number",
-      "description": "Duration in hours"
+      "description": "Duration in minutes"
     },
     "tattoo_description": {
       "type": "string"

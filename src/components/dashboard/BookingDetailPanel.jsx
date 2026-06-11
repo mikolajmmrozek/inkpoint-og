@@ -79,8 +79,19 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
         ['Email', booking.client_email],
         ['Telefon', booking.client_phone || '—'],
         ['Artysta', booking.artist_name || '—'],
-        ['Data sesji', `${booking.session_date || '—'} ${booking.session_time || ''}`],
-        ['Czas trwania', booking.session_duration ? `${Math.floor((booking.session_duration || 0) / 60)}h ${(booking.session_duration || 0) % 60}m` : '—'],
+        ['Data sesji', booking.session_date || '—'],
+        ['Godziny', (() => {
+          if (!booking.session_time) return '—';
+          if (booking.session_end_time) return `${booking.session_time} — ${booking.session_end_time}`;
+          if (booking.session_duration) {
+            const [h, m] = booking.session_time.split(':').map(Number);
+            const endTotal = h * 60 + m + booking.session_duration;
+            const endH = String(Math.floor(endTotal / 60)).padStart(2, '0');
+            const endM = String(endTotal % 60).padStart(2, '0');
+            return `${booking.session_time} — ${endH}:${endM}`;
+          }
+          return booking.session_time;
+        })()],
         ['Miejsce', booking.tattoo_placement || '—'],
         ['Opis projektu', booking.tattoo_description || '—'],
         ['Cena', booking.estimated_price ? `${booking.estimated_price} PLN` : '—'],

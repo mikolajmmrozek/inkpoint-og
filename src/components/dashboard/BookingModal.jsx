@@ -25,6 +25,13 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
   const [artists, setArtists] = useState([]);
   const [saving, setSaving] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null); // existing client or null
+  const calcEndTime = (startTime, durationMinutes) => {
+    if (!startTime || !durationMinutes) return '';
+    const [h, m] = startTime.split(':').map(Number);
+    const endTotal = h * 60 + m + durationMinutes;
+    return `${String(Math.floor(endTotal / 60)).padStart(2, '0')}:${String(endTotal % 60).padStart(2, '0')}`;
+  };
+
   const initForm = () => {
     if (booking) {
       const [first, ...last] = (booking.client_name || '').split(' ');
@@ -32,6 +39,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
         ...booking,
         client_first_name: first || '',
         client_last_name: last.join(' ') || '',
+        session_end_time: booking.session_end_time || calcEndTime(booking.session_time, booking.session_duration),
       };
     }
     return {
@@ -44,7 +52,8 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
       artist_name: '',
       session_date: defaultDate || '',
       session_time: '',
-      session_duration: 2,
+      session_end_time: '',
+      session_duration: 0,
       tattoo_description: '',
       tattoo_placement: '',
       notes: '',
@@ -217,40 +226,77 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
             </div>
             <div className="grid grid-cols-4 gap-6 mb-4">
               <div>
-                {label('Godzina')}
+                {label('Godz. start')}
                 <select
                   value={form.session_time?.split(':')[0] || '00'}
-                  onChange={e => set('session_time', `${e.target.value}:${form.session_time?.split(':')[1] || '00'}`)}
+                  onChange={e => {
+                    const newStart = `${e.target.value}:${form.session_time?.split(':')[1] || '00'}`;
+                    set('session_time', newStart);
+                    // Recalculate duration from end time
+                    const endH = parseInt(form.session_end_time?.split(':')[0] || '0');
+                    const endM = parseInt(form.session_end_time?.split(':')[1] || '0');
+                    const startH = parseInt(e.target.value);
+                    const startM = parseInt(form.session_time?.split(':')[1] || '0');
+                    const dur = (endH * 60 + endM) - (startH * 60 + startM);
+                    if (dur > 0) set('session_duration', dur);
+                  }}
                   style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
                 >
                   {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
                 </select>
               </div>
               <div>
-                {label('Minuty')}
+                {label('min start')}
                 <select
                   value={form.session_time?.split(':')[1] || '00'}
-                  onChange={e => set('session_time', `${form.session_time?.split(':')[0] || '09'}:${e.target.value}`)}
+                  onChange={e => {
+                    const newStart = `${form.session_time?.split(':')[0] || '09'}:${e.target.value}`;
+                    set('session_time', newStart);
+                    const endH = parseInt(form.session_end_time?.split(':')[0] || '0');
+                    const endM = parseInt(form.session_end_time?.split(':')[1] || '0');
+                    const startH = parseInt(form.session_time?.split(':')[0] || '9');
+                    const startM = parseInt(e.target.value);
+                    const dur = (endH * 60 + endM) - (startH * 60 + startM);
+                    if (dur > 0) set('session_duration', dur);
+                  }}
                   style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
                 >
                   {MINUTES.map(m => <option key={m} value={m}>{m}</option>)}
                 </select>
               </div>
               <div>
-                {label('Czas (h)')}
+                {label('Godz. koniec')}
                 <select
-                  value={Math.floor((form.session_duration || 0) / 60).toString().padStart(2, '0')}
-                  onChange={e => set('session_duration', Number(e.target.value) * 60 + (form.session_duration || 0) % 60)}
+                  value={form.session_end_time?.split(':')[0] || '00'}
+                  onChange={e => {
+                    const newEnd = `${e.target.value}:${form.session_end_time?.split(':')[1] || '00'}`;
+                    set('session_end_time', newEnd);
+                    const startH = parseInt(form.session_time?.split(':')[0] || '0');
+                    const startM = parseInt(form.session_time?.split(':')[1] || '0');
+                    const endH = parseInt(e.target.value);
+                    const endM = parseInt(form.session_end_time?.split(':')[1] || '0');
+                    const dur = (endH * 60 + endM) - (startH * 60 + startM);
+                    if (dur > 0) set('session_duration', dur);
+                  }}
                   style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
                 >
-                  {HOURS_DUR.map(h => <option key={h} value={h}>{h}</option>)}
+                  {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
                 </select>
               </div>
               <div>
-                {label('min')}
+                {label('min koniec')}
                 <select
-                  value={((form.session_duration || 0) % 60).toString().padStart(2, '0')}
-                  onChange={e => set('session_duration', Math.floor((form.session_duration || 0) / 60) * 60 + Number(e.target.value))}
+                  value={form.session_end_time?.split(':')[1] || '00'}
+                  onChange={e => {
+                    const newEnd = `${form.session_end_time?.split(':')[0] || '00'}:${e.target.value}`;
+                    set('session_end_time', newEnd);
+                    const startH = parseInt(form.session_time?.split(':')[0] || '0');
+                    const startM = parseInt(form.session_time?.split(':')[1] || '0');
+                    const endH = parseInt(form.session_end_time?.split(':')[0] || '0');
+                    const endM = parseInt(e.target.value);
+                    const dur = (endH * 60 + endM) - (startH * 60 + startM);
+                    if (dur > 0) set('session_duration', dur);
+                  }}
                   style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
                 >
                   {MINUTES.map(m => <option key={m} value={m}>{m}</option>)}
