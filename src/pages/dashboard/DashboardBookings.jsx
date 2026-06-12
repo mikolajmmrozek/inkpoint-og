@@ -369,9 +369,6 @@ export default function DashboardBookings() {
                           >
                             <ChevronLeft size={12} /> POPRZEDNIE
                           </button>
-                          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>
-                            {listPage + 1} / {listPageCount} · {listBookings.length} sesji
-                          </span>
                           <button
                             onClick={() => setListPage(p => Math.min(listPageCount - 1, p + 1))}
                             disabled={listPage >= listPageCount - 1}
