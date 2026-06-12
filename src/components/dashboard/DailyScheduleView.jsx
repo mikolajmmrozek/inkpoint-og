@@ -113,29 +113,50 @@ const BookingTile = memo(function BookingTile({ booking, onClick, t }) {
   );
 });
 
-const TimeAxis = memo(function TimeAxis({ muted }) {
+const TimeAxis = memo(function TimeAxis({ muted, border }) {
   return (
-    <div style={{ position: 'relative', height: `${TOTAL_HEIGHT}px`, width: '44px', flexShrink: 0 }}>
-      {HOURS.map(h => (
-        <div key={h} style={{ position: 'absolute', top: `${(h * 60 - DAY_START) * PX_PER_MIN}px`, right: '8px', fontFamily: 'JetBrains Mono', fontSize: '8px', color: muted, letterSpacing: '0.05em', lineHeight: 1, transform: 'translateY(-50%)', whiteSpace: 'nowrap' }}>
-          {String(h).padStart(2, '0')}:00
-        </div>
-      ))}
+    <div style={{ width: '44px', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+      {/* Header space */}
+      <div style={{ borderBottom: `0.5px solid ${border}`, padding: '8px 0', flexShrink: 0 }} />
+      {/* Time labels */}
+      <div style={{ position: 'relative', height: `${TOTAL_HEIGHT}px` }}>
+        {HOURS.map(h => (
+          <div key={h} style={{ position: 'absolute', top: `${(h * 60 - DAY_START) * PX_PER_MIN}px`, right: '8px', fontFamily: 'JetBrains Mono', fontSize: '8px', color: muted, letterSpacing: '0.05em', lineHeight: 1, transform: 'translateY(-50%)', whiteSpace: 'nowrap' }}>
+            {String(h).padStart(2, '0')}:00
+          </div>
+        ))}
+      </div>
     </div>
   );
-}, (prev, next) => prev.muted === next.muted);
+}, (prev, next) => prev.muted === next.muted && prev.border === next.border);
 
 const ArtistColumn = memo(function ArtistColumn({ artist, artistBookings, onColumnClick, onBookingClick, border, t }) {
   const handleClick = useCallback((e) => onColumnClick(e, artist), [onColumnClick, artist]);
   return (
-    <div
-      onClick={handleClick}
-      style={{ flex: 1, minWidth: 0, position: 'relative', height: `${TOTAL_HEIGHT}px`, borderLeft: `0.5px solid ${border}`, cursor: 'crosshair' }}
-    >
-      <GridLines border={border} />
-      {artistBookings.map(b => (
-        <BookingTile key={b.id} booking={b} onClick={onBookingClick} t={t} />
-      ))}
+    <div style={{ flex: 1, minWidth: 0 }}>
+      {/* Artist header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px 4px', borderBottom: `0.5px solid ${border}`, gap: '6px' }}>
+        {artist.photo_url ? (
+          <img src={artist.photo_url} alt={artist.name} loading="lazy" width={20} height={20} style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${border}`, flexShrink: 0 }} />
+        ) : (
+          <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,0,127,0.15)', border: `1px solid ${border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ fontSize: '9px', color: '#FF007F', fontFamily: 'Bebas Neue, system-ui' }}>{artist.name.charAt(0)}</span>
+          </div>
+        )}
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {artist.name}
+        </p>
+      </div>
+      {/* Sessions */}
+      <div
+        onClick={handleClick}
+        style={{ position: 'relative', height: `${TOTAL_HEIGHT}px`, borderLeft: `0.5px solid ${border}`, cursor: 'crosshair' }}
+      >
+        <GridLines border={border} />
+        {artistBookings.map(b => (
+          <BookingTile key={b.id} booking={b} onClick={onBookingClick} t={t} />
+        ))}
+      </div>
     </div>
   );
 });
@@ -194,62 +215,22 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
         </button>
       </div>
 
-      {/* Artist profiles */}
-      <div className="flex items-center justify-center gap-4 px-4 py-3 flex-wrap" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-        {(artistFilter === 'all' ? activeArtists : activeArtists.filter(a => a.id === artistFilter)).map(a => (
-          <div key={a.id} className="flex items-center gap-2">
-            {a.photo_url ? (
-              <img src={a.photo_url} alt={a.name} loading="lazy" width={32} height={32} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${t.border}` }} />
-            ) : (
-              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255,0,127,0.15)', border: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: '12px', color: '#FF007F', fontFamily: 'Bebas Neue, system-ui' }}>{a.name.charAt(0)}</span>
-              </div>
-            )}
-            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
-              {a.name}
-            </span>
-          </div>
-        ))}
-      </div>
-
-
-
       {/* Timeline body */}
       <div ref={scrollRef} className="overflow-y-auto overflow-x-auto" style={{ maxHeight: '600px' }}>
-        {/* Artist headers */}
-        {(artistFilter === 'all' ? activeArtists : activeArtists.filter(a => a.id === artistFilter)).map((a, idx) => (
-          <div key={`header-${a.id}`} className="flex">
-            <div style={{ width: '44px', flexShrink: 0 }} />
-            <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px 4px', borderBottom: `0.5px solid ${t.border}`, gap: '6px' }}>
-              {a.photo_url ? (
-                <img src={a.photo_url} alt={a.name} loading="lazy" width={20} height={20} style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${t.border}` }} />
-              ) : (
-                <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,0,127,0.15)', border: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ fontSize: '9px', color: '#FF007F', fontFamily: 'Bebas Neue, system-ui' }}>{a.name.charAt(0)}</span>
-                </div>
-              )}
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {a.name}
-              </p>
-            </div>
-          </div>
-        ))}
-        <div style={{ position: 'relative', minWidth: 'min-content' }}>
-          <div className="flex">
-            <TimeAxis muted={t.muted} />
-            {(artistFilter === 'all' ? activeArtists : activeArtists.filter(a => a.id === artistFilter)).map(a => (
-              <ArtistColumn
-                key={a.id}
-                artist={a}
-                artistBookings={bookingsByArtist[a.id] || []}
-                onColumnClick={handleColumnClick}
-                onBookingClick={onBookingClick}
-                border={t.border}
-                t={t}
-              />
-            ))}
-            {showNowLine && <NowLine />}
-          </div>
+        <div style={{ display: 'flex', minWidth: 'min-content' }}>
+          <TimeAxis muted={t.muted} border={t.border} />
+          {(artistFilter === 'all' ? activeArtists : activeArtists.filter(a => a.id === artistFilter)).map(a => (
+            <ArtistColumn
+              key={a.id}
+              artist={a}
+              artistBookings={bookingsByArtist[a.id] || []}
+              onColumnClick={handleColumnClick}
+              onBookingClick={onBookingClick}
+              border={t.border}
+              t={t}
+            />
+          ))}
+          {showNowLine && <NowLine />}
         </div>
       </div>
 
