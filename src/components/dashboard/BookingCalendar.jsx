@@ -66,7 +66,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
               className="relative flex flex-col items-center py-2 transition-all duration-200"
               style={{
                 background: isSelected ? 'rgba(255,0,127,0.1)' : 'transparent',
-                border: isSelected ? `0.5px solid #FF007F` : isToday ? `0.5px solid ${t.border}` : '0.5px solid transparent',
+                border: isSelected ? `0.5px solid #FF007F` : (searchQuery && dayBookings.length > 0) ? `0.5px solid #FF007F` : isToday ? `0.5px solid ${t.border}` : '0.5px solid transparent',
                 cursor: 'pointer',
                 minHeight: '52px',
               }}
