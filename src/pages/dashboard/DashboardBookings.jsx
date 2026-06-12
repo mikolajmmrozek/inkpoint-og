@@ -233,7 +233,13 @@ export default function DashboardBookings() {
   }, []);
 
   const handleDayClick = (day) => {
-    setSearchQuery('');
+    const dayDateStr = format(day, 'yyyy-MM-dd');
+    const dayHasResults = calendarBookings.some(b => b.session_date === dayDateStr);
+    
+    if (searchQuery.trim() && !dayHasResults) {
+      setSearchQuery('');
+    }
+    
     if (selectedDate && isSameDay(selectedDate, day)) {
       setViewMode('day');
     } else {
