@@ -20,6 +20,65 @@ const STATUS_COLORS = {
 
 const STATUS_OPTIONS = ['pending', 'confirmed', 'completed', 'cancelled'];
 
+function BookingRow({ b, i, items, selected, setSelected, artists, t }) {
+  return (
+    <div
+      className="flex items-center justify-between p-4 cursor-pointer transition-colors"
+      style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selected?.id === b.id ? 'rgba(255,0,127,0.05)' : 'transparent' }}
+      onClick={() => setSelected(b)}
+    >
+      <div className="flex items-center gap-6 min-w-0">
+        {b.session_time && (
+          <div className="flex-shrink-0 text-center" style={{ minWidth: '48px' }}>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: STATUS_COLORS[b.status] || t.fuchsia, letterSpacing: '0.05em' }}>{b.session_time}</p>
+            {b.session_end_time ? (
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted }}>→ {b.session_end_time}</p>
+            ) : b.session_duration ? (() => {
+              const [h, m] = b.session_time.split(':').map(Number);
+              const endTotal = h * 60 + m + b.session_duration;
+              const endH = String(Math.floor(endTotal / 60)).padStart(2, '0');
+              const endM = String(endTotal % 60).padStart(2, '0');
+              return <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted }}>→ {endH}:{endM}</p>;
+            })() : null}
+          </div>
+        )}
+        <div className="flex items-center gap-2 min-w-0">
+          {(() => {
+            const artist = artists.find(a => a.id === b.artist_id);
+            return artist?.photo_url ? (
+              <img src={artist.photo_url} alt={artist.name} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${t.border}`, flexShrink: 0 }} />
+            ) : b.artist_name ? (
+              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(255,0,127,0.12)', border: '1px solid rgba(255,0,127,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ fontSize: '10px', color: '#FF007F', fontFamily: 'Bebas Neue, system-ui' }}>{b.artist_name.charAt(0)}</span>
+              </div>
+            ) : null;
+          })()}
+          <div className="min-w-0">
+            <p style={{ color: t.text, fontSize: '14px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.client_name}</p>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {b.artist_name}{b.tattoo_placement ? ` · ${b.tattoo_placement}` : ''}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 flex-shrink-0">
+        {!b.health_form_completed && (
+          <span className="hidden sm:inline" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.08em', border: '0.5px solid #FF007F', padding: '2px 5px' }}>
+            ANKIETA
+          </span>
+        )}
+        {b.estimated_price && (
+          <span className="hidden sm:inline" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{b.estimated_price} PLN</span>
+        )}
+        <span className="hidden lg:inline" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 8px', border: `0.5px solid ${STATUS_COLORS[b.status] || t.border}`, color: STATUS_COLORS[b.status] || t.muted }}>
+          {b.status}
+        </span>
+        <div className="lg:hidden" style={{ width: '8px', height: '8px', borderRadius: '50%', background: STATUS_COLORS[b.status] || t.muted, flexShrink: 0 }} />
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardBookings() {
   const { theme } = useTheme();
   const t = theme === 'light'
@@ -36,6 +95,7 @@ export default function DashboardBookings() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showModal, setShowModal] = useState(false);
   const [editingBooking, setEditingBooking] = useState(null);
+  const [listLimit, setListLimit] = useState(10);
 
   const load = async () => {
     const [data, artistData] = await Promise.all([
@@ -75,6 +135,8 @@ export default function DashboardBookings() {
     setSelected(null);
   };
 
+  useEffect(() => { setListLimit(10); }, [filter, artistFilter]);
+
   const handleBookingClick = useCallback((b) => setSelected(b), []);
   const handleNewBookingRequest = useCallback(({ artist, time, date }) => {
     setEditingBooking({
@@ -112,12 +174,24 @@ export default function DashboardBookings() {
     load();
   };
 
-  // Bookings to show in list (filtered by date for calendar/day/list views)
+  // Bookings to show in list
   const listBookings = (() => {
     let base = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
     if (artistFilter !== 'all') base = base.filter(b => b.artist_id === artistFilter);
-    if (selectedDate && (viewMode === 'calendar' || viewMode === 'day' || viewMode === 'list')) {
+    if (viewMode === 'calendar' && selectedDate) {
       base = base.filter(b => b.session_date && isSameDay(new Date(b.session_date), selectedDate));
+    }
+    if (viewMode === 'list') {
+      // Sort: upcoming first (ascending by date), past sessions at bottom
+      base = [...base].sort((a, b) => {
+        const da = a.session_date || '';
+        const db = b.session_date || '';
+        if (filter === 'all' || filter === 'pending' || filter === 'confirmed') {
+          // upcoming first
+          return da.localeCompare(db);
+        }
+        return da.localeCompare(db);
+      });
     }
     return base;
   })();
@@ -175,9 +249,9 @@ export default function DashboardBookings() {
           </div>
           {/* Today button */}
           <button
-            onClick={() => setSelectedDate(new Date())}
+            onClick={() => { setSelectedDate(new Date()); setViewMode('day'); }}
             className="btn-oxblood flex items-center gap-2"
-            style={{ padding: '10px 20px', opacity: isSameDay(selectedDate, new Date()) ? 0.5 : 1 }}
+            style={{ padding: '10px 20px' }}
           >
             DZISIAJ
           </button>
@@ -221,7 +295,7 @@ export default function DashboardBookings() {
 
             {/* List */}
             <div>
-              {(viewMode === 'calendar' || viewMode === 'list') && selectedDate && (
+              {viewMode === 'calendar' && selectedDate && (
                 <div className="flex items-center justify-between mb-3" style={{ border: `0.5px solid ${t.border}`, padding: '10px 16px', background: t.bg }}>
                   <button onClick={() => setSelectedDate(d => subDays(d, 1))} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}>
                     <ChevronLeft size={16} />
@@ -243,7 +317,7 @@ export default function DashboardBookings() {
               {listBookings.length === 0 ? (
                 <div className="py-12 text-center" style={{ border: `0.5px solid ${t.border}` }}>
                   <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
-                    {viewMode === 'calendar' && selectedDate ? 'BRAK SESJI W TEN DZIEŃ' : 'BRAK REZERWACJI'}
+                    {viewMode === 'calendar' ? 'BRAK SESJI W TEN DZIEŃ' : 'BRAK REZERWACJI'}
                   </p>
                   {viewMode === 'calendar' && selectedDate && (
                     <button onClick={() => { setEditingBooking(null); setShowModal(true); }} className="btn-oxblood mt-4" style={{ fontSize: '10px', padding: '8px 20px' }}>
@@ -251,69 +325,60 @@ export default function DashboardBookings() {
                     </button>
                   )}
                 </div>
+              ) : viewMode === 'list' ? (
+                // List view: grouped by day, max 10 at a time
+                (() => {
+                  const visibleBookings = listBookings.slice(0, listLimit);
+                  const grouped = {};
+                  visibleBookings.forEach(b => {
+                    const day = b.session_date || 'Brak daty';
+                    if (!grouped[day]) grouped[day] = [];
+                    grouped[day].push(b);
+                  });
+                  const dayGroups = Object.entries(grouped);
+                  return (
+                    <div className="space-y-4">
+                      {dayGroups.map(([date, items]) => {
+                        const dateObj = date !== 'Brak daty' ? new Date(date) : null;
+                        const today = new Date(); today.setHours(0,0,0,0);
+                        const isToday = dateObj && dateObj.toDateString() === today.toDateString();
+                        const isPast = dateObj && dateObj < today;
+                        const dayLabel = dateObj
+                          ? format(dateObj, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase()
+                          : 'BRAK DATY';
+                        return (
+                          <div key={date}>
+                            <div className="flex items-center gap-3 mb-2">
+                              <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: isPast ? '#9ca3af' : isToday ? '#f59e0b' : '#16a34a', flexShrink: 0 }} />
+                              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: isPast ? t.muted : isToday ? '#f59e0b' : t.muted }}>
+                                {isToday ? `DZIŚ — ${dayLabel}` : dayLabel}
+                              </p>
+                              <div style={{ flex: 1, height: '0.5px', background: t.border }} />
+                              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>
+                                {items.length} {items.length === 1 ? 'sesja' : 'sesji'}
+                              </span>
+                            </div>
+                            <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+                              {items.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={items} selected={selected} setSelected={setSelected} artists={artists} t={t} />)}
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {listBookings.length > listLimit && (
+                        <button
+                          onClick={() => setListLimit(l => l + 10)}
+                          className="w-full py-3 transition-all hover:opacity-80"
+                          style={{ border: `0.5px solid ${t.border}`, color: t.fuchsia, background: 'transparent', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer' }}
+                        >
+                          POKAŻ WIĘCEJ ({listBookings.length - listLimit} POZOSTAŁYCH)
+                        </button>
+                      )}
+                    </div>
+                  );
+                })()
               ) : (
                 <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-                  {listBookings.map((b, i) => (
-                    <div
-                      key={b.id}
-                      className="flex items-center justify-between p-4 cursor-pointer transition-colors"
-                      style={{ borderBottom: i < listBookings.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selected?.id === b.id ? 'rgba(255,0,127,0.05)' : 'transparent' }}
-                      onClick={() => setSelected(b)}
-                    >
-                      <div className="flex items-center gap-6 min-w-0">
-                        {/* Time badge */}
-                        {b.session_time && (
-                          <div className="flex-shrink-0 text-center" style={{ minWidth: '48px' }}>
-                            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: STATUS_COLORS[b.status] || t.fuchsia, letterSpacing: '0.05em' }}>{b.session_time}</p>
-                            {b.session_time && (() => {
-                              if (b.session_end_time) return <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted }}>→ {b.session_end_time}</p>;
-                              if (b.session_duration) {
-                                const [h, m] = b.session_time.split(':').map(Number);
-                                const endTotal = h * 60 + m + b.session_duration;
-                                const endH = String(Math.floor(endTotal / 60)).padStart(2, '0');
-                                const endM = String(endTotal % 60).padStart(2, '0');
-                                return <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted }}>→ {endH}:{endM}</p>;
-                              }
-                              return null;
-                            })()}
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2 min-w-0">
-                          {(() => {
-                            const artist = artists.find(a => a.id === b.artist_id);
-                            return artist?.photo_url ? (
-                              <img src={artist.photo_url} alt={artist.name} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${t.border}`, flexShrink: 0 }} />
-                            ) : b.artist_name ? (
-                              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(255,0,127,0.12)', border: `1px solid rgba(255,0,127,0.25)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                <span style={{ fontSize: '10px', color: '#FF007F', fontFamily: 'Bebas Neue, system-ui' }}>{b.artist_name.charAt(0)}</span>
-                              </div>
-                            ) : null;
-                          })()}
-                          <div className="min-w-0">
-                            <p style={{ color: t.text, fontSize: '14px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.client_name}</p>
-                            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                              {b.artist_name}{b.tattoo_placement ? ` · ${b.tattoo_placement}` : ''}{viewMode === 'list' ? ` · ${b.session_date || ''}` : ''}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        {!b.health_form_completed && (
-                          <span className="hidden sm:inline" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.08em', border: '0.5px solid #FF007F', padding: '2px 5px' }}>
-                            ANKIETA
-                          </span>
-                        )}
-                        {b.estimated_price && (
-                          <span className="hidden sm:inline" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{b.estimated_price} PLN</span>
-                        )}
-                        {/* Status: text on large, dot on smaller screens */}
-                        <span className="hidden lg:inline" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 8px', border: `0.5px solid ${STATUS_COLORS[b.status] || t.border}`, color: STATUS_COLORS[b.status] || t.muted }}>
-                          {b.status}
-                        </span>
-                        <div className="lg:hidden" style={{ width: '8px', height: '8px', borderRadius: '50%', background: STATUS_COLORS[b.status] || t.muted, flexShrink: 0 }} />
-                      </div>
-                    </div>
-                  ))}
+                  {listBookings.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={listBookings} selected={selected} setSelected={setSelected} artists={artists} t={t} />)}
                 </div>
               )}
             </div>
