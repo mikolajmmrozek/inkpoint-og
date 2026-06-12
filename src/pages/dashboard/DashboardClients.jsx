@@ -46,14 +46,14 @@ export default function DashboardClients() {
 
   // Get sessions and forms for a client
   const getClientData = (client) => {
-    const sessions = bookings.filter(b => 
-      b.client_email === client.email || 
-      (client.name && b.client_name === client.name)
-    );
-    const forms = healthForms.filter(f => 
-      f.client_email === client.email || 
-      (client.name && f.client_name === client.name)
-    );
+    const sessions = bookings.filter(b => {
+      if (client.email && b.client_email) return b.client_email === client.email;
+      return client.name && b.client_name === client.name;
+    });
+    const forms = healthForms.filter(f => {
+      if (client.email && f.client_email) return f.client_email === client.email;
+      return client.name && f.client_name === client.name;
+    });
     return { sessions, forms };
   };
 
