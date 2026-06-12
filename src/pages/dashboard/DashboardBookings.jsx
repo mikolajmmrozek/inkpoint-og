@@ -173,7 +173,7 @@ export default function DashboardBookings() {
   const [selected, setSelected] = useState(null);
   const [filter, setFilter] = useState(searchParams.get('filter') || 'all');
   const [artistFilter, setArtistFilter] = useState('all');
-  const [viewMode, setViewMode] = useState('calendar');
+  const [viewMode, setViewMode] = useState(searchParams.get('view') || 'calendar');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showModal, setShowModal] = useState(false);
   const [editingBooking, setEditingBooking] = useState(null);
