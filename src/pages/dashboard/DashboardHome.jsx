@@ -4,12 +4,15 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Calendar, Users, MessageSquare, FileText, TrendingUp, Clock, AlertCircle } from 'lucide-react';
 import { useTheme } from './Dashboard';
+import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
 
 export default function DashboardHome() {
   const { theme } = useTheme();
   const [stats, setStats] = useState({ bookings: 0, pending: 0, messages: 0, forms: 0 });
   const [pendingByDay, setPendingByDay] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [allBookings, setAllBookings] = useState([]);
 
   useEffect(() => {
     Promise.all([
@@ -17,6 +20,7 @@ export default function DashboardHome() {
       base44.entities.ContactMessage.filter({ is_read: false }),
       base44.entities.HealthForm.list('-created_date', 10),
     ]).then(([bookings, messages, forms]) => {
+      setAllBookings(bookings);
       const pending = bookings.filter(b => b.status === 'pending');
       setStats({
         bookings: bookings.length,
@@ -150,7 +154,7 @@ export default function DashboardHome() {
                   {/* Sessions */}
                   <div style={{ border: `0.5px solid ${isPast ? 'rgba(255,0,127,0.4)' : t.cardBorder}`, background: t.cardBg }}>
                     {items.map((b, i) => (
-                      <div key={b.id} className="flex items-center justify-between p-4" style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }}>
+                      <div key={b.id} onClick={() => setSelectedBooking(b)} className="flex items-center justify-between p-4 cursor-pointer transition-colors" style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none', background: 'transparent' }} onMouseEnter={e => e.currentTarget.style.background = t.rowHover} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                         <div className="flex items-center gap-4">
                           <div>
                             <p style={{ color: t.value, fontSize: '14px', fontWeight: 500 }}>{b.client_name}</p>
@@ -179,6 +183,26 @@ export default function DashboardHome() {
           </div>
         )}
       </div>
+
+      {selectedBooking && (
+        <BookingDetailPanel
+          booking={selectedBooking}
+          onClose={() => setSelectedBooking(null)}
+          onUpdate={(updated) => {
+            setAllBookings(prev => prev.map(b => b.id === updated.id ? updated : b));
+            // Refresh pending list
+            const pending = allBookings.map(b => b.id === updated.id ? updated : b).filter(b => b.status === 'pending');
+            const grouped = {};
+            pending.forEach(b => {
+              const day = b.session_date || 'Brak daty';
+              if (!grouped[day]) grouped[day] = [];
+              grouped[day].push(b);
+            });
+            setPendingByDay(Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b)).map(([date, items]) => ({ date, items })));
+            setSelectedBooking(null);
+          }}
+        />
+      )}
     </div>
   );
 }
