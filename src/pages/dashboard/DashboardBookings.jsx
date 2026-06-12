@@ -244,7 +244,8 @@ export default function DashboardBookings() {
             Rezerwacje
           </h2>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
+        {/* Row 1: view toggle + actions */}
+        <div className="flex items-center gap-2 flex-wrap mb-3">
           {/* View toggle */}
           <div className="flex" style={{ border: `0.5px solid ${t.border}` }}>
             {[{ mode: 'calendar', icon: Calendar }, { mode: 'day', icon: Clock }, { mode: 'list', icon: List }].map(({ mode, icon: Icon }) => (
@@ -258,42 +259,7 @@ export default function DashboardBookings() {
               </button>
             ))}
           </div>
-          {/* Artist filter */}
-          <div className="flex gap-1 flex-wrap">
-            <button onClick={() => setArtistFilter('all')} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilter === 'all' ? t.fuchsia : t.border}`, color: artistFilter === 'all' ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
-              Wszyscy
-            </button>
-            {artists.map(a => (
-              <button key={a.id} onClick={() => setArtistFilter(a.id)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilter === a.id ? t.fuchsia : t.border}`, color: artistFilter === a.id ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
-                {a.name}
-              </button>
-            ))}
-          </div>
-          {/* Status filter */}
-          <div className="flex gap-1 flex-wrap">
-            {['all', ...STATUS_OPTIONS].map(s => (
-              <button key={s} onClick={() => setFilter(s)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${filter === s ? t.fuchsia : t.border}`, color: filter === s ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
-                {s === 'all' ? 'Wszystkie' : s}
-              </button>
-            ))}
-          </div>
-          {/* Search */}
-          <div className="flex items-center gap-2 flex-1" style={{ minWidth: '180px', maxWidth: '320px', border: `0.5px solid ${searchQuery ? '#FF007F' : t.border}`, padding: '6px 12px', background: t.bg }}>
-            <Search size={12} color={searchQuery ? '#FF007F' : t.muted} />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={e => handleSearch(e.target.value)}
-              placeholder="Szukaj klienta, sesji..."
-              style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text, letterSpacing: '0.05em' }}
-            />
-            {searchQuery && (
-              <button onClick={() => setSearchQuery('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: 0 }}>
-                <X size={12} />
-              </button>
-            )}
-          </div>
-
+          <div className="flex-1" />
           {/* Today button */}
           <button
             onClick={() => { setSelectedDate(new Date()); setViewMode('day'); }}
@@ -306,6 +272,43 @@ export default function DashboardBookings() {
           <button onClick={handleNewBooking} className="flex items-center gap-2 btn-oxblood" style={{ padding: '10px 20px' }}>
             <Plus size={13} /> NOWA SESJA
           </button>
+        </div>
+
+        {/* Row 2: filters */}
+        <div className="flex items-center gap-1 flex-wrap mb-3">
+          {/* Artist filter */}
+          <button onClick={() => setArtistFilter('all')} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilter === 'all' ? t.fuchsia : t.border}`, color: artistFilter === 'all' ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
+            Wszyscy
+          </button>
+          {artists.map(a => (
+            <button key={a.id} onClick={() => setArtistFilter(a.id)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilter === a.id ? t.fuchsia : t.border}`, color: artistFilter === a.id ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
+              {a.name}
+            </button>
+          ))}
+          <div style={{ width: '0.5px', height: '16px', background: t.border, margin: '0 4px' }} />
+          {/* Status filter */}
+          {['all', ...STATUS_OPTIONS].map(s => (
+            <button key={s} onClick={() => setFilter(s)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${filter === s ? t.fuchsia : t.border}`, color: filter === s ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
+              {s === 'all' ? 'Wszystkie' : s}
+            </button>
+          ))}
+        </div>
+
+        {/* Row 3: search — full width */}
+        <div className="flex items-center gap-2 w-full" style={{ border: `0.5px solid ${searchQuery ? '#FF007F' : t.border}`, padding: '8px 14px', background: t.bg }}>
+          <Search size={12} color={searchQuery ? '#FF007F' : t.muted} />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => handleSearch(e.target.value)}
+            placeholder="Szukaj klienta, sesji, emailu, miejsca..."
+            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text, letterSpacing: '0.05em' }}
+          />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: 0 }}>
+              <X size={12} />
+            </button>
+          )}
         </div>
       </div>
 
