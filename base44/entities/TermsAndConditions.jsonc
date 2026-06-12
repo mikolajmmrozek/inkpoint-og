@@ -19,6 +19,10 @@
       "type": "string",
       "format": "date",
       "description": "Last update date"
+    },
+    "translations": {
+      "type": "object",
+      "description": "Cached translations keyed by language code, e.g. { en: { title, content }, de: { title, content } }"
     }
   },
   "required": [

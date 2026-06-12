@@ -114,6 +114,7 @@ export const T = {
     next: 'DALEJ',
     back: 'WSTECZ',
     fillRequired: 'Uzupełnij wszystkie wymagane pola przed przejściem dalej.',
+    readTerms: 'PRZECZYTAJ REGULAMIN STUDIA',
   },
   en: {
     title: 'HEALTH QUESTIONNAIRE',
@@ -215,6 +216,7 @@ export const T = {
     next: 'NEXT',
     back: 'BACK',
     fillRequired: 'Please fill in all required fields before proceeding.',
+    readTerms: 'READ STUDIO REGULATIONS',
   },
   de: {
     title: 'GESUNDHEITSFRAGEBOGEN',
@@ -316,6 +318,7 @@ export const T = {
     next: 'WEITER',
     back: 'ZURÜCK',
     fillRequired: 'Bitte füllen Sie alle Pflichtfelder aus, bevor Sie fortfahren.',
+    readTerms: 'STUDIOREGELN LESEN',
   },
   fr: {
     title: 'QUESTIONNAIRE DE SANTÉ',
@@ -417,6 +420,7 @@ export const T = {
     next: 'SUIVANT',
     back: 'RETOUR',
     fillRequired: 'Veuillez remplir tous les champs obligatoires avant de continuer.',
+    readTerms: 'LIRE LE RÈGLEMENT DU STUDIO',
   },
   es: {
     title: 'CUESTIONARIO DE SALUD',
@@ -518,6 +522,7 @@ export const T = {
     next: 'SIGUIENTE',
     back: 'ATRÁS',
     fillRequired: 'Por favor, rellene todos los campos obligatorios antes de continuar.',
+    readTerms: 'LEER EL REGLAMENTO DEL ESTUDIO',
   },
   it: {
     title: 'QUESTIONARIO SANITARIO',
@@ -619,6 +624,7 @@ export const T = {
     next: 'AVANTI',
     back: 'INDIETRO',
     fillRequired: 'Si prega di compilare tutti i campi obbligatori prima di procedere.',
+    readTerms: 'LEGGI IL REGOLAMENTO DEL STUDIO',
   },
   uk: {
     title: 'АНКЕТА ПРО ЗДОРОВ\'Я',
@@ -720,6 +726,7 @@ export const T = {
     next: 'ДАЛІ',
     back: 'НАЗАД',
     fillRequired: 'Будь ласка, заповніть всі обов\'язкові поля перед продовженням.',
+    readTerms: 'ЧИТАТИ ПРАВИЛА СТУДІЇ',
   },
   pt: {
     title: 'QUESTIONÁRIO DE SAÚDE',
@@ -821,6 +828,7 @@ export const T = {
     next: 'PRÓXIMO',
     back: 'VOLTAR',
     fillRequired: 'Por favor, preencha todos os campos obrigatórios antes de continuar.',
+    readTerms: 'LER O REGULAMENTO DO ESTÚDIO',
   },
   ru: {
     title: 'АНКЕТА ЗДОРОВЬЯ',
@@ -922,6 +930,7 @@ export const T = {
     next: 'ДАЛЕЕ',
     back: 'НАЗАД',
     fillRequired: 'Пожалуйста, заполните все обязательные поля перед продолжением.',
+    readTerms: 'ЧИТАТЬ ПРАВИЛА СТУДИИ',
   },
   cs: {
     title: 'ZDRAVOTNÍ DOTAZNÍK',
@@ -1023,6 +1032,7 @@ export const T = {
     next: 'DALŠÍ',
     back: 'ZPĚT',
     fillRequired: 'Vyplňte prosím všechna povinná pole před pokračováním.',
+    readTerms: 'ČÍST PRAVIDLA STUDIA',
   },
   sk: {
     title: 'ZDRAVOTNÝ DOTAZNÍK',
@@ -1124,6 +1134,7 @@ export const T = {
     next: 'ĎALEJ',
     back: 'SPÄŤ',
     fillRequired: 'Pred pokračovaním vyplňte všetky povinné polia.',
+    readTerms: 'ČÍTAŤ PRAVIDLÁ ŠTÚDIA',
   },
   hu: {
     title: 'EGÉSZSÉGÜGYI KÉRDŐÍV',
@@ -1225,5 +1236,6 @@ export const T = {
     next: 'KÖVETKEZŐ',
     back: 'VISSZA',
     fillRequired: 'Kérjük, töltse ki az összes kötelező mezőt a folytatás előtt.',
+    readTerms: 'OLVASSA EL A STÚDIÓ SZABÁLYZATÁT',
   },
 };

@@ -19,6 +19,10 @@
     "content": {
       "type": "string",
       "description": "Tre\u015b\u0107 instrukcji (HTML lub tekst)"
+    },
+    "translations": {
+      "type": "object",
+      "description": "Cached translations keyed by language code, e.g. { en: { title, content }, de: { title, content } }"
     }
   },
   "required": [

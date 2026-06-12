@@ -39,6 +39,8 @@ export default function StepConsents({ form, setField, t, showErrors, templateDa
     consents.forEach(c => setField(c.field_key, newVal));
   };
 
+  const termsUrl = lang && lang !== 'pl' ? `/terms?lang=${lang}` : '/terms';
+
   return (
     <div>
       {consents.length > 1 && (
@@ -54,6 +56,17 @@ export default function StepConsents({ form, setField, t, showErrors, templateDa
       {consents.map(c => (
         <ConsentBlock key={c.field_key} title={c.label} text={c.description || c.label} fieldKey={c.field_key} required={c.required} form={form} setField={setField} showErrors={showErrors} t={t} lang={lang} textMuted={textMuted} borderColor={borderColor} />
       ))}
+      {/* Link to studio terms in client's language */}
+      <div className="mt-4 pt-4" style={{ borderTop: `0.5px solid ${borderColor}` }}>
+        <a
+          href={termsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', opacity: 0.8 }}
+        >
+          ↗ {t?.readTerms || 'PRZECZYTAJ REGULAMIN STUDIA'}
+        </a>
+      </div>
     </div>
   );
 }

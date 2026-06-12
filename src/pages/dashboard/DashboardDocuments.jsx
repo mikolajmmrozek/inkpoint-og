@@ -1,7 +1,17 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
-import { Plus, Trash2, X, Pencil, FileText, Eye, Printer, Share2 } from 'lucide-react';
+import { Plus, Trash2, X, Pencil, FileText, Eye, Printer, Share2, Globe } from 'lucide-react';
+
+const LANG_OPTIONS = [
+  { code: 'pl', label: '🇵🇱 Polski' },
+  { code: 'en', label: '🇬🇧 English' },
+  { code: 'de', label: '🇩🇪 Deutsch' },
+  { code: 'fr', label: '🇫🇷 Français' },
+  { code: 'es', label: '🇪🇸 Español' },
+  { code: 'it', label: '🇮🇹 Italiano' },
+  { code: 'uk', label: '🇺🇦 Українська' },
+];
 
 const INSTRUCTION_TYPES = [
   { key: 'aftercare_tattoo', label: 'Pielęgnacja tatuażu' },
@@ -24,6 +34,9 @@ export default function DashboardDocuments() {
 
   // View modal
   const [viewDoc, setViewDoc] = useState(null); // { kind: 'instr'|'terms', data, typeKey? }
+  const [viewLang, setViewLang] = useState('pl');
+  const [translating, setTranslating] = useState(false);
+  const [translatedContent, setTranslatedContent] = useState(null); // { title, content } | null
 
   // Share modal
   const [shareDoc, setShareDoc] = useState(null); // { docData, label }
@@ -113,17 +126,41 @@ export default function DashboardDocuments() {
     width: '100%',
   };
 
-  const handlePrint = (docData, label) => {
+  const translateDoc = async (docData, kind, lang) => {
+    if (lang === 'pl') { setTranslatedContent(null); return; }
+    if (!docData?.id) return;
+    setTranslating(true);
+    try {
+      const res = await base44.functions.invoke('translateDocument', {
+        entity_type: kind === 'terms' ? 'terms' : 'instruction',
+        entity_id: docData.id,
+        target_lang: lang,
+      });
+      setTranslatedContent(res.data);
+    } finally {
+      setTranslating(false);
+    }
+  };
+
+  const handlePrint = (docData, label, translated) => {
+    const d = translated || docData;
     const w = window.open('', '_blank');
-    w.document.write(`<html><head><title>${label}</title><style>body{font-family:Inter,sans-serif;padding:40px;max-width:800px;margin:0 auto}h1{font-size:28px;margin-bottom:8px}pre{white-space:pre-wrap;font-size:14px;line-height:1.8}</style></head><body><h1>${docData?.title || label}</h1><hr/><pre>${(docData?.content || '').replace(/<[^>]+>/g, '')}</pre></body></html>`);
+    w.document.write(`<html><head><title>${d?.title || label}</title><style>body{font-family:Inter,sans-serif;padding:40px;max-width:800px;margin:0 auto}h1{font-size:28px;margin-bottom:8px}pre{white-space:pre-wrap;font-size:14px;line-height:1.8}</style></head><body><h1>${d?.title || label}</h1><hr/><div style="font-size:14px;line-height:1.8">${d?.content || ''}</div></body></html>`);
     w.document.close();
     w.print();
   };
 
   const handleShare = (docData, label) => {
+    // Use translated content if available in view modal, otherwise original
     setShareDoc({ docData, label });
     setShareEmail('');
     setShareResult(null);
+  };
+
+  const openViewDoc = (doc) => {
+    setViewDoc(doc);
+    setViewLang('pl');
+    setTranslatedContent(null);
   };
 
   const handleSendShareEmail = async () => {
@@ -191,9 +228,10 @@ export default function DashboardDocuments() {
     const isInstr = viewDoc.kind === 'instr';
     const docData = isInstr ? viewDoc.data : terms;
     const label = isInstr ? (INSTRUCTION_TYPES.find(x => x.key === viewDoc.typeKey)?.label || 'Dokument') : 'Regulamin Studia';
+    const displayData = translatedContent || docData;
 
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.8)' }} onClick={() => setViewDoc(null)}>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.8)' }} onClick={() => { setViewDoc(null); setTranslatedContent(null); setViewLang('pl'); }}>
         <div className="w-full max-w-2xl flex flex-col" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, maxHeight: '90vh' }} onClick={e => e.stopPropagation()}>
           {/* Header */}
           <div className="flex items-center justify-between p-6" style={{ borderBottom: `0.5px solid ${t.border}`, flexShrink: 0 }}>
@@ -203,33 +241,59 @@ export default function DashboardDocuments() {
               </p>
               <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em', lineHeight: 1 }}>{label}</h3>
             </div>
-            <button onClick={() => setViewDoc(null)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
-              <X size={18} />
-            </button>
+            <div className="flex items-center gap-2">
+              {/* Language selector */}
+              <div className="flex items-center gap-1.5" style={{ border: `0.5px solid ${t.border}`, padding: '6px 10px' }}>
+                <Globe size={11} color={t.muted} />
+                <select
+                  value={viewLang}
+                  onChange={e => {
+                    const lang = e.target.value;
+                    setViewLang(lang);
+                    translateDoc(docData, viewDoc.kind, lang);
+                  }}
+                  style={{ background: 'transparent', border: 'none', outline: 'none', color: t.text, fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', cursor: 'pointer' }}
+                >
+                  {LANG_OPTIONS.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
+                </select>
+              </div>
+              <button onClick={() => { setViewDoc(null); setTranslatedContent(null); setViewLang('pl'); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
+                <X size={18} />
+              </button>
+            </div>
           </div>
 
           {/* Content */}
           <div className="overflow-y-auto p-6 flex-1">
-            {docData?.title && (
-              <p style={{ ...mono, fontSize: '11px', color: t.fuchsia, letterSpacing: '0.1em', marginBottom: '12px' }}>{docData.title}</p>
-            )}
-            {docData?.last_updated && (
-              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.08em', marginBottom: '16px' }}>
-                Ostatnia aktualizacja: {docData.last_updated}
-              </p>
-            )}
-            {docData?.content ? (
-              <div
-                style={{ color: t.text, fontSize: '13px', lineHeight: 1.8, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
-                dangerouslySetInnerHTML={{ __html: docData.content }}
-              />
+            {translating ? (
+              <div className="flex items-center gap-3 py-8">
+                <div className="w-6 h-px animate-pulse" style={{ background: t.fuchsia }} />
+                <p style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.1em' }}>TŁUMACZENIE...</p>
+              </div>
             ) : (
-              <p style={{ color: t.muted, fontSize: '13px', fontStyle: 'italic' }}>Brak treści.</p>
+              <>
+                {displayData?.title && (
+                  <p style={{ ...mono, fontSize: '11px', color: t.fuchsia, letterSpacing: '0.1em', marginBottom: '12px' }}>{displayData.title}</p>
+                )}
+                {docData?.last_updated && (
+                  <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.08em', marginBottom: '16px' }}>
+                    Ostatnia aktualizacja: {docData.last_updated}
+                  </p>
+                )}
+                {displayData?.content ? (
+                  <div
+                    style={{ color: t.text, fontSize: '13px', lineHeight: 1.8, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+                    dangerouslySetInnerHTML={{ __html: displayData.content }}
+                  />
+                ) : (
+                  <p style={{ color: t.muted, fontSize: '13px', fontStyle: 'italic' }}>Brak treści.</p>
+                )}
+              </>
             )}
           </div>
 
           {/* Footer actions */}
-          <div className="flex gap-3 p-6" style={{ borderTop: `0.5px solid ${t.border}`, flexShrink: 0 }}>
+          <div className="flex gap-3 p-6 flex-wrap" style={{ borderTop: `0.5px solid ${t.border}`, flexShrink: 0 }}>
             <button
               onClick={() => {
                 if (isInstr) {
@@ -240,6 +304,8 @@ export default function DashboardDocuments() {
                   setEditingTerms(true);
                 }
                 setViewDoc(null);
+                setTranslatedContent(null);
+                setViewLang('pl');
               }}
               className="flex items-center gap-2 btn-oxblood"
               style={{ padding: '10px 20px' }}
@@ -247,16 +313,18 @@ export default function DashboardDocuments() {
               <Pencil size={12} /> EDYTUJ
             </button>
             <button
-              onClick={() => handlePrint(docData, label)}
+              onClick={() => handlePrint(docData, label, translatedContent)}
+              disabled={translating}
               className="flex items-center gap-2"
-              style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 20px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}
+              style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 20px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', opacity: translating ? 0.5 : 1 }}
             >
               <Printer size={12} /> DRUKUJ
             </button>
             <button
-              onClick={() => handleShare(docData, label)}
+              onClick={() => handleShare(translatedContent || docData, label)}
+              disabled={translating}
               className="flex items-center gap-2"
-              style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 20px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}
+              style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 20px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', opacity: translating ? 0.5 : 1 }}
             >
               <Share2 size={12} /> UDOSTĘPNIJ
             </button>
@@ -305,15 +373,15 @@ export default function DashboardDocuments() {
                 const instr = instructions.find(i => i.type === type.key);
                 return (
                   <DocCard
-                    key={type.key}
-                    label={type.label}
-                    title={instr?.title}
-                    content={instr?.content}
-                    onView={() => setViewDoc({ kind: 'instr', data: instr, typeKey: type.key })}
-                    onEdit={() => { setInstrForm(instr || { type: type.key, title: '', content: '' }); setEditingInstr(instr?.id || type.key); setSaveError(null); }}
-                    onDelete={instr ? () => handleDeleteInstr(instr.id) : null}
-                    onPrint={() => handlePrint(instr, type.label)}
-                    onShare={() => handleShare(instr, type.label)}
+                   key={type.key}
+                   label={type.label}
+                   title={instr?.title}
+                   content={instr?.content}
+                   onView={() => openViewDoc({ kind: 'instr', data: instr, typeKey: type.key })}
+                   onEdit={() => { setInstrForm(instr || { type: type.key, title: '', content: '' }); setEditingInstr(instr?.id || type.key); setSaveError(null); }}
+                   onDelete={instr ? () => handleDeleteInstr(instr.id) : null}
+                   onPrint={() => handlePrint(instr, type.label, null)}
+                   onShare={() => handleShare(instr, type.label)}
                   />
                 );
               })}
@@ -327,9 +395,9 @@ export default function DashboardDocuments() {
               label="Regulamin Studia"
               title={terms?.title}
               content={terms?.content}
-              onView={() => setViewDoc({ kind: 'terms' })}
+              onView={() => openViewDoc({ kind: 'terms', data: terms })}
               onEdit={() => { setTermsForm(terms || { title: '', content: '' }); setEditingTerms(true); setSaveError(null); }}
-              onPrint={() => handlePrint(terms, 'Regulamin Studia')}
+              onPrint={() => handlePrint(terms, 'Regulamin Studia', null)}
               onShare={() => handleShare(terms, 'Regulamin Studia')}
             />
           </div>
