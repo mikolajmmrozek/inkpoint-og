@@ -52,8 +52,8 @@ export default function DashboardHome() {
   };
 
   const t = theme === 'light'
-    ? { label: '#FF007F', title: '#111111', muted: 'rgba(0,0,0,0.4)', cardBg: '#FFFFFF', cardBorder: '#E5E5E5', value: '#111111', rowHover: 'rgba(0,0,0,0.03)', rowBorder: '#E5E5E5' }
-    : { label: '#FF007F', title: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', cardBg: 'rgba(38,38,38,0.2)', cardBorder: '#262626', value: '#F5F0EB', rowHover: 'rgba(255,255,255,0.05)', rowBorder: '#262626' };
+    ? { label: '#FF007F', title: '#111111', muted: 'rgba(0,0,0,0.4)', cardBg: '#FFFFFF', cardBorder: '#E5E5E5', value: '#111111', rowHover: 'rgba(0,0,0,0.03)', rowBorder: '#E5E5E5', pageBg: '#D5D5D5' }
+    : { label: '#FF007F', title: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', cardBg: 'rgba(255,255,255,0.06)', cardBorder: '#262626', value: '#F5F0EB', rowHover: 'rgba(255,255,255,0.05)', rowBorder: '#262626', pageBg: '#0A0A0A' };
 
   const KPI = [
     { label: 'Wszystkie rezerwacje', value: stats.bookings, icon: Calendar, link: '/dashboard/bookings' },
