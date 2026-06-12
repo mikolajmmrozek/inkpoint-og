@@ -520,7 +520,7 @@ export default function DashboardBookings() {
               )}
 
               {/* Detail panel — slide-in drawer from right */}
-      <AnimatePresence>
+              <AnimatePresence>
         {selected && (
           <BookingDetailPanel
             booking={selected}
