@@ -262,7 +262,9 @@ export default function DashboardBookings() {
     setSearchQuery(q);
     if (q.trim()) {
       setListPage(0);
-      setSelectedDate(new Date());
+      setSelectedDate(null);
+      setViewMode('list');
+      setListTab('upcoming');
     }
   };
 
