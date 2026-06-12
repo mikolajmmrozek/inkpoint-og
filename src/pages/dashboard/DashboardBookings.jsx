@@ -516,6 +516,7 @@ export default function DashboardBookings() {
                 onBookingClick={handleBookingClick}
                 onNewBookingRequest={handleNewBookingRequest}
                 t={t}
+                artistFilter={artistFilter}
               />
             )}
 

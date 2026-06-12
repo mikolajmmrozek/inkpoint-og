@@ -140,7 +140,7 @@ const ArtistColumn = memo(function ArtistColumn({ artist, artistBookings, onColu
   );
 });
 
-export default function DailyScheduleView({ bookings, artists, selectedDate, onDateChange, onBookingClick, onNewBookingRequest, t }) {
+export default function DailyScheduleView({ bookings, artists, selectedDate, onDateChange, onBookingClick, onNewBookingRequest, t, artistFilter = 'all' }) {
   const scrollRef = useRef(null);
 
   const dateStr = useMemo(() => format(selectedDate, 'yyyy-MM-dd'), [selectedDate]);
@@ -198,10 +198,28 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
 
       {/* Timeline body */}
       <div ref={scrollRef} className="overflow-y-auto overflow-x-auto" style={{ maxHeight: '600px' }}>
+        {/* Artist headers */}
+        {(artistFilter === 'all' ? activeArtists : activeArtists.filter(a => a.id === artistFilter)).map((a, idx) => (
+          <div key={`header-${a.id}`} className="flex">
+            <div style={{ width: '44px', flexShrink: 0 }} />
+            <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px 4px', borderBottom: `0.5px solid ${t.border}`, gap: '6px' }}>
+              {a.photo_url ? (
+                <img src={a.photo_url} alt={a.name} loading="lazy" width={20} height={20} style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${t.border}` }} />
+              ) : (
+                <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,0,127,0.15)', border: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontSize: '9px', color: '#FF007F', fontFamily: 'Bebas Neue, system-ui' }}>{a.name.charAt(0)}</span>
+                </div>
+              )}
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {a.name}
+              </p>
+            </div>
+          </div>
+        ))}
         <div style={{ position: 'relative', minWidth: 'min-content' }}>
           <div className="flex">
             <TimeAxis muted={t.muted} />
-            {activeArtists.map(a => (
+            {(artistFilter === 'all' ? activeArtists : activeArtists.filter(a => a.id === artistFilter)).map(a => (
               <ArtistColumn
                 key={a.id}
                 artist={a}
