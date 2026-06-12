@@ -180,7 +180,7 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
   }, [onNewBookingRequest, dateStr]);
 
   return (
-    <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+    <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, width: '100%', boxSizing: 'border-box' }}>
       {/* Date navigation */}
       <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
         <button onClick={() => onDateChange(subDays(selectedDate, 1))} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
