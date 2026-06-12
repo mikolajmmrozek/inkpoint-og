@@ -195,7 +195,7 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
       </div>
 
       {/* Artist headers (sticky) */}
-      <div style={{ display: 'flex', minWidth: 'min-content', borderBottom: `0.5px solid ${t.border}` }}>
+      <div style={{ display: 'flex', width: '100%', borderBottom: `0.5px solid ${t.border}` }}>
         <div style={{ width: '44px', flexShrink: 0, borderLeft: `0.5px solid ${t.border}` }} />
         {(artistFilter === 'all' ? activeArtists : activeArtists.filter(a => a.id === artistFilter)).map(a => (
           <div key={`header-${a.id}`} style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px 4px', gap: '6px', borderLeft: `0.5px solid ${t.border}` }}>
@@ -215,7 +215,7 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
 
       {/* Timeline body */}
       <div ref={scrollRef} className="overflow-y-auto overflow-x-auto" style={{ maxHeight: '600px' }}>
-        <div style={{ display: 'flex', minWidth: 'min-content' }}>
+        <div style={{ display: 'flex', width: '100%', minHeight: 0 }}>
           <TimeAxis muted={t.muted} />
           {(artistFilter === 'all' ? activeArtists : activeArtists.filter(a => a.id === artistFilter)).map(a => (
             <ArtistColumn
