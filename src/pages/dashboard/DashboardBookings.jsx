@@ -298,7 +298,7 @@ export default function DashboardBookings() {
             )}
 
             {/* List */}
-            <div>
+            {viewMode !== 'day' && <div>
               {viewMode === 'calendar' && selectedDate && (
                 <div className="flex items-center justify-between mb-3" style={{ border: `0.5px solid ${t.border}`, padding: '10px 16px', background: t.bg }}>
                   <button onClick={() => setSelectedDate(d => subDays(d, 1))} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}>
@@ -409,7 +409,7 @@ export default function DashboardBookings() {
                   {listBookings.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={listBookings} selected={selected} setSelected={setSelected} artists={artists} t={t} />)}
                 </div>
               )}
-            </div>
+            </div>}
           </div>
 
         </div>
