@@ -12,17 +12,17 @@ const Row = ({ label, value, t }) => (
 
 const YesNo = ({ label, value, desc, t }) => (
   <div className="flex items-start justify-between gap-3 py-2" style={{ borderBottom: `0.5px solid ${t?.border || '#1a1a1a'}` }}>
-    <p style={{ color: t?.text || 'rgba(245,240,235,0.7)', fontSize: '13px', lineHeight: 1.4, flex: 1 }}>{label}</p>
+    <p style={{ color: t?.text || '#F5F0EB', fontSize: '13px', lineHeight: 1.4, flex: 1 }}>{label}</p>
     <div className="text-right flex-shrink-0">
-      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: value === true ? '#FF007F' : value === false ? '#16a34a' : 'rgba(245,240,235,0.3)' }}>
+      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: value === true ? '#FF007F' : value === false ? '#16a34a' : t?.muted || 'rgba(245,240,235,0.3)' }}>
         {value === true ? 'TAK' : value === false ? 'NIE' : '—'}
       </span>
-      {value && desc && <p style={{ fontSize: '11px', color: 'rgba(245,240,235,0.4)', marginTop: '2px' }}>{desc}</p>}
+      {value && desc && <p style={{ fontSize: '11px', color: t?.muted || 'rgba(245,240,235,0.4)', marginTop: '2px' }}>{desc}</p>}
     </div>
   </div>
 );
 
-export default function HealthFormPreviewModal({ bookingId, clientName, onClose, t }) {
+export default function HealthFormPreviewModal({ bookingId, healthFormId, clientName, onClose, t }) {
   t = t || { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F' };
   const [form, setForm] = useState(null);
   const [guardian, setGuardian] = useState(null);
@@ -31,10 +31,15 @@ export default function HealthFormPreviewModal({ bookingId, clientName, onClose,
 
   useEffect(() => {
     const load = async () => {
-      const [forms, tplArr] = await Promise.all([
-        base44.entities.HealthForm.filter({ booking_id: bookingId }, '-form_filled_date', 1),
-        base44.entities.HealthFormTemplate.filter({ key: 'default' }),
-      ]);
+      let forms;
+      const tplArr = await base44.entities.HealthFormTemplate.filter({ key: 'default' });
+      if (healthFormId) {
+        const f = await base44.entities.HealthForm.filter({ id: healthFormId }, '-form_filled_date', 1);
+        forms = f;
+      } else {
+        forms = await base44.entities.HealthForm.filter({ booking_id: bookingId }, '-form_filled_date', 1);
+      }
+      if (tplArr.length > 0) setTemplate(tplArr[0]);
       if (tplArr.length > 0) setTemplate(tplArr[0]);
       if (forms.length > 0) {
         setForm(forms[0]);
@@ -46,7 +51,7 @@ export default function HealthFormPreviewModal({ bookingId, clientName, onClose,
       setLoading(false);
     };
     load();
-  }, [bookingId]);
+  }, [bookingId, healthFormId]);
 
   const MEDICAL = [
     ['Choroby serca', 'has_heart_condition', 'heart_condition_description'],
@@ -168,8 +173,10 @@ export default function HealthFormPreviewModal({ bookingId, clientName, onClose,
               {/* Signature */}
               {form.client_signature && (
                 <div className="mt-4">
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>— PODPIS</p>
-                  <img src={form.client_signature} alt="podpis" style={{ background: '#fff', maxWidth: '200px', border: '0.5px solid #262626' }} />
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>— PODPIS KLIENTA</p>
+                  <div style={{ background: '#ffffff', display: 'inline-block', padding: '8px', border: '0.5px solid #cccccc' }}>
+                    <img src={form.client_signature} alt="podpis" style={{ maxWidth: '200px', display: 'block' }} />
+                  </div>
                 </div>
               )}
 
@@ -180,7 +187,9 @@ export default function HealthFormPreviewModal({ bookingId, clientName, onClose,
                   <Row label="Opiekun" value={guardian.guardian_name} t={t} />
                   <Row label="Telefon opiekuna" value={guardian.guardian_phone} t={t} />
                   {guardian.guardian_signature && (
-                    <img src={guardian.guardian_signature} alt="podpis opiekuna" style={{ background: '#fff', maxWidth: '200px', border: '0.5px solid #262626', marginTop: '8px' }} />
+                    <div style={{ background: '#ffffff', display: 'inline-block', padding: '8px', border: '0.5px solid #cccccc', marginTop: '8px' }}>
+                      <img src={guardian.guardian_signature} alt="podpis opiekuna" style={{ maxWidth: '200px', display: 'block' }} />
+                    </div>
                   )}
                 </div>
               )}
