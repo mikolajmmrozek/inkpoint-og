@@ -12,12 +12,16 @@ const STATUS_COLORS = {
 
 export default function BookingCalendar({ bookings, onDayClick, selectedDate, t }) {
   const [viewMonth, setViewMonth] = useState(new Date());
+  const today = new Date();
+  const effectiveSelectedDate = selectedDate || today;
 
   const days = eachDayOfInterval({ start: startOfMonth(viewMonth), end: endOfMonth(viewMonth) });
   const startPad = (getDay(startOfMonth(viewMonth)) + 6) % 7; // Monday start
 
   const getBookingsForDay = (day) =>
     bookings.filter(b => b.session_date && isSameDay(new Date(b.session_date), day));
+
+  const selectedDayBookings = getBookingsForDay(effectiveSelectedDate);
 
   const WEEKDAYS = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Ndz'];
 
@@ -52,8 +56,8 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t 
 
         {days.map(day => {
           const dayBookings = getBookingsForDay(day);
-          const isSelected = selectedDate && isSameDay(day, selectedDate);
-          const isToday = isSameDay(day, new Date());
+          const isSelected = isSameDay(day, effectiveSelectedDate);
+          const isToday = isSameDay(day, today);
 
           return (
             <button
@@ -90,6 +94,33 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t 
           );
         })}
       </div>
+
+      {/* Selected day sessions */}
+      {selectedDayBookings.length > 0 && (
+        <div className="mt-6" style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '16px' }}>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>
+            Sesje — {format(effectiveSelectedDate, 'EEEE, d MMMM', { locale: pl }).toUpperCase()}
+          </p>
+          <div style={{ border: `0.5px solid ${t.border}`, background: 'rgba(255,0,127,0.02)' }}>
+            {selectedDayBookings.map((b, i) => (
+              <div key={b.id} style={{ borderBottom: i < selectedDayBookings.length - 1 ? `0.5px solid ${t.border}` : 'none', padding: '10px 12px' }}>
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p style={{ color: t.text, fontSize: '12px', fontWeight: 500 }}>{b.client_name}</p>
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginTop: '2px' }}>
+                      {b.session_time}{b.session_end_time ? ` — ${b.session_end_time}` : ''}
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
+                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: STATUS_COLORS[b.status] || '#FF007F' }} />
+                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>{b.status}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Legend */}
       <div className="flex gap-4 mt-6 pt-4 flex-wrap" style={{ borderTop: `0.5px solid ${t.border}` }}>
