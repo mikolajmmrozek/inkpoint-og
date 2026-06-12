@@ -234,16 +234,21 @@ export default function DashboardBookings() {
 
   const handleDayClick = (day) => {
     const dayDateStr = format(day, 'yyyy-MM-dd');
-    const dayHasResults = calendarBookings.some(b => b.session_date === dayDateStr);
+    const dayHasResults = listBookings.some(b => b.session_date === dayDateStr);
     
-    if (searchQuery.trim() && !dayHasResults) {
-      setSearchQuery('');
-    }
-    
-    if (selectedDate && isSameDay(selectedDate, day)) {
-      setViewMode('day');
+    if (searchQuery.trim()) {
+      // W trybie wyszukiwania: jeśli dzień ma wyniki, ustaw go
+      if (dayHasResults) {
+        setSelectedDate(day);
+      }
+      // Jeśli dzień nie ma wyników, nic nie rob (nie wymazuj searchQuery)
     } else {
-      setSelectedDate(day);
+      // Zwykłe zachowanie bez wyszukiwania
+      if (selectedDate && isSameDay(selectedDate, day)) {
+        setViewMode('day');
+      } else {
+        setSelectedDate(day);
+      }
     }
     setSelected(null);
   };
@@ -494,20 +499,20 @@ export default function DashboardBookings() {
             {/* List section */}
              {showListSection && (
               <div>
-                {viewMode === 'calendar' && selectedDate && !searchQuery.trim() && (
+                {viewMode === 'calendar' && selectedDate && (
                   <div className="flex items-center justify-between mb-3" style={{ border: `0.5px solid ${t.border}`, padding: '10px 16px', background: t.bg }}>
-                    <button onClick={() => { setSearchQuery(''); setSelectedDate(d => subDays(d, 1)); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}>
+                    <button onClick={() => { if (!searchQuery.trim()) setSelectedDate(d => subDays(d, 1)); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px', opacity: searchQuery.trim() ? 0.3 : 1 }}>
                       <ChevronLeft size={16} />
                     </button>
                     <div className="text-center">
                       <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.2rem', color: t.title, letterSpacing: '0.08em', lineHeight: 1 }}>
                         {format(selectedDate, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase()}
                       </p>
-                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: listBookings.length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
-                        {listBookings.length} {listBookings.length === 1 ? 'SESJA' : listBookings.length >= 2 && listBookings.length <= 4 ? 'SESJE' : 'SESJI'}
+                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
+                        {listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length} {listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length === 1 ? 'SESJA' : listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length >= 2 && listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length <= 4 ? 'SESJE' : 'SESJI'}
                       </p>
                     </div>
-                    <button onClick={() => { setSearchQuery(''); setSelectedDate(d => addDays(d, 1)); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}>
+                    <button onClick={() => { if (!searchQuery.trim()) setSelectedDate(d => addDays(d, 1)); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px', opacity: searchQuery.trim() ? 0.3 : 1 }}>
                       <ChevronRight size={16} />
                     </button>
                   </div>
@@ -546,7 +551,17 @@ export default function DashboardBookings() {
                   </div>
                 )}
 
-                {!(viewMode === 'calendar' && searchQuery.trim()) && (
+                {viewMode === 'calendar' && searchQuery.trim() && selectedDate ? (
+                  <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+                    {listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length > 0 ? (
+                      listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).map((b, i, arr) => <BookingRow key={b.id} b={b} i={i} items={arr} selected={selected} setSelected={setSelected} artists={artists} t={t} />)
+                    ) : (
+                      <div className="py-6 text-center">
+                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK SESJI W TEN DZIEŃ</p>
+                      </div>
+                    )}
+                  </div>
+                ) : !(viewMode === 'calendar') && (
                   <ListContent
                     viewMode={viewMode}
                     searchQuery={searchQuery}
