@@ -200,13 +200,13 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
 
 
       {/* Mobile: artist selector */}
-      <div className="flex md:hidden gap-1 overflow-x-auto p-2" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+      <div className="flex md:hidden p-2" style={{ borderBottom: `0.5px solid ${t.border}` }}>
         {activeArtists.map(a => (
           <button
             key={a.id}
             onClick={() => setMobileArtistId(mobileArtistId === a.id ? null : a.id)}
             style={{
-              width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0,
+              flex: 1, height: '32px', borderRadius: '50%',
               border: mobileArtistId === a.id ? '2px solid #FF007F' : `1px solid ${t.border}`,
               padding: 0, cursor: 'pointer', background: 'transparent',
               overflow: 'hidden',
