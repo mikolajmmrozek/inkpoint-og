@@ -262,6 +262,7 @@ export default function DashboardBookings() {
     setSearchQuery(q);
     if (q.trim()) {
       setListPage(0);
+      setSelectedDate(new Date());
     }
   };
 
