@@ -435,6 +435,31 @@ export default function DashboardBookings() {
       ) : (
         <div>
           <div className="space-y-6">
+            {/* Search results above calendar */}
+            {viewMode === 'calendar' && searchQuery.trim() && (
+              <div className="mb-6">
+                <div style={{ padding: '10px 16px', background: t.bg, border: `0.5px solid ${t.border}` }}>
+                  <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.1rem', color: t.title, letterSpacing: '0.08em' }}>
+                    WYNIKI WYSZUKIWANIA
+                  </p>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: listBookings.length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
+                    {listBookings.length} {listBookings.length === 1 ? 'SESJA' : listBookings.length >= 2 && listBookings.length <= 4 ? 'SESJE' : 'SESJI'}
+                  </p>
+                </div>
+                {listBookings.length > 0 ? (
+                  <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, marginTop: '4px' }}>
+                    {listBookings.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={listBookings} selected={selected} setSelected={setSelected} artists={artists} t={t} />)}
+                  </div>
+                ) : (
+                  <div className="py-6 text-center" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
+                      BRAK PASUJĄCYCH SESJI
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Calendar view */}
             {viewMode === 'calendar' && (
               <BookingCalendar
@@ -462,32 +487,8 @@ export default function DashboardBookings() {
             )}
 
             {/* List section */}
-            {showListSection && (
+             {showListSection && (
               <div>
-                {viewMode === 'calendar' && searchQuery.trim() && (
-                  <div className="mb-6">
-                    <div style={{ padding: '10px 16px', background: t.bg, border: `0.5px solid ${t.border}` }}>
-                      <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.1rem', color: t.title, letterSpacing: '0.08em' }}>
-                        WYNIKI WYSZUKIWANIA
-                      </p>
-                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: listBookings.length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
-                        {listBookings.length} {listBookings.length === 1 ? 'SESJA' : listBookings.length >= 2 && listBookings.length <= 4 ? 'SESJE' : 'SESJI'}
-                      </p>
-                    </div>
-                    {listBookings.length > 0 ? (
-                      <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, marginTop: '4px' }}>
-                        {listBookings.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={listBookings} selected={selected} setSelected={setSelected} artists={artists} t={t} />)}
-                      </div>
-                    ) : (
-                      <div className="py-6 text-center" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
-                          BRAK PASUJĄCYCH SESJI
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
                 {viewMode === 'calendar' && selectedDate && !searchQuery.trim() && (
                   <div className="flex items-center justify-between mb-3" style={{ border: `0.5px solid ${t.border}`, padding: '10px 16px', background: t.bg }}>
                     <button onClick={() => { setSearchQuery(''); setSelectedDate(d => subDays(d, 1)); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}>
