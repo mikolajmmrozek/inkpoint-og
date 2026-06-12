@@ -423,6 +423,7 @@ export default function DashboardBookings() {
                 t={t}
                 artists={artists}
                 onAddBooking={handleNewBooking}
+                searchQuery={searchQuery}
               />
             )}
 
