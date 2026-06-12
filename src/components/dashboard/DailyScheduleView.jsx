@@ -141,7 +141,6 @@ const ArtistColumn = memo(function ArtistColumn({ artist, artistBookings, onColu
 });
 
 export default function DailyScheduleView({ bookings, artists, selectedDate, onDateChange, onBookingClick, onNewBookingRequest, t }) {
-  const [selectedArtistIds, setSelectedArtistIds] = useState(new Set());
   const scrollRef = useRef(null);
 
   const dateStr = useMemo(() => format(selectedDate, 'yyyy-MM-dd'), [selectedDate]);
@@ -180,17 +179,7 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
     onNewBookingRequest?.({ artist, time: `${h}:${m}`, date: dateStr });
   }, [onNewBookingRequest, dateStr]);
 
-  const handleArtistToggle = (artistId) => {
-    setSelectedArtistIds(prev => {
-      const next = new Set(prev);
-      if (next.has(artistId)) {
-        next.delete(artistId);
-      } else {
-        next.add(artistId);
-      }
-      return next;
-    });
-  };
+
 
   return (
     <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
@@ -207,44 +196,14 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
         </button>
       </div>
 
-      {/* Artist selector */}
-      <div className="flex overflow-x-auto" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-        {activeArtists.map(a => {
-          const count = (bookingsByArtist[a.id] || []).length;
-          const isSelected = selectedArtistIds.size === 0 || selectedArtistIds.has(a.id);
-          return (
-            <button
-              key={a.id}
-              onClick={() => handleArtistToggle(a.id)}
-              className="flex items-center gap-2"
-              style={{
-                fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase',
-                padding: '8px 14px', border: 'none',
-                borderBottom: isSelected ? '2px solid #FF007F' : '2px solid transparent',
-                color: isSelected ? '#FF007F' : t.muted,
-                background: 'transparent', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-              }}
-            >
-              {a.photo_url ? (
-                <img src={a.photo_url} alt={a.name} loading="lazy" width={22} height={22} style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover', border: isSelected ? '1.5px solid #FF007F' : `1px solid ${t.border}`, flexShrink: 0 }} />
-              ) : (
-                <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255,0,127,0.15)', border: isSelected ? '1.5px solid #FF007F' : `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <span style={{ fontSize: '9px', color: '#FF007F', fontFamily: 'Bebas Neue, system-ui' }}>{a.name.charAt(0)}</span>
-                </div>
-              )}
-              {a.name.split(' ')[0]}
-              {count > 0 && <span style={{ color: '#FF007F' }}>({count})</span>}
-            </button>
-          );
-        })}
-      </div>
+
 
       {/* Timeline body */}
       <div ref={scrollRef} className="overflow-y-auto overflow-x-auto" style={{ maxHeight: '600px' }}>
         <div style={{ position: 'relative', minWidth: 'min-content' }}>
           <div className="flex">
             <TimeAxis muted={t.muted} />
-            {(selectedArtistIds.size === 0 ? activeArtists : activeArtists.filter(a => selectedArtistIds.has(a.id))).map(a => (
+            {activeArtists.map(a => (
               <ArtistColumn
                 key={a.id}
                 artist={a}
