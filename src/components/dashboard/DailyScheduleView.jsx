@@ -200,10 +200,10 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
         {(artistFilter === 'all' ? activeArtists : activeArtists.filter(a => a.id === artistFilter)).map(a => (
           <div key={`header-${a.id}`} style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px 4px', gap: '6px', borderLeft: `0.5px solid ${t.border}` }}>
             {a.photo_url ? (
-              <img src={a.photo_url} alt={a.name} loading="lazy" width={20} height={20} style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${t.border}`, flexShrink: 0 }} />
+              <img src={a.photo_url} alt={a.name} loading="lazy" width={28} height={28} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${t.border}`, flexShrink: 0 }} />
             ) : (
-              <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,0,127,0.15)', border: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ fontSize: '9px', color: '#FF007F', fontFamily: 'Bebas Neue, system-ui' }}>{a.name.charAt(0)}</span>
+              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(255,0,127,0.15)', border: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ fontSize: '11px', color: '#FF007F', fontFamily: 'Bebas Neue, system-ui' }}>{a.name.charAt(0)}</span>
               </div>
             )}
             <p className="hidden sm:block" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
