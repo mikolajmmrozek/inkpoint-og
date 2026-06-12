@@ -6,7 +6,7 @@ import { base44 } from '@/api/base44Client';
 const Row = ({ label, value, t }) => (
   <div className="mb-3 pb-3" style={{ borderBottom: `0.5px solid ${t?.border || '#262626'}` }}>
     <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '3px' }}>{label}</p>
-    <p style={{ color: t?.text || 'rgba(245,240,235,0.7)', fontSize: '13px', lineHeight: 1.5, wordBreak: 'break-word' }}>{value || '—'}</p>
+    <p style={{ color: t?.text || '#111111', fontSize: '13px', lineHeight: 1.5, wordBreak: 'break-word' }}>{value || '—'}</p>
   </div>
 );
 
@@ -182,13 +182,18 @@ export default function HealthFormPreviewModal({ bookingId, healthFormId, client
 
               {/* Guardian */}
               {guardian && (
-                <div className="mt-6 p-4" style={{ border: '0.5px solid rgba(255,0,127,0.3)', background: 'rgba(255,0,127,0.04)' }}>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>— ZGODA OPIEKUNA</p>
-                  <Row label="Opiekun" value={guardian.guardian_name} t={t} />
-                  <Row label="Telefon opiekuna" value={guardian.guardian_phone} t={t} />
+                <div className="mt-6">
+                  <div className="p-4" style={{ border: '0.5px solid rgba(255,0,127,0.3)', background: 'rgba(255,0,127,0.04)' }}>
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>— ZGODA OPIEKUNA</p>
+                    <Row label="Opiekun" value={guardian.guardian_name} t={t} />
+                    <Row label="Telefon opiekuna" value={guardian.guardian_phone} t={t} />
+                  </div>
                   {guardian.guardian_signature && (
-                    <div style={{ background: '#ffffff', display: 'inline-block', padding: '8px', border: '0.5px solid #cccccc', marginTop: '8px' }}>
-                      <img src={guardian.guardian_signature} alt="podpis opiekuna" style={{ maxWidth: '200px', display: 'block' }} />
+                    <div className="mt-3">
+                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>— PODPIS OPIEKUNA</p>
+                      <div style={{ background: '#ffffff', display: 'inline-block', padding: '8px', border: '0.5px solid #cccccc' }}>
+                        <img src={guardian.guardian_signature} alt="podpis opiekuna" style={{ maxWidth: '200px', display: 'block' }} />
+                      </div>
                     </div>
                   )}
                 </div>
