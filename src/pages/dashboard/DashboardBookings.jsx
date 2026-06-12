@@ -204,10 +204,16 @@ export default function DashboardBookings() {
         (b.notes || '').toLowerCase().includes(q)
       );
       base = [...base].sort((a, b) => (a.session_date || '').localeCompare(b.session_date || ''));
-      // If searching in calendar view, still filter by selected date
-      if (viewMode === 'calendar' && selectedDate) {
-        base = base.filter(b => b.session_date && isSameDay(new Date(b.session_date), selectedDate));
+      
+      // In day view, jump to first matching day
+      if (viewMode === 'day' && base.length > 0) {
+        const firstMatchDate = new Date(base[0].session_date);
+        setSelectedDate(firstMatchDate);
+        // Filter to only sessions on this day
+        base = base.filter(b => b.session_date === base[0].session_date);
+        base = [...base].sort((a, b) => (a.session_time || '').localeCompare(b.session_time || ''));
       }
+      // In calendar view, show all matching sessions (not filtered by date)
       return base;
     }
     
@@ -363,8 +369,31 @@ export default function DashboardBookings() {
             )}
 
             {/* List */}
-            {(viewMode === 'calendar' || viewMode === 'list' || viewMode === 'day') && <div>
-              {viewMode === 'calendar' && selectedDate && (
+            {(viewMode === 'calendar' && searchQuery.trim()) || viewMode === 'list' || viewMode === 'day' ? <div>
+              {viewMode === 'calendar' && searchQuery.trim() && (
+                <div className="mb-6">
+                  <div style={{ padding: '10px 16px', background: t.bg, border: `0.5px solid ${t.border}` }}>
+                    <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.1rem', color: t.title, letterSpacing: '0.08em' }}>
+                      WYNIKI WYSZUKIWANIA
+                    </p>
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: listBookings.length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
+                      {listBookings.length} {listBookings.length === 1 ? 'SESJA' : listBookings.length >= 2 && listBookings.length <= 4 ? 'SESJE' : 'SESJI'}
+                    </p>
+                  </div>
+                  {listBookings.length > 0 ? (
+                    <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, marginTop: '4px' }}>
+                      {listBookings.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={listBookings} selected={selected} setSelected={setSelected} artists={artists} t={t} />)}
+                    </div>
+                  ) : (
+                    <div className="py-6 text-center" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
+                        BRAK PASUJĄCYCH SESJI
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+              {viewMode === 'calendar' && selectedDate && !searchQuery.trim() && (
                 <div className="flex items-center justify-between mb-3" style={{ border: `0.5px solid ${t.border}`, padding: '10px 16px', background: t.bg }}>
                   <button onClick={() => { setSearchQuery(''); setSelectedDate(d => subDays(d, 1)); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}>
                     <ChevronLeft size={16} />
@@ -383,7 +412,7 @@ export default function DashboardBookings() {
                 </div>
               )}
 
-              {viewMode === 'list' && (
+              {viewMode === 'list' && !searchQuery.trim() && (
                 <div className="flex mb-4" style={{ border: `0.5px solid ${t.border}` }}>
                   {[{ key: 'upcoming', label: 'NADCHODZĄCE' }, { key: 'past', label: 'PRZESZŁE' }].map(tab => (
                     <button
@@ -398,6 +427,19 @@ export default function DashboardBookings() {
                       }}
                     >{tab.label}</button>
                   ))}
+                </div>
+              )}
+
+              {viewMode === 'day' && searchQuery.trim() && (
+                <div className="flex items-center justify-between mb-3" style={{ border: `0.5px solid ${t.border}`, padding: '10px 16px', background: t.bg }}>
+                  <div className="text-center flex-1">
+                    <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.2rem', color: t.title, letterSpacing: '0.08em', lineHeight: 1 }}>
+                      {format(selectedDate, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase()}
+                    </p>
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: listBookings.length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
+                      {listBookings.length} {listBookings.length === 1 ? 'SESJA' : listBookings.length >= 2 && listBookings.length <= 4 ? 'SESJE' : 'SESJI'}
+                    </p>
+                  </div>
                 </div>
               )}
 
@@ -474,9 +516,8 @@ export default function DashboardBookings() {
                   {listBookings.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={listBookings} selected={selected} setSelected={setSelected} artists={artists} t={t} />)}
                 </div>
               )}
-            </div>}
-          </div>
-
+            </div>
+          ) : null}
         </div>
       )}
 
