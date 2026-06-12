@@ -141,6 +141,7 @@ const ArtistColumn = memo(function ArtistColumn({ artist, artistBookings, onColu
 });
 
 export default function DailyScheduleView({ bookings, artists, selectedDate, onDateChange, onBookingClick, onNewBookingRequest, t }) {
+  const [mobileArtistId, setMobileArtistId] = useState(null);
   const scrollRef = useRef(null);
 
   const dateStr = useMemo(() => format(selectedDate, 'yyyy-MM-dd'), [selectedDate]);
@@ -198,10 +199,34 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
 
 
 
+      {/* Mobile: artist selector */}
+      <div className="flex md:hidden gap-1 overflow-x-auto p-2" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+        {activeArtists.map(a => (
+          <button
+            key={a.id}
+            onClick={() => setMobileArtistId(mobileArtistId === a.id ? null : a.id)}
+            style={{
+              width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0,
+              border: mobileArtistId === a.id ? '2px solid #FF007F' : `1px solid ${t.border}`,
+              padding: 0, cursor: 'pointer', background: 'transparent',
+              overflow: 'hidden',
+            }}
+          >
+            {a.photo_url ? (
+              <img src={a.photo_url} alt={a.name} loading="lazy" width={32} height={32} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              <div style={{ width: '100%', height: '100%', background: 'rgba(255,0,127,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Bebas Neue, system-ui', fontSize: '12px', color: '#FF007F' }}>
+                {a.name.charAt(0)}
+              </div>
+            )}
+          </button>
+        ))}
+      </div>
+
       {/* Timeline body */}
       <div ref={scrollRef} className="overflow-y-auto overflow-x-auto" style={{ maxHeight: '600px' }}>
         <div style={{ position: 'relative', minWidth: 'min-content' }}>
-          <div className="flex">
+          <div className="hidden md:flex">
             <TimeAxis muted={t.muted} />
             {activeArtists.map(a => (
               <ArtistColumn
@@ -214,6 +239,35 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
                 t={t}
               />
             ))}
+            {showNowLine && <NowLine />}
+          </div>
+
+          <div className="flex md:hidden">
+            <TimeAxis muted={t.muted} />
+            {mobileArtistId ? (
+              activeArtists.find(a => a.id === mobileArtistId) && (
+                <ArtistColumn
+                  artist={activeArtists.find(a => a.id === mobileArtistId)}
+                  artistBookings={bookingsByArtist[mobileArtistId] || []}
+                  onColumnClick={handleColumnClick}
+                  onBookingClick={onBookingClick}
+                  border={t.border}
+                  t={t}
+                />
+              )
+            ) : (
+              activeArtists.map(a => (
+                <ArtistColumn
+                  key={a.id}
+                  artist={a}
+                  artistBookings={bookingsByArtist[a.id] || []}
+                  onColumnClick={handleColumnClick}
+                  onBookingClick={onBookingClick}
+                  border={t.border}
+                  t={t}
+                />
+              ))
+            )}
             {showNowLine && <NowLine />}
           </div>
         </div>
