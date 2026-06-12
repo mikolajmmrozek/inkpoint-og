@@ -147,7 +147,7 @@ export default function DashboardHome() {
                       {isToday ? `DZIŚ — ${dayLabel}` : isPast ? `PRZETERMINOWANE — ${dayLabel}` : dayLabel}
                     </p>
                     <div style={{ flex: 1, height: '0.5px', background: isPast ? 'rgba(255,0,127,0.3)' : t.cardBorder }} />
-                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: isPast ? '#FF007F' : t.muted, letterSpacing: '0.08em' }}>
+                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: isPast ? '#FF007F' : t.muted, letterSpacing: '0.08em', textAlign: 'right', display: 'block' }}>
                       {items.length} {items.length === 1 ? 'sesja' : 'sesje'}
                     </span>
                   </div>
