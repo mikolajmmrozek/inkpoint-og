@@ -28,7 +28,8 @@ function BookingRow({ b, i, items, selected, setSelected, artists, t }) {
     >
       <div className="flex items-center gap-6 min-w-0">
         {b.session_time && (
-          <div className="flex-shrink-0 text-center" style={{ minWidth: '48px' }}>
+          <div className="flex-shrink-0 text-center" style={{ minWidth: '60px' }}>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.05em', marginBottom: '2px' }}>{b.session_date || '—'}</p>
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: STATUS_COLORS[b.status] || t.fuchsia, letterSpacing: '0.05em' }}>{b.session_time}</p>
             {b.session_end_time ? (
               <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted }}>→ {b.session_end_time}</p>
