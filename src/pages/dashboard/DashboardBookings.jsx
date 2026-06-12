@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { AnimatePresence } from 'framer-motion';
 import { Plus, Calendar, List, Clock, ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
@@ -160,6 +161,7 @@ function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPa
 }
 
 export default function DashboardBookings() {
+  const [searchParams] = useSearchParams();
   const { theme } = useTheme();
   const t = theme === 'light'
     ? { bg: '#FFFFFF', pageBg: '#F8F8F8', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F' }
@@ -169,7 +171,7 @@ export default function DashboardBookings() {
   const [artists, setArtists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState(searchParams.get('filter') || 'all');
   const [artistFilter, setArtistFilter] = useState('all');
   const [viewMode, setViewMode] = useState('calendar');
   const [selectedDate, setSelectedDate] = useState(new Date());

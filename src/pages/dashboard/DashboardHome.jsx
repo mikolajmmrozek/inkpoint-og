@@ -57,7 +57,7 @@ export default function DashboardHome() {
 
   const KPI = [
     { label: 'Wszystkie rezerwacje', value: stats.bookings, icon: Calendar, link: '/dashboard/bookings' },
-    { label: 'Oczekujące', value: stats.pending, icon: Clock, link: '/dashboard/bookings' },
+    { label: 'Oczekujące', value: stats.pending, icon: Clock, link: '/dashboard/bookings?filter=pending' },
     { label: 'Nowe wiadomości', value: stats.messages, icon: MessageSquare, link: '/dashboard/messages' },
     { label: 'Ankiety zdrowotne', value: stats.forms, icon: FileText, link: '/dashboard/health-forms' },
   ];
