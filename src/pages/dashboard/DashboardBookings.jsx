@@ -180,12 +180,10 @@ export default function DashboardBookings() {
     load();
   };
 
-  // When user types — switch to list view
+  // When user types — search across all views
   const handleSearch = (q) => {
     setSearchQuery(q);
     if (q.trim()) {
-      setViewMode('list');
-      setListTab('upcoming');
       setListPage(0);
     }
   };
@@ -194,6 +192,8 @@ export default function DashboardBookings() {
   const listBookings = (() => {
     let base = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
     if (artistFilter !== 'all') base = base.filter(b => b.artist_id === artistFilter);
+    
+    // Apply search filter across all views
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       base = base.filter(b =>
@@ -203,16 +203,22 @@ export default function DashboardBookings() {
         (b.tattoo_placement || '').toLowerCase().includes(q) ||
         (b.notes || '').toLowerCase().includes(q)
       );
-      return [...base].sort((a, b) => (a.session_date || '').localeCompare(b.session_date || ''));
+      base = [...base].sort((a, b) => (a.session_date || '').localeCompare(b.session_date || ''));
+      // If searching in calendar view, still filter by selected date
+      if (viewMode === 'calendar' && selectedDate) {
+        base = base.filter(b => b.session_date && isSameDay(new Date(b.session_date), selectedDate));
+      }
+      return base;
     }
+    
     if (viewMode === 'calendar' && selectedDate) {
       base = base.filter(b => b.session_date && isSameDay(new Date(b.session_date), selectedDate));
     }
-    if (!searchQuery.trim() && viewMode === 'day') {
+    if (viewMode === 'day') {
       base = base.filter(b => b.session_date && isSameDay(new Date(b.session_date), selectedDate || new Date()));
       base = [...base].sort((a, b) => (a.session_time || '').localeCompare(b.session_time || ''));
     }
-    if (!searchQuery.trim() && viewMode === 'list') {
+    if (viewMode === 'list') {
       const todayStr = format(new Date(), 'yyyy-MM-dd');
       if (listTab === 'upcoming') {
         base = [...base].filter(b => (b.session_date || '') >= todayStr).sort((a, b) => (a.session_date || '').localeCompare(b.session_date || ''));
@@ -252,7 +258,7 @@ export default function DashboardBookings() {
             {[{ mode: 'calendar', icon: Calendar }, { mode: 'day', icon: Clock }, { mode: 'list', icon: List }].map(({ mode, icon: Icon }) => (
               <button
                 key={mode}
-                onClick={() => { setSearchQuery(''); setViewMode(mode); if (mode !== 'day' && mode !== 'calendar') setSelectedDate(new Date()); }}
+                onClick={() => { setViewMode(mode); if (mode !== 'day' && mode !== 'calendar') setSelectedDate(new Date()); }}
                 className="p-2.5 transition-all"
                 style={{ background: viewMode === mode ? 'rgba(255,0,127,0.1)' : 'transparent', color: viewMode === mode ? '#FF007F' : t.muted, border: 'none', cursor: 'pointer' }}
               >
@@ -349,7 +355,7 @@ export default function DashboardBookings() {
                 bookings={calendarBookings}
                 artists={artists}
                 selectedDate={selectedDate || new Date()}
-                onDateChange={(day) => { setSearchQuery(''); setSelectedDate(day); }}
+                onDateChange={(day) => setSelectedDate(day)}
                 onBookingClick={handleBookingClick}
                 onNewBookingRequest={handleNewBookingRequest}
                 t={t}
