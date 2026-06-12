@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { AnimatePresence } from 'framer-motion';
-import { Plus, Calendar, List, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Calendar, List, Clock, ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
 import { format, isSameDay, addDays, subDays } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import { useTheme } from './Dashboard';
@@ -97,6 +97,7 @@ export default function DashboardBookings() {
   const [editingBooking, setEditingBooking] = useState(null);
   const [listPage, setListPage] = useState(0);
   const [listTab, setListTab] = useState('upcoming'); // 'upcoming' | 'past'
+  const [searchQuery, setSearchQuery] = useState('');
 
   const load = async () => {
     const [data, artistData] = await Promise.all([
@@ -178,18 +179,39 @@ export default function DashboardBookings() {
     load();
   };
 
+  // When user types — switch to list view
+  const handleSearch = (q) => {
+    setSearchQuery(q);
+    if (q.trim()) {
+      setViewMode('list');
+      setListTab('upcoming');
+      setListPage(0);
+    }
+  };
+
   // Bookings to show in list
   const listBookings = (() => {
     let base = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
     if (artistFilter !== 'all') base = base.filter(b => b.artist_id === artistFilter);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      base = base.filter(b =>
+        (b.client_name || '').toLowerCase().includes(q) ||
+        (b.session_id || '').toLowerCase().includes(q) ||
+        (b.client_email || '').toLowerCase().includes(q) ||
+        (b.tattoo_placement || '').toLowerCase().includes(q) ||
+        (b.notes || '').toLowerCase().includes(q)
+      );
+      return [...base].sort((a, b) => (a.session_date || '').localeCompare(b.session_date || ''));
+    }
     if (viewMode === 'calendar' && selectedDate) {
       base = base.filter(b => b.session_date && isSameDay(new Date(b.session_date), selectedDate));
     }
-    if (viewMode === 'day') {
+    if (!searchQuery.trim() && viewMode === 'day') {
       base = base.filter(b => b.session_date && isSameDay(new Date(b.session_date), selectedDate || new Date()));
       base = [...base].sort((a, b) => (a.session_time || '').localeCompare(b.session_time || ''));
     }
-    if (viewMode === 'list') {
+    if (!searchQuery.trim() && viewMode === 'list') {
       const todayStr = format(new Date(), 'yyyy-MM-dd');
       if (listTab === 'upcoming') {
         base = [...base].filter(b => (b.session_date || '') >= todayStr).sort((a, b) => (a.session_date || '').localeCompare(b.session_date || ''));
@@ -255,6 +277,23 @@ export default function DashboardBookings() {
               </button>
             ))}
           </div>
+          {/* Search */}
+          <div className="flex items-center gap-2 flex-1" style={{ minWidth: '180px', maxWidth: '320px', border: `0.5px solid ${searchQuery ? '#FF007F' : t.border}`, padding: '6px 12px', background: t.bg }}>
+            <Search size={12} color={searchQuery ? '#FF007F' : t.muted} />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => handleSearch(e.target.value)}
+              placeholder="Szukaj klienta, sesji..."
+              style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text, letterSpacing: '0.05em' }}
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: 0 }}>
+                <X size={12} />
+              </button>
+            )}
+          </div>
+
           {/* Today button */}
           <button
             onClick={() => { setSelectedDate(new Date()); setViewMode('day'); }}
