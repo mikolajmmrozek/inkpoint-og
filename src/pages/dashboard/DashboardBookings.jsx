@@ -262,7 +262,19 @@ export default function DashboardBookings() {
           <div className="flex-1" />
           {/* Today button */}
           <button
-            onClick={() => { setSelectedDate(new Date()); setViewMode('day'); }}
+            onClick={() => {
+              const today = new Date();
+              const todayStr = format(today, 'yyyy-MM-dd');
+              setSelectedDate(today);
+              if (viewMode === 'list') {
+                setListTab('upcoming');
+                let base = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
+                if (artistFilter !== 'all') base = base.filter(b => b.artist_id === artistFilter);
+                const upcoming = [...base].filter(b => (b.session_date || '') >= todayStr).sort((a, b) => (a.session_date || '').localeCompare(b.session_date || ''));
+                const todayIdx = upcoming.findIndex(b => b.session_date === todayStr);
+                setListPage(todayIdx >= 0 ? Math.floor(todayIdx / PAGE_SIZE) : 0);
+              }
+            }}
             className="btn-oxblood flex items-center gap-2"
             style={{ padding: '10px 20px' }}
           >
