@@ -514,12 +514,10 @@ export default function DashboardBookings() {
                   {listBookings.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={listBookings} selected={selected} setSelected={setSelected} artists={artists} t={t} />)}
                 </div>
               )}
-            </div>
-          ) : null}
-        </div>
-      )}
-
-      {/* Detail panel — slide-in drawer from right */}
+              </div>
+              ) : null}
+              </div>
+              )}
 
       {/* Detail panel — slide-in drawer from right */}
       <AnimatePresence>
