@@ -194,6 +194,24 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
         </button>
       </div>
 
+      {/* Artist profiles */}
+      <div className="flex items-center justify-center gap-4 px-4 py-3 flex-wrap" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+        {(artistFilter === 'all' ? activeArtists : activeArtists.filter(a => a.id === artistFilter)).map(a => (
+          <div key={a.id} className="flex items-center gap-2">
+            {a.photo_url ? (
+              <img src={a.photo_url} alt={a.name} loading="lazy" width={32} height={32} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${t.border}` }} />
+            ) : (
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255,0,127,0.15)', border: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: '12px', color: '#FF007F', fontFamily: 'Bebas Neue, system-ui' }}>{a.name.charAt(0)}</span>
+              </div>
+            )}
+            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+              {a.name}
+            </span>
+          </div>
+        ))}
+      </div>
+
 
 
       {/* Timeline body */}
