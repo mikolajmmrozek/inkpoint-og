@@ -10,7 +10,6 @@ import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
 import BookingModal from '@/components/dashboard/BookingModal';
 import DailyScheduleView from '@/components/dashboard/DailyScheduleView.jsx';
 
-
 const STATUS_COLORS = {
   pending: '#FF007F',
   confirmed: '#16a34a',
@@ -79,6 +78,86 @@ function BookingRow({ b, i, items, selected, setSelected, artists, t }) {
   );
 }
 
+function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPageBookings, listPageCount, listPage, setListPage, listTab, setListTab, selected, setSelected, artists, t, setEditingBooking, setShowModal }) {
+  const todayStr = format(new Date(), 'yyyy-MM-dd');
+
+  if (listBookings.length === 0) {
+    return (
+      <div className="py-12 text-center" style={{ border: `0.5px solid ${t.border}` }}>
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
+          {viewMode === 'calendar' ? 'BRAK SESJI W TEN DZIEŃ' : 'BRAK REZERWACJI'}
+        </p>
+        {viewMode === 'calendar' && selectedDate && (
+          <button onClick={() => { setEditingBooking(null); setShowModal(true); }} className="btn-oxblood mt-4" style={{ fontSize: '10px', padding: '8px 20px' }}>
+            + DODAJ SESJĘ
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  if (viewMode === 'list') {
+    const grouped = {};
+    listPageBookings.forEach(b => {
+      const day = b.session_date || 'Brak daty';
+      if (!grouped[day]) grouped[day] = [];
+      grouped[day].push(b);
+    });
+
+    return (
+      <div className="space-y-4">
+        {listPageCount > 1 && (
+          <div className="flex items-center justify-between" style={{ border: `0.5px solid ${t.border}`, padding: '8px 14px', background: t.bg }}>
+            <button
+              onClick={() => setListPage(p => Math.max(0, p - 1))}
+              disabled={listPage === 0}
+              style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: listPage === 0 ? t.muted : t.fuchsia, background: 'none', border: 'none', cursor: listPage === 0 ? 'default' : 'pointer', opacity: listPage === 0 ? 0.4 : 1 }}
+            >
+              <ChevronLeft size={12} /> POPRZEDNIE
+            </button>
+            <button
+              onClick={() => setListPage(p => Math.min(listPageCount - 1, p + 1))}
+              disabled={listPage >= listPageCount - 1}
+              style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: listPage >= listPageCount - 1 ? t.muted : t.fuchsia, background: 'none', border: 'none', cursor: listPage >= listPageCount - 1 ? 'default' : 'pointer', opacity: listPage >= listPageCount - 1 ? 0.4 : 1 }}
+            >
+              NASTĘPNE <ChevronRight size={12} />
+            </button>
+          </div>
+        )}
+        {Object.entries(grouped).map(([date, items]) => {
+          const dateObj = date !== 'Brak daty' ? new Date(date) : null;
+          const isToday = dateObj && date === todayStr;
+          const isPast = dateObj && date < todayStr;
+          const dayLabel = dateObj ? format(dateObj, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase() : 'BRAK DATY';
+          return (
+            <div key={date}>
+              <div className="flex items-center gap-3 mb-2">
+                <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: isPast ? '#9ca3af' : isToday ? '#f59e0b' : '#16a34a', flexShrink: 0 }} />
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: isPast ? t.muted : isToday ? '#f59e0b' : t.muted }}>
+                  {isToday ? `DZIŚ — ${dayLabel}` : dayLabel}
+                </p>
+                <div style={{ flex: 1, height: '0.5px', background: t.border }} />
+                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>
+                  {items.length} {items.length === 1 ? 'sesja' : 'sesji'}
+                </span>
+              </div>
+              <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+                {items.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={items} selected={selected} setSelected={setSelected} artists={artists} t={t} />)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+      {listBookings.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={listBookings} selected={selected} setSelected={setSelected} artists={artists} t={t} />)}
+    </div>
+  );
+}
+
 export default function DashboardBookings() {
   const { theme } = useTheme();
   const t = theme === 'light'
@@ -91,12 +170,12 @@ export default function DashboardBookings() {
   const [selected, setSelected] = useState(null);
   const [filter, setFilter] = useState('all');
   const [artistFilter, setArtistFilter] = useState('all');
-  const [viewMode, setViewMode] = useState('calendar'); // 'calendar' | 'list' | 'day'
+  const [viewMode, setViewMode] = useState('calendar');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showModal, setShowModal] = useState(false);
   const [editingBooking, setEditingBooking] = useState(null);
   const [listPage, setListPage] = useState(0);
-  const [listTab, setListTab] = useState('upcoming'); // 'upcoming' | 'past'
+  const [listTab, setListTab] = useState('upcoming');
   const [searchQuery, setSearchQuery] = useState('');
 
   const load = async () => {
@@ -116,7 +195,6 @@ export default function DashboardBookings() {
     setBookings(b => b.map(x => x.id === id ? { ...x, status } : x));
     if (selected?.id === id) setSelected(s => ({ ...s, status }));
 
-    // Send feedback survey email when booking is completed
     if (status === 'completed') {
       const booking = bookings.find(b => b.id === id);
       if (booking?.client_email) {
@@ -180,7 +258,6 @@ export default function DashboardBookings() {
     load();
   };
 
-  // When user types — search across all views
   const handleSearch = (q) => {
     setSearchQuery(q);
     if (q.trim()) {
@@ -188,12 +265,10 @@ export default function DashboardBookings() {
     }
   };
 
-  // Bookings to show in list
   const listBookings = (() => {
     let base = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
     if (artistFilter !== 'all') base = base.filter(b => b.artist_id === artistFilter);
     
-    // Apply search filter across all views
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       base = base.filter(b =>
@@ -205,15 +280,12 @@ export default function DashboardBookings() {
       );
       base = [...base].sort((a, b) => (a.session_date || '').localeCompare(b.session_date || ''));
       
-      // In day view, jump to first matching day
       if (viewMode === 'day' && base.length > 0) {
         const firstMatchDate = new Date(base[0].session_date);
         setSelectedDate(firstMatchDate);
-        // Filter to only sessions on this day
         base = base.filter(b => b.session_date === base[0].session_date);
         base = [...base].sort((a, b) => (a.session_time || '').localeCompare(b.session_time || ''));
       }
-      // In calendar view, show all matching sessions (not filtered by date)
       return base;
     }
     
@@ -245,6 +317,8 @@ export default function DashboardBookings() {
     return base;
   })();
 
+  const showListSection = (viewMode === 'calendar' && searchQuery.trim()) || viewMode === 'list' || viewMode === 'day';
+
   return (
     <div>
       {/* Header */}
@@ -257,9 +331,9 @@ export default function DashboardBookings() {
             Rezerwacje
           </h2>
         </div>
+
         {/* Row 1: view toggle + actions */}
         <div className="flex items-center gap-2 flex-wrap mb-3">
-          {/* View toggle */}
           <div className="flex" style={{ border: `0.5px solid ${t.border}` }}>
             {[{ mode: 'calendar', icon: Calendar }, { mode: 'day', icon: Clock }, { mode: 'list', icon: List }].map(({ mode, icon: Icon }) => (
               <button
@@ -273,7 +347,6 @@ export default function DashboardBookings() {
             ))}
           </div>
           <div className="flex-1" />
-          {/* Today button */}
           <button
             onClick={() => {
               const today = new Date();
@@ -293,7 +366,6 @@ export default function DashboardBookings() {
           >
             DZISIAJ
           </button>
-          {/* New booking */}
           <button onClick={handleNewBooking} className="flex items-center gap-2 btn-oxblood" style={{ padding: '10px 20px' }}>
             <Plus size={13} /> NOWA SESJA
           </button>
@@ -301,7 +373,6 @@ export default function DashboardBookings() {
 
         {/* Row 2: filters */}
         <div className="flex items-center gap-1 flex-wrap mb-3">
-          {/* Artist filter */}
           <button onClick={() => setArtistFilter('all')} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilter === 'all' ? t.fuchsia : t.border}`, color: artistFilter === 'all' ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
             Wszyscy
           </button>
@@ -311,7 +382,6 @@ export default function DashboardBookings() {
             </button>
           ))}
           <div style={{ width: '0.5px', height: '16px', background: t.border, margin: '0 4px' }} />
-          {/* Status filter */}
           {['all', ...STATUS_OPTIONS].map(s => (
             <button key={s} onClick={() => setFilter(s)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${filter === s ? t.fuchsia : t.border}`, color: filter === s ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
               {s === 'all' ? 'Wszystkie' : s}
@@ -319,7 +389,7 @@ export default function DashboardBookings() {
           ))}
         </div>
 
-        {/* Row 3: search — full width */}
+        {/* Row 3: search */}
         <div className="flex items-center gap-2 w-full" style={{ border: `0.5px solid ${searchQuery ? '#FF007F' : t.border}`, padding: '8px 14px', background: t.bg }}>
           <Search size={12} color={searchQuery ? '#FF007F' : t.muted} />
           <input
@@ -343,7 +413,6 @@ export default function DashboardBookings() {
         </div>
       ) : (
         <div>
-          {/* Main area */}
           <div className="space-y-6">
             {/* Calendar view */}
             {viewMode === 'calendar' && (
@@ -368,184 +437,135 @@ export default function DashboardBookings() {
               />
             )}
 
-            {/* List */}
-             {((viewMode === 'calendar' && searchQuery.trim()) || viewMode === 'list' || viewMode === 'day') && (
-               <div>
-                 {viewMode === 'calendar' && searchQuery.trim() && (
-                <div className="mb-6">
-                  <div style={{ padding: '10px 16px', background: t.bg, border: `0.5px solid ${t.border}` }}>
-                    <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.1rem', color: t.title, letterSpacing: '0.08em' }}>
-                      WYNIKI WYSZUKIWANIA
-                    </p>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: listBookings.length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
-                      {listBookings.length} {listBookings.length === 1 ? 'SESJA' : listBookings.length >= 2 && listBookings.length <= 4 ? 'SESJE' : 'SESJI'}
-                    </p>
-                  </div>
-                  {listBookings.length > 0 ? (
-                    <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, marginTop: '4px' }}>
-                      {listBookings.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={listBookings} selected={selected} setSelected={setSelected} artists={artists} t={t} />)}
-                    </div>
-                  ) : (
-                    <div className="py-6 text-center" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
-                        BRAK PASUJĄCYCH SESJI
+            {/* List section */}
+            {showListSection && (
+              <div>
+                {viewMode === 'calendar' && searchQuery.trim() && (
+                  <div className="mb-6">
+                    <div style={{ padding: '10px 16px', background: t.bg, border: `0.5px solid ${t.border}` }}>
+                      <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.1rem', color: t.title, letterSpacing: '0.08em' }}>
+                        WYNIKI WYSZUKIWANIA
+                      </p>
+                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: listBookings.length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
+                        {listBookings.length} {listBookings.length === 1 ? 'SESJA' : listBookings.length >= 2 && listBookings.length <= 4 ? 'SESJE' : 'SESJI'}
                       </p>
                     </div>
-                  )}
+                    {listBookings.length > 0 ? (
+                      <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, marginTop: '4px' }}>
+                        {listBookings.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={listBookings} selected={selected} setSelected={setSelected} artists={artists} t={t} />)}
+                      </div>
+                    ) : (
+                      <div className="py-6 text-center" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
+                          BRAK PASUJĄCYCH SESJI
+                        </p>
+                      </div>
+                    )}
                   </div>
-                  )}
-              {viewMode === 'calendar' && selectedDate && !searchQuery.trim() && (
-                <div className="flex items-center justify-between mb-3" style={{ border: `0.5px solid ${t.border}`, padding: '10px 16px', background: t.bg }}>
-                  <button onClick={() => { setSearchQuery(''); setSelectedDate(d => subDays(d, 1)); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}>
-                    <ChevronLeft size={16} />
-                  </button>
-                  <div className="text-center">
-                    <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.2rem', color: t.title, letterSpacing: '0.08em', lineHeight: 1 }}>
-                      {format(selectedDate, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase()}
-                    </p>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: listBookings.length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
-                      {listBookings.length} {listBookings.length === 1 ? 'SESJA' : listBookings.length >= 2 && listBookings.length <= 4 ? 'SESJE' : 'SESJI'}
-                    </p>
-                  </div>
-                  <button onClick={() => { setSearchQuery(''); setSelectedDate(d => addDays(d, 1)); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}>
-                    <ChevronRight size={16} />
-                  </button>
-                </div>
-              )}
+                )}
 
-              {viewMode === 'list' && !searchQuery.trim() && (
-                <div className="flex mb-4" style={{ border: `0.5px solid ${t.border}` }}>
-                  {[{ key: 'upcoming', label: 'NADCHODZĄCE' }, { key: 'past', label: 'PRZESZŁE' }].map(tab => (
-                    <button
-                      key={tab.key}
-                      onClick={() => setListTab(tab.key)}
-                      style={{
-                        flex: 1, padding: '10px', fontFamily: 'JetBrains Mono', fontSize: '9px',
-                        letterSpacing: '0.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer',
-                        background: listTab === tab.key ? 'rgba(255,0,127,0.08)' : 'transparent',
-                        color: listTab === tab.key ? '#FF007F' : t.muted,
-                        borderBottom: listTab === tab.key ? '1px solid #FF007F' : '1px solid transparent',
-                      }}
-                    >{tab.label}</button>
-                  ))}
-                </div>
-              )}
-
-              {viewMode === 'day' && searchQuery.trim() && (
-                <div className="flex items-center justify-between mb-3" style={{ border: `0.5px solid ${t.border}`, padding: '10px 16px', background: t.bg }}>
-                  <div className="text-center flex-1">
-                    <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.2rem', color: t.title, letterSpacing: '0.08em', lineHeight: 1 }}>
-                      {format(selectedDate, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase()}
-                    </p>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: listBookings.length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
-                      {listBookings.length} {listBookings.length === 1 ? 'SESJA' : listBookings.length >= 2 && listBookings.length <= 4 ? 'SESJE' : 'SESJI'}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {listBookings.length === 0 ? (
-                <div className="py-12 text-center" style={{ border: `0.5px solid ${t.border}` }}>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
-                    {viewMode === 'calendar' ? 'BRAK SESJI W TEN DZIEŃ' : 'BRAK REZERWACJI'}
-                  </p>
-                  {viewMode === 'calendar' && selectedDate && (
-                    <button onClick={() => { setEditingBooking(null); setShowModal(true); }} className="btn-oxblood mt-4" style={{ fontSize: '10px', padding: '8px 20px' }}>
-                      + DODAJ SESJĘ
+                {viewMode === 'calendar' && selectedDate && !searchQuery.trim() && (
+                  <div className="flex items-center justify-between mb-3" style={{ border: `0.5px solid ${t.border}`, padding: '10px 16px', background: t.bg }}>
+                    <button onClick={() => { setSearchQuery(''); setSelectedDate(d => subDays(d, 1)); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}>
+                      <ChevronLeft size={16} />
                     </button>
-                  )}
-                </div>
-              ) : viewMode === 'list' ? (() => {
-                  const grouped = {};
-                  listPageBookings.forEach(b => {
-                    const day = b.session_date || 'Brak daty';
-                    if (!grouped[day]) grouped[day] = [];
-                    grouped[day].push(b);
-                  });
-                  const todayStr = format(new Date(), 'yyyy-MM-dd');
-                  return (
-                    <div className="space-y-4">
-                      {/* Pagination nav */}
-                      {listPageCount > 1 && (
-                        <div className="flex items-center justify-between" style={{ border: `0.5px solid ${t.border}`, padding: '8px 14px', background: t.bg }}>
-                          <button
-                            onClick={() => setListPage(p => Math.max(0, p - 1))}
-                            disabled={listPage === 0}
-                            style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: listPage === 0 ? t.muted : t.fuchsia, background: 'none', border: 'none', cursor: listPage === 0 ? 'default' : 'pointer', opacity: listPage === 0 ? 0.4 : 1 }}
-                          >
-                            <ChevronLeft size={12} /> POPRZEDNIE
-                          </button>
-                          <button
-                            onClick={() => setListPage(p => Math.min(listPageCount - 1, p + 1))}
-                            disabled={listPage >= listPageCount - 1}
-                            style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: listPage >= listPageCount - 1 ? t.muted : t.fuchsia, background: 'none', border: 'none', cursor: listPage >= listPageCount - 1 ? 'default' : 'pointer', opacity: listPage >= listPageCount - 1 ? 0.4 : 1 }}
-                          >
-                            NASTĘPNE <ChevronRight size={12} />
-                          </button>
-                        </div>
-                      )}
-                      {/* Grouped days */}
-                      {Object.entries(grouped).map(([date, items]) => {
-                        const dateObj = date !== 'Brak daty' ? new Date(date) : null;
-                        const isToday = dateObj && date === todayStr;
-                        const isPast = dateObj && date < todayStr;
-                        const dayLabel = dateObj ? format(dateObj, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase() : 'BRAK DATY';
-                        return (
-                          <div key={date}>
-                            <div className="flex items-center gap-3 mb-2">
-                              <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: isPast ? '#9ca3af' : isToday ? '#f59e0b' : '#16a34a', flexShrink: 0 }} />
-                              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: isPast ? t.muted : isToday ? '#f59e0b' : t.muted }}>
-                                {isToday ? `DZIŚ — ${dayLabel}` : dayLabel}
-                              </p>
-                              <div style={{ flex: 1, height: '0.5px', background: t.border }} />
-                              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>
-                                {items.length} {items.length === 1 ? 'sesja' : 'sesji'}
-                              </span>
-                            </div>
-                            <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-                              {items.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={items} selected={selected} setSelected={setSelected} artists={artists} t={t} />)}
-                            </div>
-                          </div>
-                        );
-                      })}
+                    <div className="text-center">
+                      <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.2rem', color: t.title, letterSpacing: '0.08em', lineHeight: 1 }}>
+                        {format(selectedDate, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase()}
+                      </p>
+                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: listBookings.length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
+                        {listBookings.length} {listBookings.length === 1 ? 'SESJA' : listBookings.length >= 2 && listBookings.length <= 4 ? 'SESJE' : 'SESJI'}
+                      </p>
                     </div>
-                  );
-                })() : (
-                <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-                  {listBookings.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={listBookings} selected={selected} setSelected={setSelected} artists={artists} t={t} />)}
-                </div>
-              )}
+                    <button onClick={() => { setSearchQuery(''); setSelectedDate(d => addDays(d, 1)); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}>
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                )}
+
+                {viewMode === 'list' && !searchQuery.trim() && (
+                  <div className="flex mb-4" style={{ border: `0.5px solid ${t.border}` }}>
+                    {[{ key: 'upcoming', label: 'NADCHODZĄCE' }, { key: 'past', label: 'PRZESZŁE' }].map(tab => (
+                      <button
+                        key={tab.key}
+                        onClick={() => setListTab(tab.key)}
+                        style={{
+                          flex: 1, padding: '10px', fontFamily: 'JetBrains Mono', fontSize: '9px',
+                          letterSpacing: '0.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer',
+                          background: listTab === tab.key ? 'rgba(255,0,127,0.08)' : 'transparent',
+                          color: listTab === tab.key ? '#FF007F' : t.muted,
+                          borderBottom: listTab === tab.key ? '1px solid #FF007F' : '1px solid transparent',
+                        }}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {viewMode === 'day' && searchQuery.trim() && (
+                  <div className="flex items-center justify-between mb-3" style={{ border: `0.5px solid ${t.border}`, padding: '10px 16px', background: t.bg }}>
+                    <div className="text-center flex-1">
+                      <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.2rem', color: t.title, letterSpacing: '0.08em', lineHeight: 1 }}>
+                        {format(selectedDate, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase()}
+                      </p>
+                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: listBookings.length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
+                        {listBookings.length} {listBookings.length === 1 ? 'SESJA' : listBookings.length >= 2 && listBookings.length <= 4 ? 'SESJE' : 'SESJI'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                <ListContent
+                  viewMode={viewMode}
+                  searchQuery={searchQuery}
+                  selectedDate={selectedDate}
+                  listBookings={listBookings}
+                  listPageBookings={listPageBookings}
+                  listPageCount={listPageCount}
+                  listPage={listPage}
+                  setListPage={setListPage}
+                  listTab={listTab}
+                  setListTab={setListTab}
+                  selected={selected}
+                  setSelected={setSelected}
+                  artists={artists}
+                  t={t}
+                  setEditingBooking={setEditingBooking}
+                  setShowModal={setShowModal}
+                />
               </div>
-              )}
+            )}
+          </div>
 
-              {/* Detail panel — slide-in drawer from right */}
-              <AnimatePresence>
-        {selected && (
-          <BookingDetailPanel
-            booking={selected}
-            theme={theme}
-            onClose={() => setSelected(null)}
-            onStatusChange={updateStatus}
-            onDelete={deleteBooking}
-            onEdit={() => handleEdit(selected)}
-          />
-        )}
-      </AnimatePresence>
+          {/* Detail panel */}
+          <AnimatePresence>
+            {selected && (
+              <BookingDetailPanel
+                booking={selected}
+                theme={theme}
+                onClose={() => setSelected(null)}
+                onStatusChange={updateStatus}
+                onDelete={deleteBooking}
+                onEdit={() => handleEdit(selected)}
+              />
+            )}
+          </AnimatePresence>
 
-      {/* Modal */}
-      <AnimatePresence>
-        {showModal && (
-          <BookingModal
-            booking={editingBooking}
-            defaultDate={selectedDate ? format(selectedDate, 'yyyy-MM-dd') : ''}
-            onClose={() => { setShowModal(false); setEditingBooking(null); }}
-            onSaved={handleModalSaved}
-            t={t}
-          />
-        )}
-      </AnimatePresence>
-       </div>
+          {/* Modal */}
+          <AnimatePresence>
+            {showModal && (
+              <BookingModal
+                booking={editingBooking}
+                defaultDate={selectedDate ? format(selectedDate, 'yyyy-MM-dd') : ''}
+                onClose={() => { setShowModal(false); setEditingBooking(null); }}
+                onSaved={handleModalSaved}
+                t={t}
+              />
+            )}
+          </AnimatePresence>
+        </div>
       )}
-      </div>
-      );
-      }
+    </div>
+  );
+}
