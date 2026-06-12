@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Calendar, Users, MessageSquare, FileText, TrendingUp, Clock, AlertCircle } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
 import { useTheme } from './Dashboard';
 import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
 
@@ -184,6 +185,7 @@ export default function DashboardHome() {
         )}
       </div>
 
+      <AnimatePresence>
       {selectedBooking && (
         <BookingDetailPanel
           booking={selectedBooking}
@@ -219,6 +221,7 @@ export default function DashboardHome() {
           }}
         />
       )}
+      </AnimatePresence>
     </div>
   );
 }
