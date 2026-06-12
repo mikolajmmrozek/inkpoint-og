@@ -155,6 +155,7 @@ export default function DashboardBookings() {
   }, []);
 
   const handleDayClick = (day) => {
+    setSearchQuery('');
     if (selectedDate && isSameDay(selectedDate, day)) {
       setViewMode('day');
     } else {
@@ -251,7 +252,7 @@ export default function DashboardBookings() {
             {[{ mode: 'calendar', icon: Calendar }, { mode: 'day', icon: Clock }, { mode: 'list', icon: List }].map(({ mode, icon: Icon }) => (
               <button
                 key={mode}
-                onClick={() => { setViewMode(mode); if (mode !== 'day' && mode !== 'calendar') setSelectedDate(new Date()); }}
+                onClick={() => { setSearchQuery(''); setViewMode(mode); if (mode !== 'day' && mode !== 'calendar') setSelectedDate(new Date()); }}
                 className="p-2.5 transition-all"
                 style={{ background: viewMode === mode ? 'rgba(255,0,127,0.1)' : 'transparent', color: viewMode === mode ? '#FF007F' : t.muted, border: 'none', cursor: 'pointer' }}
               >
@@ -348,7 +349,7 @@ export default function DashboardBookings() {
                 bookings={calendarBookings}
                 artists={artists}
                 selectedDate={selectedDate || new Date()}
-                onDateChange={(day) => setSelectedDate(day)}
+                onDateChange={(day) => { setSearchQuery(''); setSelectedDate(day); }}
                 onBookingClick={handleBookingClick}
                 onNewBookingRequest={handleNewBookingRequest}
                 t={t}
@@ -359,7 +360,7 @@ export default function DashboardBookings() {
             {(viewMode === 'calendar' || viewMode === 'list' || viewMode === 'day') && <div>
               {viewMode === 'calendar' && selectedDate && (
                 <div className="flex items-center justify-between mb-3" style={{ border: `0.5px solid ${t.border}`, padding: '10px 16px', background: t.bg }}>
-                  <button onClick={() => setSelectedDate(d => subDays(d, 1))} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}>
+                  <button onClick={() => { setSearchQuery(''); setSelectedDate(d => subDays(d, 1)); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}>
                     <ChevronLeft size={16} />
                   </button>
                   <div className="text-center">
@@ -370,7 +371,7 @@ export default function DashboardBookings() {
                       {listBookings.length} {listBookings.length === 1 ? 'SESJA' : listBookings.length >= 2 && listBookings.length <= 4 ? 'SESJE' : 'SESJI'}
                     </p>
                   </div>
-                  <button onClick={() => setSelectedDate(d => addDays(d, 1))} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}>
+                  <button onClick={() => { setSearchQuery(''); setSelectedDate(d => addDays(d, 1)); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}>
                     <ChevronRight size={16} />
                   </button>
                 </div>
