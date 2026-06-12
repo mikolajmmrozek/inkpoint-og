@@ -141,7 +141,7 @@ const ArtistColumn = memo(function ArtistColumn({ artist, artistBookings, onColu
 });
 
 export default function DailyScheduleView({ bookings, artists, selectedDate, onDateChange, onBookingClick, onNewBookingRequest, t }) {
-  const [mobileArtistIdx, setMobileArtistIdx] = useState(0);
+  const [selectedArtistIds, setSelectedArtistIds] = useState(new Set());
   const scrollRef = useRef(null);
 
   const dateStr = useMemo(() => format(selectedDate, 'yyyy-MM-dd'), [selectedDate]);
@@ -180,6 +180,18 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
     onNewBookingRequest?.({ artist, time: `${h}:${m}`, date: dateStr });
   }, [onNewBookingRequest, dateStr]);
 
+  const handleArtistToggle = (artistId) => {
+    setSelectedArtistIds(prev => {
+      const next = new Set(prev);
+      if (next.has(artistId)) {
+        next.delete(artistId);
+      } else {
+        next.add(artistId);
+      }
+      return next;
+    });
+  };
+
   return (
     <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
       {/* Date navigation */}
@@ -195,27 +207,28 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
         </button>
       </div>
 
-      {/* Mobile: artist tabs */}
-      <div className="flex md:hidden overflow-x-auto" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-        {activeArtists.map((a, i) => {
+      {/* Artist selector */}
+      <div className="flex overflow-x-auto" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+        {activeArtists.map(a => {
           const count = (bookingsByArtist[a.id] || []).length;
+          const isSelected = selectedArtistIds.size === 0 || selectedArtistIds.has(a.id);
           return (
             <button
               key={a.id}
-              onClick={() => setMobileArtistIdx(i)}
+              onClick={() => handleArtistToggle(a.id)}
               className="flex items-center gap-2"
               style={{
                 fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase',
                 padding: '8px 14px', border: 'none',
-                borderBottom: mobileArtistIdx === i ? '2px solid #FF007F' : '2px solid transparent',
-                color: mobileArtistIdx === i ? '#FF007F' : t.muted,
+                borderBottom: isSelected ? '2px solid #FF007F' : '2px solid transparent',
+                color: isSelected ? '#FF007F' : t.muted,
                 background: 'transparent', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
               }}
             >
               {a.photo_url ? (
-                <img src={a.photo_url} alt={a.name} loading="lazy" width={22} height={22} style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover', border: mobileArtistIdx === i ? '1.5px solid #FF007F' : `1px solid ${t.border}`, flexShrink: 0 }} />
+                <img src={a.photo_url} alt={a.name} loading="lazy" width={22} height={22} style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover', border: isSelected ? '1.5px solid #FF007F' : `1px solid ${t.border}`, flexShrink: 0 }} />
               ) : (
-                <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255,0,127,0.15)', border: mobileArtistIdx === i ? '1.5px solid #FF007F' : `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255,0,127,0.15)', border: isSelected ? '1.5px solid #FF007F' : `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <span style={{ fontSize: '9px', color: '#FF007F', fontFamily: 'Bebas Neue, system-ui' }}>{a.name.charAt(0)}</span>
                 </div>
               )}
@@ -226,37 +239,12 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
         })}
       </div>
 
-      {/* Desktop: artist headers */}
-      <div className="hidden md:flex" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-        <div style={{ width: '44px', flexShrink: 0 }} />
-        {activeArtists.map(a => {
-          const count = (bookingsByArtist[a.id] || []).length;
-          return (
-            <div key={a.id} className="flex flex-col items-center" style={{ flex: 1, padding: '10px 12px', borderLeft: `0.5px solid ${t.border}`, gap: '6px' }}>
-              {a.photo_url ? (
-                <img src={a.photo_url} alt={a.name} loading="lazy" width={36} height={36} style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: `1.5px solid ${t.border}`, flexShrink: 0 }} />
-              ) : (
-                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255,0,127,0.12)', border: `1px solid rgba(255,0,127,0.3)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <span style={{ fontSize: '14px', color: '#FF007F', fontFamily: 'Bebas Neue, system-ui' }}>{a.name.charAt(0)}</span>
-                </div>
-              )}
-              <div className="text-center">
-                <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1rem', color: t.title, letterSpacing: '0.06em', lineHeight: 1 }}>{a.name}</p>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: count > 0 ? '#FF007F' : t.muted, marginTop: '2px', letterSpacing: '0.06em' }}>
-                  {count} {count === 1 ? 'SESJA' : count >= 2 && count <= 4 ? 'SESJE' : 'SESJI'}
-                </p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
       {/* Timeline body */}
-      <div ref={scrollRef} className="overflow-y-auto" style={{ maxHeight: '600px' }}>
-        <div style={{ position: 'relative' }}>
-          <div className="hidden md:flex">
+      <div ref={scrollRef} className="overflow-y-auto overflow-x-auto" style={{ maxHeight: '600px' }}>
+        <div style={{ position: 'relative', minWidth: 'min-content' }}>
+          <div className="flex">
             <TimeAxis muted={t.muted} />
-            {activeArtists.map(a => (
+            {(selectedArtistIds.size === 0 ? activeArtists : activeArtists.filter(a => selectedArtistIds.has(a.id))).map(a => (
               <ArtistColumn
                 key={a.id}
                 artist={a}
@@ -267,21 +255,6 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
                 t={t}
               />
             ))}
-            {showNowLine && <NowLine />}
-          </div>
-
-          <div className="flex md:hidden">
-            <TimeAxis muted={t.muted} />
-            {activeArtists[mobileArtistIdx] && (
-              <ArtistColumn
-                artist={activeArtists[mobileArtistIdx]}
-                artistBookings={bookingsByArtist[activeArtists[mobileArtistIdx]?.id] || []}
-                onColumnClick={handleColumnClick}
-                onBookingClick={onBookingClick}
-                border={t.border}
-                t={t}
-              />
-            )}
             {showNowLine && <NowLine />}
           </div>
         </div>
