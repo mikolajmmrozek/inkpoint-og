@@ -369,8 +369,9 @@ export default function DashboardBookings() {
             )}
 
             {/* List */}
-            {((viewMode === 'calendar' && searchQuery.trim()) || viewMode === 'list' || viewMode === 'day') ? (<div>
-              {viewMode === 'calendar' && searchQuery.trim() && (
+             {((viewMode === 'calendar' && searchQuery.trim()) || viewMode === 'list' || viewMode === 'day') && (
+               <div>
+                 {viewMode === 'calendar' && searchQuery.trim() && (
                 <div className="mb-6">
                   <div style={{ padding: '10px 16px', background: t.bg, border: `0.5px solid ${t.border}` }}>
                     <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.1rem', color: t.title, letterSpacing: '0.08em' }}>
@@ -391,8 +392,8 @@ export default function DashboardBookings() {
                       </p>
                     </div>
                   )}
-                </div>
-              )}
+                  </div>
+                  )}
               {viewMode === 'calendar' && selectedDate && !searchQuery.trim() && (
                 <div className="flex items-center justify-between mb-3" style={{ border: `0.5px solid ${t.border}`, padding: '10px 16px', background: t.bg }}>
                   <button onClick={() => { setSearchQuery(''); setSelectedDate(d => subDays(d, 1)); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}>
@@ -515,7 +516,7 @@ export default function DashboardBookings() {
                 </div>
               )}
               </div>
-              ) : null}
+              )}
 
               {/* Detail panel — slide-in drawer from right */}
               <AnimatePresence>
@@ -543,6 +544,8 @@ export default function DashboardBookings() {
           />
         )}
       </AnimatePresence>
-    </div>
-  );
-}
+       </div>
+      )}
+      </div>
+      );
+      }
