@@ -172,7 +172,7 @@ export default function Dashboard() {
         <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
           {/* Top bar */}
            <div className="flex items-center gap-4 px-6 py-4" style={{ borderBottom: `0.5px solid ${border}`, background: topBarBg }}>
-             <button onClick={() => setSidebarOpen(true)} className="lg:hidden" style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer', padding: '8px', minWidth: '44px', minHeight: '44px', display: 'none' }}>
+             <button onClick={() => setSidebarOpen(true)} className="lg:hidden" style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer', padding: '8px', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                <Menu size={20} />
              </button>
             <div className="flex-1" />
