@@ -100,7 +100,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
   const handleSave = async () => {
     setSaving(true);
     const fullName = `${form.client_first_name || ''} ${form.client_last_name || ''}`.trim();
-    const data = { ...form, client_name: fullName, estimated_price: form.estimated_price ? Number(form.estimated_price) : undefined };
+    const data = { ...form, client_name: fullName, estimated_price: form.estimated_price ? Math.round(Number(form.estimated_price) * 100) / 100 : undefined };
     delete data.client_first_name;
     delete data.client_last_name;
 
