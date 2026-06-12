@@ -141,8 +141,10 @@ export default function DashboardBookings() {
     const todayStr = format(new Date(), 'yyyy-MM-dd');
     let base = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
     if (artistFilter !== 'all') base = base.filter(b => b.artist_id === artistFilter);
-    const past = [...base].filter(b => (b.session_date || '') < todayStr);
-    const startIdx = past.length; // future starts right after all past items
+    // Find first item that is today or in the future
+    const sorted = [...base].sort((a, b) => (a.session_date || '').localeCompare(b.session_date || ''));
+    const firstTodayOrFuture = sorted.findIndex(b => (b.session_date || '') >= todayStr);
+    const startIdx = firstTodayOrFuture >= 0 ? firstTodayOrFuture : Math.max(0, sorted.length - PAGE_SIZE);
     setListPage(Math.floor(startIdx / PAGE_SIZE));
   }, [viewMode, filter, artistFilter, bookings]);
 
@@ -191,12 +193,8 @@ export default function DashboardBookings() {
       base = base.filter(b => b.session_date && isSameDay(new Date(b.session_date), selectedDate));
     }
     if (viewMode === 'list') {
-      const todayStr = format(new Date(), 'yyyy-MM-dd');
-      // Sort: past descending first, then today+future ascending
-      // This way "Poprzednie" goes further into the past
-      const past = [...base].filter(b => (b.session_date || '') < todayStr).sort((a, b) => (b.session_date || '').localeCompare(a.session_date || ''));
-      const future = [...base].filter(b => (b.session_date || '') >= todayStr).sort((a, b) => (a.session_date || '').localeCompare(b.session_date || ''));
-      base = [...past, ...future];
+      // Always chronological ascending
+      base = [...base].sort((a, b) => (a.session_date || '').localeCompare(b.session_date || ''));
     }
     return base;
   })();
