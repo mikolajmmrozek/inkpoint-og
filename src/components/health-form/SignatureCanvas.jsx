@@ -7,6 +7,7 @@ export default function SignatureCanvas({ value, onChange, label, clearLabel, sh
 
   const canvasBg = theme === 'light' ? '#ffffff' : '#111111';
   const strokeColor = theme === 'light' ? '#111111' : '#F5F0EB';
+  const borderColorFinal = showErrors && !value ? '#FF007F' : borderColor || (theme === 'light' ? '#E5E5E5' : '#262626');
   const placeholderColor = theme === 'light' ? 'rgba(0,0,0,0.15)' : 'rgba(245,240,235,0.15)';
   const bc = borderColor || '#262626';
   const tm = textMuted || 'rgba(245,240,235,0.5)';
@@ -78,7 +79,7 @@ export default function SignatureCanvas({ value, onChange, label, clearLabel, sh
           {label} * {showErrors && !value && '(wymagane)'}
         </p>
       )}
-      <div style={{ border: showErrors && !value ? '0.5px solid #FF007F' : `0.5px solid ${bc}`, background: canvasBg, position: 'relative' }}>
+      <div style={{ border: `0.5px solid ${borderColorFinal}`, background: canvasBg, position: 'relative' }}>
         <canvas
           ref={canvasRef}
           width={600}
