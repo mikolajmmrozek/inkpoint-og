@@ -292,8 +292,6 @@ export default function DashboardBookings() {
       base = [...base].sort((a, b) => (a.session_date || '').localeCompare(b.session_date || ''));
       
       if (viewMode === 'day' && base.length > 0) {
-        const firstMatchDate = new Date(base[0].session_date);
-        setSelectedDate(firstMatchDate);
         base = base.filter(b => b.session_date === base[0].session_date);
         base = [...base].sort((a, b) => (a.session_time || '').localeCompare(b.session_time || ''));
       }
@@ -317,6 +315,13 @@ export default function DashboardBookings() {
     }
     return base;
   })();
+
+  useEffect(() => {
+    if (viewMode === 'day' && searchQuery.trim() && listBookings.length > 0) {
+      const firstMatchDate = new Date(listBookings[0].session_date);
+      setSelectedDate(firstMatchDate);
+    }
+  }, [viewMode, searchQuery, listBookings]);
 
   const PAGE_SIZE = 10;
   const listPageCount = Math.ceil(listBookings.length / PAGE_SIZE);
