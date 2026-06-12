@@ -84,7 +84,7 @@ export default function DashboardHome() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1, duration: 0.5 }}
             >
-              <Link to={kpi.link} className="block p-6 transition-all duration-300" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+              <Link to={kpi.link} className="block p-6 transition-all duration-300 h-full" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
                 <div className="flex items-start justify-between mb-4">
                   <Icon size={16} color="#FF007F" />
                   <TrendingUp size={12} color={t.muted} />
