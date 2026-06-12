@@ -17,6 +17,7 @@ function getThemeColors(theme) {
     return {
       bg: '#FFFFFF',
       title: '#111111',
+      text: '#111111',
       muted: 'rgba(0,0,0,0.5)',
       border: '#E5E5E5',
     };
@@ -24,6 +25,7 @@ function getThemeColors(theme) {
   return {
     bg: '#0A0A0A',
     title: '#F5F0EB',
+    text: '#F5F0EB',
     muted: 'rgba(245,240,235,0.5)',
     border: '#262626',
   };
