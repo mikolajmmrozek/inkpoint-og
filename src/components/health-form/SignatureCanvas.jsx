@@ -87,7 +87,7 @@ export default function SignatureCanvas({ value, onChange, label, clearLabel, sh
           ref={canvasRef}
           width={600}
           height={150}
-          style={{ width: '100%', height: '150px', display: 'block', cursor: 'crosshair', touchAction: 'none' }}
+          style={{ width: '100%', height: '150px', display: 'block', cursor: 'crosshair', touchAction: 'none', backgroundColor: canvasBg }}
           onMouseDown={startDraw}
           onMouseMove={draw}
           onMouseUp={endDraw}
