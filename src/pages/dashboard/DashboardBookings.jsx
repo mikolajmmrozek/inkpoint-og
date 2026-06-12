@@ -141,17 +141,8 @@ export default function DashboardBookings() {
     const todayStr = format(new Date(), 'yyyy-MM-dd');
     let base = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
     if (artistFilter !== 'all') base = base.filter(b => b.artist_id === artistFilter);
-    const sorted = [...base].sort((a, b) => {
-      const da = a.session_date || '';
-      const db = b.session_date || '';
-      const aFuture = da >= todayStr;
-      const bFuture = db >= todayStr;
-      if (aFuture && bFuture) return da.localeCompare(db);
-      if (!aFuture && !bFuture) return db.localeCompare(da);
-      return aFuture ? -1 : 1;
-    });
-    const firstTodayOrFuture = sorted.findIndex(b => (b.session_date || '') >= todayStr);
-    const startIdx = firstTodayOrFuture >= 0 ? firstTodayOrFuture : 0;
+    const past = [...base].filter(b => (b.session_date || '') < todayStr);
+    const startIdx = past.length; // future starts right after all past items
     setListPage(Math.floor(startIdx / PAGE_SIZE));
   }, [viewMode, filter, artistFilter, bookings]);
 
@@ -201,16 +192,11 @@ export default function DashboardBookings() {
     }
     if (viewMode === 'list') {
       const todayStr = format(new Date(), 'yyyy-MM-dd');
-      // Sort ascending from today: upcoming first, then past
-      base = [...base].sort((a, b) => {
-        const da = a.session_date || '';
-        const db = b.session_date || '';
-        const aFuture = da >= todayStr;
-        const bFuture = db >= todayStr;
-        if (aFuture && bFuture) return da.localeCompare(db);
-        if (!aFuture && !bFuture) return db.localeCompare(da); // past: most recent first
-        return aFuture ? -1 : 1; // upcoming before past
-      });
+      // Sort: past descending first, then today+future ascending
+      // This way "Poprzednie" goes further into the past
+      const past = [...base].filter(b => (b.session_date || '') < todayStr).sort((a, b) => (b.session_date || '').localeCompare(a.session_date || ''));
+      const future = [...base].filter(b => (b.session_date || '') >= todayStr).sort((a, b) => (a.session_date || '').localeCompare(b.session_date || ''));
+      base = [...past, ...future];
     }
     return base;
   })();
