@@ -125,12 +125,12 @@ const TimeAxis = memo(function TimeAxis({ muted }) {
   );
 }, (prev, next) => prev.muted === next.muted);
 
-const ArtistColumn = memo(function ArtistColumn({ artist, artistBookings, onColumnClick, onBookingClick, border, t }) {
+const ArtistColumn = memo(function ArtistColumn({ artist, artistBookings, onColumnClick, onBookingClick, border, t, isLast }) {
   const handleClick = useCallback((e) => onColumnClick(e, artist), [onColumnClick, artist]);
   return (
     <div
       onClick={handleClick}
-      style={{ flex: 1, minWidth: 0, position: 'relative', height: `${TOTAL_HEIGHT}px`, borderLeft: `0.5px solid ${border}`, cursor: 'crosshair' }}
+      style={{ flex: 1, minWidth: 0, position: 'relative', height: `${TOTAL_HEIGHT}px`, borderLeft: `0.5px solid ${border}`, borderRight: isLast ? `0.5px solid ${border}` : 'none', cursor: 'crosshair' }}
     >
       <GridLines border={border} />
       {artistBookings.map(b => (
@@ -214,20 +214,24 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
       </div>
 
       {/* Timeline body */}
-      <div ref={scrollRef} className="overflow-y-auto overflow-x-auto" style={{ maxHeight: '600px' }}>
-        <div style={{ display: 'flex', width: '100%', minHeight: 0 }}>
+      <div ref={scrollRef} className="overflow-y-auto" style={{ maxHeight: '600px' }}>
+        <div style={{ display: 'flex', width: '100%', minHeight: 0, boxSizing: 'border-box' }}>
           <TimeAxis muted={t.muted} />
-          {(artistFilter === 'all' ? activeArtists : activeArtists.filter(a => a.id === artistFilter)).map(a => (
-            <ArtistColumn
-              key={a.id}
-              artist={a}
-              artistBookings={bookingsByArtist[a.id] || []}
-              onColumnClick={handleColumnClick}
-              onBookingClick={onBookingClick}
-              border={t.border}
-              t={t}
-            />
-          ))}
+          {(() => {
+            const displayed = artistFilter === 'all' ? activeArtists : activeArtists.filter(a => a.id === artistFilter);
+            return displayed.map((a, idx) => (
+              <ArtistColumn
+                key={a.id}
+                artist={a}
+                artistBookings={bookingsByArtist[a.id] || []}
+                onColumnClick={handleColumnClick}
+                onBookingClick={onBookingClick}
+                border={t.border}
+                t={t}
+                isLast={idx === displayed.length - 1}
+              />
+            ));
+          })()}
           {showNowLine && <NowLine />}
         </div>
       </div>
