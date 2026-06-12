@@ -12,15 +12,25 @@ const STATUS_COLORS = {
 };
 const STATUS_OPTIONS = ['pending', 'confirmed', 'completed', 'cancelled'];
 
-const DEFAULT_T = {
-  bg: '#0A0A0A',
-  title: '#F5F0EB',
-  muted: 'rgba(245,240,235,0.5)',
-  border: '#262626',
-};
+function getThemeColors(theme) {
+  if (theme === 'light') {
+    return {
+      bg: '#FFFFFF',
+      title: '#111111',
+      muted: 'rgba(0,0,0,0.5)',
+      border: '#E5E5E5',
+    };
+  }
+  return {
+    bg: '#0A0A0A',
+    title: '#F5F0EB',
+    muted: 'rgba(245,240,235,0.5)',
+    border: '#262626',
+  };
+}
 
-export default function BookingDetailPanel({ booking, onClose, onStatusChange, onDelete, onEdit, t: tProp }) {
-  const t = tProp || DEFAULT_T;
+export default function BookingDetailPanel({ booking, onClose, onStatusChange, onDelete, onEdit, t: tProp, theme = 'dark' }) {
+  const t = tProp || getThemeColors(theme);
   const [copied, setCopied] = useState(false);
   const [showFormPreview, setShowFormPreview] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);

@@ -187,7 +187,23 @@ export default function DashboardHome() {
       {selectedBooking && (
         <BookingDetailPanel
           booking={selectedBooking}
+          theme={theme}
           onClose={() => setSelectedBooking(null)}
+          onStatusChange={(id, status) => {
+            base44.entities.Booking.update(id, { status }).then((updated) => {
+              setAllBookings(prev => prev.map(b => b.id === id ? updated : b));
+              const pending = allBookings.map(b => b.id === id ? updated : b).filter(b => b.status === 'pending');
+              const grouped = {};
+              pending.forEach(b => {
+                const day = b.session_date || 'Brak daty';
+                if (!grouped[day]) grouped[day] = [];
+                grouped[day].push(b);
+              });
+              setPendingByDay(Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b)).map(([date, items]) => ({ date, items })));
+            });
+          }}
+          onEdit={() => {}}
+          onDelete={() => {}}
           onUpdate={(updated) => {
             setAllBookings(prev => prev.map(b => b.id === updated.id ? updated : b));
             // Refresh pending list
