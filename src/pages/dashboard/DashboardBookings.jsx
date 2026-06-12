@@ -96,6 +96,7 @@ export default function DashboardBookings() {
   const [showModal, setShowModal] = useState(false);
   const [editingBooking, setEditingBooking] = useState(null);
   const [listPage, setListPage] = useState(0);
+  const [listTab, setListTab] = useState('upcoming'); // 'upcoming' | 'past'
 
   const load = async () => {
     const [data, artistData] = await Promise.all([
@@ -137,16 +138,8 @@ export default function DashboardBookings() {
 
   useEffect(() => {
     if (viewMode !== 'list') return;
-    // Find the page that starts at or after today
-    const todayStr = format(new Date(), 'yyyy-MM-dd');
-    let base = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
-    if (artistFilter !== 'all') base = base.filter(b => b.artist_id === artistFilter);
-    // Find first item that is today or in the future
-    const sorted = [...base].sort((a, b) => (a.session_date || '').localeCompare(b.session_date || ''));
-    const firstTodayOrFuture = sorted.findIndex(b => (b.session_date || '') >= todayStr);
-    const startIdx = firstTodayOrFuture >= 0 ? firstTodayOrFuture : Math.max(0, sorted.length - PAGE_SIZE);
-    setListPage(Math.floor(startIdx / PAGE_SIZE));
-  }, [viewMode, filter, artistFilter, bookings]);
+    setListPage(0);
+  }, [viewMode, filter, artistFilter, listTab]);
 
   const handleBookingClick = useCallback((b) => setSelected(b), []);
   const handleNewBookingRequest = useCallback(({ artist, time, date }) => {
@@ -193,8 +186,12 @@ export default function DashboardBookings() {
       base = base.filter(b => b.session_date && isSameDay(new Date(b.session_date), selectedDate));
     }
     if (viewMode === 'list') {
-      // Always chronological ascending
-      base = [...base].sort((a, b) => (a.session_date || '').localeCompare(b.session_date || ''));
+      const todayStr = format(new Date(), 'yyyy-MM-dd');
+      if (listTab === 'upcoming') {
+        base = [...base].filter(b => (b.session_date || '') >= todayStr).sort((a, b) => (a.session_date || '').localeCompare(b.session_date || ''));
+      } else {
+        base = [...base].filter(b => (b.session_date || '') < todayStr).sort((a, b) => (b.session_date || '').localeCompare(a.session_date || ''));
+      }
     }
     return base;
   })();
@@ -318,6 +315,24 @@ export default function DashboardBookings() {
                   <button onClick={() => setSelectedDate(d => addDays(d, 1))} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}>
                     <ChevronRight size={16} />
                   </button>
+                </div>
+              )}
+
+              {viewMode === 'list' && (
+                <div className="flex mb-4" style={{ border: `0.5px solid ${t.border}` }}>
+                  {[{ key: 'upcoming', label: 'NADCHODZĄCE' }, { key: 'past', label: 'PRZESZŁE' }].map(tab => (
+                    <button
+                      key={tab.key}
+                      onClick={() => setListTab(tab.key)}
+                      style={{
+                        flex: 1, padding: '10px', fontFamily: 'JetBrains Mono', fontSize: '9px',
+                        letterSpacing: '0.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer',
+                        background: listTab === tab.key ? 'rgba(255,0,127,0.08)' : 'transparent',
+                        color: listTab === tab.key ? '#FF007F' : t.muted,
+                        borderBottom: listTab === tab.key ? '1px solid #FF007F' : '1px solid transparent',
+                      }}
+                    >{tab.label}</button>
+                  ))}
                 </div>
               )}
 
