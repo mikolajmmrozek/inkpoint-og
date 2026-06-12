@@ -540,24 +540,26 @@ export default function DashboardBookings() {
                   </div>
                 )}
 
-                <ListContent
-                  viewMode={viewMode}
-                  searchQuery={searchQuery}
-                  selectedDate={selectedDate}
-                  listBookings={listBookings}
-                  listPageBookings={listPageBookings}
-                  listPageCount={listPageCount}
-                  listPage={listPage}
-                  setListPage={setListPage}
-                  listTab={listTab}
-                  setListTab={setListTab}
-                  selected={selected}
-                  setSelected={setSelected}
-                  artists={artists}
-                  t={t}
-                  setEditingBooking={setEditingBooking}
-                  setShowModal={setShowModal}
-                />
+                {!(viewMode === 'calendar' && searchQuery.trim()) && (
+                  <ListContent
+                    viewMode={viewMode}
+                    searchQuery={searchQuery}
+                    selectedDate={selectedDate}
+                    listBookings={listBookings}
+                    listPageBookings={listPageBookings}
+                    listPageCount={listPageCount}
+                    listPage={listPage}
+                    setListPage={setListPage}
+                    listTab={listTab}
+                    setListTab={setListTab}
+                    selected={selected}
+                    setSelected={setSelected}
+                    artists={artists}
+                    t={t}
+                    setEditingBooking={setEditingBooking}
+                    setShowModal={setShowModal}
+                  />
+                )}
               </div>
             )}
           </div>
