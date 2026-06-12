@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useState, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { AnimatePresence } from 'framer-motion';
 import { Plus, Calendar, List, Clock, ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
@@ -519,6 +518,8 @@ export default function DashboardBookings() {
           ) : null}
         </div>
       )}
+
+      {/* Detail panel — slide-in drawer from right */}
 
       {/* Detail panel — slide-in drawer from right */}
       <AnimatePresence>
