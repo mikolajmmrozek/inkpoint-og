@@ -500,7 +500,7 @@ export default function DashboardBookings() {
             {/* List section */}
              {showListSection && (
               <div>
-                {viewMode === 'calendar' && selectedDate && (
+                {viewMode === 'calendar' && selectedDate && selectedDate instanceof Date && !isNaN(selectedDate) && (
                   <div className="flex items-center justify-between mb-3" style={{ border: `0.5px solid ${t.border}`, padding: '10px 16px', background: t.bg }}>
                     <button onClick={() => { if (!searchQuery.trim()) setSelectedDate(d => subDays(d, 1)); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px', opacity: searchQuery.trim() ? 0.3 : 1 }}>
                       <ChevronLeft size={16} />
@@ -509,8 +509,8 @@ export default function DashboardBookings() {
                       <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.2rem', color: t.title, letterSpacing: '0.08em', lineHeight: 1 }}>
                         {format(selectedDate, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase()}
                       </p>
-                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: selectedDate ? (listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length > 0 ? t.fuchsia : t.muted) : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
-                        {selectedDate ? listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length : 0} {selectedDate && listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length === 1 ? 'SESJA' : selectedDate && listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length >= 2 && listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length <= 4 ? 'SESJE' : 'SESJI'}
+                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
+                        {listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length} {listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length === 1 ? 'SESJA' : listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length >= 2 && listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length <= 4 ? 'SESJE' : 'SESJI'}
                       </p>
                     </div>
                     <button onClick={() => { if (!searchQuery.trim()) setSelectedDate(d => addDays(d, 1)); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px', opacity: searchQuery.trim() ? 0.3 : 1 }}>
