@@ -32,7 +32,7 @@ export default function StudioHero() {
           muted
           playsInline
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ filter: 'brightness(0.28) contrast(1.1) saturate(0.85)' }}
+          style={{ filter: 'brightness(0.45) contrast(1.1) saturate(0.85)' }}
         />
       ) : (
         /* Fallback: animated gradient */
@@ -40,7 +40,7 @@ export default function StudioHero() {
       )}
 
       {/* Overlays */}
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(10,10,10,0.92) 0%, rgba(10,10,10,0.5) 60%, rgba(10,10,10,0.75) 100%)' }} />
+      <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(10,10,10,0.75) 0%, rgba(10,10,10,0.35) 60%, rgba(10,10,10,0.55) 100%)' }} />
       <div className="absolute bottom-0 left-0 right-0 h-48" style={{ background: 'linear-gradient(to top, #0A0A0A, transparent)' }} />
       <div className="absolute top-0 left-0 right-0 h-32" style={{ background: 'linear-gradient(to bottom, #0A0A0A, transparent)' }} />
 
