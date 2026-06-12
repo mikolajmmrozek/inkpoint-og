@@ -421,6 +421,7 @@ export default function DashboardBookings() {
                 onDayClick={handleDayClick}
                 selectedDate={selectedDate}
                 t={t}
+                artists={artists}
               />
             )}
 

@@ -10,7 +10,7 @@ const STATUS_COLORS = {
   cancelled: '#9ca3af',
 };
 
-export default function BookingCalendar({ bookings, onDayClick, selectedDate, t }) {
+export default function BookingCalendar({ bookings, onDayClick, selectedDate, t, artists = [] }) {
   const [viewMonth, setViewMonth] = useState(new Date());
   const today = new Date();
   const effectiveSelectedDate = selectedDate || today;
@@ -101,23 +101,46 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t 
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>
             Sesje — {format(effectiveSelectedDate, 'EEEE, d MMMM', { locale: pl }).toUpperCase()}
           </p>
-          <div style={{ border: `0.5px solid ${t.border}`, background: 'rgba(255,0,127,0.02)' }}>
-            {selectedDayBookings.map((b, i) => (
-              <div key={b.id} style={{ borderBottom: i < selectedDayBookings.length - 1 ? `0.5px solid ${t.border}` : 'none', padding: '10px 12px' }}>
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p style={{ color: t.text, fontSize: '12px', fontWeight: 500 }}>{b.client_name}</p>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginTop: '2px' }}>
-                      {b.session_time}{b.session_end_time ? ` — ${b.session_end_time}` : ''}
-                    </p>
+          <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+            {selectedDayBookings.map((b, i) => {
+              const artist = artists.find(a => a.id === b.artist_id);
+              return (
+                <div key={b.id} style={{ borderBottom: i < selectedDayBookings.length - 1 ? `0.5px solid ${t.border}` : 'none', padding: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  {/* Time */}
+                  <div className="flex-shrink-0 text-center" style={{ minWidth: '48px' }}>
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: STATUS_COLORS[b.status] || t.fuchsia, letterSpacing: '0.05em' }}>{b.session_time}</p>
+                    {b.session_end_time ? (
+                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted }}>→ {b.session_end_time}</p>
+                    ) : null}
                   </div>
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
-                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: STATUS_COLORS[b.status] || '#FF007F' }} />
-                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>{b.status}</span>
+                  
+                  {/* Artist photo + client info */}
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    {artist?.photo_url ? (
+                      <img src={artist.photo_url} alt={artist.name} loading="lazy" width={28} height={28} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${t.border}`, flexShrink: 0 }} />
+                    ) : b.artist_name ? (
+                      <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(255,0,127,0.12)', border: '1px solid rgba(255,0,127,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <span style={{ fontSize: '10px', color: '#FF007F', fontFamily: 'Bebas Neue, system-ui' }}>{b.artist_name.charAt(0)}</span>
+                      </div>
+                    ) : null}
+                    <div className="min-w-0">
+                      <p style={{ color: t.text, fontSize: '14px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.client_name}</p>
+                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {b.artist_name}{b.tattoo_placement ? ` · ${b.tattoo_placement}` : ''}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Price + status */}
+                  <div className="flex items-center gap-3 flex-shrink-0">
+                    {b.estimated_price && (
+                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{b.estimated_price} PLN</span>
+                    )}
+                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: STATUS_COLORS[b.status] || t.muted }} />
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
