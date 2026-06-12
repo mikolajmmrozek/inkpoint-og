@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { X, Trash2, Edit, Copy, Check, ExternalLink, Mail, FileText, Loader2 } from 'lucide-react';
+import { X, Trash2, Edit, Copy, Check, ExternalLink, Mail, FileText, Loader2, History, Save } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import HealthFormPreviewModal from './HealthFormPreviewModal';
 
@@ -36,6 +36,37 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
   const [sendingEmail, setSendingEmail] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [previewFormId, setPreviewFormId] = useState(null);
+  const [clientHistory, setClientHistory] = useState([]);
+  const [clientRecord, setClientRecord] = useState(null);
+  const [clientNotes, setClientNotes] = useState('');
+  const [savingNotes, setSavingNotes] = useState(false);
+  const [notesSaved, setNotesSaved] = useState(false);
+
+  useEffect(() => {
+    if (!booking.client_email) return;
+    // Load other sessions of this client
+    base44.entities.Booking.filter({ client_email: booking.client_email })
+      .then(sessions => {
+        setClientHistory(sessions.filter(s => s.id !== booking.id).sort((a, b) => (b.session_date || '').localeCompare(a.session_date || '')));
+      }).catch(() => {});
+    // Load client record for notes
+    base44.entities.Client.filter({ email: booking.client_email })
+      .then(clients => {
+        if (clients.length > 0) {
+          setClientRecord(clients[0]);
+          setClientNotes(clients[0].notes || '');
+        }
+      }).catch(() => {});
+  }, [booking.id, booking.client_email]);
+
+  const saveNotes = async () => {
+    if (!clientRecord) return;
+    setSavingNotes(true);
+    await base44.entities.Client.update(clientRecord.id, { notes: clientNotes });
+    setSavingNotes(false);
+    setNotesSaved(true);
+    setTimeout(() => setNotesSaved(false), 2000);
+  };
 
   const safeOnStatusChange = onStatusChange || (() => {});
   const safeOnDelete = onDelete || (() => {});
@@ -194,6 +225,64 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
               <ExternalLink size={11} />
             </a>
           </div>
+        </div>
+      )}
+
+      {/* Client notes */}
+      {clientRecord && (
+        <div className="mb-5">
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>NOTATKI O KLIENCIE</p>
+          <textarea
+            value={clientNotes}
+            onChange={e => { setClientNotes(e.target.value); setNotesSaved(false); }}
+            rows={3}
+            placeholder="Alergie, preferencje, uwagi..."
+            style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '8px 10px', fontSize: '12px', color: t.title, fontFamily: 'Inter, sans-serif', resize: 'vertical', outline: 'none', lineHeight: 1.5 }}
+            onFocus={e => e.target.style.borderColor = '#FF007F'}
+            onBlur={e => e.target.style.borderColor = t.border}
+          />
+          <button
+            onClick={saveNotes}
+            disabled={savingNotes}
+            className="flex items-center gap-1.5 mt-2 py-1.5 px-3"
+            style={{ border: `0.5px solid ${notesSaved ? '#16a34a' : t.border}`, color: notesSaved ? '#16a34a' : t.muted, fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer', opacity: savingNotes ? 0.6 : 1 }}
+          >
+            {savingNotes ? <Loader2 size={10} className="animate-spin" /> : notesSaved ? <><Check size={10} /> ZAPISANO</> : <><Save size={10} /> ZAPISZ</>}
+          </button>
+        </div>
+      )}
+
+      {/* Client session history */}
+      {clientHistory.length > 0 && (
+        <div className="mb-5">
+          <div className="flex items-center gap-2 mb-3">
+            <History size={10} color="#FF007F" />
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              HISTORIA SESJI ({clientHistory.length})
+            </p>
+          </div>
+          <div style={{ border: `0.5px solid ${t.border}` }}>
+            {clientHistory.slice(0, 5).map((s, i) => (
+              <div key={s.id} className="px-3 py-2" style={{ borderBottom: i < Math.min(clientHistory.length, 5) - 1 ? `0.5px solid ${t.border}` : 'none' }}>
+                <div className="flex items-center justify-between gap-2">
+                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: { pending: '#FF007F', confirmed: '#16a34a', completed: '#2563eb', cancelled: '#9ca3af' }[s.status] || t.muted, flexShrink: 0 }} />
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, flex: 1 }}>{s.session_date || '—'}</p>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{s.status}</p>
+                </div>
+                {s.tattoo_placement && (
+                  <p style={{ fontSize: '11px', color: t.title, marginTop: '2px', paddingLeft: '14px' }}>{s.tattoo_placement}{s.artist_name ? ` · ${s.artist_name}` : ''}</p>
+                )}
+                {s.estimated_price && (
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, paddingLeft: '14px' }}>{s.estimated_price} PLN</p>
+                )}
+              </div>
+            ))}
+          </div>
+          {clientHistory.length > 5 && (
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.08em', marginTop: '6px', textAlign: 'right' }}>
+              + {clientHistory.length - 5} więcej sesji
+            </p>
+          )}
         </div>
       )}
 
