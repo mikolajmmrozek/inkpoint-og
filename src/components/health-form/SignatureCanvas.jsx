@@ -13,17 +13,20 @@ export default function SignatureCanvas({ value, onChange, label, clearLabel, sh
   const tm = textMuted || 'rgba(245,240,235,0.5)';
 
   useEffect(() => {
-    if (value && canvasRef.current) {
+    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = canvasBg;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (value) {
       const img = new Image();
       img.onload = () => {
-        const ctx = canvasRef.current.getContext('2d');
-        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
         ctx.drawImage(img, 0, 0);
         setIsEmpty(false);
       };
       img.src = value;
     }
-  }, []);
+  }, [canvasBg]);
 
   const getPos = (e, canvas) => {
     const rect = canvas.getBoundingClientRect();
