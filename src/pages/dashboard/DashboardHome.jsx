@@ -2,28 +2,40 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, Users, MessageSquare, FileText, TrendingUp, Clock } from 'lucide-react';
+import { Calendar, Users, MessageSquare, FileText, TrendingUp, Clock, AlertCircle } from 'lucide-react';
 import { useTheme } from './Dashboard';
 
 export default function DashboardHome() {
   const { theme } = useTheme();
   const [stats, setStats] = useState({ bookings: 0, pending: 0, messages: 0, forms: 0 });
-  const [recentBookings, setRecentBookings] = useState([]);
+  const [pendingByDay, setPendingByDay] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
-      base44.entities.Booking.list('-created_date', 50),
+      base44.entities.Booking.list('-created_date', 200),
       base44.entities.ContactMessage.filter({ is_read: false }),
       base44.entities.HealthForm.list('-created_date', 10),
     ]).then(([bookings, messages, forms]) => {
+      const pending = bookings.filter(b => b.status === 'pending');
       setStats({
         bookings: bookings.length,
-        pending: bookings.filter(b => b.status === 'pending').length,
+        pending: pending.length,
         messages: messages.length,
         forms: forms.length,
       });
-      setRecentBookings(bookings.slice(0, 5));
+
+      // Group pending by date, sorted ascending
+      const grouped = {};
+      pending.forEach(b => {
+        const day = b.session_date || 'Brak daty';
+        if (!grouped[day]) grouped[day] = [];
+        grouped[day].push(b);
+      });
+      const sorted = Object.entries(grouped)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([date, items]) => ({ date, items }));
+      setPendingByDay(sorted);
     }).finally(() => setLoading(false));
   }, []);
 
@@ -84,47 +96,88 @@ export default function DashboardHome() {
         })}
       </div>
 
-      {/* Recent bookings */}
+      {/* Pending sessions by day */}
       <div>
         <div className="flex items-center justify-between mb-6">
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-            OSTATNIE REZERWACJE
-          </p>
+          <div className="flex items-center gap-2">
+            <AlertCircle size={14} color="#FF007F" />
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              DO POTWIERDZENIA
+            </p>
+          </div>
           <Link to="/dashboard/bookings" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             WSZYSTKIE →
           </Link>
         </div>
 
-        <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
-          {loading ? (
-            <div className="p-8 text-center">
-              <div className="w-8 h-px mx-auto animate-pulse" style={{ background: '#FF007F' }} />
-            </div>
-          ) : recentBookings.length === 0 ? (
-            <div className="p-8 text-center">
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
-                BRAK REZERWACJI
-              </p>
-            </div>
-          ) : (
-            recentBookings.map((b, i) => (
-              <div key={b.id} className="flex items-center justify-between p-4 transition-colors" style={{ borderBottom: i < recentBookings.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }}>
-                <div>
-                  <p style={{ color: t.value, fontSize: '14px', fontWeight: 500 }}>{b.client_name}</p>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
-                    {b.artist_name} · {b.session_date}
-                  </p>
+        {loading ? (
+          <div className="p-8 text-center" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+            <div className="w-8 h-px mx-auto animate-pulse" style={{ background: '#FF007F' }} />
+          </div>
+        ) : pendingByDay.length === 0 ? (
+          <div className="p-8 text-center" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
+              ✓ BRAK SESJI DO POTWIERDZENIA
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {pendingByDay.map(({ date, items }) => {
+              const dateObj = date !== 'Brak daty' ? new Date(date) : null;
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              const isPast = dateObj && dateObj < today;
+              const isToday = dateObj && dateObj.toDateString() === today.toDateString();
+
+              const dayLabel = dateObj
+                ? dateObj.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+                : 'Brak daty';
+
+              return (
+                <div key={date}>
+                  {/* Day header */}
+                  <div className="flex items-center gap-3 mb-2">
+                    <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: isPast ? '#FF007F' : isToday ? '#f59e0b' : '#16a34a', flexShrink: 0 }} />
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: isPast ? '#FF007F' : isToday ? '#f59e0b' : t.muted }}>
+                      {isToday ? `DZIŚ — ${dayLabel}` : isPast ? `PRZETERMINOWANE — ${dayLabel}` : dayLabel}
+                    </p>
+                    <div style={{ flex: 1, height: '0.5px', background: isPast ? 'rgba(255,0,127,0.3)' : t.cardBorder }} />
+                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: isPast ? '#FF007F' : t.muted, letterSpacing: '0.08em' }}>
+                      {items.length} {items.length === 1 ? 'sesja' : 'sesje'}
+                    </span>
+                  </div>
+
+                  {/* Sessions */}
+                  <div style={{ border: `0.5px solid ${isPast ? 'rgba(255,0,127,0.4)' : t.cardBorder}`, background: t.cardBg }}>
+                    {items.map((b, i) => (
+                      <div key={b.id} className="flex items-center justify-between p-4" style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }}>
+                        <div className="flex items-center gap-4">
+                          <div>
+                            <p style={{ color: t.value, fontSize: '14px', fontWeight: 500 }}>{b.client_name}</p>
+                            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
+                              {b.artist_name && `${b.artist_name} · `}{b.session_time && `${b.session_time}${b.session_end_time ? `–${b.session_end_time}` : ''}`}
+                              {b.tattoo_placement && ` · ${b.tattoo_placement}`}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          {b.estimated_price && (
+                            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>
+                              {b.estimated_price} zł
+                            </span>
+                          )}
+                          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', border: '0.5px solid #FF007F', color: '#FF007F' }}>
+                            PENDING
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <span style={{
-                  fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase',
-                  padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status] || t.cardBorder}`, color: STATUS_COLORS[b.status] || t.muted,
-                }}>
-                  {b.status}
-                </span>
-              </div>
-            ))
-          )}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
