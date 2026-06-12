@@ -115,9 +115,9 @@ const BookingTile = memo(function BookingTile({ booking, onClick, t }) {
 
 const TimeAxis = memo(function TimeAxis({ muted }) {
   return (
-    <div style={{ position: 'relative', height: `${TOTAL_HEIGHT}px`, width: '44px', flexShrink: 0 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: `${TOTAL_HEIGHT}px`, width: '44px', flexShrink: 0, position: 'relative' }}>
       {HOURS.map(h => (
-        <div key={h} style={{ position: 'absolute', top: `${(h * 60 - DAY_START) * PX_PER_MIN}px`, right: '8px', fontFamily: 'JetBrains Mono', fontSize: '8px', color: muted, letterSpacing: '0.05em', lineHeight: 1, transform: 'translateY(-50%)', whiteSpace: 'nowrap' }}>
+        <div key={h} style={{ position: 'absolute', top: `${(h * 60 - DAY_START) * PX_PER_MIN}px`, left: '50%', transform: 'translate(-50%, -50%)', fontFamily: 'JetBrains Mono', fontSize: '8px', color: muted, letterSpacing: '0.05em', lineHeight: 1, whiteSpace: 'nowrap' }}>
           {String(h).padStart(2, '0')}:00
         </div>
       ))}
