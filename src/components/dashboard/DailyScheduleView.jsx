@@ -208,7 +208,7 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
       </div>
 
       {/* Artist selector */}
-      <div className="flex overflow-x-auto thin-scrollbar" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+      <div className="flex justify-center overflow-x-auto thin-scrollbar" style={{ borderBottom: `0.5px solid ${t.border}` }}>
         {activeArtists.map(a => {
           const count = (bookingsByArtist[a.id] || []).length;
           const isSelected = selectedArtistIds.size === 0 || selectedArtistIds.has(a.id);
