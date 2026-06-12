@@ -95,7 +95,7 @@ export default function DashboardBookings() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showModal, setShowModal] = useState(false);
   const [editingBooking, setEditingBooking] = useState(null);
-  const [listLimit, setListLimit] = useState(10);
+  const [listPage, setListPage] = useState(0);
 
   const load = async () => {
     const [data, artistData] = await Promise.all([
@@ -135,7 +135,25 @@ export default function DashboardBookings() {
     setSelected(null);
   };
 
-  useEffect(() => { setListLimit(10); }, [filter, artistFilter]);
+  useEffect(() => {
+    if (viewMode !== 'list') return;
+    // Find the page that starts at or after today
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
+    let base = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
+    if (artistFilter !== 'all') base = base.filter(b => b.artist_id === artistFilter);
+    const sorted = [...base].sort((a, b) => {
+      const da = a.session_date || '';
+      const db = b.session_date || '';
+      const aFuture = da >= todayStr;
+      const bFuture = db >= todayStr;
+      if (aFuture && bFuture) return da.localeCompare(db);
+      if (!aFuture && !bFuture) return db.localeCompare(da);
+      return aFuture ? -1 : 1;
+    });
+    const firstTodayOrFuture = sorted.findIndex(b => (b.session_date || '') >= todayStr);
+    const startIdx = firstTodayOrFuture >= 0 ? firstTodayOrFuture : 0;
+    setListPage(Math.floor(startIdx / PAGE_SIZE));
+  }, [viewMode, filter, artistFilter, bookings]);
 
   const handleBookingClick = useCallback((b) => setSelected(b), []);
   const handleNewBookingRequest = useCallback(({ artist, time, date }) => {
@@ -182,19 +200,24 @@ export default function DashboardBookings() {
       base = base.filter(b => b.session_date && isSameDay(new Date(b.session_date), selectedDate));
     }
     if (viewMode === 'list') {
-      // Sort: upcoming first (ascending by date), past sessions at bottom
+      const todayStr = format(new Date(), 'yyyy-MM-dd');
+      // Sort ascending from today: upcoming first, then past
       base = [...base].sort((a, b) => {
         const da = a.session_date || '';
         const db = b.session_date || '';
-        if (filter === 'all' || filter === 'pending' || filter === 'confirmed') {
-          // upcoming first
-          return da.localeCompare(db);
-        }
-        return da.localeCompare(db);
+        const aFuture = da >= todayStr;
+        const bFuture = db >= todayStr;
+        if (aFuture && bFuture) return da.localeCompare(db);
+        if (!aFuture && !bFuture) return db.localeCompare(da); // past: most recent first
+        return aFuture ? -1 : 1; // upcoming before past
       });
     }
     return base;
   })();
+
+  const PAGE_SIZE = 10;
+  const listPageCount = Math.ceil(listBookings.length / PAGE_SIZE);
+  const listPageBookings = listBookings.slice(listPage * PAGE_SIZE, (listPage + 1) * PAGE_SIZE);
 
   const calendarBookings = (() => {
     let base = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
@@ -326,26 +349,44 @@ export default function DashboardBookings() {
                   )}
                 </div>
               ) : viewMode === 'list' ? (
-                // List view: grouped by day, max 10 at a time
                 (() => {
-                  const visibleBookings = listBookings.slice(0, listLimit);
                   const grouped = {};
-                  visibleBookings.forEach(b => {
+                  listPageBookings.forEach(b => {
                     const day = b.session_date || 'Brak daty';
                     if (!grouped[day]) grouped[day] = [];
                     grouped[day].push(b);
                   });
-                  const dayGroups = Object.entries(grouped);
+                  const todayStr = format(new Date(), 'yyyy-MM-dd');
                   return (
                     <div className="space-y-4">
-                      {dayGroups.map(([date, items]) => {
+                      {/* Pagination nav */}
+                      {listPageCount > 1 && (
+                        <div className="flex items-center justify-between" style={{ border: `0.5px solid ${t.border}`, padding: '8px 14px', background: t.bg }}>
+                          <button
+                            onClick={() => setListPage(p => Math.max(0, p - 1))}
+                            disabled={listPage === 0}
+                            style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: listPage === 0 ? t.muted : t.fuchsia, background: 'none', border: 'none', cursor: listPage === 0 ? 'default' : 'pointer', opacity: listPage === 0 ? 0.4 : 1 }}
+                          >
+                            <ChevronLeft size={12} /> POPRZEDNIE
+                          </button>
+                          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>
+                            {listPage + 1} / {listPageCount} · {listBookings.length} sesji
+                          </span>
+                          <button
+                            onClick={() => setListPage(p => Math.min(listPageCount - 1, p + 1))}
+                            disabled={listPage >= listPageCount - 1}
+                            style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: listPage >= listPageCount - 1 ? t.muted : t.fuchsia, background: 'none', border: 'none', cursor: listPage >= listPageCount - 1 ? 'default' : 'pointer', opacity: listPage >= listPageCount - 1 ? 0.4 : 1 }}
+                          >
+                            NASTĘPNE <ChevronRight size={12} />
+                          </button>
+                        </div>
+                      )}
+                      {/* Grouped days */}
+                      {Object.entries(grouped).map(([date, items]) => {
                         const dateObj = date !== 'Brak daty' ? new Date(date) : null;
-                        const today = new Date(); today.setHours(0,0,0,0);
-                        const isToday = dateObj && dateObj.toDateString() === today.toDateString();
-                        const isPast = dateObj && dateObj < today;
-                        const dayLabel = dateObj
-                          ? format(dateObj, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase()
-                          : 'BRAK DATY';
+                        const isToday = dateObj && date === todayStr;
+                        const isPast = dateObj && date < todayStr;
+                        const dayLabel = dateObj ? format(dateObj, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase() : 'BRAK DATY';
                         return (
                           <div key={date}>
                             <div className="flex items-center gap-3 mb-2">
@@ -364,15 +405,6 @@ export default function DashboardBookings() {
                           </div>
                         );
                       })}
-                      {listBookings.length > listLimit && (
-                        <button
-                          onClick={() => setListLimit(l => l + 10)}
-                          className="w-full py-3 transition-all hover:opacity-80"
-                          style={{ border: `0.5px solid ${t.border}`, color: t.fuchsia, background: 'transparent', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer' }}
-                        >
-                          POKAŻ WIĘCEJ ({listBookings.length - listLimit} POZOSTAŁYCH)
-                        </button>
-                      )}
                     </div>
                   );
                 })()
