@@ -369,7 +369,7 @@ export default function DashboardBookings() {
             )}
 
             {/* List */}
-            {(viewMode === 'calendar' && searchQuery.trim()) || viewMode === 'list' || viewMode === 'day' ? <div>
+            {((viewMode === 'calendar' && searchQuery.trim()) || viewMode === 'list' || viewMode === 'day') ? (<div>
               {viewMode === 'calendar' && searchQuery.trim() && (
                 <div className="mb-6">
                   <div style={{ padding: '10px 16px', background: t.bg, border: `0.5px solid ${t.border}` }}>
@@ -454,8 +454,7 @@ export default function DashboardBookings() {
                     </button>
                   )}
                 </div>
-              ) : viewMode === 'list' ? (
-                (() => {
+              ) : viewMode === 'list' ? (() => {
                   const grouped = {};
                   listPageBookings.forEach(b => {
                     const day = b.session_date || 'Brak daty';
@@ -510,14 +509,13 @@ export default function DashboardBookings() {
                       })}
                     </div>
                   );
-                })()
-              ) : (
+                })() : (
                 <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
                   {listBookings.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={listBookings} selected={selected} setSelected={setSelected} artists={artists} t={t} />)}
                 </div>
               )}
             </div>
-          ) : null}
+          ) : null)}
         </div>
       )}
 
