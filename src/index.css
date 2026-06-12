@@ -268,3 +268,18 @@ input[type="number"] {
   background-color: #F5F0EB;
   color: #0A0A0A;
 }
+
+/* Thin scrollbar for artist selector */
+.thin-scrollbar::-webkit-scrollbar {
+  height: 3px;
+}
+.thin-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background: #FF007F;
+  border-radius: 2px;
+}
+.thin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #CC0066;
+}
