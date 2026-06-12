@@ -65,7 +65,7 @@ export default function HeroSlider() {
             src={optimizeUrl(slide?.photo_url)}
             alt={slide?.name}
             className="w-full h-full object-cover"
-            style={{ filter: 'brightness(0.35) contrast(1.1)' }}
+            style={{ filter: 'brightness(0.50) contrast(1.1)' }}
             loading="eager"
             decoding="async"
           />
@@ -73,7 +73,7 @@ export default function HeroSlider() {
       </AnimatePresence>
 
       {/* Gradient overlay */}
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(10,10,10,0.97) 0%, rgba(10,10,10,0.4) 60%, rgba(10,10,10,0.7) 100%)' }} />
+      <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(10,10,10,0.75) 0%, rgba(10,10,10,0.25) 60%, rgba(10,10,10,0.5) 100%)' }} />
       <div className="absolute bottom-0 left-0 right-0 h-64" style={{ background: 'linear-gradient(to top, rgba(255,0,127,0.12) 0%, transparent 100%)' }} />
 
       {/* Content */}
