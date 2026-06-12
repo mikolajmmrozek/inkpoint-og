@@ -82,6 +82,7 @@ export default function Footer() {
               <p>ul. Wschowska 30</p>
               <p>64-200 Wolsztyn</p>
               <a href="tel:881717880" className="hover:text-parchment/80 transition-colors" style={{ marginTop: '16px', display: 'block', color: '#FF007F' }}>881717880</a>
+              <a href="mailto:tattoo.wolsztyn@gmail.com" className="hover:text-parchment/80 transition-colors" style={{ marginTop: '8px', display: 'block', color: '#FF007F', fontSize: '12px' }}>tattoo.wolsztyn@gmail.com</a>
             </div>
           </div>
         </div>
