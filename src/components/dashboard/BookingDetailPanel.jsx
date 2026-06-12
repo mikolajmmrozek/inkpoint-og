@@ -126,45 +126,6 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
           <X size={16} />
         </button>
       </div>
-      <div className="mb-6">
-        <span style={{
-          fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase',
-          padding: '3px 8px', border: `0.5px solid ${STATUS_COLORS[booking.status] || '#262626'}`,
-          color: STATUS_COLORS[booking.status] || t.muted,
-        }}>{booking.status}</span>
-      </div>
-
-      {[
-        ['ID Sesji', booking.session_id || '—'],
-        ['Email', booking.client_email],
-        ['Telefon', booking.client_phone || '—'],
-        ['Artysta', booking.artist_name || '—'],
-        ['Data sesji', booking.session_date || '—'],
-        ['Godziny', (() => {
-          if (!booking.session_time) return '—';
-          if (booking.session_end_time) return `${booking.session_time} — ${booking.session_end_time}`;
-          if (booking.session_duration) {
-            const [h, m] = booking.session_time.split(':').map(Number);
-            const endTotal = h * 60 + m + booking.session_duration;
-            const endH = String(Math.floor(endTotal / 60)).padStart(2, '0');
-            const endM = String(endTotal % 60).padStart(2, '0');
-            return `${booking.session_time} — ${endH}:${endM}`;
-          }
-          return booking.session_time;
-        })()],
-        ['Miejsce', booking.tattoo_placement || '—'],
-        ['Opis projektu', booking.tattoo_description || '—'],
-        ['Cena', booking.estimated_price ? `${booking.estimated_price} PLN` : '—'],
-        ['Depozyt', booking.deposit_paid ? '✓ Wpłacony' : '✗ Brak'],
-        ['Ankieta', booking.health_form_completed ? '✓ Wypełniona' : '✗ Brak'],
-        ['Notatki', booking.notes || '—'],
-      ].map(([label, value]) => (
-        <div key={label} className="mb-3 pb-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '3px' }}>{label}</p>
-          <p style={{ color: t.muted, fontSize: '12px', lineHeight: 1.5, wordBreak: 'break-word' }}>{value}</p>
-        </div>
-      ))}
-
       {/* Status change */}
       <div className="mb-5">
         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>ZMIEŃ STATUS</p>
@@ -229,6 +190,36 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
           </div>
         </div>
       )}
+
+      {[
+       ['ID Sesji', booking.session_id || '—'],
+       ['Email', booking.client_email],
+       ['Telefon', booking.client_phone || '—'],
+       ['Artysta', booking.artist_name || '—'],
+       ['Data sesji', booking.session_date || '—'],
+       ['Godziny', (() => {
+         if (!booking.session_time) return '—';
+         if (booking.session_end_time) return `${booking.session_time} — ${booking.session_end_time}`;
+         if (booking.session_duration) {
+           const [h, m] = booking.session_time.split(':').map(Number);
+           const endTotal = h * 60 + m + booking.session_duration;
+           const endH = String(Math.floor(endTotal / 60)).padStart(2, '0');
+           const endM = String(endTotal % 60).padStart(2, '0');
+           return `${booking.session_time} — ${endH}:${endM}`;
+         }
+         return booking.session_time;
+       })()],
+       ['Miejsce', booking.tattoo_placement || '—'],
+       ['Opis projektu', booking.tattoo_description || '—'],
+       ['Cena', booking.estimated_price ? `${booking.estimated_price} PLN` : '—'],
+       ['Depozyt', booking.deposit_paid ? '✓ Wpłacony' : '✗ Brak'],
+       ['Notatki', booking.notes || '—'],
+      ].map(([label, value]) => (
+       <div key={label} className="mb-3 pb-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '3px' }}>{label}</p>
+         <p style={{ color: t.muted, fontSize: '12px', lineHeight: 1.5, wordBreak: 'break-word' }}>{value}</p>
+       </div>
+      ))}
 
       {/* Client notes */}
       {clientRecord && (
