@@ -262,9 +262,11 @@ export default function DashboardBookings() {
     setSearchQuery(q);
     if (q.trim()) {
       setListPage(0);
-      setSelectedDate(null);
-      setViewMode('list');
-      setListTab('upcoming');
+      if (viewMode !== 'calendar') {
+        setSelectedDate(null);
+        setViewMode('list');
+        setListTab('upcoming');
+      }
     }
   };
 
@@ -317,6 +319,16 @@ export default function DashboardBookings() {
   const calendarBookings = (() => {
     let base = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
     if (artistFilter !== 'all') base = base.filter(b => b.artist_id === artistFilter);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      base = base.filter(b =>
+        (b.client_name || '').toLowerCase().includes(q) ||
+        (b.session_id || '').toLowerCase().includes(q) ||
+        (b.client_email || '').toLowerCase().includes(q) ||
+        (b.tattoo_placement || '').toLowerCase().includes(q) ||
+        (b.notes || '').toLowerCase().includes(q)
+      );
+    }
     return base;
   })();
 
