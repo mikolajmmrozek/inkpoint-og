@@ -332,6 +332,7 @@ export default function DashboardBookings() {
   const PAGE_SIZE = 10;
   const listPageCount = Math.ceil(listBookings.length / PAGE_SIZE);
   const listPageBookings = listBookings.slice(listPage * PAGE_SIZE, (listPage + 1) * PAGE_SIZE);
+  const selectedDateStr = selectedDate && selectedDate instanceof Date && !isNaN(selectedDate) ? format(selectedDate, 'yyyy-MM-dd') : null;
 
   const calendarBookings = (() => {
     let base = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
@@ -509,8 +510,8 @@ export default function DashboardBookings() {
                       <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.2rem', color: t.title, letterSpacing: '0.08em', lineHeight: 1 }}>
                         {format(selectedDate, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase()}
                       </p>
-                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
-                        {listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length} {listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length === 1 ? 'SESJA' : listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length >= 2 && listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length <= 4 ? 'SESJE' : 'SESJI'}
+                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: selectedDateStr && listBookings.filter(b => b.session_date === selectedDateStr).length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
+                        {selectedDateStr ? listBookings.filter(b => b.session_date === selectedDateStr).length : 0} {selectedDateStr && listBookings.filter(b => b.session_date === selectedDateStr).length === 1 ? 'SESJA' : selectedDateStr && listBookings.filter(b => b.session_date === selectedDateStr).length >= 2 && listBookings.filter(b => b.session_date === selectedDateStr).length <= 4 ? 'SESJE' : 'SESJI'}
                       </p>
                     </div>
                     <button onClick={() => { if (!searchQuery.trim()) setSelectedDate(d => addDays(d, 1)); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px', opacity: searchQuery.trim() ? 0.3 : 1 }}>
@@ -552,8 +553,7 @@ export default function DashboardBookings() {
                   </div>
                 )}
 
-                {viewMode === 'calendar' && searchQuery.trim() && selectedDate ? (() => {
-                  const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
+                {viewMode === 'calendar' && searchQuery.trim() && selectedDateStr ? (() => {
                   const dayBookings = listBookings.filter(b => b.session_date === selectedDateStr);
                   return (
                     <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
