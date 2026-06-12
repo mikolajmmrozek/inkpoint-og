@@ -198,7 +198,7 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
       <div style={{ display: 'flex', minWidth: 'min-content', borderBottom: `0.5px solid ${t.border}` }}>
         <div style={{ width: '44px', flexShrink: 0 }} />
         {(artistFilter === 'all' ? activeArtists : activeArtists.filter(a => a.id === artistFilter)).map(a => (
-          <div key={`header-${a.id}`} style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px 4px', gap: '6px', borderLeft: `0.5px solid ${t.border}` }}>
+          <div key={`header-${a.id}`} style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px 4px', gap: '6px', borderLeft: `0.5px solid ${t.border}` }}>
             {a.photo_url ? (
               <img src={a.photo_url} alt={a.name} loading="lazy" width={28} height={28} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${t.border}`, flexShrink: 0 }} />
             ) : (
