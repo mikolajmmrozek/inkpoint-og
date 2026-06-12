@@ -108,7 +108,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
                 + DODAJ SESJĘ
               </button>
             </div>
-          ) : selectedDayBookings.length > 0 && (
+          ) : selectedDayBookings.length > 0 && !searchQuery.trim() && (
             <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
               {selectedDayBookings.map((b, i) => {
                 const artist = artists.find(a => a.id === b.artist_id);
