@@ -509,8 +509,8 @@ export default function DashboardBookings() {
                       <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.2rem', color: t.title, letterSpacing: '0.08em', lineHeight: 1 }}>
                         {format(selectedDate, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase()}
                       </p>
-                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
-                        {listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length} {listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length === 1 ? 'SESJA' : listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length >= 2 && listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length <= 4 ? 'SESJE' : 'SESJI'}
+                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: selectedDate ? (listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length > 0 ? t.fuchsia : t.muted) : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
+                        {selectedDate ? listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length : 0} {selectedDate && listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length === 1 ? 'SESJA' : selectedDate && listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length >= 2 && listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length <= 4 ? 'SESJE' : 'SESJI'}
                       </p>
                     </div>
                     <button onClick={() => { if (!searchQuery.trim()) setSelectedDate(d => addDays(d, 1)); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px', opacity: searchQuery.trim() ? 0.3 : 1 }}>
@@ -552,17 +552,21 @@ export default function DashboardBookings() {
                   </div>
                 )}
 
-                {viewMode === 'calendar' && searchQuery.trim() && selectedDate ? (
-                  <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-                    {listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).length > 0 ? (
-                      listBookings.filter(b => b.session_date === format(selectedDate, 'yyyy-MM-dd')).map((b, i, arr) => <BookingRow key={b.id} b={b} i={i} items={arr} selected={selected} setSelected={setSelected} artists={artists} t={t} />)
-                    ) : (
-                      <div className="py-6 text-center">
-                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK SESJI W TEN DZIEŃ</p>
-                      </div>
-                    )}
-                  </div>
-                ) : !(viewMode === 'calendar') && (
+                {viewMode === 'calendar' && searchQuery.trim() && selectedDate ? (() => {
+                  const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
+                  const dayBookings = listBookings.filter(b => b.session_date === selectedDateStr);
+                  return (
+                    <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+                      {dayBookings.length > 0 ? (
+                        dayBookings.map((b, i, arr) => <BookingRow key={b.id} b={b} i={i} items={arr} selected={selected} setSelected={setSelected} artists={artists} t={t} />)
+                      ) : (
+                        <div className="py-6 text-center">
+                          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK SESJI W TEN DZIEŃ</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })() : !(viewMode === 'calendar') && (
                   <ListContent
                     viewMode={viewMode}
                     searchQuery={searchQuery}
