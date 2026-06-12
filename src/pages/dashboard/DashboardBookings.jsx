@@ -327,7 +327,26 @@ export default function DashboardBookings() {
       const firstMatchDate = new Date(listBookings[0].session_date);
       setSelectedDate(firstMatchDate);
     }
-  }, [viewMode, searchQuery, listBookings]);
+  }, [viewMode, searchQuery]);
+
+  const dayViewBookings = (() => {
+    if (viewMode !== 'day') return [];
+    if (!selectedDate || !(selectedDate instanceof Date) || isNaN(selectedDate)) return [];
+    let base = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
+    if (artistFilter !== 'all') base = base.filter(b => b.artist_id === artistFilter);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      base = base.filter(b =>
+        (b.client_name || '').toLowerCase().includes(q) ||
+        (b.session_id || '').toLowerCase().includes(q) ||
+        (b.client_email || '').toLowerCase().includes(q) ||
+        (b.tattoo_placement || '').toLowerCase().includes(q) ||
+        (b.notes || '').toLowerCase().includes(q)
+      );
+    }
+    base = base.filter(b => b.session_date && isSameDay(new Date(b.session_date), selectedDate));
+    return [...base].sort((a, b) => (a.session_time || '').localeCompare(b.session_time || ''));
+  })();
 
   const PAGE_SIZE = 10;
   const listPageCount = Math.ceil(listBookings.length / PAGE_SIZE);
@@ -488,7 +507,7 @@ export default function DashboardBookings() {
             {/* Day view */}
             {viewMode === 'day' && (
               <DailyScheduleView
-                bookings={calendarBookings}
+                bookings={searchQuery.trim() ? dayViewBookings : calendarBookings}
                 artists={artists}
                 selectedDate={selectedDate || new Date()}
                 onDateChange={(day) => setSelectedDate(day)}
