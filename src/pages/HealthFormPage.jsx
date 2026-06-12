@@ -683,7 +683,7 @@ export default function HealthFormPage() {
           {step === 'declaration' && <StepDeclaration form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={activeTemplate} lang={lang} textPrimary={textPrimary} textMuted={textMuted} borderColor={borderColor} />}
           {step === 'consents' && <StepConsents form={form} setField={setField} t={t} showErrors={showErrors} templateData={activeTemplate} lang={lang} textPrimary={textPrimary} textMuted={textMuted} borderColor={borderColor} />}
           {step === 'signature' && <SignatureCanvas value={form.client_signature} onChange={v => setField('client_signature', v)} label={t.signatureTitle} clearLabel={t.clearSignature} showErrors={showErrors} theme={theme} textMuted={textMuted} borderColor={borderColor} />}
-          {step === 'guardian' && <StepGuardian guardian={guardian} setGuardianField={setGuardianField} form={form} t={t} inputStyle={inputStyle} showErrors={showErrors} textPrimary={textPrimary} textMuted={textMuted} borderColor={borderColor} />}
+          {step === 'guardian' && <StepGuardian guardian={guardian} setGuardianField={setGuardianField} form={form} t={t} inputStyle={inputStyle} showErrors={showErrors} textPrimary={textPrimary} textMuted={textMuted} borderColor={borderColor} theme={theme} />}
 
           {/* Navigation */}
           <div className="flex gap-4 mt-12">

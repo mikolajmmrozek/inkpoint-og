@@ -1,6 +1,6 @@
 import SignatureCanvas from './SignatureCanvas';
 
-export default function StepGuardian({ guardian, setGuardianField, form, t, inputStyle, showErrors, textPrimary, textMuted, borderColor }) {
+export default function StepGuardian({ guardian, setGuardianField, form, t, inputStyle, showErrors, textPrimary, textMuted, borderColor, theme }) {
   const labelStyle = (error) => ({
     fontFamily: 'JetBrains Mono', fontSize: '8px',
     color: error ? '#FF007F' : textMuted,
@@ -77,7 +77,7 @@ export default function StepGuardian({ guardian, setGuardianField, form, t, inpu
         label={t.guardianSignature}
         clearLabel={t.clearSignature}
         showErrors={showErrors}
-        theme={undefined}
+        theme={theme}
         textMuted={textMuted}
         borderColor={borderColor}
       />
