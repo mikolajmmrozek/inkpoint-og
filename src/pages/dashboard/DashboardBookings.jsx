@@ -422,6 +422,7 @@ export default function DashboardBookings() {
                 selectedDate={selectedDate}
                 t={t}
                 artists={artists}
+                onAddBooking={handleNewBooking}
               />
             )}
 

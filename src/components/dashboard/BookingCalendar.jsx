@@ -10,7 +10,7 @@ const STATUS_COLORS = {
   cancelled: '#9ca3af',
 };
 
-export default function BookingCalendar({ bookings, onDayClick, selectedDate, t, artists = [] }) {
+export default function BookingCalendar({ bookings, onDayClick, selectedDate, t, artists = [], onAddBooking }) {
   const [viewMonth, setViewMonth] = useState(new Date());
   const today = new Date();
   const effectiveSelectedDate = selectedDate || today;
@@ -95,12 +95,20 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
         })}
       </div>
 
-      {/* Selected day sessions */}
-      {selectedDayBookings.length > 0 && (
+      {/* Selected day sessions / empty state */}
+      {(selectedDayBookings.length > 0 || selectedDate) && (
         <div className="mt-6" style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '16px' }}>
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>
             Sesje — {format(effectiveSelectedDate, 'EEEE, d MMMM', { locale: pl }).toUpperCase()}
           </p>
+          {selectedDayBookings.length === 0 ? (
+            <div className="py-8 text-center" style={{ border: `0.5px solid ${t.border}`, background: 'rgba(255,0,127,0.02)' }}>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em', marginBottom: '12px' }}>BRAK SESJI W TEN DZIEŃ</p>
+              <button onClick={onAddBooking} className="btn-oxblood" style={{ fontSize: '10px', padding: '8px 20px' }}>
+                + DODAJ SESJĘ
+              </button>
+            </div>
+          ) : (
           <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
             {selectedDayBookings.map((b, i) => {
               const artist = artists.find(a => a.id === b.artist_id);
@@ -142,6 +150,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
               );
             })}
           </div>
+          )}
         </div>
       )}
 
