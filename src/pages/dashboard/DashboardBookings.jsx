@@ -185,6 +185,10 @@ export default function DashboardBookings() {
     if (viewMode === 'calendar' && selectedDate) {
       base = base.filter(b => b.session_date && isSameDay(new Date(b.session_date), selectedDate));
     }
+    if (viewMode === 'day') {
+      base = base.filter(b => b.session_date && isSameDay(new Date(b.session_date), selectedDate || new Date()));
+      base = [...base].sort((a, b) => (a.session_time || '').localeCompare(b.session_time || ''));
+    }
     if (viewMode === 'list') {
       const todayStr = format(new Date(), 'yyyy-MM-dd');
       if (listTab === 'upcoming') {
@@ -298,7 +302,7 @@ export default function DashboardBookings() {
             )}
 
             {/* List */}
-            {viewMode !== 'day' && <div>
+            {(viewMode === 'calendar' || viewMode === 'list' || viewMode === 'day') && <div>
               {viewMode === 'calendar' && selectedDate && (
                 <div className="flex items-center justify-between mb-3" style={{ border: `0.5px solid ${t.border}`, padding: '10px 16px', background: t.bg }}>
                   <button onClick={() => setSelectedDate(d => subDays(d, 1))} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}>
