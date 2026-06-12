@@ -12,12 +12,24 @@ const STATUS_COLORS = {
 };
 const STATUS_OPTIONS = ['pending', 'confirmed', 'completed', 'cancelled'];
 
-export default function BookingDetailPanel({ booking, onClose, onStatusChange, onDelete, onEdit, t }) {
+const DEFAULT_T = {
+  bg: '#0A0A0A',
+  title: '#F5F0EB',
+  muted: 'rgba(245,240,235,0.5)',
+  border: '#262626',
+};
+
+export default function BookingDetailPanel({ booking, onClose, onStatusChange, onDelete, onEdit, t: tProp }) {
+  const t = tProp || DEFAULT_T;
   const [copied, setCopied] = useState(false);
   const [showFormPreview, setShowFormPreview] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [previewFormId, setPreviewFormId] = useState(null);
+
+  const safeOnStatusChange = onStatusChange || (() => {});
+  const safeOnDelete = onDelete || (() => {});
+  const safeOnEdit = onEdit || (() => {});
 
   const sendFormEmail = async () => {
     setSendingEmail(true);
@@ -112,7 +124,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
           {STATUS_OPTIONS.map(s => (
             <button
               key={s}
-              onClick={() => onStatusChange(booking.id, s)}
+              onClick={() => safeOnStatusChange(booking.id, s)}
               style={{
                 fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase',
                 padding: '7px', border: `0.5px solid ${booking.status === s ? STATUS_COLORS[s] : t.border}`,
@@ -173,14 +185,14 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
       {/* Actions */}
       <div className="flex gap-2">
         <button
-          onClick={onEdit}
+          onClick={safeOnEdit}
           className="flex items-center gap-1.5 flex-1 justify-center py-2.5 transition-all hover:opacity-70"
           style={{ border: `0.5px solid ${t.border}`, color: t.muted, fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer' }}
         >
           <Edit size={11} /> EDYTUJ
         </button>
         <button
-          onClick={() => onDelete(booking.id)}
+          onClick={() => safeOnDelete(booking.id)}
           className="flex items-center gap-1.5 flex-1 justify-center py-2.5 transition-all hover:opacity-70"
           style={{ border: `0.5px solid #FF007F`, color: '#FF007F', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer' }}
         >
