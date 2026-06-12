@@ -516,8 +516,6 @@ export default function DashboardBookings() {
               )}
               </div>
               ) : null}
-              </div>
-              )}
 
               {/* Detail panel — slide-in drawer from right */}
               <AnimatePresence>
