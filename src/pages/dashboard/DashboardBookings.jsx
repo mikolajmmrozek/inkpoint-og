@@ -503,6 +503,7 @@ export default function DashboardBookings() {
                 artists={artists}
                 onAddBooking={handleNewBooking}
                 searchQuery={searchQuery}
+                onBookingClick={handleBookingClick}
               />
             )}
 

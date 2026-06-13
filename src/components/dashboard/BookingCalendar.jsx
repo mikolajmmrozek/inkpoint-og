@@ -10,7 +10,7 @@ const STATUS_COLORS = {
   cancelled: '#9ca3af',
 };
 
-export default function BookingCalendar({ bookings, onDayClick, selectedDate, t, artists = [], onAddBooking, searchQuery = '' }) {
+export default function BookingCalendar({ bookings, onDayClick, selectedDate, t, artists = [], onAddBooking, searchQuery = '', onBookingClick }) {
   const [viewMonth, setViewMonth] = useState(new Date());
   const today = new Date();
   const effectiveSelectedDate = selectedDate || today;
@@ -113,7 +113,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
               {selectedDayBookings.map((b, i) => {
                 const artist = artists.find(a => a.id === b.artist_id);
                 return (
-                  <div key={b.id} style={{ borderBottom: i < selectedDayBookings.length - 1 ? `0.5px solid ${t.border}` : 'none', padding: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div key={b.id} onClick={() => onBookingClick?.(b)} style={{ borderBottom: i < selectedDayBookings.length - 1 ? `0.5px solid ${t.border}` : 'none', padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,0,127,0.04)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                     {/* Time */}
                     <div className="flex-shrink-0 text-center" style={{ minWidth: '48px' }}>
                       <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: STATUS_COLORS[b.status] || t.fuchsia, letterSpacing: '0.05em' }}>{b.session_time}</p>
