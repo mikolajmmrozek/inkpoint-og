@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, Zap, History, CalendarPlus } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import ClientSearch from './ClientSearch';
-import { Zap } from 'lucide-react';
 
 const inputStyle = {
   background: 'transparent',
@@ -27,7 +26,8 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
   const [allArtists, setAllArtists] = useState([]);
   const [services, setServices] = useState([]);
   const [saving, setSaving] = useState(false);
-  const [selectedClient, setSelectedClient] = useState(null); // existing client or null
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [repeatPrompt, setRepeatPrompt] = useState(null); // { client, lastSession }
   const calcEndTime = (startTime, durationMinutes) => {
     if (!startTime || !durationMinutes) return '';
     const [h, m] = startTime.split(':').map(Number);
@@ -135,6 +135,26 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
     set('artist_name', a?.name || '');
   };
 
+  const applyClientToForm = (client, session = null) => {
+    setSelectedClient(client);
+    setForm(f => ({
+      ...f,
+      client_first_name: client.first_name || '',
+      client_last_name: client.last_name || '',
+      client_email: client.email || '',
+      client_phone: client.phone || '',
+      ...(session ? {
+        artist_id: session.artist_id || '',
+        artist_name: session.artist_name || '',
+        tattoo_description: session.tattoo_description || '',
+        tattoo_placement: session.tattoo_placement || '',
+        estimated_price: session.estimated_price || '',
+        service_id: session.service_id || '',
+        service_name: session.service_name || '',
+      } : {}),
+    }));
+  };
+
   const handleClientSelect = (client) => {
     if (client._isNew) {
       setSelectedClient(null);
@@ -143,33 +163,11 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
       set('client_last_name', last.join(' ') || '');
       set('client_email', '');
       set('client_phone', '');
-    } else if (client._repeatSession) {
-      // Existing client with repeat session data
-      setSelectedClient(client);
-      const s = client._repeatSession;
-      setForm(f => ({
-        ...f,
-        client_first_name: client.first_name || '',
-        client_last_name: client.last_name || '',
-        client_email: client.email || '',
-        client_phone: client.phone || '',
-        artist_id: s.artist_id || '',
-        artist_name: s.artist_name || '',
-        tattoo_description: s.tattoo_description || '',
-        tattoo_placement: s.tattoo_placement || '',
-        estimated_price: s.estimated_price || '',
-        service_id: s.service_id || '',
-        service_name: s.service_name || '',
-      }));
-      // Also filter artists if service is set
-      if (s.service_id) handleService(s.service_id);
+    } else if (client._lastSession) {
+      // Show repeat prompt popup
+      setRepeatPrompt({ client, lastSession: client._lastSession });
     } else {
-      // Existing client — fill all fields
-      setSelectedClient(client);
-      set('client_first_name', client.first_name || '');
-      set('client_last_name', client.last_name || '');
-      set('client_email', client.email || '');
-      set('client_phone', client.phone || '');
+      applyClientToForm(client);
     }
   };
 
@@ -256,6 +254,53 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
   );
 
   return (
+    <>
+    {/* Repeat session prompt — rendered outside modal to avoid overflow clipping */}
+    {repeatPrompt && (
+      <div className="fixed inset-0 z-[70] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.85)' }}>
+        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg === '#FFFFFF' ? '#FFFFFF' : '#0A0A0A', padding: '36px', maxWidth: '460px', width: '100%' }}>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <History size={14} color="#FF007F" />
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase' }}>POWRACAJĄCY KLIENT</p>
+            </div>
+            <button onClick={() => { applyClientToForm(repeatPrompt.client); setRepeatPrompt(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}>
+              <X size={14} />
+            </button>
+          </div>
+          <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.8rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em', marginBottom: '20px' }}>
+            {repeatPrompt.client.name}
+          </h3>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>OSTATNIA SESJA</p>
+          <div style={{ border: `0.5px solid ${t.border}`, padding: '14px 16px', marginBottom: '20px' }}>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.text, marginBottom: '4px' }}>
+              {repeatPrompt.lastSession.session_date}{repeatPrompt.lastSession.artist_name ? ` · ${repeatPrompt.lastSession.artist_name}` : ''}
+            </p>
+            {repeatPrompt.lastSession.tattoo_placement && (
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>
+                {repeatPrompt.lastSession.tattoo_placement}{repeatPrompt.lastSession.tattoo_description ? ` — ${repeatPrompt.lastSession.tattoo_description}` : ''}
+              </p>
+            )}
+            {repeatPrompt.lastSession.estimated_price > 0 && (
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', marginTop: '4px' }}>{repeatPrompt.lastSession.estimated_price} PLN</p>
+            )}
+          </div>
+          <p style={{ fontSize: '13px', color: t.muted, marginBottom: '20px', lineHeight: 1.6 }}>
+            Czy chcesz umówić ponownie z danymi z ostatniej sesji (artysta, opis, cena)?
+          </p>
+          <div className="flex gap-3">
+            <button className="btn-oxblood flex-1" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+              onClick={() => { applyClientToForm(repeatPrompt.client, repeatPrompt.lastSession); setRepeatPrompt(null); }}>
+              <CalendarPlus size={13} /> TAK, POWTÓRZ SESJĘ
+            </button>
+            <button className="btn-ghost-parchment" style={{ flex: 1 }}
+              onClick={() => { applyClientToForm(repeatPrompt.client); setRepeatPrompt(null); }}>
+              NIE, NOWA SESJA
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={onClose}>
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
@@ -479,5 +524,6 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
         </div>
       </motion.div>
     </div>
+    </>
   );
 }
