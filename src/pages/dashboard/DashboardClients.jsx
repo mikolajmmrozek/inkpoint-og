@@ -3,6 +3,9 @@ import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
 import { Search, Edit2, Trash2, X, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 import { format } from 'date-fns';
+import { AnimatePresence } from 'framer-motion';
+import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
+import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
 
 const inputStyle = {
   background: 'transparent',
@@ -29,6 +32,8 @@ export default function DashboardClients() {
   const [editing, setEditing] = useState(null);
   const [expandedClient, setExpandedClient] = useState(null);
   const [form, setForm] = useState({});
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [selectedFormId, setSelectedFormId] = useState(null);
 
   const load = async () => {
     const [clientData, bookingData, formData] = await Promise.all([
@@ -194,13 +199,9 @@ export default function DashboardClients() {
                       <div className="mb-4">
                         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>Sesje ({sessions.length})</p>
                         {sessions.map(s => (
-                          <p key={s.id} style={{ fontSize: '11px', color: t.text, marginBottom: '4px', cursor: 'pointer' }}>
+                          <p key={s.id} style={{ fontSize: '11px', color: t.text, marginBottom: '4px' }}>
                             <button
-                              onClick={() => {
-                                const link = document.createElement('a');
-                                link.href = `/dashboard/bookings`;
-                                link.click();
-                              }}
+                              onClick={(e) => { e.stopPropagation(); setSelectedBooking(s); }}
                               style={{ background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', color: t.fuchsia, fontSize: 'inherit', fontWeight: 'bold', padding: 0 }}
                             >
                               {s.session_date}
@@ -216,14 +217,10 @@ export default function DashboardClients() {
                         {forms.map(f => (
                           <p key={f.id} style={{ fontSize: '11px', color: t.text, marginBottom: '4px' }}>
                             <button
-                              onClick={() => {
-                                const link = document.createElement('a');
-                                link.href = `/dashboard/health-forms`;
-                                link.click();
-                              }}
+                              onClick={(e) => { e.stopPropagation(); setSelectedFormId(f.id); }}
                               style={{ background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', color: '#16a34a', fontSize: 'inherit', padding: 0 }}
                             >
-                              {format(new Date(f.form_filled_date), 'dd.MM.yyyy')}
+                              {f.form_filled_date ? format(new Date(f.form_filled_date), 'dd.MM.yyyy') : '—'}
                             </button>
                             {' · '} {f.procedure_type}
                           </p>
@@ -239,6 +236,37 @@ export default function DashboardClients() {
             );
           })}
         </div>
+      )}
+
+      {/* Booking detail panel */}
+      <AnimatePresence>
+        {selectedBooking && (
+          <BookingDetailPanel
+            booking={selectedBooking}
+            theme={theme}
+            onClose={() => setSelectedBooking(null)}
+            onStatusChange={async (id, status) => {
+              await base44.entities.Booking.update(id, { status });
+              setBookings(b => b.map(x => x.id === id ? { ...x, status } : x));
+              setSelectedBooking(s => s?.id === id ? { ...s, status } : s);
+            }}
+            onDelete={async (id) => {
+              await base44.entities.Booking.delete(id);
+              setBookings(b => b.filter(x => x.id !== id));
+              setSelectedBooking(null);
+            }}
+            onEdit={() => setSelectedBooking(null)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Health form preview */}
+      {selectedFormId && (
+        <HealthFormPreviewModal
+          healthFormId={selectedFormId}
+          onClose={() => setSelectedFormId(null)}
+          t={t}
+        />
       )}
 
       {/* Edit modal */}
