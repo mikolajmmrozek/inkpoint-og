@@ -6,6 +6,7 @@ import { Calendar, Users, MessageSquare, FileText, TrendingUp, Clock, AlertCircl
 import { AnimatePresence } from 'framer-motion';
 import { useTheme } from './Dashboard';
 import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
+import BookingModal from '@/components/dashboard/BookingModal';
 
 export default function DashboardHome() {
   const { theme } = useTheme();
@@ -13,6 +14,7 @@ export default function DashboardHome() {
   const [pendingByDay, setPendingByDay] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [editingBooking, setEditingBooking] = useState(null);
   const [allBookings, setAllBookings] = useState([]);
 
   useEffect(() => {
@@ -204,8 +206,13 @@ export default function DashboardHome() {
               setPendingByDay(Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b)).map(([date, items]) => ({ date, items })));
             });
           }}
-          onEdit={() => {}}
-          onDelete={() => {}}
+          onEdit={() => { setEditingBooking(selectedBooking); setSelectedBooking(null); }}
+          onDelete={async (id) => {
+            await base44.entities.Booking.delete(id);
+            setAllBookings(prev => prev.filter(b => b.id !== id));
+            setPendingByDay(prev => prev.map(({ date, items }) => ({ date, items: items.filter(b => b.id !== id) })).filter(({ items }) => items.length > 0));
+            setSelectedBooking(null);
+          }}
           onUpdate={(updated) => {
             setAllBookings(prev => prev.map(b => b.id === updated.id ? updated : b));
             // Refresh pending list
@@ -222,6 +229,25 @@ export default function DashboardHome() {
         />
       )}
       </AnimatePresence>
+
+      {editingBooking && (
+        <BookingModal
+          booking={editingBooking}
+          onClose={() => setEditingBooking(null)}
+          onSave={(updated) => {
+            setAllBookings(prev => prev.map(b => b.id === updated.id ? updated : b));
+            const pending = allBookings.map(b => b.id === updated.id ? updated : b).filter(b => b.status === 'pending');
+            const grouped = {};
+            pending.forEach(b => {
+              const day = b.session_date || 'Brak daty';
+              if (!grouped[day]) grouped[day] = [];
+              grouped[day].push(b);
+            });
+            setPendingByDay(Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b)).map(([date, items]) => ({ date, items })));
+            setEditingBooking(null);
+          }}
+        />
+      )}
     </div>
   );
 }
