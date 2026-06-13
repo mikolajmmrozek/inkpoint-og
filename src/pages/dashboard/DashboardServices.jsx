@@ -120,9 +120,11 @@ export default function DashboardServices() {
 
   const getPriceDisplay = (s) => {
     if (s.price_type === 'range') {
+      if (s.price_min === 0 || s.price_max === 0) return 'BEZPŁATNA';
       if (s.price_min && s.price_max) return `${s.price_min} — ${s.price_max} PLN`;
       if (s.price_min) return `od ${s.price_min} PLN`;
     }
+    if (s.price_fixed === 0) return 'BEZPŁATNA';
     if (s.price_fixed) return `${s.price_fixed} PLN`;
     return '—';
   };
@@ -265,7 +267,49 @@ export default function DashboardServices() {
               {/* Duration & Price */}
               <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
                 <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>CZAS I CENA</p>
-                <div className="mb-4">{label('Czas wykonania (minuty)')}<input {...inp('duration_minutes', 'number')} /></div>
+                {/* Duration sliders */}
+                <div className="mb-6">
+                  {label('Czas wykonania')}
+                  {(() => {
+                    const totalMin = Number(form.duration_minutes) || 0;
+                    const hours = Math.floor(totalMin / 60);
+                    const minutes = totalMin % 60;
+                    const setDuration = (h, m) => set('duration_minutes', h * 60 + m);
+                    return (
+                      <div>
+                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', color: t.fuchsia, marginBottom: '14px', letterSpacing: '0.04em' }}>
+                          {totalMin === 0 ? '— brak —' : `${hours > 0 ? `${hours}h ` : ''}${minutes > 0 ? `${minutes} min` : ''}`}
+                        </p>
+                        <div className="mb-4">
+                          <div className="flex justify-between mb-1">
+                            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Godziny: {hours}h</span>
+                          </div>
+                          <input
+                            type="range" min={0} max={12} step={1} value={hours}
+                            onChange={e => setDuration(Number(e.target.value), minutes)}
+                            style={{ width: '100%', accentColor: '#FF007F', cursor: 'pointer' }}
+                          />
+                          <div className="flex justify-between" style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: t.muted, marginTop: '2px' }}>
+                            {Array.from({length: 13}, (_, i) => <span key={i}>{i}</span>)}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="flex justify-between mb-1">
+                            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Minuty: {minutes} min</span>
+                          </div>
+                          <input
+                            type="range" min={0} max={45} step={15} value={minutes}
+                            onChange={e => setDuration(hours, Number(e.target.value))}
+                            style={{ width: '100%', accentColor: '#FF007F', cursor: 'pointer' }}
+                          />
+                          <div className="flex justify-between" style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: t.muted, marginTop: '2px' }}>
+                            {[0, 15, 30, 45].map(m => <span key={m}>{m}</span>)}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
                 <div className="mb-4">
                   {label('Typ ceny')}
                   <select
@@ -278,11 +322,29 @@ export default function DashboardServices() {
                   </select>
                 </div>
                 {form.price_type === 'fixed' ? (
-                  <div>{label('Cena (PLN)')}<input {...inp('price_fixed', 'number')} /></div>
+                  <div>
+                    {label('Cena (PLN)')}
+                    <input {...inp('price_fixed', 'number')} />
+                    {(form.price_fixed === 0 || form.price_fixed === '0') && (
+                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.1em', marginTop: '4px' }}>BEZPŁATNA</p>
+                    )}
+                  </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-6">
-                    <div>{label('Cena od (PLN)')}<input {...inp('price_min', 'number')} /></div>
-                    <div>{label('Cena do (PLN)')}<input {...inp('price_max', 'number')} /></div>
+                    <div>
+                      {label('Cena od (PLN)')}
+                      <input {...inp('price_min', 'number')} />
+                      {(form.price_min === 0 || form.price_min === '0') && (
+                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.1em', marginTop: '4px' }}>BEZPŁATNA</p>
+                      )}
+                    </div>
+                    <div>
+                      {label('Cena do (PLN)')}
+                      <input {...inp('price_max', 'number')} />
+                      {(form.price_max === 0 || form.price_max === '0') && (
+                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.1em', marginTop: '4px' }}>BEZPŁATNA</p>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
