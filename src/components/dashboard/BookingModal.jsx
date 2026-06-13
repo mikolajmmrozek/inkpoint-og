@@ -136,7 +136,9 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
   };
 
   const applyClientToForm = (client, session = null) => {
-    setSelectedClient(client);
+    // Store client WITHOUT _lastSession to avoid re-rendering the repeat prompt panel
+    const { _lastSession, ...clientWithoutSession } = client;
+    setSelectedClient(clientWithoutSession);
     setForm(f => ({
       ...f,
       client_first_name: client.first_name || '',
