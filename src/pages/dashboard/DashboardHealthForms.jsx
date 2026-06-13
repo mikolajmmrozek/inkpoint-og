@@ -334,8 +334,10 @@ export default function DashboardHealthForms() {
       form.client_email?.toLowerCase().includes(q);
   });
 
-  // Get sessions for selected form's booking
-  const selectedSessions = selected ? bookings.filter(b => b.client_email === selected.client_email || b.client_name === selected.client_name) : [];
+  // Get sessions for selected form's booking — only match by email (to avoid false matches on name)
+  const selectedSessions = selected && selected.client_email
+    ? bookings.filter(b => b.client_email === selected.client_email)
+    : [];
 
   // Group forms by client email
   const groupedClients = Object.values(
