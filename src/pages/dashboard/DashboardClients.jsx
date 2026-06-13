@@ -36,6 +36,7 @@ export default function DashboardClients() {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [selectedFormId, setSelectedFormId] = useState(null);
   const [newSessionClient, setNewSessionClient] = useState(null);
+  const [repeatLastSession, setRepeatLastSession] = useState(null); // null | false | lastBooking
 
   const load = async () => {
     const [clientData, bookingData, formData] = await Promise.all([
@@ -277,16 +278,79 @@ export default function DashboardClients() {
         />
       )}
 
+      {/* New session — repeat prompt */}
+      {newSessionClient && repeatLastSession === null && (() => {
+        const { sessions } = getClientData(newSessionClient);
+        const lastSession = sessions.sort((a, b) => (b.session_date || '').localeCompare(a.session_date || ''))[0];
+        if (!lastSession) {
+          // No history — go straight to modal
+          setTimeout(() => setRepeatLastSession(false), 0);
+          return null;
+        }
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.75)' }}>
+            <div style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '36px', maxWidth: '460px', width: '100%' }}>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>NOWA SESJA</p>
+              <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.8rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em', marginBottom: '20px' }}>
+                {newSessionClient.name}
+              </h3>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em', marginBottom: '12px', textTransform: 'uppercase' }}>
+                Ostatnia sesja:
+              </p>
+              <div style={{ border: `0.5px solid ${t.border}`, padding: '14px 16px', marginBottom: '20px' }}>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.text, marginBottom: '4px' }}>{lastSession.session_date} · {lastSession.artist_name || '—'}</p>
+                {lastSession.tattoo_placement && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>{lastSession.tattoo_placement}{lastSession.tattoo_description ? ` — ${lastSession.tattoo_description}` : ''}</p>}
+                {lastSession.estimated_price && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', marginTop: '4px' }}>{lastSession.estimated_price} PLN</p>}
+              </div>
+              <p style={{ fontSize: '13px', color: t.muted, marginBottom: '20px', lineHeight: 1.6 }}>
+                Czy chcesz umówić ponownie z danymi z ostatniej sesji (artysta, opis, cena)?
+              </p>
+              <div className="flex gap-3">
+                <button
+                  className="btn-oxblood flex-1"
+                  onClick={() => setRepeatLastSession(lastSession)}
+                >
+                  TAK, POWTÓRZ SESJĘ
+                </button>
+                <button
+                  className="btn-ghost-parchment flex-1"
+                  onClick={() => setRepeatLastSession(false)}
+                >
+                  NIE, NOWA SESJA
+                </button>
+              </div>
+              <button onClick={() => { setNewSessionClient(null); setRepeatLastSession(null); }} style={{ marginTop: '14px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', width: '100%', textAlign: 'center' }}>
+                ANULUJ
+              </button>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* New session modal */}
-      {newSessionClient && (
+      {newSessionClient && repeatLastSession !== null && (
         <BookingModal
-          booking={{ _prefill: true, client_name: newSessionClient.name, client_email: newSessionClient.email, client_phone: newSessionClient.phone }}
+          booking={{
+            _prefill: true,
+            client_name: newSessionClient.name,
+            client_email: newSessionClient.email,
+            client_phone: newSessionClient.phone,
+            ...(repeatLastSession ? {
+              artist_id: repeatLastSession.artist_id,
+              artist_name: repeatLastSession.artist_name,
+              tattoo_description: repeatLastSession.tattoo_description,
+              tattoo_placement: repeatLastSession.tattoo_placement,
+              estimated_price: repeatLastSession.estimated_price,
+              service_id: repeatLastSession.service_id,
+              service_name: repeatLastSession.service_name,
+            } : {}),
+          }}
           t={theme === 'light'
             ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)' }
             : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)' }
           }
-          onClose={() => setNewSessionClient(null)}
-          onSaved={() => { setNewSessionClient(null); load(); }}
+          onClose={() => { setNewSessionClient(null); setRepeatLastSession(null); }}
+          onSaved={() => { setNewSessionClient(null); setRepeatLastSession(null); load(); }}
         />
       )}
 

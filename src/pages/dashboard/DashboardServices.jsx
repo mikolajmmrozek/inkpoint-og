@@ -228,7 +228,15 @@ export default function DashboardServices() {
       <AnimatePresence>
         {bookingService && (
           <BookingModal
-            booking={{ _prefill: true, service_id: bookingService.id, service_name: bookingService.name }}
+            booking={{
+              _prefill: true,
+              service_id: bookingService.id,
+              service_name: bookingService.name,
+              ...(bookingService.artist_ids?.length === 1 ? {
+                artist_id: bookingService.artist_ids[0],
+                artist_name: artists.find(a => a.id === bookingService.artist_ids[0])?.name || '',
+              } : {}),
+            }}
             onClose={() => setBookingService(null)}
             onSaved={() => setBookingService(null)}
             t={theme === 'light'
