@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
-import { Search, Edit2, Trash2, X, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, Edit2, Trash2, X, Plus, ChevronDown, ChevronUp, CalendarPlus } from 'lucide-react';
+import BookingModal from '@/components/dashboard/BookingModal';
 import { format } from 'date-fns';
 import { AnimatePresence } from 'framer-motion';
 import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
@@ -34,6 +35,7 @@ export default function DashboardClients() {
   const [form, setForm] = useState({});
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [selectedFormId, setSelectedFormId] = useState(null);
+  const [newSessionClient, setNewSessionClient] = useState(null);
 
   const load = async () => {
     const [clientData, bookingData, formData] = await Promise.all([
@@ -162,6 +164,7 @@ export default function DashboardClients() {
                 <div className="md:hidden px-4 py-3 flex items-center justify-between cursor-pointer" style={{ borderBottom: `0.5px solid ${t.border}`, background: isExpanded ? 'rgba(255,0,127,0.03)' : 'transparent' }} onClick={() => setExpandedClient(isExpanded ? null : c.id)}>
                   <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{c.name}</p>
                   <div className="flex gap-2">
+                    <button onClick={(e) => { e.stopPropagation(); setNewSessionClient(c); }} style={{ color: '#16a34a', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} title="Nowa sesja"><CalendarPlus size={13} /></button>
                     <button onClick={(e) => { e.stopPropagation(); openEdit(c); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><Edit2 size={13} /></button>
                     <button onClick={(e) => { e.stopPropagation(); handleDelete(c.id); }} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><Trash2 size={13} /></button>
                   </div>
@@ -182,12 +185,17 @@ export default function DashboardClients() {
                       {c.notes && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.notes}</p>}
                     </div>
                   </div>
-                  <p className="col-span-3" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.04em' }}>{c.email || '—'}</p>
-                  <p className="col-span-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>{c.phone || '—'}</p>
+                  <div className="col-span-3">
+                    {c.email ? <a href={`mailto:${c.email}`} onClick={e => e.stopPropagation()} style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.04em', textDecoration: 'none' }} onMouseEnter={e => e.target.style.color = '#FF007F'} onMouseLeave={e => e.target.style.color = t.muted}>{c.email}</a> : <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>—</span>}
+                  </div>
+                  <div className="col-span-2">
+                    {c.phone ? <a href={`tel:${c.phone}`} onClick={e => e.stopPropagation()} style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, textDecoration: 'none' }} onMouseEnter={e => e.target.style.color = '#FF007F'} onMouseLeave={e => e.target.style.color = t.muted}>{c.phone}</a> : <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>—</span>}
+                  </div>
                   <div className="col-span-1">
                     <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: (c.total_sessions || 0) >= 2 ? t.fuchsia : t.muted, fontWeight: 600 }}>{c.total_sessions || 0}</span>
                   </div>
                   <div className="col-span-2 flex justify-end gap-3">
+                    <button onClick={(e) => { e.stopPropagation(); setNewSessionClient(c); }} style={{ color: '#16a34a', background: 'none', border: 'none', cursor: 'pointer' }} title="Nowa sesja"><CalendarPlus size={13} /></button>
                     <button onClick={(e) => { e.stopPropagation(); openEdit(c); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Edit2 size={13} /></button>
                     <button onClick={(e) => { e.stopPropagation(); handleDelete(c.id); }} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={13} /></button>
                   </div>
@@ -266,6 +274,19 @@ export default function DashboardClients() {
           healthFormId={selectedFormId}
           onClose={() => setSelectedFormId(null)}
           t={t}
+        />
+      )}
+
+      {/* New session modal */}
+      {newSessionClient && (
+        <BookingModal
+          booking={{ _prefill: true, client_name: newSessionClient.name, client_email: newSessionClient.email, client_phone: newSessionClient.phone }}
+          t={theme === 'light'
+            ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)' }
+            : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)' }
+          }
+          onClose={() => setNewSessionClient(null)}
+          onSaved={() => { setNewSessionClient(null); load(); }}
         />
       )}
 
