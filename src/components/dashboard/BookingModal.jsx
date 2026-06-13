@@ -341,11 +341,40 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
             <div className="mt-4">{label('Email')}<input {...inp('client_email', 'email')} /></div>
             <div className="mt-4">{label('Telefon')}<input {...inp('client_phone')} /></div>
             {selectedClient && (
-              <div className="mt-3 px-3 py-2 flex items-center gap-2" style={{ background: 'rgba(255,0,127,0.05)', border: '0.5px solid rgba(255,0,127,0.2)' }}>
-                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#FF007F', flexShrink: 0 }} />
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>
-                  ISTNIEJĄCY KLIENT · {selectedClient.total_sessions || 0} POPRZEDNICH SESJI
+              <div className="mt-3 p-3" style={{ background: 'rgba(255,0,127,0.04)', border: '0.5px solid rgba(255,0,127,0.2)' }}>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
+                  ISTNIEJĄCY KLIENT · {selectedClient.total_sessions || 0} SESJI
                 </p>
+                {selectedClient._lastSession ? (
+                  <>
+                    <p style={{ fontSize: '12px', color: t.muted, marginBottom: '10px', lineHeight: 1.5 }}>
+                      Ostatnia sesja: <strong style={{ color: t.text }}>{selectedClient._lastSession.session_date}</strong>
+                      {selectedClient._lastSession.artist_name ? ` · ${selectedClient._lastSession.artist_name}` : ''}
+                      {selectedClient._lastSession.tattoo_placement ? ` · ${selectedClient._lastSession.tattoo_placement}` : ''}
+                    </p>
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginBottom: '8px', textTransform: 'uppercase' }}>
+                      Zaczytać dane z poprzedniej sesji?
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => applyClientToForm(selectedClient, selectedClient._lastSession)}
+                        className="btn-oxblood"
+                        style={{ padding: '7px 14px', fontSize: '9px' }}
+                      >
+                        TAK, UMÓW PONOWNIE
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => applyClientToForm(selectedClient)}
+                        className="btn-ghost-parchment"
+                        style={{ padding: '6px 14px', fontSize: '9px' }}
+                      >
+                        NIE, NOWA SESJA
+                      </button>
+                    </div>
+                  </>
+                ) : null}
               </div>
             )}
           </div>
