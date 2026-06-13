@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
-import { Plus, Edit2, Trash2, X, Upload, Loader2, Users } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Upload, Loader2, CalendarPlus } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
+import BookingModal from '@/components/dashboard/BookingModal';
 
 const inputStyle = {
   background: 'transparent',
@@ -42,6 +44,7 @@ export default function DashboardServices() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [bookingService, setBookingService] = useState(null); // service to book
 
   const load = async () => {
     const [svc, art] = await Promise.all([
@@ -212,6 +215,7 @@ export default function DashboardServices() {
                 </p>
               </div>
               <div className="col-span-1 flex justify-end gap-2">
+                <button onClick={() => setBookingService(s)} title="Nowa sesja" style={{ color: '#16a34a', background: 'none', border: 'none', cursor: 'pointer' }}><CalendarPlus size={13} /></button>
                 <button onClick={() => openEdit(s)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Edit2 size={13} /></button>
                 <button onClick={() => handleDelete(s.id)} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={13} /></button>
               </div>
@@ -220,7 +224,22 @@ export default function DashboardServices() {
         </div>
       )}
 
-      {/* Modal */}
+      {/* Booking Modal */}
+      <AnimatePresence>
+        {bookingService && (
+          <BookingModal
+            booking={{ _prefill: true, service_id: bookingService.id, service_name: bookingService.name }}
+            onClose={() => setBookingService(null)}
+            onSaved={() => setBookingService(null)}
+            t={theme === 'light'
+              ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)' }
+              : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)' }
+            }
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Edit Modal */}
       {editing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={closeModal}>
           <div className="w-full max-w-2xl max-h-screen overflow-y-auto" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '40px' }} onClick={e => e.stopPropagation()}>
