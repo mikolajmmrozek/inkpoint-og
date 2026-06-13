@@ -34,6 +34,7 @@ import DashboardTermsEditor from './pages/dashboard/DashboardTermsEditor';
 import DashboardDocuments from './pages/dashboard/DashboardDocuments';
 import DashboardFAQ from './pages/dashboard/DashboardFAQ';
 import DashboardFeedback from './pages/dashboard/DashboardFeedback';
+import DashboardServices from './pages/dashboard/DashboardServices';
 import FeedbackSurvey from './pages/FeedbackSurvey';
 import ScrollToTop from './components/ScrollToTop';
 
@@ -88,6 +89,7 @@ const AuthenticatedApp = () => {
         <Route path="documents" element={<DashboardDocuments />} />
         <Route path="faq" element={<DashboardFAQ />} />
         <Route path="feedback" element={<DashboardFeedback />} />
+        <Route path="services" element={<DashboardServices />} />
       </Route>
 
       <Route path="*" element={<PageNotFound />} />

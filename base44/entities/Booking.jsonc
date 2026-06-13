@@ -6,6 +6,14 @@
       "type": "string",
       "description": "Unikalny ID sesji (np. SES-20260601-001)"
     },
+    "service_id": {
+      "type": "string",
+      "description": "ID powi\u0105zanej us\u0142ugi (opcjonalne)"
+    },
+    "service_name": {
+      "type": "string",
+      "description": "Nazwa us\u0142ugi (cache)"
+    },
     "client_name": {
       "type": "string"
     },

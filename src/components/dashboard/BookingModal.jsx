@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import ClientSearch from './ClientSearch';
+import { Zap } from 'lucide-react';
 
 const inputStyle = {
   background: 'transparent',
@@ -23,6 +24,8 @@ const STATUS_OPTIONS = ['pending','confirmed','completed','cancelled'];
 export default function BookingModal({ booking, defaultDate, onClose, onSaved, t }) {
   const isNew = !booking || booking._prefill;
   const [artists, setArtists] = useState([]);
+  const [allArtists, setAllArtists] = useState([]);
+  const [services, setServices] = useState([]);
   const [saving, setSaving] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null); // existing client or null
   const calcEndTime = (startTime, durationMinutes) => {
@@ -67,10 +70,55 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
   const [form, setForm] = useState(initForm());
 
   useEffect(() => {
-    base44.entities.Artist.list().then(setArtists).catch(() => {});
+    Promise.all([
+      base44.entities.Artist.list(),
+      base44.entities.Service.filter({ is_active: true }),
+    ]).then(([arts, svcs]) => {
+      setAllArtists(arts);
+      setArtists(arts);
+      setServices(svcs.sort((a, b) => (a.order || 999) - (b.order || 999)));
+    }).catch(() => {});
   }, []);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const handleService = (serviceId) => {
+    if (!serviceId) {
+      set('service_id', '');
+      set('service_name', '');
+      setArtists(allArtists);
+      return;
+    }
+    const svc = services.find(s => s.id === serviceId);
+    if (!svc) return;
+    set('service_id', serviceId);
+    set('service_name', svc.name);
+    // Prefill price
+    if (svc.price_type === 'fixed' && svc.price_fixed) {
+      set('estimated_price', svc.price_fixed);
+    } else if (svc.price_type === 'range' && svc.price_min) {
+      set('estimated_price', svc.price_min);
+    }
+    // Prefill duration → calculate end time from start
+    if (svc.duration_minutes) {
+      setForm(f => {
+        const dur = Number(svc.duration_minutes);
+        let endTime = '';
+        if (f.session_time) {
+          const [h, m] = f.session_time.split(':').map(Number);
+          const total = h * 60 + m + dur;
+          endTime = `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+        }
+        return { ...f, service_id: serviceId, service_name: svc.name, session_duration: dur, ...(endTime ? { session_end_time: endTime } : {}) };
+      });
+    }
+    // Filter artists
+    if (svc.artist_ids && svc.artist_ids.length > 0) {
+      setArtists(allArtists.filter(a => svc.artist_ids.includes(a.id)));
+    } else {
+      setArtists(allArtists);
+    }
+  };
 
   const handleArtist = (id) => {
     const a = artists.find(x => x.id === id);
@@ -201,6 +249,34 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                 <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#FF007F', flexShrink: 0 }} />
                 <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>
                   ISTNIEJĄCY KLIENT · {selectedClient.total_sessions || 0} POPRZEDNICH SESJI
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Service */}
+          <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>USŁUGA</p>
+            <div>
+              {label('Wybierz usługę (opcjonalnie)')}
+              <select
+                value={form.service_id || ''}
+                onChange={e => handleService(e.target.value)}
+                style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
+              >
+                <option value="">Brak / usługa niestandardowa</option>
+                {services.map(s => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}{s.duration_minutes ? ` (${s.duration_minutes} min)` : ''}{s.price_type === 'fixed' && s.price_fixed ? ` — ${s.price_fixed} PLN` : s.price_type === 'range' && s.price_min ? ` — od ${s.price_min} PLN` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {form.service_id && (
+              <div className="mt-3 px-3 py-2 flex items-center gap-2" style={{ background: 'rgba(255,0,127,0.05)', border: '0.5px solid rgba(255,0,127,0.2)' }}>
+                <Zap size={10} color="#FF007F" />
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>
+                  USŁUGA WYBRANA · CENA I CZAS UZUPEŁNIONE AUTOMATYCZNIE
                 </p>
               </div>
             )}
