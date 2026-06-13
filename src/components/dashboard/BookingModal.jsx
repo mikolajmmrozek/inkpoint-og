@@ -171,18 +171,41 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
     if (isNew) {
       await base44.entities.Booking.create(data);
       // Upsert client in Client database
-      if (selectedClient?.id) {
-        // Existing client — update session count
-        await base44.entities.Client.update(selectedClient.id, {
-          first_name: form.client_first_name,
-          last_name: form.client_last_name,
+      let existingClient = selectedClient;
+
+      // If no client was explicitly selected, try to find a match to avoid duplicates
+      if (!existingClient && fullName) {
+        const allClients = await base44.entities.Client.list('-created_date', 500);
+        const email = (form.client_email || '').toLowerCase().trim();
+        const phone = (form.client_phone || '').trim();
+        const nameLower = fullName.toLowerCase().trim();
+
+        existingClient = allClients.find(c => {
+          const cEmail = (c.email || '').toLowerCase().trim();
+          const cPhone = (c.phone || '').trim();
+          const cName = (c.name || '').toLowerCase().trim();
+          // Match by email (if both provided)
+          if (email && cEmail && email === cEmail) return true;
+          // Match by phone (if both provided)
+          if (phone && cPhone && phone === cPhone) return true;
+          // Match by name only if the existing client has NO email and NO phone
+          if (!cEmail && !cPhone && cName === nameLower) return true;
+          return false;
+        }) || null;
+      }
+
+      if (existingClient?.id) {
+        // Existing client — update with any new data and increment session count
+        await base44.entities.Client.update(existingClient.id, {
+          first_name: form.client_first_name || existingClient.first_name,
+          last_name: form.client_last_name || existingClient.last_name,
           name: fullName,
-          email: form.client_email,
-          phone: form.client_phone,
-          total_sessions: (selectedClient.total_sessions || 0) + 1,
+          email: form.client_email || existingClient.email,
+          phone: form.client_phone || existingClient.phone,
+          total_sessions: (existingClient.total_sessions || 0) + 1,
         });
       } else if (fullName) {
-        // New client — create record
+        // Truly new client — create record
         await base44.entities.Client.create({
           first_name: form.client_first_name,
           last_name: form.client_last_name,
