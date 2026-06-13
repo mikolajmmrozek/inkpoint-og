@@ -154,6 +154,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
         estimated_price: session.estimated_price || '',
         service_id: session.service_id || '',
         service_name: session.service_name || '',
+        session_duration: session.session_duration || 0,
       } : {}),
     }));
   };
