@@ -137,13 +137,32 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
 
   const handleClientSelect = (client) => {
     if (client._isNew) {
-      // New client — prefill name only, user fills in rest
       setSelectedClient(null);
       const [first, ...last] = client.name.split(' ');
       set('client_first_name', first || '');
       set('client_last_name', last.join(' ') || '');
       set('client_email', '');
       set('client_phone', '');
+    } else if (client._repeatSession) {
+      // Existing client with repeat session data
+      setSelectedClient(client);
+      const s = client._repeatSession;
+      setForm(f => ({
+        ...f,
+        client_first_name: client.first_name || '',
+        client_last_name: client.last_name || '',
+        client_email: client.email || '',
+        client_phone: client.phone || '',
+        artist_id: s.artist_id || '',
+        artist_name: s.artist_name || '',
+        tattoo_description: s.tattoo_description || '',
+        tattoo_placement: s.tattoo_placement || '',
+        estimated_price: s.estimated_price || '',
+        service_id: s.service_id || '',
+        service_name: s.service_name || '',
+      }));
+      // Also filter artists if service is set
+      if (s.service_id) handleService(s.service_id);
     } else {
       // Existing client — fill all fields
       setSelectedClient(client);
