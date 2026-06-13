@@ -55,15 +55,28 @@ export default function DashboardClients() {
   useEffect(() => { load(); }, []);
 
   // Get sessions and forms for a client
+  // Priority: match by email (exact). Fallback: match by full name only if client has NO email.
   const getClientData = (client) => {
+    const clientEmail = (client.email || '').toLowerCase().trim();
+    const clientName = (client.name || `${client.first_name || ''} ${client.last_name || ''}`).toLowerCase().trim();
+
     const sessions = bookings.filter(b => {
-      if (client.email && b.client_email) return b.client_email === client.email;
-      return client.name && b.client_name === client.name;
+      const bEmail = (b.client_email || '').toLowerCase().trim();
+      const bName = (b.client_name || '').toLowerCase().trim();
+      if (clientEmail && bEmail) return clientEmail === bEmail;
+      // No email on client — only match by name, and only if client has no email (avoid false positives)
+      if (!clientEmail) return clientName && clientName === bName;
+      return false;
     });
+
     const forms = healthForms.filter(f => {
-      if (client.email && f.client_email) return f.client_email === client.email;
-      return client.name && f.client_name === client.name;
+      const fEmail = (f.client_email || '').toLowerCase().trim();
+      const fName = (f.client_name || '').toLowerCase().trim();
+      if (clientEmail && fEmail) return clientEmail === fEmail;
+      if (!clientEmail) return clientName && clientName === fName;
+      return false;
     });
+
     return { sessions, forms };
   };
 
