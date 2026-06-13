@@ -41,7 +41,7 @@ const NowLine = memo(function NowLine() {
   return (
     <>
       <div style={{ position: 'absolute', top: `${nowTop}px`, left: 0, right: 0, borderTop: '1px solid #FF007F', pointerEvents: 'none', zIndex: 2, opacity: 0.7 }} />
-      <div style={{ position: 'absolute', top: `${nowTop}px`, left: '44px', width: '8px', height: '8px', borderRadius: '50%', background: '#FF007F', transform: 'translate(-50%, -50%)', pointerEvents: 'none', zIndex: 3 }} />
+      <div style={{ position: 'absolute', top: `${nowTop}px`, left: 0, width: '8px', height: '8px', borderRadius: '50%', background: '#FF007F', transform: 'translate(-50%, -50%)', pointerEvents: 'none', zIndex: 3 }} />
     </>
   );
 });
@@ -215,24 +215,26 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
 
       {/* Timeline body */}
       <div ref={scrollRef} className="overflow-y-auto" style={{ maxHeight: '600px' }}>
-        <div style={{ display: 'flex', width: '100%', minHeight: 0, boxSizing: 'border-box' }}>
+        <div style={{ display: 'flex', width: '100%', minHeight: 0, boxSizing: 'border-box', position: 'relative' }}>
           <TimeAxis muted={t.muted} />
-          {(() => {
-            const displayed = artistFilter === 'all' ? activeArtists : activeArtists.filter(a => a.id === artistFilter);
-            return displayed.map((a, idx) => (
-              <ArtistColumn
-                key={a.id}
-                artist={a}
-                artistBookings={bookingsByArtist[a.id] || []}
-                onColumnClick={handleColumnClick}
-                onBookingClick={onBookingClick}
-                border={t.border}
-                t={t}
-                isLast={idx === displayed.length - 1}
-              />
-            ));
-          })()}
-          {showNowLine && <NowLine />}
+          <div style={{ flex: 1, position: 'relative', minWidth: 0, display: 'flex' }}>
+            {(() => {
+              const displayed = artistFilter === 'all' ? activeArtists : activeArtists.filter(a => a.id === artistFilter);
+              return displayed.map((a, idx) => (
+                <ArtistColumn
+                  key={a.id}
+                  artist={a}
+                  artistBookings={bookingsByArtist[a.id] || []}
+                  onColumnClick={handleColumnClick}
+                  onBookingClick={onBookingClick}
+                  border={t.border}
+                  t={t}
+                  isLast={idx === displayed.length - 1}
+                />
+              ));
+            })()}
+            {showNowLine && <NowLine />}
+          </div>
         </div>
       </div>
 
