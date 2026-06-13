@@ -233,7 +233,10 @@ export default function DashboardHome() {
       {editingBooking && (
         <BookingModal
           booking={editingBooking}
-          t={t}
+          t={theme === 'light'
+            ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)' }
+            : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)' }
+          }
           onClose={() => setEditingBooking(null)}
           onSaved={() => {
             base44.entities.Booking.list('-created_date', 200).then(bookings => {
