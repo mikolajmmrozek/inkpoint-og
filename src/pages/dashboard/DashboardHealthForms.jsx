@@ -1,9 +1,10 @@
 import { useState, useContext, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { FileText, X, ExternalLink, Copy, Shield, AlertTriangle, Search, Download, Mail, Trash2, Settings, Loader2, Edit3, Printer } from 'lucide-react';
 import { format } from 'date-fns';
 import { useTheme } from './Dashboard';
+import { AnimatePresence } from 'framer-motion';
+import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -236,7 +237,6 @@ function FormDetailPanel({ selected, guardianForm, t, onClose, theme, template }
 }
 
 export default function DashboardHealthForms() {
-  const navigate = useNavigate();
   const { theme } = useTheme();
   const t = theme === 'light'
     ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F' }
@@ -546,6 +546,7 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
     }
   };
 
+  const [selectedSession, setSelectedSession] = useState(null);
   const [sendingEditLink, setSendingEditLink] = useState(false);
 
   const sendEditLink = async (form) => {
@@ -589,14 +590,14 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
           <p style={{ ...mono, fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>DANE MEDYCZNE</p>
           <h2 style={{ ...display, fontSize: '2.5rem', color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>Ankiety Zdrowotne</h2>
         </div>
-        <button
-          onClick={() => navigate('/dashboard/form-template')}
+        <a
+          href="/dashboard/form-template"
           title="Edytuj szablon formularza"
           className="flex items-center gap-2"
-          style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}
+          style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', textDecoration: 'none' }}
         >
           <Settings size={13} /> EDYTUJ SZABLON
-        </button>
+        </a>
       </div>
 
       {/* General form link section */}
@@ -785,6 +786,28 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
         </div>
       </div>
 
+      {/* Booking detail panel */}
+      <AnimatePresence>
+        {selectedSession && (
+          <BookingDetailPanel
+            booking={selectedSession}
+            theme={theme}
+            onClose={() => setSelectedSession(null)}
+            onStatusChange={async (id, status) => {
+              await base44.entities.Booking.update(id, { status });
+              setBookings(b => b.map(x => x.id === id ? { ...x, status } : x));
+              setSelectedSession(s => s?.id === id ? { ...s, status } : s);
+            }}
+            onDelete={async (id) => {
+              await base44.entities.Booking.delete(id);
+              setBookings(b => b.filter(x => x.id !== id));
+              setSelectedSession(null);
+            }}
+            onEdit={() => setSelectedSession(null)}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Modal overlay */}
       {selected && (
         <div
@@ -822,12 +845,12 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
               <div className="px-5 py-3" style={{ borderBottom: `0.5px solid ${t.border}`, background: 'rgba(255,0,127,0.03)' }}>
                 <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>SESJE</p>
                 {selectedSessions.map(s => (
-                  <div key={s.id} style={{ fontSize: '11px', color: t.text, marginBottom: '6px', paddingBottom: '6px', borderBottom: `0.5px solid ${t.border}` }}>
-                    <button onClick={() => navigate('/dashboard/bookings')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', width: '100%' }}>
-                      <p><strong style={{ color: t.fuchsia, textDecoration: 'underline' }}>{s.session_date}</strong> · {s.artist_name}</p>
-                    </button>
-                    <p style={{ color: t.muted, fontSize: '10px', marginTop: '2px' }}>{s.tattoo_description || s.tattoo_placement || 'Brak opisu'}</p>
-                  </div>
+                 <div key={s.id} style={{ fontSize: '11px', color: t.text, marginBottom: '6px', paddingBottom: '6px', borderBottom: `0.5px solid ${t.border}` }}>
+                   <button onClick={() => setSelectedSession(s)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', width: '100%' }}>
+                     <p><strong style={{ color: t.fuchsia, textDecoration: 'underline' }}>{s.session_date}</strong> · {s.artist_name}</p>
+                   </button>
+                   <p style={{ color: t.muted, fontSize: '10px', marginTop: '2px' }}>{s.tattoo_description || s.tattoo_placement || 'Brak opisu'}</p>
+                 </div>
                 ))}
               </div>
             )}
