@@ -35,39 +35,48 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
     return `${String(Math.floor(endTotal / 60)).padStart(2, '0')}:${String(endTotal % 60).padStart(2, '0')}`;
   };
 
-  const initForm = () => {
-    if (booking && !booking._prefill) {
-      const [first, ...last] = (booking.client_name || '').split(' ');
+  const buildForm = (b) => {
+    if (b && !b._prefill) {
+      const [first, ...last] = (b.client_name || '').split(' ');
       return {
-        ...booking,
+        ...b,
         client_first_name: first || '',
         client_last_name: last.join(' ') || '',
-        session_end_time: booking.session_end_time || calcEndTime(booking.session_time, booking.session_duration),
+        session_end_time: b.session_end_time || calcEndTime(b.session_time, b.session_duration),
       };
     }
-    const prefill = booking?._prefill ? booking : null;
+    const p = b?._prefill ? b : null;
+    // Split client_name into first/last if provided via prefill
+    const [prefillFirst, ...prefillLast] = (p?.client_name || '').split(' ');
     return {
       client_name: '',
-      client_first_name: '',
-      client_last_name: '',
-      client_email: '',
-      client_phone: '',
-      artist_id: prefill?.artist_id || '',
-      artist_name: prefill?.artist_name || '',
-      session_date: prefill?.session_date || defaultDate || '',
-      session_time: prefill?.session_time || '',
+      client_first_name: p?.client_first_name || prefillFirst || '',
+      client_last_name: p?.client_last_name || prefillLast.join(' ') || '',
+      client_email: p?.client_email || '',
+      client_phone: p?.client_phone || '',
+      artist_id: p?.artist_id || '',
+      artist_name: p?.artist_name || '',
+      session_date: p?.session_date || defaultDate || '',
+      session_time: p?.session_time || '',
       session_end_time: '',
-      session_duration: 0,
-      tattoo_description: '',
-      tattoo_placement: '',
+      session_duration: p?.session_duration || 0,
+      tattoo_description: p?.tattoo_description || '',
+      tattoo_placement: p?.tattoo_placement || '',
       notes: '',
       status: 'pending',
       deposit_paid: false,
-      estimated_price: '',
+      estimated_price: p?.estimated_price || '',
       health_form_completed: false,
+      service_id: p?.service_id || '',
+      service_name: p?.service_name || '',
     };
   };
-  const [form, setForm] = useState(initForm());
+  const [form, setForm] = useState(() => buildForm(booking));
+
+  // Re-initialize form when booking prop changes (e.g. repeat session selected)
+  useEffect(() => {
+    setForm(buildForm(booking));
+  }, [booking?.service_id, booking?.artist_id, booking?.client_email, booking?.tattoo_placement]);
 
   useEffect(() => {
     Promise.all([
