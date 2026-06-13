@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { GripVertical } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import { Plus, Edit, Trash2, X } from 'lucide-react';
+import { Plus, Edit, Trash2, X, History } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTheme } from './Dashboard';
 import { compressImage } from '@/utils/compressImage';
+import { format } from 'date-fns';
 
 const inputStyle = {
   background: 'transparent',
@@ -29,6 +30,9 @@ export default function DashboardArtists() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({});
   const [uploading, setUploading] = useState(false);
+  const [commissionHistory, setCommissionHistory] = useState([]);
+  const [newCommission, setNewCommission] = useState({ cut_percent: 60, effective_from: format(new Date(), 'yyyy-MM-dd'), note: '' });
+  const [showAddCommission, setShowAddCommission] = useState(false);
 
   const load = async () => {
     const data = await base44.entities.Artist.list('-created_date', 50);
@@ -51,20 +55,59 @@ export default function DashboardArtists() {
   const openNew = () => {
     setForm({ name: '', slug: '', bio: '', specialty: [], years_experience: '', instagram: '', is_active: true, portfolio_images: [] });
     setEditing('new');
+    setCommissionHistory([]);
+    setShowAddCommission(false);
+    setNewCommission({ cut_percent: 60, effective_from: format(new Date(), 'yyyy-MM-dd'), note: '' });
   };
 
-  const openEdit = (a) => { setForm({ ...a }); setEditing(a); };
+  const openEdit = async (a) => {
+    setForm({ ...a });
+    setEditing(a);
+    setShowAddCommission(false);
+    setNewCommission({ cut_percent: a.artist_cut_percent ?? 60, effective_from: format(new Date(), 'yyyy-MM-dd'), note: '' });
+    const history = await base44.entities.ArtistCommissionHistory.filter({ artist_id: a.id }, '-effective_from', 50);
+    setCommissionHistory(history);
+  };
 
   const handleSave = async () => {
     const specialtyArr = typeof form.specialty === 'string' ? form.specialty.split(',').map(s => s.trim()).filter(Boolean) : (form.specialty || []);
     const data = { ...form, specialty: specialtyArr };
     if (editing === 'new') {
-      await base44.entities.Artist.create(data);
+      const created = await base44.entities.Artist.create(data);
+      // Zapisz wpis w historii przy tworzeniu
+      await base44.entities.ArtistCommissionHistory.create({
+        artist_id: created.id,
+        artist_name: created.name,
+        cut_percent: data.artist_cut_percent ?? 60,
+        effective_from: format(new Date(), 'yyyy-MM-dd'),
+        note: 'Stawka początkowa',
+      });
     } else {
       await base44.entities.Artist.update(editing.id, data);
     }
     setEditing(null);
     load();
+  };
+
+  const handleAddCommission = async () => {
+    const entry = await base44.entities.ArtistCommissionHistory.create({
+      artist_id: editing.id,
+      artist_name: editing.name,
+      cut_percent: newCommission.cut_percent,
+      effective_from: newCommission.effective_from,
+      note: newCommission.note || '',
+    });
+    // Zaktualizuj też bieżący procent w profilu artysty
+    await base44.entities.Artist.update(editing.id, { artist_cut_percent: newCommission.cut_percent });
+    setForm(f => ({ ...f, artist_cut_percent: newCommission.cut_percent }));
+    setCommissionHistory(h => [entry, ...h]);
+    setShowAddCommission(false);
+    setNewCommission({ cut_percent: newCommission.cut_percent, effective_from: format(new Date(), 'yyyy-MM-dd'), note: '' });
+  };
+
+  const deleteCommissionEntry = async (id) => {
+    await base44.entities.ArtistCommissionHistory.delete(id);
+    setCommissionHistory(h => h.filter(x => x.id !== id));
   };
 
   const deleteArtist = async (id) => {
@@ -153,10 +196,22 @@ export default function DashboardArtists() {
 
                 {/* Revenue split */}
                 <div style={{ border: `0.5px solid ${t.border}`, padding: '16px' }}>
-                  <label className="block mb-3" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Podział przychodu</label>
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Podział przychodu</label>
+                    {editing !== 'new' && (
+                      <button
+                        onClick={() => setShowAddCommission(v => !v)}
+                        style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: showAddCommission ? '#FF007F' : t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${showAddCommission ? '#FF007F' : t.border}`, padding: '4px 10px', cursor: 'pointer' }}
+                      >
+                        + ZMIEŃ STAWKĘ
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Bieżąca stawka (tylko do odczytu jeśli jest historia) */}
+                  <div className="flex items-center gap-4 mb-3">
                     <div className="flex-1">
-                      <label className="block mb-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Artysta %</label>
+                      <label className="block mb-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Artysta % (bieżące)</label>
                       <input
                         type="number" min="0" max="100"
                         style={{ ...inputStyle, color: '#16a34a', borderBottomColor: t.border }}
@@ -164,19 +219,93 @@ export default function DashboardArtists() {
                         onChange={e => setForm(f => ({ ...f, artist_cut_percent: Math.min(100, Math.max(0, Number(e.target.value))) }))}
                         onFocus={e => e.target.style.borderBottomColor = '#16a34a'}
                         onBlur={e => e.target.style.borderBottomColor = t.border}
+                        readOnly={editing !== 'new' && commissionHistory.length > 0}
                       />
                     </div>
                     <div style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: t.muted }}>+</div>
                     <div className="flex-1">
                       <label className="block mb-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Studio %</label>
-                      <input
-                        type="number" readOnly
-                        style={{ ...inputStyle, color: '#FF007F', borderBottomColor: t.border, cursor: 'default' }}
-                        value={100 - (form.artist_cut_percent ?? 60)}
-                      />
+                      <input type="number" readOnly style={{ ...inputStyle, color: '#FF007F', borderBottomColor: t.border, cursor: 'default' }} value={100 - (form.artist_cut_percent ?? 60)} />
                     </div>
                     <div style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted }}>= 100%</div>
                   </div>
+
+                  {/* Formularz nowej zmiany */}
+                  {showAddCommission && (
+                    <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '14px', marginTop: '8px' }}>
+                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px' }}>Nowa stawka od daty:</p>
+                      <div className="flex gap-4 items-end mb-3">
+                        <div className="flex-1">
+                          <label className="block mb-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Nowy % artysty</label>
+                          <input
+                            type="number" min="0" max="100"
+                            style={{ ...inputStyle, color: '#16a34a', borderBottomColor: t.border }}
+                            value={newCommission.cut_percent}
+                            onChange={e => setNewCommission(c => ({ ...c, cut_percent: Math.min(100, Math.max(0, Number(e.target.value))) }))}
+                            onFocus={e => e.target.style.borderBottomColor = '#16a34a'}
+                            onBlur={e => e.target.style.borderBottomColor = t.border}
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <label className="block mb-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Obowiązuje od</label>
+                          <input
+                            type="date"
+                            style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }}
+                            value={newCommission.effective_from}
+                            onChange={e => setNewCommission(c => ({ ...c, effective_from: e.target.value }))}
+                            onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
+                            onBlur={e => e.target.style.borderBottomColor = t.border}
+                          />
+                        </div>
+                      </div>
+                      <div className="mb-3">
+                        <label className="block mb-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Notatka (opcjonalna)</label>
+                        <input
+                          type="text"
+                          placeholder="np. podwyżka, zmiana umowy..."
+                          style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }}
+                          value={newCommission.note}
+                          onChange={e => setNewCommission(c => ({ ...c, note: e.target.value }))}
+                          onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
+                          onBlur={e => e.target.style.borderBottomColor = t.border}
+                        />
+                      </div>
+                      <button onClick={handleAddCommission} className="btn-oxblood" style={{ fontSize: '9px', padding: '8px 18px' }}>
+                        ZAPISZ ZMIANĘ STAWKI
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Historia stawek */}
+                  {commissionHistory.length > 1 && (
+                    <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '12px', marginTop: '14px' }}>
+                      <div className="flex items-center gap-2 mb-3">
+                        <History size={10} color={t.muted} />
+                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Historia stawek</p>
+                      </div>
+                      <div className="space-y-2">
+                        {commissionHistory.map((entry, i) => (
+                          <div key={entry.id} className="flex items-center justify-between" style={{ padding: '8px 10px', background: i === 0 ? 'rgba(22,163,74,0.06)' : 'transparent', border: `0.5px solid ${i === 0 ? 'rgba(22,163,74,0.3)' : t.border}` }}>
+                            <div>
+                              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: i === 0 ? '#16a34a' : t.text, fontWeight: i === 0 ? 600 : 400 }}>
+                                {entry.cut_percent}% artysta / {100 - entry.cut_percent}% studio
+                              </span>
+                              <div className="flex items-center gap-3 mt-0.5">
+                                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>od {entry.effective_from}</span>
+                                {entry.note && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted }}>· {entry.note}</span>}
+                                {i === 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#16a34a', letterSpacing: '0.1em', border: '0.5px solid rgba(22,163,74,0.4)', padding: '1px 5px' }}>BIEŻĄCA</span>}
+                              </div>
+                            </div>
+                            {i > 0 && (
+                              <button onClick={() => deleteCommissionEntry(entry.id)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0 }}>
+                                <Trash2 size={11} />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div>

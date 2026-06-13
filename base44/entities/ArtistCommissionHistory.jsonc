@@ -1,0 +1,32 @@
+{
+  "name": "ArtistCommissionHistory",
+  "type": "object",
+  "properties": {
+    "artist_id": {
+      "type": "string",
+      "description": "ID artysty"
+    },
+    "artist_name": {
+      "type": "string",
+      "description": "Imi\u0119 artysty (cache dla czytelno\u015bci)"
+    },
+    "cut_percent": {
+      "type": "number",
+      "description": "Procent artysty od daty effective_from"
+    },
+    "effective_from": {
+      "type": "string",
+      "format": "date",
+      "description": "Data obowi\u0105zywania stawki"
+    },
+    "note": {
+      "type": "string",
+      "description": "Opcjonalna notatka (np. pow\u00f3d zmiany)"
+    }
+  },
+  "required": [
+    "artist_id",
+    "cut_percent",
+    "effective_from"
+  ]
+}
