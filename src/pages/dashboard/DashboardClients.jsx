@@ -80,10 +80,12 @@ export default function DashboardClients() {
     return { sessions, forms };
   };
 
-  const filtered = clients.filter(c => {
-    const q = search.toLowerCase();
-    return !q || c.name?.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q) || c.phone?.includes(q);
-  });
+  const filtered = clients
+    .filter(c => {
+      const q = search.toLowerCase();
+      return !q || c.name?.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q) || c.phone?.includes(q);
+    })
+    .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'pl'));
 
   const openEdit = (c) => { setForm({ ...c }); setEditing(c); };
   const openNew = () => { setForm({ first_name: '', last_name: '', email: '', phone: '', notes: '', total_sessions: 0 }); setEditing('new'); };
