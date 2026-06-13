@@ -164,8 +164,16 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
       set('client_email', '');
       set('client_phone', '');
     } else if (client._lastSession) {
-      // Show repeat prompt popup
+      // Always show repeat prompt when last session exists
       setRepeatPrompt({ client, lastSession: client._lastSession });
+      // Also prefill basic client data immediately
+      setForm(f => ({
+        ...f,
+        client_first_name: client.first_name || '',
+        client_last_name: client.last_name || '',
+        client_email: client.email || '',
+        client_phone: client.phone || '',
+      }));
     } else {
       applyClientToForm(client);
     }

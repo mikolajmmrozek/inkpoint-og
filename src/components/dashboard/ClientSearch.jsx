@@ -34,9 +34,19 @@ export default function ClientSearch({ value, onSelect, t }) {
     setOpen(false);
 
     // If client has sessions, fetch the last one and pass it along
-    if ((client.total_sessions || 0) > 0 && client.email) {
+    // Match by email if available, otherwise by full name
+    if ((client.total_sessions || 0) > 0) {
       try {
-        const sessions = await base44.entities.Booking.filter({ client_email: client.email }, '-session_date', 5);
+        let sessions = [];
+        if (client.email) {
+          sessions = await base44.entities.Booking.filter({ client_email: client.email }, '-session_date', 10);
+        }
+        // Fallback: search by name if no results from email
+        if (sessions.length === 0 && client.name) {
+          const allSessions = await base44.entities.Booking.list('-session_date', 200);
+          const nameLower = client.name.toLowerCase().trim();
+          sessions = allSessions.filter(s => (s.client_name || '').toLowerCase().trim() === nameLower);
+        }
         const lastSession = sessions.filter(s => s.status !== 'cancelled')[0] || sessions[0];
         if (lastSession) {
           onSelect({ ...client, _lastSession: lastSession });
