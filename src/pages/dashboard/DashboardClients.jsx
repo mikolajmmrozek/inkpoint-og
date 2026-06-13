@@ -142,6 +142,19 @@ export default function DashboardClients() {
         </div>
       </div>
 
+      {/* Stats row */}
+      <div className="flex gap-4 mb-4 flex-wrap">
+        {[
+          { label: 'Łączna liczba klientów', value: clients.length },
+          { label: 'Powracający (2+ sesji)', value: clients.filter(c => (c.total_sessions || 0) >= 2).length },
+        ].map(s => (
+          <div key={s.label} className="px-5 py-4" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+            <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2rem', fontWeight: 400, color: t.fuchsia, lineHeight: 1 }}>{s.value}</p>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '4px' }}>{s.label}</p>
+          </div>
+        ))}
+      </div>
+
       {/* Search — full width above list */}
       <div className="mb-4 flex items-center" style={{ border: `0.5px solid ${t.border}`, padding: '8px 14px', gap: '8px' }}>
         <Search size={12} color={t.muted} />
@@ -156,19 +169,6 @@ export default function DashboardClients() {
             <X size={12} />
           </button>
         )}
-      </div>
-
-      {/* Stats row */}
-      <div className="flex gap-4 mb-6 flex-wrap">
-        {[
-          { label: 'Łączna liczba klientów', value: clients.length },
-          { label: 'Powracający (2+ sesji)', value: clients.filter(c => (c.total_sessions || 0) >= 2).length },
-        ].map(s => (
-          <div key={s.label} className="px-5 py-4" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-            <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2rem', fontWeight: 400, color: t.fuchsia, lineHeight: 1 }}>{s.value}</p>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '4px' }}>{s.label}</p>
-          </div>
-        ))}
       </div>
 
       {/* Table */}
