@@ -28,6 +28,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
   const [saving, setSaving] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
   const [repeatPrompt, setRepeatPrompt] = useState(null); // { client, lastSession }
+  const [manualEndTime, setManualEndTime] = useState(false);
   const calcEndTime = (startTime, durationMinutes) => {
     if (!startTime || !durationMinutes) return '';
     const [h, m] = startTime.split(':').map(Number);
@@ -442,13 +443,16 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                 <select
                   value={form.session_time?.split(':')[0] || '00'}
                   onChange={e => {
-                    const startH = parseInt(e.target.value);
-                    const startM = parseInt(form.session_time?.split(':')[1] || '0');
-                    const newStart = `${e.target.value}:${form.session_time?.split(':')[1] || '00'}`;
-                    const endH = parseInt(form.session_end_time?.split(':')[0] || '0');
-                    const endM = parseInt(form.session_end_time?.split(':')[1] || '0');
-                    const dur = (endH * 60 + endM) - (startH * 60 + startM);
-                    setForm(f => ({ ...f, session_time: newStart, ...(dur > 0 ? { session_duration: dur } : {}) }));
+                    setForm(f => {
+                      const newStartH = parseInt(e.target.value);
+                      const startM = parseInt(f.session_time?.split(':')[1] || '0');
+                      const newStart = `${e.target.value}:${f.session_time?.split(':')[1] || '00'}`;
+                      const dur = f.session_duration || 0;
+                      // Shift end time by same duration (locked block)
+                      const newEndTotal = newStartH * 60 + startM + dur;
+                      const newEnd = `${String(Math.floor(newEndTotal / 60)).padStart(2, '0')}:${String(newEndTotal % 60).padStart(2, '0')}`;
+                      return { ...f, session_time: newStart, session_end_time: dur > 0 ? newEnd : f.session_end_time };
+                    });
                   }}
                   style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
                 >
@@ -460,13 +464,16 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                 <select
                   value={form.session_time?.split(':')[1] || '00'}
                   onChange={e => {
-                    const startH = parseInt(form.session_time?.split(':')[0] || '0');
-                    const startM = parseInt(e.target.value);
-                    const newStart = `${form.session_time?.split(':')[0] || '09'}:${e.target.value}`;
-                    const endH = parseInt(form.session_end_time?.split(':')[0] || '0');
-                    const endM = parseInt(form.session_end_time?.split(':')[1] || '0');
-                    const dur = (endH * 60 + endM) - (startH * 60 + startM);
-                    setForm(f => ({ ...f, session_time: newStart, ...(dur > 0 ? { session_duration: dur } : {}) }));
+                    setForm(f => {
+                      const startH = parseInt(f.session_time?.split(':')[0] || '0');
+                      const newStartM = parseInt(e.target.value);
+                      const newStart = `${f.session_time?.split(':')[0] || '00'}:${e.target.value}`;
+                      const dur = f.session_duration || 0;
+                      // Shift end time by same duration (locked block)
+                      const newEndTotal = startH * 60 + newStartM + dur;
+                      const newEnd = `${String(Math.floor(newEndTotal / 60)).padStart(2, '0')}:${String(newEndTotal % 60).padStart(2, '0')}`;
+                      return { ...f, session_time: newStart, session_end_time: dur > 0 ? newEnd : f.session_end_time };
+                    });
                   }}
                   style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
                 >
@@ -478,13 +485,16 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                 <select
                   value={form.session_end_time?.split(':')[0] || '00'}
                   onChange={e => {
-                    const endH = parseInt(e.target.value);
-                    const endM = parseInt(form.session_end_time?.split(':')[1] || '0');
-                    const newEnd = `${e.target.value}:${form.session_end_time?.split(':')[1] || '00'}`;
-                    const startH = parseInt(form.session_time?.split(':')[0] || '0');
-                    const startM = parseInt(form.session_time?.split(':')[1] || '0');
-                    const dur = (endH * 60 + endM) - (startH * 60 + startM);
-                    setForm(f => ({ ...f, session_end_time: newEnd, ...(dur > 0 ? { session_duration: dur } : {}) }));
+                    setManualEndTime(true);
+                    setForm(f => {
+                      const newEnd = `${e.target.value}:${f.session_end_time?.split(':')[1] || '00'}`;
+                      const startH = parseInt(f.session_time?.split(':')[0] || '0');
+                      const startM = parseInt(f.session_time?.split(':')[1] || '0');
+                      const endH = parseInt(e.target.value);
+                      const endM = parseInt(f.session_end_time?.split(':')[1] || '0');
+                      const dur = (endH * 60 + endM) - (startH * 60 + startM);
+                      return { ...f, session_end_time: newEnd, ...(dur > 0 ? { session_duration: dur } : {}) };
+                    });
                   }}
                   style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
                 >
@@ -496,13 +506,16 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                 <select
                   value={form.session_end_time?.split(':')[1] || '00'}
                   onChange={e => {
-                    const endH = parseInt(form.session_end_time?.split(':')[0] || '0');
-                    const endM = parseInt(e.target.value);
-                    const newEnd = `${form.session_end_time?.split(':')[0] || '00'}:${e.target.value}`;
-                    const startH = parseInt(form.session_time?.split(':')[0] || '0');
-                    const startM = parseInt(form.session_time?.split(':')[1] || '0');
-                    const dur = (endH * 60 + endM) - (startH * 60 + startM);
-                    setForm(f => ({ ...f, session_end_time: newEnd, ...(dur > 0 ? { session_duration: dur } : {}) }));
+                    setManualEndTime(true);
+                    setForm(f => {
+                      const newEnd = `${f.session_end_time?.split(':')[0] || '00'}:${e.target.value}`;
+                      const startH = parseInt(f.session_time?.split(':')[0] || '0');
+                      const startM = parseInt(f.session_time?.split(':')[1] || '0');
+                      const endH = parseInt(f.session_end_time?.split(':')[0] || '0');
+                      const endM = parseInt(e.target.value);
+                      const dur = (endH * 60 + endM) - (startH * 60 + startM);
+                      return { ...f, session_end_time: newEnd, ...(dur > 0 ? { session_duration: dur } : {}) };
+                    });
                   }}
                   style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
                 >
