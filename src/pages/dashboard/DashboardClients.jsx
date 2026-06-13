@@ -130,26 +130,32 @@ export default function DashboardClients() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
+      <div className="mb-6 flex flex-col gap-4">
         <div>
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>BAZA DANYCH</p>
           <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>Klienci</h2>
         </div>
         <div className="flex items-center gap-3">
-          {/* Search */}
-          <div className="relative flex items-center" style={{ border: `0.5px solid ${t.border}`, padding: '8px 14px', gap: '8px', minWidth: '220px' }}>
-            <Search size={12} color={t.muted} />
-            <input
-              placeholder="Szukaj..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              style={{ background: 'transparent', border: 'none', outline: 'none', color: t.text, fontSize: '13px', fontFamily: 'Inter', width: '100%' }}
-            />
-          </div>
           <button onClick={openNew} className="flex items-center gap-2 btn-oxblood" style={{ padding: '10px 20px' }}>
             <Plus size={13} /> NOWY KLIENT
           </button>
         </div>
+      </div>
+
+      {/* Search — full width above list */}
+      <div className="mb-4 flex items-center" style={{ border: `0.5px solid ${t.border}`, padding: '8px 14px', gap: '8px' }}>
+        <Search size={12} color={t.muted} />
+        <input
+          placeholder="Szukaj po nazwisku, emailu, telefonie..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{ background: 'transparent', border: 'none', outline: 'none', color: t.text, fontSize: '13px', fontFamily: 'Inter', width: '100%' }}
+        />
+        {search && (
+          <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: 0 }}>
+            <X size={12} />
+          </button>
+        )}
       </div>
 
       {/* Stats row */}
