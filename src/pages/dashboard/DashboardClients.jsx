@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
-import { Search, Edit2, Trash2, X, Plus, ChevronDown, ChevronUp, CalendarPlus } from 'lucide-react';
+import { Search, Edit2, Trash2, X, Plus, ChevronDown, ChevronUp, CalendarPlus, Merge, Loader2 } from 'lucide-react';
 import BookingModal from '@/components/dashboard/BookingModal';
 import { format } from 'date-fns';
 import { AnimatePresence } from 'framer-motion';
@@ -39,6 +39,10 @@ export default function DashboardClients() {
   const [lastSessionForClient, setLastSessionForClient] = useState(null); // last booking object or undefined
   const [repeatPromptVisible, setRepeatPromptVisible] = useState(false);
   const [useRepeatData, setUseRepeatData] = useState(false);
+  const [mergeSource, setMergeSource] = useState(null); // client to merge FROM (will be deleted)
+  const [mergeTarget, setMergeTarget] = useState(null); // client to merge INTO (will be kept)
+  const [mergeSearch, setMergeSearch] = useState('');
+  const [merging, setMerging] = useState(false);
 
   const load = async () => {
     const [clientData, bookingData, formData] = await Promise.all([
@@ -114,6 +118,71 @@ export default function DashboardClients() {
   const handleDelete = async (id) => {
     await base44.entities.Client.delete(id);
     setClients(c => c.filter(x => x.id !== id));
+  };
+
+  // Merge mergeSource INTO mergeTarget:
+  // 1. Re-assign all bookings & health forms from source email → target email/name
+  // 2. Merge session counts
+  // 3. Delete source client record
+  const handleMerge = async () => {
+    if (!mergeSource || !mergeTarget) return;
+    setMerging(true);
+
+    const srcEmail = (mergeSource.email || '').toLowerCase().trim();
+    const srcName = (mergeSource.name || '').toLowerCase().trim();
+
+    // Find all bookings belonging to source
+    const srcBookings = bookings.filter(b => {
+      const bEmail = (b.client_email || '').toLowerCase().trim();
+      const bName = (b.client_name || '').toLowerCase().trim();
+      if (srcEmail && bEmail) return srcEmail === bEmail;
+      if (!srcEmail) return bName === srcName;
+      return false;
+    });
+
+    // Find all health forms belonging to source
+    const srcForms = healthForms.filter(f => {
+      const fEmail = (f.client_email || '').toLowerCase().trim();
+      const fName = (f.client_name || '').toLowerCase().trim();
+      if (srcEmail && fEmail) return srcEmail === fEmail;
+      if (!srcEmail) return fName === srcName;
+      return false;
+    });
+
+    const targetName = mergeTarget.name || `${mergeTarget.first_name || ''} ${mergeTarget.last_name || ''}`.trim();
+    const targetEmail = mergeTarget.email || '';
+    const targetPhone = mergeTarget.phone || '';
+
+    // Re-assign bookings
+    await Promise.all(srcBookings.map(b =>
+      base44.entities.Booking.update(b.id, {
+        client_name: targetName,
+        client_email: targetEmail,
+        client_phone: targetPhone,
+      })
+    ));
+
+    // Re-assign health forms
+    await Promise.all(srcForms.map(f =>
+      base44.entities.HealthForm.update(f.id, {
+        client_name: targetName,
+        client_email: targetEmail,
+        client_phone: targetPhone,
+      })
+    ));
+
+    // Update target session count
+    const newTotal = (mergeTarget.total_sessions || 0) + (mergeSource.total_sessions || 0);
+    await base44.entities.Client.update(mergeTarget.id, { total_sessions: newTotal });
+
+    // Delete source client
+    await base44.entities.Client.delete(mergeSource.id);
+
+    setMergeSource(null);
+    setMergeTarget(null);
+    setMergeSearch('');
+    setMerging(false);
+    load();
   };
 
   const inp = (field) => ({
@@ -198,6 +267,7 @@ export default function DashboardClients() {
                   <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{c.name}</p>
                   <div className="flex gap-2">
                     <button onClick={(e) => { e.stopPropagation(); openNewSession(c); }} style={{ color: '#16a34a', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} title="Nowa sesja"><CalendarPlus size={13} /></button>
+                    <button onClick={(e) => { e.stopPropagation(); setMergeSource(c); setMergeTarget(null); setMergeSearch(''); }} style={{ color: '#a855f7', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} title="Połącz"><Merge size={13} /></button>
                     <button onClick={(e) => { e.stopPropagation(); openEdit(c); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><Edit2 size={13} /></button>
                     <button onClick={(e) => { e.stopPropagation(); handleDelete(c.id); }} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><Trash2 size={13} /></button>
                   </div>
@@ -229,6 +299,7 @@ export default function DashboardClients() {
                   </div>
                   <div className="col-span-2 flex justify-end gap-3">
                     <button onClick={(e) => { e.stopPropagation(); openNewSession(c); }} style={{ color: '#16a34a', background: 'none', border: 'none', cursor: 'pointer' }} title="Nowa sesja"><CalendarPlus size={13} /></button>
+                    <button onClick={(e) => { e.stopPropagation(); setMergeSource(c); setMergeTarget(null); setMergeSearch(''); }} style={{ color: '#a855f7', background: 'none', border: 'none', cursor: 'pointer' }} title="Połącz z innym klientem"><Merge size={13} /></button>
                     <button onClick={(e) => { e.stopPropagation(); openEdit(c); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Edit2 size={13} /></button>
                     <button onClick={(e) => { e.stopPropagation(); handleDelete(c.id); }} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={13} /></button>
                   </div>
@@ -369,6 +440,109 @@ export default function DashboardClients() {
           onClose={() => { setNewSessionClient(null); setLastSessionForClient(null); }}
           onSaved={() => { setNewSessionClient(null); setLastSessionForClient(null); load(); }}
         />
+      )}
+
+      {/* Merge modal */}
+      {mergeSource && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.8)' }} onClick={() => setMergeSource(null)}>
+          <div className="w-full max-w-lg" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '36px' }} onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-2">
+              <div className="flex items-center gap-2">
+                <Merge size={14} color="#a855f7" />
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#a855f7', letterSpacing: '0.2em', textTransform: 'uppercase' }}>ŁĄCZENIE KLIENTÓW</p>
+              </div>
+              <button onClick={() => setMergeSource(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}><X size={16} /></button>
+            </div>
+            <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.8rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em', marginBottom: '20px' }}>
+              Połącz duplikaty
+            </h3>
+
+            {/* Source */}
+            <div className="mb-5">
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>DUPLIKAT (zostanie usunięty)</p>
+              <div style={{ border: `0.5px solid #a855f7`, padding: '12px 16px', background: 'rgba(168,85,247,0.05)' }}>
+                <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{mergeSource.name}</p>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginTop: '3px' }}>
+                  {[mergeSource.email, mergeSource.phone].filter(Boolean).join(' · ') || '—'} · {mergeSource.total_sessions || 0} sesji
+                </p>
+              </div>
+            </div>
+
+            {/* Target search */}
+            <div className="mb-5">
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>DOCELOWY PROFIL (zostanie zachowany)</p>
+              {mergeTarget ? (
+                <div style={{ border: `0.5px solid #16a34a`, padding: '12px 16px', background: 'rgba(22,163,74,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div>
+                    <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{mergeTarget.name}</p>
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginTop: '3px' }}>
+                      {[mergeTarget.email, mergeTarget.phone].filter(Boolean).join(' · ') || '—'} · {mergeTarget.total_sessions || 0} sesji
+                    </p>
+                  </div>
+                  <button onClick={() => setMergeTarget(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}><X size={13} /></button>
+                </div>
+              ) : (
+                <div>
+                  <div style={{ border: `0.5px solid ${t.border}`, padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                    <Search size={11} color={t.muted} />
+                    <input
+                      autoFocus
+                      placeholder="Szukaj klienta docelowego..."
+                      value={mergeSearch}
+                      onChange={e => setMergeSearch(e.target.value)}
+                      style={{ background: 'transparent', border: 'none', outline: 'none', color: t.text, fontSize: '13px', fontFamily: 'Inter', width: '100%' }}
+                    />
+                  </div>
+                  {mergeSearch.trim() && (
+                    <div style={{ border: `0.5px solid ${t.border}`, maxHeight: '200px', overflowY: 'auto' }}>
+                      {clients
+                        .filter(c => c.id !== mergeSource.id && (
+                          c.name?.toLowerCase().includes(mergeSearch.toLowerCase()) ||
+                          c.email?.toLowerCase().includes(mergeSearch.toLowerCase()) ||
+                          c.phone?.includes(mergeSearch)
+                        ))
+                        .slice(0, 8)
+                        .map(c => (
+                          <button key={c.id} onClick={() => setMergeTarget(c)}
+                            className="w-full text-left px-4 py-3"
+                            style={{ background: 'none', border: 'none', borderBottom: `0.5px solid ${t.border}`, cursor: 'pointer', display: 'block' }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(168,85,247,0.05)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                          >
+                            <p style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>{c.name}</p>
+                            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginTop: '2px' }}>
+                              {[c.email, c.phone].filter(Boolean).join(' · ') || '—'} · {c.total_sessions || 0} sesji
+                            </p>
+                          </button>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {mergeTarget && (
+              <div className="mb-5 px-4 py-3" style={{ background: 'rgba(168,85,247,0.05)', border: `0.5px solid rgba(168,85,247,0.3)` }}>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#a855f7', letterSpacing: '0.1em', marginBottom: '4px' }}>PO POŁĄCZENIU:</p>
+                <p style={{ fontSize: '12px', color: t.muted, lineHeight: 1.6 }}>
+                  Wszystkie sesje i ankiety z <strong style={{ color: t.text }}>{mergeSource.name}</strong> zostaną przeniesione na <strong style={{ color: t.text }}>{mergeTarget.name}</strong>. Profil duplikatu zostanie usunięty.
+                </p>
+              </div>
+            )}
+
+            <div className="flex gap-3 pt-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
+              <button
+                onClick={handleMerge}
+                disabled={!mergeTarget || merging}
+                className="btn-oxblood flex-1"
+                style={{ opacity: (!mergeTarget || merging) ? 0.5 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: !mergeTarget || merging ? undefined : 'linear-gradient(135deg,#a855f7,#7c3aed)' }}
+              >
+                {merging ? <><Loader2 size={13} className="animate-spin" /> ŁĄCZENIE...</> : <><Merge size={13} /> POŁĄCZ PROFILE</>}
+              </button>
+              <button onClick={() => setMergeSource(null)} className="btn-ghost-parchment">ANULUJ</button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Edit modal */}
