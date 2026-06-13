@@ -233,21 +233,26 @@ export default function DashboardHome() {
       {editingBooking && (
         <BookingModal
           booking={editingBooking}
+          t={t}
           onClose={() => setEditingBooking(null)}
-          onSave={(updated) => {
-            setAllBookings(prev => prev.map(b => b.id === updated.id ? updated : b));
-            const pending = allBookings.map(b => b.id === updated.id ? updated : b).filter(b => b.status === 'pending');
-            const grouped = {};
-            pending.forEach(b => {
-              const day = b.session_date || 'Brak daty';
-              if (!grouped[day]) grouped[day] = [];
-              grouped[day].push(b);
+          onSaved={() => {
+            base44.entities.Booking.list('-created_date', 200).then(bookings => {
+              setAllBookings(bookings);
+              const pending = bookings.filter(b => b.status === 'pending');
+              const grouped = {};
+              pending.forEach(b => {
+                const day = b.session_date || 'Brak daty';
+                if (!grouped[day]) grouped[day] = [];
+                grouped[day].push(b);
+              });
+              setPendingByDay(Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b)).map(([date, items]) => ({ date, items })));
             });
-            setPendingByDay(Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b)).map(([date, items]) => ({ date, items })));
             setEditingBooking(null);
           }}
         />
       )}
+
+
     </div>
   );
 }
