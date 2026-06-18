@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, TrendingUp } from 'lucide-react';
+import { Calendar, Clock, TrendingUp, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { format, isToday, isPast, parseISO } from 'date-fns';
+import { format, isToday, isPast, parseISO, addDays, subDays } from 'date-fns';
 import { pl } from 'date-fns/locale';
-import BookingModal from '@/components/dashboard/BookingModal';
+import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -14,6 +14,131 @@ const STATUS_COLORS = {
   completed: '#2563eb',
   cancelled: '#9ca3af',
 };
+const STATUS_LABELS = { pending: 'Oczekuje', confirmed: 'Potwierdzona', completed: 'Zakończona', cancelled: 'Anulowana' };
+
+// ── Booking Detail / View Modal ──────────────────────────────────────────────
+function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, onSaved }) {
+  const t = theme === 'light'
+    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', inputBorder: '#CCCCCC' }
+    : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', inputBorder: '#262626' };
+
+  const [form, setForm] = useState(() => {
+    if (isNew) return {
+      client_name: '', client_first_name: '', client_last_name: '', client_email: '', client_phone: '',
+      session_date: booking?.session_date || format(new Date(), 'yyyy-MM-dd'),
+      session_time: '', session_end_time: '', session_duration: 0,
+      tattoo_description: '', tattoo_placement: '', estimated_price: '',
+      service_id: '', service_name: '', notes: '', status: 'pending', deposit_paid: false,
+      artist_id: artist.id, artist_name: artist.name,
+    };
+    return { ...booking };
+  });
+  const [showHealthForm, setShowHealthForm] = useState(false);
+
+  const handleStatusChange = async (newStatus) => {
+    if (newStatus === 'cancelled') {
+      await base44.entities.Booking.update(booking.id, { status: 'cancelled' });
+      onSaved();
+      return;
+    }
+    await base44.entities.Booking.update(booking.id, { status: newStatus });
+    setForm(f => ({ ...f, status: newStatus }));
+    onSaved();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.75)' }} onClick={onClose}>
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        className="w-full max-w-xl max-h-[90vh] overflow-y-auto"
+        style={{ background: t.bg, border: `0.5px solid ${t.border}`, padding: '32px' }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>PODGLĄD SESJI</p>
+            <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em', lineHeight: 1 }}>
+              {form.client_name}
+            </h3>
+          </div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}><X size={18} /></button>
+        </div>
+
+        {/* Status badges */}
+        <div className="mb-6 space-y-4">
+          <div className="flex items-center gap-3 flex-wrap">
+            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 12px', border: `0.5px solid ${STATUS_COLORS[form.status]}`, color: STATUS_COLORS[form.status] }}>
+              {STATUS_LABELS[form.status]}
+            </span>
+            {form.deposit_paid && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.08em' }}>✓ DEPOZYT</span>}
+            {!form.health_form_completed && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', padding: '3px 8px', border: '0.5px solid #FF007F', color: '#FF007F' }}>BRAK ANKIETY</span>}
+          </div>
+
+          {/* Quick status change */}
+          {form.status !== 'cancelled' && (
+            <div>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '6px' }}>ZMIEŃ STATUS</p>
+              <div className="flex gap-2 flex-wrap">
+                {Object.entries(STATUS_LABELS).filter(([k]) => k !== form.status && k !== 'cancelled').map(([k, lbl]) => (
+                  <button key={k} onClick={() => handleStatusChange(k)}
+                    style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[k]}`, color: STATUS_COLORS[k], background: 'transparent', cursor: 'pointer' }}>
+                    → {lbl}
+                  </button>
+                ))}
+                <button onClick={() => handleStatusChange('cancelled')}
+                  style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 10px', border: '0.5px solid #9ca3af', color: '#9ca3af', background: 'transparent', cursor: 'pointer' }}>
+                  → Anuluj
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Details view */}
+          <div className="space-y-3 pt-2" style={{ borderTop: `0.5px solid ${t.border}` }}>
+            {[
+              ['DATA', `${form.session_date || '—'}${form.session_time ? ` · ${form.session_time}${form.session_end_time ? `–${form.session_end_time}` : ''}` : ''}`],
+              ['KLIENT', form.client_name],
+              ['TELEFON', form.client_phone],
+              ['EMAIL', form.client_email],
+              ['USŁUGA', form.service_name],
+              ['MIEJSCE', form.tattoo_placement],
+              ['OPIS', form.tattoo_description],
+              ['CENA', form.estimated_price ? `${form.estimated_price} zł` : null],
+              ['NOTATKI', form.notes],
+            ].filter(([, v]) => v).map(([lbl, val]) => (
+              <div key={lbl}>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '2px' }}>{lbl}</p>
+                <p style={{ color: t.text, fontSize: '13px' }}>{val}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Health form button */}
+          {form.health_form_completed && (
+            <button onClick={() => setShowHealthForm(true)} className="btn-ghost-parchment" style={{ fontSize: '9px', marginTop: '8px', width: '100%' }}>
+              PODGLĄD ANKIETY ZDROWOTNEJ
+            </button>
+          )}
+        </div>
+      </motion.div>
+
+      {showHealthForm && (
+        <HealthFormPreviewModal
+          bookingId={booking?.id}
+          clientName={form.client_name}
+          onClose={() => setShowHealthForm(false)}
+          t={theme === 'light'
+            ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F' }
+            : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F' }
+          }
+        />
+      )}
+    </div>
+  );
+}
 
 export default function ArtistHome() {
   const { artist, theme } = useOutletContext();
@@ -214,10 +339,6 @@ export default function ArtistHome() {
             artist={artist}
             artistServices={artistServices}
             theme={theme}
-            t={theme === 'light'
-              ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)' }
-              : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)' }
-            }
             onClose={() => setSelectedBooking(null)}
             onSaved={() => {
               base44.entities.Booking.filter({ artist_id: artist.id }, '-session_date', 100).then(setBookings);
