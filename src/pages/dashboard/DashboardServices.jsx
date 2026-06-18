@@ -154,34 +154,59 @@ export default function DashboardServices() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3 mb-6">
-        <select
-          value={filterCategory}
-          onChange={e => setFilterCategory(e.target.value)}
-          style={{ background: filterCategory ? 'rgba(255,0,127,0.08)' : t.bg, border: `0.5px solid ${filterCategory ? '#FF007F' : t.border}`, color: filterCategory ? '#FF007F' : t.muted, fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 12px', outline: 'none', cursor: 'pointer', colorScheme: theme === 'light' ? 'light' : 'dark' }}
-        >
-          <option value="">KATEGORIA: WSZYSTKIE</option>
-          <option value="tattoo">TATTOO</option>
-          <option value="piercing">PIERCING</option>
-          <option value="studio">STUDIO</option>
-        </select>
+      <div className="mb-6 space-y-3">
+        {/* Category filter */}
+        <div>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>KATEGORIA</p>
+          <div className="flex flex-wrap gap-2">
+            {['', 'tattoo', 'piercing', 'studio'].map(cat => {
+              const active = filterCategory === cat;
+              return (
+                <button
+                  key={cat || 'all'}
+                  onClick={() => setFilterCategory(cat)}
+                  style={{
+                    border: `0.5px solid ${active ? '#FF007F' : t.border}`,
+                    color: active ? '#FF007F' : t.muted,
+                    background: active ? 'rgba(255,0,127,0.08)' : 'transparent',
+                    fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase',
+                    padding: '7px 14px', cursor: 'pointer',
+                  }}
+                >
+                  {cat === '' ? 'WSZYSTKIE' : cat.toUpperCase()}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-        <select
-          value={filterArtist}
-          onChange={e => setFilterArtist(e.target.value)}
-          style={{ background: filterArtist ? 'rgba(255,0,127,0.08)' : t.bg, border: `0.5px solid ${filterArtist ? '#FF007F' : t.border}`, color: filterArtist ? '#FF007F' : t.muted, fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 12px', outline: 'none', cursor: 'pointer', colorScheme: theme === 'light' ? 'light' : 'dark' }}
-        >
-          <option value="">ARTYSTA: WSZYSCY</option>
-          {artists.map(a => <option key={a.id} value={a.id}>{a.name.toUpperCase()}</option>)}
-        </select>
-
-        {(filterCategory || filterArtist) && (
-          <button
-            onClick={() => { setFilterCategory(''); setFilterArtist(''); }}
-            style={{ background: 'none', border: `0.5px solid ${t.border}`, color: t.muted, fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 12px', cursor: 'pointer' }}
-          >
-            WYCZYŚĆ ✕
-          </button>
+        {/* Artist filter */}
+        {artists.length > 0 && (
+          <div>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>ARTYSTA</p>
+            <div className="flex flex-wrap gap-2">
+              {[null, ...artists].map(a => {
+                const active = filterArtist === (a?.id || '');
+                return (
+                  <button
+                    key={a?.id || 'all'}
+                    onClick={() => setFilterArtist(a?.id || '')}
+                    className="flex items-center gap-2"
+                    style={{
+                      border: `0.5px solid ${active ? '#FF007F' : t.border}`,
+                      color: active ? '#FF007F' : t.muted,
+                      background: active ? 'rgba(255,0,127,0.08)' : 'transparent',
+                      fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase',
+                      padding: '7px 14px', cursor: 'pointer',
+                    }}
+                  >
+                    {a?.photo_url && <img src={a.photo_url} alt={a.name} style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover' }} />}
+                    {a ? a.name.toUpperCase() : 'WSZYSCY'}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         )}
       </div>
 
