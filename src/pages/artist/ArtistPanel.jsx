@@ -2,7 +2,7 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { Calendar, BarChart2, User, LogOut, Menu, X, Sun, Moon } from 'lucide-react';
+import { Calendar, BarChart2, User, LogOut, Menu, X, Sun, Moon, ArrowRight } from 'lucide-react';
 
 export const ArtistThemeContext = createContext({ theme: 'dark', toggleTheme: () => {} });
 export const useArtistTheme = () => useContext(ArtistThemeContext);
@@ -48,6 +48,9 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, artist }) {
                   </div>
                 )}
                 <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: textColor, letterSpacing: '0.05em' }}>{artist.name}</p>
+                <Link to="/artist/profile" style={{ color: '#FF007F', marginLeft: 'auto' }} onClick={() => setSidebarOpen(false)}>
+                  <ArrowRight size={14} />
+                </Link>
               </div>
             )}
           </div>
