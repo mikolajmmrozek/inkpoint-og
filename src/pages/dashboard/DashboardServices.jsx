@@ -47,6 +47,8 @@ export default function DashboardServices() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [bookingService, setBookingService] = useState(null); // service to book
   const [deleteConfirm, setDeleteConfirm] = useState(null); // service to delete
+  const [filterCategory, setFilterCategory] = useState('');
+  const [filterArtist, setFilterArtist] = useState('');
 
   const load = async () => {
     const [svc, art] = await Promise.all([
@@ -151,6 +153,38 @@ export default function DashboardServices() {
         </button>
       </div>
 
+      {/* Filters */}
+      <div className="flex flex-wrap gap-3 mb-6">
+        <select
+          value={filterCategory}
+          onChange={e => setFilterCategory(e.target.value)}
+          style={{ background: filterCategory ? 'rgba(255,0,127,0.08)' : t.bg, border: `0.5px solid ${filterCategory ? '#FF007F' : t.border}`, color: filterCategory ? '#FF007F' : t.muted, fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 12px', outline: 'none', cursor: 'pointer', colorScheme: theme === 'light' ? 'light' : 'dark' }}
+        >
+          <option value="">KATEGORIA: WSZYSTKIE</option>
+          <option value="tattoo">TATTOO</option>
+          <option value="piercing">PIERCING</option>
+          <option value="studio">STUDIO</option>
+        </select>
+
+        <select
+          value={filterArtist}
+          onChange={e => setFilterArtist(e.target.value)}
+          style={{ background: filterArtist ? 'rgba(255,0,127,0.08)' : t.bg, border: `0.5px solid ${filterArtist ? '#FF007F' : t.border}`, color: filterArtist ? '#FF007F' : t.muted, fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 12px', outline: 'none', cursor: 'pointer', colorScheme: theme === 'light' ? 'light' : 'dark' }}
+        >
+          <option value="">ARTYSTA: WSZYSCY</option>
+          {artists.map(a => <option key={a.id} value={a.id}>{a.name.toUpperCase()}</option>)}
+        </select>
+
+        {(filterCategory || filterArtist) && (
+          <button
+            onClick={() => { setFilterCategory(''); setFilterArtist(''); }}
+            style={{ background: 'none', border: `0.5px solid ${t.border}`, color: t.muted, fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 12px', cursor: 'pointer' }}
+          >
+            WYCZYŚĆ ✕
+          </button>
+        )}
+      </div>
+
       {/* Stats */}
       <div className="flex gap-4 mb-6 flex-wrap">
         {[
@@ -186,7 +220,11 @@ export default function DashboardServices() {
             ))}
           </div>
 
-          {services.map((s, i) => (
+          {services.filter(s => {
+            if (filterCategory && s.category !== filterCategory) return false;
+            if (filterArtist && s.artist_ids?.length > 0 && !s.artist_ids.includes(filterArtist)) return false;
+            return true;
+          }).map((s, i) => (
             <div key={s.id} className="grid grid-cols-12 px-4 py-3 items-center"
               style={{ borderBottom: i < services.length - 1 ? `0.5px solid ${t.border}` : 'none', opacity: s.is_active === false ? 0.5 : 1 }}>
               {/* Image + Name */}
