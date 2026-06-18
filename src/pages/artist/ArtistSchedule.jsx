@@ -359,11 +359,12 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
 }
 
 // ── Monthly Calendar View ────────────────────────────────────────────────────
-function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth, t, theme }) {
+function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth, t, theme, onBookingClick, onAddBooking }) {
   const days = eachDayOfInterval({ start: startOfMonth(viewMonth), end: endOfMonth(viewMonth) });
   const startPad = (getDay(startOfMonth(viewMonth)) + 6) % 7;
   const today = new Date();
   const WEEKDAYS = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Ndz'];
+  const selectedDayBookings = bookings.filter(b => b.session_date && isSameDay(new Date(b.session_date), selectedDate));
 
   return (
     <div>
@@ -385,7 +386,7 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
           const isToday = isSameDay(day, today);
           return (
             <button key={day.toISOString()} onClick={() => onDayClick(day)}
-              style={{ minHeight: '52px', padding: '6px 4px', border: `0.5px solid ${isSelected ? '#FF007F' : 'transparent'}`, background: isSelected ? 'rgba(255,0,127,0.08)' : 'transparent', cursor: 'pointer', textAlign: 'center' }}>
+              style={{ minHeight: '52px', padding: '6px 4px', border: `0.5px solid ${isSelected ? '#FF007F' : isToday ? t.cardBorder : 'transparent'}`, background: isSelected ? 'rgba(255,0,127,0.08)' : 'transparent', cursor: 'pointer', textAlign: 'center' }}>
               <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: isSelected ? '#FF007F' : isToday ? t.title : isSameMonth(day, viewMonth) ? t.text : t.muted, fontWeight: isToday ? 600 : 400 }}>
                 {format(day, 'd')}
               </span>
@@ -398,6 +399,43 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
             </button>
           );
         })}
+      </div>
+
+      {/* Selected day sessions */}
+      <div className="mt-6" style={{ borderTop: `0.5px solid ${t.cardBorder}`, paddingTop: '16px' }}>
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>
+          SESJE — {format(selectedDate, 'EEEE, d MMMM', { locale: pl }).toUpperCase()}
+        </p>
+        {selectedDayBookings.length === 0 ? (
+          <div className="py-8 text-center" style={{ border: `0.5px solid ${t.cardBorder}`, background: 'rgba(255,0,127,0.02)' }}>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em', marginBottom: '12px' }}>BRAK SESJI W TEN DZIEŃ</p>
+            <button onClick={onAddBooking} className="btn-oxblood" style={{ fontSize: '10px', padding: '8px 20px' }}>+ DODAJ SESJĘ</button>
+          </div>
+        ) : (
+          <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+            {selectedDayBookings.map((b, i) => (
+              <div key={b.id} onClick={() => onBookingClick(b)}
+                style={{ borderBottom: i < selectedDayBookings.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none', padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', opacity: b.status === 'cancelled' ? 0.5 : 1 }}
+                onMouseEnter={e => e.currentTarget.style.background = t.rowHover}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                <div className="flex-shrink-0 text-center" style={{ minWidth: '48px' }}>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: STATUS_COLORS[b.status] || '#FF007F', letterSpacing: '0.05em' }}>{b.session_time || '—'}</p>
+                  {b.session_end_time && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted }}>→ {b.session_end_time}</p>}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p style={{ color: t.text, fontSize: '14px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.client_name}</p>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {b.tattoo_placement}{b.service_name ? ` · ${b.service_name}` : ''}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {b.estimated_price > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{b.estimated_price} zł</span>}
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: STATUS_COLORS[b.status] || t.muted }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -549,7 +587,6 @@ export default function ArtistSchedule() {
 
   const handleDayClick = (day) => {
     setSelectedDate(day);
-    setViewMode('hourly');
   };
 
   const dayBookings = bookings
@@ -582,7 +619,7 @@ export default function ArtistSchedule() {
       {/* Monthly view */}
       {viewMode === 'month' && (
         <div className="p-4" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
-          <MonthView bookings={bookings} selectedDate={selectedDate} onDayClick={handleDayClick} viewMonth={viewMonth} setViewMonth={setViewMonth} t={t} theme={theme} />
+          <MonthView bookings={bookings} selectedDate={selectedDate} onDayClick={handleDayClick} viewMonth={viewMonth} setViewMonth={setViewMonth} t={t} theme={theme} onBookingClick={setSelectedBooking} onAddBooking={() => setShowNewModal(true)} />
         </div>
       )}
 
