@@ -34,8 +34,8 @@ export default function HealthFormPreviewModal({ bookingId, healthFormId, client
       let forms;
       const tplArr = await base44.entities.HealthFormTemplate.filter({ key: 'default' });
       if (healthFormId) {
-        const f = await base44.entities.HealthForm.filter({ id: healthFormId }, '-form_filled_date', 1);
-        forms = f;
+        const f = await base44.entities.HealthForm.get(healthFormId);
+        forms = f ? [f] : [];
       } else {
         forms = await base44.entities.HealthForm.filter({ booking_id: bookingId }, '-form_filled_date', 1);
       }
