@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Calendar, Users, MessageSquare, FileText, TrendingUp, Clock, AlertCircle, ClipboardList } from 'lucide-react';
+import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
 import { AnimatePresence } from 'framer-motion';
 import { useTheme } from './Dashboard';
 import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
@@ -17,6 +18,7 @@ export default function DashboardHome() {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [editingBooking, setEditingBooking] = useState(null);
   const [allBookings, setAllBookings] = useState([]);
+  const [previewForm, setPreviewForm] = useState(null); // { id?, bookingId?, clientName }
 
   useEffect(() => {
     Promise.all([
@@ -122,27 +124,30 @@ export default function DashboardHome() {
             </Link>
           </div>
           <div style={{ border: '0.5px solid rgba(255,0,127,0.4)', background: t.cardBg }}>
-            {draftForms.map((f, i) => (
-              <Link
-                key={f.id}
-                to={`/dashboard/health-forms`}
-                className="flex items-center justify-between p-4 transition-colors"
-                style={{ borderBottom: i < draftForms.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none', display: 'flex', textDecoration: 'none' }}
-                onMouseEnter={e => e.currentTarget.style.background = t.rowHover}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-              >
-                <div>
-                  <p style={{ color: t.value, fontSize: '14px', fontWeight: 500 }}>{f.client_name || `${f.client_first_name || ''} ${f.client_last_name || ''}`.trim() || 'Brak nazwy'}</p>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
-                    {f.client_email || ''}{f.procedure_type ? ` · ${f.procedure_type}` : ''}
-                    {f.created_date ? ` · ${new Date(f.created_date).toLocaleDateString('pl-PL')}` : ''}
-                  </p>
-                </div>
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: '0.5px solid #FF007F', color: '#FF007F' }}>
-                  DRAFT
-                </span>
-              </Link>
-            ))}
+            {draftForms.map((f, i) => {
+              const clientName = f.client_name || `${f.client_first_name || ''} ${f.client_last_name || ''}`.trim() || 'Brak nazwy';
+              return (
+                <button
+                  key={f.id}
+                  onClick={() => setPreviewForm({ healthFormId: f.id, clientName })}
+                  className="flex items-center justify-between p-4 transition-colors w-full text-left"
+                  style={{ borderBottom: i < draftForms.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none', background: 'transparent', border: 'none', cursor: 'pointer', borderBottom: i < draftForms.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none', width: '100%' }}
+                  onMouseEnter={e => e.currentTarget.style.background = t.rowHover}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  <div>
+                    <p style={{ color: t.value, fontSize: '14px', fontWeight: 500 }}>{clientName}</p>
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
+                      {f.client_email || ''}{f.procedure_type ? ` · ${f.procedure_type}` : ''}
+                      {f.created_date ? ` · ${new Date(f.created_date).toLocaleDateString('pl-PL')}` : ''}
+                    </p>
+                  </div>
+                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: '0.5px solid #FF007F', color: '#FF007F', flexShrink: 0 }}>
+                    DRAFT
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
@@ -278,6 +283,19 @@ export default function DashboardHome() {
         />
       )}
       </AnimatePresence>
+
+      {previewForm && (
+        <HealthFormPreviewModal
+          healthFormId={previewForm.healthFormId}
+          bookingId={previewForm.bookingId}
+          clientName={previewForm.clientName}
+          onClose={() => setPreviewForm(null)}
+          t={theme === 'light'
+            ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F' }
+            : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F' }
+          }
+        />
+      )}
 
       {editingBooking && (
         <BookingModal
