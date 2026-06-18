@@ -27,6 +27,8 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
   const [services, setServices] = useState([]);
   const [allServices, setAllServices] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [serviceQuery, setServiceQuery] = useState('');
+  const [showServiceSuggestions, setShowServiceSuggestions] = useState(false);
   const [saving, setSaving] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
   const [repeatPrompt, setRepeatPrompt] = useState(null); // { client, lastSession }
@@ -95,6 +97,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
       if (booking && !booking._prefill && booking.service_id) {
         const svc = sorted.find(s => s.id === booking.service_id);
         if (svc?.category) setSelectedCategory(svc.category);
+        if (svc?.name) setServiceQuery(svc.name);
       }
     }).catch(() => {});
   }, []);
@@ -106,6 +109,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
     // Clear selected service when category changes
     set('service_id', '');
     set('service_name', '');
+    setServiceQuery('');
     setArtists(allArtists);
   };
 
@@ -113,10 +117,11 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
     ? allServices.filter(s => s.category === selectedCategory)
     : allServices;
 
-  const handleService = (serviceId) => {
+  const handleService = (serviceId, nameTxt) => {
     if (!serviceId) {
       set('service_id', '');
       set('service_name', '');
+      setServiceQuery('');
       setArtists(allArtists);
       return;
     }
@@ -435,20 +440,62 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                 ))}
               </div>
             </div>
-            <div>
+            <div style={{ position: 'relative' }}>
               {label('Wybierz usługę (opcjonalnie)')}
-              <select
-                value={form.service_id || ''}
-                onChange={e => handleService(e.target.value)}
-                style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
-              >
-                <option value="">Brak / usługa niestandardowa</option>
-                {filteredServices.map(s => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}{s.duration_minutes ? ` (${s.duration_minutes} min)` : ''}{s.price_type === 'fixed' && s.price_fixed ? ` — ${s.price_fixed} PLN` : s.price_type === 'range' && s.price_min ? ` — od ${s.price_min} PLN` : ''}
-                  </option>
-                ))}
-              </select>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="text"
+                  placeholder="Wpisz nazwę usługi..."
+                  value={serviceQuery}
+                  onChange={e => {
+                    setServiceQuery(e.target.value);
+                    setShowServiceSuggestions(true);
+                    if (!e.target.value) handleService('');
+                  }}
+                  onFocus={() => setShowServiceSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowServiceSuggestions(false), 150)}
+                  style={{ ...inputStyle, color: t.text, borderBottomColor: form.service_id ? '#FF007F' : t.border }}
+                />
+                {serviceQuery && (
+                  <button
+                    type="button"
+                    onClick={() => handleService('')}
+                    style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: '4px' }}
+                  >
+                    <X size={12} />
+                  </button>
+                )}
+              </div>
+              {showServiceSuggestions && (() => {
+                const q = serviceQuery.toLowerCase();
+                const matches = filteredServices.filter(s => !q || s.name.toLowerCase().includes(q));
+                if (!matches.length) return null;
+                return (
+                  <div style={{ position: 'absolute', zIndex: 100, left: 0, right: 0, top: '100%', background: t.bg === '#FFFFFF' ? '#FFFFFF' : '#111111', border: `0.5px solid ${t.border}`, maxHeight: '220px', overflowY: 'auto' }}>
+                    {matches.map(s => {
+                      const priceStr = s.price_type === 'fixed' && s.price_fixed ? ` — ${s.price_fixed} PLN` : s.price_type === 'range' && s.price_min ? ` — od ${s.price_min} PLN` : '';
+                      const durStr = s.duration_minutes ? ` (${s.duration_minutes} min)` : '';
+                      return (
+                        <button
+                          key={s.id}
+                          type="button"
+                          onMouseDown={() => {
+                            setServiceQuery(s.name);
+                            setShowServiceSuggestions(false);
+                            handleService(s.id, s.name);
+                          }}
+                          style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 14px', background: 'none', border: 'none', borderBottom: `0.5px solid ${t.border}`, cursor: 'pointer', color: t.text, fontFamily: 'Inter, sans-serif', fontSize: '13px' }}
+                          onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,0,127,0.06)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                        >
+                          <span>{s.name}</span>
+                          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginLeft: '8px' }}>{durStr}{priceStr}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
             </div>
             {form.service_id && (
               <div className="mt-3 px-3 py-2 flex items-center gap-2" style={{ background: 'rgba(255,0,127,0.05)', border: '0.5px solid rgba(255,0,127,0.2)' }}>
