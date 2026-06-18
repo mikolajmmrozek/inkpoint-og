@@ -6,6 +6,15 @@
       "type": "string",
       "description": "Nazwa us\u0142ugi"
     },
+    "category": {
+      "type": "string",
+      "enum": [
+        "tattoo",
+        "piercing",
+        "studio"
+      ],
+      "description": "Kategoria us\u0142ugi"
+    },
     "short_description": {
       "type": "string",
       "description": "Kr\u00f3tki opis us\u0142ugi"

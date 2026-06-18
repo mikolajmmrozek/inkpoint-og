@@ -200,7 +200,14 @@ export default function DashboardServices() {
                 )}
                 <div className="min-w-0">
                   <p style={{ color: t.text, fontSize: '14px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</p>
-                  {s.short_description && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.short_description}</p>}
+                  <div className="flex items-center gap-2 mt-1">
+                    {s.category && (
+                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '1px 6px', border: '0.5px solid rgba(255,0,127,0.4)', color: '#FF007F' }}>
+                        {s.category}
+                      </span>
+                    )}
+                    {s.short_description && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.short_description}</p>}
+                  </div>
                 </div>
               </div>
               <div className="col-span-2">
@@ -279,6 +286,19 @@ export default function DashboardServices() {
               <div>
                 <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>PODSTAWOWE INFO</p>
                 <div className="mb-4">{label('Nazwa *')}<input {...inp('name')} /></div>
+                <div className="mb-4">
+                  {label('Kategoria')}
+                  <select
+                    value={form.category || ''}
+                    onChange={e => set('category', e.target.value || undefined)}
+                    style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: theme === 'light' ? 'light' : 'dark' }}
+                  >
+                    <option value="">— brak kategorii —</option>
+                    <option value="tattoo">Tattoo</option>
+                    <option value="piercing">Piercing</option>
+                    <option value="studio">Studio</option>
+                  </select>
+                </div>
                 <div className="mb-4">{label('Krótki opis')}<input {...inp('short_description')} /></div>
                 <div>{label('Długi opis')}
                   <textarea rows={4} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'vertical' }}
