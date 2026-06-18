@@ -6,7 +6,7 @@ import { Calendar, Clock, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, isToday, isPast, parseISO } from 'date-fns';
 import { pl } from 'date-fns/locale';
-import BookingModal from '@/components/dashboard/BookingModal';
+import ArtistBookingViewModal from '@/components/artist/ArtistBookingViewModal';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -203,17 +203,13 @@ export default function ArtistHome() {
 
       <AnimatePresence>
         {selectedBooking && (
-          <BookingModal
+          <ArtistBookingViewModal
             booking={selectedBooking}
+            onClose={() => setSelectedBooking(null)}
             t={theme === 'light'
               ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)' }
               : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)' }
             }
-            onClose={() => setSelectedBooking(null)}
-            onSaved={() => {
-              base44.entities.Booking.filter({ artist_id: artist.id }, '-session_date', 100).then(setBookings);
-              setSelectedBooking(null);
-            }}
           />
         )}
       </AnimatePresence>
