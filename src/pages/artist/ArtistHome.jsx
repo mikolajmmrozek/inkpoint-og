@@ -37,6 +37,7 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
   const [showHealthForm, setShowHealthForm] = useState(false);
   const [editing, setEditing] = useState(isNew);
   const [saving, setSaving] = useState(false);
+  const [showServiceSuggestions, setShowServiceSuggestions] = useState(false);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -193,16 +194,52 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
                   type="text"
                   placeholder="Wpisz nazwę usługi..."
                   value={form.service_name || ''}
-                  onChange={e => set('service_name', e.target.value)}
+                  onChange={e => {
+                    set('service_name', e.target.value);
+                    setShowServiceSuggestions(true);
+                  }}
+                  onFocus={() => setShowServiceSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowServiceSuggestions(false), 150)}
                   style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${form.service_id ? '#FF007F' : t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif' }}
-                  onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
-                  onBlur={e => e.target.style.borderBottomColor = t.inputBorder}
                 />
+                {showServiceSuggestions && (() => {
+                  const q = (form.service_name || '').toLowerCase();
+                  const filtered = artistServices.filter(s => !q || s.name.toLowerCase().includes(q));
+                  if (!filtered.length) return null;
+                  return (
+                    <div style={{ position: 'absolute', zIndex: 100, left: 0, right: 0, top: '100%', background: t.bg, border: `0.5px solid ${t.border}`, maxHeight: '200px', overflowY: 'auto', marginTop: '4px' }}>
+                      {filtered.map(s => {
+                        const priceStr = s.price_type === 'fixed' && s.price_fixed ? ` — ${s.price_fixed} PLN` : s.price_type === 'range' && s.price_min ? ` — od ${s.price_min} PLN` : '';
+                        const durStr = s.duration_minutes ? ` (${s.duration_minutes} min)` : '';
+                        return (
+                          <button
+                            key={s.id}
+                            type="button"
+                            onMouseDown={() => {
+                              set('service_id', s.id);
+                              set('service_name', s.name);
+                              if (s.price_type === 'fixed' && s.price_fixed) set('estimated_price', s.price_fixed);
+                              else if (s.price_type === 'range' && s.price_min) set('estimated_price', s.price_min);
+                              if (s.duration_minutes) set('session_duration', s.duration_minutes);
+                              setShowServiceSuggestions(false);
+                            }}
+                            style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 14px', background: 'none', border: 'none', borderBottom: `0.5px solid ${t.border}`, cursor: 'pointer', color: t.text, fontFamily: 'Inter, sans-serif', fontSize: '13px' }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,0,127,0.06)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                          >
+                            <span>{s.name}</span>
+                            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginLeft: '8px' }}>{durStr}{priceStr}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
               </div>
               {form.service_id && (
                 <div className="mt-3 px-3 py-2 flex items-center gap-2" style={{ background: 'rgba(255,0,127,0.05)', border: '0.5px solid rgba(255,0,127,0.2)' }}>
                   <Zap size={10} color="#FF007F" />
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>USŁUGA WYBRANA</p>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>USŁUGA WYBRANA · CENA I CZAS UZUPEŁNIONE</p>
                 </div>
               )}
             </div>
