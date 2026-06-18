@@ -2,11 +2,12 @@ import { useState, useEffect, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, TrendingUp, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, Clock, TrendingUp, X, ChevronLeft, ChevronRight, Search, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, isToday, isPast, parseISO, addDays, subDays } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
+import ClientSearch from '@/components/dashboard/ClientSearch';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -162,36 +163,59 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
 
         {/* Edit mode */}
         {editing && (
-          <div className="space-y-5">
-            <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '16px' }}>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>PODSTAWOWE</p>
-              <div className="grid grid-cols-2 gap-4 mb-3">
-                <div>{label('Imię')}<input {...inp('client_first_name')} /></div>
-                <div>{label('Nazwisko')}<input {...inp('client_last_name')} /></div>
+          <div className="space-y-6">
+            {/* Client */}
+            <div>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>KLIENT</p>
+              <div className="mb-4">
+                {label('Szukaj klienta z bazy')}
+                <ClientSearch value={form.client_name ? { name: form.client_name } : null} onSelect={(client) => {
+                  set('client_first_name', client.first_name || '');
+                  set('client_last_name', client.last_name || '');
+                  set('client_email', client.email || '');
+                  set('client_phone', client.phone || '');
+                }} t={t} />
               </div>
-              <div className="mb-3">{label('Email')}<input {...inp('client_email', 'email')} /></div>
-              <div>{label('Telefon')}<input {...inp('client_phone')} /></div>
+              <div className="grid grid-cols-2 gap-6">
+                <div>{label('Imię *')}<input {...inp('client_first_name')} /></div>
+                <div>{label('Nazwisko *')}<input {...inp('client_last_name')} /></div>
+              </div>
+              <div className="mt-4">{label('Email')}<input {...inp('client_email', 'email')} /></div>
+              <div className="mt-4">{label('Telefon')}<input {...inp('client_phone')} /></div>
             </div>
 
-            <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '16px' }}>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>SESJA</p>
-              <div className="grid grid-cols-2 gap-4 mb-3">
-                <div>{label('Data')}<input {...inp('session_date', 'date')} style={{ ...inp('session_date', 'date').style, colorScheme: theme === 'light' ? 'light' : 'dark' }} /></div>
-                <div>{label('Godzina')}<input {...inp('session_time')} /></div>
-              </div>
-              <div className="mb-3">{label('Godzina zakończenia')}<input {...inp('session_end_time')} /></div>
-              <div className="mb-3">{label('Usługa (opcjonalnie)')}
+            {/* Service */}
+            <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>USŁUGA</p>
+              <div style={{ position: 'relative' }}>
+                {label('Wybierz usługę (opcjonalnie)')}
                 <input
                   type="text"
                   placeholder="Wpisz nazwę usługi..."
                   value={form.service_name || ''}
                   onChange={e => set('service_name', e.target.value)}
-                  style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif' }}
+                  style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${form.service_id ? '#FF007F' : t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif' }}
                   onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
                   onBlur={e => e.target.style.borderBottomColor = t.inputBorder}
                 />
               </div>
-              <div className="mb-3">{label('Cena (PLN)')}<input {...inp('estimated_price', 'number')} /></div>
+              {form.service_id && (
+                <div className="mt-3 px-3 py-2 flex items-center gap-2" style={{ background: 'rgba(255,0,127,0.05)', border: '0.5px solid rgba(255,0,127,0.2)' }}>
+                  <Zap size={10} color="#FF007F" />
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>USŁUGA WYBRANA</p>
+                </div>
+              )}
+            </div>
+
+            {/* Session */}
+            <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>TERMIN</p>
+              <div className="mb-4">{label('Data *')}<input {...inp('session_date', 'date')} style={{ ...inp('session_date', 'date').style, colorScheme: theme === 'light' ? 'light' : 'dark' }} /></div>
+              <div className="grid grid-cols-2 gap-6 mb-4">
+                <div>{label('Godzina start')}<input {...inp('session_time')} /></div>
+                <div>{label('Godzina koniec')}<input {...inp('session_end_time')} /></div>
+              </div>
+              <div className="mb-4">{label('Cena (PLN)')}<input {...inp('estimated_price', 'number')} /></div>
               <div>{label('Status')}
                 <select value={form.status || 'pending'} onChange={e => set('status', e.target.value)} style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif', colorScheme: theme === 'light' ? 'light' : 'dark' }}>
                   {Object.entries(STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
@@ -199,22 +223,35 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
               </div>
             </div>
 
-            <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '16px' }}>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>TATUAŻ</p>
-              <div className="mb-3">{label('Miejsce')}<input {...inp('tattoo_placement')} /></div>
-              <div>{label('Opis')}<textarea rows={2} style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif', resize: 'none' }} value={form.tattoo_description || ''} onChange={e => set('tattoo_description', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.inputBorder} /></div>
+            {/* Tattoo */}
+            <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>TATUAŻ</p>
+              <div className="mb-4">{label('Miejsce na ciele')}<input {...inp('tattoo_placement')} /></div>
+              <div className="mb-4">{label('Opis projektu')}
+                <textarea rows={3} style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif', resize: 'none' }} value={form.tattoo_description || ''} onChange={e => set('tattoo_description', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.inputBorder} />
+              </div>
+              <div>{label('Notatki adminów')}
+                <textarea rows={2} style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif', resize: 'none' }} value={form.notes || ''} onChange={e => set('notes', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.inputBorder} />
+              </div>
             </div>
 
-            <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '16px' }}>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>NOTATKI</p>
-              <textarea rows={2} style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif', resize: 'none' }} value={form.notes || ''} onChange={e => set('notes', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.inputBorder} />
+            {/* Flags */}
+            <div className="flex gap-6" style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
+              {[['deposit_paid', 'Wpłacony depozyt'], ['health_form_completed', 'Ankieta zdrowotna']].map(([field, lbl]) => (
+                <button key={field} onClick={() => set(field, !form[field])} className="flex items-center gap-2" style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form[field] ? '#16a34a' : t.muted }}>
+                  <div style={{ width: '12px', height: '12px', border: `0.5px solid ${form[field] ? '#16a34a' : t.border}`, background: form[field] ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {form[field] && <span style={{ color: '#fff', fontSize: '8px' }}>✓</span>}
+                  </div>
+                  {lbl}
+                </button>
+              ))}
             </div>
 
-            <div className="flex gap-3 pt-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
-              <button onClick={handleSave} disabled={saving} className="btn-oxblood flex-1" style={{ fontSize: '10px', opacity: saving ? 0.5 : 1 }}>
-                {saving ? 'ZAPISUJĘ...' : 'ZAPISZ ZMIANY'}
+            <div className="flex gap-4 mt-8 pt-6" style={{ borderTop: `0.5px solid ${t.border}` }}>
+              <button onClick={handleSave} disabled={saving || !form.client_first_name} className="btn-oxblood flex-1" style={{ opacity: (!form.client_first_name) ? 0.5 : 1 }}>
+                {saving ? 'ZAPISYWANIE...' : 'ZAPISZ ZMIANY'}
               </button>
-              <button onClick={() => setEditing(false)} className="btn-ghost-parchment" style={{ fontSize: '10px' }}>ANULUJ</button>
+              <button onClick={() => setEditing(false)} className="btn-ghost-parchment">ANULUJ</button>
             </div>
           </div>
         )}
