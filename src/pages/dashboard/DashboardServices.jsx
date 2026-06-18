@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
-import { Plus, Edit2, Trash2, X, Upload, Loader2, CalendarPlus, ChevronUp, ChevronDown } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Upload, Loader2, CalendarPlus, ChevronUp, ChevronDown, Search } from 'lucide-react';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 import { AnimatePresence } from 'framer-motion';
 import BookingModal from '@/components/dashboard/BookingModal';
@@ -47,6 +47,7 @@ export default function DashboardServices() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [bookingService, setBookingService] = useState(null); // service to book
   const [deleteConfirm, setDeleteConfirm] = useState(null); // service to delete
+  const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [filterArtist, setFilterArtist] = useState('');
   const [sortKey, setSortKey] = useState('order');
@@ -160,6 +161,25 @@ export default function DashboardServices() {
         </button>
       </div>
 
+      {/* Search */}
+      <div className="mb-4" style={{ position: 'relative' }}>
+        <Search size={13} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: t.muted, pointerEvents: 'none' }} />
+        <input
+          type="text"
+          placeholder="Szukaj usługi..."
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '10px 36px', fontSize: '13px', color: t.text, fontFamily: 'Inter, sans-serif', outline: 'none' }}
+          onFocus={e => e.target.style.borderColor = '#FF007F'}
+          onBlur={e => e.target.style.borderColor = t.border}
+        />
+        {searchQuery && (
+          <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}>
+            <X size={12} />
+          </button>
+        )}
+      </div>
+
       {/* Filters */}
       <div className="mb-6 space-y-3">
         {/* Category filter */}
@@ -265,6 +285,12 @@ export default function DashboardServices() {
           </div>
 
           {services.filter(s => {
+            if (searchQuery) {
+              const q = searchQuery.toLowerCase();
+              const matchName = s.name?.toLowerCase().includes(q);
+              const matchDesc = s.short_description?.toLowerCase().includes(q);
+              if (!matchName && !matchDesc) return false;
+            }
             if (filterCategory && s.category !== filterCategory) return false;
             if (filterArtist && s.artist_ids?.length > 0 && !s.artist_ids.includes(filterArtist)) return false;
             return true;
