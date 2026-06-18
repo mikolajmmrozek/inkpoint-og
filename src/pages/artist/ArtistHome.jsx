@@ -23,23 +23,36 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
     ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', inputBorder: '#CCCCCC' }
     : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', inputBorder: '#262626' };
 
-  const [form, setForm] = useState(() => {
-    if (isNew) return {
+  const buildForm = (b) => {
+    if (b && !b._prefill) {
+      const [first, ...last] = (b.client_name || '').split(' ');
+      return {
+        ...b,
+        client_first_name: first || '',
+        client_last_name: last.join(' ') || '',
+      };
+    }
+    return {
       client_name: '', client_first_name: '', client_last_name: '', client_email: '', client_phone: '',
-      session_date: booking?.session_date || format(new Date(), 'yyyy-MM-dd'),
+      session_date: b?.session_date || format(new Date(), 'yyyy-MM-dd'),
       session_time: '', session_end_time: '', session_duration: 0,
       tattoo_description: '', tattoo_placement: '', estimated_price: '',
       service_id: '', service_name: '', notes: '', status: 'pending', deposit_paid: false,
       artist_id: artist.id, artist_name: artist.name,
     };
-    return { ...booking };
-  });
+  };
+
+  const [form, setForm] = useState(() => buildForm(booking));
   const [showHealthForm, setShowHealthForm] = useState(false);
   const [editing, setEditing] = useState(isNew);
   const [saving, setSaving] = useState(false);
   const [showServiceSuggestions, setShowServiceSuggestions] = useState(false);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  useEffect(() => {
+    setForm(buildForm(booking));
+  }, [booking?.id]);
 
   const handleSave = async () => {
     setSaving(true);
