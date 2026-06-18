@@ -27,7 +27,7 @@ export default function DashboardStats() {
       base44.entities.Artist.list(),
     ]).then(([b, a]) => {
       setBookings(b);
-      setArtists(a);
+      setArtists(a.filter(x => x.is_visible !== false));
     }).finally(() => setLoading(false));
   }, []);
 
