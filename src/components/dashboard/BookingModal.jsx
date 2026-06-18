@@ -25,6 +25,8 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
   const [artists, setArtists] = useState([]);
   const [allArtists, setAllArtists] = useState([]);
   const [services, setServices] = useState([]);
+  const [allServices, setAllServices] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [saving, setSaving] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
   const [repeatPrompt, setRepeatPrompt] = useState(null); // { client, lastSession }
@@ -86,11 +88,30 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
     ]).then(([arts, svcs]) => {
       setAllArtists(arts);
       setArtists(arts);
-      setServices(svcs.sort((a, b) => (a.order || 999) - (b.order || 999)));
+      const sorted = svcs.sort((a, b) => (a.order || 999) - (b.order || 999));
+      setAllServices(sorted);
+      setServices(sorted);
+      // If editing existing booking with a service, pre-select the category
+      if (booking && !booking._prefill && booking.service_id) {
+        const svc = sorted.find(s => s.id === booking.service_id);
+        if (svc?.category) setSelectedCategory(svc.category);
+      }
     }).catch(() => {});
   }, []);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const handleCategoryChange = (cat) => {
+    setSelectedCategory(cat);
+    // Clear selected service when category changes
+    set('service_id', '');
+    set('service_name', '');
+    setArtists(allArtists);
+  };
+
+  const filteredServices = selectedCategory
+    ? allServices.filter(s => s.category === selectedCategory)
+    : allServices;
 
   const handleService = (serviceId) => {
     if (!serviceId) {
@@ -394,6 +415,26 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
           {/* Service */}
           <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>USŁUGA</p>
+            {/* Category toggles */}
+            <div className="mb-4">
+              {label('Kategoria')}
+              <div className="flex gap-2 flex-wrap mt-1">
+                {[['', 'WSZYSTKIE'], ['tattoo', 'TATTOO'], ['piercing', 'PIERCING'], ['studio', 'STUDIO']].map(([val, lbl]) => (
+                  <button
+                    key={val}
+                    type="button"
+                    onClick={() => handleCategoryChange(val)}
+                    style={{
+                      border: `0.5px solid ${selectedCategory === val ? '#FF007F' : t.border}`,
+                      color: selectedCategory === val ? '#FF007F' : t.muted,
+                      background: selectedCategory === val ? 'rgba(255,0,127,0.08)' : 'transparent',
+                      fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em',
+                      padding: '6px 12px', cursor: 'pointer',
+                    }}
+                  >{lbl}</button>
+                ))}
+              </div>
+            </div>
             <div>
               {label('Wybierz usługę (opcjonalnie)')}
               <select
@@ -402,7 +443,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                 style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
               >
                 <option value="">Brak / usługa niestandardowa</option>
-                {services.map(s => (
+                {filteredServices.map(s => (
                   <option key={s.id} value={s.id}>
                     {s.name}{s.duration_minutes ? ` (${s.duration_minutes} min)` : ''}{s.price_type === 'fixed' && s.price_fixed ? ` — ${s.price_fixed} PLN` : s.price_type === 'range' && s.price_min ? ` — od ${s.price_min} PLN` : ''}
                   </option>
