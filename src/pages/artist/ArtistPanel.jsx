@@ -42,21 +42,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, artist }) {
           </button>
         </div>
 
-        {artist && (
-          <div className="px-6 py-4" style={{ borderBottom: `0.5px solid ${border}` }}>
-            {artist.photo_url ? (
-              <img src={artist.photo_url} alt={artist.name} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', marginBottom: '8px' }} />
-            ) : (
-              <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(255,0,127,0.12)', border: '0.5px solid rgba(255,0,127,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
-                <span style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '14px', color: '#FF007F' }}>
-                  {(artist.name || '').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
-                </span>
-              </div>
-            )}
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: textColor, letterSpacing: '0.05em' }}>{artist.name}</p>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.1em', textTransform: 'uppercase' }}>ARTYSTA</p>
-          </div>
-        )}
+
 
         <nav className="flex-1 p-6 space-y-1 overflow-y-auto">
           {NAV.map(nav => {
@@ -187,7 +173,21 @@ export default function ArtistPanel() {
               <Menu size={20} />
             </button>
             <div className="flex-1" />
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: mutedColor, letterSpacing: '0.1em' }}>{user?.email}</p>
+            <div className="flex items-center gap-3">
+              {artist?.photo_url ? (
+                <img src={artist.photo_url} alt={artist.name} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
+              ) : (
+                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255,0,127,0.12)', border: '0.5px solid rgba(255,0,127,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '11px', color: '#FF007F' }}>
+                    {(artist?.name || '').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
+                  </span>
+                </div>
+              )}
+              <div>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: textColor, letterSpacing: '0.05em' }}>{artist?.name}</p>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: mutedColor, letterSpacing: '0.1em' }}>{user?.email}</p>
+              </div>
+            </div>
           </div>
           <div className="flex-1 p-6 lg:p-10 overflow-y-auto">
             <Outlet context={{ artist, theme }} />
