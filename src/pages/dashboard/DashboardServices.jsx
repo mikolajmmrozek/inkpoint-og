@@ -248,7 +248,7 @@ export default function DashboardServices() {
               { label: 'Usługa', key: 'name', span: 'col-span-4' },
               { label: 'Czas', key: 'duration_minutes', span: 'col-span-2' },
               { label: 'Cena', key: 'price_fixed', span: 'col-span-2' },
-              { label: 'Artyści', key: null, span: 'col-span-3' },
+              { label: 'Artyści', key: 'artist_name', span: 'col-span-3' },
               { label: '', key: null, span: 'col-span-1' },
             ].map(({ label, key, span }) => (
               <button
@@ -273,6 +273,10 @@ export default function DashboardServices() {
             if (sortKey === 'price_fixed') {
               av = a.price_type === 'fixed' ? (a.price_fixed ?? 0) : (a.price_min ?? 0);
               bv = b.price_type === 'fixed' ? (b.price_fixed ?? 0) : (b.price_min ?? 0);
+            }
+            if (sortKey === 'artist_name') {
+              av = getArtistNames(a.artist_ids);
+              bv = getArtistNames(b.artist_ids);
             }
             if (av == null) av = sortDir === 'asc' ? Infinity : -Infinity;
             if (bv == null) bv = sortDir === 'asc' ? Infinity : -Infinity;
