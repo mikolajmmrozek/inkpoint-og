@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, TrendingUp, User } from 'lucide-react';
+import { Calendar, Clock, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { format, isToday, isPast, parseISO } from 'date-fns';
+import { pl } from 'date-fns/locale';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -28,8 +30,9 @@ export default function ArtistHome() {
       .finally(() => setLoading(false));
   }, [artist?.id]);
 
-  const today = new Date().toISOString().split('T')[0];
-  const upcoming = bookings.filter(b => b.session_date >= today && (b.status === 'pending' || b.status === 'confirmed'));
+  const todayStr = new Date().toISOString().split('T')[0];
+  const upcoming = bookings.filter(b => b.session_date >= todayStr && (b.status === 'pending' || b.status === 'confirmed'));
+  const overdue = bookings.filter(b => b.session_date < todayStr && (b.status === 'pending' || b.status === 'confirmed'));
   const thisMonth = bookings.filter(b => b.session_date?.startsWith(new Date().toISOString().slice(0, 7)) && b.status === 'completed');
   const revenue = thisMonth.reduce((sum, b) => sum + ((b.estimated_price || 0) * (artist.artist_cut_percent || 60) / 100), 0);
 
@@ -39,8 +42,34 @@ export default function ArtistHome() {
     { label: 'Mój zarobek (mies.)', value: `${Math.round(revenue)} zł`, icon: Clock, link: '/artist/stats' },
   ];
 
-  // next 7 days
-  const nextBookings = upcoming.slice(0, 5);
+  // All active sessions sorted ascending, max 10 upcoming
+  const sortedUpcoming = [...upcoming].sort((a, b) => (a.session_date || '').localeCompare(b.session_date || '') || (a.session_time || '').localeCompare(b.session_time || '')).slice(0, 10);
+
+  // Group by date
+  const groupByDate = (list) => {
+    const groups = {};
+    list.forEach(b => {
+      const d = b.session_date || 'brak';
+      if (!groups[d]) groups[d] = [];
+      groups[d].push(b);
+    });
+    return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
+  };
+
+  const overdueGroups = groupByDate(overdue.sort((a, b) => (a.session_date || '').localeCompare(b.session_date || '')));
+  const upcomingGroups = groupByDate(sortedUpcoming);
+
+  const todayBookings = sortedUpcoming.filter(b => b.session_date === todayStr);
+  const todayLabel = format(new Date(), 'EEEE, d MMMM', { locale: pl }).toUpperCase();
+
+  const formatDayHeader = (dateStr) => {
+    if (!dateStr || dateStr === 'brak') return 'BRAK DATY';
+    try {
+      const d = parseISO(dateStr);
+      if (isToday(d)) return `DZIŚ — ${format(d, 'EEEE, d MMMM', { locale: pl }).toUpperCase()}`;
+      return format(d, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase();
+    } catch { return dateStr; }
+  };
 
   return (
     <div>
@@ -77,23 +106,93 @@ export default function ArtistHome() {
           <div className="p-8 text-center" style={{ border: `0.5px solid ${t.cardBorder}` }}>
             <div className="w-8 h-px mx-auto animate-pulse" style={{ background: '#FF007F' }} />
           </div>
-        ) : nextBookings.length === 0 ? (
-          <div className="p-8 text-center" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK NADCHODZĄCYCH SESJI</p>
-          </div>
         ) : (
-          <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
-            {nextBookings.map((b, i) => (
-              <div key={b.id} className="flex items-center justify-between p-4" style={{ borderBottom: i < nextBookings.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }}>
-                <div>
-                  <p style={{ color: t.value, fontSize: '14px', fontWeight: 500 }}>{b.client_name}</p>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
-                    {b.session_date}{b.session_time ? ` · ${b.session_time}` : ''}{b.tattoo_placement ? ` · ${b.tattoo_placement}` : ''}
-                  </p>
+          <div className="space-y-4">
+            {/* Overdue */}
+            {overdueGroups.length > 0 && (
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#FF007F', flexShrink: 0 }} />
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#FF007F' }}>DO ROZLICZENIA / PRZETERMINOWANE</p>
+                  <div style={{ flex: 1, height: '0.5px', background: 'rgba(255,0,127,0.3)' }} />
                 </div>
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status] }}>
-                  {b.status?.toUpperCase()}
-                </span>
+                {overdueGroups.map(([date, items]) => (
+                  <div key={date} className="mb-3">
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px', opacity: 0.7 }}>{formatDayHeader(date)}</p>
+                    <div style={{ border: '0.5px solid rgba(255,0,127,0.4)', background: t.cardBg }}>
+                      {items.map((b, i) => (
+                        <div key={b.id} className="flex items-center justify-between p-4" style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }}>
+                          <div>
+                            <p style={{ color: t.value, fontSize: '14px', fontWeight: 500 }}>{b.client_name}</p>
+                            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
+                              {b.session_time ? `${b.session_time} · ` : ''}{b.tattoo_placement || ''}
+                            </p>
+                          </div>
+                          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status] }}>
+                            {b.status?.toUpperCase()}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Today — always show */}
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#f59e0b', flexShrink: 0 }} />
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#f59e0b' }}>DZIŚ — {todayLabel}</p>
+                <div style={{ flex: 1, height: '0.5px', background: 'rgba(245,158,11,0.3)' }} />
+              </div>
+              {todayBookings.length === 0 ? (
+                <div className="py-5 text-center" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK UMÓWIONYCH SESJI DZIŚ</p>
+                </div>
+              ) : (
+                <div style={{ border: `0.5px solid rgba(245,158,11,0.4)`, background: t.cardBg }}>
+                  {todayBookings.map((b, i) => (
+                    <div key={b.id} className="flex items-center justify-between p-4" style={{ borderBottom: i < todayBookings.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }}>
+                      <div>
+                        <p style={{ color: t.value, fontSize: '14px', fontWeight: 500 }}>{b.client_name}</p>
+                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
+                          {b.session_time ? `${b.session_time} · ` : ''}{b.tattoo_placement || ''}
+                        </p>
+                      </div>
+                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status] }}>
+                        {b.status?.toUpperCase()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Upcoming (excluding today) */}
+            {upcomingGroups.filter(([d]) => d !== todayStr).map(([date, items]) => (
+              <div key={date}>
+                <div className="flex items-center gap-3 mb-2">
+                  <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#16a34a', flexShrink: 0 }} />
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: t.muted }}>{formatDayHeader(date)}</p>
+                  <div style={{ flex: 1, height: '0.5px', background: t.cardBorder }} />
+                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{items.length} {items.length === 1 ? 'sesja' : 'sesje'}</span>
+                </div>
+                <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+                  {items.map((b, i) => (
+                    <div key={b.id} className="flex items-center justify-between p-4" style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }}>
+                      <div>
+                        <p style={{ color: t.value, fontSize: '14px', fontWeight: 500 }}>{b.client_name}</p>
+                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
+                          {b.session_time ? `${b.session_time} · ` : ''}{b.tattoo_placement || ''}
+                        </p>
+                      </div>
+                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status] }}>
+                        {b.status?.toUpperCase()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
