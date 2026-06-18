@@ -10,6 +10,7 @@ export default function ArtistStats() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [year, setYear] = useState(new Date().getFullYear());
+  const [viewMode, setViewMode] = useState('monthly'); // 'monthly' | 'daily'
 
   const t = theme === 'light'
     ? { title: '#111111', muted: 'rgba(0,0,0,0.4)', cardBg: '#FFFFFF', cardBorder: '#E5E5E5', text: '#111111', rowBorder: '#E5E5E5' }
@@ -33,6 +34,24 @@ export default function ArtistStats() {
       const myEarning = Math.round(revenue * cut / 100);
       return { label, sessions: completed.length, revenue, myEarning };
     });
+  }, [bookings, year, cut]);
+
+  const dailyData = useMemo(() => {
+    const yearStart = `${year}-01-01`;
+    const yearEnd = `${year}-12-31`;
+    const yearBookings = bookings.filter(b => b.session_date && b.session_date >= yearStart && b.session_date <= yearEnd && b.status === 'completed');
+    const grouped = {};
+    yearBookings.forEach(b => {
+      if (!grouped[b.session_date]) grouped[b.session_date] = [];
+      grouped[b.session_date].push(b);
+    });
+    return Object.entries(grouped)
+      .sort(([dateA], [dateB]) => dateB.localeCompare(dateA))
+      .map(([date, items]) => {
+        const revenue = items.reduce((sum, b) => sum + (b.estimated_price || 0), 0);
+        const myEarning = Math.round(revenue * cut / 100);
+        return { date, sessions: items.length, revenue, myEarning };
+      });
   }, [bookings, year, cut]);
 
   const totalSessions = monthlyData.reduce((s, m) => s + m.sessions, 0);
@@ -86,22 +105,59 @@ export default function ArtistStats() {
         </ResponsiveContainer>
       </div>
 
-      {/* Monthly table */}
-      <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
-        <div className="grid grid-cols-4 gap-4 p-3" style={{ borderBottom: `0.5px solid ${t.rowBorder}` }}>
-          {['Miesiąc', 'Sesje', 'Przychód studia', 'Mój zarobek'].map(h => (
-            <p key={h} style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{h}</p>
-          ))}
-        </div>
-        {monthlyData.map((row, i) => (
-          <div key={row.label} className="grid grid-cols-4 gap-4 p-3" style={{ borderBottom: i < monthlyData.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none', opacity: row.sessions === 0 ? 0.4 : 1 }}>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text, letterSpacing: '0.06em' }}>{row.label}</p>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text }}>{row.sessions}</p>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>{row.revenue} zł</p>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: row.myEarning > 0 ? '#FF007F' : t.muted }}>{row.myEarning} zł</p>
-          </div>
+      {/* View toggle */}
+      <div className="flex gap-2 mb-6">
+        {[['monthly', 'MIESIĘCZNY'], ['daily', 'DZIENNY']].map(([mode, label]) => (
+          <button key={mode} onClick={() => setViewMode(mode)}
+            style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '7px 14px', border: `0.5px solid ${viewMode === mode ? '#FF007F' : t.cardBorder}`, color: viewMode === mode ? '#FF007F' : t.muted, background: viewMode === mode ? 'rgba(255,0,127,0.08)' : 'transparent', cursor: 'pointer' }}>
+            {label}
+          </button>
         ))}
       </div>
+
+      {/* Monthly table */}
+      {viewMode === 'monthly' && (
+        <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+          <div className="grid grid-cols-4 gap-4 p-3" style={{ borderBottom: `0.5px solid ${t.rowBorder}` }}>
+            {['Miesiąc', 'Sesje', 'Przychód studia', 'Mój zarobek'].map(h => (
+              <p key={h} style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{h}</p>
+            ))}
+          </div>
+          {monthlyData.map((row, i) => (
+            <div key={row.label} className="grid grid-cols-4 gap-4 p-3" style={{ borderBottom: i < monthlyData.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none', opacity: row.sessions === 0 ? 0.4 : 1 }}>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text, letterSpacing: '0.06em' }}>{row.label}</p>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text }}>{row.sessions}</p>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>{row.revenue} zł</p>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: row.myEarning > 0 ? '#FF007F' : t.muted }}>{row.myEarning} zł</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Daily table */}
+      {viewMode === 'daily' && (
+        <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+          <div className="grid grid-cols-4 gap-4 p-3" style={{ borderBottom: `0.5px solid ${t.rowBorder}` }}>
+            {['Data', 'Sesje', 'Przychód studia', 'Mój zarobek'].map(h => (
+              <p key={h} style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{h}</p>
+            ))}
+          </div>
+          {dailyData.length === 0 ? (
+            <div className="p-6 text-center">
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK DANYCH</p>
+            </div>
+          ) : (
+            dailyData.map((row, i) => (
+              <div key={row.date} className="grid grid-cols-4 gap-4 p-3" style={{ borderBottom: i < dailyData.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none', opacity: row.sessions === 0 ? 0.4 : 1 }}>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text, letterSpacing: '0.06em' }}>{row.date}</p>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text }}>{row.sessions}</p>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>{row.revenue} zł</p>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: row.myEarning > 0 ? '#FF007F' : t.muted }}>{row.myEarning} zł</p>
+              </div>
+            ))
+          )}
+        </div>
+      )}
     </div>
   );
 }
