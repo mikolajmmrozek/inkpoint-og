@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Trash2, Edit, Copy, Check, ExternalLink, Mail, FileText, Loader2, History, Save } from 'lucide-react';
+import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 import { base44 } from '@/api/base44Client';
 import HealthFormPreviewModal from './HealthFormPreviewModal';
 
@@ -43,6 +44,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
   const [clientNotes, setClientNotes] = useState('');
   const [savingNotes, setSavingNotes] = useState(false);
   const [notesSaved, setNotesSaved] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (!booking.client_email) return;
@@ -289,7 +291,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
           <Edit size={11} /> EDYTUJ
         </button>
         <button
-          onClick={() => safeOnDelete(booking.id)}
+          onClick={() => setShowDeleteConfirm(true)}
           className="flex items-center gap-1.5 flex-1 justify-center py-2.5 transition-all hover:opacity-70"
           style={{ border: `0.5px solid #FF007F`, color: '#FF007F', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer' }}
         >
@@ -297,6 +299,15 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
         </button>
       </div>
     </motion.div>
+
+    <ConfirmDeleteDialog
+      open={showDeleteConfirm}
+      title="Usuń rezerwację"
+      message={`Czy na pewno chcesz usunąć sesję klienta "${booking.client_name}" z dnia ${booking.session_date}?`}
+      onConfirm={() => { setShowDeleteConfirm(false); safeOnDelete(booking.id); }}
+      onCancel={() => setShowDeleteConfirm(false)}
+      theme={theme}
+    />
 
     {showFormPreview && previewFormId && (
       <HealthFormPreviewModal

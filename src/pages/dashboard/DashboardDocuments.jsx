@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
 import { Plus, Trash2, X, Pencil, FileText, Eye, Printer, Share2, Globe } from 'lucide-react';
+import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 
 const LANG_OPTIONS = [
   { code: 'pl', label: '🇵🇱 Polski' },
@@ -44,6 +45,9 @@ export default function DashboardDocuments() {
   const [shareSending, setShareSending] = useState(false);
   const [shareResult, setShareResult] = useState(null); // 'ok' | 'error'
 
+  // Delete confirm
+  const [deleteConfirmInstr, setDeleteConfirmInstr] = useState(null); // instruction id to delete
+
   // Edit modal
   const [editingInstr, setEditingInstr] = useState(null);
   const [editingTerms, setEditingTerms] = useState(false);
@@ -84,9 +88,9 @@ export default function DashboardDocuments() {
   };
 
   const handleDeleteInstr = async (id) => {
-    if (!window.confirm('Usunąć dokument?')) return;
     await base44.entities.Instruction.delete(id);
     setInstructions(i => i.filter(x => x.id !== id));
+    setDeleteConfirmInstr(null);
     setViewDoc(null);
   };
 
@@ -213,7 +217,7 @@ export default function DashboardDocuments() {
             <Pencil size={14} />
           </button>
           {onDelete && content && (
-            <button onClick={onDelete} title="Usuń" style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: '6px' }}>
+            <button onClick={() => onDelete()} title="Usuń" style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: '6px' }}>
               <Trash2 size={14} />
             </button>
           )}
@@ -330,7 +334,7 @@ export default function DashboardDocuments() {
             </button>
             {isInstr && docData?.id && (
               <button
-                onClick={() => handleDeleteInstr(docData.id)}
+                onClick={() => setDeleteConfirmInstr(docData.id)}
                 className="flex items-center gap-2"
                 style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 20px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}
               >
@@ -379,7 +383,7 @@ export default function DashboardDocuments() {
                    content={instr?.content}
                    onView={() => openViewDoc({ kind: 'instr', data: instr, typeKey: type.key })}
                    onEdit={() => { setInstrForm(instr || { type: type.key, title: '', content: '' }); setEditingInstr(instr?.id || type.key); setSaveError(null); }}
-                   onDelete={instr ? () => handleDeleteInstr(instr.id) : null}
+                   onDelete={instr ? () => setDeleteConfirmInstr(instr.id) : null}
                    onPrint={() => handlePrint(instr, type.label, null)}
                    onShare={() => handleShare(instr, type.label)}
                   />
@@ -403,6 +407,15 @@ export default function DashboardDocuments() {
           </div>
         </div>
       )}
+
+      <ConfirmDeleteDialog
+        open={!!deleteConfirmInstr}
+        title="Usuń dokument"
+        message="Czy na pewno chcesz usunąć ten dokument? Tej operacji nie można cofnąć."
+        onConfirm={() => handleDeleteInstr(deleteConfirmInstr)}
+        onCancel={() => setDeleteConfirmInstr(null)}
+        theme={theme}
+      />
 
       {/* View modal */}
       <ViewModal />

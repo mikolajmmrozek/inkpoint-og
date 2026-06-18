@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
 import { Plus, Edit2, Trash2, X, Upload, Loader2, CalendarPlus } from 'lucide-react';
+import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 import { AnimatePresence } from 'framer-motion';
 import BookingModal from '@/components/dashboard/BookingModal';
 
@@ -45,6 +46,7 @@ export default function DashboardServices() {
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [bookingService, setBookingService] = useState(null); // service to book
+  const [deleteConfirm, setDeleteConfirm] = useState(null); // service to delete
 
   const load = async () => {
     const [svc, art] = await Promise.all([
@@ -103,9 +105,9 @@ export default function DashboardServices() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Czy na pewno chcesz usunąć tę usługę?')) return;
     await base44.entities.Service.delete(id);
     setServices(s => s.filter(x => x.id !== id));
+    setDeleteConfirm(null);
   };
 
   const inp = (field, type = 'text') => ({
@@ -217,12 +219,21 @@ export default function DashboardServices() {
               <div className="col-span-1 flex justify-end gap-2">
                 <button onClick={() => setBookingService(s)} title="Nowa sesja" style={{ color: '#16a34a', background: 'none', border: 'none', cursor: 'pointer' }}><CalendarPlus size={13} /></button>
                 <button onClick={() => openEdit(s)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Edit2 size={13} /></button>
-                <button onClick={() => handleDelete(s.id)} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={13} /></button>
+                <button onClick={() => setDeleteConfirm(s)} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={13} /></button>
               </div>
             </div>
           ))}
         </div>
       )}
+
+      <ConfirmDeleteDialog
+        open={!!deleteConfirm}
+        title="Usuń usługę"
+        message={`Czy na pewno chcesz usunąć usługę "${deleteConfirm?.name}"?`}
+        onConfirm={() => handleDelete(deleteConfirm.id)}
+        onCancel={() => setDeleteConfirm(null)}
+        theme={theme}
+      />
 
       {/* Booking Modal */}
       <AnimatePresence>

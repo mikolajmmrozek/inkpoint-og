@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Plus, Edit, Trash2, Eye, EyeOff, X } from 'lucide-react';
+import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from './Dashboard';
 
@@ -26,6 +27,7 @@ export default function DashboardBlog() {
   const [editing, setEditing] = useState(null); // null | 'new' | post object
   const [form, setForm] = useState({});
   const [uploading, setUploading] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(null); // post to delete
 
   const load = async () => {
     const data = await base44.entities.BlogPost.list('-created_date', 50);
@@ -65,6 +67,7 @@ export default function DashboardBlog() {
   const deletePost = async (id) => {
     await base44.entities.BlogPost.delete(id);
     setPosts(p => p.filter(x => x.id !== id));
+    setDeleteConfirm(null);
   };
 
   const handleImageUpload = async (e) => {
@@ -241,6 +244,15 @@ export default function DashboardBlog() {
         )}
       </AnimatePresence>
 
+      <ConfirmDeleteDialog
+        open={!!deleteConfirm}
+        title="Usuń post"
+        message={`Czy na pewno chcesz usunąć post "${deleteConfirm?.title}"?`}
+        onConfirm={() => deletePost(deleteConfirm.id)}
+        onCancel={() => setDeleteConfirm(null)}
+        theme={theme}
+      />
+
       {/* Posts list */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
@@ -279,9 +291,9 @@ export default function DashboardBlog() {
                <button onClick={() => openEdit(post)} style={{ color: t.muted, cursor: 'pointer', background: 'none', border: 'none', padding: '6px', minWidth: '28px', minHeight: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                  <Edit size={12} />
                </button>
-               <button onClick={() => deletePost(post.id)} style={{ color: t.fuchsia, cursor: 'pointer', background: 'none', border: 'none', padding: '6px', minWidth: '28px', minHeight: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                 <Trash2 size={12} />
-               </button>
+               <button onClick={() => setDeleteConfirm(post)} style={{ color: t.fuchsia, cursor: 'pointer', background: 'none', border: 'none', padding: '6px', minWidth: '28px', minHeight: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Trash2 size={12} />
+                </button>
              </div>
            </div>
           ))}

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2, Save, X, GripVertical } from 'lucide-react';
+import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 import { useTheme } from './Dashboard';
 import { base44 } from '@/api/base44Client';
 
@@ -9,6 +10,7 @@ export default function DashboardFAQ() {
   const qc = useQueryClient();
   const [editing, setEditing] = useState(null); // { id?, question, answer, order }
   const [showForm, setShowForm] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(null); // faq item to delete
 
   const bg = theme === 'light' ? '#FFFFFF' : '#0A0A0A';
   const border = theme === 'light' ? '#E5E5E5' : '#262626';
@@ -135,6 +137,15 @@ export default function DashboardFAQ() {
         </div>
       )}
 
+      <ConfirmDeleteDialog
+        open={!!deleteConfirm}
+        title="Usuń pytanie"
+        message={`Czy na pewno chcesz usunąć pytanie "${deleteConfirm?.question}"?`}
+        onConfirm={() => { deleteMut.mutate(deleteConfirm.id); setDeleteConfirm(null); }}
+        onCancel={() => setDeleteConfirm(null)}
+        theme={theme}
+      />
+
       {/* List */}
       {isLoading ? (
         <div className="flex justify-center py-20">
@@ -162,7 +173,7 @@ export default function DashboardFAQ() {
                   Edytuj
                 </button>
                 <button
-                  onClick={() => deleteMut.mutate(item.id)}
+                  onClick={() => setDeleteConfirm(item)}
                   className="p-1"
                   style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#FF007F' }}
                 >

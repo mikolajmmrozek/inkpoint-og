@@ -3,6 +3,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { GripVertical } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { Plus, Edit, Trash2, X, History } from 'lucide-react';
+import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTheme } from './Dashboard';
 import { compressImage } from '@/utils/compressImage';
@@ -33,6 +34,8 @@ export default function DashboardArtists() {
   const [commissionHistory, setCommissionHistory] = useState([]);
   const [newCommission, setNewCommission] = useState({ cut_percent: 60, effective_from: format(new Date(), 'yyyy-MM-dd'), note: '' });
   const [showAddCommission, setShowAddCommission] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(null); // artist to delete
+  const [commissionDeleteConfirm, setCommissionDeleteConfirm] = useState(null); // commission entry to delete
 
   const load = async () => {
     const data = await base44.entities.Artist.list('-created_date', 50);
@@ -108,11 +111,13 @@ export default function DashboardArtists() {
   const deleteCommissionEntry = async (id) => {
     await base44.entities.ArtistCommissionHistory.delete(id);
     setCommissionHistory(h => h.filter(x => x.id !== id));
+    setCommissionDeleteConfirm(null);
   };
 
   const deleteArtist = async (id) => {
     await base44.entities.Artist.delete(id);
     setArtists(a => a.filter(x => x.id !== id));
+    setDeleteConfirm(null);
   };
 
   const handlePhotoUpload = async (e) => {
@@ -297,7 +302,7 @@ export default function DashboardArtists() {
                               </div>
                             </div>
                             {i > 0 && (
-                              <button onClick={() => deleteCommissionEntry(entry.id)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0 }}>
+                              <button onClick={() => setCommissionDeleteConfirm(entry)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0 }}>
                                 <Trash2 size={11} />
                               </button>
                             )}
@@ -354,6 +359,23 @@ export default function DashboardArtists() {
         )}
       </AnimatePresence>
 
+      <ConfirmDeleteDialog
+        open={!!deleteConfirm}
+        title="Usuń artystę"
+        message={`Czy na pewno chcesz usunąć artystę "${deleteConfirm?.name}"?`}
+        onConfirm={() => deleteArtist(deleteConfirm.id)}
+        onCancel={() => setDeleteConfirm(null)}
+        theme={theme}
+      />
+      <ConfirmDeleteDialog
+        open={!!commissionDeleteConfirm}
+        title="Usuń wpis historii prowizji"
+        message={`Usunąć wpis ${commissionDeleteConfirm?.cut_percent}% od ${commissionDeleteConfirm?.effective_from}?`}
+        onConfirm={() => deleteCommissionEntry(commissionDeleteConfirm.id)}
+        onCancel={() => setCommissionDeleteConfirm(null)}
+        theme={theme}
+      />
+
       {/* Artists list */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
@@ -389,7 +411,7 @@ export default function DashboardArtists() {
                           <button onClick={() => openEdit(a)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
                             <Edit size={14} />
                           </button>
-                          <button onClick={() => deleteArtist(a.id)} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer' }}>
+                          <button onClick={() => setDeleteConfirm(a)} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer' }}>
                             <Trash2 size={14} />
                           </button>
                         </div>

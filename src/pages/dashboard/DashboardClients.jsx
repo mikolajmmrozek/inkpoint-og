@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
 import { Search, Edit2, Trash2, X, Plus, ChevronDown, ChevronUp, CalendarPlus, Merge, Loader2 } from 'lucide-react';
+import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 import BookingModal from '@/components/dashboard/BookingModal';
 import { format } from 'date-fns';
 import { AnimatePresence } from 'framer-motion';
@@ -43,6 +44,7 @@ export default function DashboardClients() {
   const [mergeTarget, setMergeTarget] = useState(null); // client to merge INTO (will be kept)
   const [mergeSearch, setMergeSearch] = useState('');
   const [merging, setMerging] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(null); // client to delete
 
   const load = async () => {
     const [clientData, bookingData, formData] = await Promise.all([
@@ -118,6 +120,7 @@ export default function DashboardClients() {
   const handleDelete = async (id) => {
     await base44.entities.Client.delete(id);
     setClients(c => c.filter(x => x.id !== id));
+    setDeleteConfirm(null);
   };
 
   // Merge mergeSource INTO mergeTarget:
@@ -269,7 +272,7 @@ export default function DashboardClients() {
                     <button onClick={(e) => { e.stopPropagation(); openNewSession(c); }} style={{ color: '#16a34a', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} title="Nowa sesja"><CalendarPlus size={13} /></button>
                     <button onClick={(e) => { e.stopPropagation(); setMergeSource(c); setMergeTarget(null); setMergeSearch(''); }} style={{ color: '#a855f7', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} title="Połącz"><Merge size={13} /></button>
                     <button onClick={(e) => { e.stopPropagation(); openEdit(c); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><Edit2 size={13} /></button>
-                    <button onClick={(e) => { e.stopPropagation(); handleDelete(c.id); }} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><Trash2 size={13} /></button>
+                    <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(c); }} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><Trash2 size={13} /></button>
                   </div>
                 </div>
 
@@ -301,7 +304,7 @@ export default function DashboardClients() {
                     <button onClick={(e) => { e.stopPropagation(); openNewSession(c); }} style={{ color: '#16a34a', background: 'none', border: 'none', cursor: 'pointer' }} title="Nowa sesja"><CalendarPlus size={13} /></button>
                     <button onClick={(e) => { e.stopPropagation(); setMergeSource(c); setMergeTarget(null); setMergeSearch(''); }} style={{ color: '#a855f7', background: 'none', border: 'none', cursor: 'pointer' }} title="Połącz z innym klientem"><Merge size={13} /></button>
                     <button onClick={(e) => { e.stopPropagation(); openEdit(c); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Edit2 size={13} /></button>
-                    <button onClick={(e) => { e.stopPropagation(); handleDelete(c.id); }} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={13} /></button>
+                    <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(c); }} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={13} /></button>
                   </div>
                 </div>
 
@@ -544,6 +547,15 @@ export default function DashboardClients() {
           </div>
         </div>
       )}
+
+      <ConfirmDeleteDialog
+        open={!!deleteConfirm}
+        title={`Usuń klienta`}
+        message={`Czy na pewno chcesz usunąć klienta "${deleteConfirm?.name}"? Tej operacji nie można cofnąć.`}
+        onConfirm={() => handleDelete(deleteConfirm.id)}
+        onCancel={() => setDeleteConfirm(null)}
+        theme={theme}
+      />
 
       {/* Edit modal */}
       {editing && (
