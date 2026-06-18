@@ -179,6 +179,18 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
                 <div>{label('Data')}<input {...inp('session_date', 'date')} style={{ ...inp('session_date', 'date').style, colorScheme: theme === 'light' ? 'light' : 'dark' }} /></div>
                 <div>{label('Godzina')}<input {...inp('session_time')} /></div>
               </div>
+              <div className="mb-3">{label('Godzina zakończenia')}<input {...inp('session_end_time')} /></div>
+              <div className="mb-3">{label('Usługa (opcjonalnie)')}
+                <input
+                  type="text"
+                  placeholder="Wpisz nazwę usługi..."
+                  value={form.service_name || ''}
+                  onChange={e => set('service_name', e.target.value)}
+                  style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif' }}
+                  onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
+                  onBlur={e => e.target.style.borderBottomColor = t.inputBorder}
+                />
+              </div>
               <div className="mb-3">{label('Cena (PLN)')}<input {...inp('estimated_price', 'number')} /></div>
               <div>{label('Status')}
                 <select value={form.status || 'pending'} onChange={e => set('status', e.target.value)} style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif', colorScheme: theme === 'light' ? 'light' : 'dark' }}>
