@@ -8,9 +8,11 @@ import HomeCTA from '../components/home/HomeCTA';
 import HomeTestimonials from '../components/home/HomeTestimonials';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import Lightbox from '../components/ui/Lightbox';
 
 export default function Home() {
   const [galleryImages, setGalleryImages] = useState([]);
+  const [lightboxIndex, setLightboxIndex] = useState(null);
 
   useEffect(() => {
     const loadPortfolioImages = async () => {
@@ -95,7 +97,8 @@ export default function Home() {
               <img
                 src={img}
                 alt={`Portfolio ${i + 1}`}
-                className="w-full h-full object-cover liquid-hover"
+                onClick={() => setLightboxIndex(i)}
+                className="w-full h-full object-cover liquid-hover cursor-pointer"
                 style={{ filter: 'brightness(0.65) contrast(1.15)' }}
                 loading="lazy"
                 decoding="async"
@@ -116,6 +119,18 @@ export default function Home() {
       </div>
 
       <HomeCTA />
+
+      <AnimatePresence>
+        {lightboxIndex !== null && (
+          <Lightbox
+            images={galleryImages}
+            currentIndex={lightboxIndex}
+            onClose={() => setLightboxIndex(null)}
+            onNext={(idx) => setLightboxIndex(typeof idx === 'number' ? idx : (i => (i + 1) % galleryImages.length))}
+            onPrev={() => setLightboxIndex(i => (i - 1 + galleryImages.length) % galleryImages.length)}
+          />
+        )}
+      </AnimatePresence>
     </PageLayout>
   );
 }
