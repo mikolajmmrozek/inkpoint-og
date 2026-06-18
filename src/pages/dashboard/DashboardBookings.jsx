@@ -68,9 +68,11 @@ function BookingRow({ b, i, items, selected, setSelected, artists, t }) {
             ANKIETA
           </span>
         )}
-        {b.estimated_price && (
+        {b.estimated_price > 0 ? (
           <span className="hidden sm:inline" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{b.estimated_price} PLN</span>
-        )}
+        ) : (b.estimated_price === 0 && b.service_id) ? (
+          <span className="hidden sm:inline" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>BEZPŁATNA</span>
+        ) : null}
         <span className="hidden lg:inline" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 8px', border: `0.5px solid ${STATUS_COLORS[b.status] || t.border}`, color: STATUS_COLORS[b.status] || t.muted }}>
           {b.status}
         </span>
