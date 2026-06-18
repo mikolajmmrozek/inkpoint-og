@@ -36,8 +36,13 @@ export default function HealthFormPreviewModal({ bookingId, healthFormId, client
       if (healthFormId) {
         const f = await base44.entities.HealthForm.get(healthFormId);
         forms = f ? [f] : [];
-      } else {
+      } else if (bookingId) {
         forms = await base44.entities.HealthForm.filter({ booking_id: bookingId }, '-form_filled_date', 1);
+        // Fallback: jeśli nie znaleziono po booking_id, szukaj po client_name
+        if (forms.length === 0 && clientName) {
+          const byName = await base44.entities.HealthForm.filter({ client_name: clientName }, '-form_filled_date', 1);
+          forms = byName;
+        }
       }
       if (tplArr.length > 0) setTemplate(tplArr[0]);
       if (tplArr.length > 0) setTemplate(tplArr[0]);
