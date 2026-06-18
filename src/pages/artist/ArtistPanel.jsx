@@ -173,7 +173,7 @@ export default function ArtistPanel() {
               <Menu size={20} />
             </button>
             <div className="flex-1" />
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-row-reverse">
               {artist?.photo_url ? (
                 <img src={artist.photo_url} alt={artist.name} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
               ) : (
@@ -183,7 +183,7 @@ export default function ArtistPanel() {
                   </span>
                 </div>
               )}
-              <div>
+              <div style={{ textAlign: 'right' }}>
                 <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: textColor, letterSpacing: '0.05em' }}>{artist?.name}</p>
                 <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: mutedColor, letterSpacing: '0.1em' }}>{user?.email}</p>
               </div>
