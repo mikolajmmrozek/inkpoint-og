@@ -142,16 +142,16 @@ export default function ArtistHome() {
             {/* Today — always show */}
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#f59e0b', flexShrink: 0 }} />
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#f59e0b' }}>DZIŚ — {todayLabel}</p>
-                <div style={{ flex: 1, height: '0.5px', background: 'rgba(245,158,11,0.3)' }} />
+                <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#16a34a', flexShrink: 0 }} />
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#16a34a' }}>DZIŚ — {todayLabel}</p>
+                <div style={{ flex: 1, height: '0.5px', background: 'rgba(22,163,74,0.3)' }} />
               </div>
               {todayBookings.length === 0 ? (
                 <div className="py-5 text-center" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
                   <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK UMÓWIONYCH SESJI DZIŚ</p>
                 </div>
               ) : (
-                <div style={{ border: `0.5px solid rgba(245,158,11,0.4)`, background: t.cardBg }}>
+                <div style={{ border: `0.5px solid rgba(22,163,74,0.4)`, background: t.cardBg }}>
                   {todayBookings.map((b, i) => (
                     <div key={b.id} className="flex items-center justify-between p-4" style={{ borderBottom: i < todayBookings.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }}>
                       <div>
@@ -173,7 +173,7 @@ export default function ArtistHome() {
             {upcomingGroups.filter(([d]) => d !== todayStr).map(([date, items]) => (
               <div key={date}>
                 <div className="flex items-center gap-3 mb-2">
-                  <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#16a34a', flexShrink: 0 }} />
+                  <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#FF007F', flexShrink: 0 }} />
                   <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: t.muted }}>{formatDayHeader(date)}</p>
                   <div style={{ flex: 1, height: '0.5px', background: t.cardBorder }} />
                   <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{items.length} {items.length === 1 ? 'sesja' : 'sesje'}</span>
