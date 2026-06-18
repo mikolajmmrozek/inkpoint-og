@@ -34,6 +34,35 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
     return { ...booking };
   });
   const [showHealthForm, setShowHealthForm] = useState(false);
+  const [editing, setEditing] = useState(isNew);
+  const [saving, setSaving] = useState(false);
+
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const handleSave = async () => {
+    setSaving(true);
+    const fullName = `${form.client_first_name || ''} ${form.client_last_name || ''}`.trim() || form.client_name;
+    const data = { ...form, client_name: fullName };
+    try {
+      await base44.entities.Booking.update(booking.id, data);
+      onSaved();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const inp = (field, type = 'text') => ({
+    type,
+    value: form[field] || '',
+    onChange: e => set(field, e.target.value),
+    style: { background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif' },
+    onFocus: e => e.target.style.borderBottomColor = '#FF007F',
+    onBlur: e => e.target.style.borderBottomColor = t.inputBorder,
+  });
+
+  const label = txt => (
+    <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>{txt}</label>
+  );
 
   const handleStatusChange = async (newStatus) => {
     if (newStatus === 'cancelled') {
@@ -59,70 +88,124 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
         {/* Header */}
         <div className="flex items-start justify-between mb-6">
           <div>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>PODGLĄD SESJI</p>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>{!editing ? 'PODGLĄD SESJI' : 'EDYTUJ SESJĘ'}</p>
             <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em', lineHeight: 1 }}>
               {form.client_name}
             </h3>
           </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}><X size={18} /></button>
+          <div className="flex items-center gap-2">
+            {!editing && (
+              <button onClick={() => setEditing(true)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}>EDYTUJ</button>
+            )}
+            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}><X size={18} /></button>
+          </div>
         </div>
 
-        {/* Status badges */}
-        <div className="mb-6 space-y-4">
-          <div className="flex items-center gap-3 flex-wrap">
-            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 12px', border: `0.5px solid ${STATUS_COLORS[form.status]}`, color: STATUS_COLORS[form.status] }}>
-              {STATUS_LABELS[form.status]}
-            </span>
-            {form.deposit_paid && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.08em' }}>✓ DEPOZYT</span>}
-            {!form.health_form_completed && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', padding: '3px 8px', border: '0.5px solid #FF007F', color: '#FF007F' }}>BRAK ANKIETY</span>}
-          </div>
+        {/* View mode */}
+        {!editing && (
+          <div className="mb-6 space-y-4">
+            <div className="flex items-center gap-3 flex-wrap">
+              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 12px', border: `0.5px solid ${STATUS_COLORS[form.status]}`, color: STATUS_COLORS[form.status] }}>
+                {STATUS_LABELS[form.status]}
+              </span>
+              {form.deposit_paid && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.08em' }}>✓ DEPOZYT</span>}
+              {!form.health_form_completed && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', padding: '3px 8px', border: '0.5px solid #FF007F', color: '#FF007F' }}>BRAK ANKIETY</span>}
+            </div>
 
-          {/* Quick status change */}
-          {form.status !== 'cancelled' && (
-            <div>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '6px' }}>ZMIEŃ STATUS</p>
-              <div className="flex gap-2 flex-wrap">
-                {Object.entries(STATUS_LABELS).filter(([k]) => k !== form.status && k !== 'cancelled').map(([k, lbl]) => (
-                  <button key={k} onClick={() => handleStatusChange(k)}
-                    style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[k]}`, color: STATUS_COLORS[k], background: 'transparent', cursor: 'pointer' }}>
-                    → {lbl}
+            {/* Quick status change */}
+            {form.status !== 'cancelled' && (
+              <div>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '6px' }}>ZMIEŃ STATUS</p>
+                <div className="flex gap-2 flex-wrap">
+                  {Object.entries(STATUS_LABELS).filter(([k]) => k !== form.status && k !== 'cancelled').map(([k, lbl]) => (
+                    <button key={k} onClick={() => handleStatusChange(k)}
+                      style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[k]}`, color: STATUS_COLORS[k], background: 'transparent', cursor: 'pointer' }}>
+                      → {lbl}
+                    </button>
+                  ))}
+                  <button onClick={() => handleStatusChange('cancelled')}
+                    style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 10px', border: '0.5px solid #9ca3af', color: '#9ca3af', background: 'transparent', cursor: 'pointer' }}>
+                    → Anuluj
                   </button>
-                ))}
-                <button onClick={() => handleStatusChange('cancelled')}
-                  style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 10px', border: '0.5px solid #9ca3af', color: '#9ca3af', background: 'transparent', cursor: 'pointer' }}>
-                  → Anuluj
-                </button>
+                </div>
+              </div>
+            )}
+
+            {/* Details view */}
+            <div className="space-y-3 pt-2" style={{ borderTop: `0.5px solid ${t.border}` }}>
+              {[
+                ['DATA', `${form.session_date || '—'}${form.session_time ? ` · ${form.session_time}${form.session_end_time ? `–${form.session_end_time}` : ''}` : ''}`],
+                ['KLIENT', form.client_name],
+                ['TELEFON', form.client_phone],
+                ['EMAIL', form.client_email],
+                ['USŁUGA', form.service_name],
+                ['MIEJSCE', form.tattoo_placement],
+                ['OPIS', form.tattoo_description],
+                ['CENA', form.estimated_price ? `${form.estimated_price} zł` : null],
+                ['NOTATKI', form.notes],
+              ].filter(([, v]) => v).map(([lbl, val]) => (
+                <div key={lbl}>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '2px' }}>{lbl}</p>
+                  <p style={{ color: t.text, fontSize: '13px' }}>{val}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Health form button */}
+            {form.health_form_completed && (
+              <button onClick={() => setShowHealthForm(true)} className="btn-ghost-parchment" style={{ fontSize: '9px', marginTop: '8px', width: '100%' }}>
+                PODGLĄD ANKIETY ZDROWOTNEJ
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Edit mode */}
+        {editing && (
+          <div className="space-y-5">
+            <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '16px' }}>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>PODSTAWOWE</p>
+              <div className="grid grid-cols-2 gap-4 mb-3">
+                <div>{label('Imię')}<input {...inp('client_first_name')} /></div>
+                <div>{label('Nazwisko')}<input {...inp('client_last_name')} /></div>
+              </div>
+              <div className="mb-3">{label('Email')}<input {...inp('client_email', 'email')} /></div>
+              <div>{label('Telefon')}<input {...inp('client_phone')} /></div>
+            </div>
+
+            <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '16px' }}>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>SESJA</p>
+              <div className="grid grid-cols-2 gap-4 mb-3">
+                <div>{label('Data')}<input {...inp('session_date', 'date')} style={{ ...inp('session_date', 'date').style, colorScheme: theme === 'light' ? 'light' : 'dark' }} /></div>
+                <div>{label('Godzina')}<input {...inp('session_time')} /></div>
+              </div>
+              <div className="mb-3">{label('Cena (PLN)')}<input {...inp('estimated_price', 'number')} /></div>
+              <div>{label('Status')}
+                <select value={form.status || 'pending'} onChange={e => set('status', e.target.value)} style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif', colorScheme: theme === 'light' ? 'light' : 'dark' }}>
+                  {Object.entries(STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                </select>
               </div>
             </div>
-          )}
 
-          {/* Details view */}
-          <div className="space-y-3 pt-2" style={{ borderTop: `0.5px solid ${t.border}` }}>
-            {[
-              ['DATA', `${form.session_date || '—'}${form.session_time ? ` · ${form.session_time}${form.session_end_time ? `–${form.session_end_time}` : ''}` : ''}`],
-              ['KLIENT', form.client_name],
-              ['TELEFON', form.client_phone],
-              ['EMAIL', form.client_email],
-              ['USŁUGA', form.service_name],
-              ['MIEJSCE', form.tattoo_placement],
-              ['OPIS', form.tattoo_description],
-              ['CENA', form.estimated_price ? `${form.estimated_price} zł` : null],
-              ['NOTATKI', form.notes],
-            ].filter(([, v]) => v).map(([lbl, val]) => (
-              <div key={lbl}>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '2px' }}>{lbl}</p>
-                <p style={{ color: t.text, fontSize: '13px' }}>{val}</p>
-              </div>
-            ))}
+            <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '16px' }}>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>TATUAŻ</p>
+              <div className="mb-3">{label('Miejsce')}<input {...inp('tattoo_placement')} /></div>
+              <div>{label('Opis')}<textarea rows={2} style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif', resize: 'none' }} value={form.tattoo_description || ''} onChange={e => set('tattoo_description', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.inputBorder} /></div>
+            </div>
+
+            <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '16px' }}>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>NOTATKI</p>
+              <textarea rows={2} style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif', resize: 'none' }} value={form.notes || ''} onChange={e => set('notes', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.inputBorder} />
+            </div>
+
+            <div className="flex gap-3 pt-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
+              <button onClick={handleSave} disabled={saving} className="btn-oxblood flex-1" style={{ fontSize: '10px', opacity: saving ? 0.5 : 1 }}>
+                {saving ? 'ZAPISUJĘ...' : 'ZAPISZ ZMIANY'}
+              </button>
+              <button onClick={() => setEditing(false)} className="btn-ghost-parchment" style={{ fontSize: '10px' }}>ANULUJ</button>
+            </div>
           </div>
-
-          {/* Health form button */}
-          {form.health_form_completed && (
-            <button onClick={() => setShowHealthForm(true)} className="btn-ghost-parchment" style={{ fontSize: '9px', marginTop: '8px', width: '100%' }}>
-              PODGLĄD ANKIETY ZDROWOTNEJ
-            </button>
-          )}
-        </div>
+        )}
       </motion.div>
 
       {showHealthForm && (
