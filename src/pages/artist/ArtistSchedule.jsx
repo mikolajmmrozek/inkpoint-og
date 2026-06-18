@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { ChevronLeft, ChevronRight, Plus, X, Search, Zap } from 'lucide-react';
-import { format, addDays, subDays, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, isSameMonth } from 'date-fns';
+import { format, addDays, subDays, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, isSameMonth, isToday } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
 import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
@@ -403,6 +403,118 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
   );
 }
 
+// ── Hourly Day View ──────────────────────────────────────────────────────────
+const DAY_START_H = 8;
+const DAY_END_H = 22;
+const PX_PER_MIN = 2;
+const TOTAL_H = (DAY_END_H - DAY_START_H) * 60 * PX_PER_MIN;
+const HOUR_MARKS = Array.from({ length: DAY_END_H - DAY_START_H + 1 }, (_, i) => DAY_START_H + i);
+
+function toMin(t) {
+  if (!t) return null;
+  const [h, m] = t.split(':').map(Number);
+  return h * 60 + m;
+}
+
+function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, onNewBookingClick, t }) {
+  const scrollRef = useRef(null);
+  const dateStr = format(selectedDate, 'yyyy-MM-dd');
+  const dayBk = bookings.filter(b => b.session_date === dateStr).sort((a, b) => (a.session_time || '').localeCompare(b.session_time || ''));
+  const showNow = isToday(selectedDate);
+
+  useEffect(() => {
+    if (scrollRef.current && showNow) {
+      const n = new Date();
+      const top = Math.max(0, (n.getHours() * 60 + n.getMinutes() - DAY_START_H * 60)) * PX_PER_MIN;
+      scrollRef.current.scrollTop = Math.max(0, top - 100);
+    }
+  }, [showNow]);
+
+  const nowTop = (() => {
+    const n = new Date();
+    return Math.max(0, (n.getHours() * 60 + n.getMinutes() - DAY_START_H * 60)) * PX_PER_MIN;
+  })();
+
+  const handleColumnClick = (e) => {
+    if (e.target.closest('[data-bk]')) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const scrollTop = scrollRef.current?.scrollTop || 0;
+    const offsetY = e.clientY - rect.top + scrollTop;
+    const clickedMin = Math.round((offsetY / PX_PER_MIN + DAY_START_H * 60) / 15) * 15;
+    const h = String(Math.floor(clickedMin / 60)).padStart(2, '0');
+    const m = String(clickedMin % 60).padStart(2, '0');
+    onNewBookingClick?.(`${h}:${m}`);
+  };
+
+  return (
+    <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+      {/* Date nav */}
+      <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: `0.5px solid ${t.cardBorder}` }}>
+        <button onClick={() => onDateChange(subDays(selectedDate, 1))} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><ChevronLeft size={16} /></button>
+        <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.2rem', color: t.title, letterSpacing: '0.08em' }}>
+          {format(selectedDate, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase()}
+        </p>
+        <button onClick={() => onDateChange(addDays(selectedDate, 1))} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><ChevronRight size={16} /></button>
+      </div>
+      {/* Timeline */}
+      <div ref={scrollRef} style={{ overflowY: 'auto', maxHeight: '560px' }}>
+        <div style={{ display: 'flex', position: 'relative' }}>
+          {/* Time axis */}
+          <div style={{ width: '44px', flexShrink: 0, position: 'relative', height: `${TOTAL_H}px` }}>
+            {HOUR_MARKS.map(h => (
+              <div key={h} style={{ position: 'absolute', top: `${(h - DAY_START_H) * 60 * PX_PER_MIN}px`, left: 0, right: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.04em' }}>{String(h).padStart(2, '0')}:00</span>
+              </div>
+            ))}
+          </div>
+          {/* Column */}
+          <div onClick={handleColumnClick} style={{ flex: 1, position: 'relative', height: `${TOTAL_H}px`, borderLeft: `0.5px solid ${t.cardBorder}`, cursor: 'crosshair' }}>
+            {/* Grid lines */}
+            {HOUR_MARKS.map(h => (
+              <div key={h} style={{ position: 'absolute', top: `${(h - DAY_START_H) * 60 * PX_PER_MIN}px`, left: 0, right: 0, borderTop: `0.5px solid ${t.cardBorder}`, pointerEvents: 'none' }} />
+            ))}
+            {/* Now line */}
+            {showNow && (
+              <>
+                <div style={{ position: 'absolute', top: `${nowTop}px`, left: 0, right: 0, borderTop: '1px solid #FF007F', opacity: 0.7, pointerEvents: 'none', zIndex: 2 }} />
+                <div style={{ position: 'absolute', top: `${nowTop}px`, left: '-4px', width: '8px', height: '8px', borderRadius: '50%', background: '#FF007F', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 3 }} />
+              </>
+            )}
+            {/* Booking tiles */}
+            {dayBk.map(b => {
+              const startMin = toMin(b.session_time);
+              if (startMin === null) return null;
+              const dur = b.session_duration || 60;
+              const top = Math.max(0, (startMin - DAY_START_H * 60)) * PX_PER_MIN;
+              const height = Math.max(30, dur * PX_PER_MIN);
+              const color = STATUS_COLORS[b.status] || '#FF007F';
+              const endTime = b.session_end_time || (() => { const e = startMin + dur; return `${String(Math.floor(e/60)).padStart(2,'0')}:${String(e%60).padStart(2,'0')}`; })();
+              return (
+                <div key={b.id} data-bk="1" onClick={(e) => { e.stopPropagation(); onBookingClick(b); }}
+                  style={{ position: 'absolute', top: `${top}px`, height: `${height}px`, left: '4px', right: '4px', background: `${color}18`, borderLeft: `2px solid ${color}`, borderTop: `0.5px solid ${color}40`, borderRight: `0.5px solid ${color}40`, borderBottom: `0.5px solid ${color}40`, cursor: 'pointer', padding: '3px 6px', overflow: 'hidden', zIndex: 1, opacity: b.status === 'cancelled' ? 0.45 : 1 }}
+                  onMouseEnter={e => e.currentTarget.style.background = `${color}2e`}
+                  onMouseLeave={e => e.currentTarget.style.background = `${color}18`}
+                >
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color, letterSpacing: '0.05em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{b.session_time}–{endTime}</p>
+                  {height >= 36 && <p style={{ fontSize: '11px', color: t.text, fontWeight: 500, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.client_name}</p>}
+                  {height >= 56 && b.tattoo_placement && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.tattoo_placement}</p>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+      {/* Summary */}
+      <div className="px-4 py-2 flex items-center gap-4 flex-wrap" style={{ borderTop: `0.5px solid ${t.cardBorder}` }}>
+        {dayBk.length === 0
+          ? <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>BRAK SESJI — kliknij na oś czasu aby dodać</span>
+          : <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>{dayBk.length} {dayBk.length === 1 ? 'SESJA' : 'SESJE'}</span>
+        }
+      </div>
+    </div>
+  );
+}
+
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function ArtistSchedule() {
   const { artist, theme } = useOutletContext();
@@ -410,7 +522,7 @@ export default function ArtistSchedule() {
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [viewMonth, setViewMonth] = useState(new Date());
-  const [viewMode, setViewMode] = useState('month'); // 'month' | 'day'
+  const [viewMode, setViewMode] = useState('month'); // 'month' | 'hourly' | 'list'
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showNewModal, setShowNewModal] = useState(false);
   const [artistServices, setArtistServices] = useState([]);
@@ -437,7 +549,7 @@ export default function ArtistSchedule() {
 
   const handleDayClick = (day) => {
     setSelectedDate(day);
-    setViewMode('day');
+    setViewMode('hourly');
   };
 
   const dayBookings = bookings
@@ -459,7 +571,7 @@ export default function ArtistSchedule() {
 
       {/* View toggle */}
       <div className="flex gap-2 mb-6">
-        {[['month', 'MIESIĘCZNY'], ['day', 'DZIENNY']].map(([mode, lbl]) => (
+        {[['month', 'MIESIĘCZNY'], ['hourly', 'GODZINOWY'], ['list', 'LISTA']].map(([mode, lbl]) => (
           <button key={mode} onClick={() => setViewMode(mode)}
             style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '7px 14px', border: `0.5px solid ${viewMode === mode ? '#FF007F' : t.cardBorder}`, color: viewMode === mode ? '#FF007F' : t.muted, background: viewMode === mode ? 'rgba(255,0,127,0.08)' : 'transparent', cursor: 'pointer' }}>
             {lbl}
@@ -474,8 +586,20 @@ export default function ArtistSchedule() {
         </div>
       )}
 
-      {/* Day view */}
-      {viewMode === 'day' && (
+      {/* Hourly day view */}
+      {viewMode === 'hourly' && (
+        <HourlyDayView
+          bookings={bookings}
+          selectedDate={selectedDate}
+          onDateChange={setSelectedDate}
+          onBookingClick={setSelectedBooking}
+          onNewBookingClick={(time) => { setShowNewModal(true); }}
+          t={t}
+        />
+      )}
+
+      {/* List view */}
+      {viewMode === 'list' && (
         <div>
           <div className="flex items-center justify-between mb-4">
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
@@ -513,7 +637,7 @@ export default function ArtistSchedule() {
                         )}
                         <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{b.client_name}</p>
                       </div>
-                      {b.client_phone && <a href={`tel:${b.client_phone}`} onClick={e => e.stopPropagation()} style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', display: 'block', marginBottom: '2px' }}>{b.client_phone}</a>}
+                      {b.client_phone && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginBottom: '2px' }}>{b.client_phone}</p>}
                       {b.tattoo_placement && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{b.tattoo_placement}{b.tattoo_description ? ` — ${b.tattoo_description}` : ''}</p>}
                       {b.service_name && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', opacity: 0.8, marginTop: '2px' }}>{b.service_name}</p>}
                       {!b.health_form_completed && b.status !== 'cancelled' && (
