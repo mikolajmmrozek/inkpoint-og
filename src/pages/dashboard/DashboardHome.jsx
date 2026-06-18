@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, Users, MessageSquare, FileText, TrendingUp, Clock, AlertCircle } from 'lucide-react';
+import { Calendar, Users, MessageSquare, FileText, TrendingUp, Clock, AlertCircle, ClipboardList } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import { useTheme } from './Dashboard';
 import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
@@ -12,6 +12,7 @@ export default function DashboardHome() {
   const { theme } = useTheme();
   const [stats, setStats] = useState({ bookings: 0, pending: 0, messages: 0, forms: 0 });
   const [pendingByDay, setPendingByDay] = useState([]);
+  const [draftForms, setDraftForms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [editingBooking, setEditingBooking] = useState(null);
@@ -22,8 +23,10 @@ export default function DashboardHome() {
       base44.entities.Booking.list('-created_date', 200),
       base44.entities.ContactMessage.filter({ is_read: false }),
       base44.entities.HealthForm.list('-created_date', 10),
-    ]).then(([bookings, messages, forms]) => {
+      base44.entities.HealthForm.filter({ is_draft: true }, '-created_date', 50),
+    ]).then(([bookings, messages, forms, drafts]) => {
       setAllBookings(bookings);
+      setDraftForms(drafts);
       const pending = bookings.filter(b => b.status === 'pending');
       setStats({
         bookings: bookings.length,
@@ -32,9 +35,10 @@ export default function DashboardHome() {
         forms: forms.length,
       });
 
-      // Group pending by date, sorted ascending
+      // Group pending+confirmed by date, sorted ascending
+      const active = bookings.filter(b => b.status === 'pending' || b.status === 'confirmed');
       const grouped = {};
-      pending.forEach(b => {
+      active.forEach(b => {
         const day = b.session_date || 'Brak daty';
         if (!grouped[day]) grouped[day] = [];
         grouped[day].push(b);
@@ -103,13 +107,53 @@ export default function DashboardHome() {
         })}
       </div>
 
-      {/* Pending sessions by day */}
+      {/* Draft forms section */}
+      {!loading && draftForms.length > 0 && (
+        <div className="mb-10">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <ClipboardList size={14} color="#FF007F" />
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                NIEDOKOŃCZONE ANKIETY ({draftForms.length})
+              </p>
+            </div>
+            <Link to="/dashboard/health-forms" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              WSZYSTKIE →
+            </Link>
+          </div>
+          <div style={{ border: '0.5px solid rgba(255,0,127,0.4)', background: t.cardBg }}>
+            {draftForms.map((f, i) => (
+              <Link
+                key={f.id}
+                to={`/dashboard/health-forms`}
+                className="flex items-center justify-between p-4 transition-colors"
+                style={{ borderBottom: i < draftForms.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none', display: 'flex', textDecoration: 'none' }}
+                onMouseEnter={e => e.currentTarget.style.background = t.rowHover}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >
+                <div>
+                  <p style={{ color: t.value, fontSize: '14px', fontWeight: 500 }}>{f.client_name || `${f.client_first_name || ''} ${f.client_last_name || ''}`.trim() || 'Brak nazwy'}</p>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
+                    {f.client_email || ''}{f.procedure_type ? ` · ${f.procedure_type}` : ''}
+                    {f.created_date ? ` · ${new Date(f.created_date).toLocaleDateString('pl-PL')}` : ''}
+                  </p>
+                </div>
+                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: '0.5px solid #FF007F', color: '#FF007F' }}>
+                  DRAFT
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Active sessions by day (pending + confirmed) */}
       <div>
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <AlertCircle size={14} color="#FF007F" />
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-              DO POTWIERDZENIA
+              NADCHODZĄCE SESJE
             </p>
           </div>
           <Link to="/dashboard/bookings" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
@@ -168,13 +212,18 @@ export default function DashboardHome() {
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
+                          {!b.health_form_completed && (
+                            <span title="Brak ankiety zdrowotnej" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '3px 8px', border: '0.5px solid #FF007F', color: '#FF007F', background: 'rgba(255,0,127,0.08)' }}>
+                              ANKIETA
+                            </span>
+                          )}
                           {b.estimated_price && (
                             <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>
                               {b.estimated_price} zł
                             </span>
                           )}
-                          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', border: '0.5px solid #FF007F', color: '#FF007F' }}>
-                            PENDING
+                          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status] || '#FF007F'}`, color: STATUS_COLORS[b.status] || '#FF007F' }}>
+                            {b.status?.toUpperCase()}
                           </span>
                         </div>
                       </div>
@@ -196,9 +245,9 @@ export default function DashboardHome() {
           onStatusChange={(id, status) => {
             base44.entities.Booking.update(id, { status }).then((updated) => {
               setAllBookings(prev => prev.map(b => b.id === id ? updated : b));
-              const pending = allBookings.map(b => b.id === id ? updated : b).filter(b => b.status === 'pending');
+              const active = allBookings.map(b => b.id === id ? updated : b).filter(b => b.status === 'pending' || b.status === 'confirmed');
               const grouped = {};
-              pending.forEach(b => {
+              active.forEach(b => {
                 const day = b.session_date || 'Brak daty';
                 if (!grouped[day]) grouped[day] = [];
                 grouped[day].push(b);
@@ -215,8 +264,8 @@ export default function DashboardHome() {
           }}
           onUpdate={(updated) => {
             setAllBookings(prev => prev.map(b => b.id === updated.id ? updated : b));
-            // Refresh pending list
-            const pending = allBookings.map(b => b.id === updated.id ? updated : b).filter(b => b.status === 'pending');
+            // Refresh active list
+            const pending = allBookings.map(b => b.id === updated.id ? updated : b).filter(b => b.status === 'pending' || b.status === 'confirmed');
             const grouped = {};
             pending.forEach(b => {
               const day = b.session_date || 'Brak daty';
@@ -241,7 +290,7 @@ export default function DashboardHome() {
           onSaved={() => {
             base44.entities.Booking.list('-created_date', 200).then(bookings => {
               setAllBookings(bookings);
-              const pending = bookings.filter(b => b.status === 'pending');
+              const pending = bookings.filter(b => b.status === 'pending' || b.status === 'confirmed');
               const grouped = {};
               pending.forEach(b => {
                 const day = b.session_date || 'Brak daty';
