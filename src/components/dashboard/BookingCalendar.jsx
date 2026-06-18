@@ -142,7 +142,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
                     {/* Price + status */}
                     <div className="flex items-center gap-3 flex-shrink-0">
                       {b.service_id && (b.estimated_price === 0 || b.estimated_price === null || b.estimated_price === undefined || b.estimated_price === '') ? (
-                        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.06em' }}>BEZPŁATNA</span>
+                        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>BEZPŁATNA</span>
                       ) : b.estimated_price > 0 ? (
                         <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{b.estimated_price} PLN</span>
                       ) : null}
