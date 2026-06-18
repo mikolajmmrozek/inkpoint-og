@@ -414,7 +414,15 @@ export default function DashboardArtists() {
                       >
                         <div className="flex items-center gap-4">
                           <GripVertical size={14} style={{ color: t.muted, flexShrink: 0 }} />
-                          {a.photo_url && <img src={a.photo_url} alt="" className="w-10 h-10 object-cover" />}
+                          {a.photo_url ? (
+                            <img src={a.photo_url} alt="" style={{ width: '40px', height: '40px', objectFit: 'cover', flexShrink: 0 }} />
+                          ) : (
+                            <div style={{ width: '40px', height: '40px', flexShrink: 0, background: 'rgba(255,0,127,0.1)', border: '0.5px solid rgba(255,0,127,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '14px', color: '#FF007F', letterSpacing: '0.05em' }}>
+                                {a.name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
+                              </span>
+                            </div>
+                          )}
                           <div>
                             <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{a.name}</p>
                             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
