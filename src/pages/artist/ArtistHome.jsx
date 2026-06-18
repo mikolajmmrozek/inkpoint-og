@@ -436,15 +436,19 @@ export default function ArtistHome() {
                     <div style={{ border: '0.5px solid rgba(255,0,127,0.4)', background: t.cardBg }}>
                       {items.map((b, i) => (
                         <div key={b.id} onClick={() => setSelectedBooking(b)} className="flex items-center justify-between p-4 cursor-pointer" style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }} onMouseEnter={e => e.currentTarget.style.background = t.rowHover} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                          <div>
+                          <div className="flex-1">
                             <p style={{ color: t.value, fontSize: '14px', fontWeight: 500 }}>{b.client_name}</p>
                             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
                               {b.session_time ? `${b.session_time} · ` : ''}{b.tattoo_placement || ''}
                             </p>
+                            {b.service_name && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', opacity: 0.8, marginTop: '2px' }}>{b.service_name}</p>}
                           </div>
-                          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status] }}>
-                            {b.status?.toUpperCase()}
-                          </span>
+                          <div className="flex items-end gap-3 flex-shrink-0 ml-4">
+                            {b.estimated_price > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{b.estimated_price} zł</span>}
+                            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status] }}>
+                              {b.status?.toUpperCase()}
+                            </span>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -468,15 +472,19 @@ export default function ArtistHome() {
                 <div style={{ border: `0.5px solid rgba(22,163,74,0.4)`, background: t.cardBg }}>
                   {todayBookings.map((b, i) => (
                     <div key={b.id} onClick={() => setSelectedBooking(b)} className="flex items-center justify-between p-4 cursor-pointer" style={{ borderBottom: i < todayBookings.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }} onMouseEnter={e => e.currentTarget.style.background = t.rowHover} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                      <div>
+                      <div className="flex-1">
                         <p style={{ color: t.value, fontSize: '14px', fontWeight: 500 }}>{b.client_name}</p>
                         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
                           {b.session_time ? `${b.session_time} · ` : ''}{b.tattoo_placement || ''}
                         </p>
+                        {b.service_name && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', opacity: 0.8, marginTop: '2px' }}>{b.service_name}</p>}
                       </div>
-                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status] }}>
-                        {b.status?.toUpperCase()}
-                      </span>
+                      <div className="flex items-end gap-3 flex-shrink-0 ml-4">
+                        {b.estimated_price > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{b.estimated_price} zł</span>}
+                        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status] }}>
+                          {b.status?.toUpperCase()}
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -495,15 +503,19 @@ export default function ArtistHome() {
                 <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
                   {items.map((b, i) => (
                     <div key={b.id} onClick={() => setSelectedBooking(b)} className="flex items-center justify-between p-4 cursor-pointer" style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }} onMouseEnter={e => e.currentTarget.style.background = t.rowHover} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                      <div>
+                      <div className="flex-1">
                         <p style={{ color: t.value, fontSize: '14px', fontWeight: 500 }}>{b.client_name}</p>
                         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
                           {b.session_time ? `${b.session_time} · ` : ''}{b.tattoo_placement || ''}
                         </p>
+                        {b.service_name && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', opacity: 0.8, marginTop: '2px' }}>{b.service_name}</p>}
                       </div>
-                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status] }}>
-                        {b.status?.toUpperCase()}
-                      </span>
+                      <div className="flex items-end gap-3 flex-shrink-0 ml-4">
+                        {b.estimated_price > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{b.estimated_price} zł</span>}
+                        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status] }}>
+                          {b.status?.toUpperCase()}
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>
