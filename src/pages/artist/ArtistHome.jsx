@@ -3,9 +3,10 @@ import { useOutletContext } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { Calendar, Clock, TrendingUp } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { format, isToday, isPast, parseISO } from 'date-fns';
 import { pl } from 'date-fns/locale';
+import BookingModal from '@/components/dashboard/BookingModal';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -18,6 +19,7 @@ export default function ArtistHome() {
   const { artist, theme } = useOutletContext();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedBooking, setSelectedBooking] = useState(null);
 
   const t = theme === 'light'
     ? { title: '#111111', muted: 'rgba(0,0,0,0.4)', cardBg: '#FFFFFF', cardBorder: '#E5E5E5', value: '#111111', rowHover: 'rgba(0,0,0,0.03)', rowBorder: '#E5E5E5' }
@@ -121,7 +123,7 @@ export default function ArtistHome() {
                     <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px', opacity: 0.7 }}>{formatDayHeader(date)}</p>
                     <div style={{ border: '0.5px solid rgba(255,0,127,0.4)', background: t.cardBg }}>
                       {items.map((b, i) => (
-                        <div key={b.id} className="flex items-center justify-between p-4" style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }}>
+                        <div key={b.id} onClick={() => setSelectedBooking(b)} className="flex items-center justify-between p-4 cursor-pointer" style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }} onMouseEnter={e => e.currentTarget.style.background = t.rowHover} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                           <div>
                             <p style={{ color: t.value, fontSize: '14px', fontWeight: 500 }}>{b.client_name}</p>
                             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
@@ -153,7 +155,7 @@ export default function ArtistHome() {
               ) : (
                 <div style={{ border: `0.5px solid rgba(22,163,74,0.4)`, background: t.cardBg }}>
                   {todayBookings.map((b, i) => (
-                    <div key={b.id} className="flex items-center justify-between p-4" style={{ borderBottom: i < todayBookings.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }}>
+                    <div key={b.id} onClick={() => setSelectedBooking(b)} className="flex items-center justify-between p-4 cursor-pointer" style={{ borderBottom: i < todayBookings.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }} onMouseEnter={e => e.currentTarget.style.background = t.rowHover} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                       <div>
                         <p style={{ color: t.value, fontSize: '14px', fontWeight: 500 }}>{b.client_name}</p>
                         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
@@ -180,7 +182,7 @@ export default function ArtistHome() {
                 </div>
                 <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
                   {items.map((b, i) => (
-                    <div key={b.id} className="flex items-center justify-between p-4" style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }}>
+                    <div key={b.id} onClick={() => setSelectedBooking(b)} className="flex items-center justify-between p-4 cursor-pointer" style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }} onMouseEnter={e => e.currentTarget.style.background = t.rowHover} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                       <div>
                         <p style={{ color: t.value, fontSize: '14px', fontWeight: 500 }}>{b.client_name}</p>
                         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
@@ -198,6 +200,23 @@ export default function ArtistHome() {
           </div>
         )}
       </div>
+
+      <AnimatePresence>
+        {selectedBooking && (
+          <BookingModal
+            booking={selectedBooking}
+            t={theme === 'light'
+              ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)' }
+              : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)' }
+            }
+            onClose={() => setSelectedBooking(null)}
+            onSaved={() => {
+              base44.entities.Booking.filter({ artist_id: artist.id }, '-session_date', 100).then(setBookings);
+              setSelectedBooking(null);
+            }}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
