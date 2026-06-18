@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
-import { Plus, Edit2, Trash2, X, Upload, Loader2, CalendarPlus } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Upload, Loader2, CalendarPlus, ChevronUp, ChevronDown } from 'lucide-react';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 import { AnimatePresence } from 'framer-motion';
 import BookingModal from '@/components/dashboard/BookingModal';
@@ -49,6 +49,13 @@ export default function DashboardServices() {
   const [deleteConfirm, setDeleteConfirm] = useState(null); // service to delete
   const [filterCategory, setFilterCategory] = useState('');
   const [filterArtist, setFilterArtist] = useState('');
+  const [sortKey, setSortKey] = useState('order');
+  const [sortDir, setSortDir] = useState('asc');
+
+  const handleSort = (key) => {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('asc'); }
+  };
 
   const load = async () => {
     const [svc, art] = await Promise.all([
@@ -237,11 +244,23 @@ export default function DashboardServices() {
         <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
           {/* Header */}
           <div className="hidden md:grid grid-cols-12 px-4 py-2" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-            {['Usługa', 'Czas', 'Cena', 'Artyści', ''].map((h, i) => (
-              <p key={i}
-                className={i === 0 ? 'col-span-4' : i === 1 ? 'col-span-2' : i === 2 ? 'col-span-2' : i === 3 ? 'col-span-3' : 'col-span-1 text-right'}
-                style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}
-              >{h}</p>
+            {[
+              { label: 'Usługa', key: 'name', span: 'col-span-4' },
+              { label: 'Czas', key: 'duration_minutes', span: 'col-span-2' },
+              { label: 'Cena', key: 'price_fixed', span: 'col-span-2' },
+              { label: 'Artyści', key: null, span: 'col-span-3' },
+              { label: '', key: null, span: 'col-span-1' },
+            ].map(({ label, key, span }) => (
+              <button
+                key={label || '_actions'}
+                onClick={() => key && handleSort(key)}
+                className={`${span} flex items-center gap-1`}
+                style={{ background: 'none', border: 'none', cursor: key ? 'pointer' : 'default', padding: 0, fontFamily: 'JetBrains Mono', fontSize: '8px', color: sortKey === key ? '#FF007F' : t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}
+              >
+                {label}
+                {key && sortKey === key && (sortDir === 'asc' ? <ChevronUp size={10} /> : <ChevronDown size={10} />)}
+                {key && sortKey !== key && <ChevronUp size={10} style={{ opacity: 0.25 }} />}
+              </button>
             ))}
           </div>
 
@@ -249,6 +268,16 @@ export default function DashboardServices() {
             if (filterCategory && s.category !== filterCategory) return false;
             if (filterArtist && s.artist_ids?.length > 0 && !s.artist_ids.includes(filterArtist)) return false;
             return true;
+          }).sort((a, b) => {
+            let av = a[sortKey], bv = b[sortKey];
+            if (sortKey === 'price_fixed') {
+              av = a.price_type === 'fixed' ? (a.price_fixed ?? 0) : (a.price_min ?? 0);
+              bv = b.price_type === 'fixed' ? (b.price_fixed ?? 0) : (b.price_min ?? 0);
+            }
+            if (av == null) av = sortDir === 'asc' ? Infinity : -Infinity;
+            if (bv == null) bv = sortDir === 'asc' ? Infinity : -Infinity;
+            if (typeof av === 'string') return sortDir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+            return sortDir === 'asc' ? av - bv : bv - av;
           }).map((s, i) => (
             <div key={s.id} className="grid grid-cols-12 px-4 py-3 items-center"
               style={{ borderBottom: i < services.length - 1 ? `0.5px solid ${t.border}` : 'none', opacity: s.is_active === false ? 0.5 : 1 }}>
