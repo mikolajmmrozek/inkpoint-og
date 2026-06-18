@@ -36,27 +36,27 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, artist }) {
           <div>
             <p style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, fontSize: '1.6rem', color: textColor, letterSpacing: '0.08em' }}>ROMANS</p>
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase' }}>PANEL ARTYSTY</p>
+            {artist && (
+              <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {artist.photo_url ? (
+                  <img src={artist.photo_url} alt={artist.name} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }} />
+                ) : (
+                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(255,0,127,0.12)', border: '0.5px solid rgba(255,0,127,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '10px', color: '#FF007F' }}>
+                      {(artist.name || '').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: textColor, letterSpacing: '0.05em' }}>{artist.name}</p>
+              </div>
+            )}
           </div>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden" style={{ color: mutedColor }}>
             <X size={18} />
           </button>
         </div>
 
-        {artist && (
-          <div className="px-6 py-4" style={{ borderBottom: `0.5px solid ${border}` }}>
-            {artist.photo_url ? (
-              <img src={artist.photo_url} alt={artist.name} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', marginBottom: '8px' }} />
-            ) : (
-              <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(255,0,127,0.12)', border: '0.5px solid rgba(255,0,127,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
-                <span style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '14px', color: '#FF007F' }}>
-                  {(artist.name || '').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
-                </span>
-              </div>
-            )}
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: textColor, letterSpacing: '0.05em' }}>{artist.name}</p>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.1em', textTransform: 'uppercase' }}>ARTYSTA</p>
-          </div>
-        )}
+
 
         <nav className="flex-1 p-6 space-y-1 overflow-y-auto">
           {NAV.map(nav => {
