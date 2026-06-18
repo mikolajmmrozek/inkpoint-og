@@ -35,6 +35,12 @@ import DashboardDocuments from './pages/dashboard/DashboardDocuments';
 import DashboardFAQ from './pages/dashboard/DashboardFAQ';
 import DashboardFeedback from './pages/dashboard/DashboardFeedback';
 import DashboardServices from './pages/dashboard/DashboardServices';
+import DashboardUsers from './pages/dashboard/DashboardUsers';
+import ArtistPanel from './pages/artist/ArtistPanel';
+import ArtistHome from './pages/artist/ArtistHome';
+import ArtistSchedule from './pages/artist/ArtistSchedule';
+import ArtistStats from './pages/artist/ArtistStats';
+import ArtistProfilePage from './pages/artist/ArtistProfile';
 import FeedbackSurvey from './pages/FeedbackSurvey';
 import ScrollToTop from './components/ScrollToTop';
 
@@ -90,6 +96,15 @@ const AuthenticatedApp = () => {
         <Route path="faq" element={<DashboardFAQ />} />
         <Route path="feedback" element={<DashboardFeedback />} />
         <Route path="services" element={<DashboardServices />} />
+        <Route path="users" element={<DashboardUsers />} />
+      </Route>
+
+      {/* Artist panel */}
+      <Route path="/artist" element={<ArtistPanel />}>
+        <Route index element={<ArtistHome />} />
+        <Route path="schedule" element={<ArtistSchedule />} />
+        <Route path="stats" element={<ArtistStats />} />
+        <Route path="profile" element={<ArtistProfilePage />} />
       </Route>
 
       <Route path="*" element={<PageNotFound />} />

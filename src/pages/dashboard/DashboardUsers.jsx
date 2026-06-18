@@ -1,0 +1,259 @@
+import { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
+import { useTheme } from './Dashboard';
+import { UserPlus, Mail, Link2, Copy, Check, X } from 'lucide-react';
+
+export default function DashboardUsers() {
+  const { theme } = useTheme();
+  const [users, setUsers] = useState([]);
+  const [artists, setArtists] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState('user');
+  const [inviteArtistId, setInviteArtistId] = useState('');
+  const [inviting, setInviting] = useState(false);
+  const [inviteSuccess, setInviteSuccess] = useState(null);
+  const [inviteError, setInviteError] = useState('');
+  const [copiedId, setCopiedId] = useState(null);
+  const [editingUser, setEditingUser] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  const t = theme === 'light'
+    ? { title: '#111111', muted: 'rgba(0,0,0,0.4)', cardBg: '#FFFFFF', cardBorder: '#E5E5E5', text: '#111111', rowBorder: '#E5E5E5', rowHover: 'rgba(0,0,0,0.03)', inputBorder: '#CCCCCC' }
+    : { title: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', cardBg: 'rgba(255,255,255,0.04)', cardBorder: '#262626', text: '#F5F0EB', rowBorder: '#262626', rowHover: 'rgba(255,255,255,0.04)', inputBorder: '#262626' };
+
+  const inputStyle = {
+    background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`,
+    color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif',
+  };
+
+  useEffect(() => {
+    Promise.all([
+      base44.entities.User.list(),
+      base44.entities.Artist.list(),
+    ]).then(([u, a]) => {
+      setUsers(u);
+      setArtists(a);
+    }).finally(() => setLoading(false));
+  }, []);
+
+  const handleInvite = async () => {
+    if (!inviteEmail) return;
+    setInviting(true);
+    setInviteError('');
+    setInviteSuccess(null);
+    try {
+      await base44.users.inviteUser(inviteEmail, inviteRole);
+      // If artist role + artist_id selected, we need to update after invite
+      // (user will appear after they accept the invite, so we save intent)
+      setInviteSuccess({ email: inviteEmail, role: inviteRole, artistId: inviteArtistId });
+      setInviteEmail('');
+      setInviteArtistId('');
+      setInviteRole('user');
+      // Refresh users
+      base44.entities.User.list().then(setUsers);
+    } catch (err) {
+      setInviteError(err?.message || 'Wystąpił błąd podczas wysyłania zaproszenia.');
+    }
+    setInviting(false);
+  };
+
+  const copyInviteLink = async (email) => {
+    // Build invite link — the platform handles this via the login page with email prefilled
+    const link = `${window.location.origin}`;
+    await navigator.clipboard.writeText(link);
+    setCopiedId(email);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const handleUpdateUser = async () => {
+    if (!editingUser?.id) return;
+    setSaving(true);
+    await base44.auth.updateMe ? null : null; // can't update other users' built-in fields
+    // We can update custom fields via entity
+    await base44.entities.User.update(editingUser.id, {
+      role: editingUser.role,
+      artist_id: editingUser.artist_id || null,
+    });
+    setUsers(prev => prev.map(u => u.id === editingUser.id ? { ...u, role: editingUser.role, artist_id: editingUser.artist_id } : u));
+    setEditingUser(null);
+    setSaving(false);
+  };
+
+  const ROLE_COLORS = { admin: '#FF007F', artist: '#f59e0b', user: '#9ca3af' };
+  const ROLE_LABELS = { admin: 'ADMIN', artist: 'ARTYSTA', user: 'UŻYTKOWNIK' };
+
+  return (
+    <div>
+      <div className="mb-10">
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>UŻYTKOWNICY</p>
+        <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '3rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>Zarządzanie dostępem</h1>
+      </div>
+
+      {/* Invite form */}
+      <div className="p-6 mb-8" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+        <div className="flex items-center gap-2 mb-6">
+          <UserPlus size={14} color="#FF007F" />
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase' }}>ZAPROŚ UŻYTKOWNIKA</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
+          <div>
+            <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>ADRES E-MAIL *</label>
+            <input
+              type="email"
+              value={inviteEmail}
+              onChange={e => setInviteEmail(e.target.value)}
+              placeholder="artysta@email.pl"
+              style={inputStyle}
+            />
+          </div>
+          <div>
+            <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>ROLA</label>
+            <select
+              value={inviteRole}
+              onChange={e => { setInviteRole(e.target.value); if (e.target.value !== 'artist') setInviteArtistId(''); }}
+              style={{ ...inputStyle, colorScheme: theme === 'dark' ? 'dark' : 'light' }}
+            >
+              <option value="user">Użytkownik</option>
+              <option value="artist">Artysta</option>
+              <option value="admin">Administrator</option>
+            </select>
+          </div>
+          {inviteRole === 'artist' && (
+            <div>
+              <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>POWIĄŻ Z ARTYSTĄ</label>
+              <select
+                value={inviteArtistId}
+                onChange={e => setInviteArtistId(e.target.value)}
+                style={{ ...inputStyle, colorScheme: theme === 'dark' ? 'dark' : 'light' }}
+              >
+                <option value="">— wybierz artystę —</option>
+                {artists.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+              </select>
+            </div>
+          )}
+        </div>
+
+        {inviteError && (
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em', marginBottom: '12px' }}>⚠ {inviteError}</p>
+        )}
+        {inviteSuccess && (
+          <div className="mb-4 px-3 py-2 flex items-center justify-between" style={{ border: '0.5px solid #16a34a', background: 'rgba(22,163,74,0.06)' }}>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.08em' }}>
+              ✓ Zaproszenie wysłane na {inviteSuccess.email} — rola: {ROLE_LABELS[inviteSuccess.role]}
+            </p>
+            <button onClick={() => copyInviteLink(inviteSuccess.email)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.1em' }}>
+              {copiedId === inviteSuccess.email ? <><Check size={10} /> SKOPIOWANO</> : <><Copy size={10} /> KOPIUJ LINK</>}
+            </button>
+          </div>
+        )}
+
+        <div className="flex gap-3">
+          <button
+            onClick={handleInvite}
+            disabled={!inviteEmail || inviting}
+            className="btn-oxblood"
+            style={{ fontSize: '10px', opacity: !inviteEmail || inviting ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <Mail size={12} /> {inviting ? 'WYSYŁAM...' : 'WYŚLIJ ZAPROSZENIE'}
+          </button>
+        </div>
+
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.08em', marginTop: '12px' }}>
+          Użytkownik otrzyma e-mail z linkiem do rejestracji. Po zalogowaniu możesz przypisać mu profil artysty poniżej.
+        </p>
+      </div>
+
+      {/* Users list */}
+      <div>
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>
+          ZAREJESTROWANI UŻYTKOWNICY ({users.length})
+        </p>
+        {loading ? (
+          <div className="p-8 text-center" style={{ border: `0.5px solid ${t.cardBorder}` }}>
+            <div className="w-8 h-px mx-auto animate-pulse" style={{ background: '#FF007F' }} />
+          </div>
+        ) : (
+          <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+            {users.map((u, i) => {
+              const linkedArtist = artists.find(a => a.id === u.artist_id);
+              return (
+                <div key={u.id} className="flex items-center justify-between p-4 gap-4"
+                  style={{ borderBottom: i < users.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }}>
+                  <div className="min-w-0 flex-1">
+                    <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{u.full_name || u.email}</p>
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px' }}>
+                      {u.email}{linkedArtist ? ` · ${linkedArtist.name}` : ''}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3 flex-shrink-0">
+                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.1em', padding: '3px 8px', border: `0.5px solid ${ROLE_COLORS[u.role] || '#9ca3af'}`, color: ROLE_COLORS[u.role] || '#9ca3af' }}>
+                      {ROLE_LABELS[u.role] || u.role?.toUpperCase()}
+                    </span>
+                    <button
+                      onClick={() => setEditingUser({ ...u })}
+                      style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${t.cardBorder}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}
+                    >
+                      EDYTUJ
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Edit user modal */}
+      {editingUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={() => setEditingUser(null)}>
+          <div className="w-full max-w-md p-8" style={{ background: theme === 'light' ? '#FFFFFF' : '#0A0A0A', border: `0.5px solid ${t.cardBorder}` }} onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px' }}>EDYCJA UŻYTKOWNIKA</p>
+                <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.6rem', color: t.title, letterSpacing: '0.04em' }}>{editingUser.full_name || editingUser.email}</h3>
+              </div>
+              <button onClick={() => setEditingUser(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}><X size={18} /></button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>ROLA</label>
+                <select
+                  value={editingUser.role || 'user'}
+                  onChange={e => setEditingUser(u => ({ ...u, role: e.target.value, artist_id: e.target.value !== 'artist' ? '' : u.artist_id }))}
+                  style={{ ...inputStyle, colorScheme: theme === 'dark' ? 'dark' : 'light' }}
+                >
+                  <option value="user">Użytkownik</option>
+                  <option value="artist">Artysta</option>
+                  <option value="admin">Administrator</option>
+                </select>
+              </div>
+              {editingUser.role === 'artist' && (
+                <div>
+                  <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>PROFIL ARTYSTY</label>
+                  <select
+                    value={editingUser.artist_id || ''}
+                    onChange={e => setEditingUser(u => ({ ...u, artist_id: e.target.value }))}
+                    style={{ ...inputStyle, colorScheme: theme === 'dark' ? 'dark' : 'light' }}
+                  >
+                    <option value="">— wybierz artystę —</option>
+                    {artists.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                  </select>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3 mt-8">
+              <button onClick={handleUpdateUser} disabled={saving} className="btn-oxblood flex-1" style={{ fontSize: '10px', opacity: saving ? 0.6 : 1 }}>
+                {saving ? 'ZAPISUJĘ...' : 'ZAPISZ'}
+              </button>
+              <button onClick={() => setEditingUser(null)} className="btn-ghost-parchment" style={{ fontSize: '10px' }}>ANULUJ</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

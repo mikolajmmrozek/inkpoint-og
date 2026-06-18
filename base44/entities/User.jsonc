@@ -1,17 +1,19 @@
 {
+  "name": "User",
+  "type": "object",
   "properties": {
     "role": {
       "type": "string",
-      "description": "The role of the user in the app",
       "enum": [
         "admin",
-        "user"
-      ]
+        "user",
+        "artist"
+      ],
+      "default": "user"
+    },
+    "artist_id": {
+      "type": "string",
+      "description": "Powi\u0105zanie z encj\u0105 Artist (dla roli artist)"
     }
-  },
-  "required": [
-    "role"
-  ],
-  "name": "User",
-  "type": "object"
+  }
 }
