@@ -136,6 +136,11 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
                         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {b.artist_name}{b.tattoo_placement ? ` · ${b.tattoo_placement}` : ''}
                         </p>
+                        {b.service_name && (
+                          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.08em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', opacity: 0.8 }}>
+                            {b.service_name}
+                          </p>
+                        )}
                       </div>
                     </div>
                     
