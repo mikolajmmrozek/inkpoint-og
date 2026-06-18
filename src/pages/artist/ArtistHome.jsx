@@ -6,7 +6,7 @@ import { Calendar, Clock, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, isToday, isPast, parseISO } from 'date-fns';
 import { pl } from 'date-fns/locale';
-import ArtistBookingViewModal from '@/components/artist/ArtistBookingViewModal';
+import BookingModal from '@/components/dashboard/BookingModal';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -20,6 +20,7 @@ export default function ArtistHome() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [artistServices, setArtistServices] = useState([]);
 
   const t = theme === 'light'
     ? { title: '#111111', muted: 'rgba(0,0,0,0.4)', cardBg: '#FFFFFF', cardBorder: '#E5E5E5', value: '#111111', rowHover: 'rgba(0,0,0,0.03)', rowBorder: '#E5E5E5' }
@@ -27,9 +28,13 @@ export default function ArtistHome() {
 
   useEffect(() => {
     if (!artist?.id) return;
-    base44.entities.Booking.filter({ artist_id: artist.id }, '-session_date', 100)
-      .then(setBookings)
-      .finally(() => setLoading(false));
+    Promise.all([
+      base44.entities.Booking.filter({ artist_id: artist.id }, '-session_date', 100),
+      base44.entities.Service.filter({ is_active: true }),
+    ]).then(([bk, svcs]) => {
+      setBookings(bk);
+      setArtistServices(svcs.filter(s => !s.artist_ids?.length || s.artist_ids.includes(artist.id)));
+    }).finally(() => setLoading(false));
   }, [artist?.id]);
 
   const todayStr = new Date().toISOString().split('T')[0];
@@ -203,13 +208,21 @@ export default function ArtistHome() {
 
       <AnimatePresence>
         {selectedBooking && (
-          <ArtistBookingViewModal
+          <BookingModal
             booking={selectedBooking}
-            onClose={() => setSelectedBooking(null)}
+            isNew={false}
+            artist={artist}
+            artistServices={artistServices}
+            theme={theme}
             t={theme === 'light'
               ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)' }
               : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)' }
             }
+            onClose={() => setSelectedBooking(null)}
+            onSaved={() => {
+              base44.entities.Booking.filter({ artist_id: artist.id }, '-session_date', 100).then(setBookings);
+              setSelectedBooking(null);
+            }}
           />
         )}
       </AnimatePresence>
