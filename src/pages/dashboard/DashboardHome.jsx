@@ -129,7 +129,7 @@ export default function DashboardHome() {
               return (
                 <button
                   key={f.id}
-                  onClick={() => setPreviewForm({ healthFormId: f.id, clientName })}
+                  onClick={() => setPreviewForm({ healthFormId: f.id, clientName, isDraft: true })}
                   className="flex items-center justify-between p-4 transition-colors w-full text-left"
                   style={{ borderBottom: i < draftForms.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none', background: 'transparent', border: 'none', cursor: 'pointer', borderBottom: i < draftForms.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none', width: '100%' }}
                   onMouseEnter={e => e.currentTarget.style.background = t.rowHover}
@@ -290,6 +290,10 @@ export default function DashboardHome() {
           bookingId={previewForm.bookingId}
           clientName={previewForm.clientName}
           onClose={() => setPreviewForm(null)}
+          extraAction={previewForm.isDraft ? {
+            label: '↩ KONTYNUUJ ANKIETĘ',
+            onClick: () => window.open(`/health-form?edit_form_id=${previewForm.healthFormId}`, '_blank'),
+          } : null}
           t={theme === 'light'
             ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F' }
             : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F' }

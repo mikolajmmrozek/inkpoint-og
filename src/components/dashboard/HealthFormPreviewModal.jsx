@@ -22,7 +22,7 @@ const YesNo = ({ label, value, desc, t }) => (
   </div>
 );
 
-export default function HealthFormPreviewModal({ bookingId, healthFormId, clientName, onClose, t }) {
+export default function HealthFormPreviewModal({ bookingId, healthFormId, clientName, onClose, t, extraAction }) {
   t = t || { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F' };
   const [form, setForm] = useState(null);
   const [guardian, setGuardian] = useState(null);
@@ -92,9 +92,19 @@ export default function HealthFormPreviewModal({ bookingId, healthFormId, client
               <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>ANKIETA ZDROWOTNA</p>
               <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em', lineHeight: 1 }}>{clientName}</h2>
             </div>
-            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}>
-              <X size={16} />
-            </button>
+            <div className="flex items-center gap-3">
+              {extraAction && (
+                <button
+                  onClick={extraAction.onClick}
+                  style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '7px 14px', background: 'linear-gradient(135deg,#FF007F,#CC0066)', color: '#F5F0EB', border: 'none', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                >
+                  {extraAction.label}
+                </button>
+              )}
+              <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}>
+                <X size={16} />
+              </button>
+            </div>
           </div>
 
           {loading ? (
