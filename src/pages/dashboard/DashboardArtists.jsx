@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { GripVertical } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import { Plus, Edit, Trash2, X, History } from 'lucide-react';
+import { Plus, Edit, Trash2, X, History, Eye, EyeOff } from 'lucide-react';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTheme } from './Dashboard';
@@ -349,7 +349,22 @@ export default function DashboardArtists() {
                   </label>
                 </div>
 
-                <div className="flex gap-4 pt-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
+                {/* Visibility toggle */}
+                <div className="flex items-center gap-6 pt-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
+                  <button
+                    type="button"
+                    onClick={() => setForm(f => ({ ...f, is_visible: f.is_visible === false ? true : false }))}
+                    className="flex items-center gap-2"
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.is_visible === false ? t.muted : '#16a34a' }}
+                  >
+                    <div style={{ width: '12px', height: '12px', border: `0.5px solid ${form.is_visible === false ? t.border : '#16a34a'}`, background: form.is_visible === false ? 'transparent' : '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {form.is_visible !== false && <span style={{ color: '#fff', fontSize: '8px' }}>✓</span>}
+                    </div>
+                    Widoczny na stronie artystów
+                  </button>
+                </div>
+
+                <div className="flex gap-4" style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '16px' }}>
                   <button onClick={handleSave} className="btn-oxblood flex-1">ZAPISZ</button>
                   <button onClick={() => setEditing(null)} className="btn-ghost-parchment">ANULUJ</button>
                 </div>
@@ -408,6 +423,11 @@ export default function DashboardArtists() {
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
+                          {a.is_visible === false && (
+                            <span title="Ukryty na stronie">
+                              <EyeOff size={13} style={{ color: t.muted }} />
+                            </span>
+                          )}
                           <button onClick={() => openEdit(a)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
                             <Edit size={14} />
                           </button>

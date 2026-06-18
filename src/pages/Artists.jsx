@@ -56,7 +56,9 @@ export default function Artists() {
     base44.entities.Artist.list('-created_date', 50)
       .then(data => {
         if (data.length > 0) {
-          const sorted = [...data].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+          const sorted = [...data]
+            .filter(a => a.is_visible !== false)
+            .sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
           setArtists(sorted);
         } else {
           setArtists(PLACEHOLDER_ARTISTS);

@@ -52,6 +52,11 @@
       "type": "boolean",
       "default": true
     },
+    "is_visible": {
+      "type": "boolean",
+      "default": true,
+      "description": "Czy artysta jest widoczny na stronie publicznej"
+    },
     "artist_cut_percent": {
       "type": "number",
       "default": 60,
