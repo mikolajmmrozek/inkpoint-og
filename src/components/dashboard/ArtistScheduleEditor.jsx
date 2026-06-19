@@ -25,12 +25,8 @@ const DEFAULT_SCHEDULE = [
 
 const TODAY = format(new Date(), 'yyyy-MM-dd');
 
-const TIME_OPTIONS = [];
-for (let h = 0; h < 24; h++) {
-  for (let m = 0; m < 60; m += 30) {
-    TIME_OPTIONS.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
-  }
-}
+const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
+const MINUTE_OPTIONS = ['00', '15', '30', '45'];
 
 const EMPTY_ENTRY = {
   kind: 'block',
@@ -103,41 +99,36 @@ function generateDates(dateFrom, dateTo, repeat, repeatUntil, repeatIndefinite) 
   return dates;
 }
 
-// TimeDropdown — styled select for time
-function TimeDropdown({ value, onChange, border, text, muted }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef(null);
+// TimeDropdown — godziny i minuty osobno jako natywne selecty
+function TimeDropdown({ value, onChange, border, text }) {
+  const [h, m] = (value || '09:00').split(':');
+  const setH = (newH) => onChange(`${newH}:${m || '00'}`);
+  const setM = (newM) => onChange(`${h || '09'}:${newM}`);
 
-  useEffect(() => {
-    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
+  const selectStyle = {
+    background: '#1a1a1a',
+    border: `0.5px solid ${border}`,
+    color: text,
+    padding: '6px 8px',
+    fontSize: '14px',
+    outline: 'none',
+    fontFamily: 'Inter, sans-serif',
+    cursor: 'pointer',
+    appearance: 'none',
+    WebkitAppearance: 'none',
+    borderRadius: 0,
+    flex: 1,
+  };
 
   return (
-    <div ref={ref} style={{ position: 'relative' }}>
-      <button
-        type="button"
-        onClick={() => setOpen(o => !o)}
-        style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'transparent', border: 'none', borderBottom: `0.5px solid ${open ? '#FF007F' : border}`, color: text, padding: '7px 0', fontSize: '13px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif', cursor: 'pointer' }}
-      >
-        <span style={{ flex: 1, textAlign: 'left' }}>{value || '—'}</span>
-        <ChevronDown size={12} color={muted} />
-      </button>
-      {open && (
-        <div style={{ position: 'absolute', zIndex: 200, top: '100%', left: 0, right: 0, background: '#111', border: `0.5px solid ${border}`, maxHeight: '180px', overflowY: 'auto' }}>
-          {TIME_OPTIONS.map(t => (
-            <button
-              key={t}
-              type="button"
-              onMouseDown={() => { onChange(t); setOpen(false); }}
-              style={{ display: 'block', width: '100%', textAlign: 'left', padding: '6px 10px', background: t === value ? 'rgba(255,0,127,0.1)' : 'transparent', border: 'none', color: t === value ? '#FF007F' : text, fontFamily: 'Inter, sans-serif', fontSize: '13px', cursor: 'pointer' }}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
-      )}
+    <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+      <select value={h} onChange={e => setH(e.target.value)} style={selectStyle}>
+        {HOUR_OPTIONS.map(hh => <option key={hh} value={hh}>{hh}</option>)}
+      </select>
+      <span style={{ color: text, fontSize: '14px', flexShrink: 0 }}>:</span>
+      <select value={m} onChange={e => setM(e.target.value)} style={selectStyle}>
+        {MINUTE_OPTIONS.map(mm => <option key={mm} value={mm}>{mm}</option>)}
+      </select>
     </div>
   );
 }
