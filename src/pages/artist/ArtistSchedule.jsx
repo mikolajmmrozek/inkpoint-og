@@ -730,12 +730,12 @@ export default function ArtistSchedule() {
     if (!artist?.id) return;
     // Sequential to avoid rate limit — bookings first, then availability, then services
     loadBookings();
-    setTimeout(() => loadAvailability(), 300);
+    setTimeout(() => loadAvailability(), 600);
     setTimeout(() => {
       base44.entities.Service.filter({ is_active: true }).then(svcs => {
         setArtistServices(svcs.filter(s => !s.artist_ids?.length || s.artist_ids.includes(artist.id)));
       });
-    }, 600);
+    }, 1200);
   }, [artist?.id]);
 
   const handleDayClick = (day) => {

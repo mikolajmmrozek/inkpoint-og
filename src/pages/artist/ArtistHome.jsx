@@ -342,7 +342,7 @@ export default function ArtistHome() {
       base44.entities.Service.filter({ is_active: true }).then(svcs => {
         setArtistServices(svcs.filter(s => !s.artist_ids?.length || s.artist_ids.includes(artist.id)));
       });
-    }, 400);
+    }, 800);
   }, [artist?.id]);
 
   const todayStr = new Date().toISOString().split('T')[0];
