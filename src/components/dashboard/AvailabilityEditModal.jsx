@@ -77,6 +77,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
   const isRecurring = record.repeat && record.repeat !== 'none';
 
   // step: 'view' | 'confirm' | 'edit'
+  // Gdy startInEdit=true: cykliczne → confirm (wybór zakresu), jednorazowe → edit od razu
   const [step, setStep] = useState(startInEdit ? (isRecurring ? 'confirm' : 'edit') : 'view');
   const [editScope, setEditScope] = useState(startInEdit && !isRecurring ? 'cycle' : null);
   const [saving, setSaving] = useState(false);
@@ -207,10 +208,23 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
           {/* ── VIEW ── */}
           {step === 'view' && (
             <div className="space-y-4">
+              {/* Baner cykliczności */}
+              {isRecurring && (
+                <div className="flex items-center gap-2 px-3 py-2" style={{ background: `${typeColor}08`, border: `0.5px solid ${typeColor}30` }}>
+                  <RefreshCw size={10} color={typeColor} style={{ flexShrink: 0 }} />
+                  <div>
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: typeColor, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                      WYDARZENIE CYKLICZNE
+                    </p>
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginTop: '1px' }}>
+                      {repeatDisplay} · {allRecords?.length || 1} {(allRecords?.length || 1) === 1 ? 'wpis' : (allRecords?.length || 1) < 5 ? 'wpisy' : 'wpisów'} w cyklu
+                    </p>
+                  </div>
+                </div>
+              )}
               <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '16px' }} className="space-y-3">
                 <Row label="DATA" value={dateDisplay} color={typeColor} t={t} />
                 <Row label="CZAS" value={timeDisplay} color={typeColor} t={t} />
-                {isRecurring && <Row label="POWTARZANIE" value={repeatDisplay} color={typeColor} t={t} icon={<RefreshCw size={9} />} />}
                 {record.note && <Row label="NOTATKA" value={record.note} color={typeColor} t={t} />}
               </div>
               <div className="flex gap-3 pt-2" style={{ borderTop: `0.5px solid ${t.border}` }}>
