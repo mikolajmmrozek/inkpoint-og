@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Edit2, X } from 'lucide-react';
 import { format, eachDayOfInterval, parseISO } from 'date-fns';
 
 const DAYS = [
@@ -43,6 +43,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
   const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [entry, setEntry] = useState(EMPTY_ENTRY);
+  const [editingException, setEditingException] = useState(null); // id of exception being edited
 
   const border = t?.border || '#262626';
   const text = t?.text || '#F5F0EB';
@@ -156,6 +157,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
 
     setExceptions(prev => [...prev, ...created].sort((a, b) => (a.date || '').localeCompare(b.date || '')));
     setShowForm(false);
+    setEditingException(null);
     setEntry(EMPTY_ENTRY);
     setSaving(false);
   };
@@ -163,6 +165,48 @@ export default function ArtistScheduleEditor({ artistId, t }) {
   const deleteException = async (id) => {
     await base44.entities.ArtistAvailability.delete(id);
     setExceptions(e => e.filter(x => x.id !== id));
+  };
+
+  const openEditException = (ex) => {
+    setEditingException(ex.id);
+    setEntry({
+      kind: ex.is_available ? 'free' : 'block',
+      timeMode: ex.start_time && ex.end_time ? 'hours' : 'allday',
+      dateMode: 'single',
+      date_from: ex.date || TODAY,
+      date_to: ex.date || TODAY,
+      start_time: ex.start_time || '09:00',
+      end_time: ex.end_time || '18:00',
+      repeat: 'none',
+      repeat_until: '',
+      note: ex.note || '',
+    });
+    setShowForm(true);
+  };
+
+  const saveEditException = async () => {
+    setSaving(true);
+    const isAvailable = entry.kind === 'free';
+    const allDay = entry.timeMode === 'allday';
+    await base44.entities.ArtistAvailability.update(editingException, {
+      date: entry.date_from,
+      is_available: isAvailable,
+      start_time: allDay ? null : entry.start_time,
+      end_time: allDay ? null : entry.end_time,
+      note: entry.note || undefined,
+    });
+    const updated = await base44.entities.ArtistAvailability.filter({ artist_id: artistId });
+    setExceptions(updated.filter(r => r.type === 'exception').sort((a, b) => (a.date || '').localeCompare(b.date || '')));
+    setShowForm(false);
+    setEditingException(null);
+    setEntry(EMPTY_ENTRY);
+    setSaving(false);
+  };
+
+  const cancelForm = () => {
+    setShowForm(false);
+    setEditingException(null);
+    setEntry(EMPTY_ENTRY);
   };
 
   const lbl = (txt) => (
@@ -234,14 +278,23 @@ export default function ArtistScheduleEditor({ artistId, t }) {
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
             DODAJ WOLNE
           </p>
-          <button onClick={() => { setShowForm(v => !v); setEntry(EMPTY_ENTRY); }} style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${showForm ? '#FF007F' : border}`, color: showForm ? '#FF007F' : muted, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Plus size={10} /> DODAJ
-          </button>
+          {!showForm && (
+            <button onClick={() => { setShowForm(true); setEditingException(null); setEntry(EMPTY_ENTRY); }} style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${border}`, color: muted, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Plus size={10} /> DODAJ
+            </button>
+          )}
         </div>
 
         {/* Form */}
         {showForm && (
           <div className="mb-4 p-4 space-y-4" style={{ border: `0.5px solid rgba(255,0,127,0.25)`, background: 'rgba(255,0,127,0.02)' }}>
+            <div className="flex items-center justify-between">
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                {editingException ? 'EDYTUJ WPIS' : 'NOWY WPIS'}
+              </p>
+              <button onClick={cancelForm} style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><X size={13} /></button>
+            </div>
+
             {/* Kind */}
             <div>
               {lbl('TYP')}
@@ -251,17 +304,19 @@ export default function ArtistScheduleEditor({ artistId, t }) {
               </div>
             </div>
 
-            {/* Date mode */}
-            <div>
-              {lbl('ZAKRES DAT')}
-              <div className="flex gap-2">
-                <SegBtn active={entry.dateMode === 'single'} onClick={() => setEntry(e => ({ ...e, dateMode: 'single' }))}>Jeden dzień</SegBtn>
-                <SegBtn active={entry.dateMode === 'range'} onClick={() => setEntry(e => ({ ...e, dateMode: 'range' }))}>Zakres (od–do)</SegBtn>
+            {/* Date mode — hidden when editing (single date only) */}
+            {!editingException && (
+              <div>
+                {lbl('ZAKRES DAT')}
+                <div className="flex gap-2">
+                  <SegBtn active={entry.dateMode === 'single'} onClick={() => setEntry(e => ({ ...e, dateMode: 'single' }))}>Jeden dzień</SegBtn>
+                  <SegBtn active={entry.dateMode === 'range'} onClick={() => setEntry(e => ({ ...e, dateMode: 'range' }))}>Zakres (od–do)</SegBtn>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Date inputs */}
-            {entry.dateMode === 'single' ? (
+            {entry.dateMode === 'single' || editingException ? (
               <div>{lbl('DATA')}<input {...inp(entry.date_from, e => setEntry(n => ({ ...n, date_from: e.target.value })), 'date')} /></div>
             ) : (
               <div className="grid grid-cols-2 gap-4">
@@ -286,19 +341,36 @@ export default function ArtistScheduleEditor({ artistId, t }) {
               </div>
             )}
 
-            {/* Repeat */}
-            <div>
-              {lbl('POWTARZANIE')}
-              <div className="flex gap-1 flex-wrap">
-                {[['none','Brak'], ['weekly','Co tydzień'], ['biweekly','Co 2 tygodnie'], ['monthly','Co miesiąc'], ['indefinite','Do odwołania']].map(([val, label]) => (
-                  <SegBtn key={val} active={entry.repeat === val} onClick={() => setEntry(e => ({ ...e, repeat: val, repeat_until: val === 'indefinite' ? '' : e.repeat_until }))}>{label}</SegBtn>
-                ))}
+            {/* Repeat — only for new entries */}
+            {!editingException && (
+              <div>
+                {lbl('POWTARZANIE')}
+                <div className="flex gap-1 flex-wrap">
+                  {[['none','Brak'], ['weekly','Co tydzień'], ['biweekly','Co 2 tygodnie'], ['monthly','Co miesiąc']].map(([val, label]) => (
+                    <SegBtn key={val} active={entry.repeat === val} onClick={() => setEntry(e => ({ ...e, repeat: val }))}>{label}</SegBtn>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Repeat until date — only when repeat != none and != indefinite */}
-            {entry.repeat !== 'none' && entry.repeat !== 'indefinite' && (
-              <div>{lbl('POWTARZAJ DO')}<input {...inp(entry.repeat_until, e => setEntry(n => ({ ...n, repeat_until: e.target.value })), 'date')} /></div>
+            {/* Repeat until + "Do odwołania" toggle — only when repeat != none */}
+            {!editingException && entry.repeat !== 'none' && (
+              <div>
+                {lbl('POWTARZAJ DO')}
+                <div className="flex items-center gap-3">
+                  <input
+                    {...inp(entry.repeat_until, e => setEntry(n => ({ ...n, repeat_until: e.target.value })), 'date')}
+                    disabled={entry.repeat === 'indefinite'}
+                    style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${border}`, color: entry.repeat === 'indefinite' ? muted : text, padding: '7px 0', fontSize: '13px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif', colorScheme: 'dark', opacity: entry.repeat === 'indefinite' ? 0.4 : 1, cursor: entry.repeat === 'indefinite' ? 'not-allowed' : 'text' }}
+                  />
+                  <button
+                    onClick={() => setEntry(e => ({ ...e, repeat: e.repeat === 'indefinite' ? 'weekly' : 'indefinite', repeat_until: '' }))}
+                    style={{ flexShrink: 0, fontFamily: 'JetBrains Mono', fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${entry.repeat === 'indefinite' ? '#FF007F' : border}`, color: entry.repeat === 'indefinite' ? '#FF007F' : muted, background: entry.repeat === 'indefinite' ? 'rgba(255,0,127,0.08)' : 'transparent', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                  >
+                    Do odwołania
+                  </button>
+                </div>
+              </div>
             )}
 
             {/* Note */}
@@ -308,10 +380,15 @@ export default function ArtistScheduleEditor({ artistId, t }) {
             </div>
 
             <div className="flex gap-3 pt-1">
-              <button onClick={saveEntry} disabled={saving} className="btn-oxblood" style={{ fontSize: '9px', padding: '8px 18px' }}>
-                {saving ? 'ZAPISUJĘ...' : 'ZAPISZ'}
+              <button
+                onClick={editingException ? saveEditException : saveEntry}
+                disabled={saving}
+                className="btn-oxblood"
+                style={{ fontSize: '9px', padding: '8px 18px' }}
+              >
+                {saving ? 'ZAPISUJĘ...' : editingException ? 'ZAPISZ ZMIANY' : 'ZAPISZ'}
               </button>
-              <button onClick={() => setShowForm(false)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: `0.5px solid ${border}`, color: muted, background: 'transparent', cursor: 'pointer' }}>ANULUJ</button>
+              <button onClick={cancelForm} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: `0.5px solid ${border}`, color: muted, background: 'transparent', cursor: 'pointer' }}>ANULUJ</button>
             </div>
           </div>
         )}
@@ -329,7 +406,10 @@ export default function ArtistScheduleEditor({ artistId, t }) {
                     </span>
                     {ex.note && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: muted, marginLeft: '8px' }}>· {ex.note}</span>}
                   </div>
-                  <button onClick={() => deleteException(ex.id)} style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={11} /></button>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => openEditException(ex)} style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><Edit2 size={10} /></button>
+                    <button onClick={() => deleteException(ex.id)} style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={11} /></button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -339,7 +419,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
         {/* Free days list */}
         {frees.length > 0 && (
           <div>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>DODATKOWE WOLNE / DOSTĘPNE ({frees.length})</p>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>DYSPOZYCJE / DOSTĘPNE ({frees.length})</p>
             <div className="space-y-1">
               {frees.map(ex => (
                 <div key={ex.id} className="flex items-center justify-between px-3 py-2" style={{ border: '0.5px solid rgba(22,163,74,0.25)', background: 'rgba(22,163,74,0.03)' }}>
@@ -349,7 +429,10 @@ export default function ArtistScheduleEditor({ artistId, t }) {
                     </span>
                     {ex.note && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: muted, marginLeft: '8px' }}>· {ex.note}</span>}
                   </div>
-                  <button onClick={() => deleteException(ex.id)} style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={11} /></button>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => openEditException(ex)} style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><Edit2 size={10} /></button>
+                    <button onClick={() => deleteException(ex.id)} style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={11} /></button>
+                  </div>
                 </div>
               ))}
             </div>
