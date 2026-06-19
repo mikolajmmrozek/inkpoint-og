@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Plus, Trash2, Edit2, X } from 'lucide-react';
-import { format, eachDayOfInterval, parseISO } from 'date-fns';
+import { Plus, Trash2, Edit2, X, RefreshCw } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
+import { pl } from 'date-fns/locale';
 
 const DAYS = [
   { label: 'Pn', value: 1 },
@@ -36,6 +37,64 @@ const EMPTY_ENTRY = {
   repeat_until: '',
   note: '',
 };
+
+const REPEAT_LABELS = {
+  weekly: 'co tydzień',
+  biweekly: 'co 2 tygodnie',
+  monthly: 'co miesiąc',
+};
+
+const DAY_NAMES_PL = ['niedziela', 'poniedziałek', 'wtorek', 'środa', 'czwartek', 'piątek', 'sobota'];
+
+function formatRepeatLabel(ex) {
+  if (!ex.repeat || ex.repeat === 'none') return null;
+  const repeatStr = REPEAT_LABELS[ex.repeat] || ex.repeat;
+  let dayStr = '';
+  if (ex.date) {
+    try {
+      const d = parseISO(ex.date);
+      dayStr = DAY_NAMES_PL[d.getDay()];
+    } catch {}
+  }
+  let untilStr = '';
+  if (ex.repeat_until === 'indefinite' || !ex.repeat_until) {
+    untilStr = 'do odwołania';
+  } else {
+    try {
+      untilStr = `do ${format(parseISO(ex.repeat_until), 'd MMM yyyy', { locale: pl })}`;
+    } catch { untilStr = ex.repeat_until; }
+  }
+  return `${repeatStr}${dayStr ? ` (${dayStr})` : ''} · ${untilStr}`;
+}
+
+function ExceptionRow({ ex, color, border, muted, text, onEdit, onDelete }) {
+  const timeStr = ex.start_time && ex.end_time ? `${ex.start_time}–${ex.end_time}` : 'cały dzień';
+  const repeatLabel = formatRepeatLabel(ex);
+  let dateStr = ex.date || '';
+  try { dateStr = format(parseISO(ex.date), 'd MMM yyyy', { locale: pl }); } catch {}
+
+  return (
+    <div className="flex items-start justify-between px-3 py-2" style={{ border: `0.5px solid ${color}33`, background: `${color}06` }}>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color, letterSpacing: '0.06em' }}>
+            {dateStr} · {timeStr}
+          </span>
+          {repeatLabel && (
+            <span className="flex items-center gap-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color, opacity: 0.75, letterSpacing: '0.04em' }}>
+              <RefreshCw size={8} /> {repeatLabel}
+            </span>
+          )}
+        </div>
+        {ex.note && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: muted, marginTop: '2px' }}>{ex.note}</p>}
+      </div>
+      <div className="flex items-center gap-2 ml-2 flex-shrink-0">
+        <button onClick={() => onEdit(ex)} style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><Edit2 size={10} /></button>
+        <button onClick={() => onDelete(ex.id)} style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={11} /></button>
+      </div>
+    </div>
+  );
+}
 
 export default function ArtistScheduleEditor({ artistId, t }) {
   const [recurring, setRecurring] = useState([]);
@@ -96,69 +155,25 @@ export default function ArtistScheduleEditor({ artistId, t }) {
     setSaving(false);
   };
 
-  // Expand repeat into individual dates
-  const expandDates = (dateFrom, dateTo, dateMode, repeat, repeatUntil) => {
-    let baseDates = [];
-    if (dateMode === 'range') {
-      const from = parseISO(dateFrom);
-      const to = parseISO(dateTo);
-      baseDates = (to >= from ? eachDayOfInterval({ start: from, end: to }) : [from]).map(d => format(d, 'yyyy-MM-dd'));
-    } else {
-      baseDates = [dateFrom];
-    }
-
-    if (repeat === 'none') return baseDates;
-
-    // Generate repeated occurrences
-    // repeatUntil === 'indefinite' means ~2 years ahead
-    const limitDate = repeatUntil === 'indefinite'
-      ? new Date(new Date().setFullYear(new Date().getFullYear() + 2))
-      : repeatUntil ? parseISO(repeatUntil) : null;
-    if (!limitDate) return baseDates;
-
-    const allDates = new Set(baseDates);
-    const intervalDays = repeat === 'weekly' ? 7 : repeat === 'biweekly' ? 14 : null;
-
-    baseDates.forEach(base => {
-      let current = parseISO(base);
-      for (let i = 0; i < 200; i++) {
-        let next;
-        if (intervalDays) {
-          next = new Date(current);
-          next.setDate(next.getDate() + intervalDays);
-        } else if (repeat === 'monthly') {
-          next = new Date(current);
-          next.setMonth(next.getMonth() + 1);
-        } else break;
-        if (next > limitDate) break;
-        allDates.add(format(next, 'yyyy-MM-dd'));
-        current = next;
-      }
-    });
-
-    return [...allDates].sort();
-  };
-
   const saveEntry = async () => {
     setSaving(true);
     const isAvailable = entry.kind === 'free';
     const allDay = entry.timeMode === 'allday';
-    const effectiveUntil = entry.repeat_indefinite ? 'indefinite' : entry.repeat_until;
-    const dates = expandDates(entry.date_from, entry.date_to, entry.dateMode, entry.repeat, effectiveUntil);
+    const effectiveUntil = entry.repeat_indefinite ? 'indefinite' : (entry.repeat_until || undefined);
 
-    const created = await Promise.all(dates.map(date =>
-      base44.entities.ArtistAvailability.create({
-        artist_id: artistId,
-        type: 'exception',
-        date,
-        is_available: isAvailable,
-        start_time: allDay ? null : entry.start_time,
-        end_time: allDay ? null : entry.end_time,
-        note: entry.note || undefined,
-      })
-    ));
+    const created = await base44.entities.ArtistAvailability.create({
+      artist_id: artistId,
+      type: 'exception',
+      date: entry.date_from,
+      is_available: isAvailable,
+      start_time: allDay ? null : entry.start_time,
+      end_time: allDay ? null : entry.end_time,
+      note: entry.note || undefined,
+      repeat: entry.repeat !== 'none' ? entry.repeat : 'none',
+      repeat_until: entry.repeat !== 'none' ? effectiveUntil : undefined,
+    });
 
-    setExceptions(prev => [...prev, ...created].sort((a, b) => (a.date || '').localeCompare(b.date || '')));
+    setExceptions(prev => [...prev, created].sort((a, b) => (a.date || '').localeCompare(b.date || '')));
     setShowForm(false);
     setEditingException(null);
     setEntry(EMPTY_ENTRY);
@@ -172,6 +187,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
 
   const openEditException = (ex) => {
     setEditingException(ex.id);
+    const isIndefinite = ex.repeat_until === 'indefinite';
     setEntry({
       kind: ex.is_available ? 'free' : 'block',
       timeMode: ex.start_time && ex.end_time ? 'hours' : 'allday',
@@ -180,8 +196,9 @@ export default function ArtistScheduleEditor({ artistId, t }) {
       date_to: ex.date || TODAY,
       start_time: ex.start_time || '09:00',
       end_time: ex.end_time || '18:00',
-      repeat: 'none',
-      repeat_until: '',
+      repeat: ex.repeat || 'none',
+      repeat_indefinite: isIndefinite,
+      repeat_until: isIndefinite ? '' : (ex.repeat_until || ''),
       note: ex.note || '',
     });
     setShowForm(true);
@@ -191,12 +208,15 @@ export default function ArtistScheduleEditor({ artistId, t }) {
     setSaving(true);
     const isAvailable = entry.kind === 'free';
     const allDay = entry.timeMode === 'allday';
+    const effectiveUntil = entry.repeat_indefinite ? 'indefinite' : (entry.repeat_until || undefined);
     await base44.entities.ArtistAvailability.update(editingException, {
       date: entry.date_from,
       is_available: isAvailable,
       start_time: allDay ? null : entry.start_time,
       end_time: allDay ? null : entry.end_time,
       note: entry.note || undefined,
+      repeat: entry.repeat !== 'none' ? entry.repeat : 'none',
+      repeat_until: entry.repeat !== 'none' ? effectiveUntil : undefined,
     });
     const updated = await base44.entities.ArtistAvailability.filter({ artist_id: artistId });
     setExceptions(updated.filter(r => r.type === 'exception').sort((a, b) => (a.date || '').localeCompare(b.date || '')));
@@ -406,18 +426,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>BLOKADY ({blocks.length})</p>
             <div className="space-y-1">
               {blocks.map(ex => (
-                <div key={ex.id} className="flex items-center justify-between px-3 py-2" style={{ border: '0.5px solid rgba(255,0,127,0.2)', background: 'rgba(255,0,127,0.03)' }}>
-                  <div>
-                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.06em' }}>
-                      {ex.date} {ex.start_time && ex.end_time ? `· ${ex.start_time}–${ex.end_time}` : '· cały dzień'}
-                    </span>
-                    {ex.note && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: muted, marginLeft: '8px' }}>· {ex.note}</span>}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => openEditException(ex)} style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><Edit2 size={10} /></button>
-                    <button onClick={() => deleteException(ex.id)} style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={11} /></button>
-                  </div>
-                </div>
+                <ExceptionRow key={ex.id} ex={ex} color="#FF007F" border={border} muted={muted} text={text} onEdit={openEditException} onDelete={deleteException} />
               ))}
             </div>
           </div>
@@ -429,18 +438,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>DYSPOZYCJE / DOSTĘPNE ({frees.length})</p>
             <div className="space-y-1">
               {frees.map(ex => (
-                <div key={ex.id} className="flex items-center justify-between px-3 py-2" style={{ border: '0.5px solid rgba(22,163,74,0.25)', background: 'rgba(22,163,74,0.03)' }}>
-                  <div>
-                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.06em' }}>
-                      {ex.date} {ex.start_time && ex.end_time ? `· ${ex.start_time}–${ex.end_time}` : '· cały dzień'}
-                    </span>
-                    {ex.note && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: muted, marginLeft: '8px' }}>· {ex.note}</span>}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => openEditException(ex)} style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><Edit2 size={10} /></button>
-                    <button onClick={() => deleteException(ex.id)} style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={11} /></button>
-                  </div>
-                </div>
+                <ExceptionRow key={ex.id} ex={ex} color="#16a34a" border={border} muted={muted} text={text} onEdit={openEditException} onDelete={deleteException} />
               ))}
             </div>
           </div>
@@ -454,12 +452,32 @@ export default function ArtistScheduleEditor({ artistId, t }) {
   );
 }
 
+function matchesRepeat(ex, dateStr) {
+  if (!ex.date || ex.date > dateStr) return false;
+  if (ex.repeat_until && ex.repeat_until !== 'indefinite' && ex.repeat_until < dateStr) return false;
+  if (!ex.repeat || ex.repeat === 'none') return ex.date === dateStr;
+
+  const start = parseISO(ex.date);
+  const target = parseISO(dateStr);
+  const diffDays = Math.round((target - start) / 86400000);
+  if (diffDays < 0) return false;
+
+  if (ex.repeat === 'weekly') return diffDays % 7 === 0;
+  if (ex.repeat === 'biweekly') return diffDays % 14 === 0;
+  if (ex.repeat === 'monthly') {
+    return start.getDate() === target.getDate() && (
+      (target.getFullYear() - start.getFullYear()) * 12 + (target.getMonth() - start.getMonth()) >= 0
+    );
+  }
+  return false;
+}
+
 // Helper exported for DailyScheduleView
 export function getAvailabilityForDay(availabilityRecords, artistId, dateStr) {
   const dow = new Date(dateStr + 'T12:00:00').getDay();
   const artistRecords = availabilityRecords.filter(r => r.artist_id === artistId);
 
-  const exception = artistRecords.find(r => r.type === 'exception' && r.date === dateStr);
+  const exception = artistRecords.find(r => r.type === 'exception' && matchesRepeat(r, dateStr));
   if (exception) {
     return {
       isWorkday: exception.is_available,

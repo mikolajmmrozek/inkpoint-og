@@ -21,7 +21,7 @@
     "date": {
       "type": "string",
       "format": "date",
-      "description": "Konkretna data dla exception"
+      "description": "Data startowa wpisu (dla exception: konkretny dzie\u0144 lub start powtarzania)"
     },
     "start_time": {
       "type": "string",
@@ -39,6 +39,21 @@
     "note": {
       "type": "string",
       "description": "Opcjonalna notatka (np. urlop, dentysta)"
+    },
+    "repeat": {
+      "type": "string",
+      "enum": [
+        "none",
+        "weekly",
+        "biweekly",
+        "monthly"
+      ],
+      "default": "none",
+      "description": "Cz\u0119stotliwo\u015b\u0107 powtarzania wpisu"
+    },
+    "repeat_until": {
+      "type": "string",
+      "description": "Data zako\u0144czenia powtarzania (YYYY-MM-DD) lub 'indefinite'"
     }
   },
   "required": [
