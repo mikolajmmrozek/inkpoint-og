@@ -721,19 +721,21 @@ export default function ArtistSchedule() {
 
   const loadBookings = useCallback(() => {
     if (!artist?.id) return;
-    base44.entities.Booking.filter({ artist_id: artist.id }, '-session_date', 300)
+    base44.entities.Booking.filter({ artist_id: artist.id }, '-session_date', 150)
       .then(setBookings)
       .finally(() => setLoading(false));
   }, [artist?.id]);
 
   useEffect(() => {
+    if (!artist?.id) return;
+    // Sequential to avoid rate limit — bookings first, then availability, then services
     loadBookings();
-    loadAvailability();
-    if (artist?.id) {
+    setTimeout(() => loadAvailability(), 300);
+    setTimeout(() => {
       base44.entities.Service.filter({ is_active: true }).then(svcs => {
         setArtistServices(svcs.filter(s => !s.artist_ids?.length || s.artist_ids.includes(artist.id)));
       });
-    }
+    }, 600);
   }, [artist?.id]);
 
   const handleDayClick = (day) => {
