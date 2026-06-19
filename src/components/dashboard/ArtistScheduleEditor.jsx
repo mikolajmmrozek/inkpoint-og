@@ -24,13 +24,15 @@ const DEFAULT_SCHEDULE = [
 const TODAY = format(new Date(), 'yyyy-MM-dd');
 
 const EMPTY_ENTRY = {
-  kind: 'block',       // 'block' | 'free'
-  timeMode: 'allday',  // 'allday' | 'hours'
-  dateMode: 'single',  // 'single' | 'range'
+  kind: 'block',        // 'block' | 'free'
+  timeMode: 'allday',   // 'allday' | 'hours'
+  dateMode: 'single',   // 'single' | 'range'
   date_from: TODAY,
   date_to: TODAY,
   start_time: '09:00',
   end_time: '18:00',
+  repeat: 'none',       // 'none' | 'weekly' | 'biweekly' | 'monthly' | 'indefinite'
+  repeat_until: '',
   note: '',
 };
 
@@ -92,25 +94,53 @@ export default function ArtistScheduleEditor({ artistId, t }) {
     setSaving(false);
   };
 
-  // Save one or more exception records (range = multiple single-day records)
+  // Expand repeat into individual dates
+  const expandDates = (dateFrom, dateTo, dateMode, repeat, repeatUntil) => {
+    let baseDates = [];
+    if (dateMode === 'range') {
+      const from = parseISO(dateFrom);
+      const to = parseISO(dateTo);
+      baseDates = (to >= from ? eachDayOfInterval({ start: from, end: to }) : [from]).map(d => format(d, 'yyyy-MM-dd'));
+    } else {
+      baseDates = [dateFrom];
+    }
+
+    if (repeat === 'none') return baseDates;
+
+    // Generate repeated occurrences
+    const limitDate = repeat === 'indefinite'
+      ? new Date(new Date().setFullYear(new Date().getFullYear() + 2)) // 2 years ahead
+      : repeatUntil ? parseISO(repeatUntil) : null;
+    if (!limitDate) return baseDates;
+
+    const allDates = new Set(baseDates);
+    const intervalDays = repeat === 'weekly' ? 7 : repeat === 'biweekly' ? 14 : null;
+
+    baseDates.forEach(base => {
+      let current = parseISO(base);
+      for (let i = 0; i < 200; i++) {
+        let next;
+        if (intervalDays) {
+          next = new Date(current);
+          next.setDate(next.getDate() + intervalDays);
+        } else if (repeat === 'monthly') {
+          next = new Date(current);
+          next.setMonth(next.getMonth() + 1);
+        } else break;
+        if (next > limitDate) break;
+        allDates.add(format(next, 'yyyy-MM-dd'));
+        current = next;
+      }
+    });
+
+    return [...allDates].sort();
+  };
+
   const saveEntry = async () => {
     setSaving(true);
     const isAvailable = entry.kind === 'free';
     const allDay = entry.timeMode === 'allday';
-
-    // Build list of dates
-    let dates = [];
-    if (entry.dateMode === 'range') {
-      const from = parseISO(entry.date_from);
-      const to = parseISO(entry.date_to);
-      if (to >= from) {
-        dates = eachDayOfInterval({ start: from, end: to }).map(d => format(d, 'yyyy-MM-dd'));
-      } else {
-        dates = [entry.date_from];
-      }
-    } else {
-      dates = [entry.date_from];
-    }
+    const dates = expandDates(entry.date_from, entry.date_to, entry.dateMode, entry.repeat, entry.repeat_until);
 
     const created = await Promise.all(dates.map(date =>
       base44.entities.ArtistAvailability.create({
@@ -202,7 +232,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
       <div style={{ borderTop: `0.5px solid ${border}`, paddingTop: '16px' }}>
         <div className="flex items-center justify-between mb-4">
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-            BLOKADY I WOLNE DNI
+            DODAJ WOLNE
           </p>
           <button onClick={() => { setShowForm(v => !v); setEntry(EMPTY_ENTRY); }} style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${showForm ? '#FF007F' : border}`, color: showForm ? '#FF007F' : muted, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
             <Plus size={10} /> DODAJ
@@ -212,30 +242,27 @@ export default function ArtistScheduleEditor({ artistId, t }) {
         {/* Form */}
         {showForm && (
           <div className="mb-4 p-4 space-y-4" style={{ border: `0.5px solid rgba(255,0,127,0.25)`, background: 'rgba(255,0,127,0.02)' }}>
-            {/* Kind: blokada / wolne */}
+            {/* Kind */}
             <div>
               {lbl('TYP')}
               <div className="flex gap-2">
-                <SegBtn active={entry.kind === 'block'} onClick={() => setEntry(e => ({ ...e, kind: 'block' }))}>🔴 Blokada (niedostępny)</SegBtn>
-                <SegBtn active={entry.kind === 'free'} onClick={() => setEntry(e => ({ ...e, kind: 'free' }))}>🟢 Dodaj wolne (dostępny)</SegBtn>
+                <SegBtn active={entry.kind === 'block'} onClick={() => setEntry(e => ({ ...e, kind: 'block' }))}>Blokada (niedostępny)</SegBtn>
+                <SegBtn active={entry.kind === 'free'} onClick={() => setEntry(e => ({ ...e, kind: 'free' }))}>Dodaj wolne (dostępny)</SegBtn>
               </div>
             </div>
 
-            {/* Date mode: single / range */}
+            {/* Date mode */}
             <div>
               {lbl('ZAKRES DAT')}
               <div className="flex gap-2">
                 <SegBtn active={entry.dateMode === 'single'} onClick={() => setEntry(e => ({ ...e, dateMode: 'single' }))}>Jeden dzień</SegBtn>
-                <SegBtn active={entry.dateMode === 'range'} onClick={() => setEntry(e => ({ ...e, dateMode: 'range' }))}>Zakres dni (od–do)</SegBtn>
+                <SegBtn active={entry.dateMode === 'range'} onClick={() => setEntry(e => ({ ...e, dateMode: 'range' }))}>Zakres (od–do)</SegBtn>
               </div>
             </div>
 
-            {/* Date input(s) */}
+            {/* Date inputs */}
             {entry.dateMode === 'single' ? (
-              <div>
-                {lbl('DATA')}
-                <input {...inp(entry.date_from, e => setEntry(n => ({ ...n, date_from: e.target.value })), 'date')} />
-              </div>
+              <div>{lbl('DATA')}<input {...inp(entry.date_from, e => setEntry(n => ({ ...n, date_from: e.target.value })), 'date')} /></div>
             ) : (
               <div className="grid grid-cols-2 gap-4">
                 <div>{lbl('OD')}<input {...inp(entry.date_from, e => setEntry(n => ({ ...n, date_from: e.target.value })), 'date')} /></div>
@@ -243,7 +270,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
               </div>
             )}
 
-            {/* Time mode: allday / hours */}
+            {/* Time mode */}
             <div>
               {lbl('CZAS')}
               <div className="flex gap-2">
@@ -252,7 +279,6 @@ export default function ArtistScheduleEditor({ artistId, t }) {
               </div>
             </div>
 
-            {/* Hour inputs */}
             {entry.timeMode === 'hours' && (
               <div className="grid grid-cols-2 gap-4">
                 <div>{lbl('OD GODZINY')}<input {...inp(entry.start_time, e => setEntry(n => ({ ...n, start_time: e.target.value })), 'time')} /></div>
@@ -260,10 +286,25 @@ export default function ArtistScheduleEditor({ artistId, t }) {
               </div>
             )}
 
+            {/* Repeat */}
+            <div>
+              {lbl('POWTARZANIE')}
+              <div className="flex gap-1 flex-wrap">
+                {[['none','Brak'], ['weekly','Co tydzień'], ['biweekly','Co 2 tygodnie'], ['monthly','Co miesiąc'], ['indefinite','Do odwołania']].map(([val, label]) => (
+                  <SegBtn key={val} active={entry.repeat === val} onClick={() => setEntry(e => ({ ...e, repeat: val, repeat_until: val === 'indefinite' ? '' : e.repeat_until }))}>{label}</SegBtn>
+                ))}
+              </div>
+            </div>
+
+            {/* Repeat until date — only when repeat != none and != indefinite */}
+            {entry.repeat !== 'none' && entry.repeat !== 'indefinite' && (
+              <div>{lbl('POWTARZAJ DO')}<input {...inp(entry.repeat_until, e => setEntry(n => ({ ...n, repeat_until: e.target.value })), 'date')} /></div>
+            )}
+
             {/* Note */}
             <div>
               {lbl('NOTATKA (opcjonalnie)')}
-              <input {...inp(entry.note, e => setEntry(n => ({ ...n, note: e.target.value })))} placeholder="np. urlop, choroba, otwarcie..." />
+              <input {...inp(entry.note, e => setEntry(n => ({ ...n, note: e.target.value })))} placeholder="np. urlop, choroba..." />
             </div>
 
             <div className="flex gap-3 pt-1">
