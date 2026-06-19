@@ -67,9 +67,10 @@ function formatRepeatLabel(ex) {
   return `${repeatStr}${dayStr ? ` (${dayStr})` : ''} · ${untilStr}`;
 }
 
-function ExceptionRow({ ex, color, border, muted, text, onEdit, onDelete }) {
+function ExceptionRow({ ex, count, color, border, muted, text, onEdit, onDelete }) {
   const timeStr = ex.start_time && ex.end_time ? `${ex.start_time}–${ex.end_time}` : 'cały dzień';
   const isRecurring = ex.repeat && ex.repeat !== 'none';
+  const isGrouped = count > 1; // grouped single-day duplicates
   const repeatLabel = formatRepeatLabel(ex);
 
   let dateStr = ex.date || '';
@@ -89,15 +90,17 @@ function ExceptionRow({ ex, color, border, muted, text, onEdit, onDelete }) {
             </span>
           )}
           <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color, opacity: 0.7, letterSpacing: '0.04em' }}>· {timeStr}</span>
-          {isRecurring && (
-            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color, opacity: 0.5, letterSpacing: '0.04em' }}>od {dateStr}</span>
+          {isGrouped && (
+            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color, opacity: 0.6, letterSpacing: '0.06em', background: `${color}18`, padding: '1px 5px', border: `0.5px solid ${color}40` }}>
+              ×{count} wpisów
+            </span>
           )}
         </div>
         {ex.note && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: muted, marginTop: '2px' }}>{ex.note}</p>}
       </div>
       <div className="flex items-center gap-2 ml-2 flex-shrink-0">
-        <button onClick={() => onEdit(ex)} style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><Edit2 size={10} /></button>
-        <button onClick={() => onDelete(ex.id)} style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={11} /></button>
+        <button onClick={() => onEdit(ex)} title="Edytuj" style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><Edit2 size={10} /></button>
+        <button onClick={onDelete} title={isGrouped ? `Usuń wszystkie ${count} wpisy` : 'Usuń'} style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={11} /></button>
       </div>
     </div>
   );
@@ -261,8 +264,57 @@ export default function ArtistScheduleEditor({ artistId, t }) {
   if (loading) return <div style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: muted }}>ŁADOWANIE...</div>;
 
   const activeCount = DAYS.filter(d => isDayActive(d.value)).length;
-  const blocks = exceptions.filter(e => !e.is_available);
-  const frees = exceptions.filter(e => e.is_available);
+
+  // Group exceptions: recurring records with same fingerprint → single "group" tile
+  function groupExceptions(list) {
+    const groups = [];
+    const used = new Set();
+    for (const ex of list) {
+      if (used.has(ex.id)) continue;
+      // fingerprint: same repeat+start_time+end_time+note = same cycle series
+      if (ex.repeat && ex.repeat !== 'none') {
+        // find others that are single-day duplicates of this cycle
+        // (i.e., same is_available, same start/end, no repeat themselves)
+        const siblings = list.filter(e =>
+          !used.has(e.id) &&
+          e.id !== ex.id &&
+          (!e.repeat || e.repeat === 'none') &&
+          e.is_available === ex.is_available &&
+          e.start_time === ex.start_time &&
+          e.end_time === ex.end_time
+        );
+        siblings.forEach(s => used.add(s.id));
+        used.add(ex.id);
+        groups.push({ representative: ex, siblingIds: siblings.map(s => s.id), count: 1 + siblings.length });
+      } else {
+        // check if this single-day record matches any recurring group already added
+        const matchingGroup = groups.find(g =>
+          g.representative.repeat && g.representative.repeat !== 'none' &&
+          g.representative.is_available === ex.is_available &&
+          g.representative.start_time === ex.start_time &&
+          g.representative.end_time === ex.end_time
+        );
+        if (matchingGroup) {
+          used.add(ex.id);
+          matchingGroup.siblingIds.push(ex.id);
+          matchingGroup.count++;
+        } else {
+          used.add(ex.id);
+          groups.push({ representative: ex, siblingIds: [], count: 1 });
+        }
+      }
+    }
+    return groups;
+  }
+
+  const blocks = groupExceptions(exceptions.filter(e => !e.is_available));
+  const frees = groupExceptions(exceptions.filter(e => e.is_available));
+
+  const deleteGroup = async (group) => {
+    const allIds = [group.representative.id, ...group.siblingIds];
+    await Promise.all(allIds.map(id => base44.entities.ArtistAvailability.delete(id)));
+    setExceptions(e => e.filter(x => !allIds.includes(x.id)));
+  };
 
   return (
     <div className="space-y-6">
@@ -432,8 +484,8 @@ export default function ArtistScheduleEditor({ artistId, t }) {
           <div className="mb-4">
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>BLOKADY ({blocks.length})</p>
             <div className="space-y-1">
-              {blocks.map(ex => (
-                <ExceptionRow key={ex.id} ex={ex} color="#FF007F" border={border} muted={muted} text={text} onEdit={openEditException} onDelete={deleteException} />
+              {blocks.map(group => (
+                <ExceptionRow key={group.representative.id} ex={group.representative} count={group.count} color="#FF007F" border={border} muted={muted} text={text} onEdit={openEditException} onDelete={() => deleteGroup(group)} />
               ))}
             </div>
           </div>
@@ -444,8 +496,8 @@ export default function ArtistScheduleEditor({ artistId, t }) {
           <div>
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>DYSPOZYCJE / DOSTĘPNE ({frees.length})</p>
             <div className="space-y-1">
-              {frees.map(ex => (
-                <ExceptionRow key={ex.id} ex={ex} color="#16a34a" border={border} muted={muted} text={text} onEdit={openEditException} onDelete={deleteException} />
+              {frees.map(group => (
+                <ExceptionRow key={group.representative.id} ex={group.representative} count={group.count} color="#16a34a" border={border} muted={muted} text={text} onEdit={openEditException} onDelete={() => deleteGroup(group)} />
               ))}
             </div>
           </div>
