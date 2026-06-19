@@ -685,7 +685,7 @@ export default function ArtistSchedule() {
 
   const loadAvailability = useCallback(() => {
     if (!artist?.id) return;
-    base44.entities.ArtistAvailability.filter({ artist_id: artist.id }).then(setAvailabilityRecords);
+    base44.entities.ArtistAvailability.filter({ artist_id: artist.id }, '-date', 500).then(setAvailabilityRecords);
   }, [artist?.id]);
 
   // Find the availability record that applies to a given date string
