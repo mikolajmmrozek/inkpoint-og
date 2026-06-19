@@ -415,23 +415,20 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
           <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
             {selectedDayBookings.map((b, i) => (
               <div key={b.id} onClick={() => onBookingClick(b)}
-                style={{ borderBottom: i < selectedDayBookings.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none', padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', opacity: b.status === 'cancelled' ? 0.5 : 1 }}
+                style={{ borderBottom: i < selectedDayBookings.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none', padding: '12px', cursor: 'pointer', opacity: b.status === 'cancelled' ? 0.5 : 1 }}
                 onMouseEnter={e => e.currentTarget.style.background = t.rowHover}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                <div className="flex-shrink-0 text-center" style={{ minWidth: '48px' }}>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: STATUS_COLORS[b.status] || '#FF007F', letterSpacing: '0.05em' }}>{b.session_time || '—'}</p>
-                  {b.session_end_time && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted }}>→ {b.session_end_time}</p>}
+                <div className="flex items-center gap-2 mb-1">
+                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: STATUS_COLORS[b.status] || '#FF007F', letterSpacing: '0.05em', flexShrink: 0 }}>{b.session_time || '—'}{b.session_end_time ? `–${b.session_end_time}` : ''}</span>
+                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: STATUS_COLORS[b.status] || t.muted, flexShrink: 0 }} />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p style={{ color: t.text, fontSize: '14px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.client_name}</p>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{b.client_name}</p>
+                {(b.tattoo_placement || b.service_name) && (
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px' }}>
                     {b.tattoo_placement}{b.service_name ? ` · ${b.service_name}` : ''}
                   </p>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  {b.estimated_price > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{b.estimated_price} zł</span>}
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: STATUS_COLORS[b.status] || t.muted }} />
-                </div>
+                )}
+                {b.estimated_price > 0 && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginTop: '2px' }}>{b.estimated_price} zł</p>}
               </div>
             ))}
           </div>
@@ -596,21 +593,21 @@ export default function ArtistSchedule() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
         <div>
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>MÓJ KALENDARZ</p>
-          <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '3rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>Harmonogram</h1>
+          <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.4rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>Harmonogram</h1>
         </div>
-        <button onClick={() => setShowNewModal(true)} className="btn-oxblood" style={{ fontSize: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <button onClick={() => setShowNewModal(true)} className="btn-oxblood" style={{ fontSize: '10px', display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
           <Plus size={13} /> NOWA SESJA
         </button>
       </div>
 
       {/* View toggle */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-6 flex-wrap">
         {[['month', 'MIESIĘCZNY'], ['hourly', 'GODZINOWY'], ['list', 'LISTA']].map(([mode, lbl]) => (
           <button key={mode} onClick={() => setViewMode(mode)}
-            style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '7px 14px', border: `0.5px solid ${viewMode === mode ? '#FF007F' : t.cardBorder}`, color: viewMode === mode ? '#FF007F' : t.muted, background: viewMode === mode ? 'rgba(255,0,127,0.08)' : 'transparent', cursor: 'pointer' }}>
+            style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '7px 12px', border: `0.5px solid ${viewMode === mode ? '#FF007F' : t.cardBorder}`, color: viewMode === mode ? '#FF007F' : t.muted, background: viewMode === mode ? 'rgba(255,0,127,0.08)' : 'transparent', cursor: 'pointer', flex: '1 0 auto' }}>
             {lbl}
           </button>
         ))}
@@ -638,11 +635,11 @@ export default function ArtistSchedule() {
       {/* List view */}
       {viewMode === 'list' && (
         <div>
-          <div className="flex items-center justify-between mb-4">
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-              {format(selectedDate, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase()}
+          <div className="flex items-center justify-between gap-2 mb-4 flex-wrap">
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              {format(selectedDate, 'EEE, d MMM yyyy', { locale: pl }).toUpperCase()}
             </p>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-shrink-0">
               <button onClick={() => setSelectedDate(d => subDays(d, 1))} style={{ background: 'none', border: `0.5px solid ${t.cardBorder}`, color: t.muted, cursor: 'pointer', padding: '6px 10px' }}><ChevronLeft size={14} /></button>
               <button onClick={() => setSelectedDate(new Date())} style={{ background: 'none', border: `0.5px solid ${t.cardBorder}`, color: t.muted, cursor: 'pointer', padding: '6px 12px', fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>DZIŚ</button>
               <button onClick={() => setSelectedDate(d => addDays(d, 1))} style={{ background: 'none', border: `0.5px solid ${t.cardBorder}`, color: t.muted, cursor: 'pointer', padding: '6px 10px' }}><ChevronRight size={14} /></button>
@@ -664,29 +661,25 @@ export default function ArtistSchedule() {
                   style={{ borderBottom: i < dayBookings.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none', opacity: b.status === 'cancelled' ? 0.5 : 1 }}
                   onMouseEnter={e => e.currentTarget.style.background = t.rowHover}
                   onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-1">
-                        {b.session_time && (
-                          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: STATUS_COLORS[b.status], letterSpacing: '0.05em' }}>
-                            {b.session_time}{b.session_end_time ? `–${b.session_end_time}` : ''}
-                          </span>
-                        )}
-                        <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{b.client_name}</p>
-                      </div>
-                      {b.client_phone && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginBottom: '2px' }}>{b.client_phone}</p>}
-                      {b.tattoo_placement && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{b.tattoo_placement}{b.tattoo_description ? ` — ${b.tattoo_description}` : ''}</p>}
-                      {b.service_name && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', opacity: 0.8, marginTop: '2px' }}>{b.service_name}</p>}
-                      {!b.health_form_completed && b.status !== 'cancelled' && (
-                        <span style={{ display: 'inline-block', marginTop: '4px', fontFamily: 'JetBrains Mono', fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '2px 6px', border: '0.5px solid #FF007F', color: '#FF007F' }}>BRAK ANKIETY</span>
-                      )}
-                    </div>
-                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '3px 8px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status] }}>
-                        {STATUS_LABELS[b.status]}
+                  <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
+                    {b.session_time && (
+                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: STATUS_COLORS[b.status], letterSpacing: '0.05em', flexShrink: 0 }}>
+                        {b.session_time}{b.session_end_time ? `–${b.session_end_time}` : ''}
                       </span>
-                      {b.estimated_price > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{b.estimated_price} zł</span>}
-                    </div>
+                    )}
+                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '3px 8px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status], flexShrink: 0 }}>
+                      {STATUS_LABELS[b.status]}
+                    </span>
+                  </div>
+                  <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{b.client_name}</p>
+                  {b.client_phone && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px' }}>{b.client_phone}</p>}
+                  {b.tattoo_placement && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginTop: '2px' }}>{b.tattoo_placement}{b.tattoo_description ? ` — ${b.tattoo_description}` : ''}</p>}
+                  {b.service_name && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', opacity: 0.8, marginTop: '2px' }}>{b.service_name}</p>}
+                  <div className="flex items-center gap-3 mt-2 flex-wrap">
+                    {b.estimated_price > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{b.estimated_price} zł</span>}
+                    {!b.health_form_completed && b.status !== 'cancelled' && (
+                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '2px 6px', border: '0.5px solid #FF007F', color: '#FF007F' }}>BRAK ANKIETY</span>
+                    )}
                   </div>
                 </div>
               ))}
