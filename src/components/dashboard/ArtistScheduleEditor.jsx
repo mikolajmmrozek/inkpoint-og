@@ -265,46 +265,23 @@ export default function ArtistScheduleEditor({ artistId, t }) {
 
   const activeCount = DAYS.filter(d => isDayActive(d.value)).length;
 
-  // Group exceptions: recurring records with same fingerprint → single "group" tile
+  // Group exceptions by fingerprint: same note + start_time + end_time → one tile
   function groupExceptions(list) {
-    const groups = [];
-    const used = new Set();
+    const groupMap = new Map();
     for (const ex of list) {
-      if (used.has(ex.id)) continue;
-      // fingerprint: same repeat+start_time+end_time+note = same cycle series
-      if (ex.repeat && ex.repeat !== 'none') {
-        // find others that are single-day duplicates of this cycle
-        // (i.e., same is_available, same start/end, no repeat themselves)
-        const siblings = list.filter(e =>
-          !used.has(e.id) &&
-          e.id !== ex.id &&
-          (!e.repeat || e.repeat === 'none') &&
-          e.is_available === ex.is_available &&
-          e.start_time === ex.start_time &&
-          e.end_time === ex.end_time
-        );
-        siblings.forEach(s => used.add(s.id));
-        used.add(ex.id);
-        groups.push({ representative: ex, siblingIds: siblings.map(s => s.id), count: 1 + siblings.length });
+      const key = `${ex.note || ''}|${ex.start_time || ''}|${ex.end_time || ''}|${ex.repeat || 'none'}`;
+      if (!groupMap.has(key)) {
+        groupMap.set(key, { representative: ex, siblingIds: [], count: 0 });
+      }
+      const g = groupMap.get(key);
+      if (g.representative.id === ex.id) {
+        g.count++;
       } else {
-        // check if this single-day record matches any recurring group already added
-        const matchingGroup = groups.find(g =>
-          g.representative.repeat && g.representative.repeat !== 'none' &&
-          g.representative.is_available === ex.is_available &&
-          g.representative.start_time === ex.start_time &&
-          g.representative.end_time === ex.end_time
-        );
-        if (matchingGroup) {
-          used.add(ex.id);
-          matchingGroup.siblingIds.push(ex.id);
-          matchingGroup.count++;
-        } else {
-          used.add(ex.id);
-          groups.push({ representative: ex, siblingIds: [], count: 1 });
-        }
+        g.siblingIds.push(ex.id);
+        g.count++;
       }
     }
-    return groups;
+    return Array.from(groupMap.values());
   }
 
   const blocks = groupExceptions(exceptions.filter(e => !e.is_available));
