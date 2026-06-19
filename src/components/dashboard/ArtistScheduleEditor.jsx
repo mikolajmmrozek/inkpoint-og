@@ -69,7 +69,9 @@ function formatRepeatLabel(ex) {
 
 function ExceptionRow({ ex, color, border, muted, text, onEdit, onDelete }) {
   const timeStr = ex.start_time && ex.end_time ? `${ex.start_time}–${ex.end_time}` : 'cały dzień';
+  const isRecurring = ex.repeat && ex.repeat !== 'none';
   const repeatLabel = formatRepeatLabel(ex);
+
   let dateStr = ex.date || '';
   try { dateStr = format(parseISO(ex.date), 'd MMM yyyy', { locale: pl }); } catch {}
 
@@ -77,13 +79,18 @@ function ExceptionRow({ ex, color, border, muted, text, onEdit, onDelete }) {
     <div className="flex items-start justify-between px-3 py-2" style={{ border: `0.5px solid ${color}33`, background: `${color}06` }}>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color, letterSpacing: '0.06em' }}>
-            {dateStr} · {timeStr}
-          </span>
-          {repeatLabel && (
-            <span className="flex items-center gap-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color, opacity: 0.75, letterSpacing: '0.04em' }}>
+          {isRecurring ? (
+            <span className="flex items-center gap-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color, letterSpacing: '0.06em' }}>
               <RefreshCw size={8} /> {repeatLabel}
             </span>
+          ) : (
+            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color, letterSpacing: '0.06em' }}>
+              {dateStr}
+            </span>
+          )}
+          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color, opacity: 0.7, letterSpacing: '0.04em' }}>· {timeStr}</span>
+          {isRecurring && (
+            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color, opacity: 0.5, letterSpacing: '0.04em' }}>od {dateStr}</span>
           )}
         </div>
         {ex.note && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: muted, marginTop: '2px' }}>{ex.note}</p>}
