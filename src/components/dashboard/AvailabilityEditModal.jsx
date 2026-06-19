@@ -156,10 +156,10 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
         ...toUpdate.map(r => () => base44.entities.ArtistAvailability.update(r.id, { ...updateData, date: r.date })),
         ...toAdd.map(date => () => base44.entities.ArtistAvailability.create({ artist_id: record.artist_id, type: 'exception', date, ...updateData })),
       ];
-      const BATCH = 5;
+      const BATCH = 20;
       for (let i = 0; i < allOps.length; i += BATCH) {
         await Promise.all(allOps.slice(i, i + BATCH).map(fn => fn()));
-        if (i + BATCH < allOps.length) await new Promise(res => setTimeout(res, 300));
+        if (i + BATCH < allOps.length) await new Promise(res => setTimeout(res, 800));
       }
     }
     setSaving(false);
@@ -172,12 +172,12 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
       const exactRecord = groupRecords.find(r => r.date === (dateStr || record.date)) || record;
       await base44.entities.ArtistAvailability.delete(exactRecord.id);
     } else {
-      // Usuń cały cykl partiami po 5, żeby nie przekroczyć rate limit
-      const BATCH = 5;
+      // Usuń cały cykl partiami po 20, żeby nie przekroczyć rate limit
+      const BATCH = 20;
       for (let i = 0; i < groupRecords.length; i += BATCH) {
         const batch = groupRecords.slice(i, i + BATCH);
         await Promise.all(batch.map(r => base44.entities.ArtistAvailability.delete(r.id)));
-        if (i + BATCH < groupRecords.length) await new Promise(res => setTimeout(res, 300));
+        if (i + BATCH < groupRecords.length) await new Promise(res => setTimeout(res, 800));
       }
     }
     setSaving(false);
