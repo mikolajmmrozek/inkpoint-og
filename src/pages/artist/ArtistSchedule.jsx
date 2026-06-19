@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { ChevronLeft, ChevronRight, Plus, X, Search, Zap } from 'lucide-react';
-import { format, addDays, subDays, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, isSameMonth, isToday } from 'date-fns';
+import { ChevronLeft, ChevronRight, Plus, X, Search, Zap, RefreshCw } from 'lucide-react';
+import { format, addDays, subDays, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, isSameMonth, isToday, parseISO } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
 import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
+import AvailabilityEditModal from '@/components/dashboard/AvailabilityEditModal';
+import { getAvailabilityForDay } from '@/components/dashboard/ArtistScheduleEditor';
 
 const STATUS_COLORS = { pending: '#FF007F', confirmed: '#16a34a', completed: '#2563eb', cancelled: '#9ca3af' };
 const STATUS_LABELS = { pending: 'Oczekuje', confirmed: 'Potwierdzona', completed: 'Zakończona', cancelled: 'Anulowana' };
@@ -359,12 +361,33 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
 }
 
 // ── Monthly Calendar View ────────────────────────────────────────────────────
-function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth, t, theme, onBookingClick, onAddBooking }) {
+function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth, t, theme, onBookingClick, onAddBooking, availabilityRecords, onAvailabilityClick }) {
   const days = eachDayOfInterval({ start: startOfMonth(viewMonth), end: endOfMonth(viewMonth) });
   const startPad = (getDay(startOfMonth(viewMonth)) + 6) % 7;
   const today = new Date();
   const WEEKDAYS = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Ndz'];
   const selectedDayBookings = bookings.filter(b => b.session_date && isSameDay(new Date(b.session_date), selectedDate));
+
+  // Get availability badge for a day: 'free' | 'block' | null
+  const getAvailBadge = (day) => {
+    const dateStr = format(day, 'yyyy-MM-dd');
+    const exceptions = (availabilityRecords || []).filter(r => r.type === 'exception');
+    const match = exceptions.find(r => {
+      if (!r.date || r.date > dateStr) return false;
+      if (r.repeat_until && r.repeat_until !== 'indefinite' && r.repeat_until < dateStr) return false;
+      if (!r.repeat || r.repeat === 'none') return r.date === dateStr;
+      const start = parseISO(r.date);
+      const target = parseISO(dateStr);
+      const diff = Math.round((target - start) / 86400000);
+      if (diff < 0) return false;
+      if (r.repeat === 'weekly') return diff % 7 === 0;
+      if (r.repeat === 'biweekly') return diff % 14 === 0;
+      if (r.repeat === 'monthly') return start.getDate() === target.getDate();
+      return false;
+    });
+    if (!match) return null;
+    return { type: match.is_available ? 'free' : 'block', record: match };
+  };
 
   return (
     <div>
@@ -384,9 +407,13 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
           const dayBk = bookings.filter(b => b.session_date && isSameDay(new Date(b.session_date), day));
           const isSelected = isSameDay(day, selectedDate);
           const isToday = isSameDay(day, today);
+          const avail = getAvailBadge(day);
           return (
             <button key={day.toISOString()} onClick={() => onDayClick(day)}
-              style={{ minHeight: '52px', padding: '6px 4px', border: `0.5px solid ${isSelected ? '#FF007F' : isToday ? t.cardBorder : 'transparent'}`, background: isSelected ? 'rgba(255,0,127,0.08)' : 'transparent', cursor: 'pointer', textAlign: 'center' }}>
+              style={{ minHeight: '52px', padding: '6px 4px', border: `0.5px solid ${isSelected ? '#FF007F' : isToday ? t.cardBorder : 'transparent'}`, background: isSelected ? 'rgba(255,0,127,0.08)' : 'transparent', cursor: 'pointer', textAlign: 'center', position: 'relative' }}>
+              {avail && (
+                <div style={{ position: 'absolute', top: '2px', right: '2px', width: '5px', height: '5px', borderRadius: '1px', background: avail.type === 'free' ? '#16a34a' : '#FF007F', opacity: 0.7 }} />
+              )}
               <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: isSelected ? '#FF007F' : isToday ? t.title : isSameMonth(day, viewMonth) ? t.text : t.muted, fontWeight: isToday ? 600 : 400 }}>
                 {format(day, 'd')}
               </span>
@@ -406,6 +433,31 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>
           SESJE — {format(selectedDate, 'EEEE, d MMMM', { locale: pl }).toUpperCase()}
         </p>
+
+        {/* Availability badge for selected day */}
+        {(() => {
+          const dateStr = format(selectedDate, 'yyyy-MM-dd');
+          const avail = getAvailBadge(selectedDate);
+          if (!avail) return null;
+          const isRecurring = avail.record.repeat && avail.record.repeat !== 'none';
+          const color = avail.type === 'free' ? '#16a34a' : '#FF007F';
+          const timeStr = avail.record.start_time && avail.record.end_time ? `${avail.record.start_time}–${avail.record.end_time}` : 'Cały dzień';
+          return (
+            <button
+              onClick={() => onAvailabilityClick({ record: avail.record, dateStr })}
+              className="flex items-center gap-2 w-full mb-3 px-3 py-2 text-left"
+              style={{ border: `0.5px solid ${color}40`, background: `${color}08`, cursor: 'pointer' }}
+            >
+              <div style={{ width: '6px', height: '6px', borderRadius: '1px', background: color, flexShrink: 0 }} />
+              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color, letterSpacing: '0.06em' }}>
+                {avail.type === 'free' ? 'Dyspozycja' : 'Blokada'} · {timeStr}
+              </span>
+              {isRecurring && <RefreshCw size={9} color={color} style={{ opacity: 0.7 }} />}
+              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color, opacity: 0.6, marginLeft: 'auto' }}>KLIKNIJ ABY EDYTOWAĆ →</span>
+            </button>
+          );
+        })()}
+
         {selectedDayBookings.length === 0 ? (
           <div className="py-8 text-center" style={{ border: `0.5px solid ${t.cardBorder}`, background: 'rgba(255,0,127,0.02)' }}>
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em', marginBottom: '12px' }}>BRAK SESJI W TEN DZIEŃ</p>
@@ -451,10 +503,28 @@ function toMin(t) {
   return h * 60 + m;
 }
 
-function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, onNewBookingClick, t }) {
+function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, onNewBookingClick, t, availabilityRecords, onAvailabilityClick }) {
   const scrollRef = useRef(null);
   const dateStr = format(selectedDate, 'yyyy-MM-dd');
   const dayBk = bookings.filter(b => b.session_date === dateStr).sort((a, b) => (a.session_time || '').localeCompare(b.session_time || ''));
+
+  // Find availability record for this day
+  const availRecord = (() => {
+    const exceptions = (availabilityRecords || []).filter(r => r.type === 'exception');
+    return exceptions.find(r => {
+      if (!r.date || r.date > dateStr) return false;
+      if (r.repeat_until && r.repeat_until !== 'indefinite' && r.repeat_until < dateStr) return false;
+      if (!r.repeat || r.repeat === 'none') return r.date === dateStr;
+      const start = parseISO(r.date);
+      const target = parseISO(dateStr);
+      const diff = Math.round((target - start) / 86400000);
+      if (diff < 0) return false;
+      if (r.repeat === 'weekly') return diff % 7 === 0;
+      if (r.repeat === 'biweekly') return diff % 14 === 0;
+      if (r.repeat === 'monthly') return start.getDate() === target.getDate();
+      return false;
+    }) || null;
+  })();
   const showNow = isToday(selectedDate);
 
   useEffect(() => {
@@ -491,6 +561,27 @@ function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, o
         </p>
         <button onClick={() => onDateChange(addDays(selectedDate, 1))} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><ChevronRight size={16} /></button>
       </div>
+      {/* Availability bar */}
+      {availRecord && (() => {
+        const isRecurring = availRecord.repeat && availRecord.repeat !== 'none';
+        const color = availRecord.is_available ? '#16a34a' : '#FF007F';
+        const timeStr = availRecord.start_time && availRecord.end_time ? `${availRecord.start_time}–${availRecord.end_time}` : 'Cały dzień';
+        return (
+          <button
+            onClick={() => onAvailabilityClick?.({ record: availRecord, dateStr })}
+            className="flex items-center gap-2 w-full px-4 py-2 text-left"
+            style={{ borderBottom: `0.5px solid ${t.cardBorder}`, background: `${color}08`, cursor: 'pointer', border: 'none', borderBottomWidth: '0.5px', borderBottomStyle: 'solid', borderBottomColor: t.cardBorder }}
+          >
+            <div style={{ width: '6px', height: '6px', borderRadius: '1px', background: color, flexShrink: 0 }} />
+            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color, letterSpacing: '0.06em' }}>
+              {availRecord.is_available ? 'Dyspozycja' : 'Blokada'} · {timeStr}
+            </span>
+            {isRecurring && <RefreshCw size={9} color={color} style={{ opacity: 0.7 }} />}
+            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color, opacity: 0.5, marginLeft: 'auto' }}>EDYTUJ →</span>
+          </button>
+        );
+      })()}
+
       {/* Timeline */}
       <div ref={scrollRef} style={{ overflowY: 'auto', maxHeight: '560px' }}>
         <div style={{ display: 'flex', position: 'relative' }}>
@@ -561,6 +652,40 @@ export default function ArtistSchedule() {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showNewModal, setShowNewModal] = useState(false);
   const [artistServices, setArtistServices] = useState([]);
+  const [availabilityRecords, setAvailabilityRecords] = useState([]);
+  const [selectedAvailability, setSelectedAvailability] = useState(null); // { record, dateStr }
+
+  const loadAvailability = useCallback(() => {
+    if (!artist?.id) return;
+    base44.entities.ArtistAvailability.filter({ artist_id: artist.id }).then(setAvailabilityRecords);
+  }, [artist?.id]);
+
+  // Find the availability record that applies to a given date string
+  const getAvailabilityRecordForDate = useCallback((dateStr) => {
+    const exceptions = availabilityRecords.filter(r => r.type === 'exception');
+    // First: exact single-day match (no repeat)
+    const exact = exceptions.find(r => r.date === dateStr && (!r.repeat || r.repeat === 'none'));
+    if (exact) return exact;
+    // Then: recurring that matches
+    const recurring = exceptions.find(r => r.repeat && r.repeat !== 'none' && matchesRepeatOnDate(r, dateStr));
+    return recurring || null;
+  }, [availabilityRecords]);
+
+  function matchesRepeatOnDate(ex, dateStr) {
+    if (!ex.date || ex.date > dateStr) return false;
+    if (ex.repeat_until && ex.repeat_until !== 'indefinite' && ex.repeat_until < dateStr) return false;
+    const start = parseISO(ex.date);
+    const target = parseISO(dateStr);
+    const diffDays = Math.round((target - start) / 86400000);
+    if (diffDays < 0) return false;
+    if (ex.repeat === 'weekly') return diffDays % 7 === 0;
+    if (ex.repeat === 'biweekly') return diffDays % 14 === 0;
+    if (ex.repeat === 'monthly') {
+      return start.getDate() === target.getDate() &&
+        (target.getFullYear() - start.getFullYear()) * 12 + (target.getMonth() - start.getMonth()) >= 0;
+    }
+    return false;
+  }
 
   const t = theme === 'light'
     ? { title: '#111111', muted: 'rgba(0,0,0,0.4)', cardBg: '#FFFFFF', cardBorder: '#E5E5E5', text: '#111111', rowBorder: '#E5E5E5', rowHover: 'rgba(0,0,0,0.03)' }
@@ -575,6 +700,7 @@ export default function ArtistSchedule() {
 
   useEffect(() => {
     loadBookings();
+    loadAvailability();
     if (artist?.id) {
       base44.entities.Service.filter({ is_active: true }).then(svcs => {
         setArtistServices(svcs.filter(s => !s.artist_ids?.length || s.artist_ids.includes(artist.id)));
@@ -616,7 +742,13 @@ export default function ArtistSchedule() {
       {/* Monthly view */}
       {viewMode === 'month' && (
         <div className="p-4" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
-          <MonthView bookings={bookings} selectedDate={selectedDate} onDayClick={handleDayClick} viewMonth={viewMonth} setViewMonth={setViewMonth} t={t} theme={theme} onBookingClick={setSelectedBooking} onAddBooking={() => setShowNewModal(true)} />
+          <MonthView
+            bookings={bookings} selectedDate={selectedDate} onDayClick={handleDayClick}
+            viewMonth={viewMonth} setViewMonth={setViewMonth} t={t} theme={theme}
+            onBookingClick={setSelectedBooking} onAddBooking={() => setShowNewModal(true)}
+            availabilityRecords={availabilityRecords}
+            onAvailabilityClick={setSelectedAvailability}
+          />
         </div>
       )}
 
@@ -627,8 +759,10 @@ export default function ArtistSchedule() {
           selectedDate={selectedDate}
           onDateChange={setSelectedDate}
           onBookingClick={setSelectedBooking}
-          onNewBookingClick={(time) => { setShowNewModal(true); }}
+          onNewBookingClick={() => setShowNewModal(true)}
           t={t}
+          availabilityRecords={availabilityRecords}
+          onAvailabilityClick={setSelectedAvailability}
         />
       )}
 
@@ -713,6 +847,16 @@ export default function ArtistSchedule() {
           />
         )}
       </AnimatePresence>
+
+      {selectedAvailability && (
+        <AvailabilityEditModal
+          record={selectedAvailability.record}
+          dateStr={selectedAvailability.dateStr}
+          theme={theme}
+          onClose={() => setSelectedAvailability(null)}
+          onSaved={() => { setSelectedAvailability(null); loadAvailability(); }}
+        />
+      )}
     </div>
   );
 }
