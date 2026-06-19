@@ -444,7 +444,18 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
           const timeStr = avail.record.start_time && avail.record.end_time ? `${avail.record.start_time}–${avail.record.end_time}` : 'Cały dzień';
           return (
             <button
-              onClick={() => onAvailabilityClick({ record: avail.record, dateStr })}
+              onClick={() => {
+                const r = avail.record;
+                const related = (availabilityRecords || []).filter(x =>
+                  x.type === 'exception' &&
+                  (x.note || '') === (r.note || '') &&
+                  (x.start_time || '') === (r.start_time || '') &&
+                  (x.end_time || '') === (r.end_time || '') &&
+                  (x.repeat || 'none') === (r.repeat || 'none') &&
+                  x.is_available === r.is_available
+                );
+                onAvailabilityClick({ record: r, dateStr, allRecords: related.length > 0 ? related : [r] });
+              }}
               className="flex items-center gap-2 w-full mb-3 px-3 py-2 text-left"
               style={{ border: `0.5px solid ${color}40`, background: `${color}08`, cursor: 'pointer' }}
             >
@@ -599,7 +610,18 @@ function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, o
               return (
                 <div
                   key="avail-tile"
-                  onClick={(e) => { e.stopPropagation(); onAvailabilityClick?.({ record: availRecord, dateStr }); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const related = (availabilityRecords || []).filter(x =>
+                      x.type === 'exception' &&
+                      (x.note || '') === (availRecord.note || '') &&
+                      (x.start_time || '') === (availRecord.start_time || '') &&
+                      (x.end_time || '') === (availRecord.end_time || '') &&
+                      (x.repeat || 'none') === (availRecord.repeat || 'none') &&
+                      x.is_available === availRecord.is_available
+                    );
+                    onAvailabilityClick?.({ record: availRecord, dateStr, allRecords: related.length > 0 ? related : [availRecord] });
+                  }}
                   style={{ position: 'absolute', top: `${top}px`, height: `${height}px`, left: '4px', right: '4px', background: `${color}12`, borderLeft: `2px solid ${color}80`, borderTop: `0.5px solid ${color}40`, borderRight: `0.5px solid ${color}40`, borderBottom: `0.5px solid ${color}40`, cursor: 'pointer', padding: '3px 6px', zIndex: 0, display: 'flex', alignItems: 'flex-start', gap: '4px' }}
                   onMouseEnter={e => e.currentTarget.style.background = `${color}20`}
                   onMouseLeave={e => e.currentTarget.style.background = `${color}12`}
