@@ -200,7 +200,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
   const muted = t?.muted || 'rgba(245,240,235,0.4)';
 
   const reload = async () => {
-    const all = await base44.entities.ArtistAvailability.filter({ artist_id: artistId });
+    const all = await base44.entities.ArtistAvailability.filter({ artist_id: artistId }, '-date', 500);
     setRecurring(all.filter(r => r.type === 'recurring'));
     setExceptions(all.filter(r => r.type === 'exception').sort((a, b) => (a.date || '').localeCompare(b.date || '')));
   };
