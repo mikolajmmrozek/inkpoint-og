@@ -145,16 +145,26 @@ function ExceptionRow({ group, color, border, muted, text, onView, onEdit, onDel
   try { dateStr = format(parseISO(ex.date), 'd MMM yyyy', { locale: pl }); } catch {}
 
   return (
-    <div className="flex items-start justify-between px-3 py-2 cursor-pointer" style={{ border: `0.5px solid ${color}33`, background: `${color}06` }}
+    <div className="cursor-pointer" style={{ border: `0.5px solid ${color}33`, background: `${color}06` }}
       onClick={() => onView(group)}
       onMouseEnter={e => e.currentTarget.style.background = `${color}10`}
       onMouseLeave={e => e.currentTarget.style.background = `${color}06`}
     >
+      {/* Baner cykliczności */}
+      {isRecurring && (
+        <div className="flex items-center gap-1 px-3 py-1" style={{ borderBottom: `0.5px solid ${color}20`, background: `${color}0a` }}>
+          <RefreshCw size={8} color={color} />
+          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            WYDARZENIE CYKLICZNE · {count} {count === 1 ? 'wpis' : count < 5 ? 'wpisy' : 'wpisów'}
+          </span>
+        </div>
+      )}
+      <div className="flex items-start justify-between px-3 py-2">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           {isRecurring ? (
-            <span className="flex items-center gap-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color, letterSpacing: '0.06em' }}>
-              <RefreshCw size={8} /> {repeatLabel}
+            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color, letterSpacing: '0.06em' }}>
+              {repeatLabel}
             </span>
           ) : (
             <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color, letterSpacing: '0.06em' }}>
@@ -162,17 +172,13 @@ function ExceptionRow({ group, color, border, muted, text, onView, onEdit, onDel
             </span>
           )}
           <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color, opacity: 0.7, letterSpacing: '0.04em' }}>· {timeStr}</span>
-          {isGrouped && (
-            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color, opacity: 0.6, letterSpacing: '0.06em', background: `${color}18`, padding: '1px 5px', border: `0.5px solid ${color}40` }}>
-              ×{count}
-            </span>
-          )}
         </div>
         {ex.note && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: muted, marginTop: '2px' }}>{ex.note}</p>}
       </div>
       <div className="flex items-center gap-2 ml-2 flex-shrink-0">
         <button onClick={e => { e.stopPropagation(); onEdit(group); }} title="Edytuj" style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><Edit2 size={10} /></button>
         <button onClick={e => { e.stopPropagation(); onDelete(); }} title={isGrouped ? `Usuń wszystkie ${count} wpisy` : 'Usuń'} style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={11} /></button>
+      </div>
       </div>
     </div>
   );
