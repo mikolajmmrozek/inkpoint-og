@@ -2,8 +2,33 @@ import { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { X, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, addWeeks, addMonths, eachDayOfInterval } from 'date-fns';
 import { pl } from 'date-fns/locale';
+
+function generateDates(dateFrom, dateTo, repeat, repeatUntil, repeatIndefinite) {
+  const start = parseISO(dateFrom);
+  const endLimit = repeatIndefinite
+    ? addMonths(new Date(), 24)
+    : (repeatUntil ? parseISO(repeatUntil) : (dateTo ? parseISO(dateTo) : start));
+
+  if (!repeat || repeat === 'none') {
+    if (dateTo && dateTo > dateFrom) {
+      return eachDayOfInterval({ start, end: parseISO(dateTo) }).map(d => format(d, 'yyyy-MM-dd'));
+    }
+    return [dateFrom];
+  }
+
+  const dates = [];
+  let cur = start;
+  while (cur <= endLimit) {
+    dates.push(format(cur, 'yyyy-MM-dd'));
+    if (repeat === 'weekly') cur = addWeeks(cur, 1);
+    else if (repeat === 'biweekly') cur = addWeeks(cur, 2);
+    else if (repeat === 'monthly') cur = addMonths(cur, 1);
+    else break;
+  }
+  return dates;
+}
 
 const REPEAT_LABELS = { weekly: 'Co tydzień', biweekly: 'Co 2 tygodnie', monthly: 'Co miesiąc' };
 
@@ -43,7 +68,8 @@ function TimeDropdown({ value, onChange, border, text }) {
   );
 }
 
-export default function AvailabilityEditModal({ record, dateStr, theme, onClose, onSaved, startInEdit = false }) {
+export default function AvailabilityEditModal({ record, allRecords, dateStr, theme, onClose, onSaved, startInEdit = false }) {
+  // allRecords: wszystkie rekordy grupy cyklicznej (przekazane z ArtistScheduleEditor / ArtistSchedule)
   const t = theme === 'light'
     ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', inputBorder: '#CCCCCC' }
     : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', inputBorder: '#262626' };
@@ -85,6 +111,7 @@ export default function AvailabilityEditModal({ record, dateStr, theme, onClose,
     const effectiveUntil = form.repeat_indefinite ? 'indefinite' : (form.repeat_until || undefined);
 
     if (editScope === 'occurrence') {
+      // Dodaj wyjątek dla konkretnego dnia (nie ruszaj cyklu)
       await base44.entities.ArtistAvailability.create({
         artist_id: record.artist_id,
         type: 'exception',
@@ -96,15 +123,26 @@ export default function AvailabilityEditModal({ record, dateStr, theme, onClose,
         repeat: 'none',
       });
     } else {
-      await base44.entities.ArtistAvailability.update(record.id, {
+      // Edytuj cały cykl: przelicz nowe daty, usuń stare które wypadają poza zakres, dodaj nowe
+      const groupRecords = allRecords && allRecords.length > 0 ? allRecords : [record];
+      const newDates = new Set(generateDates(form.date || record.date, null, form.repeat, form.repeat_until, form.repeat_indefinite));
+      const oldDates = new Set(groupRecords.map(r => r.date));
+      const updateData = {
         is_available: isAvail,
         start_time: allDay ? null : form.start_time,
         end_time: allDay ? null : form.end_time,
         note: form.note || undefined,
-        repeat: form.repeat,
+        repeat: form.repeat !== 'none' ? form.repeat : 'none',
         repeat_until: form.repeat !== 'none' ? effectiveUntil : undefined,
-        date: form.date || record.date,
-      });
+      };
+      const toDelete = groupRecords.filter(r => !newDates.has(r.date));
+      const toUpdate = groupRecords.filter(r => newDates.has(r.date));
+      const toAdd = [...newDates].filter(d => !oldDates.has(d));
+      await Promise.all([
+        ...toDelete.map(r => base44.entities.ArtistAvailability.delete(r.id)),
+        ...toUpdate.map(r => base44.entities.ArtistAvailability.update(r.id, { ...updateData, date: r.date })),
+        ...toAdd.map(date => base44.entities.ArtistAvailability.create({ artist_id: record.artist_id, type: 'exception', date, ...updateData })),
+      ]);
     }
     setSaving(false);
     onSaved();
@@ -112,10 +150,23 @@ export default function AvailabilityEditModal({ record, dateStr, theme, onClose,
 
   const handleDelete = async () => {
     setSaving(true);
-    await base44.entities.ArtistAvailability.delete(record.id);
+    const groupRecords = allRecords && allRecords.length > 0 ? allRecords : [record];
+    await Promise.all(groupRecords.map(r => base44.entities.ArtistAvailability.delete(r.id)));
     setSaving(false);
     onSaved();
   };
+
+  // Oblicz podgląd skutków edycji cyklu
+  const cyclePreview = (() => {
+    if (editScope !== 'cycle' || step !== 'edit') return null;
+    const groupRecords = allRecords && allRecords.length > 0 ? allRecords : [record];
+    const newDates = new Set(generateDates(form.date || record.date, null, form.repeat, form.repeat_until, form.repeat_indefinite));
+    const oldDates = new Set(groupRecords.map(r => r.date));
+    const toDelete = groupRecords.filter(r => !newDates.has(r.date)).length;
+    const toAdd = [...newDates].filter(d => !oldDates.has(d)).length;
+    const toKeep = groupRecords.filter(r => newDates.has(r.date)).length;
+    return { total: newDates.size, toDelete, toAdd, toKeep };
+  })();
 
   let dateDisplay = '';
   try { dateDisplay = format(parseISO(dateStr || record.date), 'd MMMM yyyy (EEEE)', { locale: pl }); } catch {}
@@ -201,6 +252,26 @@ export default function AvailabilityEditModal({ record, dateStr, theme, onClose,
               {editScope === 'occurrence' && (
                 <div style={{ padding: '8px 10px', background: 'rgba(255,0,127,0.05)', border: '0.5px solid rgba(255,0,127,0.2)' }}>
                   <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.1em' }}>EDYTUJESZ TYLKO: {dateDisplay}</p>
+                </div>
+              )}
+              {editScope === 'cycle' && (
+                <div style={{ padding: '10px 12px', background: 'rgba(22,163,74,0.05)', border: '0.5px solid rgba(22,163,74,0.25)' }}>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>EDYTUJESZ CAŁY CYKL</p>
+                  {cyclePreview ? (
+                    <div className="space-y-1">
+                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>
+                        Łącznie wpisów po zapisie: <span style={{ color: t.text }}>{cyclePreview.total}</span>
+                      </p>
+                      {cyclePreview.toAdd > 0 && (
+                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#16a34a', letterSpacing: '0.06em' }}>+ {cyclePreview.toAdd} nowych wpisów zostanie dodanych</p>
+                      )}
+                      {cyclePreview.toDelete > 0 && (
+                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.06em' }}>− {cyclePreview.toDelete} wpisów poza nowym zakresem zostanie usuniętych</p>
+                      )}
+                    </div>
+                  ) : (
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>Wszystkie wpisy cyklu zostaną zaktualizowane.</p>
+                  )}
                 </div>
               )}
 

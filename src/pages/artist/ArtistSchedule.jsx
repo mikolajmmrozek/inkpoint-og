@@ -857,6 +857,7 @@ export default function ArtistSchedule() {
       {selectedAvailability && (
         <AvailabilityEditModal
           record={selectedAvailability.record}
+          allRecords={selectedAvailability.allRecords || [selectedAvailability.record]}
           dateStr={selectedAvailability.dateStr}
           theme={theme}
           onClose={() => setSelectedAvailability(null)}

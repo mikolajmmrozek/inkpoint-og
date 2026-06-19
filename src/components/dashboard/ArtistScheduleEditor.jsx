@@ -330,7 +330,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
   const openViewModal = (group, startInEdit = false) => {
     const ex = group.representative;
     const dateStr = ex.date || '';
-    setViewModal({ record: ex, dateStr, startInEdit });
+    setViewModal({ record: ex, allRecords: group.allRecords, dateStr, startInEdit });
   };
 
   const openEditGroup = (group) => {
@@ -590,6 +590,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
       {viewModal && (
         <AvailabilityEditModal
           record={viewModal.record}
+          allRecords={viewModal.allRecords}
           dateStr={viewModal.dateStr}
           theme={theme}
           startInEdit={viewModal.startInEdit}
