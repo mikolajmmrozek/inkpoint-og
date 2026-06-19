@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Plus, Trash2, Edit2, X, RefreshCw, ChevronDown } from 'lucide-react';
 import { format, parseISO, addDays, addWeeks, addMonths, eachDayOfInterval } from 'date-fns';
 import { pl } from 'date-fns/locale';
+import AvailabilityEditModal from '@/components/dashboard/AvailabilityEditModal';
 
 const DAYS = [
   { label: 'Pn', value: 1 },
@@ -141,7 +142,7 @@ function TimeDropdown({ value, onChange, border, text, muted }) {
   );
 }
 
-function ExceptionRow({ group, color, border, muted, text, onEdit, onDelete }) {
+function ExceptionRow({ group, color, border, muted, text, onView, onEdit, onDelete }) {
   const ex = group.representative;
   const count = group.count;
   const timeStr = ex.start_time && ex.end_time ? `${ex.start_time}–${ex.end_time}` : 'cały dzień';
@@ -153,7 +154,11 @@ function ExceptionRow({ group, color, border, muted, text, onEdit, onDelete }) {
   try { dateStr = format(parseISO(ex.date), 'd MMM yyyy', { locale: pl }); } catch {}
 
   return (
-    <div className="flex items-start justify-between px-3 py-2" style={{ border: `0.5px solid ${color}33`, background: `${color}06` }}>
+    <div className="flex items-start justify-between px-3 py-2 cursor-pointer" style={{ border: `0.5px solid ${color}33`, background: `${color}06` }}
+      onClick={() => onView(group)}
+      onMouseEnter={e => e.currentTarget.style.background = `${color}10`}
+      onMouseLeave={e => e.currentTarget.style.background = `${color}06`}
+    >
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           {isRecurring ? (
@@ -175,8 +180,8 @@ function ExceptionRow({ group, color, border, muted, text, onEdit, onDelete }) {
         {ex.note && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: muted, marginTop: '2px' }}>{ex.note}</p>}
       </div>
       <div className="flex items-center gap-2 ml-2 flex-shrink-0">
-        <button onClick={() => onEdit(group)} title="Edytuj" style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><Edit2 size={10} /></button>
-        <button onClick={onDelete} title={isGrouped ? `Usuń wszystkie ${count} wpisy` : 'Usuń'} style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={11} /></button>
+        <button onClick={e => { e.stopPropagation(); onEdit(group); }} title="Edytuj" style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><Edit2 size={10} /></button>
+        <button onClick={e => { e.stopPropagation(); onDelete(); }} title={isGrouped ? `Usuń wszystkie ${count} wpisy` : 'Usuń'} style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={11} /></button>
       </div>
     </div>
   );
@@ -190,6 +195,8 @@ export default function ArtistScheduleEditor({ artistId, t }) {
   const [showForm, setShowForm] = useState(false);
   const [entry, setEntry] = useState(EMPTY_ENTRY);
   const [editingGroup, setEditingGroup] = useState(null); // group being edited
+  const [viewModal, setViewModal] = useState(null); // { record, dateStr, startInEdit }
+  const theme = t?.bg?.includes('FFF') || t?.bg === '#FFFFFF' ? 'light' : 'dark';
 
   const border = t?.border || '#262626';
   const text = t?.text || '#F5F0EB';
@@ -327,6 +334,12 @@ export default function ArtistScheduleEditor({ artistId, t }) {
   const deleteGroup = async (group) => {
     await Promise.all(group.allRecords.map(r => base44.entities.ArtistAvailability.delete(r.id)));
     setExceptions(e => e.filter(x => !group.allRecords.find(r => r.id === x.id)));
+  };
+
+  const openViewModal = (group, startInEdit = false) => {
+    const ex = group.representative;
+    const dateStr = ex.date || '';
+    setViewModal({ record: ex, dateStr, startInEdit });
   };
 
   const openEditGroup = (group) => {
@@ -559,7 +572,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>BLOKADY ({blocks.length})</p>
             <div className="space-y-1">
               {blocks.map(group => (
-                <ExceptionRow key={group.representative.id} group={group} color="#FF007F" border={border} muted={muted} text={text} onEdit={openEditGroup} onDelete={() => deleteGroup(group)} />
+                <ExceptionRow key={group.representative.id} group={group} color="#FF007F" border={border} muted={muted} text={text} onView={g => openViewModal(g, false)} onEdit={g => openViewModal(g, true)} onDelete={() => deleteGroup(group)} />
               ))}
             </div>
           </div>
@@ -571,7 +584,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>DYSPOZYCJE / DOSTĘPNE ({frees.length})</p>
             <div className="space-y-1">
               {frees.map(group => (
-                <ExceptionRow key={group.representative.id} group={group} color="#16a34a" border={border} muted={muted} text={text} onEdit={openEditGroup} onDelete={() => deleteGroup(group)} />
+                <ExceptionRow key={group.representative.id} group={group} color="#16a34a" border={border} muted={muted} text={text} onView={g => openViewModal(g, false)} onEdit={g => openViewModal(g, true)} onDelete={() => deleteGroup(group)} />
               ))}
             </div>
           </div>
@@ -581,6 +594,18 @@ export default function ArtistScheduleEditor({ artistId, t }) {
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: muted, letterSpacing: '0.08em' }}>Brak wpisów</p>
         )}
       </div>
+
+      {/* Popup podglądu/edycji */}
+      {viewModal && (
+        <AvailabilityEditModal
+          record={viewModal.record}
+          dateStr={viewModal.dateStr}
+          theme={theme}
+          startInEdit={viewModal.startInEdit}
+          onClose={() => setViewModal(null)}
+          onSaved={async () => { setViewModal(null); await reload(); }}
+        />
+      )}
     </div>
   );
 }

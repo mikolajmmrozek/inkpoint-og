@@ -561,26 +561,7 @@ function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, o
         </p>
         <button onClick={() => onDateChange(addDays(selectedDate, 1))} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><ChevronRight size={16} /></button>
       </div>
-      {/* Availability bar */}
-      {availRecord && (() => {
-        const isRecurring = availRecord.repeat && availRecord.repeat !== 'none';
-        const color = availRecord.is_available ? '#16a34a' : '#FF007F';
-        const timeStr = availRecord.start_time && availRecord.end_time ? `${availRecord.start_time}–${availRecord.end_time}` : 'Cały dzień';
-        return (
-          <button
-            onClick={() => onAvailabilityClick?.({ record: availRecord, dateStr })}
-            className="flex items-center gap-2 w-full px-4 py-2 text-left"
-            style={{ borderBottom: `0.5px solid ${t.cardBorder}`, background: `${color}08`, cursor: 'pointer', border: 'none', borderBottomWidth: '0.5px', borderBottomStyle: 'solid', borderBottomColor: t.cardBorder }}
-          >
-            <div style={{ width: '6px', height: '6px', borderRadius: '1px', background: color, flexShrink: 0 }} />
-            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color, letterSpacing: '0.06em' }}>
-              {availRecord.is_available ? 'Dyspozycja' : 'Blokada'} · {timeStr}
-            </span>
-            {isRecurring && <RefreshCw size={9} color={color} style={{ opacity: 0.7 }} />}
-            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color, opacity: 0.5, marginLeft: 'auto' }}>EDYTUJ →</span>
-          </button>
-        );
-      })()}
+      
 
       {/* Timeline */}
       <div ref={scrollRef} style={{ overflowY: 'auto', maxHeight: '560px' }}>
@@ -606,6 +587,31 @@ function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, o
                 <div style={{ position: 'absolute', top: `${nowTop}px`, left: '-4px', width: '8px', height: '8px', borderRadius: '50%', background: '#FF007F', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 3 }} />
               </>
             )}
+            {/* Availability tile in timeline */}
+            {availRecord && availRecord.start_time && availRecord.end_time && (() => {
+              const color = availRecord.is_available ? '#16a34a' : '#FF007F';
+              const label = availRecord.is_available ? 'Dyspozycja' : 'Blokada';
+              const isRecurring = availRecord.repeat && availRecord.repeat !== 'none';
+              const startMin = toMin(availRecord.start_time);
+              const endMin = toMin(availRecord.end_time);
+              const top = Math.max(0, (startMin - DAY_START_H * 60)) * PX_PER_MIN;
+              const height = Math.max(20, (endMin - startMin) * PX_PER_MIN);
+              return (
+                <div
+                  key="avail-tile"
+                  onClick={(e) => { e.stopPropagation(); onAvailabilityClick?.({ record: availRecord, dateStr }); }}
+                  style={{ position: 'absolute', top: `${top}px`, height: `${height}px`, left: '4px', right: '4px', background: `${color}12`, borderLeft: `2px solid ${color}80`, borderTop: `0.5px solid ${color}40`, borderRight: `0.5px solid ${color}40`, borderBottom: `0.5px solid ${color}40`, cursor: 'pointer', padding: '3px 6px', zIndex: 0, display: 'flex', alignItems: 'flex-start', gap: '4px' }}
+                  onMouseEnter={e => e.currentTarget.style.background = `${color}20`}
+                  onMouseLeave={e => e.currentTarget.style.background = `${color}12`}
+                >
+                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color, letterSpacing: '0.06em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {label} {availRecord.start_time}–{availRecord.end_time}
+                  </span>
+                  {isRecurring && <RefreshCw size={8} color={color} style={{ opacity: 0.7, flexShrink: 0 }} />}
+                </div>
+              );
+            })()}
+
             {/* Booking tiles */}
             {dayBk.map(b => {
               const startMin = toMin(b.session_time);

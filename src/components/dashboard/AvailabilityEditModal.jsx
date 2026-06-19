@@ -1,51 +1,71 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { X, RefreshCw } from 'lucide-react';
+import { X, RefreshCw, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, parseISO } from 'date-fns';
 import { pl } from 'date-fns/locale';
 
 const REPEAT_LABELS = { weekly: 'Co tydzień', biweekly: 'Co 2 tygodnie', monthly: 'Co miesiąc' };
-const DAY_NAMES = ['niedziela', 'poniedziałek', 'wtorek', 'środa', 'czwartek', 'piątek', 'sobota'];
 
-// Modal with two modes:
-// 1. Confirm dialog — "edit this occurrence or whole cycle?"
-// 2. Edit form
+const TIME_OPTIONS = [];
+for (let h = 0; h < 24; h++) {
+  for (let m = 0; m < 60; m += 30) {
+    TIME_OPTIONS.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+  }
+}
 
-export default function AvailabilityEditModal({ record, dateStr, theme, onClose, onSaved }) {
+function TimeDropdown({ value, onChange, border, text, muted }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    const h = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
+  }, []);
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button type="button" onClick={() => setOpen(o => !o)}
+        style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'transparent', border: 'none', borderBottom: `0.5px solid ${open ? '#FF007F' : border}`, color: text, padding: '8px 0', fontSize: '13px', width: '100%', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
+        <span style={{ flex: 1, textAlign: 'left' }}>{value || '—'}</span>
+        <ChevronDown size={12} color={muted} />
+      </button>
+      {open && (
+        <div style={{ position: 'absolute', zIndex: 300, top: '100%', left: 0, right: 0, background: '#111', border: `0.5px solid ${border}`, maxHeight: '180px', overflowY: 'auto' }}>
+          {TIME_OPTIONS.map(t => (
+            <button key={t} type="button" onMouseDown={() => { onChange(t); setOpen(false); }}
+              style={{ display: 'block', width: '100%', textAlign: 'left', padding: '6px 10px', background: t === value ? 'rgba(255,0,127,0.1)' : 'transparent', border: 'none', color: t === value ? '#FF007F' : text, fontFamily: 'Inter, sans-serif', fontSize: '13px', cursor: 'pointer' }}>
+              {t}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function AvailabilityEditModal({ record, dateStr, theme, onClose, onSaved, startInEdit = false }) {
   const t = theme === 'light'
     ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', inputBorder: '#CCCCCC' }
     : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', inputBorder: '#262626' };
 
   const isRecurring = record.repeat && record.repeat !== 'none';
 
-  // Step: 'view' | 'confirm' | 'edit'
-  const [step, setStep] = useState('view');
-  // 'occurrence' = only this date, 'cycle' = the whole record
-  const [editScope, setEditScope] = useState(null);
+  // step: 'view' | 'confirm' | 'edit'
+  const [step, setStep] = useState(startInEdit ? (isRecurring ? 'confirm' : 'edit') : 'view');
+  const [editScope, setEditScope] = useState(startInEdit && !isRecurring ? 'cycle' : null);
   const [saving, setSaving] = useState(false);
 
-  const initForm = () => ({
+  const [form, setForm] = useState({
     kind: record.is_available ? 'free' : 'block',
+    timeMode: record.start_time && record.end_time ? 'hours' : 'allday',
+    dateMode: 'single',
     start_time: record.start_time || '09:00',
     end_time: record.end_time || '18:00',
-    timeMode: record.start_time && record.end_time ? 'hours' : 'allday',
     note: record.note || '',
     repeat: record.repeat || 'none',
     repeat_until: record.repeat_until === 'indefinite' ? '' : (record.repeat_until || ''),
     repeat_indefinite: record.repeat_until === 'indefinite',
     date: dateStr || record.date || '',
-  });
-
-  const [form, setForm] = useState(initForm);
-
-  const inp = (field, type = 'text') => ({
-    type,
-    value: form[field] || '',
-    onChange: e => setForm(f => ({ ...f, [field]: e.target.value })),
-    style: { background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '8px 0', fontSize: '13px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif', colorScheme: 'dark' },
-    onFocus: e => e.target.style.borderBottomColor = '#FF007F',
-    onBlur: e => e.target.style.borderBottomColor = t.inputBorder,
   });
 
   const lbl = txt => (
@@ -58,20 +78,6 @@ export default function AvailabilityEditModal({ record, dateStr, theme, onClose,
     </button>
   );
 
-  const handleEditClick = () => {
-    if (isRecurring) {
-      setStep('confirm');
-    } else {
-      setEditScope('cycle');
-      setStep('edit');
-    }
-  };
-
-  const handleScopeSelect = (scope) => {
-    setEditScope(scope);
-    setStep('edit');
-  };
-
   const handleSave = async () => {
     setSaving(true);
     const isAvail = form.kind === 'free';
@@ -79,7 +85,6 @@ export default function AvailabilityEditModal({ record, dateStr, theme, onClose,
     const effectiveUntil = form.repeat_indefinite ? 'indefinite' : (form.repeat_until || undefined);
 
     if (editScope === 'occurrence') {
-      // Create a new single-day exception for this specific date (overrides the cycle for that day)
       await base44.entities.ArtistAvailability.create({
         artist_id: record.artist_id,
         type: 'exception',
@@ -89,38 +94,29 @@ export default function AvailabilityEditModal({ record, dateStr, theme, onClose,
         end_time: allDay ? null : form.end_time,
         note: form.note || undefined,
         repeat: 'none',
-        repeat_until: undefined,
       });
     } else {
-      // Edit the whole record
       await base44.entities.ArtistAvailability.update(record.id, {
         is_available: isAvail,
         start_time: allDay ? null : form.start_time,
         end_time: allDay ? null : form.end_time,
         note: form.note || undefined,
-        repeat: form.repeat !== 'none' ? form.repeat : 'none',
+        repeat: form.repeat,
         repeat_until: form.repeat !== 'none' ? effectiveUntil : undefined,
         date: form.date || record.date,
       });
     }
-
     setSaving(false);
     onSaved();
   };
 
   const handleDelete = async () => {
     setSaving(true);
-    if (editScope === 'occurrence' || !isRecurring) {
-      // For non-recurring or when user chose "this only" — create a blocking override for this day
-      // Actually for delete: if cycle, just delete the record; if occurrence, create a "cancelled" marker isn't needed —
-      // For simplicity: delete is only available on cycle scope (whole record)
-      await base44.entities.ArtistAvailability.delete(record.id);
-    }
+    await base44.entities.ArtistAvailability.delete(record.id);
     setSaving(false);
     onSaved();
   };
 
-  // Format display info
   let dateDisplay = '';
   try { dateDisplay = format(parseISO(dateStr || record.date), 'd MMMM yyyy (EEEE)', { locale: pl }); } catch {}
   let repeatDisplay = '';
@@ -140,8 +136,8 @@ export default function AvailabilityEditModal({ record, dateStr, theme, onClose,
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
-          className="w-full max-w-md"
-          style={{ background: t.bg, border: `0.5px solid ${t.border}`, padding: '28px' }}
+          className="w-full max-w-md overflow-y-auto"
+          style={{ background: t.bg, border: `0.5px solid ${t.border}`, padding: '28px', maxHeight: '90vh' }}
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
@@ -163,18 +159,14 @@ export default function AvailabilityEditModal({ record, dateStr, theme, onClose,
               <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '16px' }} className="space-y-3">
                 <Row label="DATA" value={dateDisplay} color={typeColor} t={t} />
                 <Row label="CZAS" value={timeDisplay} color={typeColor} t={t} />
-                {isRecurring && (
-                  <Row label="POWTARZANIE" value={repeatDisplay} color={typeColor} t={t} icon={<RefreshCw size={9} />} />
-                )}
+                {isRecurring && <Row label="POWTARZANIE" value={repeatDisplay} color={typeColor} t={t} icon={<RefreshCw size={9} />} />}
                 {record.note && <Row label="NOTATKA" value={record.note} color={typeColor} t={t} />}
               </div>
               <div className="flex gap-3 pt-2" style={{ borderTop: `0.5px solid ${t.border}` }}>
-                <button onClick={handleEditClick} className="btn-oxblood flex-1" style={{ fontSize: '9px' }}>EDYTUJ</button>
-                {!isRecurring && (
-                  <button onClick={handleDelete} disabled={saving} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: `0.5px solid rgba(255,0,127,0.4)`, color: '#FF007F', background: 'transparent', cursor: 'pointer' }}>
-                    {saving ? '...' : 'USUŃ'}
-                  </button>
-                )}
+                <button onClick={() => { if (isRecurring) setStep('confirm'); else { setEditScope('cycle'); setStep('edit'); } }} className="btn-oxblood flex-1" style={{ fontSize: '9px' }}>EDYTUJ</button>
+                <button onClick={handleDelete} disabled={saving} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: `0.5px solid rgba(255,0,127,0.4)`, color: '#FF007F', background: 'transparent', cursor: 'pointer' }}>
+                  {saving ? '...' : 'USUŃ'}
+                </button>
               </div>
             </div>
           )}
@@ -183,28 +175,21 @@ export default function AvailabilityEditModal({ record, dateStr, theme, onClose,
           {step === 'confirm' && (
             <div className="space-y-4">
               <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text, letterSpacing: '0.04em', lineHeight: 1.6 }}>
-                Ten wpis jest wydarzeniem cyklicznym ({REPEAT_LABELS[record.repeat]}).<br />
-                Co chcesz edytować?
+                Ten wpis jest cykliczny ({REPEAT_LABELS[record.repeat]}).<br />Co chcesz edytować?
               </p>
               <div className="space-y-2 pt-2">
-                <button
-                  onClick={() => handleScopeSelect('occurrence')}
-                  style={{ display: 'block', width: '100%', textAlign: 'left', padding: '12px 14px', border: `0.5px solid ${t.border}`, background: 'transparent', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = '#FF007F'}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = t.border}
-                >
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>TYLKO TEN DZIEŃ</p>
-                  <p style={{ fontSize: '12px', color: t.muted }}>{dateDisplay}</p>
-                </button>
-                <button
-                  onClick={() => handleScopeSelect('cycle')}
-                  style={{ display: 'block', width: '100%', textAlign: 'left', padding: '12px 14px', border: `0.5px solid ${t.border}`, background: 'transparent', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = '#FF007F'}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = t.border}
-                >
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>CAŁY CYKL</p>
-                  <p style={{ fontSize: '12px', color: t.muted }}>{repeatDisplay}</p>
-                </button>
+                {[
+                  ['occurrence', 'TYLKO TEN DZIEŃ', dateDisplay],
+                  ['cycle', 'CAŁY CYKL', repeatDisplay],
+                ].map(([scope, title, sub]) => (
+                  <button key={scope} onClick={() => { setEditScope(scope); setStep('edit'); }}
+                    style={{ display: 'block', width: '100%', textAlign: 'left', padding: '12px 14px', border: `0.5px solid ${t.border}`, background: 'transparent', cursor: 'pointer' }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = '#FF007F'}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = t.border}>
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>{title}</p>
+                    <p style={{ fontSize: '12px', color: t.muted }}>{sub}</p>
+                  </button>
+                ))}
               </div>
               <button onClick={() => setStep('view')} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}>← WRÓĆ</button>
             </div>
@@ -215,9 +200,7 @@ export default function AvailabilityEditModal({ record, dateStr, theme, onClose,
             <div className="space-y-4">
               {editScope === 'occurrence' && (
                 <div style={{ padding: '8px 10px', background: 'rgba(255,0,127,0.05)', border: '0.5px solid rgba(255,0,127,0.2)' }}>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.1em' }}>
-                    EDYTUJESZ TYLKO: {dateDisplay}
-                  </p>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.1em' }}>EDYTUJESZ TYLKO: {dateDisplay}</p>
                 </div>
               )}
 
@@ -230,6 +213,15 @@ export default function AvailabilityEditModal({ record, dateStr, theme, onClose,
                 </div>
               </div>
 
+              {/* Data startu (tylko cycle) */}
+              {editScope === 'cycle' && (
+                <div>
+                  {lbl('DATA STARTU')}
+                  <input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
+                    style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '8px 0', fontSize: '13px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif', colorScheme: 'dark' }} />
+                </div>
+              )}
+
               {/* Czas */}
               <div>
                 {lbl('CZAS')}
@@ -239,18 +231,13 @@ export default function AvailabilityEditModal({ record, dateStr, theme, onClose,
                 </div>
                 {form.timeMode === 'hours' && (
                   <div className="grid grid-cols-2 gap-3">
-                    <div>{lbl('OD')}<input {...inp('start_time', 'time')} /></div>
-                    <div>{lbl('DO')}<input {...inp('end_time', 'time')} /></div>
+                    <div>{lbl('OD')}<TimeDropdown value={form.start_time} onChange={v => setForm(f => ({ ...f, start_time: v }))} border={t.inputBorder} text={t.text} muted={t.muted} /></div>
+                    <div>{lbl('DO')}<TimeDropdown value={form.end_time} onChange={v => setForm(f => ({ ...f, end_time: v }))} border={t.inputBorder} text={t.text} muted={t.muted} /></div>
                   </div>
                 )}
               </div>
 
-              {/* Data (only cycle edit) */}
-              {editScope === 'cycle' && (
-                <div>{lbl('DATA STARTU')}<input {...inp('date', 'date')} /></div>
-              )}
-
-              {/* Repeat (only cycle edit and non-occurrence) */}
+              {/* Powtarzanie (tylko cycle) */}
               {editScope === 'cycle' && (
                 <>
                   <div>
@@ -268,10 +255,8 @@ export default function AvailabilityEditModal({ record, dateStr, theme, onClose,
                         <input type="date" value={form.repeat_until}
                           onChange={e => setForm(f => ({ ...f, repeat_until: e.target.value, repeat_indefinite: false }))}
                           disabled={form.repeat_indefinite}
-                          style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '8px 0', fontSize: '13px', flex: 1, outline: 'none', fontFamily: 'Inter, sans-serif', colorScheme: 'dark', opacity: form.repeat_indefinite ? 0.3 : 1 }}
-                        />
-                        <button type="button"
-                          onClick={() => setForm(f => ({ ...f, repeat_indefinite: !f.repeat_indefinite, repeat_until: '' }))}
+                          style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '8px 0', fontSize: '13px', flex: 1, outline: 'none', fontFamily: 'Inter, sans-serif', colorScheme: 'dark', opacity: form.repeat_indefinite ? 0.3 : 1 }} />
+                        <button type="button" onClick={() => setForm(f => ({ ...f, repeat_indefinite: !f.repeat_indefinite, repeat_until: '' }))}
                           style={{ flexShrink: 0, fontFamily: 'JetBrains Mono', fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 8px', border: `0.5px solid ${form.repeat_indefinite ? '#FF007F' : t.border}`, color: form.repeat_indefinite ? '#FF007F' : t.muted, background: form.repeat_indefinite ? 'rgba(255,0,127,0.08)' : 'transparent', cursor: 'pointer', whiteSpace: 'nowrap' }}>
                           Do odwołania
                         </button>
@@ -282,7 +267,11 @@ export default function AvailabilityEditModal({ record, dateStr, theme, onClose,
               )}
 
               {/* Notatka */}
-              <div>{lbl('NOTATKA')}<input {...inp('note')} placeholder="np. urlop..." /></div>
+              <div>
+                {lbl('NOTATKA')}
+                <input type="text" value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} placeholder="np. urlop..."
+                  style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '8px 0', fontSize: '13px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif' }} />
+              </div>
 
               <div className="flex gap-3 pt-2" style={{ borderTop: `0.5px solid ${t.border}` }}>
                 <button onClick={handleSave} disabled={saving} className="btn-oxblood flex-1" style={{ fontSize: '9px' }}>
