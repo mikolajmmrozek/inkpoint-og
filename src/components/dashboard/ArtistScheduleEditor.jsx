@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Plus, Trash2, Edit2, X, RefreshCw } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { Plus, Trash2, Edit2, X, RefreshCw, ChevronDown } from 'lucide-react';
+import { format, parseISO, addDays, addWeeks, addMonths, eachDayOfInterval } from 'date-fns';
 import { pl } from 'date-fns/locale';
 
 const DAYS = [
@@ -24,16 +24,23 @@ const DEFAULT_SCHEDULE = [
 
 const TODAY = format(new Date(), 'yyyy-MM-dd');
 
+const TIME_OPTIONS = [];
+for (let h = 0; h < 24; h++) {
+  for (let m = 0; m < 60; m += 30) {
+    TIME_OPTIONS.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+  }
+}
+
 const EMPTY_ENTRY = {
-  kind: 'block',           // 'block' | 'free'
-  timeMode: 'allday',      // 'allday' | 'hours'
-  dateMode: 'single',      // 'single' | 'range'
+  kind: 'block',
+  timeMode: 'allday',
+  dateMode: 'single',
   date_from: TODAY,
   date_to: TODAY,
   start_time: '09:00',
   end_time: '18:00',
-  repeat: 'none',          // 'none' | 'weekly' | 'biweekly' | 'monthly'
-  repeat_indefinite: false, // true = do odwołania (ignoruje repeat_until)
+  repeat: 'none',
+  repeat_indefinite: false,
   repeat_until: '',
   note: '',
 };
@@ -51,26 +58,95 @@ function formatRepeatLabel(ex) {
   const repeatStr = REPEAT_LABELS[ex.repeat] || ex.repeat;
   let dayStr = '';
   if (ex.date) {
-    try {
-      const d = parseISO(ex.date);
-      dayStr = DAY_NAMES_PL[d.getDay()];
-    } catch {}
+    try { dayStr = DAY_NAMES_PL[parseISO(ex.date).getDay()]; } catch {}
   }
   let untilStr = '';
   if (ex.repeat_until === 'indefinite' || !ex.repeat_until) {
     untilStr = 'do odwołania';
   } else {
-    try {
-      untilStr = `do ${format(parseISO(ex.repeat_until), 'd MMM yyyy', { locale: pl })}`;
-    } catch { untilStr = ex.repeat_until; }
+    try { untilStr = `do ${format(parseISO(ex.repeat_until), 'd MMM yyyy', { locale: pl })}`; }
+    catch { untilStr = ex.repeat_until; }
   }
   return `${repeatStr}${dayStr ? ` (${dayStr})` : ''} · ${untilStr}`;
 }
 
-function ExceptionRow({ ex, count, color, border, muted, text, onEdit, onDelete }) {
+// Generate all occurrence dates for a group of exceptions
+function getGroupDates(records) {
+  return records.map(r => r.date).filter(Boolean).sort();
+}
+
+// Generate expected dates from a repeat pattern
+function generateDates(dateFrom, dateTo, repeat, repeatUntil, repeatIndefinite) {
+  const start = parseISO(dateFrom);
+  const endLimit = repeatIndefinite
+    ? addMonths(new Date(), 24) // 2 years ahead as practical limit
+    : (repeatUntil ? parseISO(repeatUntil) : (dateTo ? parseISO(dateTo) : start));
+
+  if (!repeat || repeat === 'none') {
+    // Range: all days from date_from to date_to
+    if (dateTo && dateTo > dateFrom) {
+      return eachDayOfInterval({ start, end: parseISO(dateTo) }).map(d => format(d, 'yyyy-MM-dd'));
+    }
+    return [dateFrom];
+  }
+
+  const dates = [];
+  let cur = start;
+  while (cur <= endLimit) {
+    dates.push(format(cur, 'yyyy-MM-dd'));
+    if (repeat === 'weekly') cur = addWeeks(cur, 1);
+    else if (repeat === 'biweekly') cur = addWeeks(cur, 2);
+    else if (repeat === 'monthly') cur = addMonths(cur, 1);
+    else break;
+  }
+  return dates;
+}
+
+// TimeDropdown — styled select for time
+function TimeDropdown({ value, onChange, border, text, muted }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'transparent', border: 'none', borderBottom: `0.5px solid ${open ? '#FF007F' : border}`, color: text, padding: '7px 0', fontSize: '13px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif', cursor: 'pointer' }}
+      >
+        <span style={{ flex: 1, textAlign: 'left' }}>{value || '—'}</span>
+        <ChevronDown size={12} color={muted} />
+      </button>
+      {open && (
+        <div style={{ position: 'absolute', zIndex: 200, top: '100%', left: 0, right: 0, background: '#111', border: `0.5px solid ${border}`, maxHeight: '180px', overflowY: 'auto' }}>
+          {TIME_OPTIONS.map(t => (
+            <button
+              key={t}
+              type="button"
+              onMouseDown={() => { onChange(t); setOpen(false); }}
+              style={{ display: 'block', width: '100%', textAlign: 'left', padding: '6px 10px', background: t === value ? 'rgba(255,0,127,0.1)' : 'transparent', border: 'none', color: t === value ? '#FF007F' : text, fontFamily: 'Inter, sans-serif', fontSize: '13px', cursor: 'pointer' }}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ExceptionRow({ group, color, border, muted, text, onEdit, onDelete }) {
+  const ex = group.representative;
+  const count = group.count;
   const timeStr = ex.start_time && ex.end_time ? `${ex.start_time}–${ex.end_time}` : 'cały dzień';
   const isRecurring = ex.repeat && ex.repeat !== 'none';
-  const isGrouped = count > 1; // grouped single-day duplicates
+  const isGrouped = count > 1;
   const repeatLabel = formatRepeatLabel(ex);
 
   let dateStr = ex.date || '';
@@ -86,20 +162,20 @@ function ExceptionRow({ ex, count, color, border, muted, text, onEdit, onDelete 
             </span>
           ) : (
             <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color, letterSpacing: '0.06em' }}>
-              {dateStr}
+              {isGrouped ? `${dateStr} (+${count - 1} więcej)` : dateStr}
             </span>
           )}
           <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color, opacity: 0.7, letterSpacing: '0.04em' }}>· {timeStr}</span>
           {isGrouped && (
             <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color, opacity: 0.6, letterSpacing: '0.06em', background: `${color}18`, padding: '1px 5px', border: `0.5px solid ${color}40` }}>
-              ×{count} wpisów
+              ×{count}
             </span>
           )}
         </div>
         {ex.note && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: muted, marginTop: '2px' }}>{ex.note}</p>}
       </div>
       <div className="flex items-center gap-2 ml-2 flex-shrink-0">
-        <button onClick={() => onEdit(ex)} title="Edytuj" style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><Edit2 size={10} /></button>
+        <button onClick={() => onEdit(group)} title="Edytuj" style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><Edit2 size={10} /></button>
         <button onClick={onDelete} title={isGrouped ? `Usuń wszystkie ${count} wpisy` : 'Usuń'} style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={11} /></button>
       </div>
     </div>
@@ -113,19 +189,21 @@ export default function ArtistScheduleEditor({ artistId, t }) {
   const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [entry, setEntry] = useState(EMPTY_ENTRY);
-  const [editingException, setEditingException] = useState(null); // id of exception being edited
+  const [editingGroup, setEditingGroup] = useState(null); // group being edited
 
   const border = t?.border || '#262626';
   const text = t?.text || '#F5F0EB';
   const muted = t?.muted || 'rgba(245,240,235,0.4)';
 
+  const reload = async () => {
+    const all = await base44.entities.ArtistAvailability.filter({ artist_id: artistId });
+    setRecurring(all.filter(r => r.type === 'recurring'));
+    setExceptions(all.filter(r => r.type === 'exception').sort((a, b) => (a.date || '').localeCompare(b.date || '')));
+  };
+
   useEffect(() => {
     if (!artistId) return;
-    base44.entities.ArtistAvailability.filter({ artist_id: artistId }).then(all => {
-      setRecurring(all.filter(r => r.type === 'recurring'));
-      setExceptions(all.filter(r => r.type === 'exception').sort((a, b) => (a.date || '').localeCompare(b.date || '')));
-      setLoading(false);
-    });
+    reload().then(() => setLoading(false));
   }, [artistId]);
 
   const isDayActive = (dow) => recurring.some(r => r.day_of_week === dow);
@@ -165,80 +243,115 @@ export default function ArtistScheduleEditor({ artistId, t }) {
     setSaving(false);
   };
 
+  // Group exceptions by fingerprint: same note + start_time + end_time + repeat
+  function groupExceptions(list) {
+    const groupMap = new Map();
+    for (const ex of list) {
+      const key = `${ex.note || ''}|${ex.start_time || ''}|${ex.end_time || ''}|${ex.repeat || 'none'}|${ex.is_available}`;
+      if (!groupMap.has(key)) {
+        groupMap.set(key, { representative: ex, allRecords: [], count: 0 });
+      }
+      const g = groupMap.get(key);
+      g.allRecords.push(ex);
+      g.count++;
+    }
+    return Array.from(groupMap.values());
+  }
+
   const saveEntry = async () => {
     setSaving(true);
     const isAvailable = entry.kind === 'free';
     const allDay = entry.timeMode === 'allday';
     const effectiveUntil = entry.repeat_indefinite ? 'indefinite' : (entry.repeat_until || undefined);
+    const dates = generateDates(entry.date_from, entry.date_to, entry.repeat, entry.repeat_until, entry.repeat_indefinite);
 
-    const created = await base44.entities.ArtistAvailability.create({
-      artist_id: artistId,
-      type: 'exception',
-      date: entry.date_from,
+    await Promise.all(dates.map(date =>
+      base44.entities.ArtistAvailability.create({
+        artist_id: artistId,
+        type: 'exception',
+        date,
+        is_available: isAvailable,
+        start_time: allDay ? null : entry.start_time,
+        end_time: allDay ? null : entry.end_time,
+        note: entry.note || undefined,
+        repeat: entry.repeat !== 'none' ? entry.repeat : 'none',
+        repeat_until: entry.repeat !== 'none' ? effectiveUntil : undefined,
+      })
+    ));
+
+    await reload();
+    setShowForm(false);
+    setEditingGroup(null);
+    setEntry(EMPTY_ENTRY);
+    setSaving(false);
+  };
+
+  const saveEditGroup = async () => {
+    setSaving(true);
+    const isAvailable = entry.kind === 'free';
+    const allDay = entry.timeMode === 'allday';
+    const newDates = new Set(generateDates(entry.date_from, entry.date_to, entry.repeat, entry.repeat_until, entry.repeat_indefinite));
+    const oldRecords = editingGroup.allRecords;
+    const oldDates = new Set(oldRecords.map(r => r.date));
+
+    // Dates to remove (in old but not new)
+    const toDelete = oldRecords.filter(r => !newDates.has(r.date));
+    // Dates to update (in both)
+    const toUpdate = oldRecords.filter(r => newDates.has(r.date));
+    // Dates to add (in new but not old)
+    const toAdd = [...newDates].filter(d => !oldDates.has(d));
+
+    const effectiveUntil = entry.repeat_indefinite ? 'indefinite' : (entry.repeat_until || undefined);
+    const updateData = {
       is_available: isAvailable,
       start_time: allDay ? null : entry.start_time,
       end_time: allDay ? null : entry.end_time,
       note: entry.note || undefined,
       repeat: entry.repeat !== 'none' ? entry.repeat : 'none',
       repeat_until: entry.repeat !== 'none' ? effectiveUntil : undefined,
-    });
+    };
 
-    setExceptions(prev => [...prev, created].sort((a, b) => (a.date || '').localeCompare(b.date || '')));
+    await Promise.all([
+      ...toDelete.map(r => base44.entities.ArtistAvailability.delete(r.id)),
+      ...toUpdate.map(r => base44.entities.ArtistAvailability.update(r.id, updateData)),
+      ...toAdd.map(date => base44.entities.ArtistAvailability.create({ artist_id: artistId, type: 'exception', date, ...updateData })),
+    ]);
+
+    await reload();
     setShowForm(false);
-    setEditingException(null);
+    setEditingGroup(null);
     setEntry(EMPTY_ENTRY);
     setSaving(false);
   };
 
-  const deleteException = async (id) => {
-    await base44.entities.ArtistAvailability.delete(id);
-    setExceptions(e => e.filter(x => x.id !== id));
+  const deleteGroup = async (group) => {
+    await Promise.all(group.allRecords.map(r => base44.entities.ArtistAvailability.delete(r.id)));
+    setExceptions(e => e.filter(x => !group.allRecords.find(r => r.id === x.id)));
   };
 
-  const openEditException = (ex) => {
-    setEditingException(ex.id);
-    const isIndefinite = ex.repeat_until === 'indefinite';
+  const openEditGroup = (group) => {
+    const ex = group.representative;
+    const dates = group.allRecords.map(r => r.date).filter(Boolean).sort();
+    setEditingGroup(group);
     setEntry({
       kind: ex.is_available ? 'free' : 'block',
       timeMode: ex.start_time && ex.end_time ? 'hours' : 'allday',
-      dateMode: 'single',
-      date_from: ex.date || TODAY,
-      date_to: ex.date || TODAY,
+      dateMode: dates.length > 1 ? 'range' : 'single',
+      date_from: dates[0] || ex.date || TODAY,
+      date_to: dates[dates.length - 1] || ex.date || TODAY,
       start_time: ex.start_time || '09:00',
       end_time: ex.end_time || '18:00',
       repeat: ex.repeat || 'none',
-      repeat_indefinite: isIndefinite,
-      repeat_until: isIndefinite ? '' : (ex.repeat_until || ''),
+      repeat_indefinite: ex.repeat_until === 'indefinite',
+      repeat_until: ex.repeat_until === 'indefinite' ? '' : (ex.repeat_until || ''),
       note: ex.note || '',
     });
     setShowForm(true);
   };
 
-  const saveEditException = async () => {
-    setSaving(true);
-    const isAvailable = entry.kind === 'free';
-    const allDay = entry.timeMode === 'allday';
-    const effectiveUntil = entry.repeat_indefinite ? 'indefinite' : (entry.repeat_until || undefined);
-    await base44.entities.ArtistAvailability.update(editingException, {
-      date: entry.date_from,
-      is_available: isAvailable,
-      start_time: allDay ? null : entry.start_time,
-      end_time: allDay ? null : entry.end_time,
-      note: entry.note || undefined,
-      repeat: entry.repeat !== 'none' ? entry.repeat : 'none',
-      repeat_until: entry.repeat !== 'none' ? effectiveUntil : undefined,
-    });
-    const updated = await base44.entities.ArtistAvailability.filter({ artist_id: artistId });
-    setExceptions(updated.filter(r => r.type === 'exception').sort((a, b) => (a.date || '').localeCompare(b.date || '')));
-    setShowForm(false);
-    setEditingException(null);
-    setEntry(EMPTY_ENTRY);
-    setSaving(false);
-  };
-
   const cancelForm = () => {
     setShowForm(false);
-    setEditingException(null);
+    setEditingGroup(null);
     setEntry(EMPTY_ENTRY);
   };
 
@@ -264,34 +377,8 @@ export default function ArtistScheduleEditor({ artistId, t }) {
   if (loading) return <div style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: muted }}>ŁADOWANIE...</div>;
 
   const activeCount = DAYS.filter(d => isDayActive(d.value)).length;
-
-  // Group exceptions by fingerprint: same note + start_time + end_time → one tile
-  function groupExceptions(list) {
-    const groupMap = new Map();
-    for (const ex of list) {
-      const key = `${ex.note || ''}|${ex.start_time || ''}|${ex.end_time || ''}|${ex.repeat || 'none'}`;
-      if (!groupMap.has(key)) {
-        groupMap.set(key, { representative: ex, siblingIds: [], count: 0 });
-      }
-      const g = groupMap.get(key);
-      if (g.representative.id === ex.id) {
-        g.count++;
-      } else {
-        g.siblingIds.push(ex.id);
-        g.count++;
-      }
-    }
-    return Array.from(groupMap.values());
-  }
-
   const blocks = groupExceptions(exceptions.filter(e => !e.is_available));
   const frees = groupExceptions(exceptions.filter(e => e.is_available));
-
-  const deleteGroup = async (group) => {
-    const allIds = [group.representative.id, ...group.siblingIds];
-    await Promise.all(allIds.map(id => base44.entities.ArtistAvailability.delete(id)));
-    setExceptions(e => e.filter(x => !allIds.includes(x.id)));
-  };
 
   return (
     <div className="space-y-6">
@@ -316,11 +403,13 @@ export default function ArtistScheduleEditor({ artistId, t }) {
                 </button>
                 {active && rec ? (
                   <div className="flex items-center gap-2 flex-1">
-                    <input type="time" value={rec.start_time || '09:00'} onChange={e => updateDayTime(rec, 'start_time', e.target.value)}
-                      style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${border}`, color: text, padding: '4px 0', fontSize: '13px', outline: 'none', colorScheme: 'dark', width: '88px' }} />
+                    <div style={{ width: '90px' }}>
+                      <TimeDropdown value={rec.start_time || '09:00'} onChange={v => updateDayTime(rec, 'start_time', v)} border={border} text={text} muted={muted} />
+                    </div>
                     <span style={{ color: muted, fontSize: '11px' }}>–</span>
-                    <input type="time" value={rec.end_time || '18:00'} onChange={e => updateDayTime(rec, 'end_time', e.target.value)}
-                      style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${border}`, color: text, padding: '4px 0', fontSize: '13px', outline: 'none', colorScheme: 'dark', width: '88px' }} />
+                    <div style={{ width: '90px' }}>
+                      <TimeDropdown value={rec.end_time || '18:00'} onChange={v => updateDayTime(rec, 'end_time', v)} border={border} text={text} muted={muted} />
+                    </div>
                   </div>
                 ) : (
                   <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: muted, letterSpacing: '0.08em' }}>wolne</span>
@@ -338,7 +427,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
             DODAJ WOLNE
           </p>
           {!showForm && (
-            <button onClick={() => { setShowForm(true); setEditingException(null); setEntry(EMPTY_ENTRY); }} style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${border}`, color: muted, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <button onClick={() => { setShowForm(true); setEditingGroup(null); setEntry(EMPTY_ENTRY); }} style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${border}`, color: muted, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
               <Plus size={10} /> DODAJ
             </button>
           )}
@@ -349,7 +438,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
           <div className="mb-4 p-4 space-y-4" style={{ border: `0.5px solid rgba(255,0,127,0.25)`, background: 'rgba(255,0,127,0.02)' }}>
             <div className="flex items-center justify-between">
               <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-                {editingException ? 'EDYTUJ WPIS' : 'NOWY WPIS'}
+                {editingGroup ? `EDYTUJ WPIS (×${editingGroup.count})` : 'NOWY WPIS'}
               </p>
               <button onClick={cancelForm} style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><X size={13} /></button>
             </div>
@@ -363,20 +452,18 @@ export default function ArtistScheduleEditor({ artistId, t }) {
               </div>
             </div>
 
-            {/* Date mode — hidden when editing (single date only) */}
-            {!editingException && (
-              <div>
-                {lbl('ZAKRES DAT')}
-                <div className="flex gap-2">
-                  <SegBtn active={entry.dateMode === 'single'} onClick={() => setEntry(e => ({ ...e, dateMode: 'single' }))}>Jeden dzień</SegBtn>
-                  <SegBtn active={entry.dateMode === 'range'} onClick={() => setEntry(e => ({ ...e, dateMode: 'range' }))}>Zakres (od–do)</SegBtn>
-                </div>
+            {/* Date mode */}
+            <div>
+              {lbl('ZAKRES DAT')}
+              <div className="flex gap-2">
+                <SegBtn active={entry.dateMode === 'single'} onClick={() => setEntry(e => ({ ...e, dateMode: 'single', date_to: e.date_from }))}>Jeden dzień</SegBtn>
+                <SegBtn active={entry.dateMode === 'range'} onClick={() => setEntry(e => ({ ...e, dateMode: 'range' }))}>Zakres (od–do)</SegBtn>
               </div>
-            )}
+            </div>
 
             {/* Date inputs */}
-            {entry.dateMode === 'single' || editingException ? (
-              <div>{lbl('DATA')}<input {...inp(entry.date_from, e => setEntry(n => ({ ...n, date_from: e.target.value })), 'date')} /></div>
+            {entry.dateMode === 'single' ? (
+              <div>{lbl('DATA')}<input {...inp(entry.date_from, e => setEntry(n => ({ ...n, date_from: e.target.value, date_to: e.target.value })), 'date')} /></div>
             ) : (
               <div className="grid grid-cols-2 gap-4">
                 <div>{lbl('OD')}<input {...inp(entry.date_from, e => setEntry(n => ({ ...n, date_from: e.target.value })), 'date')} /></div>
@@ -395,25 +482,29 @@ export default function ArtistScheduleEditor({ artistId, t }) {
 
             {entry.timeMode === 'hours' && (
               <div className="grid grid-cols-2 gap-4">
-                <div>{lbl('OD GODZINY')}<input {...inp(entry.start_time, e => setEntry(n => ({ ...n, start_time: e.target.value })), 'time')} /></div>
-                <div>{lbl('DO GODZINY')}<input {...inp(entry.end_time, e => setEntry(n => ({ ...n, end_time: e.target.value })), 'time')} /></div>
-              </div>
-            )}
-
-            {/* Repeat — only for new entries */}
-            {!editingException && (
-              <div>
-                {lbl('POWTARZANIE')}
-                <div className="flex gap-1 flex-wrap">
-                  {[['none','Brak'], ['weekly','Co tydzień'], ['biweekly','Co 2 tygodnie'], ['monthly','Co miesiąc']].map(([val, label]) => (
-                    <SegBtn key={val} active={entry.repeat === val} onClick={() => setEntry(e => ({ ...e, repeat: val }))}>{label}</SegBtn>
-                  ))}
+                <div>
+                  {lbl('OD GODZINY')}
+                  <TimeDropdown value={entry.start_time} onChange={v => setEntry(n => ({ ...n, start_time: v }))} border={border} text={text} muted={muted} />
+                </div>
+                <div>
+                  {lbl('DO GODZINY')}
+                  <TimeDropdown value={entry.end_time} onChange={v => setEntry(n => ({ ...n, end_time: v }))} border={border} text={text} muted={muted} />
                 </div>
               </div>
             )}
 
-            {/* Repeat until + "Do odwołania" — shown when repeat != none, for new entries only */}
-            {!editingException && entry.repeat !== 'none' && (
+            {/* Repeat */}
+            <div>
+              {lbl('POWTARZANIE')}
+              <div className="flex gap-1 flex-wrap">
+                {[['none','Brak'], ['weekly','Co tydzień'], ['biweekly','Co 2 tyg.'], ['monthly','Co miesiąc']].map(([val, label]) => (
+                  <SegBtn key={val} active={entry.repeat === val} onClick={() => setEntry(e => ({ ...e, repeat: val }))}>{label}</SegBtn>
+                ))}
+              </div>
+            </div>
+
+            {/* Repeat until */}
+            {entry.repeat !== 'none' && (
               <div>
                 {lbl('ZAKOŃCZENIE POWTARZANIA')}
                 <div className="flex items-center gap-3">
@@ -422,9 +513,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
                     value={entry.repeat_until}
                     onChange={e => setEntry(n => ({ ...n, repeat_until: e.target.value, repeat_indefinite: false }))}
                     disabled={entry.repeat_indefinite}
-                    style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${border}`, color: text, padding: '7px 0', fontSize: '13px', flex: 1, outline: 'none', fontFamily: 'Inter, sans-serif', colorScheme: 'dark', opacity: entry.repeat_indefinite ? 0.3 : 1, cursor: entry.repeat_indefinite ? 'not-allowed' : 'text' }}
-                    onFocus={e => { if (!entry.repeat_indefinite) e.target.style.borderBottomColor = '#FF007F'; }}
-                    onBlur={e => e.target.style.borderBottomColor = border}
+                    style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${border}`, color: text, padding: '7px 0', fontSize: '13px', flex: 1, outline: 'none', fontFamily: 'Inter, sans-serif', colorScheme: 'dark', opacity: entry.repeat_indefinite ? 0.3 : 1 }}
                   />
                   <button
                     onClick={() => setEntry(e => ({ ...e, repeat_indefinite: !e.repeat_indefinite, repeat_until: '' }))}
@@ -442,14 +531,22 @@ export default function ArtistScheduleEditor({ artistId, t }) {
               <input {...inp(entry.note, e => setEntry(n => ({ ...n, note: e.target.value })))} placeholder="np. urlop, choroba..." />
             </div>
 
+            {editingGroup && (
+              <div style={{ padding: '8px 10px', background: 'rgba(255,0,127,0.04)', border: '0.5px solid rgba(255,0,127,0.2)' }}>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#FF007F', letterSpacing: '0.1em' }}>
+                  Zmiana zakresu dat: wpisy poza nowym zakresem zostaną usunięte, nowe daty zostaną dodane.
+                </p>
+              </div>
+            )}
+
             <div className="flex gap-3 pt-1">
               <button
-                onClick={editingException ? saveEditException : saveEntry}
+                onClick={editingGroup ? saveEditGroup : saveEntry}
                 disabled={saving}
                 className="btn-oxblood"
                 style={{ fontSize: '9px', padding: '8px 18px' }}
               >
-                {saving ? 'ZAPISUJĘ...' : editingException ? 'ZAPISZ ZMIANY' : 'ZAPISZ'}
+                {saving ? 'ZAPISUJĘ...' : editingGroup ? 'ZAPISZ ZMIANY' : 'ZAPISZ'}
               </button>
               <button onClick={cancelForm} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: `0.5px solid ${border}`, color: muted, background: 'transparent', cursor: 'pointer' }}>ANULUJ</button>
             </div>
@@ -462,7 +559,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>BLOKADY ({blocks.length})</p>
             <div className="space-y-1">
               {blocks.map(group => (
-                <ExceptionRow key={group.representative.id} ex={group.representative} count={group.count} color="#FF007F" border={border} muted={muted} text={text} onEdit={openEditException} onDelete={() => deleteGroup(group)} />
+                <ExceptionRow key={group.representative.id} group={group} color="#FF007F" border={border} muted={muted} text={text} onEdit={openEditGroup} onDelete={() => deleteGroup(group)} />
               ))}
             </div>
           </div>
@@ -474,7 +571,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>DYSPOZYCJE / DOSTĘPNE ({frees.length})</p>
             <div className="space-y-1">
               {frees.map(group => (
-                <ExceptionRow key={group.representative.id} ex={group.representative} count={group.count} color="#16a34a" border={border} muted={muted} text={text} onEdit={openEditException} onDelete={() => deleteGroup(group)} />
+                <ExceptionRow key={group.representative.id} group={group} color="#16a34a" border={border} muted={muted} text={text} onEdit={openEditGroup} onDelete={() => deleteGroup(group)} />
               ))}
             </div>
           </div>
@@ -508,7 +605,6 @@ function matchesRepeat(ex, dateStr) {
   return false;
 }
 
-// Helper exported for DailyScheduleView
 export function getAvailabilityForDay(availabilityRecords, artistId, dateStr) {
   const dow = new Date(dateStr + 'T12:00:00').getDay();
   const artistRecords = availabilityRecords.filter(r => r.artist_id === artistId);
