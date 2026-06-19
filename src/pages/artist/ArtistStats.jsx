@@ -18,7 +18,7 @@ export default function ArtistStats() {
 
   useEffect(() => {
     if (!artist?.id) return;
-    base44.entities.Booking.filter({ artist_id: artist.id }, '-session_date', 500)
+    base44.entities.Booking.filter({ artist_id: artist.id }, '-session_date', 200)
       .then(setBookings)
       .finally(() => setLoading(false));
   }, [artist?.id]);

@@ -22,13 +22,14 @@ export default function DashboardStats() {
   const [breakdownView, setBreakdownView] = useState('monthly'); // 'monthly' | 'daily'
 
   useEffect(() => {
-    Promise.all([
-      base44.entities.Booking.list('-session_date', 500),
-      base44.entities.Artist.list(),
-    ]).then(([b, a]) => {
-      setBookings(b);
+    base44.entities.Artist.list().then(a => {
       setArtists(a.filter(x => x.is_visible !== false));
-    }).finally(() => setLoading(false));
+    });
+    setTimeout(() => {
+      base44.entities.Booking.list('-session_date', 300)
+        .then(setBookings)
+        .finally(() => setLoading(false));
+    }, 400);
   }, []);
 
   // Build artist map: id -> artist (with cut)
