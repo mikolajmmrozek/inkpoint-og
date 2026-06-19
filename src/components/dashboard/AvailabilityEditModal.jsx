@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { X, RefreshCw } from 'lucide-react';
+import { X, RefreshCw, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, parseISO, addWeeks, addMonths, eachDayOfInterval } from 'date-fns';
 import { pl } from 'date-fns/locale';
@@ -31,7 +31,6 @@ function generateDates(dateFrom, dateTo, repeat, repeatUntil, repeatIndefinite) 
 }
 
 const REPEAT_LABELS = { weekly: 'Co tydzień', biweekly: 'Co 2 tygodnie', monthly: 'Co miesiąc' };
-
 const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
 const MINUTE_OPTIONS = ['00', '15', '30', '45'];
 
@@ -39,22 +38,11 @@ function TimeDropdown({ value, onChange, border, text }) {
   const [h, m] = (value || '09:00').split(':');
   const setH = (newH) => onChange(`${newH}:${m || '00'}`);
   const setM = (newM) => onChange(`${h || '09'}:${newM}`);
-
   const selectStyle = {
-    background: '#1a1a1a',
-    border: `0.5px solid ${border}`,
-    color: text,
-    padding: '6px 8px',
-    fontSize: '14px',
-    outline: 'none',
-    fontFamily: 'Inter, sans-serif',
-    cursor: 'pointer',
-    appearance: 'none',
-    WebkitAppearance: 'none',
-    borderRadius: 0,
-    flex: 1,
+    background: '#1a1a1a', border: `0.5px solid ${border}`, color: text,
+    padding: '6px 8px', fontSize: '14px', outline: 'none', fontFamily: 'Inter, sans-serif',
+    cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none', borderRadius: 0, flex: 1,
   };
-
   return (
     <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
       <select value={h} onChange={e => setH(e.target.value)} style={selectStyle}>
@@ -68,24 +56,37 @@ function TimeDropdown({ value, onChange, border, text }) {
   );
 }
 
+function Row({ label, value, color, t }) {
+  return (
+    <div>
+      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '2px' }}>{label}</p>
+      <p style={{ color: t.text, fontSize: '13px' }}>{value}</p>
+    </div>
+  );
+}
+
+// steps: 'view' | 'confirm_edit' | 'edit' | 'confirm_delete_scope' | 'confirm_delete'
 export default function AvailabilityEditModal({ record, allRecords, dateStr, theme, onClose, onSaved, startInEdit = false }) {
-  // allRecords: wszystkie rekordy grupy cyklicznej (przekazane z ArtistScheduleEditor / ArtistSchedule)
   const t = theme === 'light'
     ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', inputBorder: '#CCCCCC' }
     : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', inputBorder: '#262626' };
 
-  const isRecurring = record.repeat && record.repeat !== 'none';
+  const isRecurring = !!(record.repeat && record.repeat !== 'none');
+  const groupRecords = allRecords && allRecords.length > 0 ? allRecords : [record];
 
-  // step: 'view' | 'confirm' | 'edit'
-  // Gdy startInEdit=true: cykliczne → confirm (wybór zakresu), jednorazowe → edit od razu
-  const [step, setStep] = useState(startInEdit ? (isRecurring ? 'confirm' : 'edit') : 'view');
-  const [editScope, setEditScope] = useState(startInEdit && !isRecurring ? 'cycle' : null);
+  const initialStep = startInEdit
+    ? (isRecurring ? 'confirm_edit' : 'edit')
+    : 'view';
+  const initialScope = startInEdit && !isRecurring ? 'cycle' : null;
+
+  const [step, setStep] = useState(initialStep);
+  const [editScope, setEditScope] = useState(initialScope);
+  const [deleteScope, setDeleteScope] = useState(null); // 'occurrence' | 'cycle'
   const [saving, setSaving] = useState(false);
 
   const [form, setForm] = useState({
     kind: record.is_available ? 'free' : 'block',
     timeMode: record.start_time && record.end_time ? 'hours' : 'allday',
-    dateMode: 'single',
     start_time: record.start_time || '09:00',
     end_time: record.end_time || '18:00',
     note: record.note || '',
@@ -94,6 +95,18 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
     repeat_indefinite: record.repeat_until === 'indefinite',
     date: dateStr || record.date || '',
   });
+
+  let dateDisplay = '';
+  try { dateDisplay = format(parseISO(dateStr || record.date), 'd MMMM yyyy (EEEE)', { locale: pl }); } catch {}
+  let repeatDisplay = '';
+  if (isRecurring) {
+    const label = REPEAT_LABELS[record.repeat] || record.repeat;
+    const until = record.repeat_until === 'indefinite' || !record.repeat_until ? 'do odwołania' : `do ${record.repeat_until}`;
+    repeatDisplay = `${label} · ${until}`;
+  }
+  const timeDisplay = record.start_time && record.end_time ? `${record.start_time}–${record.end_time}` : 'Cały dzień';
+  const typeLabel = record.is_available ? 'Dyspozycja (dostępny)' : 'Blokada (niedostępny)';
+  const typeColor = record.is_available ? '#16a34a' : '#FF007F';
 
   const lbl = txt => (
     <label style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>{txt}</label>
@@ -112,11 +125,11 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
     const effectiveUntil = form.repeat_indefinite ? 'indefinite' : (form.repeat_until || undefined);
 
     if (editScope === 'occurrence') {
-      // Dodaj wyjątek dla konkretnego dnia (nie ruszaj cyklu)
+      // Utwórz osobny wyjątek dla tego konkretnego dnia
       await base44.entities.ArtistAvailability.create({
         artist_id: record.artist_id,
         type: 'exception',
-        date: dateStr,
+        date: dateStr || record.date,
         is_available: isAvail,
         start_time: allDay ? null : form.start_time,
         end_time: allDay ? null : form.end_time,
@@ -124,8 +137,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
         repeat: 'none',
       });
     } else {
-      // Edytuj cały cykl: przelicz nowe daty, usuń stare które wypadają poza zakres, dodaj nowe
-      const groupRecords = allRecords && allRecords.length > 0 ? allRecords : [record];
+      // Edytuj cały cykl
       const newDates = new Set(generateDates(form.date || record.date, null, form.repeat, form.repeat_until, form.repeat_indefinite));
       const oldDates = new Set(groupRecords.map(r => r.date));
       const updateData = {
@@ -151,35 +163,28 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
 
   const handleDelete = async () => {
     setSaving(true);
-    const groupRecords = allRecords && allRecords.length > 0 ? allRecords : [record];
-    await Promise.all(groupRecords.map(r => base44.entities.ArtistAvailability.delete(r.id)));
+    if (deleteScope === 'occurrence') {
+      // Usuń tylko ten jeden rekord (lub dodaj wyjątek blokujący ten dzień)
+      const exactRecord = groupRecords.find(r => r.date === (dateStr || record.date)) || record;
+      await base44.entities.ArtistAvailability.delete(exactRecord.id);
+    } else {
+      // Usuń cały cykl
+      await Promise.all(groupRecords.map(r => base44.entities.ArtistAvailability.delete(r.id)));
+    }
     setSaving(false);
     onSaved();
   };
 
-  // Oblicz podgląd skutków edycji cyklu
   const cyclePreview = (() => {
     if (editScope !== 'cycle' || step !== 'edit') return null;
-    const groupRecords = allRecords && allRecords.length > 0 ? allRecords : [record];
     const newDates = new Set(generateDates(form.date || record.date, null, form.repeat, form.repeat_until, form.repeat_indefinite));
     const oldDates = new Set(groupRecords.map(r => r.date));
-    const toDelete = groupRecords.filter(r => !newDates.has(r.date)).length;
-    const toAdd = [...newDates].filter(d => !oldDates.has(d)).length;
-    const toKeep = groupRecords.filter(r => newDates.has(r.date)).length;
-    return { total: newDates.size, toDelete, toAdd, toKeep };
+    return {
+      total: newDates.size,
+      toDelete: groupRecords.filter(r => !newDates.has(r.date)).length,
+      toAdd: [...newDates].filter(d => !oldDates.has(d)).length,
+    };
   })();
-
-  let dateDisplay = '';
-  try { dateDisplay = format(parseISO(dateStr || record.date), 'd MMMM yyyy (EEEE)', { locale: pl }); } catch {}
-  let repeatDisplay = '';
-  if (isRecurring) {
-    const label = REPEAT_LABELS[record.repeat] || record.repeat;
-    const until = record.repeat_until === 'indefinite' || !record.repeat_until ? 'do odwołania' : `do ${record.repeat_until}`;
-    repeatDisplay = `${label} · ${until}`;
-  }
-  const timeDisplay = record.start_time && record.end_time ? `${record.start_time}–${record.end_time}` : 'Cały dzień';
-  const typeLabel = record.is_available ? 'Dyspozycja (dostępny)' : 'Blokada (niedostępny)';
-  const typeColor = record.is_available ? '#16a34a' : '#FF007F';
 
   return (
     <AnimatePresence>
@@ -216,7 +221,6 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
           {/* ── VIEW ── */}
           {step === 'view' && (
             <div className="space-y-4">
-              {/* Baner cykliczności */}
               {isRecurring && (
                 <div className="flex items-center gap-2 px-3 py-2" style={{ background: `${typeColor}08`, border: `0.5px solid ${typeColor}30` }}>
                   <RefreshCw size={10} color={typeColor} style={{ flexShrink: 0 }} />
@@ -225,7 +229,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                       WYDARZENIE CYKLICZNE
                     </p>
                     <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginTop: '1px' }}>
-                      {repeatDisplay} · {allRecords?.length || 1} {(allRecords?.length || 1) === 1 ? 'wpis' : (allRecords?.length || 1) < 5 ? 'wpisy' : 'wpisów'} w cyklu
+                      {repeatDisplay} · {groupRecords.length} {groupRecords.length === 1 ? 'wpis' : groupRecords.length < 5 ? 'wpisy' : 'wpisów'} w cyklu
                     </p>
                   </div>
                 </div>
@@ -236,24 +240,28 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                 {record.note && <Row label="NOTATKA" value={record.note} color={typeColor} t={t} />}
               </div>
               <div className="flex gap-3 pt-2" style={{ borderTop: `0.5px solid ${t.border}` }}>
-                <button onClick={() => { if (isRecurring) setStep('confirm'); else { setEditScope('cycle'); setStep('edit'); } }} className="btn-oxblood flex-1" style={{ fontSize: '9px' }}>EDYTUJ</button>
-                <button onClick={handleDelete} disabled={saving} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: `0.5px solid rgba(255,0,127,0.4)`, color: '#FF007F', background: 'transparent', cursor: 'pointer' }}>
-                  {saving ? '...' : 'USUŃ'}
-                </button>
+                <button
+                  onClick={() => isRecurring ? setStep('confirm_edit') : (setEditScope('cycle'), setStep('edit'))}
+                  className="btn-oxblood flex-1" style={{ fontSize: '9px' }}
+                >EDYTUJ</button>
+                <button
+                  onClick={() => isRecurring ? setStep('confirm_delete_scope') : setStep('confirm_delete')}
+                  style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: `0.5px solid rgba(255,0,127,0.4)`, color: '#FF007F', background: 'transparent', cursor: 'pointer' }}
+                >USUŃ</button>
               </div>
             </div>
           )}
 
-          {/* ── CONFIRM scope ── */}
-          {step === 'confirm' && (
+          {/* ── CONFIRM EDIT SCOPE ── */}
+          {step === 'confirm_edit' && (
             <div className="space-y-4">
               <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text, letterSpacing: '0.04em', lineHeight: 1.6 }}>
-                Ten wpis jest cykliczny ({REPEAT_LABELS[record.repeat]}).<br />Co chcesz edytować?
+                To wydarzenie jest częścią cyklu ({REPEAT_LABELS[record.repeat]}).<br />Co chcesz edytować?
               </p>
               <div className="space-y-2 pt-2">
                 {[
                   ['occurrence', 'TYLKO TEN DZIEŃ', dateDisplay],
-                  ['cycle', 'CAŁY CYKL', repeatDisplay],
+                  ['cycle', 'CAŁY CYKL', `${repeatDisplay} · ${groupRecords.length} wpisów`],
                 ].map(([scope, title, sub]) => (
                   <button key={scope} onClick={() => { setEditScope(scope); setStep('edit'); }}
                     style={{ display: 'block', width: '100%', textAlign: 'left', padding: '12px 14px', border: `0.5px solid ${t.border}`, background: 'transparent', cursor: 'pointer' }}
@@ -268,6 +276,60 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
             </div>
           )}
 
+          {/* ── CONFIRM DELETE SCOPE (dla cyklicznych) ── */}
+          {step === 'confirm_delete_scope' && (
+            <div className="space-y-4">
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text, letterSpacing: '0.04em', lineHeight: 1.6 }}>
+                To wydarzenie jest częścią cyklu ({REPEAT_LABELS[record.repeat]}).<br />Co chcesz usunąć?
+              </p>
+              <div className="space-y-2 pt-2">
+                {[
+                  ['occurrence', 'TYLKO TEN DZIEŃ', dateDisplay],
+                  ['cycle', 'CAŁY CYKL', `${repeatDisplay} · ${groupRecords.length} wpisów`],
+                ].map(([scope, title, sub]) => (
+                  <button key={scope} onClick={() => { setDeleteScope(scope); setStep('confirm_delete'); }}
+                    style={{ display: 'block', width: '100%', textAlign: 'left', padding: '12px 14px', border: `0.5px solid ${t.border}`, background: 'transparent', cursor: 'pointer' }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = '#FF007F'}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = t.border}>
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>{title}</p>
+                    <p style={{ fontSize: '12px', color: t.muted }}>{sub}</p>
+                  </button>
+                ))}
+              </div>
+              <button onClick={() => setStep('view')} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}>← WRÓĆ</button>
+            </div>
+          )}
+
+          {/* ── CONFIRM DELETE (monit potwierdzenia) ── */}
+          {step === 'confirm_delete' && (
+            <div className="space-y-4">
+              <div className="flex items-start gap-3 px-3 py-3" style={{ background: 'rgba(255,0,127,0.06)', border: '0.5px solid rgba(255,0,127,0.3)' }}>
+                <AlertTriangle size={16} color="#FF007F" style={{ flexShrink: 0, marginTop: '2px' }} />
+                <div>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>
+                    POTWIERDŹ USUNIĘCIE
+                  </p>
+                  <p style={{ fontSize: '13px', color: t.text, lineHeight: 1.5 }}>
+                    {deleteScope === 'cycle' || !isRecurring
+                      ? `Usunięcie obejmie ${isRecurring ? `cały cykl (${groupRecords.length} ${groupRecords.length === 1 ? 'wpis' : groupRecords.length < 5 ? 'wpisy' : 'wpisów'})` : 'to wydarzenie'}. Tej operacji nie można cofnąć.`
+                      : `Zostanie usunięty tylko wpis z dnia ${dateDisplay}.`
+                    }
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button onClick={handleDelete} disabled={saving}
+                  style={{ flex: 1, fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 14px', background: 'linear-gradient(135deg,#FF007F,#CC0066)', color: '#F5F0EB', border: 'none', cursor: 'pointer' }}>
+                  {saving ? 'USUWAM...' : 'TAK, USUŃ'}
+                </button>
+                <button onClick={() => setStep(isRecurring ? 'confirm_delete_scope' : 'view')}
+                  style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 14px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}>
+                  ANULUJ
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* ── EDIT FORM ── */}
           {step === 'edit' && (
             <div className="space-y-4">
@@ -278,26 +340,19 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
               )}
               {editScope === 'cycle' && (
                 <div style={{ padding: '10px 12px', background: 'rgba(22,163,74,0.05)', border: '0.5px solid rgba(22,163,74,0.25)' }}>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>EDYTUJESZ CAŁY CYKL</p>
-                  {cyclePreview ? (
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>EDYTUJESZ CAŁY CYKL</p>
+                  {cyclePreview && (
                     <div className="space-y-1">
                       <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>
-                        Łącznie wpisów po zapisie: <span style={{ color: t.text }}>{cyclePreview.total}</span>
+                        Łącznie po zapisie: <span style={{ color: t.text }}>{cyclePreview.total} wpisów</span>
                       </p>
-                      {cyclePreview.toAdd > 0 && (
-                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#16a34a', letterSpacing: '0.06em' }}>+ {cyclePreview.toAdd} nowych wpisów zostanie dodanych</p>
-                      )}
-                      {cyclePreview.toDelete > 0 && (
-                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.06em' }}>− {cyclePreview.toDelete} wpisów poza nowym zakresem zostanie usuniętych</p>
-                      )}
+                      {cyclePreview.toAdd > 0 && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#16a34a' }}>+ {cyclePreview.toAdd} nowych</p>}
+                      {cyclePreview.toDelete > 0 && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F' }}>− {cyclePreview.toDelete} usuniętych</p>}
                     </div>
-                  ) : (
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>Wszystkie wpisy cyklu zostaną zaktualizowane.</p>
                   )}
                 </div>
               )}
 
-              {/* Typ */}
               <div>
                 {lbl('TYP')}
                 <div className="flex gap-2">
@@ -306,7 +361,6 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                 </div>
               </div>
 
-              {/* Data startu (tylko cycle) */}
               {editScope === 'cycle' && (
                 <div>
                   {lbl('DATA STARTU')}
@@ -315,7 +369,6 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                 </div>
               )}
 
-              {/* Czas */}
               <div>
                 {lbl('CZAS')}
                 <div className="flex gap-2 mb-3">
@@ -324,13 +377,12 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                 </div>
                 {form.timeMode === 'hours' && (
                   <div className="grid grid-cols-2 gap-3">
-                    <div>{lbl('OD')}<TimeDropdown value={form.start_time} onChange={v => setForm(f => ({ ...f, start_time: v }))} border={t.inputBorder} text={t.text} muted={t.muted} /></div>
-                    <div>{lbl('DO')}<TimeDropdown value={form.end_time} onChange={v => setForm(f => ({ ...f, end_time: v }))} border={t.inputBorder} text={t.text} muted={t.muted} /></div>
+                    <div>{lbl('OD')}<TimeDropdown value={form.start_time} onChange={v => setForm(f => ({ ...f, start_time: v }))} border={t.inputBorder} text={t.text} /></div>
+                    <div>{lbl('DO')}<TimeDropdown value={form.end_time} onChange={v => setForm(f => ({ ...f, end_time: v }))} border={t.inputBorder} text={t.text} /></div>
                   </div>
                 )}
               </div>
 
-              {/* Powtarzanie (tylko cycle) */}
               {editScope === 'cycle' && (
                 <>
                   <div>
@@ -359,7 +411,6 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                 </>
               )}
 
-              {/* Notatka */}
               <div>
                 {lbl('NOTATKA')}
                 <input type="text" value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} placeholder="np. urlop..."
@@ -370,12 +421,8 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                 <button onClick={handleSave} disabled={saving} className="btn-oxblood flex-1" style={{ fontSize: '9px' }}>
                   {saving ? 'ZAPISUJĘ...' : 'ZAPISZ'}
                 </button>
-                {editScope === 'cycle' && (
-                  <button onClick={handleDelete} disabled={saving} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 12px', border: `0.5px solid rgba(255,0,127,0.4)`, color: '#FF007F', background: 'transparent', cursor: 'pointer' }}>
-                    USUŃ
-                  </button>
-                )}
-                <button onClick={() => setStep(isRecurring ? 'confirm' : 'view')} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 12px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}>
+                <button onClick={() => setStep(isRecurring ? 'confirm_edit' : 'view')}
+                  style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 12px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}>
                   ANULUJ
                 </button>
               </div>
@@ -384,16 +431,5 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
         </motion.div>
       </div>
     </AnimatePresence>
-  );
-}
-
-function Row({ label, value, color, t, icon }) {
-  return (
-    <div>
-      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-        {icon}{label}
-      </p>
-      <p style={{ color: t.text, fontSize: '13px' }}>{value}</p>
-    </div>
   );
 }
