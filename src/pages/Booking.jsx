@@ -63,12 +63,12 @@ export default function Booking() {
     delete bookingData.client_first_name;
     delete bookingData.client_last_name;
     const booking = await base44.entities.Booking.create(bookingData);
-    // Send confirmation email
-    await base44.integrations.Core.SendEmail({
-      to: data.client_email,
-      subject: 'Potwierdzenie rezerwacji — INK Studio',
-      body: `Cześć ${fullName},\n\nDziękujemy za dokonanie rezerwacji w INK Studio!\n\nSzczegóły Twojej sesji:\n- Artysta: ${data.artist_name}\n- Data: ${data.session_date} o ${data.session_time}\n- Miejsce: ${data.tattoo_placement}\n\nPrzed sesją prosimy o wypełnienie ankiety zdrowotnej:\n${window.location.origin}/health-form?booking=${booking.id}\n\nDo zobaczenia!\nZespół INK Studio`,
-    });
+    // Send confirmation email via backend function (Resend)
+    try {
+      await base44.functions.invoke('sendBookingConfirmationEmail', { bookingId: booking.id });
+    } catch (e) {
+      console.warn('Email send failed:', e);
+    }
     setSubmitting(false);
     setSubmitted(true);
   };
