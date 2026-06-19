@@ -43,14 +43,13 @@ export default function DashboardUsers() {
     setInviteError('');
     setInviteSuccess(null);
     try {
-      await base44.users.inviteUser(inviteEmail, inviteRole);
-      // If artist role + artist_id selected, we need to update after invite
-      // (user will appear after they accept the invite, so we save intent)
+      // Platform inviteUser only accepts 'user' or 'admin' — 'artist' must be set after registration
+      const platformRole = inviteRole === 'artist' ? 'user' : inviteRole;
+      await base44.users.inviteUser(inviteEmail, platformRole);
       setInviteSuccess({ email: inviteEmail, role: inviteRole, artistId: inviteArtistId });
       setInviteEmail('');
       setInviteArtistId('');
       setInviteRole('user');
-      // Refresh users
       base44.entities.User.list().then(setUsers);
     } catch (err) {
       setInviteError(err?.message || 'Wystąpił błąd podczas wysyłania zaproszenia.');
@@ -161,7 +160,7 @@ export default function DashboardUsers() {
         </div>
 
         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.08em', marginTop: '12px' }}>
-          Użytkownik otrzyma e-mail z linkiem do rejestracji. Po zalogowaniu możesz przypisać mu profil artysty poniżej.
+          Użytkownik otrzyma e-mail z linkiem do rejestracji. Jeśli wybrałeś rolę Artysta — po zalogowaniu użytkownika kliknij EDYTUJ przy jego koncie, ustaw rolę na Artysta i powiąż z profilem.
         </p>
       </div>
 

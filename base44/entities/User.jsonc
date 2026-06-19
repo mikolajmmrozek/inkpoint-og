@@ -2,18 +2,9 @@
   "name": "User",
   "type": "object",
   "properties": {
-    "role": {
-      "type": "string",
-      "enum": [
-        "admin",
-        "user",
-        "artist"
-      ],
-      "default": "user"
-    },
     "artist_id": {
       "type": "string",
-      "description": "Powi\u0105zanie z encj\u0105 Artist (dla roli artist)"
+      "description": "ID powi\u0105zanego profilu artysty"
     }
   }
 }
