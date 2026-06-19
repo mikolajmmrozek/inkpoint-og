@@ -201,6 +201,14 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
               <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.5rem', color: t.title, letterSpacing: '0.04em', lineHeight: 1 }}>
                 {typeLabel}
               </h3>
+              {isRecurring && (
+                <div className="flex items-center gap-1 mt-2">
+                  <RefreshCw size={9} color={typeColor} />
+                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: typeColor, letterSpacing: '0.1em', textTransform: 'uppercase', opacity: 0.8 }}>
+                    Wydarzenie cykliczne · {REPEAT_LABELS[record.repeat]}
+                  </span>
+                </div>
+              )}
             </div>
             <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}><X size={16} /></button>
           </div>
