@@ -51,10 +51,10 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
               )}
               <textarea
                 rows={1}
+                readOnly
                 style={{ ...inputStyle, resize: 'none', overflow: 'hidden', whiteSpace: 'pre-wrap' }}
                 value={form[field.field_key] || ''}
                 ref={el => { if (el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; } }}
-                onChange={e => { setField(field.field_key, e.target.value); e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; }}
                 placeholder={field.placeholder || field.label}
               />
             </div>
