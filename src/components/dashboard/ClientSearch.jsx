@@ -5,13 +5,17 @@ import { UserPlus, Search, History } from 'lucide-react';
 export default function ClientSearch({ value, onSelect, t }) {
   const [query, setQuery] = useState(value?.name || '');
   const [clients, setClients] = useState([]);
+  const [loaded, setLoaded] = useState(false);
   const [filtered, setFiltered] = useState([]);
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
-  useEffect(() => {
-    base44.entities.Client.list('-created_date', 200).then(setClients).catch(() => {});
-  }, []);
+  // Lazy load — only when user starts typing
+  const ensureLoaded = () => {
+    if (loaded) return;
+    setLoaded(true);
+    base44.entities.Client.list('-created_date', 150).then(setClients).catch(() => {});
+  };
 
   useEffect(() => {
     if (!query.trim()) { setFiltered([]); return; }
@@ -33,20 +37,9 @@ export default function ClientSearch({ value, onSelect, t }) {
     setQuery(client.name);
     setOpen(false);
 
-    // If client has sessions, fetch the last one and pass it along
-    // Match by email if available, otherwise by full name
-    if ((client.total_sessions || 0) > 0) {
+    if ((client.total_sessions || 0) > 0 && client.email) {
       try {
-        let sessions = [];
-        if (client.email) {
-          sessions = await base44.entities.Booking.filter({ client_email: client.email }, '-session_date', 10);
-        }
-        // Fallback: search by name if no results from email
-        if (sessions.length === 0 && client.name) {
-          const allSessions = await base44.entities.Booking.list('-session_date', 200);
-          const nameLower = client.name.toLowerCase().trim();
-          sessions = allSessions.filter(s => (s.client_name || '').toLowerCase().trim() === nameLower);
-        }
+        const sessions = await base44.entities.Booking.filter({ client_email: client.email }, '-session_date', 5);
         const lastSession = sessions.filter(s => s.status !== 'cancelled')[0] || sessions[0];
         if (lastSession) {
           onSelect({ ...client, _lastSession: lastSession });
@@ -83,8 +76,8 @@ export default function ClientSearch({ value, onSelect, t }) {
           style={{ ...inputStyle, paddingLeft: '20px' }}
           placeholder="Szukaj klienta po imieniu, emailu, telefonie..."
           value={query}
-          onChange={e => { setQuery(e.target.value); setOpen(true); }}
-          onFocus={e => { setOpen(true); e.target.style.borderBottomColor = '#FF007F'; }}
+          onChange={e => { setQuery(e.target.value); setOpen(true); ensureLoaded(); }}
+          onFocus={e => { setOpen(true); e.target.style.borderBottomColor = '#FF007F'; ensureLoaded(); }}
           onBlur={e => e.target.style.borderBottomColor = t.border}
         />
       </div>
