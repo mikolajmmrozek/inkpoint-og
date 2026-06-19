@@ -169,6 +169,7 @@ export default function DashboardBookings() {
 
   const [bookings, setBookings] = useState([]);
   const [artists, setArtists] = useState([]);
+  const [availabilityRecords, setAvailabilityRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [filter, setFilter] = useState(searchParams.get('filter') || 'all');
@@ -182,12 +183,14 @@ export default function DashboardBookings() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const load = async () => {
-    const [data, artistData] = await Promise.all([
+    const [data, artistData, avail] = await Promise.all([
       base44.entities.Booking.list('-session_date', 200),
       base44.entities.Artist.list(),
+      base44.entities.ArtistAvailability.list(),
     ]);
     setBookings(data);
     setArtists(artistData);
+    setAvailabilityRecords(avail);
     setLoading(false);
   };
 
@@ -518,6 +521,7 @@ export default function DashboardBookings() {
                 onNewBookingRequest={handleNewBookingRequest}
                 t={t}
                 artistFilter={artistFilter}
+                availabilityRecords={availabilityRecords}
               />
             )}
 

@@ -3,6 +3,7 @@ import { useOutletContext } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { compressImage } from '@/utils/compressImage';
 import { Upload, Instagram } from 'lucide-react';
+import ArtistScheduleEditor from '@/components/dashboard/ArtistScheduleEditor';
 
 export default function ArtistProfile() {
   const { artist: initialArtist, theme } = useOutletContext();
@@ -12,6 +13,7 @@ export default function ArtistProfile() {
   const [saved, setSaved] = useState(false);
   const [bio, setBio] = useState(initialArtist?.bio || '');
   const [instagram, setInstagram] = useState(initialArtist?.instagram || '');
+  const [activeTab, setActiveTab] = useState('profile');
 
   const t = theme === 'light'
     ? { title: '#111111', muted: 'rgba(0,0,0,0.4)', cardBg: '#FFFFFF', cardBorder: '#E5E5E5', text: '#111111', inputBorder: '#CCCCCC' }
@@ -67,12 +69,26 @@ export default function ArtistProfile() {
 
   return (
     <div>
-      <div className="mb-8">
+      <div className="mb-6">
         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>MÓJ PROFIL</p>
         <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '3rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>{artist?.name}</h1>
       </div>
 
-      <div className="space-y-6">
+      {/* Tabs */}
+      <div className="flex mb-6" style={{ borderBottom: `0.5px solid ${t.cardBorder}` }}>
+        {[['profile', 'Profil'], ['schedule', 'Mój Grafik']].map(([key, lbl]) => (
+          <button key={key} onClick={() => setActiveTab(key)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '8px 16px', background: 'transparent', border: 'none', borderBottom: `1.5px solid ${activeTab === key ? '#FF007F' : 'transparent'}`, color: activeTab === key ? '#FF007F' : t.muted, cursor: 'pointer', marginBottom: '-0.5px' }}>{lbl}</button>
+        ))}
+      </div>
+
+      {/* Schedule tab */}
+      {activeTab === 'schedule' && (
+        <div className="p-6" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+          <ArtistScheduleEditor artistId={artist?.id} t={{ border: t.inputBorder, text: t.text, muted: t.muted, cardBg: 'transparent' }} />
+        </div>
+      )}
+
+      <div className="space-y-6" style={{ display: activeTab === 'profile' ? 'block' : 'none' }}>
         {/* Photo */}
         <div className="p-6" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>ZDJĘCIE PROFILOWE</p>

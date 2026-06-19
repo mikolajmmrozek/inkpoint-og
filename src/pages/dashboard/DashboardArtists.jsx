@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { GripVertical } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import { Plus, Edit, Trash2, X, History, Eye, EyeOff } from 'lucide-react';
+import { Plus, Edit, Trash2, X, History, Eye, EyeOff, Clock } from 'lucide-react';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTheme } from './Dashboard';
 import { compressImage } from '@/utils/compressImage';
 import { format } from 'date-fns';
+import ArtistScheduleEditor from '@/components/dashboard/ArtistScheduleEditor';
 
 const inputStyle = {
   background: 'transparent',
@@ -30,6 +31,7 @@ export default function DashboardArtists() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({});
+  const [activeTab, setActiveTab] = useState('profile');
   const [uploading, setUploading] = useState(false);
   const [commissionHistory, setCommissionHistory] = useState([]);
   const [newCommission, setNewCommission] = useState({ cut_percent: 60, effective_from: format(new Date(), 'yyyy-MM-dd'), note: '' });
@@ -58,6 +60,7 @@ export default function DashboardArtists() {
   const openNew = () => {
     setForm({ name: '', slug: '', bio: '', specialty: [], years_experience: '', instagram: '', is_active: true, portfolio_images: [] });
     setEditing('new');
+    setActiveTab('profile');
     setCommissionHistory([]);
     setShowAddCommission(false);
     setNewCommission({ cut_percent: 60, effective_from: format(new Date(), 'yyyy-MM-dd'), note: '' });
@@ -66,6 +69,7 @@ export default function DashboardArtists() {
   const openEdit = async (a) => {
     setForm({ ...a });
     setEditing(a);
+    setActiveTab('profile');
     setShowAddCommission(false);
     setNewCommission({ cut_percent: a.artist_cut_percent ?? 60, effective_from: format(new Date(), 'yyyy-MM-dd'), note: '' });
     const history = await base44.entities.ArtistCommissionHistory.filter({ artist_id: a.id }, '-effective_from', 50);
@@ -164,14 +168,26 @@ export default function DashboardArtists() {
         {editing && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }}>
             <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="w-full max-w-2xl max-h-screen overflow-y-auto" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '40px' }}>
-              <div className="flex justify-between items-center mb-8">
+              <div className="flex justify-between items-center mb-6">
                 <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
                   {editing === 'new' ? 'Nowy Artysta' : 'Edytuj Artystę'}
                 </h3>
                 <button onClick={() => setEditing(null)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
               </div>
 
-              <div className="space-y-6">
+              {/* Tabs */}
+              <div className="flex mb-6" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+                {[['profile', 'Profil'], ...(editing !== 'new' ? [['schedule', 'Grafik']] : [])].map(([key, lbl]) => (
+                  <button key={key} onClick={() => setActiveTab(key)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '8px 16px', background: 'transparent', border: 'none', borderBottom: `1.5px solid ${activeTab === key ? '#FF007F' : 'transparent'}`, color: activeTab === key ? '#FF007F' : t.muted, cursor: 'pointer', marginBottom: '-0.5px' }}>{lbl}</button>
+                ))}
+              </div>
+
+              {/* Schedule tab */}
+              {activeTab === 'schedule' && editing !== 'new' && (
+                <ArtistScheduleEditor artistId={editing.id} t={{ border: t.border, text: t.text, muted: t.muted, cardBg: 'transparent' }} />
+              )}
+
+              <div className="space-y-6" style={{ display: activeTab === 'profile' ? 'block' : 'none' }}>
                 <div className="grid grid-cols-2 gap-6">
                   <div>
                     <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Imię i Nazwisko *</label>

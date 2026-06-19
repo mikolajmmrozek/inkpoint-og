@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo, useCallback, memo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, addDays, subDays, isToday } from 'date-fns';
 import { pl } from 'date-fns/locale';
+import { getAvailabilityForDay } from '@/components/dashboard/ArtistScheduleEditor';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -125,14 +126,41 @@ const TimeAxis = memo(function TimeAxis({ muted }) {
   );
 }, (prev, next) => prev.muted === next.muted);
 
-const ArtistColumn = memo(function ArtistColumn({ artist, artistBookings, onColumnClick, onBookingClick, border, t, isLast }) {
+const ArtistColumn = memo(function ArtistColumn({ artist, artistBookings, onColumnClick, onBookingClick, border, t, isLast, availability }) {
   const handleClick = useCallback((e) => onColumnClick(e, artist), [onColumnClick, artist]);
+
+  // Calculate inactive overlay regions
+  const inactiveRegions = useMemo(() => {
+    if (!availability) return [];
+    const regions = [];
+    if (!availability.isWorkday) {
+      // Whole day inactive
+      regions.push({ top: 0, height: TOTAL_HEIGHT });
+    } else {
+      const startMin = toMinutes(availability.start_time) || DAY_START;
+      const endMin = toMinutes(availability.end_time) || DAY_END;
+      // Before work hours
+      if (startMin > DAY_START) {
+        regions.push({ top: 0, height: (startMin - DAY_START) * PX_PER_MIN });
+      }
+      // After work hours
+      if (endMin < DAY_END) {
+        regions.push({ top: (endMin - DAY_START) * PX_PER_MIN, height: (DAY_END - endMin) * PX_PER_MIN });
+      }
+    }
+    return regions;
+  }, [availability]);
+
   return (
     <div
       onClick={handleClick}
       style={{ flex: 1, minWidth: 0, position: 'relative', height: `${TOTAL_HEIGHT}px`, borderLeft: `0.5px solid ${border}`, borderRight: isLast ? `0.5px solid ${border}` : 'none', cursor: 'crosshair' }}
     >
       <GridLines border={border} />
+      {/* Inactive hour overlays */}
+      {inactiveRegions.map((r, i) => (
+        <div key={i} style={{ position: 'absolute', top: `${r.top}px`, left: 0, right: 0, height: `${r.height}px`, background: 'repeating-linear-gradient(45deg, rgba(128,128,128,0.06) 0px, rgba(128,128,128,0.06) 3px, transparent 3px, transparent 9px)', pointerEvents: 'none', zIndex: 0, borderTop: r.top > 0 ? `0.5px dashed rgba(128,128,128,0.2)` : 'none', borderBottom: r.top === 0 ? `0.5px dashed rgba(128,128,128,0.2)` : 'none' }} />
+      ))}
       {artistBookings.map(b => (
         <BookingTile key={b.id} booking={b} onClick={onBookingClick} t={t} />
       ))}
@@ -140,7 +168,7 @@ const ArtistColumn = memo(function ArtistColumn({ artist, artistBookings, onColu
   );
 });
 
-export default function DailyScheduleView({ bookings, artists, selectedDate, onDateChange, onBookingClick, onNewBookingRequest, t, artistFilter = 'all' }) {
+export default function DailyScheduleView({ bookings, artists, selectedDate, onDateChange, onBookingClick, onNewBookingRequest, t, artistFilter = 'all', availabilityRecords = [] }) {
   const scrollRef = useRef(null);
 
   const dateStr = useMemo(() => format(selectedDate, 'yyyy-MM-dd'), [selectedDate]);
@@ -230,6 +258,7 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
                   border={t.border}
                   t={t}
                   isLast={idx === displayed.length - 1}
+                  availability={availabilityRecords.length > 0 ? getAvailabilityForDay(availabilityRecords, a.id, dateStr) : null}
                 />
               ));
             })()}

@@ -1,0 +1,49 @@
+{
+  "name": "ArtistAvailability",
+  "type": "object",
+  "properties": {
+    "artist_id": {
+      "type": "string",
+      "description": "ID artysty"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "recurring",
+        "exception"
+      ],
+      "description": "recurring = sta\u0142y grafik tygodniowy, exception = blokada/wyj\u0105tek na konkretny dzie\u0144"
+    },
+    "day_of_week": {
+      "type": "number",
+      "description": "Dzie\u0144 tygodnia dla recurring: 0=Niedziela, 1=Poniedzia\u0142ek, ..., 6=Sobota"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Konkretna data dla exception"
+    },
+    "start_time": {
+      "type": "string",
+      "description": "Godzina rozpocz\u0119cia (HH:MM)"
+    },
+    "end_time": {
+      "type": "string",
+      "description": "Godzina zako\u0144czenia (HH:MM)"
+    },
+    "is_available": {
+      "type": "boolean",
+      "default": true,
+      "description": "true = dost\u0119pny, false = zablokowany"
+    },
+    "note": {
+      "type": "string",
+      "description": "Opcjonalna notatka (np. urlop, dentysta)"
+    }
+  },
+  "required": [
+    "artist_id",
+    "type",
+    "is_available"
+  ]
+}
