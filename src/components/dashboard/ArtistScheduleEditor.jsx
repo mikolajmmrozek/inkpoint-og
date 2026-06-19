@@ -317,8 +317,8 @@ export default function ArtistScheduleEditor({ artistId, t }) {
 
     // Wykonuj partiami po 5 żeby nie przekroczyć rate limit
     const allOps = [
-      ...toDelete.map(r => () => base44.entities.ArtistAvailability.delete(r.id)),
-      ...toUpdate.map(r => () => base44.entities.ArtistAvailability.update(r.id, { ...updateData, date: r.date })),
+      ...toDelete.map(r => () => base44.entities.ArtistAvailability.delete(r.id).catch(() => null)),
+      ...toUpdate.map(r => () => base44.entities.ArtistAvailability.update(r.id, { ...updateData, date: r.date }).catch(() => null)),
       ...toAdd.map(date => () => base44.entities.ArtistAvailability.create({ artist_id: artistId, type: 'exception', date, ...updateData })),
     ];
     const BATCH = 5;

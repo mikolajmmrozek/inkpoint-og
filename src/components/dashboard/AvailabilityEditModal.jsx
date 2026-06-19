@@ -152,8 +152,8 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
       const toUpdate = groupRecords.filter(r => newDates.has(r.date));
       const toAdd = [...newDates].filter(d => !oldDates.has(d));
       const allOps = [
-        ...toDelete.map(r => () => base44.entities.ArtistAvailability.delete(r.id)),
-        ...toUpdate.map(r => () => base44.entities.ArtistAvailability.update(r.id, { ...updateData, date: r.date })),
+        ...toDelete.map(r => () => base44.entities.ArtistAvailability.delete(r.id).catch(() => null)),
+        ...toUpdate.map(r => () => base44.entities.ArtistAvailability.update(r.id, { ...updateData, date: r.date }).catch(() => null)),
         ...toAdd.map(date => () => base44.entities.ArtistAvailability.create({ artist_id: record.artist_id, type: 'exception', date, ...updateData })),
       ];
       const BATCH = 5;
@@ -176,7 +176,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
       const BATCH = 5;
       for (let i = 0; i < groupRecords.length; i += BATCH) {
         const batch = groupRecords.slice(i, i + BATCH);
-        await Promise.all(batch.map(r => base44.entities.ArtistAvailability.delete(r.id)));
+        await Promise.all(batch.map(r => base44.entities.ArtistAvailability.delete(r.id).catch(() => null)));
         if (i + BATCH < groupRecords.length) await new Promise(res => setTimeout(res, 1200));
       }
     }
