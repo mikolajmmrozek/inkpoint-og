@@ -247,7 +247,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
               {lbl('TYP')}
               <div className="flex gap-2">
                 <SegBtn active={entry.kind === 'block'} onClick={() => setEntry(e => ({ ...e, kind: 'block' }))}>Blokada (niedostępny)</SegBtn>
-                <SegBtn active={entry.kind === 'free'} onClick={() => setEntry(e => ({ ...e, kind: 'free' }))}>Dodaj wolne (dostępny)</SegBtn>
+                <SegBtn active={entry.kind === 'free'} onClick={() => setEntry(e => ({ ...e, kind: 'free' }))}>Dyspozycja (dostępny)</SegBtn>
               </div>
             </div>
 
