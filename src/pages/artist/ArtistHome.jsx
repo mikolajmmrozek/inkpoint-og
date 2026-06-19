@@ -335,13 +335,14 @@ export default function ArtistHome() {
 
   useEffect(() => {
     if (!artist?.id) return;
-    Promise.all([
-      base44.entities.Booking.filter({ artist_id: artist.id }, '-session_date', 100),
-      base44.entities.Service.filter({ is_active: true }),
-    ]).then(([bk, svcs]) => {
-      setBookings(bk);
-      setArtistServices(svcs.filter(s => !s.artist_ids?.length || s.artist_ids.includes(artist.id)));
-    }).finally(() => setLoading(false));
+    base44.entities.Booking.filter({ artist_id: artist.id }, '-session_date', 100)
+      .then(setBookings)
+      .finally(() => setLoading(false));
+    setTimeout(() => {
+      base44.entities.Service.filter({ is_active: true }).then(svcs => {
+        setArtistServices(svcs.filter(s => !s.artist_ids?.length || s.artist_ids.includes(artist.id)));
+      });
+    }, 400);
   }, [artist?.id]);
 
   const todayStr = new Date().toISOString().split('T')[0];

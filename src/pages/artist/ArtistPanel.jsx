@@ -113,8 +113,8 @@ export default function ArtistPanel() {
       if (!user) {
         base44.auth.redirectToLogin(window.location.href);
       } else if (user.role === 'artist' && user.artist_id) {
-        base44.entities.Artist.filter({ id: user.artist_id }).then(res => {
-          if (res[0]) setArtist(res[0]);
+        base44.entities.Artist.get(user.artist_id).then(res => {
+          if (res) setArtist(res);
           setLoadingArtist(false);
         }).catch(() => setLoadingArtist(false));
       } else {
