@@ -120,68 +120,74 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
 
   const handleSave = async () => {
     setSaving(true);
-    const isAvail = form.kind === 'free';
-    const allDay = form.timeMode === 'allday';
-    const effectiveUntil = form.repeat_indefinite ? 'indefinite' : (form.repeat_until || undefined);
+    try {
+      const isAvail = form.kind === 'free';
+      const allDay = form.timeMode === 'allday';
+      const effectiveUntil = form.repeat_indefinite ? 'indefinite' : (form.repeat_until || undefined);
 
-    if (editScope === 'occurrence') {
-      // Utwórz osobny wyjątek dla tego konkretnego dnia
-      await base44.entities.ArtistAvailability.create({
-        artist_id: record.artist_id,
-        type: 'exception',
-        date: dateStr || record.date,
-        is_available: isAvail,
-        start_time: allDay ? null : form.start_time,
-        end_time: allDay ? null : form.end_time,
-        note: form.note || undefined,
-        repeat: 'none',
-      });
-    } else {
-      // Edytuj cały cykl
-      const newDates = new Set(generateDates(form.date || record.date, null, form.repeat, form.repeat_until, form.repeat_indefinite));
-      const oldDates = new Set(groupRecords.map(r => r.date));
-      const updateData = {
-        is_available: isAvail,
-        start_time: allDay ? null : form.start_time,
-        end_time: allDay ? null : form.end_time,
-        note: form.note || undefined,
-        repeat: form.repeat !== 'none' ? form.repeat : 'none',
-        repeat_until: form.repeat !== 'none' ? effectiveUntil : undefined,
-      };
-      const toDelete = groupRecords.filter(r => !newDates.has(r.date));
-      const toUpdate = groupRecords.filter(r => newDates.has(r.date));
-      const toAdd = [...newDates].filter(d => !oldDates.has(d));
-      const allOps = [
-        ...toDelete.map(r => () => base44.entities.ArtistAvailability.delete(r.id).catch(() => null)),
-        ...toUpdate.map(r => () => base44.entities.ArtistAvailability.update(r.id, { ...updateData, date: r.date }).catch(() => null)),
-        ...toAdd.map(date => () => base44.entities.ArtistAvailability.create({ artist_id: record.artist_id, type: 'exception', date, ...updateData })),
-      ];
-      const BATCH = 5;
-      for (let i = 0; i < allOps.length; i += BATCH) {
-        await Promise.all(allOps.slice(i, i + BATCH).map(fn => fn()));
-        if (i + BATCH < allOps.length) await new Promise(res => setTimeout(res, 1200));
+      if (editScope === 'occurrence') {
+        // Utwórz osobny wyjątek dla tego konkretnego dnia
+        await base44.entities.ArtistAvailability.create({
+          artist_id: record.artist_id,
+          type: 'exception',
+          date: dateStr || record.date,
+          is_available: isAvail,
+          start_time: allDay ? null : form.start_time,
+          end_time: allDay ? null : form.end_time,
+          note: form.note || undefined,
+          repeat: 'none',
+        });
+      } else {
+        // Edytuj cały cykl
+        const newDates = new Set(generateDates(form.date || record.date, null, form.repeat, form.repeat_until, form.repeat_indefinite));
+        const oldDates = new Set(groupRecords.map(r => r.date));
+        const updateData = {
+          is_available: isAvail,
+          start_time: allDay ? null : form.start_time,
+          end_time: allDay ? null : form.end_time,
+          note: form.note || undefined,
+          repeat: form.repeat !== 'none' ? form.repeat : 'none',
+          repeat_until: form.repeat !== 'none' ? effectiveUntil : undefined,
+        };
+        const toDelete = groupRecords.filter(r => !newDates.has(r.date));
+        const toUpdate = groupRecords.filter(r => newDates.has(r.date));
+        const toAdd = [...newDates].filter(d => !oldDates.has(d));
+        const allOps = [
+          ...toDelete.map(r => () => base44.entities.ArtistAvailability.delete(r.id).catch(() => null)),
+          ...toUpdate.map(r => () => base44.entities.ArtistAvailability.update(r.id, { ...updateData, date: r.date }).catch(() => null)),
+          ...toAdd.map(date => () => base44.entities.ArtistAvailability.create({ artist_id: record.artist_id, type: 'exception', date, ...updateData }).catch(() => null)),
+        ];
+        const BATCH = 5;
+        for (let i = 0; i < allOps.length; i += BATCH) {
+          await Promise.all(allOps.slice(i, i + BATCH).map(fn => fn()));
+          if (i + BATCH < allOps.length) await new Promise(res => setTimeout(res, 1200));
+        }
       }
+      onSaved();
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
-    onSaved();
   };
 
   const handleDelete = async () => {
     setSaving(true);
-    if (deleteScope === 'occurrence') {
-      const exactRecord = groupRecords.find(r => r.date === (dateStr || record.date)) || record;
-      await base44.entities.ArtistAvailability.delete(exactRecord.id);
-    } else {
-      // Usuń cały cykl sekwencyjnie po 5 z opóźnieniem
-      const BATCH = 5;
-      for (let i = 0; i < groupRecords.length; i += BATCH) {
-        const batch = groupRecords.slice(i, i + BATCH);
-        await Promise.all(batch.map(r => base44.entities.ArtistAvailability.delete(r.id).catch(() => null)));
-        if (i + BATCH < groupRecords.length) await new Promise(res => setTimeout(res, 1200));
+    try {
+      if (deleteScope === 'occurrence') {
+        const exactRecord = groupRecords.find(r => r.date === (dateStr || record.date)) || record;
+        await base44.entities.ArtistAvailability.delete(exactRecord.id).catch(() => null);
+      } else {
+        // Usuń cały cykl sekwencyjnie po 5 z opóźnieniem
+        const BATCH = 5;
+        for (let i = 0; i < groupRecords.length; i += BATCH) {
+          const batch = groupRecords.slice(i, i + BATCH);
+          await Promise.all(batch.map(r => base44.entities.ArtistAvailability.delete(r.id).catch(() => null)));
+          if (i + BATCH < groupRecords.length) await new Promise(res => setTimeout(res, 1200));
+        }
       }
+      onSaved();
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
-    onSaved();
   };
 
   const cyclePreview = (() => {
