@@ -43,9 +43,25 @@ import ArtistStats from './pages/artist/ArtistStats';
 import ArtistProfilePage from './pages/artist/ArtistProfile';
 import FeedbackSurvey from './pages/FeedbackSurvey';
 import ScrollToTop from './components/ScrollToTop';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+const isIOSStandalone = () => {
+  return window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+};
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoadingAuth && !isLoadingPublicSettings && !authError && isIOSStandalone()) {
+      const currentPath = window.location.pathname;
+      if (currentPath === '/') {
+        navigate('/dashboard', { replace: true });
+      }
+    }
+  }, [isLoadingAuth, isLoadingPublicSettings, authError, navigate]);
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
