@@ -24,14 +24,15 @@ const DEFAULT_SCHEDULE = [
 const TODAY = format(new Date(), 'yyyy-MM-dd');
 
 const EMPTY_ENTRY = {
-  kind: 'block',        // 'block' | 'free'
-  timeMode: 'allday',   // 'allday' | 'hours'
-  dateMode: 'single',   // 'single' | 'range'
+  kind: 'block',           // 'block' | 'free'
+  timeMode: 'allday',      // 'allday' | 'hours'
+  dateMode: 'single',      // 'single' | 'range'
   date_from: TODAY,
   date_to: TODAY,
   start_time: '09:00',
   end_time: '18:00',
-  repeat: 'none',       // 'none' | 'weekly' | 'biweekly' | 'monthly' | 'indefinite'
+  repeat: 'none',          // 'none' | 'weekly' | 'biweekly' | 'monthly'
+  repeat_indefinite: false, // true = do odwołania (ignoruje repeat_until)
   repeat_until: '',
   note: '',
 };
@@ -109,8 +110,9 @@ export default function ArtistScheduleEditor({ artistId, t }) {
     if (repeat === 'none') return baseDates;
 
     // Generate repeated occurrences
-    const limitDate = repeat === 'indefinite'
-      ? new Date(new Date().setFullYear(new Date().getFullYear() + 2)) // 2 years ahead
+    // repeatUntil === 'indefinite' means ~2 years ahead
+    const limitDate = repeatUntil === 'indefinite'
+      ? new Date(new Date().setFullYear(new Date().getFullYear() + 2))
       : repeatUntil ? parseISO(repeatUntil) : null;
     if (!limitDate) return baseDates;
 
@@ -141,7 +143,8 @@ export default function ArtistScheduleEditor({ artistId, t }) {
     setSaving(true);
     const isAvailable = entry.kind === 'free';
     const allDay = entry.timeMode === 'allday';
-    const dates = expandDates(entry.date_from, entry.date_to, entry.dateMode, entry.repeat, entry.repeat_until);
+    const effectiveUntil = entry.repeat_indefinite ? 'indefinite' : entry.repeat_until;
+    const dates = expandDates(entry.date_from, entry.date_to, entry.dateMode, entry.repeat, effectiveUntil);
 
     const created = await Promise.all(dates.map(date =>
       base44.entities.ArtistAvailability.create({
@@ -353,19 +356,23 @@ export default function ArtistScheduleEditor({ artistId, t }) {
               </div>
             )}
 
-            {/* Repeat until + "Do odwołania" toggle — only when repeat != none */}
+            {/* Repeat until + "Do odwołania" — shown when repeat != none, for new entries only */}
             {!editingException && entry.repeat !== 'none' && (
               <div>
-                {lbl('POWTARZAJ DO')}
+                {lbl('ZAKOŃCZENIE POWTARZANIA')}
                 <div className="flex items-center gap-3">
                   <input
-                    {...inp(entry.repeat_until, e => setEntry(n => ({ ...n, repeat_until: e.target.value })), 'date')}
-                    disabled={entry.repeat === 'indefinite'}
-                    style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${border}`, color: entry.repeat === 'indefinite' ? muted : text, padding: '7px 0', fontSize: '13px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif', colorScheme: 'dark', opacity: entry.repeat === 'indefinite' ? 0.4 : 1, cursor: entry.repeat === 'indefinite' ? 'not-allowed' : 'text' }}
+                    type="date"
+                    value={entry.repeat_until}
+                    onChange={e => setEntry(n => ({ ...n, repeat_until: e.target.value, repeat_indefinite: false }))}
+                    disabled={entry.repeat_indefinite}
+                    style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${border}`, color: text, padding: '7px 0', fontSize: '13px', flex: 1, outline: 'none', fontFamily: 'Inter, sans-serif', colorScheme: 'dark', opacity: entry.repeat_indefinite ? 0.3 : 1, cursor: entry.repeat_indefinite ? 'not-allowed' : 'text' }}
+                    onFocus={e => { if (!entry.repeat_indefinite) e.target.style.borderBottomColor = '#FF007F'; }}
+                    onBlur={e => e.target.style.borderBottomColor = border}
                   />
                   <button
-                    onClick={() => setEntry(e => ({ ...e, repeat: e.repeat === 'indefinite' ? 'weekly' : 'indefinite', repeat_until: '' }))}
-                    style={{ flexShrink: 0, fontFamily: 'JetBrains Mono', fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${entry.repeat === 'indefinite' ? '#FF007F' : border}`, color: entry.repeat === 'indefinite' ? '#FF007F' : muted, background: entry.repeat === 'indefinite' ? 'rgba(255,0,127,0.08)' : 'transparent', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                    onClick={() => setEntry(e => ({ ...e, repeat_indefinite: !e.repeat_indefinite, repeat_until: '' }))}
+                    style={{ flexShrink: 0, fontFamily: 'JetBrains Mono', fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${entry.repeat_indefinite ? '#FF007F' : border}`, color: entry.repeat_indefinite ? '#FF007F' : muted, background: entry.repeat_indefinite ? 'rgba(255,0,127,0.08)' : 'transparent', cursor: 'pointer', whiteSpace: 'nowrap' }}
                   >
                     Do odwołania
                   </button>
