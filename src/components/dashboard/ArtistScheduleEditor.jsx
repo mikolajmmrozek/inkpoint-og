@@ -321,10 +321,10 @@ export default function ArtistScheduleEditor({ artistId, t }) {
       ...toUpdate.map(r => () => base44.entities.ArtistAvailability.update(r.id, { ...updateData, date: r.date })),
       ...toAdd.map(date => () => base44.entities.ArtistAvailability.create({ artist_id: artistId, type: 'exception', date, ...updateData })),
     ];
-    const BATCH = 20;
+    const BATCH = 5;
     for (let i = 0; i < allOps.length; i += BATCH) {
       await Promise.all(allOps.slice(i, i + BATCH).map(fn => fn()));
-      if (i + BATCH < allOps.length) await new Promise(res => setTimeout(res, 800));
+      if (i + BATCH < allOps.length) await new Promise(res => setTimeout(res, 1200));
     }
 
     await reload();
