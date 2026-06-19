@@ -162,10 +162,10 @@ export default function Booking() {
                     <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.4rem', fontWeight: 600, color: '#F5F0EB' }}>
                       {artist.name}
                     </h3>
-                    <div className="flex gap-2 mt-2">
-                      {(artist.specialty || []).map(s => (
+                    <div className="flex flex-wrap gap-0 mt-2">
+                      {(artist.specialty || []).map((s, idx, arr) => (
                         <span key={s} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.1em' }}>
-                          {s}
+                          {s}{idx < arr.length - 1 ? <span style={{ color: 'rgba(255,0,127,0.35)', margin: '0 5px' }}>/</span> : ''}
                         </span>
                       ))}
                     </div>
