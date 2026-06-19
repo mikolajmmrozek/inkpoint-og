@@ -315,11 +315,17 @@ export default function ArtistScheduleEditor({ artistId, t }) {
       repeat_until: entry.repeat !== 'none' ? effectiveUntil : undefined,
     };
 
-    await Promise.all([
-      ...toDelete.map(r => base44.entities.ArtistAvailability.delete(r.id)),
-      ...toUpdate.map(r => base44.entities.ArtistAvailability.update(r.id, updateData)),
-      ...toAdd.map(date => base44.entities.ArtistAvailability.create({ artist_id: artistId, type: 'exception', date, ...updateData })),
-    ]);
+    // Wykonuj partiami po 5 żeby nie przekroczyć rate limit
+    const allOps = [
+      ...toDelete.map(r => () => base44.entities.ArtistAvailability.delete(r.id)),
+      ...toUpdate.map(r => () => base44.entities.ArtistAvailability.update(r.id, { ...updateData, date: r.date })),
+      ...toAdd.map(date => () => base44.entities.ArtistAvailability.create({ artist_id: artistId, type: 'exception', date, ...updateData })),
+    ];
+    const BATCH = 5;
+    for (let i = 0; i < allOps.length; i += BATCH) {
+      await Promise.all(allOps.slice(i, i + BATCH).map(fn => fn()));
+      if (i + BATCH < allOps.length) await new Promise(res => setTimeout(res, 300));
+    }
 
     await reload();
     setShowForm(false);

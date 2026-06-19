@@ -151,11 +151,16 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
       const toDelete = groupRecords.filter(r => !newDates.has(r.date));
       const toUpdate = groupRecords.filter(r => newDates.has(r.date));
       const toAdd = [...newDates].filter(d => !oldDates.has(d));
-      await Promise.all([
-        ...toDelete.map(r => base44.entities.ArtistAvailability.delete(r.id)),
-        ...toUpdate.map(r => base44.entities.ArtistAvailability.update(r.id, { ...updateData, date: r.date })),
-        ...toAdd.map(date => base44.entities.ArtistAvailability.create({ artist_id: record.artist_id, type: 'exception', date, ...updateData })),
-      ]);
+      const allOps = [
+        ...toDelete.map(r => () => base44.entities.ArtistAvailability.delete(r.id)),
+        ...toUpdate.map(r => () => base44.entities.ArtistAvailability.update(r.id, { ...updateData, date: r.date })),
+        ...toAdd.map(date => () => base44.entities.ArtistAvailability.create({ artist_id: record.artist_id, type: 'exception', date, ...updateData })),
+      ];
+      const BATCH = 5;
+      for (let i = 0; i < allOps.length; i += BATCH) {
+        await Promise.all(allOps.slice(i, i + BATCH).map(fn => fn()));
+        if (i + BATCH < allOps.length) await new Promise(res => setTimeout(res, 300));
+      }
     }
     setSaving(false);
     onSaved();
@@ -164,12 +169,16 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
   const handleDelete = async () => {
     setSaving(true);
     if (deleteScope === 'occurrence') {
-      // Usuń tylko ten jeden rekord (lub dodaj wyjątek blokujący ten dzień)
       const exactRecord = groupRecords.find(r => r.date === (dateStr || record.date)) || record;
       await base44.entities.ArtistAvailability.delete(exactRecord.id);
     } else {
-      // Usuń cały cykl
-      await Promise.all(groupRecords.map(r => base44.entities.ArtistAvailability.delete(r.id)));
+      // Usuń cały cykl partiami po 5, żeby nie przekroczyć rate limit
+      const BATCH = 5;
+      for (let i = 0; i < groupRecords.length; i += BATCH) {
+        const batch = groupRecords.slice(i, i + BATCH);
+        await Promise.all(batch.map(r => base44.entities.ArtistAvailability.delete(r.id)));
+        if (i + BATCH < groupRecords.length) await new Promise(res => setTimeout(res, 300));
+      }
     }
     setSaving(false);
     onSaved();
