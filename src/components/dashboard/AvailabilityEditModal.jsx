@@ -157,7 +157,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
           ...toUpdate.map(r => () => base44.entities.ArtistAvailability.update(r.id, { ...updateData, date: r.date }).catch(() => null)),
           ...toAdd.map(date => () => base44.entities.ArtistAvailability.create({ artist_id: record.artist_id, type: 'exception', date, ...updateData }).catch(() => null)),
         ];
-        const BATCH = 5;
+        const BATCH = 15;
         for (let i = 0; i < allOps.length; i += BATCH) {
           await Promise.all(allOps.slice(i, i + BATCH).map(fn => fn()));
           if (i + BATCH < allOps.length) await new Promise(res => setTimeout(res, 1200));
