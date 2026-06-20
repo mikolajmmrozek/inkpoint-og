@@ -34,7 +34,8 @@ export default function Booking() {
   const preselectedArtistName = urlParams.get('artist_name') || '';
 
   const [step, setStep] = useState(preselectedArtistId ? 1 : 0);
-  const [artists, setArtists] = useState(PLACEHOLDER_ARTISTS);
+  const [artists, setArtists] = useState([]);
+  const [artistsLoading, setArtistsLoading] = useState(true);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [data, setData] = useState({
@@ -47,8 +48,9 @@ export default function Booking() {
 
   useEffect(() => {
     base44.entities.Artist.filter({ is_active: true })
-      .then(res => { if (res.length > 0) setArtists(res); })
-      .catch(() => {});
+      .then(res => { setArtists(res.length > 0 ? res : PLACEHOLDER_ARTISTS); })
+      .catch(() => { setArtists(PLACEHOLDER_ARTISTS); })
+      .finally(() => setArtistsLoading(false));
   }, []);
 
   const update = (key, value) => setData(d => ({ ...d, [key]: value }));
@@ -152,7 +154,11 @@ export default function Booking() {
                 <p className="mb-8" style={{ color: 'rgba(245,240,235,0.5)', fontSize: '15px' }}>
                   Wybierz artystę, z którym chcesz się umówić.
                 </p>
-                {artists.map(artist => (
+                {artistsLoading ? (
+                  <div className="flex justify-center py-12">
+                    <div className="w-8 h-px animate-pulse" style={{ background: '#FF007F' }} />
+                  </div>
+                ) : artists.map(artist => (
                   <button
                     key={artist.id}
                     onClick={() => update('artist_id', artist.id) || update('artist_name', artist.name)}
@@ -177,6 +183,7 @@ export default function Booking() {
                 ))}
               </div>
             )}
+
 
             {/* Step 1: Szczegóły */}
             {step === 1 && (
