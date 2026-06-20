@@ -29,12 +29,16 @@ const inputStyle = {
 };
 
 export default function Booking() {
-  const [step, setStep] = useState(0);
+  const urlParams = new URLSearchParams(window.location.search);
+  const preselectedArtistId = urlParams.get('artist_id') || '';
+  const preselectedArtistName = urlParams.get('artist_name') || '';
+
+  const [step, setStep] = useState(preselectedArtistId ? 1 : 0);
   const [artists, setArtists] = useState(PLACEHOLDER_ARTISTS);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [data, setData] = useState({
-    artist_id: '', artist_name: '',
+    artist_id: preselectedArtistId, artist_name: preselectedArtistName,
     client_first_name: '', client_last_name: '', client_email: '', client_phone: '',
     tattoo_description: '', tattoo_placement: '',
     session_date: '', session_time: '',

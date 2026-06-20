@@ -120,7 +120,10 @@ export default function ArtistProfile() {
                 </a>
               )}
 
-              <Link to="/booking" className="btn-oxblood block text-center animate-pulse-oxblood">
+              <Link
+                to={`/booking?artist_id=${encodeURIComponent(artist?.id || '')}&artist_name=${encodeURIComponent(artist?.name || MOCK.name)}`}
+                className="btn-oxblood block text-center animate-pulse-oxblood"
+              >
                 Umów z Artystą
               </Link>
             </motion.div>
