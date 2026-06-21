@@ -9,12 +9,16 @@ import ChangeRequestModal from '@/components/client/ChangeRequestModal';
 import MessageModal from '@/components/client/MessageModal';
 
 export default function ClientSessions() {
-  const { client, user } = useOutletContext();
+  const { client, user, theme } = useOutletContext();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('upcoming');
   const [changeRequestBooking, setChangeRequestBooking] = useState(null);
   const [messageBooking, setMessageBooking] = useState(null);
+
+  const t = theme === 'light'
+    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F' }
+    : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F' };
 
   const load = async () => {
     const res = await base44.entities.Booking.filter({ client_email: user.email }, '-session_date', 200);
@@ -44,10 +48,10 @@ export default function ClientSessions() {
     <div>
       <div className="mb-8 flex items-end justify-between">
         <div>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>
             TWOJE SESJE
           </p>
-          <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: '#F5F0EB', lineHeight: 1, letterSpacing: '0.04em' }}>
+          <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>
             Rezerwacje
           </h1>
         </div>
@@ -61,29 +65,29 @@ export default function ClientSessions() {
         {[
           { key: 'upcoming', label: `Nadchodzące (${upcoming.length})` },
           { key: 'past', label: `Historia (${past.length})` },
-        ].map(t => (
+        ].map(tbtn => (
           <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
+            key={tbtn.key}
+            onClick={() => setTab(tbtn.key)}
             style={{
               fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase',
-              padding: '8px 16px', border: `0.5px solid ${tab === t.key ? '#FF007F' : '#262626'}`,
-              color: tab === t.key ? '#FF007F' : 'rgba(245,240,235,0.4)',
-              background: tab === t.key ? 'rgba(255,0,127,0.06)' : 'transparent',
+              padding: '8px 16px', border: `0.5px solid ${tab === tbtn.key ? t.fuchsia : t.border}`,
+              color: tab === tbtn.key ? t.fuchsia : t.muted,
+              background: tab === tbtn.key ? 'rgba(255,0,127,0.06)' : 'transparent',
               cursor: 'pointer',
             }}
           >
-            {t.label}
+            {tbtn.label}
           </button>
         ))}
       </div>
 
       {/* List */}
       {loading ? (
-        <div className="flex justify-center py-20"><div className="w-8 h-px animate-pulse" style={{ background: '#FF007F' }} /></div>
+        <div className="flex justify-center py-20"><div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} /></div>
       ) : displayed.length === 0 ? (
-        <div className="py-16 text-center" style={{ border: '0.5px solid #262626' }}>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em' }}>
+        <div className="py-16 text-center" style={{ border: `0.5px solid ${t.border}` }}>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
             BRAK SESJI
           </p>
         </div>
@@ -93,6 +97,7 @@ export default function ClientSessions() {
             <SessionCard
               key={b.id}
               booking={b}
+              theme={theme}
               onChangeRequest={setChangeRequestBooking}
               onMessage={setMessageBooking}
               showActions={tab === 'upcoming'}
@@ -106,6 +111,7 @@ export default function ClientSessions() {
         {changeRequestBooking && (
           <ChangeRequestModal
             booking={changeRequestBooking}
+            theme={theme}
             onClose={() => setChangeRequestBooking(null)}
             onSaved={() => { setChangeRequestBooking(null); load(); }}
           />
@@ -117,6 +123,7 @@ export default function ClientSessions() {
           booking={messageBooking}
           client={client}
           user={user}
+          theme={theme}
           onClose={() => setMessageBooking(null)}
           onSent={() => setMessageBooking(null)}
         />

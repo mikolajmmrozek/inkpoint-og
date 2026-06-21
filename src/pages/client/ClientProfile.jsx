@@ -3,23 +3,27 @@ import { useOutletContext } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Loader2 } from 'lucide-react';
 
-const inputStyle = {
-  background: 'transparent',
-  border: 'none',
-  borderBottom: '0.5px solid #262626',
-  color: '#F5F0EB',
-  padding: '10px 0',
-  fontSize: '14px',
-  width: '100%',
-  outline: 'none',
-  fontFamily: 'Inter, sans-serif',
-};
-
 export default function ClientProfile() {
-  const { client, user } = useOutletContext();
+  const { client, user, theme } = useOutletContext();
   const [form, setForm] = useState({ phone: '', notes: '' });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  const t = theme === 'light'
+    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', mutedLow: 'rgba(0,0,0,0.5)', fuchsia: '#FF007F' }
+    : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', mutedLow: 'rgba(245,240,235,0.5)', fuchsia: '#FF007F' };
+
+  const inputStyle = {
+    background: 'transparent',
+    border: 'none',
+    borderBottom: `0.5px solid ${t.border}`,
+    color: t.text,
+    padding: '10px 0',
+    fontSize: '14px',
+    width: '100%',
+    outline: 'none',
+    fontFamily: 'Inter, sans-serif',
+  };
 
   useEffect(() => {
     if (client) {
@@ -46,16 +50,16 @@ export default function ClientProfile() {
   };
 
   const label = (text) => (
-    <label className="block mb-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>{text}</label>
+    <label className="block mb-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>{text}</label>
   );
 
   return (
     <div>
       <div className="mb-8">
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>
           KONTO
         </p>
-        <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: '#F5F0EB', lineHeight: 1, letterSpacing: '0.04em' }}>
+        <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>
           Twój Profil
         </h1>
       </div>
@@ -67,7 +71,7 @@ export default function ClientProfile() {
           <input
             readOnly
             value={client?.name || user?.full_name || ''}
-            style={{ ...inputStyle, color: 'rgba(245,240,235,0.5)', cursor: 'default' }}
+            style={{ ...inputStyle, color: t.mutedLow, cursor: 'default' }}
           />
         </div>
         <div>
@@ -75,13 +79,13 @@ export default function ClientProfile() {
           <input
             readOnly
             value={user?.email || ''}
-            style={{ ...inputStyle, color: 'rgba(245,240,235,0.5)', cursor: 'default' }}
+            style={{ ...inputStyle, color: t.mutedLow, cursor: 'default' }}
           />
         </div>
       </div>
 
-      <div className="pt-6" style={{ borderTop: '0.5px solid #262626' }}>
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>
+      <div className="pt-6" style={{ borderTop: `0.5px solid ${t.border}` }}>
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>
           DANE EDYTOWALNE
         </p>
         <div className="space-y-5">
@@ -91,8 +95,8 @@ export default function ClientProfile() {
               style={inputStyle}
               value={form.phone}
               onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
-              onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
-              onBlur={e => e.target.style.borderBottomColor = '#262626'}
+              onFocus={e => e.target.style.borderBottomColor = t.fuchsia}
+              onBlur={e => e.target.style.borderBottomColor = t.border}
             />
           </div>
           <div>
@@ -103,8 +107,8 @@ export default function ClientProfile() {
               value={form.notes}
               onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
               placeholder="Alergie, preferencje, ważne informacje..."
-              onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
-              onBlur={e => e.target.style.borderBottomColor = '#262626'}
+              onFocus={e => e.target.style.borderBottomColor = t.fuchsia}
+              onBlur={e => e.target.style.borderBottomColor = t.border}
             />
           </div>
         </div>

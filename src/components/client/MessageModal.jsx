@@ -3,9 +3,13 @@ import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { X, MessageSquare, Loader2 } from 'lucide-react';
 
-export default function MessageModal({ booking, client, user, onClose, onSent }) {
+export default function MessageModal({ booking, client, user, theme = 'dark', onClose, onSent }) {
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
+
+  const t = theme === 'light'
+    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F', overlay: 'rgba(0,0,0,0.5)' }
+    : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F', overlay: 'rgba(0,0,0,0.8)' };
 
   const handleSend = async () => {
     if (!message.trim()) return;
@@ -30,31 +34,31 @@ export default function MessageModal({ booking, client, user, onClose, onSent })
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.8)' }} onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: t.overlay }} onClick={onClose}>
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
         className="w-full max-w-md"
-        style={{ border: '0.5px solid #262626', background: '#0A0A0A', padding: '36px' }}
+        style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '36px' }}
         onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-6">
           <div>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>
               WIADOMOŚĆ DO STUDIA
             </p>
-            <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.4rem', color: '#F5F0EB', letterSpacing: '0.04em' }}>
+            <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.4rem', color: t.title, letterSpacing: '0.04em' }}>
               {booking.session_date} {booking.session_time && `· ${booking.session_time}`}
             </h3>
           </div>
-          <button onClick={onClose} style={{ color: 'rgba(245,240,235,0.4)', background: 'none', border: 'none', cursor: 'pointer' }}>
+          <button onClick={onClose} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
             <X size={18} />
           </button>
         </div>
 
         <div className="mb-4">
-          <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+          <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
             TWOJA WIADOMOŚĆ
           </label>
           <textarea
@@ -66,8 +70,8 @@ export default function MessageModal({ booking, client, user, onClose, onSent })
             style={{
               background: 'transparent',
               border: 'none',
-              borderBottom: '0.5px solid #262626',
-              color: '#F5F0EB',
+              borderBottom: `0.5px solid ${t.border}`,
+              color: t.text,
               padding: '10px 0',
               fontSize: '14px',
               width: '100%',
@@ -75,12 +79,12 @@ export default function MessageModal({ booking, client, user, onClose, onSent })
               fontFamily: 'Inter, sans-serif',
               resize: 'none',
             }}
-            onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
-            onBlur={e => e.target.style.borderBottomColor = '#262626'}
+            onFocus={e => e.target.style.borderBottomColor = t.fuchsia}
+            onBlur={e => e.target.style.borderBottomColor = t.border}
           />
         </div>
 
-        <div className="flex gap-3 mt-6 pt-4" style={{ borderTop: '0.5px solid #262626' }}>
+        <div className="flex gap-3 mt-6 pt-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
           <button
             onClick={handleSend}
             disabled={sending || !message.trim()}
