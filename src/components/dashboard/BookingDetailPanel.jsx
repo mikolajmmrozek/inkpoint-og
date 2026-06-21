@@ -349,15 +349,6 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
         exit={{ opacity: 0 }}
         onClick={() => setShowImageLightbox(false)}
         className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80"
-        onTouchStart={(e) => { window.touchStartX = e.touches[0].clientX; }}
-        onTouchEnd={(e) => {
-          const touchEndX = e.changedTouches[0].clientX;
-          const diff = window.touchStartX - touchEndX;
-          if (Math.abs(diff) > 50) {
-            if (diff > 0) setLightboxImageIndex(i => (i + 1) % booking.reference_images.length);
-            else setLightboxImageIndex(i => (i - 1 + booking.reference_images.length) % booking.reference_images.length);
-          }
-        }}
       >
         <motion.div
           initial={{ scale: 0.9 }}
@@ -365,6 +356,15 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
           exit={{ scale: 0.9 }}
           onClick={e => e.stopPropagation()}
           className="relative max-w-4xl"
+          onTouchStart={(e) => { window.touchStartX = e.touches[0].clientX; }}
+          onTouchEnd={(e) => {
+            const touchEndX = e.changedTouches[0].clientX;
+            const diff = window.touchStartX - touchEndX;
+            if (Math.abs(diff) > 50) {
+              if (diff > 0) setLightboxImageIndex(i => (i + 1) % booking.reference_images.length);
+              else setLightboxImageIndex(i => (i - 1 + booking.reference_images.length) % booking.reference_images.length);
+            }
+          }}
         >
           <img src={booking.reference_images[lightboxImageIndex]} alt="preview" className="max-w-full max-h-[80vh] object-contain" />
           
