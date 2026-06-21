@@ -290,11 +290,10 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
                 ))}
               </div>
 
-              {/* Days — fixed 6-row grid so the modal never resizes between months */}
-              <div className="grid grid-cols-7 gap-0.5" style={{ height: '252px' }}>
-                {Array.from({ length: 42 }).map((_, i) => {
-                  const day = addDays(startOfMonth(viewMonth), i - startPad);
-                  const inMonth = isSameMonth(day, viewMonth);
+              {/* Days — only current month days, fixed row height so the modal never resizes */}
+              <div className="grid grid-cols-7 gap-0.5" style={{ height: `${Math.ceil((startPad + calendarDays.length) / 7) * 42}px` }}>
+                {Array.from({ length: startPad }).map((_, i) => <div key={`pad${i}`} style={{ height: '42px' }} />)}
+                {calendarDays.map(day => {
                   const dateStr = format(day, 'yyyy-MM-dd');
                   const isPast = isBefore(day, today);
                   const hasSlots = !isPast && isDayAvailable(dateStr);
@@ -302,7 +301,7 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
                   const isTodayDate = isToday(day);
                   return (
                     <button
-                      key={i}
+                      key={day.toISOString()}
                       onClick={() => { if (hasSlots) { handleDateSelect(dateStr); setShowCalendar(false); } }}
                       disabled={!hasSlots}
                       style={{
@@ -311,7 +310,7 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
                         border: `0.5px solid ${isSelected ? '#FF007F' : 'transparent'}`,
                         background: isSelected ? 'rgba(255,0,127,0.08)' : 'transparent',
                         cursor: hasSlots ? 'pointer' : 'default',
-                        opacity: hasSlots ? 1 : isPast ? 0.15 : inMonth ? 0.3 : 0.08,
+                        opacity: hasSlots ? 1 : isPast ? 0.15 : 0.3,
                         textAlign: 'center',
                         position: 'relative',
                       }}
