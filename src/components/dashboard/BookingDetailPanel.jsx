@@ -348,7 +348,21 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={() => setShowImageLightbox(false)}
-        className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: theme === 'light' ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem',
+          paddingTop: 'max(env(safe-area-inset-top), 1rem)',
+          paddingBottom: 'max(env(safe-area-inset-bottom), 1rem)',
+          zIndex: 60,
+        }}
       >
         <motion.div
           initial={{ scale: 0.9 }}
