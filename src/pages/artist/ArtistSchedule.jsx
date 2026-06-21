@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { ChevronLeft, ChevronRight, Plus, X, Search, Zap, RefreshCw, FileText } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, X, Search, Zap, RefreshCw, FileText, Edit3 } from 'lucide-react';
 import { format, addDays, subDays, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, isSameMonth, isToday, parseISO } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -139,9 +139,9 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
           </div>
           <div className="flex items-center gap-2">
             {!isNew && !editing && (
-              <button onClick={() => setEditing(true)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}>EDYTUJ</button>
+              <button onClick={() => setEditing(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#FF007F', padding: '4px' }}><Edit3 size={18} /></button>
             )}
-            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}><X size={18} /></button>
+            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#FF007F', padding: '4px' }}><X size={18} /></button>
           </div>
         </div>
 
