@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import PageLayout from '../components/layout/PageLayout';
+import SessionDatePicker from '@/components/booking/SessionDatePicker';
 import { Check } from 'lucide-react';
 import { format } from 'date-fns';
 import { pl } from 'date-fns/locale';
@@ -237,46 +238,13 @@ export default function Booking() {
 
             {/* Step 2: Termin */}
             {step === 2 && (
-              <div className="space-y-10">
-                <div>
-                  <label className="text-micro block mb-4" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-                    Data sesji *
-                  </label>
-                  <input
-                    type="date"
-                    min={format(new Date(), 'yyyy-MM-dd')}
-                    style={{ ...inputStyle, colorScheme: 'dark' }}
-                    value={data.session_date}
-                    onChange={e => update('session_date', e.target.value)}
-                    onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
-                    onBlur={e => e.target.style.borderBottomColor = '#262626'}
-                  />
-                </div>
-                <div>
-                  <label className="text-micro block mb-4" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-                    Godzina *
-                  </label>
-                  <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
-                    {TIME_SLOTS.map(time => (
-                      <button
-                        key={time}
-                        onClick={() => update('session_time', time)}
-                        className="py-3 transition-all duration-200"
-                        style={{
-                          border: data.session_time === time ? '0.5px solid #FF007F' : '0.5px solid #262626',
-                          background: data.session_time === time ? 'rgba(139,26,26,0.08)' : 'transparent',
-                          fontFamily: 'JetBrains Mono',
-                          fontSize: '11px',
-                          color: data.session_time === time ? '#FF007F' : 'rgba(245,240,235,0.5)',
-                          letterSpacing: '0.05em',
-                        }}
-                      >
-                        {time}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              <SessionDatePicker
+                artistId={data.artist_id}
+                selectedDate={data.session_date}
+                selectedTime={data.session_time}
+                onDateChange={val => update('session_date', val)}
+                onTimeChange={val => update('session_time', val)}
+              />
             )}
 
             {/* Step 3: Potwierdzenie */}
