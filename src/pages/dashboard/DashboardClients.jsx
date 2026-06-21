@@ -343,7 +343,7 @@ export default function DashboardClients() {
                     {c.phone ? <a href={`tel:${c.phone}`} onClick={e => e.stopPropagation()} style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, textDecoration: 'none' }} onMouseEnter={e => e.target.style.color = '#FF007F'} onMouseLeave={e => e.target.style.color = t.muted}>{c.phone}</a> : <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>—</span>}
                   </div>
                   <div className="col-span-1">
-                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: (c.total_sessions || 0) >= 2 ? t.fuchsia : t.muted, fontWeight: 600 }}>{c.total_sessions || 0}</span>
+                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: getClientData(c).sessions.filter(s => s.status === 'completed').length >= 2 ? t.fuchsia : t.muted, fontWeight: 600 }}>{getClientData(c).sessions.filter(s => s.status === 'completed').length}</span>
                   </div>
                   <div className="col-span-2 flex justify-end gap-3">
                     {c.email && getClientStatus(c) === 'inactive' && (
