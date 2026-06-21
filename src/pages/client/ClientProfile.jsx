@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Loader2 } from 'lucide-react';
+import AccountSecurity from '@/components/client/AccountSecurity';
 
 export default function ClientProfile() {
   const { client, user, theme } = useOutletContext();
@@ -129,6 +130,8 @@ export default function ClientProfile() {
           )}
         </div>
       </div>
+
+      <AccountSecurity user={user} t={t} />
     </div>
   );
 }
