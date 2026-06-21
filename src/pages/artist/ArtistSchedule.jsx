@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { ChevronLeft, ChevronRight, Plus, X, Search, Zap, RefreshCw } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, X, Search, Zap, RefreshCw, FileText } from 'lucide-react';
 import { format, addDays, subDays, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, isSameMonth, isToday, parseISO } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -197,8 +197,8 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
 
             {/* Health form button */}
             {form.health_form_completed && (
-              <button onClick={() => setShowHealthForm(true)} className="btn-ghost-parchment" style={{ fontSize: '9px', marginTop: '8px' }}>
-                PODGLĄD ANKIETY ZDROWOTNEJ
+              <button onClick={() => setShowHealthForm(true)} style={{ fontSize: '9px', marginTop: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', padding: '10px 20px', background: 'transparent', color: theme === 'light' ? '#111111' : '#F5F0EB', border: `0.5px solid ${theme === 'light' ? '#111111' : '#F5F0EB'}`, cursor: 'pointer', transition: 'all 0.3s ease' }}>
+                <FileText size={12} /> PODGLĄD ANKIETY ZDROWOTNEJ
               </button>
             )}
           </div>
