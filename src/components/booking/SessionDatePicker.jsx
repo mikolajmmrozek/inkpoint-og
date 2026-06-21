@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Calendar, ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { format, addDays, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, isToday, parseISO, isBefore, startOfDay } from 'date-fns';
+import { format, addDays, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, isToday, isSameMonth, parseISO, isBefore, startOfDay } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getAvailabilityForDay } from '@/components/dashboard/ArtistScheduleEditor';
@@ -290,10 +290,11 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
                 ))}
               </div>
 
-              {/* Days */}
-              <div className="grid grid-cols-7 gap-0.5">
-                {Array.from({ length: startPad }).map((_, i) => <div key={`pad${i}`} />)}
-                {calendarDays.map(day => {
+              {/* Days — fixed 6-row grid so the modal never resizes between months */}
+              <div className="grid grid-cols-7 gap-0.5" style={{ height: '252px' }}>
+                {Array.from({ length: 42 }).map((_, i) => {
+                  const day = addDays(startOfMonth(viewMonth), i - startPad);
+                  const inMonth = isSameMonth(day, viewMonth);
                   const dateStr = format(day, 'yyyy-MM-dd');
                   const isPast = isBefore(day, today);
                   const hasSlots = !isPast && isDayAvailable(dateStr);
@@ -301,16 +302,16 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
                   const isTodayDate = isToday(day);
                   return (
                     <button
-                      key={day.toISOString()}
+                      key={i}
                       onClick={() => { if (hasSlots) { handleDateSelect(dateStr); setShowCalendar(false); } }}
                       disabled={!hasSlots}
                       style={{
-                        minHeight: '40px',
+                        height: '42px',
                         padding: '6px 4px',
                         border: `0.5px solid ${isSelected ? '#FF007F' : 'transparent'}`,
                         background: isSelected ? 'rgba(255,0,127,0.08)' : 'transparent',
                         cursor: hasSlots ? 'pointer' : 'default',
-                        opacity: hasSlots ? 1 : isPast ? 0.15 : 0.3,
+                        opacity: hasSlots ? 1 : isPast ? 0.15 : inMonth ? 0.3 : 0.08,
                         textAlign: 'center',
                         position: 'relative',
                       }}
