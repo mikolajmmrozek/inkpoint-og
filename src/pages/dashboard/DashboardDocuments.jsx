@@ -49,6 +49,8 @@ export default function DashboardDocuments() {
 
   // Delete confirm
   const [deleteConfirmInstr, setDeleteConfirmInstr] = useState(null); // instruction id to delete
+  const [deleteConfirmTerms, setDeleteConfirmTerms] = useState(false);
+  const [deleteConfirmLegal, setDeleteConfirmLegal] = useState(null); // 'cookies' | 'privacy'
 
   // Edit modal
   const [editingInstr, setEditingInstr] = useState(null);
@@ -99,6 +101,25 @@ export default function DashboardDocuments() {
     await base44.entities.Instruction.delete(id);
     setInstructions(i => i.filter(x => x.id !== id));
     setDeleteConfirmInstr(null);
+    setViewDoc(null);
+  };
+
+  const handleDeleteTerms = async () => {
+    if (terms?.id) {
+      await base44.entities.TermsAndConditions.delete(terms.id);
+      setTerms(null);
+    }
+    setDeleteConfirmTerms(false);
+    setViewDoc(null);
+  };
+
+  const handleDeleteLegal = async () => {
+    const existing = deleteConfirmLegal === 'cookies' ? cookiesPolicy : privacyPolicy;
+    if (existing?.id) {
+      await base44.entities.TermsAndConditions.delete(existing.id);
+      if (deleteConfirmLegal === 'cookies') setCookiesPolicy(null); else setPrivacyPolicy(null);
+    }
+    setDeleteConfirmLegal(null);
     setViewDoc(null);
   };
 
@@ -232,24 +253,20 @@ export default function DashboardDocuments() {
           </div>
         </div>
         <div className="flex items-center gap-1 flex-shrink-0">
-          {content && (
-            <>
-              <button onClick={onView} title="Podgląd" style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: '6px' }}>
-                <Eye size={14} />
-              </button>
-              <button onClick={onPrint} title="Drukuj PDF" style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: '6px' }}>
-                <Printer size={14} />
-              </button>
-              <button onClick={onShare} title="Udostępnij" style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: '6px' }}>
-                <Share2 size={14} />
-              </button>
-            </>
-          )}
+          <button onClick={onView} disabled={!content} title="Podgląd" style={{ background: 'none', border: 'none', cursor: content ? 'pointer' : 'default', color: t.muted, padding: '6px', opacity: content ? 1 : 0.3 }}>
+            <Eye size={14} />
+          </button>
+          <button onClick={onPrint} disabled={!content} title="Drukuj PDF" style={{ background: 'none', border: 'none', cursor: content ? 'pointer' : 'default', color: t.muted, padding: '6px', opacity: content ? 1 : 0.3 }}>
+            <Printer size={14} />
+          </button>
+          <button onClick={onShare} disabled={!content} title="Udostępnij" style={{ background: 'none', border: 'none', cursor: content ? 'pointer' : 'default', color: t.muted, padding: '6px', opacity: content ? 1 : 0.3 }}>
+            <Share2 size={14} />
+          </button>
           <button onClick={onEdit} title="Edytuj" style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.fuchsia, padding: '6px' }}>
             <Pencil size={14} />
           </button>
-          {onDelete && content && (
-            <button onClick={() => onDelete()} title="Usuń" style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: '6px' }}>
+          {onDelete && (
+            <button onClick={() => onDelete()} disabled={!content} title="Usuń" style={{ background: 'none', border: 'none', cursor: content ? 'pointer' : 'default', color: t.muted, padding: '6px', opacity: content ? 1 : 0.3 }}>
               <Trash2 size={14} />
             </button>
           )}
@@ -426,13 +443,23 @@ export default function DashboardDocuments() {
 
           {/* Regulamin */}
           <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '24px' }}>
-            <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em', marginBottom: '16px' }}>Regulamin Studia</h3>
+            <div className="flex items-center justify-between mb-6">
+              <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em' }}>Regulamin Studia</h3>
+              <button
+                onClick={() => { setTermsForm(terms || { title: 'Regulamin Studia', content: '' }); setEditingTerms(true); setSaveError(null); }}
+                className="flex items-center gap-2"
+                style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: 'pointer' }}
+              >
+                <Plus size={12} /> DODAJ NOWY
+              </button>
+            </div>
             <DocCard
               label="Regulamin Studia"
               title={terms?.title}
               content={terms?.content}
               onView={() => openViewDoc({ kind: 'terms', data: terms })}
               onEdit={() => { setTermsForm(terms || { title: '', content: '' }); setEditingTerms(true); setSaveError(null); }}
+              onDelete={() => setDeleteConfirmTerms(true)}
               onPrint={() => handlePrint(terms, 'Regulamin Studia', null)}
               onShare={() => handleShare(terms, 'Regulamin Studia')}
             />
@@ -440,7 +467,16 @@ export default function DashboardDocuments() {
 
           {/* Dokumenty prawne */}
           <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '24px' }}>
-            <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em', marginBottom: '16px' }}>Dokumenty prawne</h3>
+            <div className="flex items-center justify-between mb-6">
+              <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em' }}>Dokumenty prawne</h3>
+              <button
+                onClick={() => { setLegalForm(cookiesPolicy || { title: 'Polityka Cookies', content: '' }); setEditingLegal('cookies'); setSaveError(null); }}
+                className="flex items-center gap-2"
+                style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: 'pointer' }}
+              >
+                <Plus size={12} /> DODAJ NOWY
+              </button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <DocCard
                 label="Polityka Cookies"
@@ -448,6 +484,7 @@ export default function DashboardDocuments() {
                 content={cookiesPolicy?.content}
                 onView={() => openViewDoc({ kind: 'terms', data: cookiesPolicy })}
                 onEdit={() => { setLegalForm(cookiesPolicy || { title: 'Polityka Cookies', content: '' }); setEditingLegal('cookies'); setSaveError(null); }}
+                onDelete={() => setDeleteConfirmLegal('cookies')}
                 onPrint={() => handlePrint(cookiesPolicy, 'Polityka Cookies', null)}
                 onShare={() => handleShare(cookiesPolicy, 'Polityka Cookies')}
               />
@@ -457,6 +494,7 @@ export default function DashboardDocuments() {
                 content={privacyPolicy?.content}
                 onView={() => openViewDoc({ kind: 'terms', data: privacyPolicy })}
                 onEdit={() => { setLegalForm(privacyPolicy || { title: 'Polityka Prywatności', content: '' }); setEditingLegal('privacy'); setSaveError(null); }}
+                onDelete={() => setDeleteConfirmLegal('privacy')}
                 onPrint={() => handlePrint(privacyPolicy, 'Polityka Prywatności', null)}
                 onShare={() => handleShare(privacyPolicy, 'Polityka Prywatności')}
               />
@@ -471,6 +509,24 @@ export default function DashboardDocuments() {
         message="Czy na pewno chcesz usunąć ten dokument? Tej operacji nie można cofnąć."
         onConfirm={() => handleDeleteInstr(deleteConfirmInstr)}
         onCancel={() => setDeleteConfirmInstr(null)}
+        theme={theme}
+      />
+
+      <ConfirmDeleteDialog
+        open={deleteConfirmTerms}
+        title="Usuń Regulamin Studia"
+        message="Czy na pewno chcesz usunąć Regulamin Studia? Tej operacji nie można cofnąć."
+        onConfirm={handleDeleteTerms}
+        onCancel={() => setDeleteConfirmTerms(false)}
+        theme={theme}
+      />
+
+      <ConfirmDeleteDialog
+        open={!!deleteConfirmLegal}
+        title={`Usuń ${deleteConfirmLegal === 'cookies' ? 'Politykę Cookies' : 'Politykę Prywatności'}`}
+        message="Czy na pewno chcesz usunąć ten dokument? Tej operacji nie można cofnąć."
+        onConfirm={handleDeleteLegal}
+        onCancel={() => setDeleteConfirmLegal(null)}
         theme={theme}
       />
 
