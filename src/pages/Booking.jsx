@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import PageLayout from '../components/layout/PageLayout';
 import SessionDatePicker from '@/components/booking/SessionDatePicker';
-import { Check } from 'lucide-react';
+import { Check, Upload, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { pl } from 'date-fns/locale';
 
@@ -45,7 +45,9 @@ export default function Booking() {
     tattoo_description: '', tattoo_placement: '',
     session_date: '', session_time: '',
     notes: '',
+    reference_images: [],
   });
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
     base44.entities.Artist.filter({ is_active: true })
@@ -55,6 +57,34 @@ export default function Booking() {
   }, []);
 
   const update = (key, value) => setData(d => ({ ...d, [key]: value }));
+
+  const handleImageUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    
+    const remaining = 10 - data.reference_images.length;
+    if (files.length > remaining) {
+      alert(`Możesz przesłać maksymalnie ${remaining} zdjęć`);
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const uploadedUrls = await Promise.all(
+        files.map(file => base44.integrations.Core.UploadFile({ file }).then(res => res.file_url))
+      );
+      update('reference_images', [...data.reference_images, ...uploadedUrls]);
+    } catch (err) {
+      console.error('Upload failed:', err);
+      alert('Błąd przy przesyłaniu zdjęć');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const removeImage = (idx) => {
+    update('reference_images', data.reference_images.filter((_, i) => i !== idx));
+  };
 
   const canNext = () => {
     if (step === 0) return !!data.artist_id;
@@ -241,12 +271,52 @@ export default function Booking() {
                   <textarea required rows={4} style={{ ...inputStyle, resize: 'none' }} value={data.tattoo_description} onChange={e => update('tattoo_description', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
                 </div>
                 <div>
-                  <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-                    Dodatkowe uwagi
-                  </label>
-                  <textarea rows={2} style={{ ...inputStyle, resize: 'none' }} value={data.notes} onChange={e => update('notes', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                   <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                     Dodatkowe uwagi
+                   </label>
+                   <textarea rows={2} style={{ ...inputStyle, resize: 'none' }} value={data.notes} onChange={e => update('notes', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                 </div>
+                 <div>
+                   <label className="text-micro block mb-3" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                     Przeslij nam swoje pomysly / inspiracje / zdjecia ({data.reference_images.length}/10)
+                   </label>
+                   <p style={{ fontSize: '12px', color: 'rgba(245,240,235,0.3)', marginBottom: '12px' }}>
+                     Możesz wysłać miejsce na którym miałby się znaleźć tatuaż, inspiracje, zdjęcia do poprawy lub zakrycia.
+                   </p>
+                   <label className="flex items-center justify-center py-6 border-dashed" style={{ borderWidth: '1px', borderColor: '#262626', cursor: data.reference_images.length >= 10 ? 'not-allowed' : 'pointer', opacity: data.reference_images.length >= 10 ? 0.5 : 1 }}>
+                     <input
+                       type="file"
+                       multiple
+                       accept="image/*"
+                       onChange={handleImageUpload}
+                       disabled={data.reference_images.length >= 10 || uploadingImage}
+                       style={{ display: 'none' }}
+                     />
+                     <div className="text-center">
+                       <Upload size={20} color="#FF007F" style={{ marginBottom: '6px', marginLeft: 'auto', marginRight: 'auto', display: 'block' }} />
+                       <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: '#FF007F', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                         {uploadingImage ? 'Wczytywanie...' : 'Kliknij aby wybrać zdjęcia'}
+                       </span>
+                     </div>
+                   </label>
+                   {data.reference_images.length > 0 && (
+                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
+                       {data.reference_images.map((img, idx) => (
+                         <div key={idx} className="relative group">
+                           <img src={img} alt={`ref-${idx}`} className="w-full h-24 object-cover" style={{ border: '0.5px solid #262626' }} />
+                           <button
+                             onClick={() => removeImage(idx)}
+                             className="absolute top-1 right-1 p-1 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity"
+                             style={{ border: '0.5px solid #FF007F' }}
+                           >
+                             <X size={14} color="#FF007F" />
+                           </button>
+                         </div>
+                       ))}
+                     </div>
+                   )}
+                 </div>
                 </div>
-              </div>
             )}
 
             {/* Step 2: Termin */}
