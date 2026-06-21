@@ -76,6 +76,7 @@ export default function Booking() {
   };
 
   const handleSubmit = async () => {
+    scrollToTop();
     setSubmitting(true);
     const fullName = `${data.client_first_name} ${data.client_last_name}`.trim();
     const bookingData = { ...data, client_name: fullName, status: 'pending', health_form_completed: false };
