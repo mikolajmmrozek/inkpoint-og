@@ -256,7 +256,7 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
       {/* Calendar popup */}
       <AnimatePresence>
         {showCalendar && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.8)' }} onClick={() => setShowCalendar(false)}>
+          <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-24" style={{ background: 'rgba(0,0,0,0.8)' }} onClick={() => setShowCalendar(false)}>
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
