@@ -106,21 +106,21 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
       {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        animate={{ opacity: showImageLightbox ? 0 : 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
         className="fixed inset-0 z-40"
-        style={{ background: 'rgba(0,0,0,0.5)' }}
+        style={{ background: 'rgba(0,0,0,0.5)', pointerEvents: showImageLightbox ? 'none' : 'auto' }}
         onClick={onClose}
       />
       {/* Drawer */}
       <motion.div
         initial={{ x: '100%' }}
-        animate={{ x: 0 }}
+        animate={{ x: showImageLightbox ? '100%' : 0 }}
         exit={{ x: '100%' }}
         transition={{ type: 'tween', duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
         className="fixed top-0 right-0 h-full z-50 w-full sm:w-96 overflow-y-auto"
-        style={{ borderLeft: `0.5px solid ${t.border}`, background: t.bg, padding: '24px' }}
+        style={{ borderLeft: `0.5px solid ${t.border}`, background: t.bg, padding: '24px', pointerEvents: showImageLightbox ? 'none' : 'auto' }}
       >
       <div className="flex justify-between items-start mb-2">
         <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.5rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
@@ -361,7 +361,8 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
           padding: '1rem',
           paddingTop: 'max(env(safe-area-inset-top), 1rem)',
           paddingBottom: 'max(env(safe-area-inset-bottom), 1rem)',
-          zIndex: 60,
+          zIndex: 70,
+          pointerEvents: 'auto',
         }}
       >
         <motion.div
