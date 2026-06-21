@@ -1,10 +1,24 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { User } from 'lucide-react';
+import { useAuth } from '@/lib/AuthContext';
+import { base44 } from '@/api/base44Client';
 
 export default function Navbar() {
+  const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
+
+  const handleAccountClick = () => {
+    if (isAuthenticated) {
+      const target = user?.role === 'admin' ? '/dashboard' : user?.role === 'artist' ? '/artist' : '/panel';
+      navigate(target);
+    } else {
+      base44.auth.redirectToLogin(window.location.href);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 60);
@@ -56,6 +70,51 @@ export default function Navbar() {
 
           {/* Book CTA */}
           <div className="hidden md:flex items-center gap-4">
+            <button
+              onClick={handleAccountClick}
+              className="flex items-center justify-center gap-0 overflow-hidden transition-all duration-500 ease-out group"
+              style={{
+                height: '38px',
+                borderRadius: '0.25rem',
+                border: '0.5px solid rgba(255,0,127,0.4)',
+                background: 'rgba(255,0,127,0.04)',
+                padding: '0 10px',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.width = 'auto';
+                const label = e.currentTarget.querySelector('.login-label');
+                const icon = e.currentTarget.querySelector('.login-icon');
+                if (label) { label.style.maxWidth = '120px'; label.style.opacity = '1'; label.style.marginLeft = '8px'; }
+                if (icon) { e.currentTarget.style.borderColor = '#FF007F'; e.currentTarget.style.background = 'rgba(255,0,127,0.08)'; }
+              }}
+              onMouseLeave={e => {
+                const label = e.currentTarget.querySelector('.login-label');
+                if (label) { label.style.maxWidth = '0'; label.style.opacity = '0'; label.style.marginLeft = '0'; }
+                e.currentTarget.style.borderColor = 'rgba(255,0,127,0.4)';
+                e.currentTarget.style.background = 'rgba(255,0,127,0.04)';
+              }}
+            >
+              <User size={15} className="login-icon" color="#FF007F" style={{ flexShrink: 0 }} />
+              <span
+                className="login-label"
+                style={{
+                  fontFamily: 'JetBrains Mono, monospace',
+                  fontSize: '10px',
+                  fontWeight: 500,
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  color: '#F5F0EB',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  maxWidth: '0',
+                  opacity: '0',
+                  transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+                }}
+              >
+                {isAuthenticated ? 'MOJE KONTO' : 'ZALOGUJ SIĘ'}
+              </span>
+            </button>
             <Link to="/booking" className="btn-oxblood animate-pulse-oxblood" style={{ padding: '10px 24px', fontSize: '11px' }}>
               Umów Sesję
             </Link>
@@ -91,7 +150,14 @@ export default function Navbar() {
               <div className="h-px w-full mt-4" style={{ background: '#262626', height: '0.5px' }} />
             </div>
           ))}
-          <Link to="/booking" className="btn-oxblood inline-block mt-4">
+          <button
+            onClick={handleAccountClick}
+            className="btn-ghost-parchment inline-block mt-4 flex items-center gap-2"
+          >
+            <User size={16} />
+            {isAuthenticated ? 'MOJE KONTO' : 'ZALOGUJ SIĘ'}
+          </button>
+          <Link to="/booking" className="btn-oxblood inline-block mt-2">
             Umów Sesję
           </Link>
         </div>
