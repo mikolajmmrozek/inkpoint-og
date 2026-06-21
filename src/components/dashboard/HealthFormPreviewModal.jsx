@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { format } from 'date-fns';
 
 const Row = ({ label, value, t }) => (
   <div className="mb-3 pb-3" style={{ borderBottom: `0.5px solid ${t?.border || '#262626'}` }}>
@@ -22,8 +23,9 @@ const YesNo = ({ label, value, desc, t }) => (
   </div>
 );
 
-export default function HealthFormPreviewModal({ bookingId, healthFormId, clientName, onClose, t, extraAction }) {
+export default function HealthFormPreviewModal({ bookingId, healthFormId, clientName, onClose, t, extraAction, extraActions, formSelector }) {
   t = t || { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F' };
+  const allActions = [...(extraActions || []), ...(extraAction ? [extraAction] : [])];
   const [form, setForm] = useState(null);
   const [guardian, setGuardian] = useState(null);
   const [template, setTemplate] = useState(null);
@@ -97,16 +99,18 @@ export default function HealthFormPreviewModal({ bookingId, healthFormId, client
               <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>ANKIETA ZDROWOTNA</p>
               <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em', lineHeight: 1 }}>{clientName}</h2>
             </div>
-            <div className="flex items-center gap-3">
-              {extraAction && (
+            <div className="flex items-center gap-2">
+              {allActions.map((action, i) => (
                 <button
-                  onClick={extraAction.onClick}
-                  style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '7px 14px', background: 'linear-gradient(135deg,#FF007F,#CC0066)', color: '#F5F0EB', border: 'none', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                  key={i}
+                  onClick={action.onClick}
+                  title={action.label}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '7px', background: 'none', color: action.color || t.muted, border: `0.5px solid ${t.border}`, cursor: 'pointer', whiteSpace: 'nowrap' }}
                 >
-                  {extraAction.label}
+                  {action.icon || action.label}
                 </button>
-              )}
-              <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}>
+              ))}
+              <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, marginLeft: '4px' }}>
                 <X size={16} />
               </button>
             </div>
@@ -120,6 +124,20 @@ export default function HealthFormPreviewModal({ bookingId, healthFormId, client
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK DANYCH ANKIETY</p>
           ) : (
             <div>
+              {/* Form selector — when client has multiple forms */}
+              {formSelector && formSelector.forms && formSelector.forms.length > 1 && (
+                <div className="flex items-center gap-2 flex-wrap mb-5 pb-4" style={{ borderBottom: `0.5px solid ${t.border}`, background: 'rgba(255,0,127,0.03)', padding: '8px 12px' }}>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginRight: '4px' }}>ANKIETY:</p>
+                  {formSelector.forms.map(f => (
+                    <button key={f.id} onClick={() => formSelector.onSelect(f)}
+                      style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.06em', padding: '3px 8px', border: `0.5px solid ${formSelector.selectedId === f.id ? t.fuchsia : t.border}`, color: formSelector.selectedId === f.id ? t.fuchsia : t.muted, background: formSelector.selectedId === f.id ? 'rgba(255,0,127,0.08)' : 'transparent', cursor: 'pointer' }}
+                    >
+                      {f.form_filled_date ? format(new Date(f.form_filled_date), 'dd.MM.yyyy') : f.id?.slice(-4)}{f.is_update_only ? ' ↻' : ''}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {/* Personal */}
               <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>— DANE OSOBOWE</p>
               <Row label="Imię i nazwisko" value={form.client_name} t={t} />

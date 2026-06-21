@@ -5,8 +5,7 @@ import { format } from 'date-fns';
 import { useTheme } from './Dashboard';
 import { AnimatePresence } from 'framer-motion';
 import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
 
 const safeFormat = (dateStr, fmt) => {
   try {
@@ -45,196 +44,6 @@ const CONSENT_FIELDS = [
   ['consent_image_use', 'Zgoda na wizerunek'],
   ['confirm_regulations_read', 'Regulamin'],
 ];
-
-function FormDetailPanel({ selected, guardianForm, t, onClose, theme, template }) {
-  useEffect(() => {
-    if (template) {
-      // Template already provided via props
-    }
-  }, [template]);
-  
-  const allMedical = (Array.isArray(template?.medical_fields) ? template.medical_fields : BOOL_FIELDS);
-  const allProcedure = (Array.isArray(template?.procedure_questions) ? template.procedure_questions : []);
-
-  return (
-    <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, maxHeight: '80vh', overflowY: 'auto' }}>
-      {/* Header */}
-      <div className="flex justify-between items-start p-5" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.6rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
-              {selected.client_name}
-            </h3>
-            {selected.is_minor && (
-              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '2px 6px', letterSpacing: '0.08em' }}>NIELETNI</span>
-            )}
-            {selected.is_update_only && (
-              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#16a34a', border: '0.5px solid #16a34a', padding: '2px 6px', letterSpacing: '0.08em' }}>AKTUALIZACJA</span>
-            )}
-          </div>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>
-            {selected.client_email} · <a href={`tel:${selected.client_phone}`} style={{ color: t.fuchsia, textDecoration: 'none' }}>{selected.client_phone}</a>
-          </p>
-          {selected.form_filled_date && (
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, marginTop: '3px', letterSpacing: '0.06em' }}>
-          {safeFormat(selected.form_filled_date, 'dd.MM.yyyy')}
-            </p>
-          )}
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, marginTop: '3px', letterSpacing: '0.1em', opacity: 0.7, cursor: 'pointer', userSelect: 'all' }}
-            title="Kliknij aby zaznaczyć">
-            {selected.id?.slice(-8).toUpperCase()}
-          </p>
-        </div>
-        <button onClick={onClose} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
-          <X size={16} />
-        </button>
-      </div>
-
-      {/* Session info */}
-      <div className="px-5 py-3 flex gap-6" style={{ borderBottom: `0.5px solid ${t.border}`, background: 'rgba(255,0,127,0.03)' }}>
-        {selected.procedure_type && (
-          <div>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>ZABIEG</p>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: '#FF007F' }}>{selected.procedure_type}</p>
-          </div>
-        )}
-        {selected.body_placement && (
-          <div>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>MIEJSCE</p>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.text }}>{selected.body_placement}</p>
-          </div>
-        )}
-        {selected.date_of_birth && (
-          <div>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>DATA UR.</p>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.text }}>{selected.date_of_birth}</p>
-          </div>
-        )}
-      </div>
-
-      {/* Medical flags warning */}
-      {allMedical.filter(field => {
-        const fieldKey = field.field_key || field[0];
-        return selected[fieldKey] === true;
-      }).length > 0 && (
-        <div className="mx-5 mt-4 px-3 py-2 flex items-center gap-2" style={{ background: 'rgba(255,0,127,0.06)', border: '0.5px solid rgba(255,0,127,0.2)' }}>
-          <AlertTriangle size={12} color="#FF007F" />
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>
-            UWAGA: Klient zgłosił problemy zdrowotne
-          </p>
-        </div>
-      )}
-
-      {/* Medical fields — ALL answers */}
-      <div className="px-5 py-4">
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>WYWIAD MEDYCZNY</p>
-        {allMedical.map(field => {
-          const fieldKey = field.field_key || field[0];
-          const label = field.label || field[1];
-          const descField = (field.has_description !== false) ? (field[2] || `${fieldKey}_desc`) : null;
-          return (
-            <div key={fieldKey}>
-              <div className="flex items-center justify-between py-1.5" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.text, letterSpacing: '0.06em' }}>{label}</p>
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: selected[fieldKey] === true ? '#FF007F' : selected[fieldKey] === false ? '#16a34a' : 'rgba(245,240,235,0.3)' }}>
-                  {selected[fieldKey] === true ? 'TAK' : selected[fieldKey] === false ? 'NIE' : '—'}
-                </span>
-              </div>
-              {selected[fieldKey] === true && descField && selected[descField] && (
-                <p style={{ color: theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.5)', fontSize: '11px', padding: '2px 0 6px 8px', fontStyle: 'italic' }}>{selected[descField]}</p>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Procedure questions — ALL answers */}
-      {allProcedure.length > 0 && (
-        <div className="px-5 pb-4">
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>PYTANIA PRZEDZABIEGOWE</p>
-          {allProcedure.map(q => (
-            <div key={q.field_key}>
-              <div className="flex items-center justify-between py-1.5" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.text, letterSpacing: '0.06em' }}>{q.label}</p>
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: selected[q.field_key] === true ? '#f97316' : selected[q.field_key] === false ? '#16a34a' : 'rgba(245,240,235,0.3)' }}>
-                  {selected[q.field_key] === true ? 'TAK' : selected[q.field_key] === false ? 'NIE' : '—'}
-                </span>
-              </div>
-              {selected[q.field_key] === true && (q.has_description !== false) && selected[`${q.field_key}_desc`] && (
-                <p style={{ color: theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.5)', fontSize: '11px', padding: '2px 0 6px 8px', fontStyle: 'italic' }}>{selected[`${q.field_key}_desc`]}</p>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Consents — dynamic from template */}
-      <div className="px-5 pb-4">
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>ZGODY</p>
-        <div className="flex flex-wrap gap-2">
-          {(() => {
-            const consentFields = template?.consent_fields || [];
-            return consentFields.map(field => (
-              <div key={field.field_key} className="flex items-center gap-1.5 px-2 py-1" style={{ border: `0.5px solid ${selected[field.field_key] ? '#16a34a' : t.border}` }}>
-                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: selected[field.field_key] ? '#16a34a' : t.muted }} />
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: selected[field.field_key] ? '#16a34a' : t.muted, letterSpacing: '0.08em' }}>{field.label}</span>
-              </div>
-            ));
-          })()}
-        </div>
-      </div>
-
-      {/* Signature */}
-      {selected.client_signature && (
-        <div className="px-5 pb-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '12px', marginBottom: '8px' }}>PODPIS KLIENTA</p>
-          <img src={selected.client_signature} alt="Podpis" style={{ maxWidth: '240px', border: `0.5px solid ${t.border}`, background: '#FFFFFF', padding: '4px' }} />
-        </div>
-      )}
-
-      {/* Other Information — any unmapped fields */}
-      {(() => {
-        const knownFields = new Set([
-          'id', 'created_date', 'updated_date', 'created_by',
-          'booking_id', 'client_first_name', 'client_last_name', 'client_name', 'client_email', 'client_phone',
-          'date_of_birth', 'address_street', 'address_city', 'address_postal_code', 'pesel', 'id_document',
-          'procedure_type', 'body_placement', 'is_minor', 'is_update_only', 'previous_form_id',
-          'guardian_consent_form_id', 'client_signature', 'form_filled_date',
-        ]);
-        const medicalKeys = (template?.medical_fields || []).map(f => f.field_key);
-        const procKeys = (template?.procedure_questions || []).map(q => q.field_key);
-        const consentKeys = (template?.consent_fields || []).map(f => f.field_key);
-        const declKeys = (template?.declaration_fields || []).map(f => f.field_key);
-        
-        medicalKeys.forEach(k => { knownFields.add(k); knownFields.add(`${k}_desc`); });
-        procKeys.forEach(k => { knownFields.add(k); knownFields.add(`${k}_desc`); });
-        consentKeys.forEach(k => knownFields.add(k));
-        declKeys.forEach(k => knownFields.add(k));
-        knownFields.add(template?.declaration_of_will?.field_key);
-        
-        const otherFields = Object.entries(selected).filter(([k]) => !knownFields.has(k) && selected[k]);
-        if (otherFields.length === 0) return null;
-        
-        return null;
-      })()}
-
-      {/* Guardian consent */}
-      {guardianForm && (
-        <div className="px-5 pb-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
-          <div className="flex items-center gap-2 mt-4 mb-3">
-            <Shield size={12} color="#FF007F" />
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase' }}>ZGODA OPIEKUNA PRAWNEGO</p>
-          </div>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text }}>{guardianForm.guardian_name}</p>
-          <a href={`tel:${guardianForm.guardian_phone}`} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, marginTop: '2px', display: 'block', textDecoration: 'none' }}>{guardianForm.guardian_phone}</a>
-          {guardianForm.guardian_signature && (
-            <img src={guardianForm.guardian_signature} alt="Podpis opiekuna" style={{ maxWidth: '240px', border: `0.5px solid ${t.border}`, background: '#FFFFFF', padding: '4px', marginTop: '8px' }} />
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
 
 export default function DashboardHealthForms() {
   const { theme } = useTheme();
@@ -810,58 +619,24 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
         )}
       </AnimatePresence>
 
-      {/* Modal overlay */}
+      {/* Health form preview modal — unified with client/artist panels */}
       {selected && (
-        <div
-          style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '40px', paddingBottom: '40px', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', overflowY: 'auto' }}
-          onClick={e => { if (e.target === e.currentTarget) setSelected(null); }}
-        >
-          <div style={{ width: '100%', maxWidth: '680px', margin: '0 16px', background: theme === 'light' ? '#FFFFFF' : '#0A0A0A', border: `0.5px solid ${t.border}` }}>
-            {/* Action bar */}
-            <div className="flex justify-between items-center px-5 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-              <div className="flex items-center gap-3">
-                <button onClick={() => exportPDF(selected, 'save')} disabled={exporting} title="Zapisz na urządzenie" style={{ color: t.muted, background: 'none', border: 'none', cursor: exporting ? 'not-allowed' : 'pointer', opacity: exporting ? 0.5 : 1 }}><Download size={15} /></button>
-                <button onClick={() => exportPDF(selected, 'print')} disabled={exporting} title="Drukuj" style={{ color: t.muted, background: 'none', border: 'none', cursor: exporting ? 'not-allowed' : 'pointer', opacity: exporting ? 0.5 : 1 }}><Printer size={15} /></button>
-
-                <button onClick={() => deleteForm(selected)} title="Usuń ankietę" style={{ color: '#FF007F', background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={15} /></button>
-              </div>
-              <button onClick={() => setSelected(null)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><X size={16} /></button>
-            </div>
-
-            {/* Form selector — when client has multiple forms */}
-            {selectedClientForms.length > 1 && (
-              <div className="flex items-center gap-2 px-5 py-2 flex-wrap" style={{ borderBottom: `0.5px solid ${t.border}`, background: 'rgba(255,0,127,0.03)' }}>
-                <p style={{ ...mono, fontSize: '7px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginRight: '4px' }}>ANKIETY:</p>
-                {selectedClientForms.map(f => (
-                  <button key={f.id} onClick={() => setSelected(f)}
-                    style={{ ...mono, fontSize: '8px', letterSpacing: '0.06em', padding: '3px 8px', border: `0.5px solid ${selected.id === f.id ? t.fuchsia : t.border}`, color: selected.id === f.id ? t.fuchsia : t.muted, background: selected.id === f.id ? 'rgba(255,0,127,0.08)' : 'transparent', cursor: 'pointer' }}
-                  >
-                    {f.form_filled_date ? safeFormat(f.form_filled_date, 'dd.MM.yyyy') : f.id.slice(-4)}{f.is_update_only ? ' ↻' : ''}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Sessions */}
-            {selectedSessions.length > 0 && (
-              <div className="px-5 py-3" style={{ borderBottom: `0.5px solid ${t.border}`, background: 'rgba(255,0,127,0.03)' }}>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>SESJE</p>
-                {selectedSessions.map(s => (
-                 <div key={s.id} style={{ fontSize: '11px', color: t.text, marginBottom: '6px', paddingBottom: '6px', borderBottom: `0.5px solid ${t.border}` }}>
-                   <button onClick={() => setSelectedSession(s)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', width: '100%' }}>
-                     <p><strong style={{ color: t.fuchsia, textDecoration: 'underline' }}>{s.session_date}</strong> · {s.artist_name}</p>
-                   </button>
-                   <p style={{ color: t.muted, fontSize: '10px', marginTop: '2px' }}>{s.tattoo_description || s.tattoo_placement || 'Brak opisu'}</p>
-                 </div>
-                ))}
-              </div>
-            )}
-
-            <div style={{ maxHeight: '60vh', overflowY: 'auto' }}>
-              <FormDetailPanel selected={selected} guardianForm={selectedGuardian} t={t} onClose={() => setSelected(null)} theme={theme} template={template} />
-            </div>
-          </div>
-        </div>
+        <HealthFormPreviewModal
+          healthFormId={selected.id}
+          clientName={getClientName(selected)}
+          onClose={() => setSelected(null)}
+          t={t}
+          extraActions={[
+            { icon: <Download size={14} />, label: 'Pobierz', onClick: () => exportPDF(selected, 'save'), color: exporting ? t.muted : t.muted },
+            { icon: <Printer size={14} />, label: 'Drukuj', onClick: () => exportPDF(selected, 'print'), color: exporting ? t.muted : t.muted },
+            { icon: <Trash2 size={14} />, label: 'Usuń', onClick: () => deleteForm(selected), color: '#FF007F' },
+          ]}
+          formSelector={selectedClientForms.length > 1 ? {
+            forms: selectedClientForms,
+            selectedId: selected.id,
+            onSelect: (f) => setSelected(f),
+          } : undefined}
+        />
       )}
     </div>
   );
