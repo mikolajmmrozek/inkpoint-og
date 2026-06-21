@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { X, Trash2, Edit, Copy, Check, ExternalLink, Mail, FileText, Loader2, History, Save, Download, Eye } from 'lucide-react';
+import { X, Trash2, Edit, Copy, Check, ExternalLink, Mail, FileText, Loader2, History, Save, Download, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 import { base44 } from '@/api/base44Client';
 import HealthFormPreviewModal from './HealthFormPreviewModal';
@@ -371,45 +371,53 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
           animate={{ scale: 1 }}
           exit={{ scale: 0.9 }}
           onClick={e => e.stopPropagation()}
-          className="relative max-w-2xl max-h-[90vh] flex flex-col"
+          className="relative max-w-4xl"
         >
           <img src={booking.reference_images[lightboxImageIndex]} alt="preview" className="max-w-full max-h-[80vh] object-contain" />
           
-          {/* Navigation buttons */}
+          {/* Navigation arrows */}
           {booking.reference_images.length > 1 && (
-            <div className="flex items-center justify-between mt-4 px-4">
+            <>
               <button
                 onClick={() => setLightboxImageIndex(i => (i - 1 + booking.reference_images.length) % booking.reference_images.length)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#FF007F', padding: '8px' }}
+                style={{ position: 'absolute', left: '-50px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#FF007F', padding: '12px', opacity: 0.7, transition: 'opacity 0.2s' }}
+                onMouseEnter={e => e.target.style.opacity = '1'}
+                onMouseLeave={e => e.target.style.opacity = '0.7'}
                 title="Poprzednie"
               >
-                ← POPRZEDNIE
+                <ChevronLeft size={28} />
               </button>
-              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: '#FFF' }}>
-                {lightboxImageIndex + 1} / {booking.reference_images.length}
-              </span>
               <button
                 onClick={() => setLightboxImageIndex(i => (i + 1) % booking.reference_images.length)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#FF007F', padding: '8px' }}
+                style={{ position: 'absolute', right: '-50px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#FF007F', padding: '12px', opacity: 0.7, transition: 'opacity 0.2s' }}
+                onMouseEnter={e => e.target.style.opacity = '1'}
+                onMouseLeave={e => e.target.style.opacity = '0.7'}
                 title="Następne"
               >
-                NASTĘPNE →
+                <ChevronRight size={28} />
               </button>
-            </div>
+              <span style={{ position: 'absolute', bottom: '12px', left: '50%', transform: 'translateX(-50%)', fontFamily: 'JetBrains Mono', fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>
+                {lightboxImageIndex + 1} / {booking.reference_images.length}
+              </span>
+            </>
           )}
 
           <button
             onClick={() => setShowImageLightbox(false)}
-            style={{ position: 'absolute', top: '-32px', right: 0, background: 'none', border: 'none', cursor: 'pointer', color: '#FFF' }}
+            style={{ position: 'absolute', top: '-40px', right: 0, background: 'none', border: 'none', cursor: 'pointer', color: '#FFF', padding: '8px', opacity: 0.6, transition: 'opacity 0.2s' }}
+            onMouseEnter={e => e.target.style.opacity = '1'}
+            onMouseLeave={e => e.target.style.opacity = '0.6'}
           >
             <X size={24} />
           </button>
           <a
             href={booking.reference_images[lightboxImageIndex]}
             download={`reference-${lightboxImageIndex}`}
-            style={{ position: 'absolute', bottom: '10px', right: '10px', background: '#FF007F', color: '#FFF', padding: '10px 14px', border: 'none', cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontSize: '11px', textTransform: 'uppercase' }}
+            style={{ position: 'absolute', bottom: '12px', right: '12px', background: 'rgba(255,0,127,0.9)', color: '#FFF', padding: '8px 12px', border: 'none', cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px', fontFamily: 'JetBrains Mono', fontSize: '10px', textTransform: 'uppercase', opacity: 0.7, transition: 'opacity 0.2s' }}
+            onMouseEnter={e => e.target.style.opacity = '1'}
+            onMouseLeave={e => e.target.style.opacity = '0.7'}
           >
-            <Download size={12} /> POBIERZ
+            <Download size={11} />
           </a>
         </motion.div>
       </motion.div>
