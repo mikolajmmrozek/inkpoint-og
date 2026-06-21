@@ -347,7 +347,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={() => setShowImageLightbox(false)}
+        onClick={(e) => e.currentTarget === e.target && setShowImageLightbox(false)}
         style={{
           position: 'fixed',
           top: 0,
