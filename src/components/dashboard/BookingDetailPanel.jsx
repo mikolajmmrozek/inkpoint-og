@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { X, Trash2, Edit, Copy, Check, ExternalLink, Mail, FileText, Loader2, History, Save } from 'lucide-react';
+import { X, Trash2, Edit, Copy, Check, ExternalLink, Mail, FileText, Loader2, History, Save, Download, Eye } from 'lucide-react';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 import { base44 } from '@/api/base44Client';
 import HealthFormPreviewModal from './HealthFormPreviewModal';
@@ -45,6 +45,8 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
   const [savingNotes, setSavingNotes] = useState(false);
   const [notesSaved, setNotesSaved] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showImageLightbox, setShowImageLightbox] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState(null);
 
   useEffect(() => {
     if (!booking.client_email) return;
@@ -223,6 +225,43 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
        </div>
       ))}
 
+      {/* Reference images */}
+      {booking.reference_images && booking.reference_images.length > 0 && (
+        <div className="mb-5">
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>REFERENCJE KLIENTA ({booking.reference_images.length})</p>
+          <div className="grid grid-cols-3 gap-2">
+            {booking.reference_images.map((imgUrl, idx) => (
+              <div key={idx} className="relative group">
+                <img 
+                  src={imgUrl} 
+                  alt={`ref-${idx}`} 
+                  className="w-full h-20 object-cover cursor-pointer"
+                  style={{ border: `0.5px solid ${t.border}` }}
+                  onClick={() => { setLightboxImage(imgUrl); setShowImageLightbox(true); }}
+                />
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                  <button
+                    onClick={() => { setLightboxImage(imgUrl); setShowImageLightbox(true); }}
+                    style={{ background: '#FF007F', border: 'none', cursor: 'pointer', padding: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    title="Podgląd"
+                  >
+                    <Eye size={12} color="#FFF" />
+                  </button>
+                  <a
+                    href={imgUrl}
+                    download={`reference-${idx}`}
+                    style={{ background: '#FF007F', border: 'none', cursor: 'pointer', padding: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
+                    title="Pobierz"
+                  >
+                    <Download size={12} color="#FFF" />
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Client notes */}
       {clientRecord && (
         <div className="mb-5">
@@ -316,6 +355,40 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
         onClose={() => { setShowFormPreview(false); setPreviewFormId(null); }}
         t={t}
       />
+    )}
+
+    {/* Image lightbox */}
+    {showImageLightbox && lightboxImage && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={() => setShowImageLightbox(false)}
+        className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80"
+      >
+        <motion.div
+          initial={{ scale: 0.9 }}
+          animate={{ scale: 1 }}
+          exit={{ scale: 0.9 }}
+          onClick={e => e.stopPropagation()}
+          className="relative max-w-2xl max-h-[90vh]"
+        >
+          <img src={lightboxImage} alt="preview" className="max-w-full max-h-[90vh] object-contain" />
+          <button
+            onClick={() => setShowImageLightbox(false)}
+            style={{ position: 'absolute', top: '-32px', right: 0, background: 'none', border: 'none', cursor: 'pointer', color: '#FFF' }}
+          >
+            <X size={24} />
+          </button>
+          <a
+            href={lightboxImage}
+            download
+            style={{ position: 'absolute', bottom: '10px', right: '10px', background: '#FF007F', color: '#FFF', padding: '10px 14px', border: 'none', cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontSize: '11px', textTransform: 'uppercase' }}
+          >
+            <Download size={12} /> POBIERZ
+          </a>
+        </motion.div>
+      </motion.div>
     )}
     </>
   );

@@ -139,6 +139,111 @@ Deno.serve(async (req) => {
       return Response.json({ success: false, error: `Resend API error: ${error.message}` }, { status: 500 });
     }
 
+    // Send notification to admin (if admin email exists)
+    if (contact.contact_email) {
+      const refImages = booking.reference_images && booking.reference_images.length > 0
+        ? booking.reference_images.map((url, i) => `<img src="${url}" alt="ref-${i}" style="max-width: 150px; margin: 10px 5px; border: 1px solid #ddd;">`).join('')
+        : '<p style="color: #999;">Brak zdjęć referencyjnych</p>';
+
+      const adminHtml = `
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <style>
+            body { font-family: Arial, sans-serif; color: #333; line-height: 1.6; background: #f9f9f9; }
+            .container { max-width: 700px; margin: 0 auto; background: #fff; border: 1px solid #ddd; padding: 40px; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #FF007F; padding-bottom: 20px; }
+            .header h1 { color: #FF007F; margin: 0; font-size: 24px; }
+            .section { margin: 20px 0; }
+            .section h3 { color: #333; font-size: 16px; margin: 12px 0 8px 0; text-transform: uppercase; font-weight: bold; }
+            .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
+            .detail-label { font-weight: bold; color: #333; width: 150px; }
+            .detail-value { color: #666; flex: 1; }
+            .images-container { border: 1px dashed #ddd; padding: 15px; margin: 10px 0; background: #fafafa; }
+            .cta-button { display: inline-block; background: linear-gradient(135deg, #FF007F, #CC0066); color: #fff; padding: 12px 28px; text-decoration: none; border-radius: 2px; margin: 16px 0; font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; }
+            .cta-button:hover { opacity: 0.9; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🔔 Nowa Rezerwacja</h1>
+            </div>
+
+            <div class="section">
+              <h3>📋 Szczegóły Klienta</h3>
+              <div class="detail-row">
+                <span class="detail-label">Imię i Nazwisko:</span>
+                <span class="detail-value">${booking.client_name || '—'}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Email:</span>
+                <span class="detail-value"><a href="mailto:${booking.client_email}" style="color: #FF007F; text-decoration: none;">${booking.client_email}</a></span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Telefon:</span>
+                <span class="detail-value">${booking.client_phone || '—'}</span>
+              </div>
+            </div>
+
+            <div class="section">
+              <h3>📅 Szczegóły Sesji</h3>
+              <div class="detail-row">
+                <span class="detail-label">Data:</span>
+                <span class="detail-value">${dateStr}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Godzina:</span>
+                <span class="detail-value">${timeStr}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Tatuażysta:</span>
+                <span class="detail-value">${booking.artist_name || 'TBD'}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Miejsce:</span>
+                <span class="detail-value">${booking.tattoo_placement || '—'}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Opis:</span>
+                <span class="detail-value">${booking.tattoo_description || '—'}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Cena:</span>
+                <span class="detail-value">${booking.estimated_price ? booking.estimated_price.toLocaleString('pl-PL') : '-'} PLN</span>
+              </div>
+            </div>
+
+            <div class="section">
+              <h3>🖼️ Referencje Klienta</h3>
+              <div class="images-container">
+                ${refImages}
+              </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+              <a href="${Deno.env.get('APP_URL') || 'https://app.base44.app'}/dashboard/bookings" class="cta-button">Przejdź do Rezerwacji</a>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${resendApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: 'Romans Tattoo <noreply@mail.tattoostudio.pl>',
+          to: contact.contact_email,
+          subject: `📌 Nowa rezerwacja — ${booking.client_name} (${dateStr})`,
+          html: adminHtml,
+        }),
+      }).catch(e => console.warn('Admin email failed:', e));
+    }
+
     return Response.json({ success: true, message: 'Email sent' });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
