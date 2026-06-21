@@ -338,7 +338,7 @@ export default function DashboardArtists() {
                 <div>
                   <label className="block mb-3" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Zdjęcie profilowe</label>
                   {form.photo_url && <img src={form.photo_url} alt="" className="w-24 h-24 object-cover mb-3" style={{ filter: 'brightness(0.7)' }} />}
-                  <label className="btn-ghost-parchment inline-block cursor-pointer" style={{ fontSize: '10px', padding: '8px 16px' }}>
+                  <label style={{ display: 'inline-block', cursor: 'pointer', fontFamily: 'JetBrains Mono', fontSize: '10px', padding: '8px 16px', background: 'transparent', border: `0.5px solid ${t.border}`, color: t.text, transition: 'all 0.2s ease' }} className="hover:opacity-70">
                     {uploading ? 'PRZESYŁANIE...' : 'WYBIERZ ZDJĘCIE'}
                     <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
                   </label>
@@ -359,7 +359,7 @@ export default function DashboardArtists() {
                       </div>
                     ))}
                   </div>
-                  <label className="btn-ghost-parchment inline-block cursor-pointer" style={{ fontSize: '10px', padding: '8px 16px' }}>
+                  <label style={{ display: 'inline-block', cursor: 'pointer', fontFamily: 'JetBrains Mono', fontSize: '10px', padding: '8px 16px', background: 'transparent', border: `0.5px solid ${t.border}`, color: t.text, transition: 'all 0.2s ease' }} className="hover:opacity-70">
                     {uploading ? 'PRZESYŁANIE...' : 'DODAJ DO PORTFOLIO'}
                     <input type="file" accept="image/*" multiple onChange={handlePortfolioUpload} className="hidden" />
                   </label>
