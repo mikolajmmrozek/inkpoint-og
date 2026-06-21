@@ -161,7 +161,7 @@ export default function AccountSecurity({ user, t }) {
               className="btn-oxblood flex items-center gap-2"
               style={{ opacity: changing ? 0.5 : 1 }}
             >
-              {changing ? <><Loader2 size={13} className="animate-spin" /> ZMIENIANIE...</> : <><KeyRound size={13} /> ZAPISZ ZMIANY</>}
+              {changing ? <><Loader2 size={13} className="animate-spin" /> ZMIENIANIE...</> : 'ZAPISZ ZMIANY'}
             </button>
             <button
               onClick={handleCancel}
