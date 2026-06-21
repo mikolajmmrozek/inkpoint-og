@@ -42,7 +42,7 @@ export default function AccountSecurity({ user, t }) {
       setEditing(false);
       setTimeout(() => setChanged(false), 4000);
     } catch (err) {
-      setError(err?.message || 'Nie udało się zmienić hasła. Sprawdź obecne hasło.');
+      setError('Nie udało się zmienić hasła. Sprawdź, czy obecne hasło jest poprawne.');
     } finally {
       setChanging(false);
     }
