@@ -159,8 +159,19 @@ export default function ClientProfile() {
             </button>
             <button
               onClick={handleCancel}
-              className="btn-ghost-parchment"
-              style={{ fontSize: '10px' }}
+              style={{
+                fontSize: '10px',
+                fontFamily: 'JetBrains Mono',
+                fontWeight: 500,
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                padding: '13px 31px',
+                background: 'transparent',
+                color: t.text,
+                border: `0.5px solid ${t.text}`,
+                cursor: 'pointer',
+                transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+              }}
             >
               ANULUJ
             </button>
