@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, Link } from 'react-router-dom';
+import { Plus } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { AnimatePresence } from 'framer-motion';
 import { parseISO, isAfter, isToday } from 'date-fns';
@@ -41,13 +42,18 @@ export default function ClientSessions() {
 
   return (
     <div>
-      <div className="mb-8">
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>
-          TWOJE SESJE
-        </p>
-        <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: '#F5F0EB', lineHeight: 1, letterSpacing: '0.04em' }}>
-          Rezerwacje
-        </h1>
+      <div className="mb-8 flex items-end justify-between">
+        <div>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>
+            TWOJE SESJE
+          </p>
+          <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: '#F5F0EB', lineHeight: 1, letterSpacing: '0.04em' }}>
+            Rezerwacje
+          </h1>
+        </div>
+        <Link to="/booking" className="btn-oxblood" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 20px', whiteSpace: 'nowrap' }}>
+          <Plus size={13} /> UMÓW SESJĘ
+        </Link>
       </div>
 
       {/* Tabs */}
