@@ -45,14 +45,6 @@ export default function ClientHealthForms() {
         </h1>
       </div>
 
-      {/* Read-only notice */}
-      <div className="mb-6 flex items-center gap-2 p-3" style={{ border: '0.5px solid rgba(245,240,235,0.1)', background: 'rgba(245,240,235,0.02)' }}>
-        <Lock size={12} color="rgba(245,240,235,0.4)" />
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.08em' }}>
-          ANKIETY SĄ TYLKO DO ODCZYTU. EDYCJA MOŻLIWA TYLKO Z POZIOMU ADMINA LUB ARTYSTY.
-        </p>
-      </div>
-
       {/* Pending forms */}
       {pendingBookings.length > 0 && (
         <div className="mb-8">
