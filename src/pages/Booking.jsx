@@ -67,12 +67,12 @@ export default function Booking() {
 
   const handleNext = () => {
     setStep(s => s + 1);
-    scrollToTop();
+    setTimeout(scrollToTop, 50);
   };
 
   const handleBack = () => {
     setStep(s => s - 1);
-    scrollToTop();
+    setTimeout(scrollToTop, 50);
   };
 
   const handleSubmit = async () => {
