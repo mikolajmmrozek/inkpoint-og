@@ -4,18 +4,15 @@ import { base44 } from '@/api/base44Client';
 import PageLayout from '../components/layout/PageLayout';
 import SessionDatePicker from '@/components/booking/SessionDatePicker';
 import { Check, Upload, X } from 'lucide-react';
-import { format } from 'date-fns';
-import { pl } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
 
-const STEPS = ['Artysta', 'Szczegóły', 'Termin', 'Potwierdzenie'];
+const STEPS = ['Logowanie', 'Artysta', 'Usługa', 'Szczegóły', 'Termin', 'Potwierdzenie'];
 
 const PLACEHOLDER_ARTISTS = [
   { id: '1', name: 'Aleksandra Wiśniewska', specialty: ['Blackwork', 'Fine Line'] },
   { id: '2', name: 'Marcin Kowalski', specialty: ['Realism', 'Portrait'] },
   { id: '3', name: 'Zuzanna Karpińska', specialty: ['Neo-Traditional', 'Color'] },
 ];
-
-const TIME_SLOTS = ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
 
 const inputStyle = {
   background: 'transparent',
@@ -30,29 +27,61 @@ const inputStyle = {
 };
 
 export default function Booking() {
+  const navigate = useNavigate();
   const urlParams = new URLSearchParams(window.location.search);
   const preselectedArtistId = urlParams.get('artist_id') || '';
   const preselectedArtistName = urlParams.get('artist_name') || '';
 
-  const [step, setStep] = useState(preselectedArtistId ? 1 : 0);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [step, setStep] = useState(0);
   const [artists, setArtists] = useState([]);
+  const [services, setServices] = useState([]);
   const [artistsLoading, setArtistsLoading] = useState(true);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
   const [data, setData] = useState({
-    artist_id: preselectedArtistId, artist_name: preselectedArtistName,
     client_first_name: '', client_last_name: '', client_email: '', client_phone: '',
+    artist_id: preselectedArtistId, artist_name: preselectedArtistName,
+    service_id: '', service_name: '',
     tattoo_description: '', tattoo_placement: '',
     session_date: '', session_time: '',
     notes: '',
     reference_images: [],
   });
-  const [uploadingImage, setUploadingImage] = useState(false);
 
+  // Check auth
   useEffect(() => {
-    base44.entities.Artist.filter({ is_active: true })
-      .then(res => { setArtists(res.length > 0 ? res : PLACEHOLDER_ARTISTS); })
-      .catch(() => { setArtists(PLACEHOLDER_ARTISTS); })
+    base44.auth.me()
+      .then(user => {
+        if (user) {
+          setIsLoggedIn(true);
+          setData(d => ({ ...d, client_first_name: user.full_name?.split(' ')[0] || '', client_last_name: user.full_name?.split(' ').slice(1).join(' ') || '', client_email: user.email || '' }));
+          setStep(preselectedArtistId ? 2 : 1);
+        } else {
+          setIsLoggedIn(false);
+          setStep(0);
+        }
+      })
+      .catch(() => {
+        setIsLoggedIn(false);
+        setStep(0);
+      })
+      .finally(() => setCheckingAuth(false));
+  }, [preselectedArtistId]);
+
+  // Load artists & services
+  useEffect(() => {
+    Promise.all([
+      base44.entities.Artist.filter({ is_active: true }).catch(() => PLACEHOLDER_ARTISTS),
+      base44.entities.Service.filter({ is_active: true }).catch(() => []),
+    ])
+      .then(([resArtists, resServices]) => {
+        setArtists(resArtists.length > 0 ? resArtists : PLACEHOLDER_ARTISTS);
+        setServices(resServices);
+      })
       .finally(() => setArtistsLoading(false));
   }, []);
 
@@ -61,7 +90,7 @@ export default function Booking() {
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
-    
+
     const remaining = 10 - data.reference_images.length;
     if (files.length > remaining) {
       alert(`Możesz przesłać maksymalnie ${remaining} zdjęć`);
@@ -86,10 +115,21 @@ export default function Booking() {
     update('reference_images', data.reference_images.filter((_, i) => i !== idx));
   };
 
+  const getVisibleServices = () => {
+    return services.filter(s => {
+      if (!s.artist_ids?.includes(data.artist_id)) return false;
+      if (s.visibility === 'hidden') return false;
+      if (s.visibility === 'members_only' && !isLoggedIn) return false;
+      return true;
+    });
+  };
+
   const canNext = () => {
-    if (step === 0) return !!data.artist_id;
-    if (step === 1) return !!(data.client_first_name && data.client_last_name && data.client_email && data.tattoo_description && data.tattoo_placement);
-    if (step === 2) return !!(data.session_date && data.session_time);
+    if (step === 0) return !!(data.client_first_name && data.client_last_name && data.client_email);
+    if (step === 1) return !!data.artist_id;
+    if (step === 2) return !!data.service_id;
+    if (step === 3) return !!(data.tattoo_description && data.tattoo_placement);
+    if (step === 4) return !!(data.session_date && data.session_time);
     return true;
   };
 
@@ -112,26 +152,34 @@ export default function Booking() {
     const bookingData = { ...data, client_name: fullName, status: 'pending', health_form_completed: false };
     delete bookingData.client_first_name;
     delete bookingData.client_last_name;
-    const booking = await base44.entities.Booking.create(bookingData);
-    // Send confirmation email via backend function (Resend)
     try {
-      await base44.functions.invoke('sendBookingConfirmationEmail', { bookingId: booking.id });
-    } catch (e) {
-      console.warn('Email send failed:', e);
+      const booking = await base44.entities.Booking.create(bookingData);
+      try {
+        await base44.functions.invoke('sendBookingConfirmationEmail', { bookingId: booking.id });
+      } catch (e) {
+        console.warn('Email send failed:', e);
+      }
+      setSubmitting(false);
+      setSubmitted(true);
+    } catch (err) {
+      console.error('Booking error:', err);
+      alert('Błąd przy tworzeniu rezerwacji');
+      setSubmitting(false);
     }
-    setSubmitting(false);
-    setSubmitted(true);
   };
+
+  if (checkingAuth) return (
+    <PageLayout>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-px animate-pulse" style={{ background: '#FF007F' }} />
+      </div>
+    </PageLayout>
+  );
 
   if (submitted) return (
     <PageLayout>
       <div className="min-h-screen flex items-center justify-center px-8">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8 }}
-          className="text-center max-w-lg"
-        >
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8 }} className="text-center max-w-lg">
           <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-8" style={{ border: '0.5px solid #FF007F' }}>
             <Check size={24} color="#FF007F" />
           </div>
@@ -167,14 +215,14 @@ export default function Booking() {
           <div className="flex items-center gap-0 mb-4">
             {STEPS.map((s, i) => (
               <div key={s} className="flex items-center flex-1">
-                <div className={`w-2 h-2 rounded-full flex-shrink-0 transition-all duration-500 ${i <= step ? 'bg-oxblood' : 'bg-steel'}`} style={{ background: i <= step ? '#FF007F' : '#262626' }} />
+                <div className="w-2 h-2 rounded-full flex-shrink-0 transition-all duration-500" style={{ background: i <= step ? '#FF007F' : '#262626' }} />
                 {i < STEPS.length - 1 && (
                   <div className="flex-1 h-px transition-all duration-700" style={{ background: i < step ? '#FF007F' : '#262626', height: '0.5px' }} />
                 )}
               </div>
             ))}
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between flex-wrap">
             {STEPS.map((s, i) => (
               <p key={s} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: i === step ? '#FF007F' : 'rgba(245,240,235,0.25)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                 {s}
@@ -185,18 +233,58 @@ export default function Booking() {
 
         {/* Step content */}
         <AnimatePresence mode="wait">
-          <motion.div
-            key={step}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.4 }}
-          >
-            {/* Step 0: Artysta */}
-            {step === 0 && (
+          <motion.div key={step} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.4 }}>
+
+            {/* Step 0: Login/Guest */}
+            {step === 0 && !isLoggedIn && (
+              <div className="space-y-8">
+                <p style={{ color: 'rgba(245,240,235,0.5)', fontSize: '15px' }}>
+                  {isLoggedIn ? 'Zalogowany' : 'Kontynuuj jako gość lub zaloguj się na konto.'}
+                </p>
+                <div className="space-y-4">
+                  <button
+                    onClick={() => navigate('/dashboard')}
+                    className="w-full py-3 px-6 transition-all duration-300"
+                    style={{ border: '0.5px solid #FF007F', background: 'transparent', color: '#FF007F', fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer' }}
+                  >
+                    Zaloguj się
+                  </button>
+                  <p style={{ textAlign: 'center', color: 'rgba(245,240,235,0.3)', fontSize: '12px' }}>LUB KONTYNUUJ JAKO GOŚĆ</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                      <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                        Imię *
+                      </label>
+                      <input required style={inputStyle} value={data.client_first_name} onChange={e => update('client_first_name', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                    </div>
+                    <div>
+                      <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                        Nazwisko *
+                      </label>
+                      <input required style={inputStyle} value={data.client_last_name} onChange={e => update('client_last_name', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                        Email *
+                      </label>
+                      <input required type="email" style={inputStyle} value={data.client_email} onChange={e => update('client_email', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                        Telefon
+                      </label>
+                      <input style={inputStyle} value={data.client_phone} onChange={e => update('client_phone', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Step 1: Artist selection */}
+            {step === 1 && (
               <div className="space-y-4">
-                <p className="mb-8" style={{ color: 'rgba(245,240,235,0.5)', fontSize: '15px' }}>
-                  Wybierz artystę, z którym chcesz się umówić.
+                <p style={{ color: 'rgba(245,240,235,0.5)', fontSize: '15px', marginBottom: '8px' }}>
+                  Wybierz artystę.
                 </p>
                 {artistsLoading ? (
                   <div className="flex justify-center py-12">
@@ -205,13 +293,12 @@ export default function Booking() {
                 ) : artists.map(artist => (
                   <button
                     key={artist.id}
-                    onClick={() => update('artist_id', artist.id) || update('artist_name', artist.name)}
+                    onClick={() => { update('artist_id', artist.id); update('artist_name', artist.name); }}
                     className="w-full text-left p-6 transition-all duration-300"
                     style={{
                       border: data.artist_id === artist.id ? '0.5px solid #FF007F' : '0.5px solid #262626',
                       background: data.artist_id === artist.id ? 'rgba(139,26,26,0.08)' : 'transparent',
                     }}
-                    onClick={() => { update('artist_id', artist.id); update('artist_name', artist.name); }}
                   >
                     <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.4rem', fontWeight: 600, color: '#F5F0EB' }}>
                       {artist.name}
@@ -228,36 +315,50 @@ export default function Booking() {
               </div>
             )}
 
+            {/* Step 2: Service selection */}
+            {step === 2 && (
+              <div className="space-y-4">
+                <p style={{ color: 'rgba(245,240,235,0.5)', fontSize: '15px', marginBottom: '8px' }}>
+                  Wybierz usługę dla {data.artist_name}.
+                </p>
+                {getVisibleServices().length === 0 ? (
+                  <p style={{ color: 'rgba(245,240,235,0.3)', fontSize: '14px' }}>
+                    Brak dostępnych usług dla tego artysty.
+                  </p>
+                ) : (
+                  getVisibleServices().map(service => (
+                    <button
+                      key={service.id}
+                      onClick={() => { update('service_id', service.id); update('service_name', service.name); }}
+                      className="w-full text-left p-6 transition-all duration-300"
+                      style={{
+                        border: data.service_id === service.id ? '0.5px solid #FF007F' : '0.5px solid #262626',
+                        background: data.service_id === service.id ? 'rgba(139,26,26,0.08)' : 'transparent',
+                      }}
+                    >
+                      <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.2rem', fontWeight: 600, color: '#F5F0EB' }}>
+                        {service.name}
+                      </h3>
+                      {service.short_description && (
+                        <p style={{ fontSize: '13px', color: 'rgba(245,240,235,0.5)', marginTop: '4px' }}>
+                          {service.short_description}
+                        </p>
+                      )}
+                      <div className="flex justify-between mt-3" style={{ fontSize: '12px', color: 'rgba(245,240,235,0.4)' }}>
+                        <span>{service.duration_minutes} min</span>
+                        <span>
+                          {service.price_type === 'fixed' ? `${service.price_fixed} PLN` : `${service.price_min} - ${service.price_max} PLN`}
+                        </span>
+                      </div>
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
 
-            {/* Step 1: Szczegóły */}
-            {step === 1 && (
+            {/* Step 3: Details */}
+            {step === 3 && (
               <div className="space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div>
-                    <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-                      Imię *
-                    </label>
-                    <input required style={inputStyle} value={data.client_first_name} onChange={e => update('client_first_name', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
-                  </div>
-                  <div>
-                    <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-                      Nazwisko *
-                    </label>
-                    <input required style={inputStyle} value={data.client_last_name} onChange={e => update('client_last_name', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
-                  </div>
-                  <div>
-                    <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-                      Email *
-                    </label>
-                    <input required type="email" style={inputStyle} value={data.client_email} onChange={e => update('client_email', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
-                  </div>
-                </div>
-                <div>
-                  <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-                    Telefon
-                  </label>
-                  <input style={inputStyle} value={data.client_phone} onChange={e => update('client_phone', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
-                </div>
                 <div>
                   <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                     Miejsce na ciele *
@@ -271,56 +372,45 @@ export default function Booking() {
                   <textarea required rows={4} style={{ ...inputStyle, resize: 'none' }} value={data.tattoo_description} onChange={e => update('tattoo_description', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
                 </div>
                 <div>
-                   <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-                     Dodatkowe uwagi
-                   </label>
-                   <textarea rows={2} style={{ ...inputStyle, resize: 'none' }} value={data.notes} onChange={e => update('notes', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
-                 </div>
-                 <div>
-                   <label className="text-micro block mb-3" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-                     Przeslij nam swoje pomysly / inspiracje / zdjecia ({data.reference_images.length}/10)
-                   </label>
-                   <p style={{ fontSize: '12px', color: 'rgba(245,240,235,0.3)', marginBottom: '12px' }}>
-                     Możesz wysłać miejsce na którym miałby się znaleźć tatuaż, inspiracje, zdjęcia do poprawy lub zakrycia.
-                   </p>
-                   <label className="flex items-center justify-center py-6 border-dashed" style={{ borderWidth: '1px', borderColor: '#262626', cursor: data.reference_images.length >= 10 ? 'not-allowed' : 'pointer', opacity: data.reference_images.length >= 10 ? 0.5 : 1 }}>
-                     <input
-                       type="file"
-                       multiple
-                       accept="image/*"
-                       onChange={handleImageUpload}
-                       disabled={data.reference_images.length >= 10 || uploadingImage}
-                       style={{ display: 'none' }}
-                     />
-                     <div className="text-center">
-                       <Upload size={20} color="#FF007F" style={{ marginBottom: '6px', marginLeft: 'auto', marginRight: 'auto', display: 'block' }} />
-                       <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: '#FF007F', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                         {uploadingImage ? 'Wczytywanie...' : 'Kliknij aby wybrać zdjęcia'}
-                       </span>
-                     </div>
-                   </label>
-                   {data.reference_images.length > 0 && (
-                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
-                       {data.reference_images.map((img, idx) => (
-                         <div key={idx} className="relative group">
-                           <img src={img} alt={`ref-${idx}`} className="w-full h-24 object-cover" style={{ border: '0.5px solid #262626' }} />
-                           <button
-                             onClick={() => removeImage(idx)}
-                             className="absolute top-1 right-1 p-1 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity"
-                             style={{ border: '0.5px solid #FF007F' }}
-                           >
-                             <X size={14} color="#FF007F" />
-                           </button>
-                         </div>
-                       ))}
-                     </div>
-                   )}
-                 </div>
+                  <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                    Dodatkowe uwagi
+                  </label>
+                  <textarea rows={2} style={{ ...inputStyle, resize: 'none' }} value={data.notes} onChange={e => update('notes', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
                 </div>
+                <div>
+                  <label className="text-micro block mb-3" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                    Przeslij nam swoje pomysly / inspiracje ({data.reference_images.length}/10)
+                  </label>
+                  <p style={{ fontSize: '12px', color: 'rgba(245,240,235,0.3)', marginBottom: '12px' }}>
+                    Możesz wysłać miejsce na którym miałby się znaleźć tatuaż, inspiracje, zdjęcia do poprawy lub zakrycia.
+                  </p>
+                  <label className="flex items-center justify-center py-6 border-dashed" style={{ borderWidth: '1px', borderColor: '#262626', cursor: data.reference_images.length >= 10 ? 'not-allowed' : 'pointer', opacity: data.reference_images.length >= 10 ? 0.5 : 1 }}>
+                    <input type="file" multiple accept="image/*" onChange={handleImageUpload} disabled={data.reference_images.length >= 10 || uploadingImage} style={{ display: 'none' }} />
+                    <div className="text-center">
+                      <Upload size={20} color="#FF007F" style={{ marginBottom: '6px', marginLeft: 'auto', marginRight: 'auto', display: 'block' }} />
+                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: '#FF007F', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                        {uploadingImage ? 'Wczytywanie...' : 'Kliknij aby wybrać zdjęcia'}
+                      </span>
+                    </div>
+                  </label>
+                  {data.reference_images.length > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
+                      {data.reference_images.map((img, idx) => (
+                        <div key={idx} className="relative group">
+                          <img src={img} alt={`ref-${idx}`} className="w-full h-24 object-cover" style={{ border: '0.5px solid #262626' }} />
+                          <button onClick={() => removeImage(idx)} className="absolute top-1 right-1 p-1 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity" style={{ border: '0.5px solid #FF007F' }}>
+                            <X size={14} color="#FF007F" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
 
-            {/* Step 2: Termin */}
-            {step === 2 && (
+            {/* Step 4: Termin */}
+            {step === 4 && (
               <SessionDatePicker
                 artistId={data.artist_id}
                 selectedDate={data.session_date}
@@ -330,15 +420,16 @@ export default function Booking() {
               />
             )}
 
-            {/* Step 3: Potwierdzenie */}
-            {step === 3 && (
+            {/* Step 5: Confirmation */}
+            {step === 5 && (
               <div className="space-y-6">
-                <p className="mb-8" style={{ color: 'rgba(245,240,235,0.5)', fontSize: '15px' }}>
+                <p style={{ color: 'rgba(245,240,235,0.5)', fontSize: '15px', marginBottom: '8px' }}>
                   Sprawdź szczegóły przed wysłaniem.
                 </p>
                 {[
-                   ['Artysta', data.artist_name],
-                   ['Imię i Nazwisko', `${data.client_first_name} ${data.client_last_name}`],
+                  ['Artysta', data.artist_name],
+                  ['Usługa', data.service_name],
+                  ['Imię i Nazwisko', `${data.client_first_name} ${data.client_last_name}`],
                   ['Email', data.client_email],
                   ['Telefon', data.client_phone || '—'],
                   ['Termin', `${data.session_date} o ${data.session_time}`],
@@ -365,21 +456,12 @@ export default function Booking() {
             </button>
           ) : <div />}
 
-          {step < 3 ? (
-            <button
-              onClick={handleNext}
-              disabled={!canNext()}
-              className="btn-oxblood"
-              style={{ opacity: canNext() ? 1 : 0.4 }}
-            >
+          {step < 5 ? (
+            <button onClick={handleNext} disabled={!canNext()} className="btn-oxblood" style={{ opacity: canNext() ? 1 : 0.4 }}>
               DALEJ
             </button>
           ) : (
-            <button
-              onClick={handleSubmit}
-              disabled={submitting}
-              className="btn-oxblood animate-pulse-oxblood"
-            >
+            <button onClick={handleSubmit} disabled={submitting} className="btn-oxblood animate-pulse-oxblood">
               {submitting ? 'WYSYŁANIE...' : 'WYŚLIJ ZGŁOSZENIE'}
             </button>
           )}

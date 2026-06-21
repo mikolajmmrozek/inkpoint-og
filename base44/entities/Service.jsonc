@@ -59,6 +59,16 @@
       },
       "description": "Lista ID artyst\u00f3w wykonuj\u0105cych t\u0119 us\u0142ug\u0119"
     },
+    "visibility": {
+      "type": "string",
+      "enum": [
+        "public",
+        "members_only",
+        "hidden"
+      ],
+      "default": "public",
+      "description": "public = wszyscy, members_only = tylko zalogowani, hidden = ukryta"
+    },
     "is_active": {
       "type": "boolean",
       "default": true,
