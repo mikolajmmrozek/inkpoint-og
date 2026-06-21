@@ -1,23 +1,112 @@
-import { useState, useEffect } from 'react';
-import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
+import { useState, useEffect, createContext, useContext } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
-import { Calendar, FileText, User, LogOut, Home, Menu, X } from 'lucide-react';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Calendar, FileText, User, LogOut, Home, Menu, X, Sun, Moon } from 'lucide-react';
+
+export const ClientThemeContext = createContext({ theme: 'dark', toggleTheme: () => {} });
+export const useClientTheme = () => useContext(ClientThemeContext);
 
 const NAV = [
-  { path: '/panel', label: 'Pulpit', icon: Home },
+  { path: '/panel', label: 'Pulpit', icon: Home, exact: true },
   { path: '/panel/sessions', label: 'Sesje', icon: Calendar },
   { path: '/panel/health-forms', label: 'Ankiety', icon: FileText },
   { path: '/panel/profile', label: 'Profil', icon: User },
 ];
 
+function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, clientName, userEmail }) {
+  const location = useLocation();
+  const isActive = (nav) => nav.exact ? location.pathname === nav.path : location.pathname.startsWith(nav.path);
+
+  const bg = theme === 'light' ? '#FFFFFF' : '#0A0A0A';
+  const border = theme === 'light' ? '#E5E5E5' : '#262626';
+  const textColor = theme === 'light' ? '#111111' : '#F5F0EB';
+  const mutedColor = theme === 'light' ? 'rgba(0,0,0,0.4)' : 'rgba(245,240,235,0.4)';
+
+  return (
+    <>
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-40 lg:hidden" style={{ background: 'rgba(0,0,0,0.5)' }} onClick={() => setSidebarOpen(false)} />
+      )}
+      <aside
+        className={`fixed top-0 left-0 h-full z-50 w-64 flex flex-col transition-transform duration-500 lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        style={{ background: bg, borderRight: `0.5px solid ${border}` }}
+      >
+        <div className="p-8 flex items-center justify-between" style={{ borderBottom: `0.5px solid ${border}` }}>
+          <div>
+            <p style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, fontSize: '1.6rem', color: textColor, letterSpacing: '0.08em' }}>ROMANS</p>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase' }}>PANEL KLIENTA</p>
+          </div>
+          <button onClick={() => setSidebarOpen(false)} className="lg:hidden" style={{ color: mutedColor }}>
+            <X size={18} />
+          </button>
+        </div>
+
+        <nav className="flex-1 p-6 space-y-1 overflow-y-auto">
+          {NAV.map(nav => {
+            const Icon = nav.icon;
+            const active = isActive(nav);
+            return (
+              <Link
+                key={nav.path}
+                to={nav.path}
+                className="flex items-center gap-3 px-4 py-3 transition-all duration-200"
+                style={{
+                  background: active ? 'rgba(255,0,127,0.08)' : 'transparent',
+                  borderLeft: active ? '2px solid #FF007F' : '2px solid transparent',
+                  color: active ? textColor : mutedColor,
+                }}
+                onClick={() => setSidebarOpen(false)}
+              >
+                <Icon size={14} color={active ? '#FF007F' : (theme === 'light' ? 'rgba(0,0,0,0.3)' : 'rgba(245,240,235,0.3)')} />
+                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{nav.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="p-6 space-y-2" style={{ borderTop: `0.5px solid ${border}` }}>
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-3 px-4 py-3 w-full transition-all duration-200 hover:opacity-70"
+            style={{ color: mutedColor, background: 'transparent', border: 'none', cursor: 'pointer' }}
+          >
+            {theme === 'light' ? <Moon size={14} /> : <Sun size={14} />}
+            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              {theme === 'light' ? 'Ciemny motyw' : 'Jasny motyw'}
+            </span>
+          </button>
+          <button
+            onClick={() => base44.auth.logout('/')}
+            className="flex items-center gap-3 px-4 py-3 w-full transition-all duration-200 hover:opacity-70"
+            style={{ color: mutedColor, background: 'transparent', border: 'none', cursor: 'pointer' }}
+          >
+            <LogOut size={14} />
+            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Wyloguj się</span>
+          </button>
+          <Link to="/" className="flex items-center gap-3 px-4 py-2 w-full mt-1" style={{ color: theme === 'light' ? 'rgba(0,0,0,0.25)' : 'rgba(245,240,235,0.2)', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            ← Wróć na stronę
+          </Link>
+        </div>
+      </aside>
+    </>
+  );
+}
+
 export default function ClientPanel() {
-  const { user, isAuthenticated, isLoadingAuth, authChecked, authError, logout } = useAuth();
+  const { user, isAuthenticated, isLoadingAuth, authChecked, authError } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [client, setClient] = useState(null);
   const [loadingClient, setLoadingClient] = useState(true);
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [theme, setTheme] = useState(() => localStorage.getItem('clientPanelTheme') || 'dark');
+
+  const toggleTheme = () => {
+    const next = theme === 'light' ? 'dark' : 'light';
+    setTheme(next);
+    localStorage.setItem('clientPanelTheme', next);
+  };
 
   useEffect(() => {
     if (isLoadingAuth || !authChecked) return;
@@ -51,88 +140,34 @@ export default function ClientPanel() {
 
   const clientName = client?.name || user.full_name || user.email;
 
-  const SidebarContent = () => (
-    <>
-      <div className="p-6">
-        <Link to="/" className="block">
-          <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.3rem', color: '#FF007F', letterSpacing: '0.05em' }}>
-            PANEL KLIENTA
-          </p>
-        </Link>
-      </div>
-      <nav className="flex-1 px-4 space-y-1">
-        {NAV.map(({ path, label, icon: Icon }) => {
-          const active = location.pathname === path;
-          return (
-            <Link
-              key={path}
-              to={path}
-              onClick={() => setMobileNavOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 transition-all"
-              style={{
-                background: active ? 'rgba(255,0,127,0.08)' : 'transparent',
-                border: `0.5px solid ${active ? '#FF007F' : 'transparent'}`,
-                color: active ? '#FF007F' : 'rgba(245,240,235,0.5)',
-              }}
-            >
-              <Icon size={14} />
-              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                {label}
-              </span>
-            </Link>
-          );
-        })}
-      </nav>
-      <div className="p-4" style={{ borderTop: '0.5px solid #262626' }}>
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.5)', marginBottom: '8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {clientName}
-        </p>
-        <button
-          onClick={() => logout()}
-          className="flex items-center gap-2"
-          style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer' }}
-        >
-          <LogOut size={12} /> Wyloguj
-        </button>
-      </div>
-    </>
-  );
+  const bg = theme === 'light' ? '#F8F8F8' : '#0A0A0A';
+  const topBarBg = theme === 'light' ? '#FFFFFF' : '#0A0A0A';
+  const border = theme === 'light' ? '#E5E5E5' : '#262626';
+  const textColor = theme === 'light' ? '#111111' : '#F5F0EB';
+  const mutedColor = theme === 'light' ? 'rgba(0,0,0,0.4)' : 'rgba(245,240,235,0.4)';
 
   return (
-    <div className="min-h-screen flex" style={{ background: '#0A0A0A', color: '#F5F0EB' }}>
-      {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-64 flex-shrink-0 flex-col" style={{ borderRight: '0.5px solid #262626' }}>
-        <SidebarContent />
-      </aside>
-
-      {/* Mobile nav overlay */}
-      {mobileNavOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.8)' }} onClick={() => setMobileNavOpen(false)} />
-          <aside className="absolute left-0 top-0 bottom-0 w-64 flex flex-col" style={{ background: '#0A0A0A', borderRight: '0.5px solid #262626' }}>
-            <button onClick={() => setMobileNavOpen(false)} className="absolute top-4 right-4" style={{ color: 'rgba(245,240,235,0.4)', background: 'none', border: 'none', cursor: 'pointer' }}>
-              <X size={18} />
+    <ClientThemeContext.Provider value={{ theme, toggleTheme, client }}>
+      <div className="min-h-screen flex" style={{ background: bg, color: textColor }}>
+        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} theme={theme} toggleTheme={toggleTheme} clientName={clientName} userEmail={user.email} />
+        <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
+          <div className="flex items-center gap-4 px-6 py-4" style={{ borderBottom: `0.5px solid ${border}`, background: topBarBg }}>
+            <button onClick={() => setSidebarOpen(true)} className="lg:hidden flex items-center justify-center" style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer', padding: '8px', minWidth: '44px', minHeight: '44px' }}>
+              <Menu size={20} />
             </button>
-            <SidebarContent />
-          </aside>
+            <div className="flex-1" />
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full" style={{ background: '#FF007F' }} />
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: mutedColor, letterSpacing: '0.1em' }}>
+                {user?.email}
+              </p>
+            </div>
+          </div>
+          <div className="flex-1 p-6 lg:p-10 overflow-y-auto">
+            <Outlet context={{ client, user, theme }} />
+          </div>
         </div>
-      )}
-
-      {/* Main content */}
-      <main className="flex-1 overflow-y-auto">
-        {/* Mobile top bar */}
-        <div className="md:hidden flex items-center justify-between px-6 py-4" style={{ borderBottom: '0.5px solid #262626' }}>
-          <button onClick={() => setMobileNavOpen(true)} style={{ color: '#F5F0EB', background: 'none', border: 'none', cursor: 'pointer' }}>
-            <Menu size={20} />
-          </button>
-          <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1rem', color: '#FF007F', letterSpacing: '0.05em' }}>PANEL KLIENTA</p>
-          <div style={{ width: '20px' }} />
-        </div>
-
-        <div className="p-6 md:p-12 max-w-4xl mx-auto">
-          <Outlet context={{ client, user }} />
-        </div>
-      </main>
-    </div>
+      </div>
+    </ClientThemeContext.Provider>
   );
 }
