@@ -347,7 +347,6 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={(e) => e.currentTarget === e.target && setShowImageLightbox(false)}
         style={{
           position: 'fixed',
           top: 0,
@@ -363,7 +362,6 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
           paddingBottom: 'max(env(safe-area-inset-bottom), 1rem)',
           zIndex: 70,
           pointerEvents: 'auto',
-          touchAction: 'none',
           overflow: 'hidden',
         }}
       >
@@ -373,6 +371,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
           exit={{ scale: 0.9 }}
           onClick={e => e.stopPropagation()}
           className="relative max-w-4xl"
+          style={{ touchAction: 'none' }}
         >
           <AnimatePresence mode="wait">
             <motion.img 
