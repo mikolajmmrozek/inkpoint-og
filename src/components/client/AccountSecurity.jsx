@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Loader2, Shield, KeyRound, Check, Mail, Apple } from 'lucide-react';
+import { Loader2, Shield, KeyRound, Check, Mail, Apple, Edit3 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 export default function AccountSecurity({ user, t }) {
+  const [editing, setEditing] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -10,11 +11,10 @@ export default function AccountSecurity({ user, t }) {
   const [changed, setChanged] = useState(false);
   const [error, setError] = useState('');
 
-  // Detect auth provider from user object
   const authProvider = user?.auth_provider || user?.provider || user?.oauth_provider;
   const isSocialLogin = authProvider && ['google', 'apple', 'facebook'].includes(authProvider.toLowerCase());
 
-  const handleChangePassword = async () => {
+  const handleSave = async () => {
     setError('');
     if (!currentPassword || !newPassword || !confirmPassword) {
       setError('Wypełnij wszystkie pola.');
@@ -39,12 +39,21 @@ export default function AccountSecurity({ user, t }) {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
+      setEditing(false);
       setTimeout(() => setChanged(false), 4000);
     } catch (err) {
       setError(err?.message || 'Nie udało się zmienić hasła. Sprawdź obecne hasło.');
     } finally {
       setChanging(false);
     }
+  };
+
+  const handleCancel = () => {
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setError('');
+    setEditing(false);
   };
 
   const inputStyle = {
@@ -69,10 +78,20 @@ export default function AccountSecurity({ user, t }) {
     : 'E-mail i hasło';
 
   return (
-    <div className="pt-6" style={{ borderTop: `0.5px solid ${t.border}` }}>
-      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>
-        BEZPIECZEŃSTWO KONTA
-      </p>
+    <div className="pt-6 mt-8" style={{ borderTop: `0.5px solid ${t.border}` }}>
+      <div className="flex items-center justify-between mb-5">
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+          BEZPIECZEŃSTWO
+        </p>
+        {!editing && !isSocialLogin && (
+          <button
+            onClick={() => setEditing(true)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.fuchsia, display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}
+          >
+            <Edit3 size={13} /> ZMIEŃ HASŁO
+          </button>
+        )}
+      </div>
 
       {/* Login method */}
       <div className="mb-6 p-4" style={{ border: `0.5px solid ${t.border}`, background: t.bg === '#FFFFFF' ? 'rgba(0,0,0,0.02)' : 'rgba(255,255,255,0.02)' }}>
@@ -94,8 +113,8 @@ export default function AccountSecurity({ user, t }) {
         </div>
       </div>
 
-      {/* Password change form — only for email/password users */}
-      {!isSocialLogin && (
+      {/* Password change — only in edit mode, email/password users */}
+      {!isSocialLogin && editing && (
         <div className="space-y-5">
           <div>
             {label('Obecne hasło')}
@@ -137,26 +156,28 @@ export default function AccountSecurity({ user, t }) {
 
           <div className="flex items-center gap-4">
             <button
-              onClick={handleChangePassword}
+              onClick={handleSave}
               disabled={changing}
-              className="flex items-center gap-2"
-              style={{
-                fontFamily: 'JetBrains Mono',
-                fontSize: '9px',
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-                padding: '11px 24px',
-                border: `0.5px solid ${changed ? '#16a34a' : t.fuchsia}`,
-                color: changed ? '#16a34a' : t.fuchsia,
-                background: 'transparent',
-                cursor: changing ? 'not-allowed' : 'pointer',
-                opacity: changing ? 0.5 : 1,
-              }}
+              className="btn-oxblood flex items-center gap-2"
+              style={{ opacity: changing ? 0.5 : 1 }}
             >
-              {changing ? <><Loader2 size={12} className="animate-spin" /> ZMIENIANIE...</> : changed ? <><Check size={12} /> ZMIENIONO</> : <><KeyRound size={12} /> ZMIEŃ HASŁO</>}
+              {changing ? <><Loader2 size={13} className="animate-spin" /> ZMIENIANIE...</> : <><KeyRound size={13} /> ZAPISZ ZMIANY</>}
+            </button>
+            <button
+              onClick={handleCancel}
+              className="btn-ghost-parchment"
+              style={{ fontSize: '10px' }}
+            >
+              ANULUJ
             </button>
           </div>
         </div>
+      )}
+
+      {!isSocialLogin && !editing && changed && (
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.1em' }}>
+          ✓ HASŁO ZMIENIONE
+        </p>
       )}
 
       {isSocialLogin && (
