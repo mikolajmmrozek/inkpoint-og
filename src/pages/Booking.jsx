@@ -139,7 +139,7 @@ export default function Booking() {
             Rezerwacja potwierdzona
           </h2>
           <p className="mt-6 text-sm leading-relaxed" style={{ color: 'rgba(245,240,235,0.5)', fontSize: '15px' }}>
-            Wysłaliśmy potwierdzenie na adres <strong style={{ color: '#F5F0EB' }}>{data.client_email}</strong>. W mailu znajdziesz link do ankiety zdrowotnej, którą prosimy wypełnić przed sesją.
+            Zgłoszenie wysłane. Otrzymasz od nas potwierdzenie terminu najszybciej jak to możliwe. Skontaktujemy się z Tobą w sprawie szczegółów.
           </p>
           <p className="mt-4 text-sm" style={{ color: 'rgba(245,240,235,0.3)', fontSize: '13px' }}>
             Sesja: {data.session_date} o {data.session_time} | {data.artist_name}
