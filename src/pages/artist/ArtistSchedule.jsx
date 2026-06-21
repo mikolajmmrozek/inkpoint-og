@@ -138,6 +138,9 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
             </h3>
           </div>
           <div className="flex items-center gap-2">
+            {!isNew && !editing && (
+              <button onClick={() => setEditing(true)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}>EDYTUJ</button>
+            )}
             <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}><X size={18} /></button>
           </div>
         </div>
@@ -151,7 +154,6 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
               </span>
               {form.deposit_paid && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.08em' }}>✓ DEPOZYT</span>}
               {!form.health_form_completed && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', padding: '3px 8px', border: '0.5px solid #FF007F', color: '#FF007F' }}>BRAK ANKIETY</span>}
-              <button onClick={() => setEditing(true)} style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 12px', border: '0.5px solid #FF007F', color: '#FF007F', background: 'transparent', cursor: 'pointer', marginLeft: 'auto' }}>EDYTUJ</button>
             </div>
 
             {/* Quick status change */}
