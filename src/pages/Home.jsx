@@ -99,7 +99,6 @@ export default function Home() {
                 alt={`Portfolio ${i + 1}`}
                 onClick={() => setLightboxIndex(i)}
                 className="w-full h-full object-cover liquid-hover cursor-pointer"
-                style={{ filter: 'brightness(0.65) contrast(1.15)' }}
                 loading="lazy"
                 decoding="async"
               />
