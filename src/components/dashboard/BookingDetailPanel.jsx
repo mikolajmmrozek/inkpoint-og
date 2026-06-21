@@ -46,7 +46,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
   const [notesSaved, setNotesSaved] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showImageLightbox, setShowImageLightbox] = useState(false);
-  const [lightboxImage, setLightboxImage] = useState(null);
+  const [lightboxImageIndex, setLightboxImageIndex] = useState(0);
 
   useEffect(() => {
     if (!booking.client_email) return;
@@ -237,16 +237,16 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
                   alt={`ref-${idx}`} 
                   className="w-full h-20 object-cover cursor-pointer"
                   style={{ border: `0.5px solid ${t.border}` }}
-                  onClick={() => { setLightboxImage(imgUrl); setShowImageLightbox(true); }}
+                  onClick={() => { setLightboxImageIndex(idx); setShowImageLightbox(true); }}
                 />
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
                   <button
-                    onClick={() => { setLightboxImage(imgUrl); setShowImageLightbox(true); }}
-                    style={{ background: '#FF007F', border: 'none', cursor: 'pointer', padding: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                    title="Podgląd"
-                  >
-                    <Eye size={12} color="#FFF" />
-                  </button>
+                      onClick={() => { setLightboxImageIndex(idx); setShowImageLightbox(true); }}
+                      style={{ background: '#FF007F', border: 'none', cursor: 'pointer', padding: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                      title="Podgląd"
+                    >
+                      <Eye size={12} color="#FFF" />
+                    </button>
                   <a
                     href={imgUrl}
                     download={`reference-${idx}`}
@@ -358,7 +358,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
     )}
 
     {/* Image lightbox */}
-    {showImageLightbox && lightboxImage && (
+    {showImageLightbox && booking.reference_images && booking.reference_images.length > 0 && (
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -371,9 +371,33 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
           animate={{ scale: 1 }}
           exit={{ scale: 0.9 }}
           onClick={e => e.stopPropagation()}
-          className="relative max-w-2xl max-h-[90vh]"
+          className="relative max-w-2xl max-h-[90vh] flex flex-col"
         >
-          <img src={lightboxImage} alt="preview" className="max-w-full max-h-[90vh] object-contain" />
+          <img src={booking.reference_images[lightboxImageIndex]} alt="preview" className="max-w-full max-h-[80vh] object-contain" />
+          
+          {/* Navigation buttons */}
+          {booking.reference_images.length > 1 && (
+            <div className="flex items-center justify-between mt-4 px-4">
+              <button
+                onClick={() => setLightboxImageIndex(i => (i - 1 + booking.reference_images.length) % booking.reference_images.length)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#FF007F', padding: '8px' }}
+                title="Poprzednie"
+              >
+                ← POPRZEDNIE
+              </button>
+              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: '#FFF' }}>
+                {lightboxImageIndex + 1} / {booking.reference_images.length}
+              </span>
+              <button
+                onClick={() => setLightboxImageIndex(i => (i + 1) % booking.reference_images.length)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#FF007F', padding: '8px' }}
+                title="Następne"
+              >
+                NASTĘPNE →
+              </button>
+            </div>
+          )}
+
           <button
             onClick={() => setShowImageLightbox(false)}
             style={{ position: 'absolute', top: '-32px', right: 0, background: 'none', border: 'none', cursor: 'pointer', color: '#FFF' }}
@@ -381,8 +405,8 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
             <X size={24} />
           </button>
           <a
-            href={lightboxImage}
-            download
+            href={booking.reference_images[lightboxImageIndex]}
+            download={`reference-${lightboxImageIndex}`}
             style={{ position: 'absolute', bottom: '10px', right: '10px', background: '#FF007F', color: '#FFF', padding: '10px 14px', border: 'none', cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontSize: '11px', textTransform: 'uppercase' }}
           >
             <Download size={12} /> POBIERZ
