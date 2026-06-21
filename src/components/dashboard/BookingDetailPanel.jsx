@@ -356,17 +356,21 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
           exit={{ scale: 0.9 }}
           onClick={e => e.stopPropagation()}
           className="relative max-w-4xl"
-          onTouchStart={(e) => { window.touchStartX = e.touches[0].clientX; }}
-          onTouchEnd={(e) => {
-            const touchEndX = e.changedTouches[0].clientX;
-            const diff = window.touchStartX - touchEndX;
-            if (Math.abs(diff) > 50) {
-              if (diff > 0) setLightboxImageIndex(i => (i + 1) % booking.reference_images.length);
-              else setLightboxImageIndex(i => (i - 1 + booking.reference_images.length) % booking.reference_images.length);
-            }
-          }}
         >
-          <img src={booking.reference_images[lightboxImageIndex]} alt="preview" className="max-w-full max-h-[80vh] object-contain" />
+          <img 
+            src={booking.reference_images[lightboxImageIndex]} 
+            alt="preview" 
+            className="max-w-full max-h-[80vh] object-contain cursor-grab active:cursor-grabbing"
+            onTouchStart={(e) => { window.touchStartX = e.touches[0].clientX; }}
+            onTouchEnd={(e) => {
+              const touchEndX = e.changedTouches[0].clientX;
+              const diff = window.touchStartX - touchEndX;
+              if (Math.abs(diff) > 50) {
+                if (diff > 0) setLightboxImageIndex(i => (i + 1) % booking.reference_images.length);
+                else setLightboxImageIndex(i => (i - 1 + booking.reference_images.length) % booking.reference_images.length);
+              }
+            }}
+          />
           
           {/* Navigation arrows */}
           {booking.reference_images.length > 1 && (
