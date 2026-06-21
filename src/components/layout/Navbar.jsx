@@ -150,16 +150,32 @@ export default function Navbar() {
               <div className="h-px w-full mt-4" style={{ background: '#262626', height: '0.5px' }} />
             </div>
           ))}
-          <button
-            onClick={handleAccountClick}
-            className="btn-ghost-parchment inline-block mt-4 flex items-center gap-2"
-          >
-            <User size={16} />
-            {isAuthenticated ? 'MOJE KONTO' : 'ZALOGUJ SIĘ'}
-          </button>
-          <Link to="/booking" className="btn-oxblood inline-block mt-2">
-            Umów Sesję
-          </Link>
+          <div className="flex gap-3 mt-4">
+            <button
+              onClick={handleAccountClick}
+              className="flex items-center justify-center gap-2"
+              style={{
+                height: '42px',
+                padding: '0 20px',
+                borderRadius: '0.25rem',
+                border: '0.5px solid #FF007F',
+                background: 'rgba(255,0,127,0.06)',
+                cursor: 'pointer',
+                fontFamily: 'JetBrains Mono, monospace',
+                fontSize: '11px',
+                fontWeight: 500,
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                color: '#FF007F',
+              }}
+            >
+              <User size={15} color="#FF007F" />
+              {isAuthenticated ? 'MOJE KONTO' : 'ZALOGUJ SIĘ'}
+            </button>
+            <Link to="/booking" className="btn-oxblood" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '42px' }}>
+              Umów Sesję
+            </Link>
+          </div>
         </div>
       </div>
     </>
