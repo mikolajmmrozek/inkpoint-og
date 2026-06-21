@@ -239,23 +239,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
                   style={{ border: `0.5px solid ${t.border}` }}
                   onClick={() => { setLightboxImageIndex(idx); setShowImageLightbox(true); }}
                 />
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
-                  <button
-                      onClick={() => { setLightboxImageIndex(idx); setShowImageLightbox(true); }}
-                      style={{ background: '#FF007F', border: 'none', cursor: 'pointer', padding: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                      title="Podgląd"
-                    >
-                      <Eye size={12} color="#FFF" />
-                    </button>
-                  <a
-                    href={imgUrl}
-                    download={`reference-${idx}`}
-                    style={{ background: '#FF007F', border: 'none', cursor: 'pointer', padding: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
-                    title="Pobierz"
-                  >
-                    <Download size={12} color="#FFF" />
-                  </a>
-                </div>
+
               </div>
             ))}
           </div>
