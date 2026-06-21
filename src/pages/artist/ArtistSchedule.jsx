@@ -197,7 +197,7 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
 
             {/* Health form button */}
             {form.health_form_completed && (
-              <button onClick={() => setShowHealthForm(true)} style={{ fontSize: '9px', marginTop: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', padding: '10px 20px', background: 'transparent', color: theme === 'light' ? '#111111' : '#F5F0EB', border: `0.5px solid ${theme === 'light' ? '#111111' : '#F5F0EB'}`, cursor: 'pointer', transition: 'all 0.3s ease' }}>
+              <button onClick={() => setShowHealthForm(true)} style={{ fontSize: '9px', marginTop: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', padding: '10px 20px', background: 'transparent', color: '#FF007F', border: '0.5px solid #FF007F', cursor: 'pointer', transition: 'all 0.3s ease' }}>
                 <FileText size={12} /> PODGLĄD ANKIETY ZDROWOTNEJ
               </button>
             )}
