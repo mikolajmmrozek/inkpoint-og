@@ -514,7 +514,7 @@ function toMin(t) {
   return h * 60 + m;
 }
 
-function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, onNewBookingClick, t, availabilityRecords, onAvailabilityClick }) {
+function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, onNewBookingClick, t, artistId, availabilityRecords, onAvailabilityClick }) {
   const scrollRef = useRef(null);
   const dateStr = format(selectedDate, 'yyyy-MM-dd');
   const dayBk = bookings.filter(b => b.session_date === dateStr).sort((a, b) => (a.session_time || '').localeCompare(b.session_time || ''));
@@ -536,6 +536,45 @@ function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, o
       return false;
     }) || null;
   })();
+
+  // Compute unavailable ranges (hours outside working schedule)
+  const unavailableRanges = (() => {
+    const DAY_START_MIN = DAY_START_H * 60;
+    const DAY_END_MIN = DAY_END_H * 60;
+    const ranges = [];
+    const dow = new Date(dateStr + 'T12:00:00').getDay();
+    const artistRecords = (availabilityRecords || []).filter(r => r.artist_id === artistId);
+
+    const recurring = artistRecords.find(r => r.type === 'recurring' && r.day_of_week === dow && r.is_available !== false);
+    let workStart = recurring ? toMin(recurring.start_time) : null;
+    let workEnd = recurring ? toMin(recurring.end_time) : null;
+
+    if (availRecord) {
+      if (availRecord.is_available) {
+        workStart = toMin(availRecord.start_time);
+        workEnd = toMin(availRecord.end_time);
+      } else if (!availRecord.start_time || !availRecord.end_time) {
+        workStart = null;
+        workEnd = null;
+      }
+    }
+
+    if (workStart === null || workEnd === null) {
+      ranges.push({ start: DAY_START_MIN, end: DAY_END_MIN, full: true });
+    } else {
+      if (workStart > DAY_START_MIN) ranges.push({ start: DAY_START_MIN, end: workStart });
+      if (workEnd < DAY_END_MIN) ranges.push({ start: workEnd, end: DAY_END_MIN });
+    }
+
+    if (availRecord && !availRecord.is_available && availRecord.start_time && availRecord.end_time) {
+      const blockStart = toMin(availRecord.start_time);
+      const blockEnd = toMin(availRecord.end_time);
+      if (blockStart !== null && blockEnd !== null) ranges.push({ start: blockStart, end: blockEnd });
+    }
+
+    return ranges;
+  })();
+
   const showNow = isToday(selectedDate);
 
   useEffect(() => {
@@ -591,6 +630,20 @@ function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, o
             {HOUR_MARKS.map(h => (
               <div key={h} style={{ position: 'absolute', top: `${(h - DAY_START_H) * 60 * PX_PER_MIN}px`, left: 0, right: 0, borderTop: `0.5px solid ${t.cardBorder}`, pointerEvents: 'none' }} />
             ))}
+            {/* Unavailable hours overlay (striped) */}
+            {unavailableRanges.map((range, idx) => {
+              const top = Math.max(0, (range.start - DAY_START_H * 60)) * PX_PER_MIN;
+              const height = Math.max(0, range.end - range.start) * PX_PER_MIN;
+              return (
+                <div key={`unavail-${idx}`} style={{
+                  position: 'absolute', top: `${top}px`, height: `${height}px`, left: 0, right: 0,
+                  backgroundImage: 'repeating-linear-gradient(135deg, rgba(255,0,127,0.07) 0px, rgba(255,0,127,0.07) 4px, transparent 4px, transparent 10px)',
+                  borderTop: range.start > DAY_START_H * 60 ? '0.5px dashed rgba(255,0,127,0.25)' : 'none',
+                  borderBottom: range.end < DAY_END_H * 60 ? '0.5px dashed rgba(255,0,127,0.25)' : 'none',
+                  pointerEvents: 'none', zIndex: 0,
+                }} />
+              );
+            })}
             {/* Now line */}
             {showNow && (
               <>
@@ -791,6 +844,7 @@ export default function ArtistSchedule() {
           onBookingClick={setSelectedBooking}
           onNewBookingClick={() => setShowNewModal(true)}
           t={t}
+          artistId={artist.id}
           availabilityRecords={availabilityRecords}
           onAvailabilityClick={setSelectedAvailability}
         />
