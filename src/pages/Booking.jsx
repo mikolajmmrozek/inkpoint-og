@@ -63,6 +63,18 @@ export default function Booking() {
     return true;
   };
 
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  const handleNext = () => {
+    setStep(s => s + 1);
+    scrollToTop();
+  };
+
+  const handleBack = () => {
+    setStep(s => s - 1);
+    scrollToTop();
+  };
+
   const handleSubmit = async () => {
     setSubmitting(true);
     const fullName = `${data.client_first_name} ${data.client_last_name}`.trim();
@@ -277,14 +289,14 @@ export default function Booking() {
         {/* Navigation */}
         <div className="flex justify-between mt-12 pt-8" style={{ borderTop: '0.5px solid #262626' }}>
           {step > 0 ? (
-            <button onClick={() => setStep(s => s - 1)} className="btn-ghost-parchment">
+            <button onClick={handleBack} className="btn-ghost-parchment">
               WSTECZ
             </button>
           ) : <div />}
 
           {step < 3 ? (
             <button
-              onClick={() => setStep(s => s + 1)}
+              onClick={handleNext}
               disabled={!canNext()}
               className="btn-oxblood"
               style={{ opacity: canNext() ? 1 : 0.4 }}
