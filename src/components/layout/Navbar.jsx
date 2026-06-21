@@ -138,19 +138,7 @@ export default function Navbar() {
         menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
       }`} style={{ background: '#0A0A0A' }}>
         <div className="space-y-8">
-          {navLinks.map((link, i) => (
-            <div key={link.href}>
-              <Link
-                to={link.href}
-                className="block font-display text-6xl font-300 text-parchment hover:text-oxblood transition-colors duration-300"
-                style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(3rem, 10vw, 6rem)', color: '#F5F0EB', fontWeight: 400, letterSpacing: '0.05em' }}
-              >
-                {link.label}
-              </Link>
-              <div className="h-px w-full mt-4" style={{ background: '#262626', height: '0.5px' }} />
-            </div>
-          ))}
-          <div className="flex gap-3 mt-4">
+          <div className="flex gap-3 mb-8">
             <button
               onClick={handleAccountClick}
               className="flex items-center justify-center gap-2"
@@ -176,6 +164,18 @@ export default function Navbar() {
               Umów Sesję
             </Link>
           </div>
+          {navLinks.map((link, i) => (
+            <div key={link.href}>
+              <Link
+                to={link.href}
+                className="block font-display text-6xl font-300 text-parchment hover:text-oxblood transition-colors duration-300"
+                style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(3rem, 10vw, 6rem)', color: '#F5F0EB', fontWeight: 400, letterSpacing: '0.05em' }}
+              >
+                {link.label}
+              </Link>
+              <div className="h-px w-full mt-4" style={{ background: '#262626', height: '0.5px' }} />
+            </div>
+          ))}
         </div>
       </div>
     </>
