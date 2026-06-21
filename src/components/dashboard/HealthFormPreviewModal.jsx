@@ -207,7 +207,7 @@ export default function HealthFormPreviewModal({ bookingId, healthFormId, client
               {form.client_signature && (
                 <div className="mt-4">
                   <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>— PODPIS KLIENTA</p>
-                  <div style={{ background: '#ffffff', display: 'inline-block', padding: '8px', border: '0.5px solid #cccccc' }}>
+                  <div style={{ background: '#ffffff', display: 'inline-block', padding: '8px', border: `0.5px solid ${t.border}` }}>
                     <img src={form.client_signature} alt="podpis" style={{ maxWidth: '200px', display: 'block' }} />
                   </div>
                 </div>
@@ -224,7 +224,7 @@ export default function HealthFormPreviewModal({ bookingId, healthFormId, client
                   {guardian.guardian_signature && (
                     <div className="mt-3">
                       <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>— PODPIS OPIEKUNA</p>
-                      <div style={{ background: '#ffffff', display: 'inline-block', padding: '8px', border: '0.5px solid #cccccc' }}>
+                      <div style={{ background: '#ffffff', display: 'inline-block', padding: '8px', border: `0.5px solid ${t.border}` }}>
                         <img src={guardian.guardian_signature} alt="podpis opiekuna" style={{ maxWidth: '200px', display: 'block' }} />
                       </div>
                     </div>
