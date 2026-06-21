@@ -425,9 +425,9 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
 
         <button
           onClick={() => setShowImageLightbox(false)}
-            style={{ position: 'absolute', top: '-40px', right: 0, background: 'none', border: 'none', cursor: 'pointer', color: '#FFF', padding: '8px', opacity: 0.6, transition: 'opacity 0.2s' }}
+            style={{ position: 'fixed', top: '24px', right: '24px', background: 'none', border: 'none', cursor: 'pointer', color: '#FFF', padding: '8px', opacity: 0.8, transition: 'opacity 0.2s', zIndex: 72 }}
             onMouseEnter={e => e.target.style.opacity = '1'}
-            onMouseLeave={e => e.target.style.opacity = '0.6'}
+            onMouseLeave={e => e.target.style.opacity = '0.8'}
           >
             <X size={24} />
         </button>
