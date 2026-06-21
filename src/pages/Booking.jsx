@@ -329,7 +329,7 @@ export default function Booking() {
               disabled={submitting}
               className="btn-oxblood animate-pulse-oxblood"
             >
-              {submitting ? 'WYSYŁANIE...' : 'POTWIERDŹ REZERWACJĘ'}
+              {submitting ? 'WYSYŁANIE...' : 'WYŚLIJ ZGŁOSZENIE'}
             </button>
           )}
         </div>
