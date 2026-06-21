@@ -29,6 +29,8 @@ export default function DashboardDocuments() {
 
   const [instructions, setInstructions] = useState([]);
   const [terms, setTerms] = useState(null);
+  const [cookiesPolicy, setCookiesPolicy] = useState(null);
+  const [privacyPolicy, setPrivacyPolicy] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
@@ -51,16 +53,22 @@ export default function DashboardDocuments() {
   // Edit modal
   const [editingInstr, setEditingInstr] = useState(null);
   const [editingTerms, setEditingTerms] = useState(false);
+  const [editingLegal, setEditingLegal] = useState(null); // null | 'cookies' | 'privacy'
   const [instrForm, setInstrForm] = useState({ type: '', title: '', content: '' });
   const [termsForm, setTermsForm] = useState({ title: '', content: '' });
+  const [legalForm, setLegalForm] = useState({ title: '', content: '' });
 
   useEffect(() => {
     Promise.all([
       base44.entities.Instruction.list(),
       base44.entities.TermsAndConditions.filter({ key: 'default' }),
-    ]).then(([i, t_list]) => {
+      base44.entities.TermsAndConditions.filter({ key: 'cookies_policy' }),
+      base44.entities.TermsAndConditions.filter({ key: 'privacy_policy' }),
+    ]).then(([i, t_list, c_list, p_list]) => {
       setInstructions(i);
       setTerms(t_list[0] || null);
+      setCookiesPolicy(c_list[0] || null);
+      setPrivacyPolicy(p_list[0] || null);
     }).finally(() => setLoading(false));
   }, []);
 
@@ -107,6 +115,30 @@ export default function DashboardDocuments() {
         setTerms(created);
       }
       setEditingTerms(false);
+      setSaveError(null);
+      setViewDoc(null);
+    } catch (err) {
+      setSaveError(err?.message || 'Błąd zapisu. Spróbuj ponownie.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveLegal = async () => {
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const existing = editingLegal === 'cookies' ? cookiesPolicy : privacyPolicy;
+      const key = editingLegal === 'cookies' ? 'cookies_policy' : 'privacy_policy';
+      if (existing?.id) {
+        await base44.entities.TermsAndConditions.update(existing.id, { ...legalForm, last_updated: new Date().toISOString().split('T')[0] });
+        const updated = { ...existing, ...legalForm, last_updated: new Date().toISOString().split('T')[0] };
+        if (editingLegal === 'cookies') setCookiesPolicy(updated); else setPrivacyPolicy(updated);
+      } else {
+        const created = await base44.entities.TermsAndConditions.create({ key, ...legalForm, last_updated: new Date().toISOString().split('T')[0] });
+        if (editingLegal === 'cookies') setCookiesPolicy(created); else setPrivacyPolicy(created);
+      }
+      setEditingLegal(null);
       setSaveError(null);
       setViewDoc(null);
     } catch (err) {
@@ -405,6 +437,31 @@ export default function DashboardDocuments() {
               onShare={() => handleShare(terms, 'Regulamin Studia')}
             />
           </div>
+
+          {/* Dokumenty prawne */}
+          <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '24px' }}>
+            <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em', marginBottom: '16px' }}>Dokumenty prawne</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <DocCard
+                label="Polityka Cookies"
+                title={cookiesPolicy?.title}
+                content={cookiesPolicy?.content}
+                onView={() => openViewDoc({ kind: 'terms', data: cookiesPolicy })}
+                onEdit={() => { setLegalForm(cookiesPolicy || { title: 'Polityka Cookies', content: '' }); setEditingLegal('cookies'); setSaveError(null); }}
+                onPrint={() => handlePrint(cookiesPolicy, 'Polityka Cookies', null)}
+                onShare={() => handleShare(cookiesPolicy, 'Polityka Cookies')}
+              />
+              <DocCard
+                label="Polityka Prywatności"
+                title={privacyPolicy?.title}
+                content={privacyPolicy?.content}
+                onView={() => openViewDoc({ kind: 'terms', data: privacyPolicy })}
+                onEdit={() => { setLegalForm(privacyPolicy || { title: 'Polityka Prywatności', content: '' }); setEditingLegal('privacy'); setSaveError(null); }}
+                onPrint={() => handlePrint(privacyPolicy, 'Polityka Prywatności', null)}
+                onShare={() => handleShare(privacyPolicy, 'Polityka Prywatności')}
+              />
+            </div>
+          </div>
         </div>
       )}
 
@@ -536,6 +593,39 @@ export default function DashboardDocuments() {
               <div className="flex gap-4">
                 <button onClick={handleSaveTerms} disabled={saving} className="btn-oxblood flex-1" style={{ padding: '12px', opacity: saving ? 0.5 : 1 }}>{saving ? 'ZAPISYWANIE...' : 'ZAPISZ'}</button>
                 <button onClick={() => { setEditingTerms(false); setSaveError(null); }} className="btn-ghost-parchment">ANULUJ</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal edycji dokumentów prawnych */}
+      {editingLegal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.8)' }} onClick={() => { setEditingLegal(null); setSaveError(null); }}>
+          <div className="w-full max-w-2xl flex flex-col" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, maxHeight: '90vh' }} onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center p-6" style={{ borderBottom: `0.5px solid ${t.border}`, flexShrink: 0 }}>
+              <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em' }}>
+                {editingLegal === 'cookies' ? 'Edytuj Politykę Cookies' : 'Edytuj Politykę Prywatności'}
+              </h3>
+              <button onClick={() => { setEditingLegal(null); setSaveError(null); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><X size={18} /></button>
+            </div>
+
+            <div className="overflow-y-auto p-6 flex-1 space-y-6">
+              <div>
+                <label style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Tytuł</label>
+                <input type="text" value={legalForm.title} onChange={e => setLegalForm({ ...legalForm, title: e.target.value })} style={inputStyle} />
+              </div>
+              <div>
+                <label style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Treść (HTML lub tekst)</label>
+                <textarea rows={15} value={legalForm.content} onChange={e => setLegalForm({ ...legalForm, content: e.target.value })} style={{ ...inputStyle, borderBottom: 'none', border: `0.5px solid ${t.border}`, padding: '12px', resize: 'vertical' }} />
+              </div>
+            </div>
+
+            <div className="p-6 space-y-3" style={{ borderTop: `0.5px solid ${t.border}`, flexShrink: 0 }}>
+              {saveError && <p style={{ ...mono, fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>⚠ {saveError}</p>}
+              <div className="flex gap-4">
+                <button onClick={handleSaveLegal} disabled={saving} className="btn-oxblood flex-1" style={{ padding: '12px', opacity: saving ? 0.5 : 1 }}>{saving ? 'ZAPISYWANIE...' : 'ZAPISZ'}</button>
+                <button onClick={() => { setEditingLegal(null); setSaveError(null); }} className="btn-ghost-parchment">ANULUJ</button>
               </div>
             </div>
           </div>
