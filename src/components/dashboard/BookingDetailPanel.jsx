@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, Edit, Copy, Check, ExternalLink, Mail, FileText, Loader2, History, Save, Download, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 import { base44 } from '@/api/base44Client';
@@ -357,20 +357,27 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
           onClick={e => e.stopPropagation()}
           className="relative max-w-4xl"
         >
-          <img 
-            src={booking.reference_images[lightboxImageIndex]} 
-            alt="preview" 
-            className="max-w-full max-h-[80vh] object-contain cursor-grab active:cursor-grabbing"
-            onTouchStart={(e) => { window.touchStartX = e.touches[0].clientX; }}
-            onTouchEnd={(e) => {
-              const touchEndX = e.changedTouches[0].clientX;
-              const diff = window.touchStartX - touchEndX;
-              if (Math.abs(diff) > 50) {
-                if (diff > 0) setLightboxImageIndex(i => (i + 1) % booking.reference_images.length);
-                else setLightboxImageIndex(i => (i - 1 + booking.reference_images.length) % booking.reference_images.length);
-              }
-            }}
-          />
+          <AnimatePresence mode="wait">
+            <motion.img 
+              key={lightboxImageIndex}
+              src={booking.reference_images[lightboxImageIndex]} 
+              alt="preview" 
+              className="max-w-full max-h-[80vh] object-contain cursor-grab active:cursor-grabbing"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onTouchStart={(e) => { window.touchStartX = e.touches[0].clientX; }}
+              onTouchEnd={(e) => {
+                const touchEndX = e.changedTouches[0].clientX;
+                const diff = window.touchStartX - touchEndX;
+                if (Math.abs(diff) > 50) {
+                  if (diff > 0) setLightboxImageIndex(i => (i + 1) % booking.reference_images.length);
+                  else setLightboxImageIndex(i => (i - 1 + booking.reference_images.length) % booking.reference_images.length);
+                }
+              }}
+            />
+          </AnimatePresence>
           
           {/* Navigation arrows */}
           {booking.reference_images.length > 1 && (
