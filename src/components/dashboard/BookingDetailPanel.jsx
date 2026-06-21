@@ -393,45 +393,46 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
               }}
             />
           </AnimatePresence>
-          
-          {/* Navigation arrows */}
-          {booking.reference_images.length > 1 && (
-            <>
-              <button
-                onClick={() => setLightboxImageIndex(i => (i - 1 + booking.reference_images.length) % booking.reference_images.length)}
-                style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', border: 'none', cursor: 'pointer', color: '#FF007F', padding: '12px', opacity: 0.7, transition: 'opacity 0.2s' }}
-                onMouseEnter={e => e.target.style.opacity = '1'}
-                onMouseLeave={e => e.target.style.opacity = '0.7'}
-                title="Poprzednie"
-              >
-                <ChevronLeft size={28} />
-              </button>
-              <button
-                onClick={() => setLightboxImageIndex(i => (i + 1) % booking.reference_images.length)}
-                style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', border: 'none', cursor: 'pointer', color: '#FF007F', padding: '12px', opacity: 0.7, transition: 'opacity 0.2s' }}
-                onMouseEnter={e => e.target.style.opacity = '1'}
-                onMouseLeave={e => e.target.style.opacity = '0.7'}
-                title="Następne"
-              >
-                <ChevronRight size={28} />
-              </button>
-              <span style={{ position: 'absolute', bottom: '12px', left: '50%', transform: 'translateX(-50%)', fontFamily: 'JetBrains Mono', fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>
-                {lightboxImageIndex + 1} / {booking.reference_images.length}
-              </span>
-            </>
-          )}
+        </motion.div>
+        
+        {/* Navigation arrows - outside image */}
+        {booking.reference_images && booking.reference_images.length > 1 && (
+          <>
+            <button
+              onClick={() => setLightboxImageIndex(i => (i - 1 + booking.reference_images.length) % booking.reference_images.length)}
+              style={{ position: 'fixed', left: '12px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', border: 'none', cursor: 'pointer', color: '#FF007F', padding: '12px', opacity: 0.7, transition: 'opacity 0.2s', zIndex: 71 }}
+              onMouseEnter={e => e.target.style.opacity = '1'}
+              onMouseLeave={e => e.target.style.opacity = '0.7'}
+              title="Poprzednie"
+            >
+              <ChevronLeft size={28} />
+            </button>
+            <button
+              onClick={() => setLightboxImageIndex(i => (i + 1) % booking.reference_images.length)}
+              style={{ position: 'fixed', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', border: 'none', cursor: 'pointer', color: '#FF007F', padding: '12px', opacity: 0.7, transition: 'opacity 0.2s', zIndex: 71 }}
+              onMouseEnter={e => e.target.style.opacity = '1'}
+              onMouseLeave={e => e.target.style.opacity = '0.7'}
+              title="Następne"
+            >
+              <ChevronRight size={28} />
+            </button>
+            <span style={{ position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)', fontFamily: 'JetBrains Mono', fontSize: '11px', color: 'rgba(255,255,255,0.5)', zIndex: 71 }}>
+              {lightboxImageIndex + 1} / {booking.reference_images.length}
+            </span>
+          </>
+        )}
 
-          <button
-            onClick={() => setShowImageLightbox(false)}
+        <button
+          onClick={() => setShowImageLightbox(false)}
             style={{ position: 'absolute', top: '-40px', right: 0, background: 'none', border: 'none', cursor: 'pointer', color: '#FFF', padding: '8px', opacity: 0.6, transition: 'opacity 0.2s' }}
             onMouseEnter={e => e.target.style.opacity = '1'}
             onMouseLeave={e => e.target.style.opacity = '0.6'}
           >
             <X size={24} />
-          </button>
-          <button
-            onClick={() => {
-              const isMobile = /iPhone|iPad|Android|webOS|BlackBerry/i.test(navigator.userAgent);
+        </button>
+        <button
+          onClick={() => {
+            const isMobile = /iPhone|iPad|Android|webOS|BlackBerry/i.test(navigator.userAgent);
               const url = booking.reference_images[lightboxImageIndex];
               
               const a = document.createElement('a');
@@ -439,15 +440,14 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
               a.download = isMobile ? '' : `reference-${lightboxImageIndex}.jpg`;
               document.body.appendChild(a);
               a.click();
-              document.body.removeChild(a);
-            }}
-            style={{ position: 'absolute', bottom: '12px', right: '12px', background: 'rgba(255,0,127,0.9)', color: '#FFF', padding: '8px 12px', border: 'none', cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px', fontFamily: 'JetBrains Mono', fontSize: '10px', textTransform: 'uppercase', opacity: 0.7, transition: 'opacity 0.2s' }}
-            onMouseEnter={e => e.target.style.opacity = '1'}
-            onMouseLeave={e => e.target.style.opacity = '0.7'}
-          >
-            <Download size={11} />
-          </button>
-        </motion.div>
+            document.body.removeChild(a);
+          }}
+          style={{ position: 'fixed', bottom: '12px', right: '12px', background: 'rgba(255,0,127,0.9)', color: '#FFF', padding: '8px 12px', border: 'none', cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px', fontFamily: 'JetBrains Mono', fontSize: '10px', textTransform: 'uppercase', opacity: 0.7, transition: 'opacity 0.2s', zIndex: 71 }}
+          onMouseEnter={e => e.target.style.opacity = '1'}
+          onMouseLeave={e => e.target.style.opacity = '0.7'}
+        >
+          <Download size={11} />
+        </button>
       </motion.div>
     )}
     </>
