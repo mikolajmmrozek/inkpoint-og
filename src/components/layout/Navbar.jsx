@@ -138,7 +138,7 @@ export default function Navbar() {
         menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
       }`} style={{ background: '#0A0A0A' }}>
         <div className="space-y-8">
-          <div className="flex gap-3 mb-8">
+          <div className="flex gap-3 mb-8" style={{ marginTop: '60px' }}>
             <button
               onClick={handleAccountClick}
               className="flex items-center justify-center gap-2"
