@@ -136,7 +136,7 @@ export default function Booking() {
             <Check size={24} color="#FF007F" />
           </div>
           <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '3rem', fontWeight: 700, color: '#F5F0EB' }}>
-            Rezerwacja potwierdzona
+            Przetwarzamy Twoje zgłoszenie
           </h2>
           <p className="mt-6 text-sm leading-relaxed" style={{ color: 'rgba(245,240,235,0.5)', fontSize: '15px' }}>
             Zgłoszenie wysłane. Otrzymasz od nas potwierdzenie terminu najszybciej jak to możliwe. Skontaktujemy się z Tobą w sprawie szczegółów.
