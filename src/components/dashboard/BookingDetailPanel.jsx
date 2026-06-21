@@ -363,6 +363,8 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
           paddingBottom: 'max(env(safe-area-inset-bottom), 1rem)',
           zIndex: 70,
           pointerEvents: 'auto',
+          touchAction: 'none',
+          overflow: 'hidden',
         }}
       >
         <motion.div
@@ -399,7 +401,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
         {booking.reference_images && booking.reference_images.length > 1 && (
           <>
             <button
-              onClick={() => setLightboxImageIndex(i => (i - 1 + booking.reference_images.length) % booking.reference_images.length)}
+              onClick={(e) => { e.stopPropagation(); setLightboxImageIndex(i => (i - 1 + booking.reference_images.length) % booking.reference_images.length); }}
               style={{ position: 'fixed', left: '12px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', border: 'none', cursor: 'pointer', color: '#FF007F', padding: '12px', opacity: 0.7, transition: 'opacity 0.2s', zIndex: 71 }}
               onMouseEnter={e => e.target.style.opacity = '1'}
               onMouseLeave={e => e.target.style.opacity = '0.7'}
@@ -408,7 +410,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
               <ChevronLeft size={28} />
             </button>
             <button
-              onClick={() => setLightboxImageIndex(i => (i + 1) % booking.reference_images.length)}
+              onClick={(e) => { e.stopPropagation(); setLightboxImageIndex(i => (i + 1) % booking.reference_images.length); }}
               style={{ position: 'fixed', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', border: 'none', cursor: 'pointer', color: '#FF007F', padding: '12px', opacity: 0.7, transition: 'opacity 0.2s', zIndex: 71 }}
               onMouseEnter={e => e.target.style.opacity = '1'}
               onMouseLeave={e => e.target.style.opacity = '0.7'}
