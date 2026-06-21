@@ -1,0 +1,39 @@
+{
+  "name": "UserLog",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID u\u017cytkownika"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "E-mail u\u017cytkownika"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "login",
+        "page_view",
+        "session_view",
+        "health_form_view",
+        "profile_update",
+        "change_request",
+        "message_sent"
+      ],
+      "description": "Typ zdarzenia"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Dodatkowe dane kontekstowe (np. \u015bcie\u017cka, booking_id)"
+    },
+    "user_agent": {
+      "type": "string",
+      "description": "User-Agent przegl\u0105darki"
+    }
+  },
+  "required": [
+    "user_id",
+    "event_type"
+  ]
+}

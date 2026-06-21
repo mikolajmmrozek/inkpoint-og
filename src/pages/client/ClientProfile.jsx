@@ -1,0 +1,130 @@
+import { useState, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
+import { Loader2 } from 'lucide-react';
+
+const inputStyle = {
+  background: 'transparent',
+  border: 'none',
+  borderBottom: '0.5px solid #262626',
+  color: '#F5F0EB',
+  padding: '10px 0',
+  fontSize: '14px',
+  width: '100%',
+  outline: 'none',
+  fontFamily: 'Inter, sans-serif',
+};
+
+export default function ClientProfile() {
+  const { client, user } = useOutletContext();
+  const [form, setForm] = useState({ phone: '', notes: '' });
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (client) {
+      setForm({ phone: client.phone || '', notes: client.notes || '' });
+    }
+  }, [client]);
+
+  const handleSave = async () => {
+    if (!client?.id) return;
+    setSaving(true);
+    await base44.entities.Client.update(client.id, {
+      phone: form.phone,
+      notes: form.notes,
+    });
+
+    base44.functions.invoke('trackUserActivity', {
+      event_type: 'profile_update',
+      metadata: {}
+    }).catch(() => null);
+
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
+  };
+
+  const label = (text) => (
+    <label className="block mb-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>{text}</label>
+  );
+
+  return (
+    <div>
+      <div className="mb-8">
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>
+          KONTO
+        </p>
+        <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: '#F5F0EB', lineHeight: 1, letterSpacing: '0.04em' }}>
+          Twój Profil
+        </h1>
+      </div>
+
+      {/* Read-only account info */}
+      <div className="mb-8 space-y-4">
+        <div>
+          {label('Imię i Nazwisko')}
+          <input
+            readOnly
+            value={client?.name || user?.full_name || ''}
+            style={{ ...inputStyle, color: 'rgba(245,240,235,0.5)', cursor: 'default' }}
+          />
+        </div>
+        <div>
+          {label('E-mail')}
+          <input
+            readOnly
+            value={user?.email || ''}
+            style={{ ...inputStyle, color: 'rgba(245,240,235,0.5)', cursor: 'default' }}
+          />
+        </div>
+      </div>
+
+      <div className="pt-6" style={{ borderTop: '0.5px solid #262626' }}>
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>
+          DANE EDYTOWALNE
+        </p>
+        <div className="space-y-5">
+          <div>
+            {label('Telefon')}
+            <input
+              style={inputStyle}
+              value={form.phone}
+              onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+              onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
+              onBlur={e => e.target.style.borderBottomColor = '#262626'}
+            />
+          </div>
+          <div>
+            {label('Notatki / Preferencje')}
+            <textarea
+              rows={4}
+              style={{ ...inputStyle, resize: 'none' }}
+              value={form.notes}
+              onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
+              placeholder="Alergie, preferencje, ważne informacje..."
+              onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
+              onBlur={e => e.target.style.borderBottomColor = '#262626'}
+            />
+          </div>
+        </div>
+
+        <div className="mt-8 flex items-center gap-4">
+          <button
+            onClick={handleSave}
+            disabled={saving || !client?.id}
+            className="btn-oxblood flex items-center gap-2"
+            style={{ opacity: (saving || !client?.id) ? 0.5 : 1 }}
+          >
+            {saving ? <><Loader2 size={13} className="animate-spin" /> ZAPISYWANIE...</> : 'ZAPISZ ZMIANY'}
+          </button>
+          {saved && (
+            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.1em' }}>
+              ✓ ZAPISANO
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

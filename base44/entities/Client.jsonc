@@ -30,6 +30,24 @@
       "type": "number",
       "default": 0,
       "description": "Liczba sesji"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "ID powi\u0105zanego konta u\u017cytkownika (Base44 User)"
+    },
+    "invite_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Czy wys\u0142ano zaproszenie do aplikacji"
+    },
+    "invite_sent_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data wys\u0142ania zaproszenia"
+    },
+    "last_login": {
+      "type": "string",
+      "description": "Data ostatniego logowania klienta (ISO)"
     }
   },
   "required": [

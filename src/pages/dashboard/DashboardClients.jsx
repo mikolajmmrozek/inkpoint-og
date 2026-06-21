@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
-import { Search, Edit2, Trash2, X, Plus, ChevronDown, ChevronUp, CalendarPlus, Merge, Loader2 } from 'lucide-react';
+import { Search, Edit2, Trash2, X, Plus, ChevronDown, ChevronUp, CalendarPlus, Merge, Loader2, UserPlus, Check } from 'lucide-react';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 import BookingModal from '@/components/dashboard/BookingModal';
 import { format } from 'date-fns';
@@ -45,16 +45,20 @@ export default function DashboardClients() {
   const [mergeSearch, setMergeSearch] = useState('');
   const [merging, setMerging] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null); // client to delete
+  const [users, setUsers] = useState([]);
+  const [inviteStatus, setInviteStatus] = useState({}); // { [clientId]: 'inviting' | 'invited' | 'error' }
 
   const load = async () => {
-    const [clientData, bookingData, formData] = await Promise.all([
+    const [clientData, bookingData, formData, userData] = await Promise.all([
       base44.entities.Client.list('-created_date', 200),
       base44.entities.Booking.list('-session_date', 500),
       base44.entities.HealthForm.list('-form_filled_date', 500),
+      base44.entities.User.list('-created_date', 200).catch(() => []),
     ]);
     setClients(clientData);
     setBookings(bookingData);
     setHealthForms(formData);
+    setUsers(userData);
     setLoading(false);
   };
 
@@ -84,6 +88,30 @@ export default function DashboardClients() {
     });
 
     return { sessions, forms };
+  };
+
+  const getClientStatus = (client) => {
+    if (!client.email) return 'no_email';
+    const userExists = users.some(u => u.email?.toLowerCase() === client.email.toLowerCase());
+    if (userExists) return 'active';
+    if (client.invite_sent) return 'invited';
+    return 'inactive';
+  };
+
+  const handleInvite = async (client) => {
+    setInviteStatus(s => ({ ...s, [client.id]: 'inviting' }));
+    try {
+      await base44.users.inviteUser(client.email, 'user');
+      await base44.entities.Client.update(client.id, {
+        invite_sent: true,
+        invite_sent_date: new Date().toISOString().split('T')[0],
+      });
+      setInviteStatus(s => ({ ...s, [client.id]: 'invited' }));
+      base44.entities.User.list().then(setUsers);
+      load();
+    } catch (err) {
+      setInviteStatus(s => ({ ...s, [client.id]: 'error' }));
+    }
   };
 
   const filtered = clients
@@ -269,6 +297,9 @@ export default function DashboardClients() {
                 <div className="md:hidden px-4 py-3 flex items-center justify-between cursor-pointer" style={{ borderBottom: `0.5px solid ${t.border}`, background: isExpanded ? 'rgba(255,0,127,0.03)' : 'transparent' }} onClick={() => setExpandedClient(isExpanded ? null : c.id)}>
                   <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{c.name}</p>
                   <div className="flex gap-2">
+                    {c.email && getClientStatus(c) === 'inactive' && (
+                      <button onClick={(e) => { e.stopPropagation(); handleInvite(c); }} style={{ color: '#FF007F', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} title="Utwórz konto i zaproś"><UserPlus size={13} /></button>
+                    )}
                     <button onClick={(e) => { e.stopPropagation(); openNewSession(c); }} style={{ color: '#16a34a', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} title="Nowa sesja"><CalendarPlus size={13} /></button>
                     <button onClick={(e) => { e.stopPropagation(); setMergeSource(c); setMergeTarget(null); setMergeSearch(''); }} style={{ color: '#a855f7', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} title="Połącz"><Merge size={13} /></button>
                     <button onClick={(e) => { e.stopPropagation(); openEdit(c); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><Edit2 size={13} /></button>
@@ -291,8 +322,27 @@ export default function DashboardClients() {
                       {c.notes && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.notes}</p>}
                     </div>
                   </div>
-                  <div className="col-span-3">
-                    {c.email ? <a href={`mailto:${c.email}`} onClick={e => e.stopPropagation()} style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.04em', textDecoration: 'none' }} onMouseEnter={e => e.target.style.color = '#FF007F'} onMouseLeave={e => e.target.style.color = t.muted}>{c.email}</a> : <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>—</span>}
+                  <div className="col-span-3 flex items-center gap-2">
+                    {c.email ? (
+                      <>
+                        <a href={`mailto:${c.email}`} onClick={e => e.stopPropagation()} style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.04em', textDecoration: 'none' }} onMouseEnter={e => e.target.style.color = '#FF007F'} onMouseLeave={e => e.target.style.color = t.muted}>{c.email}</a>
+                        {(() => {
+                          const st = getClientStatus(c);
+                          const dotColor = st === 'active' ? '#16a34a' : st === 'invited' ? '#f59e0b' : 'rgba(245,240,235,0.2)';
+                          const tip = st === 'active' ? 'Konto aktywne' : st === 'invited' ? 'Zaproszony — czeka na logowanie' : 'Brak konta — kliknij + aby zaprosić';
+                          return <div title={tip} style={{ width: '6px', height: '6px', borderRadius: '50%', background: dotColor, flexShrink: 0 }} />;
+                        })()}
+                        {getClientStatus(c) === 'inactive' && inviteStatus[c.id] !== 'inviting' && inviteStatus[c.id] !== 'invited' && (
+                          <button onClick={(e) => { e.stopPropagation(); handleInvite(c); }} title="Utwórz konto i zaproś do aplikacji" style={{ color: '#FF007F', background: 'none', border: 'none', cursor: 'pointer', padding: '0', display: 'flex', alignItems: 'center' }}>
+                            <UserPlus size={11} />
+                          </button>
+                        )}
+                        {inviteStatus[c.id] === 'inviting' && <Loader2 size={11} className="animate-spin" color={t.muted} />}
+                        {inviteStatus[c.id] === 'invited' && <Check size={11} color="#16a34a" />}
+                      </>
+                    ) : (
+                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>—</span>
+                    )}
                   </div>
                   <div className="col-span-2">
                     {c.phone ? <a href={`tel:${c.phone}`} onClick={e => e.stopPropagation()} style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, textDecoration: 'none' }} onMouseEnter={e => e.target.style.color = '#FF007F'} onMouseLeave={e => e.target.style.color = t.muted}>{c.phone}</a> : <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>—</span>}

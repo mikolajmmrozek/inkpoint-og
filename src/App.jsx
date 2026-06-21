@@ -41,6 +41,11 @@ import ArtistHome from './pages/artist/ArtistHome';
 import ArtistSchedule from './pages/artist/ArtistSchedule';
 import ArtistStats from './pages/artist/ArtistStats';
 import ArtistProfilePage from './pages/artist/ArtistProfile';
+import ClientPanel from './pages/client/ClientPanel';
+import ClientHome from './pages/client/ClientHome';
+import ClientSessions from './pages/client/ClientSessions';
+import ClientHealthForms from './pages/client/ClientHealthForms';
+import ClientProfile from './pages/client/ClientProfile';
 import FeedbackSurvey from './pages/FeedbackSurvey';
 import ScrollToTop from './components/ScrollToTop';
 import { useEffect } from 'react';
@@ -51,14 +56,15 @@ const isIOSStandalone = () => {
 };
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const { user, isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!isLoadingAuth && !isLoadingPublicSettings && !authError && isIOSStandalone()) {
       const currentPath = window.location.pathname;
       if (currentPath === '/') {
-        navigate('/dashboard', { replace: true });
+        const target = user?.role === 'artist' ? '/artist' : user?.role === 'user' ? '/panel' : '/dashboard';
+        navigate(target, { replace: true });
       }
     }
   }, [isLoadingAuth, isLoadingPublicSettings, authError, navigate]);
@@ -121,6 +127,14 @@ const AuthenticatedApp = () => {
         <Route path="schedule" element={<ArtistSchedule />} />
         <Route path="stats" element={<ArtistStats />} />
         <Route path="profile" element={<ArtistProfilePage />} />
+      </Route>
+
+      {/* Client panel */}
+      <Route path="/panel" element={<ClientPanel />}>
+        <Route index element={<ClientHome />} />
+        <Route path="sessions" element={<ClientSessions />} />
+        <Route path="health-forms" element={<ClientHealthForms />} />
+        <Route path="profile" element={<ClientProfile />} />
       </Route>
 
       <Route path="*" element={<PageNotFound />} />
