@@ -325,13 +325,13 @@ export default function DashboardClients() {
                   <div className="col-span-3 flex items-center gap-2">
                     {c.email ? (
                       <>
-                        <a href={`mailto:${c.email}`} onClick={e => e.stopPropagation()} style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.04em', textDecoration: 'none' }} onMouseEnter={e => e.target.style.color = '#FF007F'} onMouseLeave={e => e.target.style.color = t.muted}>{c.email}</a>
                         {(() => {
                           const st = getClientStatus(c);
                           const dotColor = st === 'active' ? '#16a34a' : st === 'invited' ? '#f59e0b' : 'rgba(245,240,235,0.2)';
                           const tip = st === 'active' ? 'Konto aktywne' : st === 'invited' ? 'Zaproszony — czeka na logowanie' : 'Brak konta — kliknij + aby zaprosić';
                           return <div title={tip} style={{ width: '6px', height: '6px', borderRadius: '50%', background: dotColor, flexShrink: 0 }} />;
                         })()}
+                        <a href={`mailto:${c.email}`} onClick={e => e.stopPropagation()} style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.04em', textDecoration: 'none' }} onMouseEnter={e => e.target.style.color = '#FF007F'} onMouseLeave={e => e.target.style.color = t.muted}>{c.email}</a>
                         {inviteStatus[c.id] === 'inviting' && <Loader2 size={11} className="animate-spin" color={t.muted} />}
                         {inviteStatus[c.id] === 'invited' && <Check size={11} color="#16a34a" />}
                       </>
