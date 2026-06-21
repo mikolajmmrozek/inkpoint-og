@@ -6,7 +6,8 @@ import { pl } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getAvailabilityForDay } from '@/components/dashboard/ArtistScheduleEditor';
 
-const SLOT_INTERVAL = 60;
+const SLOT_INTERVAL = 15;
+const BOOKING_DURATION = 60;
 
 const DAY_SHORT = ['Nd', 'Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb'];
 const WEEKDAYS = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb', 'Nd'];
@@ -43,31 +44,42 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
 
   const getDayBookings = (dateStr) => bookings.filter(b => b.session_date === dateStr);
 
-  const getAvailableSlots = (dateStr) => {
+  // Returns array of { time, status: 'free' | 'booked' | 'outside' }
+  const getAllSlots = (dateStr) => {
     const avail = getAvailabilityForDay(availability, artistId, dateStr);
     if (!avail.isWorkday || !avail.start_time || !avail.end_time) return [];
     const workStart = toMin(avail.start_time);
     const workEnd = toMin(avail.end_time);
     if (workStart === null || workEnd === null) return [];
     const dayBk = getDayBookings(dateStr);
+
+    // Round up start to the next 15-min boundary aligned to the hour
+    const startHour = Math.floor(workStart / 60);
+    const startAligned = startHour * 60; // may be before workStart
     const slots = [];
-    for (let t = workStart; t + SLOT_INTERVAL <= workEnd; t += SLOT_INTERVAL) {
+    for (let t = startAligned; t + BOOKING_DURATION <= workEnd; t += SLOT_INTERVAL) {
       const slotStart = t;
-      const slotEnd = t + SLOT_INTERVAL;
+      const slotEnd = t + BOOKING_DURATION;
+      const withinHours = slotStart >= workStart && slotEnd <= workEnd;
       const hasOverlap = dayBk.some(b => {
         const bkStart = toMin(b.session_time);
         const bkEnd = toMin(b.session_end_time) || (bkStart + (b.session_duration || 60));
         return bkStart !== null && bkStart < slotEnd && bkEnd > slotStart;
       });
-      if (!hasOverlap) slots.push(minToTime(slotStart));
+      slots.push({
+        time: minToTime(slotStart),
+        status: !withinHours ? 'outside' : hasOverlap ? 'booked' : 'free',
+      });
     }
     return slots;
   };
 
+  const getAvailableSlots = (dateStr) => getAllSlots(dateStr).filter(s => s.status === 'free').map(s => s.time);
+
   const isDayAvailable = (dateStr) => {
     const avail = getAvailabilityForDay(availability, artistId, dateStr);
     if (!avail.isWorkday) return false;
-    return getAvailableSlots(dateStr).length > 0;
+    return getAllSlots(dateStr).some(s => s.status === 'free');
   };
 
   // Auto-select first available day
@@ -93,7 +105,7 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
 
   const today = startOfDay(new Date());
   const dayTiles = Array.from({ length: 7 }, (_, i) => addDays(today, i + 1));
-  const selectedSlots = selectedDate ? getAvailableSlots(selectedDate) : [];
+  const allSlots = selectedDate ? getAllSlots(selectedDate) : [];
 
   // Calendar
   const monthStart = startOfMonth(viewMonth);
@@ -163,31 +175,41 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
           <label className="block mb-4" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
             {format(parseISO(selectedDate), 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase()} — wybierz godzinę *
           </label>
-          {selectedSlots.length === 0 ? (
+          {allSlots.length === 0 || !allSlots.some(s => s.status === 'free') ? (
             <div className="py-8 text-center" style={{ border: '0.5px solid #262626' }}>
               <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em' }}>
                 W TYM DNIU NIE MA WOLNYCH TERMINÓW
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
-              {selectedSlots.map(time => (
-                <button
-                  key={time}
-                  onClick={() => onTimeChange(time)}
-                  className="py-3 transition-all duration-200"
-                  style={{
-                    border: selectedTime === time ? '0.5px solid #FF007F' : '0.5px solid #262626',
-                    background: selectedTime === time ? 'rgba(255,0,127,0.08)' : 'transparent',
-                    fontFamily: 'JetBrains Mono',
-                    fontSize: '11px',
-                    color: selectedTime === time ? '#FF007F' : 'rgba(245,240,235,0.5)',
-                    letterSpacing: '0.05em',
-                  }}
-                >
-                  {time}
-                </button>
-              ))}
+            <div className="grid grid-cols-4 gap-2">
+              {allSlots.map(slot => {
+                if (slot.status === 'outside') {
+                  return <div key={slot.time} style={{ minHeight: '44px' }} />;
+                }
+                const isSelected = selectedTime === slot.time;
+                const isBooked = slot.status === 'booked';
+                return (
+                  <button
+                    key={slot.time}
+                    onClick={() => !isBooked && onTimeChange(slot.time)}
+                    disabled={isBooked}
+                    className="py-3 transition-all duration-200"
+                    style={{
+                      border: `0.5px solid ${isSelected ? '#FF007F' : isBooked ? '#262626' : '#262626'}`,
+                      background: isSelected ? 'rgba(255,0,127,0.08)' : isBooked ? 'rgba(245,240,235,0.02)' : 'transparent',
+                      fontFamily: 'JetBrains Mono',
+                      fontSize: '11px',
+                      color: isSelected ? '#FF007F' : isBooked ? 'rgba(245,240,235,0.2)' : 'rgba(245,240,235,0.5)',
+                      letterSpacing: '0.05em',
+                      cursor: isBooked ? 'not-allowed' : 'pointer',
+                      textDecoration: isBooked ? 'line-through' : 'none',
+                    }}
+                  >
+                    {slot.time}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
