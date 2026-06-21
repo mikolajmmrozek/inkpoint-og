@@ -363,10 +363,10 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
               src={booking.reference_images[lightboxImageIndex]} 
               alt="preview" 
               className="max-w-full max-h-[80vh] object-contain cursor-grab active:cursor-grabbing"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
               onTouchStart={(e) => { window.touchStartX = e.touches[0].clientX; }}
               onTouchEnd={(e) => {
                 const touchEndX = e.changedTouches[0].clientX;
@@ -384,7 +384,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
             <>
               <button
                 onClick={() => setLightboxImageIndex(i => (i - 1 + booking.reference_images.length) % booking.reference_images.length)}
-                style={{ position: 'absolute', left: '-50px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#FF007F', padding: '12px', opacity: 0.7, transition: 'opacity 0.2s' }}
+                style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', border: 'none', cursor: 'pointer', color: '#FF007F', padding: '12px', opacity: 0.7, transition: 'opacity 0.2s' }}
                 onMouseEnter={e => e.target.style.opacity = '1'}
                 onMouseLeave={e => e.target.style.opacity = '0.7'}
                 title="Poprzednie"
@@ -393,7 +393,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
               </button>
               <button
                 onClick={() => setLightboxImageIndex(i => (i + 1) % booking.reference_images.length)}
-                style={{ position: 'absolute', right: '-50px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#FF007F', padding: '12px', opacity: 0.7, transition: 'opacity 0.2s' }}
+                style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', border: 'none', cursor: 'pointer', color: '#FF007F', padding: '12px', opacity: 0.7, transition: 'opacity 0.2s' }}
                 onMouseEnter={e => e.target.style.opacity = '1'}
                 onMouseLeave={e => e.target.style.opacity = '0.7'}
                 title="Następne"
