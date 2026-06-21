@@ -67,7 +67,7 @@ export default function ArtistProfile() {
         {/* Split layout */}
         <div className="flex flex-col md:flex-row gap-0" style={{ border: 'none' }}>
           {/* LEFT — Sticky bio */}
-          <div className="md:w-96 md:flex-shrink-0 px-8 md:px-16 md:sticky md:top-24 md:self-start pb-16">
+          <div className="md:w-96 md:flex-shrink-0 px-8 md:px-16 md:sticky md:top-24 md:self-start pb-16 border-none">
             <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8 }}>
               <div className="relative w-full h-auto md:h-96 mb-8 md:overflow-hidden">
                 <img
