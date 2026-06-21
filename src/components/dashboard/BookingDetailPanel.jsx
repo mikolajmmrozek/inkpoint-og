@@ -410,15 +410,35 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
           >
             <X size={24} />
           </button>
-          <a
-            href={booking.reference_images[lightboxImageIndex]}
-            download={`reference-${lightboxImageIndex}`}
+          <button
+            onClick={async () => {
+              const isMobile = /iPhone|iPad|Android|webOS|BlackBerry/i.test(navigator.userAgent);
+              const url = booking.reference_images[lightboxImageIndex];
+              
+              if (isMobile) {
+                window.open(url, '_blank');
+              } else {
+                try {
+                  const res = await fetch(url);
+                  const blob = await res.blob();
+                  const a = document.createElement('a');
+                  a.href = URL.createObjectURL(blob);
+                  a.download = `reference-${lightboxImageIndex}.jpg`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(a.href);
+                } catch (e) {
+                  window.open(url, '_blank');
+                }
+              }
+            }}
             style={{ position: 'absolute', bottom: '12px', right: '12px', background: 'rgba(255,0,127,0.9)', color: '#FFF', padding: '8px 12px', border: 'none', cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px', fontFamily: 'JetBrains Mono', fontSize: '10px', textTransform: 'uppercase', opacity: 0.7, transition: 'opacity 0.2s' }}
             onMouseEnter={e => e.target.style.opacity = '1'}
             onMouseLeave={e => e.target.style.opacity = '0.7'}
           >
             <Download size={11} />
-          </a>
+          </button>
         </motion.div>
       </motion.div>
     )}
