@@ -28,6 +28,7 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
   const [loading, setLoading] = useState(true);
   const [showCalendar, setShowCalendar] = useState(false);
   const [viewMonth, setViewMonth] = useState(new Date());
+  const [weekOffset, setWeekOffset] = useState(0);
 
   useEffect(() => {
     if (!artistId) return;
@@ -101,10 +102,14 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
     if (selectedTime && !getAvailableSlots(dateStr).includes(selectedTime)) {
       onTimeChange('');
     }
+    // Sync week offset so the selected date is within the visible week
+    const sel = parseISO(dateStr);
+    const daysFromToday = Math.round((sel - today) / 86400000);
+    setWeekOffset(Math.max(0, Math.floor((daysFromToday - 1) / 7)));
   };
 
   const today = startOfDay(new Date());
-  const dayTiles = Array.from({ length: 7 }, (_, i) => addDays(today, i + 1));
+  const dayTiles = Array.from({ length: 7 }, (_, i) => addDays(today, weekOffset * 7 + i + 1));
   const allSlots = selectedDate ? getAllSlots(selectedDate) : [];
 
   // Calendar
@@ -134,38 +139,71 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
             <div className="flex justify-center py-6 w-full">
               <div className="w-8 h-px animate-pulse" style={{ background: '#FF007F' }} />
             </div>
-          ) : dayTiles.map(day => {
-            const dateStr = format(day, 'yyyy-MM-dd');
-            const hasSlots = isDayAvailable(dateStr);
-            const isSelected = selectedDate === dateStr;
-            return (
+          ) : (
+            <>
               <button
-                key={dateStr}
-                onClick={() => hasSlots && handleDateSelect(dateStr)}
-                disabled={!hasSlots}
-                className="flex-shrink-0 transition-all duration-200"
+                onClick={() => setWeekOffset(w => Math.max(0, w - 1))}
+                disabled={weekOffset === 0}
+                className="flex-shrink-0 flex items-center justify-center"
                 style={{
-                  minWidth: '72px',
-                  padding: '12px 8px',
-                  border: `0.5px solid ${isSelected ? '#FF007F' : hasSlots ? '#262626' : '#1a1a1a'}`,
-                  background: isSelected ? 'rgba(255,0,127,0.08)' : 'transparent',
-                  cursor: hasSlots ? 'pointer' : 'default',
-                  opacity: hasSlots ? 1 : 0.25,
-                  textAlign: 'center',
+                  minWidth: '36px',
+                  border: '0.5px solid #262626',
+                  background: 'transparent',
+                  color: weekOffset === 0 ? 'rgba(245,240,235,0.15)' : 'rgba(245,240,235,0.5)',
+                  cursor: weekOffset === 0 ? 'default' : 'pointer',
+                  transition: 'all 0.2s ease',
                 }}
               >
-                <div style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: isSelected ? '#FF007F' : 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                  {DAY_SHORT[day.getDay()]}
-                </div>
-                <div style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.5rem', color: isSelected ? '#FF007F' : '#F5F0EB', lineHeight: 1, marginTop: '4px' }}>
-                  {format(day, 'd')}
-                </div>
-                <div style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: '2px' }}>
-                  {format(day, 'MMM', { locale: pl })}
-                </div>
+                <ChevronLeft size={16} />
               </button>
-            );
-          })}
+              {dayTiles.map(day => {
+                const dateStr = format(day, 'yyyy-MM-dd');
+                const hasSlots = isDayAvailable(dateStr);
+                const isSelected = selectedDate === dateStr;
+                return (
+                  <button
+                    key={dateStr}
+                    onClick={() => hasSlots && handleDateSelect(dateStr)}
+                    disabled={!hasSlots}
+                    className="flex-shrink-0 transition-all duration-200"
+                    style={{
+                      minWidth: '72px',
+                      padding: '12px 8px',
+                      border: `0.5px solid ${isSelected ? '#FF007F' : hasSlots ? '#262626' : '#1a1a1a'}`,
+                      background: isSelected ? 'rgba(255,0,127,0.08)' : 'transparent',
+                      cursor: hasSlots ? 'pointer' : 'default',
+                      opacity: hasSlots ? 1 : 0.25,
+                      textAlign: 'center',
+                    }}
+                  >
+                    <div style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: isSelected ? '#FF007F' : 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                      {DAY_SHORT[day.getDay()]}
+                    </div>
+                    <div style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.5rem', color: isSelected ? '#FF007F' : '#F5F0EB', lineHeight: 1, marginTop: '4px' }}>
+                      {format(day, 'd')}
+                    </div>
+                    <div style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: '2px' }}>
+                      {format(day, 'MMM', { locale: pl })}
+                    </div>
+                  </button>
+                );
+              })}
+              <button
+                onClick={() => setWeekOffset(w => w + 1)}
+                className="flex-shrink-0 flex items-center justify-center"
+                style={{
+                  minWidth: '36px',
+                  border: '0.5px solid #262626',
+                  background: 'transparent',
+                  color: 'rgba(245,240,235,0.5)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                <ChevronRight size={16} />
+              </button>
+            </>
+          )}
         </div>
       </div>
 
