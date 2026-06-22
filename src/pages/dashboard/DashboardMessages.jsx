@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Trash2, Send, ArrowLeft, Mail, MailOpen, Loader2 } from 'lucide-react';
+import { Trash2, Send, ArrowLeft, Mail, MailOpen, Loader2, Search, X } from 'lucide-react';
 import { useTheme } from './Dashboard';
 import { format } from 'date-fns';
 import BookingCard from '@/components/dashboard/BookingCard';
@@ -18,6 +18,7 @@ export default function DashboardMessages() {
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const messagesEndRef = useRef(null);
 
   const load = async () => {
@@ -50,6 +51,20 @@ export default function DashboardMessages() {
       };
     }).sort((a, b) => new Date(b.lastMessage.created_date) - new Date(a.lastMessage.created_date));
   })();
+
+  const filteredThreads = searchQuery.trim()
+    ? threads.filter(th => {
+        const q = searchQuery.toLowerCase().trim();
+        return (th.clientName || '').toLowerCase().includes(q) ||
+               (th.email || '').toLowerCase().includes(q) ||
+               (th.phone || '').toLowerCase().includes(q) ||
+               th.messages.some(m =>
+                 (m.message || '').toLowerCase().includes(q) ||
+                 (m.subject || '').toLowerCase().includes(q) ||
+                 (m.name || '').toLowerCase().includes(q)
+               );
+      })
+    : threads;
 
   const selectedThread = threads.find(th => th.email === selectedEmail);
 
@@ -134,6 +149,25 @@ export default function DashboardMessages() {
         </h2>
       </div>
 
+      {/* Search bar */}
+      <div className="mb-6 relative">
+        <Search size={14} color={t.muted} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          placeholder="Szukaj po imieniu, emailu, telefonie, treści wiadomości..."
+          style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '12px 14px 12px 38px', fontSize: '13px', color: t.text, fontFamily: 'Inter, sans-serif', outline: 'none' }}
+          onFocus={e => e.target.style.borderColor = t.fuchsia}
+          onBlur={e => e.target.style.borderColor = t.border}
+        />
+        {searchQuery && (
+          <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}>
+            <X size={14} />
+          </button>
+        )}
+      </div>
+
       <div className="grid lg:grid-cols-5 gap-6">
         {/* Thread List */}
         <div className={`lg:col-span-2 ${selectedEmail ? 'hidden lg:block' : 'block'}`} style={{ border: `0.5px solid ${t.border}`, background: t.bg, minHeight: '500px' }}>
@@ -141,17 +175,17 @@ export default function DashboardMessages() {
             <div className="flex items-center justify-center py-20">
               <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
             </div>
-          ) : threads.length === 0 ? (
+          ) : filteredThreads.length === 0 ? (
             <div className="py-20 text-center">
               <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
                 BRAK WIADOMOŚCI
               </p>
             </div>
-          ) : threads.map((th, i) => (
+          ) : filteredThreads.map((th, i) => (
             <div
               key={th.email}
               className="flex items-center gap-3 p-4 cursor-pointer transition-colors"
-              style={{ borderBottom: i < threads.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selectedEmail === th.email ? 'rgba(255,0,127,0.05)' : 'transparent' }}
+              style={{ borderBottom: i < filteredThreads.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selectedEmail === th.email ? 'rgba(255,0,127,0.05)' : 'transparent' }}
               onClick={() => handleSelectThread(th.email)}
             >
               <div className="flex-shrink-0">
@@ -186,8 +220,8 @@ export default function DashboardMessages() {
           ))}
         </div>
 
-        {/* Conversation View */}
-        <div className={`lg:col-span-3 ${selectedEmail ? 'block' : 'hidden lg:block'}`} style={{ border: `0.5px solid ${t.border}`, background: t.bg, minHeight: '500px', display: 'flex', flexDirection: 'column' }}>
+        {/* Conversation View — full screen overlay on mobile */}
+        <div className={`lg:col-span-3 ${selectedEmail ? 'block' : 'hidden lg:block'} fixed lg:relative inset-0 z-30 lg:z-auto top-0 left-0 right-0 bottom-0 lg:inset-auto lg:min-h-[600px]`} style={{ border: `0.5px solid ${t.border}`, background: t.bg, display: 'flex', flexDirection: 'column' }}>
           {selectedThread ? (
             <>
               {/* Thread header */}
@@ -209,7 +243,7 @@ export default function DashboardMessages() {
               </div>
 
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ maxHeight: '60vh' }}>
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {selectedThread.messages.map((msg) => {
                   const isAdmin = msg.sender_type === 'admin';
                   const isSystem = msg.sender_type === 'system' || msg.message_type === 'status_change';
