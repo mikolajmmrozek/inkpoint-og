@@ -27,7 +27,23 @@ export default function DashboardMessages() {
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    // Realtime subscription — live updates when new messages arrive
+    const unsubscribe = base44.entities.ContactMessage.subscribe((event) => {
+      if (event.type === 'create') {
+        setAllMessages(prev => {
+          if (prev.some(m => m.id === event.data.id)) return prev;
+          return [event.data, ...prev];
+        });
+      } else if (event.type === 'update') {
+        setAllMessages(prev => prev.map(m => m.id === event.data.id ? { ...m, ...event.data } : m));
+      } else if (event.type === 'delete') {
+        setAllMessages(prev => prev.filter(m => m.id !== event.data.id));
+      }
+    });
+    return () => { if (typeof unsubscribe === 'function') unsubscribe(); };
+  }, []);
 
   // Group messages by email to form threads
   const threads = (() => {

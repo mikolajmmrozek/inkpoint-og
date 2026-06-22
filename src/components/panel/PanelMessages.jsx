@@ -29,11 +29,16 @@ export default function PanelMessages({ theme, userEmail, userName, roleLabel })
   useEffect(() => {
     load();
     const unsubscribe = base44.entities.ContactMessage.subscribe((event) => {
-      if (event.data?.email === userEmail) {
-        load();
+      if (!event.data || (event.data.email || '').toLowerCase() !== (userEmail || '').toLowerCase()) return;
+      if (event.type === 'create') {
+        setMessages(prev => prev.some(m => m.id === event.data.id) ? prev : [...prev, event.data]);
+      } else if (event.type === 'update') {
+        setMessages(prev => prev.map(m => m.id === event.data.id ? { ...m, ...event.data } : m));
+      } else if (event.type === 'delete') {
+        setMessages(prev => prev.filter(m => m.id !== event.data.id));
       }
     });
-    return () => unsubscribe();
+    return () => { if (typeof unsubscribe === 'function') unsubscribe(); };
   }, [userEmail]);
 
   useEffect(() => {
