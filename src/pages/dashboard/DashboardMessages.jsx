@@ -351,9 +351,7 @@ export default function DashboardMessages() {
                     {sending ? <Loader2 size={14} className="animate-spin" color="#F5F0EB" /> : <Send size={14} color="#F5F0EB" />}
                   </button>
                 </div>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.05em', marginTop: '6px' }}>
-                  Odpowiedź zostanie wysłana na email klienta
-                </p>
+
               </div>
             </>
           ) : (
