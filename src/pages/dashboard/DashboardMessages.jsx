@@ -247,7 +247,7 @@ export default function DashboardMessages() {
         </div>
 
         {/* Conversation View */}
-        <div className="lg:col-span-3 hidden lg:flex" style={{ border: `0.5px solid ${t.border}`, background: t.bg, minHeight: '500px', flexDirection: 'column' }}>
+        <div className={`lg:col-span-3 ${selectedEmail ? 'flex' : 'hidden'} lg:flex`} style={{ border: `0.5px solid ${t.border}`, background: t.bg, minHeight: '500px', flexDirection: 'column' }}>
           {selectedThread ? (
             <>
               {/* Thread header */}
