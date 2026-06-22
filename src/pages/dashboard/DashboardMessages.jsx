@@ -259,7 +259,7 @@ export default function DashboardMessages() {
                   <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.4rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
                     {selectedThread.clientName}
                   </h3>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.06em' }}>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: theme === 'light' ? 'rgba(0,0,0,0.35)' : 'rgba(245,240,235,0.4)', letterSpacing: '0.06em' }}>
                     {selectedThread.email} {selectedThread.phone ? `· ${selectedThread.phone}` : ''}
                   </p>
                 </div>
