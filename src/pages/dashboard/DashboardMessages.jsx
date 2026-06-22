@@ -165,6 +165,9 @@ export default function DashboardMessages() {
                 <div className="flex items-center justify-between gap-2">
                   <p style={{ color: th.unreadCount > 0 ? t.text : t.muted, fontSize: '14px', fontWeight: th.unreadCount > 0 ? 500 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {th.clientName}
+                    {th.messages.some(m => m.subject === 'ARTYSTA') && (
+                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#FF007F', letterSpacing: '0.1em', marginLeft: '6px', border: '0.5px solid rgba(255,0,127,0.4)', padding: '1px 4px' }}>ARTYSTA</span>
+                    )}
                   </p>
                   <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.05em', flexShrink: 0 }}>
                     {format(new Date(th.lastMessage.created_date), 'dd.MM HH:mm')}

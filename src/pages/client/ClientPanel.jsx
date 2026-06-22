@@ -2,7 +2,7 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Calendar, FileText, User, LogOut, Home, Menu, X, Sun, Moon } from 'lucide-react';
+import { Calendar, FileText, User, LogOut, Home, Menu, X, Sun, Moon, MessageSquare } from 'lucide-react';
 
 export const ClientThemeContext = createContext({ theme: 'dark', toggleTheme: () => {} });
 export const useClientTheme = () => useContext(ClientThemeContext);
@@ -12,6 +12,7 @@ const NAV = [
   { path: '/panel/sessions', label: 'Sesje', icon: Calendar },
   { path: '/panel/health-forms', label: 'Ankiety', icon: FileText },
   { path: '/panel/profile', label: 'Profil', icon: User },
+  { path: '/panel/messages', label: 'Wiadomości', icon: MessageSquare },
 ];
 
 function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, clientName, userEmail }) {

@@ -41,11 +41,13 @@ import ArtistHome from './pages/artist/ArtistHome';
 import ArtistSchedule from './pages/artist/ArtistSchedule';
 import ArtistStats from './pages/artist/ArtistStats';
 import ArtistProfilePage from './pages/artist/ArtistProfile';
+import ArtistMessages from './pages/artist/ArtistMessages';
 import ClientPanel from './pages/client/ClientPanel';
 import ClientHome from './pages/client/ClientHome';
 import ClientSessions from './pages/client/ClientSessions';
 import ClientHealthForms from './pages/client/ClientHealthForms';
 import ClientProfile from './pages/client/ClientProfile';
+import ClientMessages from './pages/client/ClientMessages';
 import FeedbackSurvey from './pages/FeedbackSurvey';
 import ScrollToTop from './components/ScrollToTop';
 import { useEffect } from 'react';
@@ -128,6 +130,7 @@ const AuthenticatedApp = () => {
         <Route path="schedule" element={<ArtistSchedule />} />
         <Route path="stats" element={<ArtistStats />} />
         <Route path="profile" element={<ArtistProfilePage />} />
+        <Route path="messages" element={<ArtistMessages />} />
       </Route>
 
       {/* Client panel */}
@@ -136,6 +139,7 @@ const AuthenticatedApp = () => {
         <Route path="sessions" element={<ClientSessions />} />
         <Route path="health-forms" element={<ClientHealthForms />} />
         <Route path="profile" element={<ClientProfile />} />
+        <Route path="messages" element={<ClientMessages />} />
       </Route>
 
       <Route path="*" element={<PageNotFound />} />

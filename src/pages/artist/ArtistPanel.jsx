@@ -2,7 +2,7 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { Calendar, BarChart2, User, LogOut, Menu, X, Sun, Moon } from 'lucide-react';
+import { Calendar, BarChart2, User, LogOut, Menu, X, Sun, Moon, MessageSquare } from 'lucide-react';
 
 export const ArtistThemeContext = createContext({ theme: 'dark', toggleTheme: () => {} });
 export const useArtistTheme = () => useContext(ArtistThemeContext);
@@ -12,6 +12,7 @@ const NAV = [
   { path: '/artist/schedule', label: 'Mój Kalendarz', icon: Calendar },
   { path: '/artist/stats', label: 'Moje Wyniki', icon: BarChart2 },
   { path: '/artist/profile', label: 'Mój Profil', icon: User },
+  { path: '/artist/messages', label: 'Wiadomości', icon: MessageSquare },
 ];
 
 function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, artist }) {

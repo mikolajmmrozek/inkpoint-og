@@ -46,7 +46,7 @@ function getStatusEmailSubject(status) {
   }
 }
 
-export default function BookingCard({ bookingId, t, theme, onAction }) {
+export default function BookingCard({ bookingId, t, theme, onAction, readOnly = false }) {
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showImages, setShowImages] = useState(false);
@@ -201,6 +201,7 @@ export default function BookingCard({ bookingId, t, theme, onAction }) {
         )}
 
         {/* Actions */}
+        {!readOnly && (
         <div className="flex flex-wrap gap-2 mt-3 pt-3" style={{ borderTop: `0.5px solid ${t.border}` }}>
           {booking.status === 'pending' && (
             <>
@@ -280,6 +281,7 @@ export default function BookingCard({ bookingId, t, theme, onAction }) {
             <Edit size={10} /> EDYTUJ
           </button>
         </div>
+        )}
 
         {actionLoading && (
           <div className="flex items-center gap-2 mt-2">
