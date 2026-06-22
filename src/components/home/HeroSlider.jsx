@@ -111,7 +111,7 @@ export default function HeroSlider() {
 
             <div className="mt-8 h-px w-16" style={{ background: 'linear-gradient(to right, #FF007F, transparent)', height: '1px' }} />
 
-            <p className="mt-6 max-w-sm" style={{ color: 'rgba(245,240,235,0.6)', fontSize: '15px', lineHeight: 1.7 }}>
+            <p className="mt-6 max-w-sm" style={{ color: 'rgba(245,240,235,0.85)', fontSize: '15px', lineHeight: 1.7 }}>
               {slide?.bio ? slide.bio.slice(0, 120) + (slide.bio.length > 120 ? '…' : '') : 'Każdy tatuaż to unikalna historia wyryta na skórze. Trwała, precyzyjna, Twoja.'}
             </p>
 
@@ -139,7 +139,7 @@ export default function HeroSlider() {
                 display: 'block',
                 width: i === current ? '40px' : '16px',
                 height: '1px',
-                background: i === current ? '#FF007F' : 'rgba(245,240,235,0.3)',
+                background: i === current ? '#FF007F' : 'rgba(245,240,235,0.5)',
                 transition: 'all 0.5s',
                 }}
                 />
@@ -149,7 +149,7 @@ export default function HeroSlider() {
 
         {/* Scroll hint */}
         <div className="absolute bottom-10 right-8 md:right-16 flex flex-col items-center gap-3">
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.2em', writingMode: 'vertical-rl' }}>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.6)', letterSpacing: '0.2em', writingMode: 'vertical-rl' }}>
             SCROLL
           </p>
           <div className="w-px h-12 relative overflow-hidden" style={{ background: 'rgba(245,240,235,0.1)' }}>

@@ -61,7 +61,7 @@ export default function Navbar() {
               className={`text-micro transition-all duration-300 hover:text-oxblood ${
               location.pathname === link.href ? 'text-oxblood' : 'text-parchment/60'}`
               }
-              style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: location.pathname === link.href ? '#FF007F' : 'rgba(245,240,235,0.6)' }}>
+              style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: location.pathname === link.href ? '#FF007F' : 'rgba(245,240,235,0.85)' }}>
               
                 {link.label}
               </Link>

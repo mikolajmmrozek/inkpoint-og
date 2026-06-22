@@ -28,7 +28,7 @@ export default function HomeCTA() {
             Gotowy na<br />
             <span style={{ background: 'linear-gradient(135deg, #FF007F, #FF66B2)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>PERMANENTNĄ ZMIANĘ?</span>
           </h2>
-          <p className="mt-8 text-parchment/60 max-w-xl mx-auto text-base leading-relaxed" style={{ color: 'rgba(245,240,235,0.6)', fontSize: '16px' }}>
+          <p className="mt-8 text-parchment/60 max-w-xl mx-auto text-base leading-relaxed" style={{ color: 'rgba(245,240,235,0.85)', fontSize: '16px' }}>
             Umów się na bezpłatną konsultację. Porozmawiamy o Twoim pomyśle, dobierzemy artystę i ustalimy termin.
           </p>
           <div className="mt-12 flex gap-4 justify-center flex-wrap">

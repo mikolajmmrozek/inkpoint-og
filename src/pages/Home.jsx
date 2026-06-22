@@ -77,7 +77,7 @@ export default function Home() {
                 Galeria
               </h2>
             </div>
-            <Link to="/artists" className="text-micro" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textDecoration: 'none' }}>
+            <Link to="/artists" className="text-micro" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.7)', letterSpacing: '0.15em', textDecoration: 'none' }}>
               WSZYSTKIE PRACE →
             </Link>
           </div>

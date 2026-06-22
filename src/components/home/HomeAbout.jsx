@@ -58,10 +58,10 @@ export default function HomeAbout() {
             <div>na zawsze</div>
           </h2>
           <div className="mt-8 h-px w-12" style={{ background: 'linear-gradient(to right, #FF007F, transparent)', height: '1px' }} />
-          <p className="mt-8 text-parchment/60 leading-relaxed" style={{ color: 'rgba(245,240,235,0.6)', fontSize: '16px', lineHeight: 1.8 }}>
+          <p className="mt-8 text-parchment/60 leading-relaxed" style={{ color: 'rgba(245,240,235,0.85)', fontSize: '16px', lineHeight: 1.8 }}>
             {data.about_paragraph_1}
           </p>
-          <p className="mt-4 text-parchment/60 leading-relaxed" style={{ color: 'rgba(245,240,235,0.6)', fontSize: '16px', lineHeight: 1.8 }}>
+          <p className="mt-4 text-parchment/60 leading-relaxed" style={{ color: 'rgba(245,240,235,0.85)', fontSize: '16px', lineHeight: 1.8 }}>
             {data.about_paragraph_2}
           </p>
           <div className="mt-10">
@@ -94,7 +94,7 @@ export default function HomeAbout() {
           {/* Stats badge */}
           <div className="absolute top-8 -right-4 bg-obsidian p-6" style={{ background: '#0A0A0A', border: '0.5px solid #262626' }}>
             <p className="font-display text-4xl font-700" style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, color: '#FF007F', fontSize: '2.5rem', letterSpacing: '0.05em' }}>{data.about_stats_number}</p>
-            <p className="text-micro mt-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#C4196B', letterSpacing: '0.15em' }}>{data.about_stats_text}</p>
+            <p className="text-micro mt-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.7)', letterSpacing: '0.15em' }}>{data.about_stats_text}</p>
           </div>
         </motion.div>
       </div>

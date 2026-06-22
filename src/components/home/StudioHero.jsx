@@ -103,7 +103,7 @@ export default function StudioHero() {
             className="space-y-1 mb-12"
           >
             {sublines.map((line, i) => (
-              <p key={i} style={{ color: 'rgba(245,240,235,0.55)', fontSize: '16px', lineHeight: 1.7, fontFamily: 'Inter, sans-serif' }}>
+              <p key={i} style={{ color: 'rgba(245,240,235,0.85)', fontSize: '16px', lineHeight: 1.7, fontFamily: 'Inter, sans-serif' }}>
                 {line}
               </p>
             ))}
@@ -132,7 +132,7 @@ export default function StudioHero() {
           transition={{ delay: 1.5, duration: 1 }}
           className="absolute bottom-10 right-8 md:right-16 flex flex-col items-center gap-3"
         >
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.2em', writingMode: 'vertical-rl' }}>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.6)', letterSpacing: '0.2em', writingMode: 'vertical-rl' }}>
             SCROLL
           </p>
           <div className="w-px h-12 relative overflow-hidden" style={{ background: 'rgba(245,240,235,0.1)' }}>

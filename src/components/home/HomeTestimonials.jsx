@@ -53,7 +53,7 @@ export default function HomeTestimonials() {
                 {fb.client_name}
               </p>
               {fb.artist_name && (
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.08em' }}>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.6)', letterSpacing: '0.08em' }}>
                   · {fb.artist_name}
                 </p>
               )}
