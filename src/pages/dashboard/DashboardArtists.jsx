@@ -387,15 +387,15 @@ export default function DashboardArtists() {
                   <button
                     onClick={() => setEditing(null)}
                     style={{
-                      backgroundColor: theme === 'light' ? '#F5F0EB' : '#F5F0EB',
-                      color: '#0A0A0A',
+                      backgroundColor: 'transparent',
+                      color: t.muted,
                       fontFamily: 'JetBrains Mono, monospace',
                       fontSize: '12px',
                       fontWeight: 500,
                       textTransform: 'uppercase',
                       letterSpacing: '0.1em',
                       padding: '14px 32px',
-                      border: '0.5px solid #F5F0EB',
+                      border: `0.5px solid ${t.border}`,
                       cursor: 'pointer',
                       transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
                     }}
