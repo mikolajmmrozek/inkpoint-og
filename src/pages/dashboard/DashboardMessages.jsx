@@ -45,6 +45,16 @@ export default function DashboardMessages() {
     return () => { if (typeof unsubscribe === 'function') unsubscribe(); };
   }, []);
 
+  // Polling fallback — refresh every 5 seconds in case WebSocket misses events
+  useEffect(() => {
+    const interval = setInterval(() => {
+      base44.entities.ContactMessage.list('-created_date', 200)
+        .then(data => setAllMessages(data))
+        .catch(() => {});
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Group messages by email to form threads
   const threads = (() => {
     const grouped = {};

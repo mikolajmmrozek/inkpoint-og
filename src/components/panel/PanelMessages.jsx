@@ -41,6 +41,16 @@ export default function PanelMessages({ theme, userEmail, userName, roleLabel })
     return () => { if (typeof unsubscribe === 'function') unsubscribe(); };
   }, [userEmail]);
 
+  // Polling fallback — refresh every 5 seconds in case WebSocket misses events
+  useEffect(() => {
+    const interval = setInterval(() => {
+      base44.entities.ContactMessage.filter({ email: userEmail }, 'created_date', 200)
+        .then(data => setMessages(data))
+        .catch(() => {});
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [userEmail]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
