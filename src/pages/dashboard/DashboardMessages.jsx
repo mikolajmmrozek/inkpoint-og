@@ -229,7 +229,7 @@ export default function DashboardMessages() {
                       <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#FF007F', letterSpacing: '0.1em', marginLeft: '6px', border: '0.5px solid rgba(255,0,127,0.4)', padding: '1px 4px' }}>ARTYSTA</span>
                     )}
                   </p>
-                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.05em', flexShrink: 0 }}>
+                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: theme === 'light' ? 'rgba(0,0,0,0.35)' : 'rgba(245,240,235,0.4)', letterSpacing: '0.05em', flexShrink: 0 }}>
                     {format(new Date(th.lastMessage.created_date), 'dd.MM HH:mm')}
                   </span>
                 </div>
