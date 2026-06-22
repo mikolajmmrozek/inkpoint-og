@@ -1,17 +1,15 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Calendar, MessageSquare } from 'lucide-react';
-import NotificationBell from '@/components/panel/NotificationBell';
+import { Calendar, MessageSquare, Bell } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
 
 /**
  * Przypięty pasek nawigacji na dole dla widoków mobilnych i tabletów.
- * Trzy ikony: kalendarz, wiadomości, powiadomienia.
- * Props:
- *  - theme: 'light' | 'dark'
- *  - calendarPath: string (np. '/panel/sessions')
- *  - messagesPath: string (np. '/panel/messages')
+ * Trzy ikony w równych odstępach: kalendarz, wiadomości, powiadomienia.
  */
 export default function BottomNav({ theme, calendarPath, messagesPath, onBellClick, userEmail }) {
   const location = useLocation();
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const bg = theme === 'light' ? '#FFFFFF' : '#0A0A0A';
   const border = theme === 'light' ? '#E5E5E5' : '#262626';
@@ -20,6 +18,20 @@ export default function BottomNav({ theme, calendarPath, messagesPath, onBellCli
 
   const isCalendarActive = location.pathname.startsWith(calendarPath);
   const isMessagesActive = location.pathname.startsWith(messagesPath);
+
+  const loadCount = async () => {
+    if (!userEmail) return;
+    try {
+      const all = await base44.entities.Notification.filter({ target_email: userEmail }, '-created_date', 100);
+      setUnreadCount(all.filter(n => !n.is_read).length);
+    } catch (e) {}
+  };
+
+  useEffect(() => {
+    loadCount();
+    const unsubscribe = base44.entities.Notification.subscribe(() => loadCount());
+    return () => { if (typeof unsubscribe === 'function') unsubscribe(); };
+  }, [userEmail]);
 
   const items = [
     {
@@ -36,12 +48,18 @@ export default function BottomNav({ theme, calendarPath, messagesPath, onBellCli
       active: isMessagesActive,
       isLink: true,
     },
-
+    {
+      icon: Bell,
+      label: 'Powiadomienia',
+      active: false,
+      isLink: false,
+      badge: unreadCount,
+    },
   ];
 
   return (
     <nav
-      className="lg:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around"
+      className="lg:hidden fixed bottom-0 left-0 right-0 z-40 flex"
       style={{
         background: bg,
         borderTop: `0.5px solid ${border}`,
@@ -54,7 +72,22 @@ export default function BottomNav({ theme, calendarPath, messagesPath, onBellCli
 
         const inner = (
           <div className="flex flex-col items-center gap-1 py-2" style={{ minWidth: '60px' }}>
-            <Icon size={20} color={color} />
+            <div style={{ position: 'relative' }}>
+              <Icon size={20} color={color} />
+              {item.badge > 0 && (
+                <span style={{
+                  position: 'absolute', top: '-2px', right: '-4px',
+                  minWidth: '14px', height: '14px',
+                  background: '#FF007F', color: '#F5F0EB',
+                  fontSize: '8px', fontWeight: 600,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  borderRadius: '7px', padding: '0 3px',
+                  fontFamily: 'JetBrains Mono',
+                }}>
+                  {item.badge > 9 ? '9+' : item.badge}
+                </span>
+              )}
+            </div>
             <span
               style={{
                 fontFamily: 'JetBrains Mono',
@@ -77,6 +110,7 @@ export default function BottomNav({ theme, calendarPath, messagesPath, onBellCli
           <button
             key={i}
             type="button"
+            onClick={onBellClick}
             className="flex-1 flex justify-center transition-opacity hover:opacity-70"
             style={{ background: 'none', border: 'none', cursor: 'pointer' }}
           >
@@ -84,13 +118,6 @@ export default function BottomNav({ theme, calendarPath, messagesPath, onBellCli
           </button>
         );
       })}
-      <NotificationBell
-        userEmail={userEmail}
-        theme={theme}
-        onClick={onBellClick}
-        size={20}
-        showLabel
-      />
     </nav>
   );
 }
