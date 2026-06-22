@@ -150,20 +150,20 @@ export default function DashboardMessages() {
       </div>
 
       {/* Search bar */}
-      <div className="mb-4 relative flex items-center gap-2">
-        <Search size={12} color={t.muted} style={{ flexShrink: 0 }} />
+      <div className="mb-6 relative">
+        <Search size={14} color={t.muted} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
         <input
           type="text"
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
-          placeholder="Szukaj..."
-          style={{ flex: 1, background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.border}`, padding: '6px 0', fontSize: '12px', color: t.text, fontFamily: 'Inter, sans-serif', outline: 'none' }}
+          placeholder="Szukaj po imieniu, emailu, telefonie, treści wiadomości..."
+          style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '12px 14px 12px 38px', fontSize: '13px', color: t.text, fontFamily: 'Inter, sans-serif', outline: 'none' }}
           onFocus={e => e.target.style.borderColor = t.fuchsia}
           onBlur={e => e.target.style.borderColor = t.border}
         />
         {searchQuery && (
-          <button onClick={() => setSearchQuery('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, flexShrink: 0 }}>
-            <X size={12} />
+          <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}>
+            <X size={14} />
           </button>
         )}
       </div>
