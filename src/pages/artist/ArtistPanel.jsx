@@ -86,6 +86,9 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, artist }) {
             <LogOut size={14} />
             <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Wyloguj się</span>
           </button>
+          <Link to="/" className="flex items-center gap-3 px-4 py-2 w-full" style={{ color: mutedColor, fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            ← Wróć na stronę
+          </Link>
         </div>
       </aside>
     </>

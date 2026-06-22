@@ -119,42 +119,11 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem('dashboardTheme') || 'light');
-  const [pulling, setPulling] = useState(false);
-  const [pullDistance, setPullDistance] = useState(0);
-  let touchStartY = 0;
 
   const toggleTheme = () => {
     const next = theme === 'light' ? 'dark' : 'light';
     setTheme(next);
     localStorage.setItem('dashboardTheme', next);
-  };
-
-  const handlePullRefresh = (e) => {
-    const container = e.currentTarget;
-    if (container.scrollTop > 0) return;
-
-    if (e.type === 'touchstart') {
-      touchStartY = e.touches[0].clientY;
-      setPullDistance(0);
-    } else if (e.type === 'touchmove') {
-      const touchCurrentY = e.touches[0].clientY;
-      const distance = Math.max(0, touchCurrentY - touchStartY);
-      setPullDistance(distance);
-      if (distance > 60) {
-        setPulling(true);
-      } else {
-        setPulling(false);
-      }
-      if (distance > 10) {
-        e.preventDefault();
-      }
-    } else if (e.type === 'touchend') {
-      if (pullDistance > 60) {
-        location.reload();
-      }
-      setPullDistance(0);
-      setPulling(false);
-    }
   };
 
   useEffect(() => {
@@ -219,25 +188,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div 
-            className="flex-1 p-6 lg:p-10 overflow-y-auto relative"
-            onTouchStart={handlePullRefresh}
-            onTouchMove={handlePullRefresh}
-            onTouchEnd={handlePullRefresh}
-            style={{ position: 'relative' }}
-          >
-            {pullDistance > 0 && (
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: `${pullDistance}px`, background: 'rgba(255,0,127,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1 }}>
-                <div style={{ opacity: Math.min(pullDistance / 60, 1), transform: `rotate(${Math.min(pullDistance / 60, 1) * 360}deg)` }}>
-                  <div style={{ width: '20px', height: '20px', border: '2px solid #FF007F', borderTopColor: 'transparent', borderRadius: '50%' }} />
-                </div>
-              </div>
-            )}
-            {pulling && (
-              <p style={{ position: 'absolute', top: '20px', left: '50%', transform: 'translateX(-50%)', fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.1em', textTransform: 'uppercase', zIndex: 1 }}>
-                Puść aby odświeżyć
-              </p>
-            )}
+          <div className="flex-1 p-6 lg:p-10 overflow-y-auto">
             <Outlet />
           </div>
         </div>
