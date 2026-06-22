@@ -289,7 +289,7 @@ export default function DashboardDocuments() {
           {/* Header */}
           <div className="flex items-center justify-between p-6" style={{ borderBottom: `0.5px solid ${t.border}`, flexShrink: 0 }}>
             <div>
-              <p style={{ ...mono, fontSize: '9px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px' }}>
+              <p style={{ ...mono, fontSize: '9px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>
                 DOKUMENT STUDIA
               </p>
               <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em', lineHeight: 1 }}>{label}</h3>
@@ -399,7 +399,7 @@ export default function DashboardDocuments() {
   return (
     <div>
       <div className="mb-8">
-        <p style={{ ...mono, fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>ZAWARTOŚĆ STUDIA</p>
+        <p style={{ ...mono, fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>ZAWARTOŚĆ STUDIA</p>
         <h2 style={{ ...display, fontSize: '2.5rem', color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>Dokumenty</h2>
       </div>
 
@@ -539,7 +539,7 @@ export default function DashboardDocuments() {
           <div className="w-full max-w-md flex flex-col" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg }} onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center p-6" style={{ borderBottom: `0.5px solid ${t.border}` }}>
               <div>
-                <p style={{ ...mono, fontSize: '9px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px' }}>WYŚLIJ DOKUMENT</p>
+                <p style={{ ...mono, fontSize: '9px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>WYŚLIJ DOKUMENT</p>
                 <h3 style={{ ...display, fontSize: '1.6rem', color: t.title, letterSpacing: '0.04em', lineHeight: 1 }}>{shareDoc.label}</h3>
               </div>
               <button onClick={() => setShareDoc(null)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><X size={18} /></button>
