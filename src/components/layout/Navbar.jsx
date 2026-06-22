@@ -160,7 +160,7 @@ export default function Navbar() {
               <User size={15} color="#FF007F" />
               {isAuthenticated ? 'MOJE KONTO' : 'ZALOGUJ SIĘ'}
             </button>
-            <Link to="/booking" className="btn-oxblood" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '42px' }}>
+            <Link to="/booking" className="btn-oxblood" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '42px', textAlign: 'center' }}>
               Umów Sesję
             </Link>
           </div>
