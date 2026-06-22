@@ -413,6 +413,7 @@ export default function Booking() {
             {step === 4 && (
               <SessionDatePicker
                 artistId={data.artist_id}
+                serviceId={data.service_id}
                 selectedDate={data.session_date}
                 selectedTime={data.session_time}
                 onDateChange={val => update('session_date', val)}

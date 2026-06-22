@@ -22,13 +22,14 @@ function minToTime(min) {
   return `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
 }
 
-export default function SessionDatePicker({ artistId, selectedDate, selectedTime, onDateChange, onTimeChange }) {
+export default function SessionDatePicker({ artistId, selectedDate, selectedTime, onDateChange, onTimeChange, serviceId }) {
   const [availability, setAvailability] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCalendar, setShowCalendar] = useState(false);
   const [viewMonth, setViewMonth] = useState(new Date());
   const [weekOffset, setWeekOffset] = useState(0);
+  const [service, setService] = useState(null);
 
   useEffect(() => {
     if (!artistId) return;
@@ -36,12 +37,14 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
     Promise.all([
       base44.entities.ArtistAvailability.filter({ artist_id: artistId }, '-date', 500).catch(() => []),
       base44.entities.Booking.filter({ artist_id: artistId }, '-session_date', 200).catch(() => []),
-    ]).then(([avail, bk]) => {
+      serviceId ? base44.entities.Service.list(undefined, 1).then(s => s.find(x => x.id === serviceId)).catch(() => null) : Promise.resolve(null),
+    ]).then(([avail, bk, svc]) => {
       setAvailability(avail);
       setBookings(bk.filter(b => b.status !== 'cancelled'));
+      setService(svc);
       setLoading(false);
     });
-  }, [artistId]);
+  }, [artistId, serviceId]);
 
   const getDayBookings = (dateStr) => bookings.filter(b => b.session_date === dateStr);
 
@@ -77,9 +80,29 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
 
   const getAvailableSlots = (dateStr) => getAllSlots(dateStr).filter(s => s.status === 'free').map(s => s.time);
 
+  const getMinBookingTime = () => {
+    if (!service?.min_advance_booking || service.min_advance_booking.value === 0) return 0;
+    const unit = service.min_advance_booking.unit;
+    const val = service.min_advance_booking.value;
+    if (unit === 'minutes') return val;
+    if (unit === 'hours') return val * 60;
+    if (unit === 'days') return val * 24 * 60;
+    return 0;
+  };
+
+  const isDateEarlyEnough = (dateStr) => {
+    const minMinutes = getMinBookingTime();
+    if (minMinutes === 0) return true;
+    const now = new Date();
+    const dateObj = parseISO(dateStr);
+    const diffMinutes = Math.round((dateObj - now) / 60000);
+    return diffMinutes >= minMinutes;
+  };
+
   const isDayAvailable = (dateStr) => {
     const avail = getAvailabilityForDay(availability, artistId, dateStr);
     if (!avail.isWorkday) return false;
+    if (!isDateEarlyEnough(dateStr)) return false;
     return getAllSlots(dateStr).some(s => s.status === 'free');
   };
 

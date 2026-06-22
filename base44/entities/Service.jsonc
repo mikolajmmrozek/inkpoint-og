@@ -69,6 +69,30 @@
       "default": "public",
       "description": "public = wszyscy, members_only = tylko zalogowani, hidden = ukryta"
     },
+    "members_only": {
+      "type": "boolean",
+      "default": false,
+      "description": "Tylko dla zalogowanych u\u017cytkownik\u00f3w"
+    },
+    "min_advance_booking": {
+      "type": "object",
+      "description": "Minimalne wyprzedzenie przed rezerwacj\u0105",
+      "properties": {
+        "unit": {
+          "type": "string",
+          "enum": [
+            "minutes",
+            "hours",
+            "days"
+          ],
+          "description": "Jednostka czasu"
+        },
+        "value": {
+          "type": "number",
+          "description": "Warto\u015b\u0107 (np. 30 minut, 2 godziny, 14 dni)"
+        }
+      }
+    },
     "is_active": {
       "type": "boolean",
       "default": true,

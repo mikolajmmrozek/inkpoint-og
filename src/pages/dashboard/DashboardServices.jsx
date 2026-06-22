@@ -28,6 +28,8 @@ const EMPTY_FORM = {
   price_min: '',
   price_max: '',
   artist_ids: [],
+  members_only: false,
+  min_advance_booking: { unit: 'minutes', value: 0 },
   is_active: true,
   order: 999,
 };
@@ -557,19 +559,77 @@ export default function DashboardServices() {
                 </div>
               </div>
 
-              {/* Active toggle */}
-              <div className="flex items-center gap-3" style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
-                <button
-                  type="button"
-                  onClick={() => set('is_active', !form.is_active)}
-                  className="flex items-center gap-2"
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.is_active ? '#16a34a' : t.muted }}
-                >
-                  <div style={{ width: '12px', height: '12px', border: `0.5px solid ${form.is_active ? '#16a34a' : t.border}`, background: form.is_active ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {form.is_active && <span style={{ color: '#fff', fontSize: '8px' }}>✓</span>}
+              {/* Settings */}
+              <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px', space: 'y-4' }}>
+                <div className="space-y-4">
+                  {/* Active toggle */}
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => set('is_active', !form.is_active)}
+                      className="flex items-center gap-2"
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.is_active ? '#16a34a' : t.muted }}
+                    >
+                      <div style={{ width: '12px', height: '12px', border: `0.5px solid ${form.is_active ? '#16a34a' : t.border}`, background: form.is_active ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {form.is_active && <span style={{ color: '#fff', fontSize: '8px' }}>✓</span>}
+                      </div>
+                      Usługa aktywna
+                    </button>
                   </div>
-                  Usługa aktywna
-                </button>
+
+                  {/* Members only toggle */}
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => set('members_only', !form.members_only)}
+                      className="flex items-center gap-2"
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.members_only ? '#16a34a' : t.muted }}
+                    >
+                      <div style={{ width: '12px', height: '12px', border: `0.5px solid ${form.members_only ? '#16a34a' : t.border}`, background: form.members_only ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {form.members_only && <span style={{ color: '#fff', fontSize: '8px' }}>✓</span>}
+                      </div>
+                      Tylko dla zalogowanych
+                    </button>
+                  </div>
+
+                  {/* Min advance booking */}
+                  <div style={{ paddingTop: '12px' }}>
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>Minimalne wyprzedzenie rezerwacji</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        {label('Jednostka')}
+                        <select
+                          value={form.min_advance_booking?.unit || 'minutes'}
+                          onChange={e => set('min_advance_booking', { ...form.min_advance_booking, unit: e.target.value })}
+                          style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: theme === 'light' ? 'light' : 'dark' }}
+                        >
+                          <option value="minutes">Minuty</option>
+                          <option value="hours">Godziny</option>
+                          <option value="days">Dni</option>
+                        </select>
+                      </div>
+                      <div>
+                        {label('Wartość')}
+                        <input
+                          type="number"
+                          min={0}
+                          max={form.min_advance_booking?.unit === 'days' ? 30 : form.min_advance_booking?.unit === 'hours' ? 999 : 999}
+                          step={form.min_advance_booking?.unit === 'minutes' ? 15 : 1}
+                          value={form.min_advance_booking?.value || 0}
+                          onChange={e => set('min_advance_booking', { ...form.min_advance_booking, value: Number(e.target.value) })}
+                          {...inp('min_advance_booking_value', 'number')}
+                          style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }}
+                        />
+                      </div>
+                    </div>
+                    {(() => {
+                      const unit = form.min_advance_booking?.unit || 'minutes';
+                      const val = form.min_advance_booking?.value || 0;
+                      let display = val === 0 ? 'Bez wymogów' : unit === 'minutes' ? `Za ${val} minut` : unit === 'hours' ? `Za ${val} h` : `Za ${val} dni`;
+                      return <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', marginTop: '8px', letterSpacing: '0.05em' }}>{display}</p>;
+                    })()}
+                  </div>
+                </div>
               </div>
             </div>
 
