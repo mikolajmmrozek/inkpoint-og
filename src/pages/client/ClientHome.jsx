@@ -13,8 +13,8 @@ export default function ClientHome() {
   const [loading, setLoading] = useState(true);
 
   const t = theme === 'light'
-    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', mutedLow: 'rgba(0,0,0,0.3)', fuchsia: '#FF007F', panelBg: '#FFFFFF' }
-    : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', mutedLow: 'rgba(245,240,235,0.3)', fuchsia: '#FF007F', panelBg: 'transparent' };
+    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.65)', mutedLow: 'rgba(0,0,0,0.55)', fuchsia: '#FF007F', panelBg: '#FAFAFA' }
+    : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.75)', mutedLow: 'rgba(245,240,235,0.65)', fuchsia: '#FF007F', panelBg: '#141414' };
 
   const STATUS_COLORS = { pending: '#f59e0b', confirmed: '#16a34a', completed: '#3b82f6', cancelled: theme === 'light' ? 'rgba(0,0,0,0.3)' : 'rgba(245,240,235,0.3)' };
 
