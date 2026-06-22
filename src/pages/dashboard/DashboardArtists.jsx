@@ -78,7 +78,9 @@ export default function DashboardArtists() {
 
   const handleSave = async () => {
     const specialtyArr = typeof form.specialty === 'string' ? form.specialty.split(',').map(s => s.trim()).filter(Boolean) : (form.specialty || []);
-    const data = { ...form, specialty: specialtyArr };
+    // Strip built-in fields to avoid payload issues; explicitly preserve portfolio_images
+    const { id: _formId, created_date, updated_date, created_by_id, ...editableFields } = form;
+    const data = { ...editableFields, specialty: specialtyArr, portfolio_images: form.portfolio_images || [] };
     if (editing === 'new') {
       const created = await base44.entities.Artist.create(data);
       // Zapisz wpis w historii przy tworzeniu
@@ -148,7 +150,7 @@ export default function DashboardArtists() {
   };
 
   const removePortfolioImage = (idx) => {
-    setForm(f => ({ ...f, portfolio_images: f.portfolio_images.filter((_, i) => i !== idx) }));
+    setForm(f => ({ ...f, portfolio_images: (f.portfolio_images || []).filter((_, i) => i !== idx) }));
   };
 
   return (
