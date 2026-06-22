@@ -9,8 +9,8 @@ import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 export default function DashboardMessages() {
   const { theme } = useTheme();
   const t = theme === 'light'
-    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.5)', fuchsia: '#FF007F', hover: 'rgba(0,0,0,0.03)', cardBg: '#FFFFFF', bubbleBg: 'rgba(0,0,0,0.04)', adminBubble: '#FF007F' }
-    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.5)', fuchsia: '#FF007F', hover: 'rgba(255,255,255,0.05)', cardBg: 'transparent', bubbleBg: 'rgba(255,255,255,0.04)', adminBubble: '#FF007F' };
+    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.65)', fuchsia: '#FF007F', hover: 'rgba(0,0,0,0.03)', cardBg: '#FFFFFF', bubbleBg: 'rgba(0,0,0,0.06)', adminBubble: '#FF007F' }
+    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.75)', fuchsia: '#FF007F', hover: 'rgba(255,255,255,0.05)', cardBg: 'transparent', bubbleBg: 'rgba(255,255,255,0.06)', adminBubble: '#FF007F' };
 
   const [allMessages, setAllMessages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -203,9 +203,9 @@ export default function DashboardMessages() {
             </div>
           ) : filteredThreads.length === 0 ? (
             <div className="py-20 text-center">
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
-                BRAK WIADOMOŚCI
-              </p>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted, letterSpacing: '0.1em' }}>
+                 BRAK WIADOMOŚCI
+               </p>
             </div>
           ) : filteredThreads.map((th, i) => (
             <div
@@ -229,11 +229,11 @@ export default function DashboardMessages() {
                       <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#FF007F', letterSpacing: '0.1em', marginLeft: '6px', border: '0.5px solid rgba(255,0,127,0.4)', padding: '1px 4px' }}>ARTYSTA</span>
                     )}
                   </p>
-                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.05em', flexShrink: 0 }}>
+                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.05em', flexShrink: 0 }}>
                     {format(new Date(th.lastMessage.created_date), 'dd.MM HH:mm')}
                   </span>
                 </div>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.03em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.03em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {getMessagePreview(th.lastMessage)}
                 </p>
               </div>
@@ -259,7 +259,7 @@ export default function DashboardMessages() {
                   <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.4rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
                     {selectedThread.clientName}
                   </h3>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.06em' }}>
                     {selectedThread.email} {selectedThread.phone ? `· ${selectedThread.phone}` : ''}
                   </p>
                 </div>
@@ -280,7 +280,7 @@ export default function DashboardMessages() {
                     return (
                       <div key={msg.id} className="flex flex-col items-center">
                         <BookingCard bookingId={msg.booking_id} t={t} theme={theme} onAction={onBookingAction} />
-                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.05em', marginTop: '4px' }}>
+                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.05em', marginTop: '4px' }}>
                           {format(new Date(msg.created_date), 'dd.MM.yyyy HH:mm')}
                         </p>
                       </div>
@@ -292,13 +292,13 @@ export default function DashboardMessages() {
                     return (
                       <div key={msg.id} className="flex justify-center">
                         <div style={{ background: 'rgba(255,0,127,0.06)', border: `0.5px solid rgba(255,0,127,0.2)`, padding: '10px 16px', maxWidth: '80%', textAlign: 'center' }}>
-                          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '4px' }}>
+                          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '4px' }}>
                             STATUS REZERWACJI
                           </p>
-                          <p style={{ fontSize: '12px', color: t.text, lineHeight: 1.5 }}>
+                          <p style={{ fontSize: '13px', color: t.text, lineHeight: 1.5 }}>
                             {msg.message}
                           </p>
-                          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.05em', marginTop: '6px' }}>
+                          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.05em', marginTop: '6px' }}>
                             {format(new Date(msg.created_date), 'dd.MM.yyyy HH:mm')}
                           </p>
                         </div>
@@ -315,11 +315,11 @@ export default function DashboardMessages() {
                           background: isAdmin ? t.adminBubble : t.bubbleBg,
                           borderRadius: '2px',
                         }}>
-                          <p style={{ fontSize: '13px', color: isAdmin ? '#F5F0EB' : t.text, lineHeight: 1.5, wordBreak: 'break-word' }}>
+                          <p style={{ fontSize: '14px', color: isAdmin ? '#F5F0EB' : t.text, lineHeight: 1.5, wordBreak: 'break-word' }}>
                             {msg.message}
                           </p>
                         </div>
-                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.05em', marginTop: '4px', textAlign: isAdmin ? 'right' : 'left' }}>
+                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.05em', marginTop: '4px', textAlign: isAdmin ? 'right' : 'left' }}>
                           {msg.sender_type === 'admin' ? 'Romans Tattoo · ' : ''}
                           {format(new Date(msg.created_date), 'dd.MM.yyyy HH:mm')}
                         </p>
@@ -351,16 +351,16 @@ export default function DashboardMessages() {
                     {sending ? <Loader2 size={14} className="animate-spin" color="#F5F0EB" /> : <Send size={14} color="#F5F0EB" />}
                   </button>
                 </div>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.05em', marginTop: '6px' }}>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.05em', marginTop: '6px' }}>
                   Odpowiedź zostanie wysłana na email klienta
                 </p>
               </div>
             </>
           ) : (
             <div className="flex items-center justify-center h-full py-20">
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
-                WYBIERZ WĄTEK
-              </p>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted, letterSpacing: '0.1em' }}>
+                 WYBIERZ WĄTEK
+               </p>
             </div>
           )}
         </div>
