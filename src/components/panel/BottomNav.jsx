@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Calendar, MessageSquare, Bell } from 'lucide-react';
+import { Calendar, MessageSquare } from 'lucide-react';
+import NotificationBell from '@/components/panel/NotificationBell';
 
 /**
  * Przypięty pasek nawigacji na dole dla widoków mobilnych i tabletów.
@@ -9,7 +10,7 @@ import { Calendar, MessageSquare, Bell } from 'lucide-react';
  *  - calendarPath: string (np. '/panel/sessions')
  *  - messagesPath: string (np. '/panel/messages')
  */
-export default function BottomNav({ theme, calendarPath, messagesPath }) {
+export default function BottomNav({ theme, calendarPath, messagesPath, onBellClick, userEmail }) {
   const location = useLocation();
 
   const bg = theme === 'light' ? '#FFFFFF' : '#0A0A0A';
@@ -35,13 +36,7 @@ export default function BottomNav({ theme, calendarPath, messagesPath }) {
       active: isMessagesActive,
       isLink: true,
     },
-    {
-      icon: Bell,
-      label: 'Powiadomienia',
-      path: null,
-      active: false,
-      isLink: false,
-    },
+
   ];
 
   return (
@@ -89,6 +84,13 @@ export default function BottomNav({ theme, calendarPath, messagesPath }) {
           </button>
         );
       })}
+      <NotificationBell
+        userEmail={userEmail}
+        theme={theme}
+        onClick={onBellClick}
+        size={20}
+        showLabel
+      />
     </nav>
   );
 }

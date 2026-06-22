@@ -4,6 +4,8 @@ import { base44 } from '@/api/base44Client';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { Calendar, BarChart2, User, LogOut, Menu, X, Sun, Moon, MessageSquare } from 'lucide-react';
 import BottomNav from '@/components/panel/BottomNav';
+import NotificationBell from '@/components/panel/NotificationBell';
+import NotificationPanel from '@/components/panel/NotificationPanel';
 
 export const ArtistThemeContext = createContext({ theme: 'dark', toggleTheme: () => {} });
 export const useArtistTheme = () => useContext(ArtistThemeContext);
@@ -103,6 +105,7 @@ export default function ArtistPanel() {
   const [theme, setTheme] = useState(() => localStorage.getItem('artistPanelTheme') || 'dark');
   const [artist, setArtist] = useState(null);
   const [loadingArtist, setLoadingArtist] = useState(true);
+  const [notifOpen, setNotifOpen] = useState(false);
 
   const toggleTheme = () => {
     const next = theme === 'light' ? 'dark' : 'light';
@@ -175,6 +178,9 @@ export default function ArtistPanel() {
               <Menu size={20} />
             </button>
             <div className="flex-1" />
+            <div className="hidden lg:block">
+              <NotificationBell userEmail={user.email} theme={theme} onClick={() => setNotifOpen(true)} />
+            </div>
             <div className="flex items-center gap-3 flex-row-reverse">
               {artist?.photo_url ? (
                 <img src={artist.photo_url} alt={artist.name} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
@@ -195,7 +201,8 @@ export default function ArtistPanel() {
             <Outlet context={{ artist, theme }} />
           </div>
         </div>
-        <BottomNav theme={theme} calendarPath="/artist/schedule" messagesPath="/artist/messages" />
+        <BottomNav theme={theme} calendarPath="/artist/schedule" messagesPath="/artist/messages" onBellClick={() => setNotifOpen(true)} userEmail={user.email} />
+        <NotificationPanel open={notifOpen} onClose={() => setNotifOpen(false)} userEmail={user.email} theme={theme} />
       </div>
     </ArtistThemeContext.Provider>
   );

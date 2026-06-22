@@ -4,6 +4,8 @@ import { base44 } from '@/api/base44Client';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Calendar, Users, BookOpen, MessageSquare, FileText, LogOut, BarChart2, Menu, X, Sun, Moon, Settings, UserCircle, PieChart, Star, FolderOpen, Scissors, ShieldCheck } from 'lucide-react';
 import BottomNav from '@/components/panel/BottomNav';
+import NotificationBell from '@/components/panel/NotificationBell';
+import NotificationPanel from '@/components/panel/NotificationPanel';
 
 export const ThemeContext = createContext({ theme: 'light', toggleTheme: () => {} });
 export const useTheme = () => useContext(ThemeContext);
@@ -119,6 +121,7 @@ export default function Dashboard() {
   const { user, isLoadingAuth } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem('dashboardTheme') || 'light');
 
   const toggleTheme = () => {
@@ -182,6 +185,9 @@ export default function Dashboard() {
              </button>
             <div className="flex-1" />
             <div className="flex items-center gap-3">
+              <div className="hidden lg:block">
+                <NotificationBell userEmail={user.email} theme={theme} onClick={() => setNotifOpen(true)} />
+              </div>
               <div className="w-2 h-2 rounded-full" style={{ background: '#FF007F' }} />
               <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: mutedColor, letterSpacing: '0.1em' }}>
                 {user?.email}
@@ -193,7 +199,8 @@ export default function Dashboard() {
             <Outlet />
           </div>
         </div>
-        <BottomNav theme={theme} calendarPath="/dashboard/bookings" messagesPath="/dashboard/messages" />
+        <BottomNav theme={theme} calendarPath="/dashboard/bookings" messagesPath="/dashboard/messages" onBellClick={() => setNotifOpen(true)} userEmail={user.email} />
+        <NotificationPanel open={notifOpen} onClose={() => setNotifOpen(false)} userEmail={user.email} theme={theme} />
       </div>
     </ThemeContext.Provider>
   );
