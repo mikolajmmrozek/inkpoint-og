@@ -319,7 +319,7 @@ export default function DashboardMessages() {
                             {msg.message}
                           </p>
                         </div>
-                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.05em', marginTop: '4px', textAlign: isAdmin ? 'right' : 'left' }}>
+                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: theme === 'light' ? 'rgba(0,0,0,0.35)' : 'rgba(245,240,235,0.4)', letterSpacing: '0.05em', marginTop: '4px', textAlign: isAdmin ? 'right' : 'left' }}>
                           {msg.sender_type === 'admin' ? 'Romans Tattoo · ' : ''}
                           {format(new Date(msg.created_date), 'dd.MM.yyyy HH:mm')}
                         </p>
