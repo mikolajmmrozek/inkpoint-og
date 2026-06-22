@@ -141,26 +141,25 @@ export default function Navbar() {
           <div className="flex gap-3 mb-8" style={{ marginTop: '60px' }}>
             <button
               onClick={handleAccountClick}
-              className="flex items-center justify-center gap-2 rounded-none"
+              className="flex items-center justify-center gap-2 flex-1 whitespace-nowrap"
               style={{
                 height: '42px',
-                padding: '0 20px',
-                borderRadius: '0.25rem',
+                padding: '0 12px',
+                borderRadius: '0',
                 border: '0.5px solid #FF007F',
                 background: 'rgba(255,0,127,0.06)',
                 cursor: 'pointer',
                 fontFamily: 'JetBrains Mono, monospace',
-                fontSize: '11px',
+                fontSize: '10px',
                 fontWeight: 500,
-                letterSpacing: '0.1em',
+                letterSpacing: '0.08em',
                 textTransform: 'uppercase',
                 color: '#FF007F'
               }}>
-              
               <User size={15} color="#FF007F" />
               {isAuthenticated ? 'MOJE KONTO' : 'ZALOGUJ SIĘ'}
             </button>
-            <Link to="/booking" className="btn-oxblood" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '42px', textAlign: 'center' }}>
+            <Link to="/booking" className="btn-oxblood flex items-center justify-center flex-1 whitespace-nowrap" style={{ height: '42px', padding: '0 12px', borderRadius: '0', fontSize: '10px', letterSpacing: '0.08em', textAlign: 'center' }}>
               Umów Sesję
             </Link>
           </div>
