@@ -233,7 +233,7 @@ export default function DashboardMessages() {
                     {format(new Date(th.lastMessage.created_date), 'dd.MM HH:mm')}
                   </span>
                 </div>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.03em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: theme === 'light' ? 'rgba(0,0,0,0.35)' : 'rgba(245,240,235,0.4)', letterSpacing: '0.03em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {getMessagePreview(th.lastMessage)}
                 </p>
               </div>
