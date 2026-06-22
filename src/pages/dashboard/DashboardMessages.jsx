@@ -1,41 +1,130 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Trash2, Mail, MailOpen } from 'lucide-react';
+import { Trash2, Send, ArrowLeft, Mail, MailOpen, Loader2 } from 'lucide-react';
 import { useTheme } from './Dashboard';
+import { format } from 'date-fns';
+import BookingCard from '@/components/dashboard/BookingCard';
+import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 
 export default function DashboardMessages() {
   const { theme } = useTheme();
   const t = theme === 'light'
-    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F', hover: 'rgba(0,0,0,0.03)' }
-    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F', hover: 'rgba(255,255,255,0.05)' };
-  const [messages, setMessages] = useState([]);
+    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.5)', fuchsia: '#FF007F', hover: 'rgba(0,0,0,0.03)', cardBg: '#FFFFFF', bubbleBg: 'rgba(0,0,0,0.04)', adminBubble: '#FF007F' }
+    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.5)', fuchsia: '#FF007F', hover: 'rgba(255,255,255,0.05)', cardBg: 'transparent', bubbleBg: 'rgba(255,255,255,0.04)', adminBubble: '#FF007F' };
+
+  const [allMessages, setAllMessages] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState(null);
+  const [selectedEmail, setSelectedEmail] = useState(null);
+  const [replyText, setReplyText] = useState('');
+  const [sending, setSending] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const messagesEndRef = useRef(null);
 
   const load = async () => {
-    const data = await base44.entities.ContactMessage.list('-created_date', 100);
-    setMessages(data);
+    const data = await base44.entities.ContactMessage.list('-created_date', 200);
+    setAllMessages(data);
     setLoading(false);
   };
 
   useEffect(() => { load(); }, []);
 
-  const markRead = async (msg) => {
-    if (!msg.is_read) {
-      await base44.entities.ContactMessage.update(msg.id, { is_read: true });
-      setMessages(m => m.map(x => x.id === msg.id ? { ...x, is_read: true } : x));
+  // Group messages by email to form threads
+  const threads = (() => {
+    const grouped = {};
+    allMessages.forEach(msg => {
+      const key = (msg.email || '').toLowerCase().trim();
+      if (!key) return;
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(msg);
+    });
+    return Object.entries(grouped).map(([email, msgs]) => {
+      const sorted = [...msgs].sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
+      const latest = [...msgs].sort((a, b) => new Date(b.created_date) - new Date(a.created_date))[0];
+      return {
+        email,
+        messages: sorted,
+        lastMessage: latest,
+        unreadCount: msgs.filter(m => !m.is_read && m.sender_type !== 'admin').length,
+        clientName: msgs.find(m => m.sender_type === 'client')?.name || msgs[0].name,
+        phone: msgs[0].phone,
+      };
+    }).sort((a, b) => new Date(b.lastMessage.created_date) - new Date(a.lastMessage.created_date));
+  })();
+
+  const selectedThread = threads.find(th => th.email === selectedEmail);
+
+  const markThreadRead = async (email) => {
+    const thread = threads.find(th => th.email === email);
+    if (!thread) return;
+    const unread = thread.messages.filter(m => !m.is_read);
+    if (unread.length > 0) {
+      setAllMessages(msgs => msgs.map(m => unread.find(u => u.id === m.id) ? { ...m, is_read: true } : m));
+      await Promise.all(unread.map(m => base44.entities.ContactMessage.update(m.id, { is_read: true })));
     }
-    setSelected(msg);
   };
 
-  const deleteMsg = async (id) => {
-    await base44.entities.ContactMessage.delete(id);
-    setMessages(m => m.filter(x => x.id !== id));
-    if (selected?.id === id) setSelected(null);
+  const handleSelectThread = (email) => {
+    setSelectedEmail(email);
+    markThreadRead(email);
+    setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
   };
 
+  const sendReply = async () => {
+    if (!replyText.trim() || !selectedEmail) return;
+    setSending(true);
+    const thread = threads.find(th => th.email === selectedEmail);
+    try {
+      await base44.entities.ContactMessage.create({
+        name: 'Romans Tattoo',
+        email: selectedEmail,
+        phone: thread?.phone || '',
+        message: replyText,
+        sender_type: 'admin',
+        message_type: 'text',
+        is_read: true,
+      });
+      // Send email notification to client
+      try {
+        await base44.integrations.Core.SendEmail({
+          to: selectedEmail,
+          subject: 'Wiadomość od Romans Tattoo',
+          body: replyText,
+        });
+      } catch (e) {
+        console.warn('Email notification failed:', e);
+      }
+      setReplyText('');
+      await load();
+    } catch (e) {
+      console.error('Reply failed:', e);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const deleteThread = async (email) => {
+    const thread = threads.find(th => th.email === email);
+    if (!thread) return;
+    await Promise.all(thread.messages.map(m => base44.entities.ContactMessage.delete(m.id)));
+    setAllMessages(msgs => msgs.filter(m => (m.email || '').toLowerCase() !== email));
+    if (selectedEmail === email) setSelectedEmail(null);
+    setDeleteConfirm(null);
+  };
+
+  const onBookingAction = () => {
+    load();
+  };
+
+  const getMessagePreview = (msg) => {
+    if (msg.message_type === 'booking_card') return '🎫 Nowa rezerwacja';
+    if (msg.message_type === 'status_change') return '🔄 Zmiana statusu rezerwacji';
+    return (msg.sender_type === 'admin' ? 'Ty: ' : '') + (msg.message || '').slice(0, 60);
+  };
+
+  // ============ RENDER ============
   return (
     <div>
+      {/* Header */}
       <div className="mb-8">
         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
           SKRZYNKA ODBIORCZA
@@ -45,85 +134,183 @@ export default function DashboardMessages() {
         </h2>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* List */}
-        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+      <div className="grid lg:grid-cols-5 gap-6">
+        {/* Thread List */}
+        <div className={`lg:col-span-2 ${selectedEmail ? 'hidden lg:block' : 'block'}`} style={{ border: `0.5px solid ${t.border}`, background: t.bg, minHeight: '500px' }}>
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
             </div>
-          ) : messages.length === 0 ? (
+          ) : threads.length === 0 ? (
             <div className="py-20 text-center">
               <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
                 BRAK WIADOMOŚCI
               </p>
             </div>
-          ) : messages.map((msg, i) => (
+          ) : threads.map((th, i) => (
             <div
-              key={msg.id}
-              className="flex items-center gap-4 p-4 cursor-pointer transition-colors"
-              style={{ borderBottom: i < messages.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selected?.id === msg.id ? 'rgba(255,0,127,0.05)' : 'transparent' }}
-              onClick={() => markRead(msg)}
+              key={th.email}
+              className="flex items-center gap-3 p-4 cursor-pointer transition-colors"
+              style={{ borderBottom: i < threads.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selectedEmail === th.email ? 'rgba(255,0,127,0.05)' : 'transparent' }}
+              onClick={() => handleSelectThread(th.email)}
             >
               <div className="flex-shrink-0">
-                {msg.is_read ? (
-                  <MailOpen size={14} color={t.muted} />
-                ) : (
+                {th.unreadCount > 0 ? (
                   <Mail size={14} color={t.fuchsia} />
+                ) : (
+                  <MailOpen size={14} color={t.muted} />
                 )}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
-                  <p style={{ color: msg.is_read ? t.muted : t.text, fontSize: '14px', fontWeight: msg.is_read ? 400 : 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {msg.name}
+                  <p style={{ color: th.unreadCount > 0 ? t.text : t.muted, fontSize: '14px', fontWeight: th.unreadCount > 0 ? 500 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {th.clientName}
                   </p>
-                  <button onClick={(e) => { e.stopPropagation(); deleteMsg(msg.id); }} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0 }}>
-                    <Trash2 size={12} />
-                  </button>
+                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.05em', flexShrink: 0 }}>
+                    {format(new Date(th.lastMessage.created_date), 'dd.MM HH:mm')}
+                  </span>
                 </div>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.05em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {msg.subject || msg.message?.slice(0, 50)}
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.03em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {getMessagePreview(th.lastMessage)}
                 </p>
               </div>
+              {th.unreadCount > 0 && (
+                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#F5F0EB', background: t.fuchsia, padding: '2px 6px', borderRadius: '10px', flexShrink: 0 }}>
+                  {th.unreadCount}
+                </span>
+              )}
             </div>
           ))}
         </div>
 
-        {/* Detail */}
-        {selected ? (
-          <div style={{ border: `0.5px solid ${t.border}`, padding: '24px', background: t.bg }}>
-            <div className="mb-6 pb-6" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-              <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.75rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
-                {selected.name}
-              </h3>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '4px' }}>
-                {selected.email} {selected.phone ? `· ${selected.phone}` : ''}
+        {/* Conversation View */}
+        <div className={`lg:col-span-3 ${selectedEmail ? 'block' : 'hidden lg:block'}`} style={{ border: `0.5px solid ${t.border}`, background: t.bg, minHeight: '500px', display: 'flex', flexDirection: 'column' }}>
+          {selectedThread ? (
+            <>
+              {/* Thread header */}
+              <div className="flex items-center gap-3 p-4" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+                <button onClick={() => setSelectedEmail(null)} className="lg:hidden" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
+                  <ArrowLeft size={16} />
+                </button>
+                <div className="flex-1">
+                  <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.4rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
+                    {selectedThread.clientName}
+                  </h3>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>
+                    {selectedThread.email} {selectedThread.phone ? `· ${selectedThread.phone}` : ''}
+                  </p>
+                </div>
+                <button onClick={() => setDeleteConfirm(selectedThread)} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0 }}>
+                  <Trash2 size={14} />
+                </button>
+              </div>
+
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ maxHeight: '60vh' }}>
+                {selectedThread.messages.map((msg) => {
+                  const isAdmin = msg.sender_type === 'admin';
+                  const isSystem = msg.sender_type === 'system' || msg.message_type === 'status_change';
+                  const isBookingCard = msg.message_type === 'booking_card';
+
+                  // Booking card
+                  if (isBookingCard) {
+                    return (
+                      <div key={msg.id} className="flex flex-col items-center">
+                        <BookingCard bookingId={msg.booking_id} t={t} theme={theme} onAction={onBookingAction} />
+                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.05em', marginTop: '4px' }}>
+                          {format(new Date(msg.created_date), 'dd.MM.yyyy HH:mm')}
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  // Status change notification
+                  if (msg.message_type === 'status_change') {
+                    return (
+                      <div key={msg.id} className="flex justify-center">
+                        <div style={{ background: 'rgba(255,0,127,0.06)', border: `0.5px solid rgba(255,0,127,0.2)`, padding: '10px 16px', maxWidth: '80%', textAlign: 'center' }}>
+                          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '4px' }}>
+                            STATUS REZERWACJI
+                          </p>
+                          <p style={{ fontSize: '12px', color: t.text, lineHeight: 1.5 }}>
+                            {msg.message}
+                          </p>
+                          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.05em', marginTop: '6px' }}>
+                            {format(new Date(msg.created_date), 'dd.MM.yyyy HH:mm')}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  // Text message bubble
+                  return (
+                    <div key={msg.id} className={`flex ${isAdmin ? 'justify-end' : 'justify-start'}`}>
+                      <div style={{ maxWidth: '75%' }}>
+                        <div style={{
+                          padding: '10px 14px',
+                          background: isAdmin ? t.adminBubble : t.bubbleBg,
+                          borderRadius: '2px',
+                        }}>
+                          <p style={{ fontSize: '13px', color: isAdmin ? '#F5F0EB' : t.text, lineHeight: 1.5, wordBreak: 'break-word' }}>
+                            {msg.message}
+                          </p>
+                        </div>
+                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.05em', marginTop: '4px', textAlign: isAdmin ? 'right' : 'left' }}>
+                          {msg.sender_type === 'admin' ? 'Romans Tattoo · ' : ''}
+                          {format(new Date(msg.created_date), 'dd.MM.yyyy HH:mm')}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Reply box */}
+              <div className="p-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
+                <div className="flex gap-2">
+                  <textarea
+                    value={replyText}
+                    onChange={e => setReplyText(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendReply(); } }}
+                    rows={1}
+                    placeholder="Napisz odpowiedź..."
+                    style={{ flex: 1, background: 'transparent', border: `0.5px solid ${t.border}`, padding: '10px 12px', fontSize: '13px', color: t.text, fontFamily: 'Inter, sans-serif', resize: 'none', outline: 'none', minHeight: '40px', maxHeight: '120px' }}
+                    onFocus={e => e.target.style.borderColor = t.fuchsia}
+                    onBlur={e => e.target.style.borderColor = t.border}
+                  />
+                  <button
+                    onClick={sendReply}
+                    disabled={sending || !replyText.trim()}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px', background: 'linear-gradient(135deg, #FF007F, #CC0066)', border: 'none', cursor: sending || !replyText.trim() ? 'not-allowed' : 'pointer', opacity: sending || !replyText.trim() ? 0.4 : 1, transition: 'all 0.3s' }}
+                  >
+                    {sending ? <Loader2 size={14} className="animate-spin" color="#F5F0EB" /> : <Send size={14} color="#F5F0EB" />}
+                  </button>
+                </div>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.05em', marginTop: '6px' }}>
+                  Odpowiedź zostanie wysłana na email klienta
+                </p>
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center justify-center h-full py-20">
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
+                WYBIERZ WĄTEK
               </p>
             </div>
-            {selected.subject && (
-              <p className="mb-4" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                {selected.subject}
-              </p>
-            )}
-            <p style={{ color: t.muted, fontSize: '15px', lineHeight: 1.8 }}>
-              {selected.message}
-            </p>
-            <a
-              href={`mailto:${selected.email}?subject=Re: ${selected.subject || 'Twoja wiadomość'}`}
-              className="btn-oxblood inline-block mt-8"
-              style={{ textDecoration: 'none' }}
-            >
-              ODPOWIEDZ
-            </a>
-          </div>
-        ) : (
-          <div className="flex items-center justify-center" style={{ border: `0.5px solid ${t.border}` }}>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
-              WYBIERZ WIADOMOŚĆ
-            </p>
-          </div>
-        )}
+          )}
+        </div>
       </div>
+
+      <ConfirmDeleteDialog
+        open={!!deleteConfirm}
+        title="Usuń wątek"
+        message={`Czy na pewno chcesz usunąć cały wątek z klientem "${deleteConfirm?.clientName}"? Wszystkie wiadomości zostaną trwale usunięte.`}
+        onConfirm={() => deleteThread(deleteConfirm.email)}
+        onCancel={() => setDeleteConfirm(null)}
+        theme={theme}
+      />
     </div>
   );
 }

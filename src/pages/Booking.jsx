@@ -149,7 +149,7 @@ export default function Booking() {
     scrollToTop();
     setSubmitting(true);
     const fullName = `${data.client_first_name} ${data.client_last_name}`.trim();
-    const bookingData = { ...data, client_name: fullName, status: 'pending', health_form_completed: false };
+    const bookingData = { ...data, client_name: fullName, status: 'pending', health_form_completed: false, source: 'online_form' };
     delete bookingData.client_first_name;
     delete bookingData.client_last_name;
     try {

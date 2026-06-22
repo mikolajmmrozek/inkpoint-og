@@ -82,6 +82,15 @@
     },
     "notes": {
       "type": "string"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "online_form",
+        "dashboard"
+      ],
+      "default": "dashboard",
+      "description": "\u0179r\u00f3d\u0142o rezerwacji: online_form = klient sam przez formularz, dashboard = admin/artysta"
     }
   },
   "required": [

@@ -1,11 +1,16 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const { event, data } = await req.json();
-    const booking = data;
-
+    const body = await req.json();
+    
+    // Accept either automation payload { event, data } or frontend payload { bookingId }
+    let booking = body.data;
+    if (!booking && body.bookingId) {
+      booking = await base44.asServiceRole.entities.Booking.get(body.bookingId);
+    }
+    
     if (!booking) {
       return Response.json({ success: false, error: 'No booking data' }, { status: 400 });
     }
@@ -22,7 +27,7 @@ Deno.serve(async (req) => {
     // Build survey link (with token)
     const surveyLink = booking.health_form_token
       ? `${Deno.env.get('APP_URL') || 'https://app.base44.app'}/health-form?token=${booking.health_form_token}`
-      : '#';
+      : `${Deno.env.get('APP_URL') || 'https://app.base44.app'}/health-form?booking_id=${booking.id}`;
 
     // Email HTML
     const htmlBody = `
@@ -55,7 +60,7 @@ Deno.serve(async (req) => {
 
           <div class="section">
             <p>Cześć ${booking.client_name || 'Kliencie'},</p>
-            <p>Twoja rezerwacja została <strong>POTWIERDZONA</strong>. Oto szczegóły sesji:</p>
+            <p>Otrzymaliśmy Twoje zgłoszenie rezerwacji. Oto szczegóły sesji:</p>
           </div>
 
           <div class="section">
@@ -82,7 +87,6 @@ Deno.serve(async (req) => {
             <h3>📋 Ankieta Zdrowotna</h3>
             <p>Aby zaoszczędzić czas w studiu, wypełnij naszą ankietę zdrowotną online. Zajmie Ci to zaledwie kilka minut!</p>
             <a href="${surveyLink}" class="cta-button">Wypełnij Ankietę</a>
-            <p style="font-size: 12px; color: #999;">Link jest ważny przez 30 dni od daty rezerwacji.</p>
           </div>
 
           <div class="section">
@@ -107,7 +111,6 @@ Deno.serve(async (req) => {
 
           <div class="footer">
             <p style="margin: 8px 0;">Dziękujemy za zaufanie! 🎨</p>
-            <p style="margin: 0; font-size: 11px;">${contact.contact_instagram_url ? `<a href="${contact.contact_instagram_url}" style="color: #FF007F; text-decoration: none;">Instagram</a>` : ''}</p>
           </div>
         </div>
       </body>
@@ -161,7 +164,6 @@ Deno.serve(async (req) => {
             .detail-value { color: #666; flex: 1; }
             .images-container { border: 1px dashed #ddd; padding: 15px; margin: 10px 0; background: #fafafa; }
             .cta-button { display: inline-block; background: linear-gradient(135deg, #FF007F, #CC0066); color: #fff; padding: 12px 28px; text-decoration: none; border-radius: 2px; margin: 16px 0; font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; }
-            .cta-button:hover { opacity: 0.9; }
           </style>
         </head>
         <body>
@@ -169,60 +171,27 @@ Deno.serve(async (req) => {
             <div class="header">
               <h1>🔔 Nowa Rezerwacja</h1>
             </div>
-
             <div class="section">
               <h3>📋 Szczegóły Klienta</h3>
-              <div class="detail-row">
-                <span class="detail-label">Imię i Nazwisko:</span>
-                <span class="detail-value">${booking.client_name || '—'}</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Email:</span>
-                <span class="detail-value"><a href="mailto:${booking.client_email}" style="color: #FF007F; text-decoration: none;">${booking.client_email}</a></span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Telefon:</span>
-                <span class="detail-value">${booking.client_phone || '—'}</span>
-              </div>
+              <div class="detail-row"><span class="detail-label">Imię i Nazwisko:</span><span class="detail-value">${booking.client_name || '—'}</span></div>
+              <div class="detail-row"><span class="detail-label">Email:</span><span class="detail-value"><a href="mailto:${booking.client_email}" style="color: #FF007F; text-decoration: none;">${booking.client_email}</a></span></div>
+              <div class="detail-row"><span class="detail-label">Telefon:</span><span class="detail-value">${booking.client_phone || '—'}</span></div>
             </div>
-
             <div class="section">
               <h3>📅 Szczegóły Sesji</h3>
-              <div class="detail-row">
-                <span class="detail-label">Data:</span>
-                <span class="detail-value">${dateStr}</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Godzina:</span>
-                <span class="detail-value">${timeStr}</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Tatuażysta:</span>
-                <span class="detail-value">${booking.artist_name || 'TBD'}</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Miejsce:</span>
-                <span class="detail-value">${booking.tattoo_placement || '—'}</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Opis:</span>
-                <span class="detail-value">${booking.tattoo_description || '—'}</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Cena:</span>
-                <span class="detail-value">${booking.estimated_price ? booking.estimated_price.toLocaleString('pl-PL') : '-'} PLN</span>
-              </div>
+              <div class="detail-row"><span class="detail-label">Data:</span><span class="detail-value">${dateStr}</span></div>
+              <div class="detail-row"><span class="detail-label">Godzina:</span><span class="detail-value">${timeStr}</span></div>
+              <div class="detail-row"><span class="detail-label">Tatuażysta:</span><span class="detail-value">${booking.artist_name || 'TBD'}</span></div>
+              <div class="detail-row"><span class="detail-label">Miejsce:</span><span class="detail-value">${booking.tattoo_placement || '—'}</span></div>
+              <div class="detail-row"><span class="detail-label">Opis:</span><span class="detail-value">${booking.tattoo_description || '—'}</span></div>
+              <div class="detail-row"><span class="detail-label">Cena:</span><span class="detail-value">${booking.estimated_price ? booking.estimated_price.toLocaleString('pl-PL') : '-'} PLN</span></div>
             </div>
-
             <div class="section">
               <h3>🖼️ Referencje Klienta</h3>
-              <div class="images-container">
-                ${refImages}
-              </div>
+              <div class="images-container">${refImages}</div>
             </div>
-
             <div style="text-align: center; margin-top: 30px;">
-              <a href="${Deno.env.get('APP_URL') || 'https://app.base44.app'}/dashboard/bookings" class="cta-button">Przejdź do Rezerwacji</a>
+              <a href="${Deno.env.get('APP_URL') || 'https://app.base44.app'}/dashboard/messages" class="cta-button">Przejdź do Wiadomości</a>
             </div>
           </div>
         </body>
