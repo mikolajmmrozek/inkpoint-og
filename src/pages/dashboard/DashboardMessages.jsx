@@ -220,8 +220,8 @@ export default function DashboardMessages() {
           ))}
         </div>
 
-        {/* Conversation View — full screen overlay on mobile */}
-        <div className={`lg:col-span-3 ${selectedEmail ? 'block' : 'hidden lg:block'} fixed lg:relative inset-0 z-30 lg:z-auto top-0 left-0 right-0 bottom-0 lg:inset-auto lg:min-h-[600px]`} style={{ border: `0.5px solid ${t.border}`, background: t.bg, display: 'flex', flexDirection: 'column' }}>
+        {/* Conversation View */}
+        <div className={`lg:col-span-3 ${selectedEmail ? 'block' : 'hidden lg:block'}`} style={{ border: `0.5px solid ${t.border}`, background: t.bg, minHeight: '500px', display: 'flex', flexDirection: 'column' }}>
           {selectedThread ? (
             <>
               {/* Thread header */}
