@@ -62,7 +62,8 @@ const AuthenticatedApp = () => {
   useEffect(() => {
     if (!isLoadingAuth && !isLoadingPublicSettings && !authError && isIOSStandalone()) {
       const currentPath = window.location.pathname;
-      if (currentPath === '/') {
+      // Only auto-redirect if not already on a specific route that user navigated to
+      if (currentPath === '/' && !window.location.search) {
         const target = user?.role === 'artist' ? '/artist' : user?.role === 'user' ? '/panel' : '/dashboard';
         navigate(target, { replace: true });
       }
