@@ -384,7 +384,22 @@ export default function DashboardArtists() {
 
                 <div className="flex gap-4" style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '16px' }}>
                   <button onClick={handleSave} className="btn-oxblood flex-1">ZAPISZ</button>
-                  <button onClick={() => setEditing(null)} className="btn-ghost-parchment">ANULUJ</button>
+                  <button
+                    onClick={() => setEditing(null)}
+                    style={{
+                      backgroundColor: 'transparent',
+                      color: t.text,
+                      fontFamily: 'JetBrains Mono, monospace',
+                      fontSize: '12px',
+                      fontWeight: 500,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      padding: '14px 32px',
+                      border: `0.5px solid ${t.text}`,
+                      cursor: 'pointer',
+                      transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                    }}
+                  >ANULUJ</button>
                 </div>
               </div>
             </motion.div>
