@@ -47,7 +47,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme }) {
         {/* Logo */}
         <div className="p-8 flex items-center justify-between" style={{ borderBottom: `0.5px solid ${border}` }}>
           <div>
-            <p style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, fontSize: '1.6rem', color: textColor, letterSpacing: '0.08em' }}>ROMANS</p>
+            <p style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, fontSize: '2.5rem', color: textColor, letterSpacing: '0.08em', lineHeight: 1 }}>ROMANS</p>
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase' }}>DASHBOARD</p>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden" style={{ color: mutedColor }}>
