@@ -17,7 +17,7 @@ export default function Home() {
   useEffect(() => {
     const loadPortfolioImages = async () => {
       try {
-        const artists = await base44.entities.Artist.filter({ is_active: true });
+        const artists = await base44.entities.Artist.filter({ is_active: true, is_visible: true });
         const allImages = [];
         
         artists.forEach(artist => {

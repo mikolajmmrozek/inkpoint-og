@@ -19,7 +19,7 @@ export default function HeroSlider() {
   const intervalRef = useRef(null);
 
   useEffect(() => {
-    base44.entities.Artist.filter({ is_active: true })
+    base44.entities.Artist.filter({ is_active: true, is_visible: true })
       .then(data => {
         if (data.length > 0) {
           const sorted = [...data].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
