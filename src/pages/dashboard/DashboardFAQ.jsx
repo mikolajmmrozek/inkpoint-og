@@ -67,7 +67,7 @@ export default function DashboardFAQ() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>TREŚĆ STRONY</p>
-          <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2rem', fontWeight: 400, color: textColor, letterSpacing: '0.04em' }}>FAQ</h1>
+          <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: textColor, letterSpacing: '0.04em' }}>FAQ</h1>
         </div>
         <button
           onClick={openNew}
