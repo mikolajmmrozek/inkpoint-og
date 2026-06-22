@@ -15,16 +15,16 @@ const YesNo = ({ label, value, desc, t }) => (
   <div className="flex items-start justify-between gap-3 py-2" style={{ borderBottom: `0.5px solid ${t?.border || '#1a1a1a'}` }}>
     <p style={{ color: t?.text || '#F5F0EB', fontSize: '13px', lineHeight: 1.4, flex: 1 }}>{label}</p>
     <div className="text-right flex-shrink-0">
-      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: value === true ? '#FF007F' : value === false ? '#16a34a' : t?.muted || 'rgba(245,240,235,0.3)' }}>
+      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: value === true ? '#FF007F' : value === false ? '#16a34a' : t?.muted || 'rgba(245,240,235,0.75)' }}>
         {value === true ? 'TAK' : value === false ? 'NIE' : '—'}
       </span>
-      {value && desc && <p style={{ fontSize: '11px', color: t?.muted || 'rgba(245,240,235,0.4)', marginTop: '2px' }}>{desc}</p>}
+      {value && desc && <p style={{ fontSize: '11px', color: t?.muted || 'rgba(245,240,235,0.75)', marginTop: '2px' }}>{desc}</p>}
     </div>
   </div>
 );
 
 export default function HealthFormPreviewModal({ bookingId, healthFormId, clientName, onClose, t, extraAction, extraActions, formSelector }) {
-  t = t || { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F' };
+  t = t || { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.75)', fuchsia: '#FF007F' };
   const allActions = [...(extraActions || []), ...(extraAction ? [extraAction] : [])];
   const [form, setForm] = useState(null);
   const [guardian, setGuardian] = useState(null);
