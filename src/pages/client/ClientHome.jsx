@@ -105,7 +105,7 @@ export default function ClientHome() {
           )}
         </div>
       ) : (
-        <div className="mb-8 p-8 text-center" style={{ border: `0.5px solid ${t.border}` }}>
+        <div className="mb-8 p-8 text-center" style={{ border: `0.5px solid ${t.border}`, background: t.panelBg }}>
           <Calendar size={24} color={t.mutedLow} style={{ margin: '0 auto 12px' }} />
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
             BRAK NADCHODZĄCYCH SESJI
