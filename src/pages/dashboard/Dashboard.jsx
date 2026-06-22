@@ -2,10 +2,11 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Calendar, Users, BookOpen, MessageSquare, FileText, LogOut, BarChart2, Menu, X, Sun, Moon, Settings, UserCircle, PieChart, Star, FolderOpen, Scissors, ShieldCheck } from 'lucide-react';
+import { Calendar, Users, BookOpen, MessageSquare, FileText, LogOut, BarChart2, Menu, X, Sun, Moon, Settings, UserCircle, PieChart, Star, FolderOpen, Scissors, ShieldCheck, Bell } from 'lucide-react';
 import BottomNav from '@/components/panel/BottomNav';
 import NotificationBell from '@/components/panel/NotificationBell';
 import NotificationPanel from '@/components/panel/NotificationPanel';
+import NotificationSidebarItem from '@/components/panel/NotificationSidebarItem';
 
 export const ThemeContext = createContext({ theme: 'light', toggleTheme: () => {} });
 export const useTheme = () => useContext(ThemeContext);
@@ -27,7 +28,7 @@ const NAV = [
   { path: '/dashboard/settings', label: 'Ustawienia', icon: Settings },
 ];
 
-function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme }) {
+function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, onNotifClick }) {
   const location = useLocation();
 
   const isActive = (nav) => nav.exact ? location.pathname === nav.path : location.pathname.startsWith(nav.path);
@@ -82,6 +83,14 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme }) {
               </Link>
             );
           })}
+          {/* Notifications */}
+          <div className="mt-3 pt-3" style={{ borderTop: `0.5px solid ${border}` }}>
+            <NotificationSidebarItem
+              userEmail={userEmail}
+              theme={theme}
+              onClick={() => { setSidebarOpen(false); onNotifClick(); }}
+            />
+          </div>
         </nav>
 
         {/* Bottom actions */}
@@ -175,7 +184,7 @@ export default function Dashboard() {
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <div className="min-h-screen flex" style={{ background: bg, color: textColor }}>
-        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} theme={theme} toggleTheme={toggleTheme} />
+        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} theme={theme} toggleTheme={toggleTheme} userEmail={user.email} onNotifClick={() => setNotifOpen(true)} />
 
         <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
           {/* Top bar */}
