@@ -22,7 +22,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, clientName, 
   const bg = theme === 'light' ? '#FFFFFF' : '#0A0A0A';
   const border = theme === 'light' ? '#E5E5E5' : '#262626';
   const textColor = theme === 'light' ? '#111111' : '#F5F0EB';
-  const mutedColor = theme === 'light' ? 'rgba(0,0,0,0.4)' : 'rgba(245,240,235,0.4)';
+  const mutedColor = theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.75)';
 
   return (
     <>
@@ -59,7 +59,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, clientName, 
                 }}
                 onClick={() => setSidebarOpen(false)}
               >
-                <Icon size={14} color={active ? '#FF007F' : (theme === 'light' ? 'rgba(0,0,0,0.3)' : 'rgba(245,240,235,0.3)')} />
+                <Icon size={14} color={active ? '#FF007F' : (theme === 'light' ? 'rgba(0,0,0,0.55)' : 'rgba(245,240,235,0.65)')} />
                 <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{nav.label}</span>
               </Link>
             );
@@ -85,7 +85,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, clientName, 
             <LogOut size={14} />
             <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Wyloguj się</span>
           </button>
-          <Link to="/" className="flex items-center gap-3 px-4 py-2 w-full mt-1" style={{ color: theme === 'light' ? 'rgba(0,0,0,0.25)' : 'rgba(245,240,235,0.2)', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+          <Link to="/" className="flex items-center gap-3 px-4 py-2 w-full mt-1" style={{ color: theme === 'light' ? 'rgba(0,0,0,0.45)' : 'rgba(245,240,235,0.5)', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             ← Wróć na stronę
           </Link>
         </div>
@@ -145,7 +145,7 @@ export default function ClientPanel() {
   const topBarBg = theme === 'light' ? '#FFFFFF' : '#0A0A0A';
   const border = theme === 'light' ? '#E5E5E5' : '#262626';
   const textColor = theme === 'light' ? '#111111' : '#F5F0EB';
-  const mutedColor = theme === 'light' ? 'rgba(0,0,0,0.4)' : 'rgba(245,240,235,0.4)';
+  const mutedColor = theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.75)';
 
   return (
     <ClientThemeContext.Provider value={{ theme, toggleTheme, client }}>
