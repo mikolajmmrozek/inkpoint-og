@@ -355,7 +355,7 @@ export default function DashboardMessages() {
               </div>
             </>
           ) : (
-            <div className="flex items-center justify-center h-full py-20">
+            <div className="hidden lg:flex items-center justify-center h-full py-20">
               <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted, letterSpacing: '0.1em' }}>
                  WYBIERZ WĄTEK
                </p>
