@@ -3,6 +3,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { Calendar, BarChart2, User, LogOut, Menu, X, Sun, Moon, MessageSquare } from 'lucide-react';
+import BottomNav from '@/components/panel/BottomNav';
 
 export const ArtistThemeContext = createContext({ theme: 'dark', toggleTheme: () => {} });
 export const useArtistTheme = () => useContext(ArtistThemeContext);
@@ -190,10 +191,11 @@ export default function ArtistPanel() {
               </div>
             </div>
           </div>
-          <div className="flex-1 p-6 lg:p-10 overflow-y-auto">
+          <div className="flex-1 p-6 lg:p-10 overflow-y-auto pb-20 lg:pb-10">
             <Outlet context={{ artist, theme }} />
           </div>
         </div>
+        <BottomNav theme={theme} calendarPath="/artist/schedule" messagesPath="/artist/messages" />
       </div>
     </ArtistThemeContext.Provider>
   );

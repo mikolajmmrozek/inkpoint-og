@@ -3,6 +3,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Calendar, Users, BookOpen, MessageSquare, FileText, LogOut, BarChart2, Menu, X, Sun, Moon, Settings, UserCircle, PieChart, Star, FolderOpen, Scissors, ShieldCheck } from 'lucide-react';
+import BottomNav from '@/components/panel/BottomNav';
 
 export const ThemeContext = createContext({ theme: 'light', toggleTheme: () => {} });
 export const useTheme = () => useContext(ThemeContext);
@@ -188,10 +189,11 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="flex-1 p-6 lg:p-10 overflow-y-auto">
+          <div className="flex-1 p-6 lg:p-10 overflow-y-auto pb-20 lg:pb-10">
             <Outlet />
           </div>
         </div>
+        <BottomNav theme={theme} calendarPath="/dashboard/bookings" messagesPath="/dashboard/messages" />
       </div>
     </ThemeContext.Provider>
   );

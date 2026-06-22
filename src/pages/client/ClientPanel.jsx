@@ -3,6 +3,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Calendar, FileText, User, LogOut, Home, Menu, X, Sun, Moon, MessageSquare } from 'lucide-react';
+import BottomNav from '@/components/panel/BottomNav';
 
 export const ClientThemeContext = createContext({ theme: 'dark', toggleTheme: () => {} });
 export const useClientTheme = () => useContext(ClientThemeContext);
@@ -164,10 +165,11 @@ export default function ClientPanel() {
               </p>
             </div>
           </div>
-          <div className="flex-1 p-6 lg:p-10 overflow-y-auto">
+          <div className="flex-1 p-6 lg:p-10 overflow-y-auto pb-20 lg:pb-10">
             <Outlet context={{ client, user, theme }} />
           </div>
         </div>
+        <BottomNav theme={theme} calendarPath="/panel/sessions" messagesPath="/panel/messages" />
       </div>
     </ClientThemeContext.Provider>
   );
