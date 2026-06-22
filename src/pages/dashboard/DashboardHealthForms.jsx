@@ -398,7 +398,7 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
     <div>
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <p style={{ ...mono, fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>DANE MEDYCZNE</p>
+          <p style={{ ...mono, fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>DANE MEDYCZNE</p>
           <h2 style={{ ...display, fontSize: '2.5rem', color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>Ankiety Zdrowotne</h2>
         </div>
         <a
