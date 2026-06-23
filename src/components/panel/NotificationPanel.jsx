@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { X, Bell, CheckCheck, Calendar, MessageSquare, Info, FileText } from 'lucide-react';
+import { X, Bell, CheckCheck, Trash2, Calendar, MessageSquare, Info, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 
@@ -49,11 +49,25 @@ export default function NotificationPanel({ open, onClose, userEmail, theme }) {
   };
 
   const markAllRead = async () => {
-    const unread = notifications.filter(n => !n.is_read);
-    try {
-      await Promise.all(unread.map(n => base44.entities.Notification.update(n.id, { is_read: true })));
-      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
-    } catch (e) {}
+   const unread = notifications.filter(n => !n.is_read);
+   try {
+     await Promise.all(unread.map(n => base44.entities.Notification.update(n.id, { is_read: true })));
+     setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+   } catch (e) {}
+  };
+
+  const deleteNotification = async (id) => {
+   try {
+     await base44.entities.Notification.delete(id);
+     setNotifications(prev => prev.filter(n => n.id !== id));
+   } catch (e) {}
+  };
+
+  const deleteAll = async () => {
+   try {
+     await Promise.all(notifications.map(n => base44.entities.Notification.delete(n.id)));
+     setNotifications([]);
+   } catch (e) {}
   };
 
   const handleClick = (notif) => {
@@ -94,14 +108,19 @@ export default function NotificationPanel({ open, onClose, userEmail, theme }) {
           </button>
         </div>
 
-        {/* Mark all read */}
-        {notifications.some(n => !n.is_read) && (
-          <div className="px-6 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-            <button onClick={markAllRead} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer' }}>
-              <CheckCheck size={12} /> Oznacz wszystkie jako przeczytane
-            </button>
-          </div>
-        )}
+        {/* Action buttons */}
+         {notifications.length > 0 && (
+           <div className="px-6 py-3 flex gap-2" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+             {notifications.some(n => !n.is_read) && (
+               <button onClick={markAllRead} style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1, fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', border: `0.5px solid ${t.fuchsia}`, padding: '6px 10px', cursor: 'pointer' }}>
+                 <CheckCheck size={11} /> Przeczytane
+               </button>
+             )}
+             <button onClick={deleteAll} style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1, fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '6px 10px', cursor: 'pointer' }}>
+               <Trash2 size={11} /> Wyczyść
+             </button>
+           </div>
+         )}
 
         {/* List */}
         <div className="flex-1 overflow-y-auto">
@@ -121,9 +140,9 @@ export default function NotificationPanel({ open, onClose, userEmail, theme }) {
               return (
                 <div
                   key={notif.id}
-                  onClick={() => handleClick(notif)}
-                  className="flex gap-3 p-4 cursor-pointer transition-colors hover:opacity-80"
+                  className="flex gap-3 p-4 cursor-pointer transition-colors hover:opacity-80 group"
                   style={{ borderBottom: `0.5px solid ${t.border}`, background: !notif.is_read ? t.unreadBg : 'transparent' }}
+                  onClick={() => handleClick(notif)}
                 >
                   <div className="flex-shrink-0 mt-0.5">
                     <Icon size={14} color={color} />
@@ -139,11 +158,19 @@ export default function NotificationPanel({ open, onClose, userEmail, theme }) {
                       {format(new Date(notif.created_date), 'dd.MM.yyyy HH:mm')}
                     </p>
                   </div>
-                  {!notif.is_read && (
-                    <div className="flex-shrink-0 mt-1.5">
-                      <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: t.fuchsia }} />
-                    </div>
-                  )}
+                  <div className="flex items-start gap-2">
+                    {!notif.is_read && (
+                      <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: t.fuchsia, marginTop: '6px' }} />
+                    )}
+                    <button
+                      onClick={(e) => { e.stopPropagation(); deleteNotification(notif.id); }}
+                      style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '4px', transition: 'color 0.2s' }}
+                      onMouseEnter={e => e.currentTarget.style.color = '#FF007F'}
+                      onMouseLeave={e => e.currentTarget.style.color = t.muted}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </div>
               );
             })
