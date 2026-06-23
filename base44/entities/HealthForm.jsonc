@@ -312,6 +312,11 @@
       "type": "boolean",
       "default": false,
       "description": "True if form is incomplete / in progress"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false,
+      "description": "Czy ankieta zosta\u0142a przeczytana przez admina"
     }
   },
   "required": [
