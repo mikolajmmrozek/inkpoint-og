@@ -50,9 +50,14 @@ export default function BottomNav({ theme, calendarPath, messagesPath, notificat
     loadMessages();
     const unsubNotif = base44.entities.Notification.subscribe(() => loadCount());
     const unsubMsg = base44.entities.ContactMessage.subscribe(() => loadMessages());
+    const interval = setInterval(() => {
+      loadCount();
+      loadMessages();
+    }, 15000);
     return () => {
       if (typeof unsubNotif === 'function') unsubNotif();
       if (typeof unsubMsg === 'function') unsubMsg();
+      clearInterval(interval);
     };
   }, [userEmail, role]);
 
