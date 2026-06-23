@@ -31,6 +31,7 @@ export default function DashboardClients() {
   const [healthForms, setHealthForms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [clientFilter, setClientFilter] = useState('all'); // 'all' | 'new' | 'returning'
   const [editing, setEditing] = useState(null);
   const [expandedClient, setExpandedClient] = useState(null);
   const [form, setForm] = useState({});
@@ -123,6 +124,8 @@ export default function DashboardClients() {
 
   const filtered = clients
     .filter(c => {
+      if (clientFilter === 'new' && !isNewClient(c)) return false;
+      if (clientFilter === 'returning' && (c.total_sessions || 0) < 2) return false;
       const q = search.toLowerCase();
       return !q || c.name?.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q) || c.phone?.includes(q);
     })
@@ -252,15 +255,18 @@ export default function DashboardClients() {
       {/* Stats row */}
       <div className="flex gap-4 mb-4 flex-wrap">
         {[
-          { label: 'Łączna liczba klientów', value: clients.length },
-          { label: 'Nowi (7 dni)', value: clients.filter(c => isNewClient(c)).length },
-          { label: 'Powracający (2+ sesji)', value: clients.filter(c => (c.total_sessions || 0) >= 2).length },
-        ].map(s => (
-          <div key={s.label} className="px-5 py-4" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-            <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2rem', fontWeight: 400, color: t.fuchsia, lineHeight: 1 }}>{s.value}</p>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '4px' }}>{s.label}</p>
-          </div>
-        ))}
+          { label: 'Łączna liczba klientów', value: clients.length, filter: 'all' },
+          { label: 'Nowi (7 dni)', value: clients.filter(c => isNewClient(c)).length, filter: 'new' },
+          { label: 'Powracający (2+ sesji)', value: clients.filter(c => (c.total_sessions || 0) >= 2).length, filter: 'returning' },
+        ].map(s => {
+          const active = clientFilter === s.filter;
+          return (
+            <button key={s.label} onClick={() => setClientFilter(active ? 'all' : s.filter)} className="px-5 py-4 text-left transition-all" style={{ border: `0.5px solid ${active ? t.fuchsia : t.border}`, background: active ? 'rgba(255,0,127,0.05)' : t.bg, cursor: 'pointer' }}>
+              <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2rem', fontWeight: 400, color: t.fuchsia, lineHeight: 1 }}>{s.value}</p>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: active ? t.fuchsia : t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '4px' }}>{s.label}</p>
+            </button>
+          );
+        })}
       </div>
 
       {/* Search — full width above list */}
