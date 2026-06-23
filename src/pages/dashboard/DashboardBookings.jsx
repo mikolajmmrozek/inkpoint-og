@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { AnimatePresence } from 'framer-motion';
-import { Plus, Calendar, List, Clock, ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
+import { Plus, Calendar, List, Clock, ChevronLeft, ChevronRight, Search, X, Inbox } from 'lucide-react';
 import { format, isSameDay, addDays, subDays } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import { useTheme } from './Dashboard';
@@ -374,6 +374,23 @@ export default function DashboardBookings() {
     return base;
   })();
 
+  const pendingViewBookings = (() => {
+    if (viewMode !== 'pending') return [];
+    let base = bookings.filter(b => b.status === 'pending' || b.status === 'cancelled');
+    if (artistFilter !== 'all') base = base.filter(b => b.artist_id === artistFilter);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      base = base.filter(b =>
+        (b.client_name || '').toLowerCase().includes(q) ||
+        (b.session_id || '').toLowerCase().includes(q) ||
+        (b.client_email || '').toLowerCase().includes(q) ||
+        (b.tattoo_placement || '').toLowerCase().includes(q) ||
+        (b.notes || '').toLowerCase().includes(q)
+      );
+    }
+    return [...base].sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+  })();
+
   const showListSection = (viewMode === 'calendar' && searchQuery.trim()) || viewMode === 'list' || viewMode === 'day';
 
   return (
@@ -392,12 +409,13 @@ export default function DashboardBookings() {
         {/* Row 1: view toggle + actions */}
         <div className="flex items-center gap-2 flex-wrap mb-3">
           <div className="flex" style={{ border: `0.5px solid ${t.border}` }}>
-            {[{ mode: 'calendar', icon: Calendar }, { mode: 'day', icon: Clock }, { mode: 'list', icon: List }].map(({ mode, icon: Icon }) => (
+            {[{ mode: 'calendar', icon: Calendar }, { mode: 'day', icon: Clock }, { mode: 'list', icon: List }, { mode: 'pending', icon: Inbox }].map(({ mode, icon: Icon }) => (
               <button
                 key={mode}
-                onClick={() => { setViewMode(mode); if (mode !== 'day' && mode !== 'calendar') setSelectedDate(new Date()); }}
+                onClick={() => { setViewMode(mode); if (mode !== 'day' && mode !== 'calendar' && mode !== 'pending') setSelectedDate(new Date()); }}
                 className="p-2.5 transition-all"
                 style={{ background: viewMode === mode ? 'rgba(255,0,127,0.1)' : 'transparent', color: viewMode === mode ? '#FF007F' : t.muted, border: 'none', cursor: 'pointer' }}
+                title={mode === 'pending' ? 'Nowe rezerwacje (do weryfikacji)' : ''}
               >
                 <Icon size={14} />
               </button>
@@ -616,6 +634,29 @@ export default function DashboardBookings() {
               </div>
             )}
           </div>
+
+          {/* Pending view (Nowe rezerwacje — do weryfikacji) */}
+          {viewMode === 'pending' && (
+            <div>
+              <div style={{ padding: '10px 16px', background: t.bg, border: `0.5px solid ${t.border}`, marginBottom: '8px' }}>
+                <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.1rem', color: t.title, letterSpacing: '0.08em' }}>
+                  DO WERYFIKACJI
+                </p>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: pendingViewBookings.length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
+                  {pendingViewBookings.length} {pendingViewBookings.length === 1 ? 'REZERWACJA' : pendingViewBookings.length >= 2 && pendingViewBookings.length <= 4 ? 'REZERWACJE' : 'REZERWACJI'}
+                </p>
+              </div>
+              {pendingViewBookings.length === 0 ? (
+                <div className="py-12 text-center" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK REZERWACJI DO WERYFIKACJI</p>
+                </div>
+              ) : (
+                <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+                  {pendingViewBookings.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={pendingViewBookings} selected={selected} setSelected={setSelected} artists={artists} t={t} />)}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Detail panel */}
           <AnimatePresence>

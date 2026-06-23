@@ -98,6 +98,13 @@ export default function DashboardClients() {
     return 'inactive';
   };
 
+  const isNewClient = (client) => {
+    if (!client.created_date) return false;
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    return new Date(client.created_date) >= sevenDaysAgo;
+  };
+
   const handleInvite = async (client) => {
     setInviteStatus(s => ({ ...s, [client.id]: 'inviting' }));
     try {
@@ -246,6 +253,7 @@ export default function DashboardClients() {
       <div className="flex gap-4 mb-4 flex-wrap">
         {[
           { label: 'Łączna liczba klientów', value: clients.length },
+          { label: 'Nowi (7 dni)', value: clients.filter(c => isNewClient(c)).length },
           { label: 'Powracający (2+ sesji)', value: clients.filter(c => (c.total_sessions || 0) >= 2).length },
         ].map(s => (
           <div key={s.label} className="px-5 py-4" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
@@ -295,7 +303,10 @@ export default function DashboardClients() {
               <div key={c.id}>
                 {/* Mobile row — minimal */}
                 <div className="md:hidden px-4 py-3 flex items-center justify-between cursor-pointer" style={{ borderBottom: `0.5px solid ${t.border}`, background: isExpanded ? 'rgba(255,0,127,0.03)' : 'transparent' }} onClick={() => setExpandedClient(isExpanded ? null : c.id)}>
-                  <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{c.name}</p>
+                  <div className="flex items-center gap-2">
+                    <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{c.name}</p>
+                    {isNewClient(c) && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#16a34a', border: '0.5px solid #16a34a', padding: '1px 4px' }}>NOWY</span>}
+                  </div>
                   <div className="flex gap-2">
                     {c.email && getClientStatus(c) === 'inactive' && (
                       <button onClick={(e) => { e.stopPropagation(); handleInvite(c); }} style={{ color: '#FF007F', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} title="Utwórz konto i zaproś"><UserPlus size={13} /></button>
@@ -318,7 +329,10 @@ export default function DashboardClients() {
                       isExpanded ? <ChevronUp size={13} color={t.muted} /> : <ChevronDown size={13} color={t.muted} />
                     )}
                     <div>
-                      <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{c.name}</p>
+                      <div className="flex items-center gap-2">
+                        <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{c.name}</p>
+                        {isNewClient(c) && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#16a34a', border: '0.5px solid #16a34a', padding: '1px 4px' }}>NOWY</span>}
+                      </div>
                       {c.notes && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.notes}</p>}
                     </div>
                   </div>

@@ -375,6 +375,16 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
     }
   };
 
+  const handleSelectForm = async (form) => {
+    setSelected(form);
+    if (!form.is_read) {
+      try {
+        await base44.entities.HealthForm.update(form.id, { is_read: true });
+        setForms(prev => prev.map(f => f.id === form.id ? { ...f, is_read: true } : f));
+      } catch (e) {}
+    }
+  };
+
   const deleteForm = async (form) => {
     if (!window.confirm(`Czy na pewno chcesz usunąć ankietę dla ${getClientName(form)}?`)) return;
     await base44.entities.HealthForm.delete(form.id);
@@ -566,10 +576,11 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
                 return (
                   <div key={form.client_email || form.id}
                     className="flex items-center gap-3 px-4 py-3 cursor-pointer"
-                    style={{ borderBottom: i < groupedClients.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selected?.client_email === form.client_email ? 'rgba(255,0,127,0.05)' : 'transparent' }}
-                    onClick={() => setSelected(form)}
+                    style={{ borderBottom: i < groupedClients.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selected?.client_email === form.client_email ? 'rgba(255,0,127,0.05)' : group.some(f => !f.is_read) ? 'rgba(255,0,127,0.025)' : 'transparent', borderLeft: group.some(f => !f.is_read) ? '2px solid rgba(255,0,127,0.4)' : '2px solid transparent' }}
+                    onClick={() => handleSelectForm(form)}
                   >
                     <FileText size={13} color={form.is_minor ? '#FF007F' : t.fuchsia} />
+                    {group.some(f => !f.is_read) && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '1px 4px' }}>NOWA</span>}
                     <div className="flex-1 min-w-0">
                       <p style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>{getClientName(form)}</p>
                       <p style={{ ...mono, fontSize: '8px', color: t.muted, marginTop: '2px' }}>{form.client_email}</p>

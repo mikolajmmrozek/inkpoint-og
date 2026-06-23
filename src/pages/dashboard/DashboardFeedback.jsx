@@ -43,6 +43,7 @@ export default function DashboardFeedback() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('reviews'); // 'reviews' | 'config'
   const [copied, setCopied] = useState(false);
+  const [sortBy, setSortBy] = useState('newest'); // 'newest' | 'oldest' | 'highest' | 'lowest'
 
   const surveyUrl = `${window.location.origin}/feedback`;
 
@@ -80,6 +81,16 @@ export default function DashboardFeedback() {
   const deleteFeedback = useMutation({
     mutationFn: (id) => base44.entities.Feedback.delete(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['feedback'] }),
+  });
+
+  const sortedFeedbacks = [...feedbacks].sort((a, b) => {
+    switch (sortBy) {
+      case 'newest': return new Date(b.created_date) - new Date(a.created_date);
+      case 'oldest': return new Date(a.created_date) - new Date(b.created_date);
+      case 'highest': return (b.rating_overall || 0) - (a.rating_overall || 0);
+      case 'lowest': return (a.rating_overall || 0) - (b.rating_overall || 0);
+      default: return 0;
+    }
   });
 
   const avg = (arr) => arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1) : '—';
@@ -176,12 +187,21 @@ export default function DashboardFeedback() {
       {/* Reviews tab */}
       {activeTab === 'reviews' && (
         <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-          {feedbacks.length === 0 ? (
+          {/* Sort controls */}
+          <div className="flex items-center gap-1 px-4 py-2 flex-wrap" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginRight: '6px' }}>SORTUJ:</span>
+            {[{ key: 'newest', label: 'Najnowsze' }, { key: 'oldest', label: 'Najstarsze' }, { key: 'highest', label: 'Najwyższa ocena' }, { key: 'lowest', label: 'Najniższa ocena' }].map(opt => (
+              <button key={opt.key} onClick={() => setSortBy(opt.key)} style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 8px', border: `0.5px solid ${sortBy === opt.key ? t.fuchsia : t.border}`, color: sortBy === opt.key ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer' }}>
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          {sortedFeedbacks.length === 0 ? (
             <div className="py-20 text-center">
               <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK OPINII</p>
             </div>
-          ) : feedbacks.map((fb, i) => (
-            <div key={fb.id} style={{ borderBottom: i < feedbacks.length - 1 ? `0.5px solid ${t.border}` : 'none', padding: '20px' }}>
+          ) : sortedFeedbacks.map((fb, i) => (
+            <div key={fb.id} style={{ borderBottom: i < sortedFeedbacks.length - 1 ? `0.5px solid ${t.border}` : 'none', padding: '20px' }}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-2 flex-wrap">

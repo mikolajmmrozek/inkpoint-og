@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
             title: 'Nowa rezerwacja online',
             message: `${booking.client_name || 'Klient'} — ${booking.session_date || '—'}${booking.session_time ? ' o ' + booking.session_time : ''}`,
             category: 'booking',
-            link_path: '/dashboard/bookings',
+            link_path: '/dashboard/bookings?view=pending',
             is_read: false,
           });
         }
