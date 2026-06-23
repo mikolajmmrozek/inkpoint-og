@@ -28,21 +28,19 @@ function BookingRow({ b, i, items, selected, setSelected, artists, t }) {
       onClick={() => setSelected(b)}
     >
       <div className="flex items-center gap-6 min-w-0">
-        {b.session_time && (
-          <div className="flex-shrink-0 text-center" style={{ minWidth: '60px' }}>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.05em', marginBottom: '2px' }}>{b.session_date || '—'}</p>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: STATUS_COLORS[b.status] || t.fuchsia, letterSpacing: '0.05em' }}>{b.session_time}</p>
-            {b.session_end_time ? (
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted }}>→ {b.session_end_time}</p>
-            ) : b.session_duration ? (() => {
-              const [h, m] = b.session_time.split(':').map(Number);
-              const endTotal = h * 60 + m + b.session_duration;
-              const endH = String(Math.floor(endTotal / 60)).padStart(2, '0');
-              const endM = String(endTotal % 60).padStart(2, '0');
-              return <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted }}>→ {endH}:{endM}</p>;
-            })() : null}
-          </div>
-        )}
+        <div className="flex-shrink-0 text-center" style={{ minWidth: '60px' }}>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.05em', marginBottom: '2px' }}>{b.session_date || '—'}</p>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: STATUS_COLORS[b.status] || t.fuchsia, letterSpacing: '0.05em' }}>{b.session_time || '—'}</p>
+          {b.session_end_time ? (
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted }}>→ {b.session_end_time}</p>
+          ) : b.session_time && b.session_duration ? (() => {
+            const [h, m] = b.session_time.split(':').map(Number);
+            const endTotal = h * 60 + m + b.session_duration;
+            const endH = String(Math.floor(endTotal / 60)).padStart(2, '0');
+            const endM = String(endTotal % 60).padStart(2, '0');
+            return <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted }}>→ {endH}:{endM}</p>;
+          })() : null}
+        </div>
         <div className="flex items-center gap-2 min-w-0">
           {(() => {
             const artist = artists.find(a => a.id === b.artist_id);
