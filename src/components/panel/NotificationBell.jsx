@@ -17,7 +17,16 @@ export default function NotificationBell({ userEmail, theme, onClick, size = 18,
 
   useEffect(() => {
     loadCount();
-    const unsubscribe = base44.entities.Notification.subscribe(() => loadCount());
+    const unsubscribe = base44.entities.Notification.subscribe((event) => {
+      if (event.data.target_email?.toLowerCase() === userEmail?.toLowerCase()) {
+        setUnreadCount(prev => {
+          if (event.type === 'create' && !event.data.is_read) return prev + 1;
+          if (event.type === 'update' && event.data.is_read) return Math.max(0, prev - 1);
+          if (event.type === 'delete') return Math.max(0, prev - 1);
+          return prev;
+        });
+      }
+    });
     return () => { if (typeof unsubscribe === 'function') unsubscribe(); };
   }, [userEmail]);
 

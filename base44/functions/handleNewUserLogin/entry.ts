@@ -6,9 +6,9 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { is_first_login } = await req.json();
-    
-    if (!is_first_login) {
+    // Check if this is truly the first login — last_login should be null (backend checks this)
+    // Only proceed if the user has no last_login recorded
+    if (user.last_login) {
       return Response.json({ success: true });
     }
 
@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
     // Create notification for each admin
     const notifications = admins.map(admin => ({
       target_email: admin.email,
-      title: 'Nowy użytkownik zalogował się',
+      title: 'Nowy użytkownik zarejestrował się',
       message: `${user.full_name || user.email} zalogował się w aplikacji po raz pierwszy.`,
       category: 'system',
       link_path: '/dashboard/clients',
