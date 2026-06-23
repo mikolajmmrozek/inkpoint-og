@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { useOutletContext } from 'react-router-dom';
-import { Bell, CheckCheck, Calendar, MessageSquare, Info, FileText } from 'lucide-react';
+import { Bell, CheckCheck, Calendar, MessageSquare, Info, FileText, Trash2, Check } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 
@@ -48,7 +48,8 @@ export default function NotificationsPage() {
     return () => { if (typeof unsubscribe === 'function') unsubscribe(); };
   }, [userEmail]);
 
-  const markRead = async (id) => {
+  const markRead = async (id, e) => {
+    e?.stopPropagation();
     try {
       await base44.entities.Notification.update(id, { is_read: true });
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
@@ -63,6 +64,21 @@ export default function NotificationsPage() {
     } catch (e) {}
   };
 
+  const deleteNotification = async (id, e) => {
+    e.stopPropagation();
+    try {
+      await base44.entities.Notification.delete(id);
+      setNotifications(prev => prev.filter(n => n.id !== id));
+    } catch (e) {}
+  };
+
+  const deleteAll = async () => {
+    try {
+      await Promise.all(notifications.map(n => base44.entities.Notification.delete(n.id)));
+      setNotifications([]);
+    } catch (e) {}
+  };
+
   const handleClick = (notif) => {
     if (!notif.is_read) markRead(notif.id);
     if (notif.link_path) navigate(notif.link_path);
@@ -71,7 +87,7 @@ export default function NotificationsPage() {
   return (
     <div>
       {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8 flex items-center justify-between flex-wrap gap-2">
         <div>
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
             POWIADOMIENIA
@@ -80,11 +96,18 @@ export default function NotificationsPage() {
             Powiadomienia
           </h2>
         </div>
-        {notifications.some(n => !n.is_read) && (
-          <button onClick={markAllRead} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer' }}>
-            <CheckCheck size={12} /> Przeczytane
-          </button>
-        )}
+        <div className="flex gap-2">
+          {notifications.some(n => !n.is_read) && (
+            <button onClick={markAllRead} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer' }}>
+              <CheckCheck size={12} /> Przeczytane
+            </button>
+          )}
+          {notifications.length > 0 && (
+            <button onClick={deleteAll} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF4444', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer' }}>
+              <Trash2 size={12} /> Usuń wszystkie
+            </button>
+          )}
+        </div>
       </div>
 
       {/* List */}
@@ -113,21 +136,29 @@ export default function NotificationsPage() {
                   <Icon size={14} color={color} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p style={{ fontSize: '13px', color: t.text, fontWeight: !notif.is_read ? 500 : 400, marginBottom: '2px' }}>
-                    {notif.title}
-                  </p>
-                  <p style={{ fontSize: '12px', color: t.muted, lineHeight: 1.5, marginBottom: '4px' }}>
-                    {notif.message}
-                  </p>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.05em' }}>
-                    {format(new Date(notif.created_date), 'dd.MM.yyyy HH:mm')}
-                  </p>
-                </div>
-                {!notif.is_read && (
-                  <div className="flex-shrink-0 mt-1.5">
-                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: t.fuchsia }} />
+                    <p style={{ fontSize: '13px', color: t.text, fontWeight: !notif.is_read ? 500 : 400, marginBottom: '2px' }}>
+                      {notif.title}
+                    </p>
+                    <p style={{ fontSize: '12px', color: t.muted, lineHeight: 1.5, marginBottom: '4px' }}>
+                      {notif.message}
+                    </p>
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.05em' }}>
+                      {format(new Date(notif.created_date), 'dd.MM.yyyy HH:mm')}
+                    </p>
                   </div>
-                )}
+                  <div className="flex-shrink-0 flex items-center gap-2">
+                    {!notif.is_read && (
+                      <button onClick={(e) => markRead(notif.id, e)} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px' }} title="Oznacz jako przeczytane">
+                        <Check size={13} color={t.fuchsia} />
+                      </button>
+                    )}
+                    <button onClick={(e) => deleteNotification(notif.id, e)} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px' }} title="Usuń">
+                      <Trash2 size={13} color={t.muted} />
+                    </button>
+                    {!notif.is_read && (
+                      <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: t.fuchsia, marginLeft: '2px' }} />
+                    )}
+                  </div>
               </div>
             );
           })
