@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { useOutletContext } from 'react-router-dom';
-import { Bell, CheckCheck, Calendar, MessageSquare, Info, FileText, Trash2, Check } from 'lucide-react';
+import { Bell, CheckCheck, Calendar, MessageSquare, Info, FileText, Trash2, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 
@@ -19,6 +19,8 @@ export default function NotificationsPage() {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 15;
 
   const t = theme === 'light'
     ? { bg: '#FFFFFF', border: '#E5E5E5', text: '#111111', muted: 'rgba(0,0,0,0.5)', fuchsia: '#FF007F', unreadBg: 'rgba(255,0,127,0.03)' }
@@ -84,6 +86,11 @@ export default function NotificationsPage() {
     if (notif.link_path) navigate(notif.link_path);
   };
 
+  const totalPages = Math.ceil(notifications.length / pageSize);
+  const startIdx = (currentPage - 1) * pageSize;
+  const endIdx = startIdx + pageSize;
+  const paginatedNotifications = notifications.slice(startIdx, endIdx);
+
   return (
     <div>
       {/* Header */}
@@ -122,7 +129,7 @@ export default function NotificationsPage() {
             <p style={{ fontSize: '14px', color: t.muted }}>Brak powiadomień</p>
           </div>
         ) : (
-          notifications.map(notif => {
+          paginatedNotifications.map(notif => {
             const Icon = CATEGORY_ICONS[notif.category] || Bell;
             const color = CATEGORY_COLORS[notif.category] || '#9ca3af';
             return (
@@ -162,8 +169,31 @@ export default function NotificationsPage() {
               </div>
             );
           })
-        )}
-      </div>
-    </div>
-  );
-}
+          )}
+          </div>
+
+          {/* Pagination */}
+          {notifications.length > pageSize && (
+          <div className="mt-6 flex items-center justify-between">
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'JetBrains Mono', fontSize: '9px', color: currentPage === 1 ? t.muted : t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', opacity: currentPage === 1 ? 0.5 : 1 }}
+          >
+            <ChevronLeft size={12} /> Nowsze
+          </button>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em' }}>
+            Strona {currentPage} z {totalPages}
+          </p>
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'JetBrains Mono', fontSize: '9px', color: currentPage === totalPages ? t.muted : t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', opacity: currentPage === totalPages ? 0.5 : 1 }}
+          >
+            Starsze <ChevronRight size={12} />
+          </button>
+          </div>
+          )}
+          </div>
+          );
+          }
