@@ -36,6 +36,7 @@ import DashboardFAQ from './pages/dashboard/DashboardFAQ';
 import DashboardFeedback from './pages/dashboard/DashboardFeedback';
 import DashboardServices from './pages/dashboard/DashboardServices';
 import DashboardUsers from './pages/dashboard/DashboardUsers';
+import NotificationsPage from './pages/shared/NotificationsPage';
 import ArtistPanel from './pages/artist/ArtistPanel';
 import ArtistHome from './pages/artist/ArtistHome';
 import ArtistSchedule from './pages/artist/ArtistSchedule';
@@ -122,6 +123,7 @@ const AuthenticatedApp = () => {
         <Route path="feedback" element={<DashboardFeedback />} />
         <Route path="services" element={<DashboardServices />} />
         <Route path="users" element={<DashboardUsers />} />
+        <Route path="notifications" element={<NotificationsPage />} />
       </Route>
 
       {/* Artist panel */}
@@ -131,6 +133,7 @@ const AuthenticatedApp = () => {
         <Route path="stats" element={<ArtistStats />} />
         <Route path="profile" element={<ArtistProfilePage />} />
         <Route path="messages" element={<ArtistMessages />} />
+        <Route path="notifications" element={<NotificationsPage />} />
       </Route>
 
       {/* Client panel */}
@@ -140,6 +143,7 @@ const AuthenticatedApp = () => {
         <Route path="health-forms" element={<ClientHealthForms />} />
         <Route path="profile" element={<ClientProfile />} />
         <Route path="messages" element={<ClientMessages />} />
+        <Route path="notifications" element={<NotificationsPage />} />
       </Route>
 
       <Route path="*" element={<PageNotFound />} />

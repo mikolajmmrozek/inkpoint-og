@@ -205,10 +205,10 @@ export default function Dashboard() {
           </div>
 
           <div className="flex-1 p-6 lg:p-10 overflow-y-auto pb-20 lg:pb-10">
-            <Outlet />
+            <Outlet context={{ theme }} />
           </div>
         </div>
-        <BottomNav theme={theme} calendarPath="/dashboard/bookings" messagesPath="/dashboard/messages" onBellClick={() => setNotifOpen(true)} userEmail={user.email} />
+        <BottomNav theme={theme} calendarPath="/dashboard/bookings" messagesPath="/dashboard/messages" notificationsPath="/dashboard/notifications" userEmail={user.email} />
         <NotificationPanel open={notifOpen} onClose={() => setNotifOpen(false)} userEmail={user.email} theme={theme} />
       </div>
     </ThemeContext.Provider>

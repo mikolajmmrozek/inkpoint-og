@@ -175,7 +175,7 @@ export default function ClientPanel() {
             <Outlet context={{ client, user, theme }} />
           </div>
         </div>
-        <BottomNav theme={theme} calendarPath="/panel/sessions" messagesPath="/panel/messages" onBellClick={() => setNotifOpen(true)} userEmail={user.email} />
+        <BottomNav theme={theme} calendarPath="/panel/sessions" messagesPath="/panel/messages" notificationsPath="/panel/notifications" userEmail={user.email} />
         <NotificationPanel open={notifOpen} onClose={() => setNotifOpen(false)} userEmail={user.email} theme={theme} />
       </div>
     </ClientThemeContext.Provider>

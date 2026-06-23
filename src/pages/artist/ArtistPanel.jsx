@@ -201,7 +201,7 @@ export default function ArtistPanel() {
             <Outlet context={{ artist, theme }} />
           </div>
         </div>
-        <BottomNav theme={theme} calendarPath="/artist/schedule" messagesPath="/artist/messages" onBellClick={() => setNotifOpen(true)} userEmail={user.email} />
+        <BottomNav theme={theme} calendarPath="/artist/schedule" messagesPath="/artist/messages" notificationsPath="/artist/notifications" userEmail={user.email} />
         <NotificationPanel open={notifOpen} onClose={() => setNotifOpen(false)} userEmail={user.email} theme={theme} />
       </div>
     </ArtistThemeContext.Provider>

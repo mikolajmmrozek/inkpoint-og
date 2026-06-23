@@ -7,7 +7,7 @@ import { base44 } from '@/api/base44Client';
  * Przypięty pasek nawigacji na dole dla widoków mobilnych i tabletów.
  * Trzy ikony w równych odstępach: kalendarz, wiadomości, powiadomienia.
  */
-export default function BottomNav({ theme, calendarPath, messagesPath, onBellClick, userEmail }) {
+export default function BottomNav({ theme, calendarPath, messagesPath, notificationsPath, userEmail }) {
   const location = useLocation();
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -18,6 +18,7 @@ export default function BottomNav({ theme, calendarPath, messagesPath, onBellCli
 
   const isCalendarActive = location.pathname.startsWith(calendarPath);
   const isMessagesActive = location.pathname.startsWith(messagesPath);
+  const isNotificationsActive = location.pathname.startsWith(notificationsPath);
 
   const loadCount = async () => {
     if (!userEmail) return;
@@ -51,8 +52,9 @@ export default function BottomNav({ theme, calendarPath, messagesPath, onBellCli
     {
       icon: Bell,
       label: 'Powiadomienia',
-      active: false,
-      isLink: false,
+      path: notificationsPath,
+      active: isNotificationsActive,
+      isLink: true,
       badge: unreadCount,
     },
   ];
@@ -102,20 +104,10 @@ export default function BottomNav({ theme, calendarPath, messagesPath, onBellCli
           </div>
         );
 
-        return item.isLink ? (
+        return (
           <Link key={i} to={item.path} className="flex-1 flex justify-center transition-opacity hover:opacity-70">
             {inner}
           </Link>
-        ) : (
-          <button
-            key={i}
-            type="button"
-            onClick={onBellClick}
-            className="flex-1 flex justify-center transition-opacity hover:opacity-70"
-            style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-          >
-            {inner}
-          </button>
         );
       })}
     </nav>
