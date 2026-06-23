@@ -427,7 +427,8 @@ export default function DashboardBookings() {
                 setListPage(todayIdx >= 0 ? Math.floor(todayIdx / PAGE_SIZE) : 0);
               }
             }}
-            style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}
+            className="btn-oxblood"
+            style={{ padding: '8px 14px' }}
           >
             DZISIAJ
           </button>
