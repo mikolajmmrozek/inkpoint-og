@@ -29,6 +29,15 @@ export default function DashboardMessages() {
       setSelectedEmail(email);
     }
   }, [location.search, loading]);
+
+  // Mark thread as read when selectedEmail changes
+  useEffect(() => {
+    if (selectedEmail && threads.length > 0) {
+      markThreadRead(selectedEmail);
+      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+    }
+  }, [selectedEmail, threads.length]);
+
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
