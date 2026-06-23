@@ -18,7 +18,7 @@ export default function NotificationBell({ userEmail, theme, onClick, size = 18,
   useEffect(() => {
     loadCount();
     const unsubscribe = base44.entities.Notification.subscribe(() => loadCount());
-    const interval = setInterval(loadCount, 15000);
+    const interval = setInterval(loadCount, 5000);
     return () => {
       if (typeof unsubscribe === 'function') unsubscribe();
       clearInterval(interval);
