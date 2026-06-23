@@ -32,9 +32,12 @@ export default function BottomNav({ theme, calendarPath, messagesPath, notificat
   const loadMessages = async () => {
     if (!userEmail) return;
     try {
-      if (role === 'admin' || role === 'artist') {
+      if (role === 'admin') {
         const msgs = await base44.entities.ContactMessage.filter({ is_read: false, sender_type: 'client' }, '-created_date', 200);
         setUnreadMessages(msgs.length);
+      } else if (role === 'artist') {
+        const msgs = await base44.entities.ContactMessage.filter({ is_read: false }, '-created_date', 200);
+        setUnreadMessages(msgs.filter(m => m.sender_type === 'client' || m.sender_type === 'admin').length);
       } else {
         const msgs = await base44.entities.ContactMessage.filter({ is_read: false, email: userEmail }, '-created_date', 200);
         setUnreadMessages(msgs.filter(m => m.sender_type === 'admin' || m.sender_type === 'system').length);
