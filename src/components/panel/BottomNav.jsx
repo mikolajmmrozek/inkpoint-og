@@ -32,6 +32,7 @@ export default function BottomNav({ theme, calendarPath, messagesPath, notificat
   const loadMessages = async () => {
     if (!userEmail) return;
     try {
+      const normalizedEmail = userEmail.toLowerCase().trim();
       if (role === 'admin') {
         const msgs = await base44.entities.ContactMessage.filter({ is_read: false, sender_type: 'client' }, '-created_date', 200);
         setUnreadMessages(msgs.length);
@@ -39,10 +40,14 @@ export default function BottomNav({ theme, calendarPath, messagesPath, notificat
         const msgs = await base44.entities.ContactMessage.filter({ is_read: false }, '-created_date', 200);
         setUnreadMessages(msgs.filter(m => m.sender_type === 'client' || m.sender_type === 'admin').length);
       } else {
-        const msgs = await base44.entities.ContactMessage.filter({ is_read: false, email: userEmail }, '-created_date', 200);
-        setUnreadMessages(msgs.filter(m => m.sender_type === 'admin' || m.sender_type === 'system').length);
+        const msgs = await base44.entities.ContactMessage.filter({ is_read: false }, '-created_date', 200);
+        const count = msgs.filter(m => {
+          const msgEmail = (m.email || '').toLowerCase().trim();
+          return msgEmail === normalizedEmail && (m.sender_type === 'admin' || m.sender_type === 'system');
+        }).length;
+        setUnreadMessages(count);
       }
-    } catch (e) {}
+    } catch (e) { console.log('Load messages error:', e); }
   };
 
   useEffect(() => {
