@@ -6,6 +6,7 @@ import { useTheme } from './Dashboard';
 import { AnimatePresence } from 'framer-motion';
 import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
 import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
+import StatsTile from '@/components/dashboard/StatsTile';
 
 const safeFormat = (dateStr, fmt) => {
   try {
@@ -60,6 +61,7 @@ export default function DashboardHealthForms() {
   const [selected, setSelected] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [formFilter, setFormFilter] = useState('all'); // 'all' | 'unread'
   const [exporting, setExporting] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
   const [sendingLinkEmail, setSendingLinkEmail] = useState(null);
@@ -124,6 +126,7 @@ export default function DashboardHealthForms() {
 
   // Filter forms by search query
   const filteredForms = completedForms.filter(form => {
+    if (formFilter === 'unread' && form.is_read) return false;
     const q = searchQuery.toLowerCase().replace(/^#/, '');
     return !q || 
       form.client_name?.toLowerCase().includes(q) ||
@@ -429,6 +432,12 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
         >
           <Settings size={13} /> EDYTUJ SZABLON
         </a>
+      </div>
+
+      {/* Stats tiles */}
+      <div className="flex gap-4 mb-6 flex-wrap">
+        <StatsTile label="Wszystkie ankiety" value={completedForms.length} active={formFilter === 'all'} onClick={() => setFormFilter('all')} t={t} />
+        <StatsTile label="Nowe (nieprzeczytane)" value={completedForms.filter(f => !f.is_read).length} active={formFilter === 'unread'} onClick={() => setFormFilter(formFilter === 'unread' ? 'all' : 'unread')} t={t} />
       </div>
 
       {/* General form link section */}

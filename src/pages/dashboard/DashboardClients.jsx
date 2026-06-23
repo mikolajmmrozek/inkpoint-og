@@ -8,6 +8,7 @@ import { format } from 'date-fns';
 import { AnimatePresence } from 'framer-motion';
 import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
 import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
+import StatsTile from '@/components/dashboard/StatsTile';
 
 const inputStyle = {
   background: 'transparent',
@@ -255,18 +256,12 @@ export default function DashboardClients() {
       {/* Stats row */}
       <div className="flex gap-4 mb-4 flex-wrap">
         {[
-          { label: 'Łączna liczba klientów', value: clients.length, filter: 'all' },
+          { label: 'Wszyscy klienci', value: clients.length, filter: 'all' },
           { label: 'Nowi (7 dni)', value: clients.filter(c => isNewClient(c)).length, filter: 'new' },
           { label: 'Powracający (2+ sesji)', value: clients.filter(c => (c.total_sessions || 0) >= 2).length, filter: 'returning' },
-        ].map(s => {
-          const active = clientFilter === s.filter;
-          return (
-            <button key={s.label} onClick={() => setClientFilter(active ? 'all' : s.filter)} className="px-5 py-4 text-left transition-all" style={{ border: `0.5px solid ${active ? t.fuchsia : t.border}`, background: active ? 'rgba(255,0,127,0.05)' : t.bg, cursor: 'pointer' }}>
-              <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2rem', fontWeight: 400, color: t.fuchsia, lineHeight: 1 }}>{s.value}</p>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: active ? t.fuchsia : t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '4px' }}>{s.label}</p>
-            </button>
-          );
-        })}
+        ].map(s => (
+          <StatsTile key={s.label} label={s.label} value={s.value} active={clientFilter === s.filter} onClick={() => setClientFilter(clientFilter === s.filter ? 'all' : s.filter)} t={t} />
+        ))}
       </div>
 
       {/* Search — full width above list */}

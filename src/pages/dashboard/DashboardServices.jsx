@@ -5,6 +5,7 @@ import { Plus, Edit2, Trash2, X, Upload, Loader2, CalendarPlus, ChevronUp, Chevr
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 import { AnimatePresence } from 'framer-motion';
 import BookingModal from '@/components/dashboard/BookingModal';
+import StatsTile from '@/components/dashboard/StatsTile';
 
 const inputStyle = {
   background: 'transparent',
@@ -245,10 +246,7 @@ export default function DashboardServices() {
           { label: 'Wszystkich usług', value: services.length },
           { label: 'Aktywnych', value: services.filter(s => s.is_active !== false).length },
         ].map(s => (
-          <div key={s.label} className="px-5 py-4" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-            <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2rem', fontWeight: 400, color: t.fuchsia, lineHeight: 1 }}>{s.value}</p>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '4px' }}>{s.label}</p>
-          </div>
+          <StatsTile key={s.label} label={s.label} value={s.value} t={t} />
         ))}
       </div>
 

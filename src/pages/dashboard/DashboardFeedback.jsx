@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
 import { Star, Mail, Eye, EyeOff, Trash2, X, Check, Plus, GripVertical, Copy, ExternalLink } from 'lucide-react';
+import StatsTile from '@/components/dashboard/StatsTile';
 
 function StarDisplay({ value, size = 12 }) {
   return (
@@ -151,17 +152,14 @@ export default function DashboardFeedback() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div className="flex gap-4 mb-8 flex-wrap">
         {[
           { label: 'Łączna liczba', value: feedbacks.length },
           { label: 'Śr. ocena ogólna', value: avg(ratings) + (ratings.length ? ' ★' : '') },
           { label: 'Śr. ocena artysty', value: avg(artistRatings) + (artistRatings.length ? ' ★' : '') },
           { label: 'Opublikowane', value: feedbacks.filter(f => f.is_published).length },
         ].map(stat => (
-          <div key={stat.label} style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '20px' }}>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>{stat.label}</p>
-            <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2rem', color: t.fuchsia, letterSpacing: '0.04em' }}>{stat.value}</p>
-          </div>
+          <StatsTile key={stat.label} label={stat.label} value={stat.value} t={t} />
         ))}
       </div>
 
