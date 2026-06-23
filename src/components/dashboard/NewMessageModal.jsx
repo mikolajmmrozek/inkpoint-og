@@ -4,10 +4,10 @@ import { X, Search, Send, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import AttachmentBar from '@/components/panel/AttachmentBar';
 
-export default function NewMessageModal({ onClose, onSent, t }) {
+export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }) {
   const [recipientType, setRecipientType] = useState('client');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedRecipient, setSelectedRecipient] = useState(null);
+  const [selectedRecipient, setSelectedRecipient] = useState(defaultRecipient || null);
   const [messageText, setMessageText] = useState('');
   const [sending, setSending] = useState(false);
   const [pendingAttachments, setPendingAttachments] = useState([]);

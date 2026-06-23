@@ -9,6 +9,7 @@ import { AnimatePresence } from 'framer-motion';
 import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
 import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
 import StatsTile from '@/components/dashboard/StatsTile';
+import ClientMessageButton from '@/components/dashboard/ClientMessageButton';
 
 const inputStyle = {
   background: 'transparent',
@@ -307,14 +308,15 @@ export default function DashboardClients() {
                     {isNewClient(c) && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#16a34a', border: '0.5px solid #16a34a', padding: '1px 4px' }}>NOWY</span>}
                   </div>
                   <div className="flex gap-2">
-                    {c.email && getClientStatus(c) === 'inactive' && (
-                      <button onClick={(e) => { e.stopPropagation(); handleInvite(c); }} style={{ color: '#FF007F', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} title="Utwórz konto i zaproś"><UserPlus size={13} /></button>
-                    )}
-                    <button onClick={(e) => { e.stopPropagation(); openNewSession(c); }} style={{ color: '#16a34a', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} title="Nowa sesja"><CalendarPlus size={13} /></button>
-                    <button onClick={(e) => { e.stopPropagation(); setMergeSource(c); setMergeTarget(null); setMergeSearch(''); }} style={{ color: '#a855f7', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} title="Połącz"><Merge size={13} /></button>
-                    <button onClick={(e) => { e.stopPropagation(); openEdit(c); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><Edit2 size={13} /></button>
-                    <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(c); }} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><Trash2 size={13} /></button>
-                  </div>
+                     {c.email && getClientStatus(c) === 'inactive' && (
+                       <button onClick={(e) => { e.stopPropagation(); handleInvite(c); }} style={{ color: '#FF007F', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} title="Utwórz konto i zaproś"><UserPlus size={13} /></button>
+                     )}
+                     <ClientMessageButton client={c} t={t} users={users} />
+                     <button onClick={(e) => { e.stopPropagation(); openNewSession(c); }} style={{ color: '#16a34a', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} title="Nowa sesja"><CalendarPlus size={13} /></button>
+                     <button onClick={(e) => { e.stopPropagation(); setMergeSource(c); setMergeTarget(null); setMergeSearch(''); }} style={{ color: '#a855f7', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} title="Połącz"><Merge size={13} /></button>
+                     <button onClick={(e) => { e.stopPropagation(); openEdit(c); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><Edit2 size={13} /></button>
+                     <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(c); }} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><Trash2 size={13} /></button>
+                   </div>
                 </div>
 
                 {/* Desktop row — full grid */}
@@ -362,6 +364,7 @@ export default function DashboardClients() {
                     {c.email && getClientStatus(c) === 'inactive' && (
                       <button onClick={(e) => { e.stopPropagation(); handleInvite(c); }} style={{ color: '#FF007F', background: 'none', border: 'none', cursor: 'pointer' }} title="Utwórz konto i zaproś do aplikacji"><UserPlus size={13} /></button>
                     )}
+                    <ClientMessageButton client={c} t={t} users={users} />
                     <button onClick={(e) => { e.stopPropagation(); openNewSession(c); }} style={{ color: '#16a34a', background: 'none', border: 'none', cursor: 'pointer' }} title="Nowa sesja"><CalendarPlus size={13} /></button>
                     <button onClick={(e) => { e.stopPropagation(); setMergeSource(c); setMergeTarget(null); setMergeSearch(''); }} style={{ color: '#a855f7', background: 'none', border: 'none', cursor: 'pointer' }} title="Połącz z innym klientem"><Merge size={13} /></button>
                     <button onClick={(e) => { e.stopPropagation(); openEdit(c); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Edit2 size={13} /></button>

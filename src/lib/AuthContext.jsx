@@ -96,6 +96,16 @@ export const AuthProvider = ({ children }) => {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
       setIsAuthenticated(true);
+      
+      // Notify admins of first login
+      if (currentUser && !currentUser.last_login) {
+        try {
+          await base44.functions.invoke('handleNewUserLogin', { is_first_login: true });
+        } catch (e) {
+          console.error('Failed to notify admins:', e);
+        }
+      }
+      
       setIsLoadingAuth(false);
       setAuthChecked(true);
     } catch (error) {
