@@ -37,14 +37,20 @@ Deno.serve(async (req) => {
         });
       }
     } else if (msg.sender_type === 'admin' && msg.email) {
-      // Admin replied → notify the client
+      // Admin replied → notify the recipient (client or artist)
       const preview = (msg.message || '').slice(0, 80);
+      const recipientEmail = msg.email.toLowerCase().trim();
+      
+      // Check if recipient is an artist or a client
+      const user = await base44.asServiceRole.entities.User.filter({ email: recipientEmail }, null, 1);
+      const isArtist = user.length > 0 && user[0].role === 'artist';
+      
       notifications.push({
-        target_email: msg.email,
-        title: 'Nowa wiadomość ze studia',
+        target_email: recipientEmail,
+        title: isArtist ? 'Nowa wiadomość od studia' : 'Nowa wiadomość ze studia',
         message: `${preview}${msg.message && msg.message.length > 80 ? '...' : ''}`,
         category: 'message',
-        link_path: '/panel/messages',
+        link_path: isArtist ? '/artist/messages' : '/panel/messages',
         link_data: msg.email,
         is_read: false,
       });
