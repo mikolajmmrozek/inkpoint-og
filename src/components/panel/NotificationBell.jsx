@@ -32,8 +32,8 @@ export default function NotificationBell({ userEmail, theme, onClick, size = 18,
       className="flex flex-col items-center gap-1 transition-opacity hover:opacity-70"
       style={{ background: 'none', border: 'none', cursor: 'pointer', minWidth: showLabel ? '60px' : 'auto', padding: showLabel ? '8px 0' : '8px' }}
     >
-      <div style={{ position: 'relative' }}>
-        <Bell size={size} color={inactiveColor} />
+      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Bell size={size} color={inactiveColor} strokeWidth={1.5} />
         {unreadCount > 0 && (
           <span style={{
             position: 'absolute', top: '-2px', right: '-4px',
