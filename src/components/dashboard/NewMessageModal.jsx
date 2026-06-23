@@ -46,7 +46,7 @@ export default function NewMessageModal({ onClose, onSent, t }) {
         name: u.full_name || u.email,
         email: u.email || '',
         phone: '',
-        type: u.role === 'artist' ? 'Artysta' : 'Admin',
+        type: u.role === 'artist' ? 'Artysta' : u.role === 'user' ? 'Użytkownik' : 'Admin',
       })).filter(r => r.email);
       if (!q) return base.slice(0, 20);
       return base.filter(r =>
