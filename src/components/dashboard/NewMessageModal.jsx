@@ -30,10 +30,18 @@ export default function NewMessageModal({ onClose, onSent, t }) {
       let base = clients.map(c => ({
         id: c.id,
         name: c.name || `${c.first_name || ''} ${c.last_name || ''}`.trim(),
-        email: c.email || '',
+        email: (c.email || '').toLowerCase().trim(),
         phone: c.phone || '',
         type: 'Klient',
       })).filter(r => r.email);
+      // Merge in logged-in users with role 'user' (clients with accounts)
+      const clientEmails = new Set(base.map(r => r.email));
+      users.filter(u => u.role === 'user').forEach(u => {
+        const email = (u.email || '').toLowerCase().trim();
+        if (email && !clientEmails.has(email)) {
+          base.push({ id: u.id, name: u.full_name || u.email, email, phone: '', type: 'Klient' });
+        }
+      });
       if (!q) return base.slice(0, 20);
       return base.filter(r =>
         r.name.toLowerCase().includes(q) ||
@@ -41,12 +49,12 @@ export default function NewMessageModal({ onClose, onSent, t }) {
         r.phone.toLowerCase().includes(q)
       ).slice(0, 20);
     } else {
-      let base = users.map(u => ({
+      let base = users.filter(u => u.role === 'artist' || u.role === 'admin').map(u => ({
         id: u.id,
         name: u.full_name || u.email,
         email: u.email || '',
         phone: '',
-        type: u.role === 'artist' ? 'Artysta' : u.role === 'user' ? 'Użytkownik' : 'Admin',
+        type: u.role === 'artist' ? 'Artysta' : 'Admin',
       })).filter(r => r.email);
       if (!q) return base.slice(0, 20);
       return base.filter(r =>
