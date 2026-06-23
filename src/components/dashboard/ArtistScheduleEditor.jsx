@@ -106,7 +106,7 @@ function TimeDropdown({ value, onChange, border, text }) {
   const setM = (newM) => onChange(`${h || '09'}:${newM}`);
 
   const selectStyle = {
-    background: '#1a1a1a',
+    background: text === '#F5F0EB' ? '#1a1a1a' : '#FFFFFF',
     border: `0.5px solid ${border}`,
     color: text,
     padding: '6px 8px',
