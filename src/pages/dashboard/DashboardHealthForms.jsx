@@ -427,8 +427,8 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
         <a
           href="/dashboard/form-template"
           title="Edytuj szablon formularza"
-          className="flex items-center gap-2"
-          style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', textDecoration: 'none' }}
+          className="flex items-center gap-2 btn-oxblood"
+          style={{ padding: '10px 20px' }}
         >
           <Settings size={13} /> EDYTUJ SZABLON
         </a>
