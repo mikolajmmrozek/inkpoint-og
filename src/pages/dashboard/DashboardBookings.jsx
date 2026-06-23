@@ -374,6 +374,8 @@ export default function DashboardBookings() {
     return base;
   })();
 
+  const pendingCount = bookings.filter(b => b.status === 'pending').length;
+
   const pendingViewBookings = (() => {
     if (viewMode !== 'pending') return [];
     let base = bookings.filter(b => b.status === 'pending' || b.status === 'cancelled');
@@ -416,8 +418,14 @@ export default function DashboardBookings() {
                 className="p-2.5 transition-all"
                 style={{ background: viewMode === mode ? 'rgba(255,0,127,0.1)' : 'transparent', color: viewMode === mode ? '#FF007F' : t.muted, border: 'none', cursor: 'pointer' }}
                 title={mode === 'pending' ? 'Nowe rezerwacje (do weryfikacji)' : ''}
+                style={{ position: 'relative', background: viewMode === mode ? 'rgba(255,0,127,0.1)' : 'transparent', color: viewMode === mode ? '#FF007F' : t.muted, border: 'none', cursor: 'pointer' }}
               >
                 <Icon size={14} />
+                {mode === 'pending' && pendingCount > 0 && (
+                  <span style={{ position: 'absolute', top: '-2px', right: '-2px', minWidth: '14px', height: '14px', background: '#FF007F', color: '#F5F0EB', fontSize: '8px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '7px', padding: '0 3px', fontFamily: 'JetBrains Mono' }}>
+                    {pendingCount > 9 ? '9+' : pendingCount}
+                  </span>
+                )}
               </button>
             ))}
           </div>

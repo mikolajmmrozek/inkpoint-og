@@ -33,10 +33,10 @@ const NAV = [
 const getBadgeForPath = (path, counts) => {
   const map = {
     '/dashboard/messages': counts.messages > 0 ? { type: 'count', value: counts.messages } : null,
-    '/dashboard/bookings': counts.pendingBookings > 0 ? { type: 'dot', value: counts.pendingBookings } : null,
-    '/dashboard/health-forms': counts.newHealthForms > 0 ? { type: 'dot', value: counts.newHealthForms } : null,
-    '/dashboard/feedback': counts.unpublishedFeedback > 0 ? { type: 'dot', value: counts.unpublishedFeedback } : null,
-    '/dashboard/clients': counts.newClients > 0 ? { type: 'dot', value: counts.newClients } : null,
+    '/dashboard/bookings': counts.pendingBookings > 0 ? { type: 'count', value: counts.pendingBookings } : null,
+    '/dashboard/health-forms': counts.newHealthForms > 0 ? { type: 'count', value: counts.newHealthForms } : null,
+    '/dashboard/feedback': counts.unpublishedFeedback > 0 ? { type: 'count', value: counts.unpublishedFeedback } : null,
+    '/dashboard/clients': counts.newClients > 0 ? { type: 'count', value: counts.newClients } : null,
   };
   return map[path] || null;
 };
