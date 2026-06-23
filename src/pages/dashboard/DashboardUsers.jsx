@@ -71,6 +71,7 @@ export default function DashboardUsers() {
     await base44.auth.updateMe ? null : null; // can't update other users' built-in fields
     // We can update custom fields via entity
     await base44.entities.User.update(editingUser.id, {
+      full_name: editingUser.full_name || null,
       role: editingUser.role,
       artist_id: editingUser.artist_id || null,
     });
@@ -82,7 +83,7 @@ export default function DashboardUsers() {
         setArtists(prev => prev.map(a => a.id === editingUser.artist_id ? { ...a, name: editingUser.artist_name } : a));
       }
     }
-    setUsers(prev => prev.map(u => u.id === editingUser.id ? { ...u, role: editingUser.role, artist_id: editingUser.artist_id } : u));
+    setUsers(prev => prev.map(u => u.id === editingUser.id ? { ...u, full_name: editingUser.full_name, role: editingUser.role, artist_id: editingUser.artist_id } : u));
     setEditingUser(null);
     setSaving(false);
   };
@@ -225,6 +226,16 @@ export default function DashboardUsers() {
             </div>
 
             <div className="space-y-4">
+              <div>
+                <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>NAZWA WYŚWIETLANA</label>
+                <input
+                  type="text"
+                  value={editingUser.full_name || ''}
+                  onChange={e => setEditingUser(u => ({ ...u, full_name: e.target.value }))}
+                  placeholder="Imię i nazwisko"
+                  style={inputStyle}
+                />
+              </div>
               <div>
                 <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>ROLA</label>
                 <select
