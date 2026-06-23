@@ -36,13 +36,22 @@ export function useBadgeCounts({ role, userEmail }) {
 
       // Wiadomości
       try {
-        if (role === 'admin' || role === 'artist') {
+        if (role === 'admin') {
           const msgs = await base44.entities.ContactMessage.filter(
             { is_read: false, sender_type: 'client' },
             '-created_date',
             200
           );
           results.messages = msgs.length;
+        } else if (role === 'artist') {
+          const msgs = await base44.entities.ContactMessage.filter(
+            { is_read: false },
+            '-created_date',
+            200
+          );
+          results.messages = msgs.filter(
+            (m) => m.sender_type === 'client' || m.sender_type === 'admin'
+          ).length;
         } else if (role === 'user') {
           const msgs = await base44.entities.ContactMessage.filter(
             { is_read: false, email: userEmail },
@@ -139,9 +148,13 @@ export function useBadgeCounts({ role, userEmail }) {
     try {
       unsubs.push(
         base44.entities.ContactMessage.subscribe((event) => {
-          if (role === 'admin' || role === 'artist') {
+          if (role === 'admin') {
             const isClientMsg = event.data.sender_type === 'client' && !event.data.is_read;
             const unreadChange = event.type === 'delete' ? -1 : (isClientMsg ? 1 : 0);
+            setCounts(prev => ({ ...prev, messages: Math.max(0, prev.messages + unreadChange) }));
+          } else if (role === 'artist') {
+            const isUnread = !event.data.is_read && (event.data.sender_type === 'client' || event.data.sender_type === 'admin');
+            const unreadChange = event.type === 'delete' ? -1 : (isUnread ? 1 : 0);
             setCounts(prev => ({ ...prev, messages: Math.max(0, prev.messages + unreadChange) }));
           } else if (role === 'user' && event.data.email?.toLowerCase() === userEmail?.toLowerCase()) {
             const isUnread = !event.data.is_read && (event.data.sender_type === 'admin' || event.data.sender_type === 'system');
