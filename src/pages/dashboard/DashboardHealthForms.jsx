@@ -389,9 +389,9 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
     const unread = filteredForms.filter(f => !f.is_read);
     if (unread.length === 0) return;
     try {
-      await Promise.all(unread.map(f => base44.entities.HealthForm.update(f.id, { is_read: true })));
-      const unreadIds = new Set(unread.map(f => f.id));
-      setForms(prev => prev.map(f => unreadIds.has(f.id) ? { ...f, is_read: true } : f));
+      const unreadIds = unread.map(f => f.id);
+      await base44.entities.HealthForm.updateMany({ id: { $in: unreadIds } }, { $set: { is_read: true } });
+      setForms(prev => prev.map(f => unreadIds.includes(f.id) ? { ...f, is_read: true } : f));
     } catch (e) {}
   };
 
