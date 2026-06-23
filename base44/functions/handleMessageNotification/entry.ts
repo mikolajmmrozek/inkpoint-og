@@ -41,9 +41,10 @@ Deno.serve(async (req) => {
       const preview = (msg.message || '').slice(0, 80);
       const recipientEmail = msg.email.toLowerCase().trim();
       
-      // Check if recipient is an artist or a client
-      const user = await base44.asServiceRole.entities.User.filter({ email: recipientEmail }, null, 1);
-      const isArtist = user.length > 0 && user[0].role === 'artist';
+      // Check if recipient is an artist or a client (search all users, then match case-insensitive)
+      const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 500);
+      const user = allUsers.find(u => (u.email || '').toLowerCase().trim() === recipientEmail);
+      const isArtist = user && user.role === 'artist';
       
       notifications.push({
         target_email: recipientEmail,
