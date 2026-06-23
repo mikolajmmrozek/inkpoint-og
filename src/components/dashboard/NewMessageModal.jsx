@@ -126,7 +126,7 @@ export default function NewMessageModal({ onClose, onSent, t }) {
               onClick={() => { setRecipientType('studio'); setSelectedRecipient(null); setSearchQuery(''); }}
               style={{ flex: 1, padding: '10px', border: `0.5px solid ${recipientType === 'studio' ? '#FF007F' : t.border}`, color: recipientType === 'studio' ? '#FF007F' : t.muted, background: recipientType === 'studio' ? 'rgba(255,0,127,0.08)' : 'transparent', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer' }}
             >
-              ARTYSTA / ADMIN
+              STUDIO
             </button>
           </div>
         </div>
