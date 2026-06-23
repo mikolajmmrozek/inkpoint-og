@@ -36,10 +36,10 @@ Deno.serve(async (req) => {
       // Notify the assigned artist on any new booking
       if (booking.artist_id) {
         try {
-          const artist = await base44.asServiceRole.entities.User.get(booking.artist_id);
-          if (artist && artist.email) {
+          const artistUser = await base44.asServiceRole.entities.User.filter({ 'data.artist_id': booking.artist_id }, null, 1);
+          if (artistUser.length > 0 && artistUser[0].email) {
             notifications.push({
-              target_email: artist.email,
+              target_email: artistUser[0].email,
               title: 'Nowa rezerwacja',
               message: `Rezerwacja klienta ${booking.client_name || '—'} na ${booking.session_date || '—'}${booking.session_time ? ' o ' + booking.session_time : ''}`,
               category: 'booking',
@@ -88,10 +88,10 @@ Deno.serve(async (req) => {
       // Booking confirmed — notify the assigned artist
       if (oldBooking && booking.status !== oldBooking.status && booking.status === 'confirmed' && booking.artist_id) {
         try {
-          const artist = await base44.asServiceRole.entities.User.get(booking.artist_id);
-          if (artist && artist.email) {
+          const artistUser = await base44.asServiceRole.entities.User.filter({ 'data.artist_id': booking.artist_id }, null, 1);
+          if (artistUser.length > 0 && artistUser[0].email) {
             notifications.push({
-              target_email: artist.email,
+              target_email: artistUser[0].email,
               title: 'Nowa potwierdzona rezerwacja',
               message: `Rezerwacja klienta ${booking.client_name || '—'} na ${booking.session_date || '—'}${booking.session_time ? ' o ' + booking.session_time : ''} została potwierdzona`,
               category: 'booking',
