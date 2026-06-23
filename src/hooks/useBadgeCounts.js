@@ -16,6 +16,7 @@ export function useBadgeCounts({ role, userEmail }) {
     pendingBookings: 0,
     newHealthForms: 0,
     unpublishedFeedback: 0,
+    newClients: 0,
   });
 
   useEffect(() => {
@@ -30,6 +31,7 @@ export function useBadgeCounts({ role, userEmail }) {
         pendingBookings: 0,
         newHealthForms: 0,
         unpublishedFeedback: 0,
+        newClients: 0,
       };
 
       // Wiadomości
@@ -94,6 +96,19 @@ export function useBadgeCounts({ role, userEmail }) {
             50
           );
           results.unpublishedFeedback = feedbacks.length;
+        } catch (e) {}
+
+        try {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const clients = await base44.entities.Client.filter(
+            {},
+            '-created_date',
+            50
+          );
+          results.newClients = clients.filter(
+            (c) => new Date(c.created_date) >= today
+          ).length;
         } catch (e) {}
       }
 

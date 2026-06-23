@@ -36,6 +36,7 @@ const getBadgeForPath = (path, counts) => {
     '/dashboard/bookings': counts.pendingBookings > 0 ? { type: 'dot', value: counts.pendingBookings } : null,
     '/dashboard/health-forms': counts.newHealthForms > 0 ? { type: 'dot', value: counts.newHealthForms } : null,
     '/dashboard/feedback': counts.unpublishedFeedback > 0 ? { type: 'dot', value: counts.unpublishedFeedback } : null,
+    '/dashboard/clients': counts.newClients > 0 ? { type: 'dot', value: counts.newClients } : null,
   };
   return map[path] || null;
 };
