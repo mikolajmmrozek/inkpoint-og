@@ -117,28 +117,73 @@ export function useBadgeCounts({ role, userEmail }) {
 
     loadAll();
 
-    // Subskrypcje realtime
+    // Subskrypcje realtime — update counters na żywo bez pełnego reload
     const unsubs = [];
+    
+    // Powiadomienia
     try {
-      unsubs.push(base44.entities.ContactMessage.subscribe(() => loadAll()));
+      unsubs.push(
+        base44.entities.Notification.subscribe((event) => {
+          setCounts(prev => {
+            const unreadCount = event.data.is_read ? -1 : (event.type === 'delete' ? -1 : 1);
+            return {
+              ...prev,
+              notifications: Math.max(0, prev.notifications + unreadCount)
+            };
+          });
+        })
+      );
     } catch (e) {}
+
+    // Wiadomości
     try {
-      unsubs.push(base44.entities.Notification.subscribe(() => loadAll()));
+      unsubs.push(
+        base44.entities.ContactMessage.subscribe((event) => {
+          if (role === 'admin' || role === 'artist') {
+            const isClientMsg = event.data.sender_type === 'client' && !event.data.is_read;
+            const unreadChange = event.type === 'delete' ? -1 : (isClientMsg ? 1 : 0);
+            setCounts(prev => ({ ...prev, messages: Math.max(0, prev.messages + unreadChange) }));
+          } else if (role === 'user' && event.data.email?.toLowerCase() === userEmail?.toLowerCase()) {
+            const isUnread = !event.data.is_read && (event.data.sender_type === 'admin' || event.data.sender_type === 'system');
+            const unreadChange = event.type === 'delete' ? -1 : (isUnread ? 1 : 0);
+            setCounts(prev => ({ ...prev, messages: Math.max(0, prev.messages + unreadChange) }));
+          }
+        })
+      );
     } catch (e) {}
+
     if (role === 'admin') {
       try {
-        unsubs.push(base44.entities.Booking.subscribe(() => loadAll()));
+        unsubs.push(
+          base44.entities.Booking.subscribe((event) => {
+            const isPending = event.data.status === 'pending';
+            const wasDeleted = event.type === 'delete';
+            const unreadChange = wasDeleted ? -1 : (isPending ? 1 : 0);
+            setCounts(prev => ({ ...prev, pendingBookings: Math.max(0, prev.pendingBookings + unreadChange) }));
+          })
+        );
       } catch (e) {}
+
       try {
-        unsubs.push(base44.entities.HealthForm.subscribe(() => loadAll()));
+        unsubs.push(
+          base44.entities.HealthForm.subscribe(() => loadAll())
+        );
       } catch (e) {}
+
       try {
-        unsubs.push(base44.entities.Feedback.subscribe(() => loadAll()));
+        unsubs.push(
+          base44.entities.Feedback.subscribe((event) => {
+            const isUnpublished = !event.data.is_published;
+            const wasDeleted = event.type === 'delete';
+            const unreadChange = wasDeleted ? -1 : (isUnpublished ? 1 : 0);
+            setCounts(prev => ({ ...prev, unpublishedFeedback: Math.max(0, prev.unpublishedFeedback + unreadChange) }));
+          })
+        );
       } catch (e) {}
     }
 
-    // Polling fallback (30s)
-    const interval = setInterval(loadAll, 30000);
+    // Polling fallback (60s)
+    const interval = setInterval(loadAll, 60000);
 
     return () => {
       cancelled = true;
