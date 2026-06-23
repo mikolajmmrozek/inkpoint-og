@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
  * Mobile/tablet: Link do strony powiadomień.
  * Desktop: przycisk otwierający panel popup.
  */
-export default function NotificationSidebarItem({ userEmail, theme, onClick, notificationsPath }) {
+export default function NotificationSidebarItem({ userEmail, theme, onMobileClick, onDesktopClick, notificationsPath }) {
   const [unreadCount, setUnreadCount] = useState(0);
 
   const inactiveColor = theme === 'light' ? 'rgba(0,0,0,0.55)' : 'rgba(245,240,235,0.65)';
@@ -56,7 +56,7 @@ export default function NotificationSidebarItem({ userEmail, theme, onClick, not
       {/* Mobile/tablet: link do strony powiadomień */}
       <Link
         to={notificationsPath}
-        onClick={onClick}
+        onClick={onMobileClick}
         className="flex items-center gap-3 px-4 py-3 w-full transition-all duration-200 hover:opacity-70 lg:hidden"
         style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: inactiveColor }}
       >
@@ -65,7 +65,7 @@ export default function NotificationSidebarItem({ userEmail, theme, onClick, not
 
       {/* Desktop: przycisk otwierający popup */}
       <button
-        onClick={onClick}
+        onClick={onDesktopClick}
         className="hidden lg:flex items-center gap-3 px-4 py-3 w-full transition-all duration-200 hover:opacity-70"
         style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: inactiveColor }}
       >

@@ -89,7 +89,8 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
               userEmail={userEmail}
               theme={theme}
               notificationsPath="/dashboard/notifications"
-              onClick={() => { setSidebarOpen(false); onNotifClick(); }}
+              onMobileClick={() => setSidebarOpen(false)}
+              onDesktopClick={() => { setSidebarOpen(false); onNotifClick(); }}
             />
           </div>
         </nav>
