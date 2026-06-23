@@ -7,9 +7,10 @@ import { base44 } from '@/api/base44Client';
  * Przypięty pasek nawigacji na dole dla widoków mobilnych i tabletów.
  * Trzy ikony w równych odstępach: kalendarz, wiadomości, powiadomienia.
  */
-export default function BottomNav({ theme, calendarPath, messagesPath, notificationsPath, userEmail }) {
+export default function BottomNav({ theme, calendarPath, messagesPath, notificationsPath, userEmail, role }) {
   const location = useLocation();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadMessages, setUnreadMessages] = useState(0);
 
   const bg = theme === 'light' ? '#FFFFFF' : '#0A0A0A';
   const border = theme === 'light' ? '#E5E5E5' : '#262626';
@@ -28,11 +29,29 @@ export default function BottomNav({ theme, calendarPath, messagesPath, notificat
     } catch (e) {}
   };
 
+  const loadMessages = async () => {
+    if (!userEmail) return;
+    try {
+      if (role === 'admin' || role === 'artist') {
+        const msgs = await base44.entities.ContactMessage.filter({ is_read: false, sender_type: 'client' }, '-created_date', 200);
+        setUnreadMessages(msgs.length);
+      } else {
+        const msgs = await base44.entities.ContactMessage.filter({ is_read: false, email: userEmail }, '-created_date', 200);
+        setUnreadMessages(msgs.filter(m => m.sender_type === 'admin' || m.sender_type === 'system').length);
+      }
+    } catch (e) {}
+  };
+
   useEffect(() => {
     loadCount();
-    const unsubscribe = base44.entities.Notification.subscribe(() => loadCount());
-    return () => { if (typeof unsubscribe === 'function') unsubscribe(); };
-  }, [userEmail]);
+    loadMessages();
+    const unsubNotif = base44.entities.Notification.subscribe(() => loadCount());
+    const unsubMsg = base44.entities.ContactMessage.subscribe(() => loadMessages());
+    return () => {
+      if (typeof unsubNotif === 'function') unsubNotif();
+      if (typeof unsubMsg === 'function') unsubMsg();
+    };
+  }, [userEmail, role]);
 
   const items = [
     {
@@ -48,6 +67,7 @@ export default function BottomNav({ theme, calendarPath, messagesPath, notificat
       path: messagesPath,
       active: isMessagesActive,
       isLink: true,
+      badge: unreadMessages,
     },
     {
       icon: Bell,

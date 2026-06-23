@@ -6,6 +6,8 @@ import { Calendar, BarChart2, User, LogOut, Menu, X, Sun, Moon, MessageSquare } 
 import BottomNav from '@/components/panel/BottomNav';
 import NotificationBell from '@/components/panel/NotificationBell';
 import NotificationPanel from '@/components/panel/NotificationPanel';
+import SidebarBadge from '@/components/panel/SidebarBadge';
+import { useBadgeCounts } from '@/hooks/useBadgeCounts';
 
 export const ArtistThemeContext = createContext({ theme: 'dark', toggleTheme: () => {} });
 export const useArtistTheme = () => useContext(ArtistThemeContext);
@@ -18,9 +20,10 @@ const NAV = [
   { path: '/artist/messages', label: 'Wiadomości', icon: MessageSquare },
 ];
 
-function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, artist }) {
+function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, artist, userEmail }) {
   const location = useLocation();
   const isActive = (nav) => nav.exact ? location.pathname === nav.path : location.pathname.startsWith(nav.path);
+  const counts = useBadgeCounts({ role: 'artist', userEmail });
 
   const bg = theme === 'light' ? '#FFFFFF' : '#0A0A0A';
   const border = theme === 'light' ? '#E5E5E5' : '#262626';
@@ -64,7 +67,10 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, artist }) {
                 }}
                 onClick={() => setSidebarOpen(false)}
               >
-                <Icon size={14} color={active ? '#FF007F' : (theme === 'light' ? 'rgba(0,0,0,0.3)' : 'rgba(245,240,235,0.3)')} />
+                <div style={{ position: 'relative' }}>
+                  <Icon size={14} color={active ? '#FF007F' : (theme === 'light' ? 'rgba(0,0,0,0.3)' : 'rgba(245,240,235,0.3)')} />
+                  {nav.path === '/artist/messages' && counts.messages > 0 && <SidebarBadge type="count" value={counts.messages} />}
+                </div>
                 <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{nav.label}</span>
               </Link>
             );
@@ -171,7 +177,7 @@ export default function ArtistPanel() {
   return (
     <ArtistThemeContext.Provider value={{ theme, toggleTheme, artist }}>
       <div className="min-h-screen flex" style={{ background: bg, color: textColor }}>
-        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} theme={theme} toggleTheme={toggleTheme} artist={artist} />
+        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} theme={theme} toggleTheme={toggleTheme} artist={artist} userEmail={user.email} />
         <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
           <div className="flex items-center gap-4 px-6 py-4" style={{ borderBottom: `0.5px solid ${border}`, background: topBarBg }}>
             <button onClick={() => setSidebarOpen(true)} className="lg:hidden" style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer', padding: '8px' }}>
@@ -201,7 +207,7 @@ export default function ArtistPanel() {
             <Outlet context={{ artist, theme }} />
           </div>
         </div>
-        <BottomNav theme={theme} calendarPath="/artist/schedule" messagesPath="/artist/messages" notificationsPath="/artist/notifications" userEmail={user.email} />
+        <BottomNav theme={theme} role="artist" calendarPath="/artist/schedule" messagesPath="/artist/messages" notificationsPath="/artist/notifications" userEmail={user.email} />
         <NotificationPanel open={notifOpen} onClose={() => setNotifOpen(false)} userEmail={user.email} theme={theme} />
       </div>
     </ArtistThemeContext.Provider>

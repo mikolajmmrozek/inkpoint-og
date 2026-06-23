@@ -1,0 +1,138 @@
+import { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
+
+/**
+ * Centralny hook pobierający liczniki nieprzeczytanych wiadomości,
+ * powiadomień oraz wskaźniki "nowych rzeczy" dla sekcji dashboardu.
+ *
+ * @param {Object} params
+ * @param {string} params.role - 'admin' | 'artist' | 'user'
+ * @param {string} params.userEmail - e-mail zalogowanego użytkownika
+ */
+export function useBadgeCounts({ role, userEmail }) {
+  const [counts, setCounts] = useState({
+    messages: 0,
+    notifications: 0,
+    pendingBookings: 0,
+    newHealthForms: 0,
+    unpublishedFeedback: 0,
+  });
+
+  useEffect(() => {
+    if (!userEmail) return;
+
+    let cancelled = false;
+
+    const loadAll = async () => {
+      const results = {
+        messages: 0,
+        notifications: 0,
+        pendingBookings: 0,
+        newHealthForms: 0,
+        unpublishedFeedback: 0,
+      };
+
+      // Wiadomości
+      try {
+        if (role === 'admin' || role === 'artist') {
+          const msgs = await base44.entities.ContactMessage.filter(
+            { is_read: false, sender_type: 'client' },
+            '-created_date',
+            200
+          );
+          results.messages = msgs.length;
+        } else if (role === 'user') {
+          const msgs = await base44.entities.ContactMessage.filter(
+            { is_read: false, email: userEmail },
+            '-created_date',
+            200
+          );
+          results.messages = msgs.filter(
+            (m) => m.sender_type === 'admin' || m.sender_type === 'system'
+          ).length;
+        }
+      } catch (e) {}
+
+      // Powiadomienia
+      try {
+        const notifs = await base44.entities.Notification.filter(
+          { target_email: userEmail, is_read: false },
+          '-created_date',
+          100
+        );
+        results.notifications = notifs.length;
+      } catch (e) {}
+
+      // Tylko dla admina
+      if (role === 'admin') {
+        try {
+          const bookings = await base44.entities.Booking.filter(
+            { status: 'pending' },
+            '-created_date',
+            100
+          );
+          results.pendingBookings = bookings.length;
+        } catch (e) {}
+
+        try {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const healthForms = await base44.entities.HealthForm.filter(
+            {},
+            '-created_date',
+            50
+          );
+          results.newHealthForms = healthForms.filter(
+            (f) => new Date(f.created_date) >= today
+          ).length;
+        } catch (e) {}
+
+        try {
+          const feedbacks = await base44.entities.Feedback.filter(
+            { is_published: false },
+            '-created_date',
+            50
+          );
+          results.unpublishedFeedback = feedbacks.length;
+        } catch (e) {}
+      }
+
+      if (!cancelled) setCounts(results);
+    };
+
+    loadAll();
+
+    // Subskrypcje realtime
+    const unsubs = [];
+    try {
+      unsubs.push(base44.entities.ContactMessage.subscribe(() => loadAll()));
+    } catch (e) {}
+    try {
+      unsubs.push(base44.entities.Notification.subscribe(() => loadAll()));
+    } catch (e) {}
+    if (role === 'admin') {
+      try {
+        unsubs.push(base44.entities.Booking.subscribe(() => loadAll()));
+      } catch (e) {}
+      try {
+        unsubs.push(base44.entities.HealthForm.subscribe(() => loadAll()));
+      } catch (e) {}
+      try {
+        unsubs.push(base44.entities.Feedback.subscribe(() => loadAll()));
+      } catch (e) {}
+    }
+
+    // Polling fallback (30s)
+    const interval = setInterval(loadAll, 30000);
+
+    return () => {
+      cancelled = true;
+      unsubs.forEach((u) => {
+        if (typeof u === 'function') u();
+      });
+      clearInterval(interval);
+    };
+  }, [userEmail, role]);
+
+  return counts;
+}

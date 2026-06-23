@@ -6,6 +6,8 @@ import { Calendar, FileText, User, LogOut, Home, Menu, X, Sun, Moon, MessageSqua
 import BottomNav from '@/components/panel/BottomNav';
 import NotificationBell from '@/components/panel/NotificationBell';
 import NotificationPanel from '@/components/panel/NotificationPanel';
+import SidebarBadge from '@/components/panel/SidebarBadge';
+import { useBadgeCounts } from '@/hooks/useBadgeCounts';
 
 export const ClientThemeContext = createContext({ theme: 'dark', toggleTheme: () => {} });
 export const useClientTheme = () => useContext(ClientThemeContext);
@@ -21,6 +23,7 @@ const NAV = [
 function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, clientName, userEmail }) {
   const location = useLocation();
   const isActive = (nav) => nav.exact ? location.pathname === nav.path : location.pathname.startsWith(nav.path);
+  const counts = useBadgeCounts({ role: 'user', userEmail });
 
   const bg = theme === 'light' ? '#FFFFFF' : '#0A0A0A';
   const border = theme === 'light' ? '#E5E5E5' : '#262626';
@@ -62,7 +65,10 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, clientName, 
                 }}
                 onClick={() => setSidebarOpen(false)}
               >
-                <Icon size={14} color={active ? '#FF007F' : (theme === 'light' ? 'rgba(0,0,0,0.55)' : 'rgba(245,240,235,0.65)')} />
+                <div style={{ position: 'relative' }}>
+                  <Icon size={14} color={active ? '#FF007F' : (theme === 'light' ? 'rgba(0,0,0,0.55)' : 'rgba(245,240,235,0.65)')} />
+                  {nav.path === '/panel/messages' && counts.messages > 0 && <SidebarBadge type="count" value={counts.messages} />}
+                </div>
                 <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{nav.label}</span>
               </Link>
             );
@@ -175,7 +181,7 @@ export default function ClientPanel() {
             <Outlet context={{ client, user, theme }} />
           </div>
         </div>
-        <BottomNav theme={theme} calendarPath="/panel/sessions" messagesPath="/panel/messages" notificationsPath="/panel/notifications" userEmail={user.email} />
+        <BottomNav theme={theme} role="user" calendarPath="/panel/sessions" messagesPath="/panel/messages" notificationsPath="/panel/notifications" userEmail={user.email} />
         <NotificationPanel open={notifOpen} onClose={() => setNotifOpen(false)} userEmail={user.email} theme={theme} />
       </div>
     </ClientThemeContext.Provider>

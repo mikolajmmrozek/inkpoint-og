@@ -7,6 +7,8 @@ import BottomNav from '@/components/panel/BottomNav';
 import NotificationBell from '@/components/panel/NotificationBell';
 import NotificationPanel from '@/components/panel/NotificationPanel';
 import NotificationSidebarItem from '@/components/panel/NotificationSidebarItem';
+import SidebarBadge from '@/components/panel/SidebarBadge';
+import { useBadgeCounts } from '@/hooks/useBadgeCounts';
 
 export const ThemeContext = createContext({ theme: 'light', toggleTheme: () => {} });
 export const useTheme = () => useContext(ThemeContext);
@@ -28,8 +30,19 @@ const NAV = [
   { path: '/dashboard/settings', label: 'Ustawienia', icon: Settings },
 ];
 
+const getBadgeForPath = (path, counts) => {
+  const map = {
+    '/dashboard/messages': counts.messages > 0 ? { type: 'count', value: counts.messages } : null,
+    '/dashboard/bookings': counts.pendingBookings > 0 ? { type: 'dot', value: counts.pendingBookings } : null,
+    '/dashboard/health-forms': counts.newHealthForms > 0 ? { type: 'dot', value: counts.newHealthForms } : null,
+    '/dashboard/feedback': counts.unpublishedFeedback > 0 ? { type: 'dot', value: counts.unpublishedFeedback } : null,
+  };
+  return map[path] || null;
+};
+
 function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, onNotifClick }) {
   const location = useLocation();
+  const counts = useBadgeCounts({ role: 'admin', userEmail });
 
   const isActive = (nav) => nav.exact ? location.pathname === nav.path : location.pathname.startsWith(nav.path);
 
@@ -64,6 +77,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
           {NAV.map(nav => {
             const Icon = nav.icon;
             const active = isActive(nav);
+            const badge = getBadgeForPath(nav.path, counts);
             return (
               <Link
                 key={nav.path}
@@ -76,7 +90,10 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
                 }}
                 onClick={() => setSidebarOpen(false)}
               >
-                <Icon size={14} color={active ? '#FF007F' : (theme === 'light' ? 'rgba(0,0,0,0.55)' : 'rgba(245,240,235,0.65)')} />
+                <div style={{ position: 'relative' }}>
+                  <Icon size={14} color={active ? '#FF007F' : (theme === 'light' ? 'rgba(0,0,0,0.55)' : 'rgba(245,240,235,0.65)')} />
+                  {badge && <SidebarBadge type={badge.type} value={badge.value} />}
+                </div>
                 <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                   {nav.label}
                 </span>
@@ -210,7 +227,7 @@ export default function Dashboard() {
             <Outlet context={{ theme }} />
           </div>
         </div>
-        <BottomNav theme={theme} calendarPath="/dashboard/bookings" messagesPath="/dashboard/messages" notificationsPath="/dashboard/notifications" userEmail={user.email} />
+        <BottomNav theme={theme} role="admin" calendarPath="/dashboard/bookings" messagesPath="/dashboard/messages" notificationsPath="/dashboard/notifications" userEmail={user.email} />
         <NotificationPanel open={notifOpen} onClose={() => setNotifOpen(false)} userEmail={user.email} theme={theme} />
       </div>
     </ThemeContext.Provider>
