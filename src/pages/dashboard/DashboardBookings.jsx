@@ -463,7 +463,7 @@ export default function DashboardBookings() {
             </button>
           ))}
           <div style={{ width: '0.5px', height: '16px', background: t.border, margin: '0 4px' }} />
-          {['all', ...STATUS_OPTIONS].map(s => (
+          {(viewMode === 'pending' ? ['all', 'pending', 'cancelled'] : ['all', ...STATUS_OPTIONS]).map(s => (
             <button key={s} onClick={() => setFilter(s)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${filter === s ? t.fuchsia : t.border}`, color: filter === s ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
               {s === 'all' ? 'Wszystkie' : s}
             </button>
