@@ -233,8 +233,8 @@ export default function DashboardMessages() {
           ) : filteredThreads.map((th, i) => (
             <div
               key={th.email}
-              className="flex items-center gap-3 p-4 cursor-pointer transition-colors"
-              style={{ borderBottom: i < filteredThreads.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selectedEmail === th.email ? 'rgba(255,0,127,0.05)' : 'transparent' }}
+              className="flex items-center gap-3 p-4 cursor-pointer transition-colors hover:opacity-70"
+              style={{ borderBottom: i < filteredThreads.length - 1 ? `0.5px solid ${t.border}` : 'none', borderLeft: selectedEmail === th.email ? `3px solid ${t.fuchsia}` : '3px solid transparent', background: selectedEmail === th.email ? 'rgba(255,0,127,0.1)' : 'transparent', paddingLeft: '13px' }}
               onClick={() => handleSelectThread(th.email)}
             >
               <div className="flex-shrink-0">
