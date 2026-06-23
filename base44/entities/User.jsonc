@@ -5,6 +5,10 @@
     "artist_id": {
       "type": "string",
       "description": "ID powi\u0105zanego profilu artysty"
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Niestandardowa nazwa wy\u015bwietlana (nadpisuje full_name)"
     }
   }
 }

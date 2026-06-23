@@ -71,7 +71,7 @@ export default function DashboardUsers() {
     await base44.auth.updateMe ? null : null; // can't update other users' built-in fields
     // We can update custom fields via entity
     await base44.entities.User.update(editingUser.id, {
-      full_name: editingUser.full_name || null,
+      display_name: editingUser.full_name || null,
       role: editingUser.role,
       artist_id: editingUser.artist_id || null,
     });
@@ -83,7 +83,7 @@ export default function DashboardUsers() {
         setArtists(prev => prev.map(a => a.id === editingUser.artist_id ? { ...a, name: editingUser.artist_name } : a));
       }
     }
-    setUsers(prev => prev.map(u => u.id === editingUser.id ? { ...u, full_name: editingUser.full_name, role: editingUser.role, artist_id: editingUser.artist_id } : u));
+    setUsers(prev => prev.map(u => u.id === editingUser.id ? { ...u, display_name: editingUser.full_name || null, role: editingUser.role, artist_id: editingUser.artist_id } : u));
     setEditingUser(null);
     setSaving(false);
   };
@@ -191,7 +191,7 @@ export default function DashboardUsers() {
                 <div key={u.id} className="flex items-center justify-between p-4 gap-4"
                   style={{ borderBottom: i < filtered.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }}>
                   <div className="min-w-0 flex-1">
-                    <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{u.full_name || u.email}</p>
+                    <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{u.display_name || u.full_name || u.email}</p>
                     <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px' }}>
                       {u.email}{linkedArtist ? ` · ${linkedArtist.name}` : ''}
                     </p>
@@ -201,7 +201,7 @@ export default function DashboardUsers() {
                       {ROLE_LABELS[u.role] || u.role?.toUpperCase()}
                     </span>
                     <button
-                       onClick={() => setEditingUser({ ...u, artist_name: linkedArtist?.name || '' })}
+                       onClick={() => setEditingUser({ ...u, full_name: u.display_name || u.full_name || '', artist_name: linkedArtist?.name || '' })}
                        style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${t.cardBorder}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}
                      >
                       EDYTUJ
@@ -233,7 +233,7 @@ export default function DashboardUsers() {
                   type="text"
                   value={editingUser.full_name || ''}
                   onChange={e => setEditingUser(u => ({ ...u, full_name: e.target.value }))}
-                  placeholder="Imię i nazwisko"
+                  placeholder={editingUser.display_name || editingUser.email}
                   style={inputStyle}
                 />
               </div>
