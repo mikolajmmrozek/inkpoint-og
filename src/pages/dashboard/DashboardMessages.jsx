@@ -30,11 +30,16 @@ export default function DashboardMessages() {
     }
   }, [location.search, loading]);
 
-  // Mark thread as read when selectedEmail changes
+  // Mark thread as read when selectedEmail changes and scroll to bottom
   useEffect(() => {
     if (selectedEmail && allMessages.length > 0) {
       markThreadRead(selectedEmail);
-      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+      setTimeout(() => {
+        const container = messagesEndRef.current?.parentElement;
+        if (container) {
+          container.scrollTop = container.scrollHeight;
+        }
+      }, 150);
     }
   }, [selectedEmail, allMessages.length]);
 
