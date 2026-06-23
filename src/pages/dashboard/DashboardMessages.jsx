@@ -8,7 +8,6 @@ import { useTheme } from './Dashboard';
 import { format } from 'date-fns';
 import BookingCard from '@/components/dashboard/BookingCard';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
-import { useEffect as useEffectHook } from 'react';
 import { useLocation } from 'react-router-dom';
 
 export default function DashboardMessages() {
@@ -22,12 +21,14 @@ export default function DashboardMessages() {
   const [loading, setLoading] = useState(true);
   const [selectedEmail, setSelectedEmail] = useState(null);
 
-  // Check URL for email parameter from notification
-  useEffectHook(() => {
+  // Check URL for email parameter from notification and auto-select when threads load
+  useEffect(() => {
     const params = new URLSearchParams(location.search);
     const email = params.get('email');
-    if (email) setSelectedEmail(email);
-  }, [location.search]);
+    if (email && !loading) {
+      setSelectedEmail(email);
+    }
+  }, [location.search, loading]);
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
