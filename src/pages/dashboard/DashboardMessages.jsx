@@ -32,11 +32,11 @@ export default function DashboardMessages() {
 
   // Mark thread as read when selectedEmail changes
   useEffect(() => {
-    if (selectedEmail && threads.length > 0) {
+    if (selectedEmail && allMessages.length > 0) {
       markThreadRead(selectedEmail);
       setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
     }
-  }, [selectedEmail, threads.length]);
+  }, [selectedEmail, allMessages.length]);
 
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
