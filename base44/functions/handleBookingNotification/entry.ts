@@ -29,10 +29,27 @@ Deno.serve(async (req) => {
             category: 'booking',
             link_path: '/dashboard/bookings?view=pending',
             is_read: false,
+            booking_id: booking.id,
           });
         }
       }
     } else if (eventType === 'update') {
+      // Booking confirmed or completed — auto-mark admin notification as read
+      if (oldBooking && booking.status !== oldBooking.status && (booking.status === 'confirmed' || booking.status === 'completed') && booking.id) {
+        try {
+          const adminNotifs = await base44.asServiceRole.entities.Notification.filter(
+            { booking_id: booking.id, category: 'booking', is_read: false },
+            '-created_date',
+            50
+          );
+          if (adminNotifs.length > 0) {
+            await base44.asServiceRole.entities.Notification.bulkUpdate(
+              adminNotifs.map(n => ({ id: n.id, is_read: true }))
+            );
+          }
+        } catch (e) {}
+      }
+
       // Status changed — notify the client
       if (oldBooking && booking.status !== oldBooking.status && booking.client_email) {
         const statusLabels = {

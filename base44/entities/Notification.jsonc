@@ -32,6 +32,10 @@
     "is_read": {
       "type": "boolean",
       "default": false
+    },
+    "booking_id": {
+      "type": "string",
+      "description": "ID powi\u0105zanej rezerwacji (do automatycznego odznaczania)"
     }
   },
   "required": [
