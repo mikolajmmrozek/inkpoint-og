@@ -6,9 +6,12 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    // Check if this is truly the first login — last_login should be null (backend checks this)
-    // Only proceed if the user has no last_login recorded
-    if (user.last_login) {
+    // Only notify on truly first login — check if created_date === updated_date (not modified since creation)
+    const createdDate = new Date(user.created_date).getTime();
+    const updatedDate = new Date(user.updated_date).getTime();
+    const isFirstLogin = Math.abs(createdDate - updatedDate) < 10000; // Within 10 seconds = same event
+
+    if (!isFirstLogin) {
       return Response.json({ success: true });
     }
 
