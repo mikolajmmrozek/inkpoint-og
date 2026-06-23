@@ -67,6 +67,24 @@ Deno.serve(async (req) => {
           is_read: false,
         });
       }
+
+      // Booking confirmed — notify the assigned artist
+      if (oldBooking && booking.status !== oldBooking.status && booking.status === 'confirmed' && booking.artist_id) {
+        try {
+          const artist = await base44.asServiceRole.entities.User.filter({ id: booking.artist_id });
+          if (artist && artist.length > 0 && artist[0].email) {
+            notifications.push({
+              target_email: artist[0].email,
+              title: 'Nowa potwierdzona rezerwacja',
+              message: `Rezerwacja klienta ${booking.client_name || '—'} na ${booking.session_date || '—'}${booking.session_time ? ' o ' + booking.session_time : ''} została potwierdzona`,
+              category: 'booking',
+              link_path: '/artist/schedule',
+              is_read: false,
+              booking_id: booking.id,
+            });
+          }
+        } catch (e) {}
+      }
     }
 
     if (notifications.length > 0) {
