@@ -21,14 +21,16 @@ export default function DashboardMessages() {
   const [loading, setLoading] = useState(true);
   const [selectedEmail, setSelectedEmail] = useState(null);
 
-  // Check URL for email parameter from notification and auto-select when threads load
+  // Check URL for email parameter from notification and auto-select
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const email = params.get('email');
-    if (email && !loading) {
-      setSelectedEmail(email);
+    if (email) {
+      // Normalize email to match thread format (lowercase, trimmed)
+      const normalizedEmail = (email || '').toLowerCase().trim();
+      setSelectedEmail(normalizedEmail);
     }
-  }, [location.search, loading]);
+  }, [location.search]);
 
   // Mark thread as read when selectedEmail changes and scroll to bottom
   useEffect(() => {
@@ -135,9 +137,15 @@ export default function DashboardMessages() {
   };
 
   const handleSelectThread = (email) => {
-    setSelectedEmail(email);
-    markThreadRead(email);
-    setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+    const normalizedEmail = (email || '').toLowerCase().trim();
+    setSelectedEmail(normalizedEmail);
+    markThreadRead(normalizedEmail);
+    setTimeout(() => {
+      const container = messagesEndRef.current?.parentElement;
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }, 150);
   };
 
   const sendReply = async () => {
