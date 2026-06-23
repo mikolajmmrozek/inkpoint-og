@@ -28,13 +28,9 @@ export default function DashboardMessages() {
     if (email) {
       // Normalize email to match thread format (lowercase, trimmed)
       const normalizedEmail = (email || '').toLowerCase().trim();
-      console.log('🔍 URL email param:', email);
-      console.log('✅ Normalized email:', normalizedEmail);
-      console.log('📊 Available threads:', threads.map(t => t.email));
-      console.log('🎯 Match found:', threads.some(t => t.email === normalizedEmail));
       setSelectedEmail(normalizedEmail);
     }
-  }, [location.search, threads]);
+  }, [location.search]);
 
   // Mark thread as read when selectedEmail changes and scroll to bottom
   useEffect(() => {
