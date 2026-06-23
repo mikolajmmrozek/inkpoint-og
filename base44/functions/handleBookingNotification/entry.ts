@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
     const notifications = [];
 
     if (eventType === 'create') {
-      // New booking from online form — notify all admins
+      // New booking — notify all admins
       if (booking.source === 'online_form') {
         const admins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
         for (const admin of admins) {
@@ -32,6 +32,23 @@ Deno.serve(async (req) => {
             booking_id: booking.id,
           });
         }
+      }
+      // Notify the assigned artist on any new booking
+      if (booking.artist_id) {
+        try {
+          const artist = await base44.asServiceRole.entities.User.get(booking.artist_id);
+          if (artist && artist.email) {
+            notifications.push({
+              target_email: artist.email,
+              title: 'Nowa rezerwacja',
+              message: `Rezerwacja klienta ${booking.client_name || '—'} na ${booking.session_date || '—'}${booking.session_time ? ' o ' + booking.session_time : ''}`,
+              category: 'booking',
+              link_path: '/artist/schedule',
+              is_read: false,
+              booking_id: booking.id,
+            });
+          }
+        } catch (e) {}
       }
     } else if (eventType === 'update') {
       // Booking confirmed or completed — auto-mark admin notification as read
@@ -71,10 +88,10 @@ Deno.serve(async (req) => {
       // Booking confirmed — notify the assigned artist
       if (oldBooking && booking.status !== oldBooking.status && booking.status === 'confirmed' && booking.artist_id) {
         try {
-          const artist = await base44.asServiceRole.entities.User.filter({ id: booking.artist_id });
-          if (artist && artist.length > 0 && artist[0].email) {
+          const artist = await base44.asServiceRole.entities.User.get(booking.artist_id);
+          if (artist && artist.email) {
             notifications.push({
-              target_email: artist[0].email,
+              target_email: artist.email,
               title: 'Nowa potwierdzona rezerwacja',
               message: `Rezerwacja klienta ${booking.client_name || '—'} na ${booking.session_date || '—'}${booking.session_time ? ' o ' + booking.session_time : ''} została potwierdzona`,
               category: 'booking',
