@@ -74,6 +74,14 @@ export default function DashboardUsers() {
       role: editingUser.role,
       artist_id: editingUser.artist_id || null,
     });
+    // If artist is linked and name was changed, update Artist entity
+    if (editingUser.artist_id && editingUser.artist_name) {
+      const linkedArtist = artists.find(a => a.id === editingUser.artist_id);
+      if (linkedArtist && linkedArtist.name !== editingUser.artist_name) {
+        await base44.entities.Artist.update(editingUser.artist_id, { name: editingUser.artist_name });
+        setArtists(prev => prev.map(a => a.id === editingUser.artist_id ? { ...a, name: editingUser.artist_name } : a));
+      }
+    }
     setUsers(prev => prev.map(u => u.id === editingUser.id ? { ...u, role: editingUser.role, artist_id: editingUser.artist_id } : u));
     setEditingUser(null);
     setSaving(false);
@@ -191,9 +199,9 @@ export default function DashboardUsers() {
                       {ROLE_LABELS[u.role] || u.role?.toUpperCase()}
                     </span>
                     <button
-                      onClick={() => setEditingUser({ ...u })}
-                      style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${t.cardBorder}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}
-                    >
+                       onClick={() => setEditingUser({ ...u, artist_name: linkedArtist?.name || '' })}
+                       style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${t.cardBorder}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}
+                     >
                       EDYTUJ
                     </button>
                   </div>
@@ -230,17 +238,31 @@ export default function DashboardUsers() {
                 </select>
               </div>
               {editingUser.role === 'artist' && (
-                <div>
-                  <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>PROFIL ARTYSTY</label>
-                  <select
-                    value={editingUser.artist_id || ''}
-                    onChange={e => setEditingUser(u => ({ ...u, artist_id: e.target.value }))}
-                    style={{ ...inputStyle, colorScheme: theme === 'dark' ? 'dark' : 'light' }}
-                  >
-                    <option value="">— wybierz artystę —</option>
-                    {artists.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-                  </select>
-                </div>
+                <>
+                  <div>
+                    <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>PROFIL ARTYSTY</label>
+                    <select
+                      value={editingUser.artist_id || ''}
+                      onChange={e => setEditingUser(u => ({ ...u, artist_id: e.target.value, artist_name: artists.find(a => a.id === e.target.value)?.name || '' }))}
+                      style={{ ...inputStyle, colorScheme: theme === 'dark' ? 'dark' : 'light' }}
+                    >
+                      <option value="">— wybierz artystę —</option>
+                      {artists.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                    </select>
+                  </div>
+                  {editingUser.artist_id && (
+                    <div>
+                      <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>NAZWA ARTYSTY</label>
+                      <input
+                        type="text"
+                        value={editingUser.artist_name || ''}
+                        onChange={e => setEditingUser(u => ({ ...u, artist_name: e.target.value }))}
+                        placeholder="Imię i nazwisko / pseudonim"
+                        style={inputStyle}
+                      />
+                    </div>
+                  )}
+                </>
               )}
             </div>
 

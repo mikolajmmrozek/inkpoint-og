@@ -13,6 +13,7 @@ export default function ArtistProfile() {
   const [saved, setSaved] = useState(false);
   const [bio, setBio] = useState(initialArtist?.bio || '');
   const [instagram, setInstagram] = useState(initialArtist?.instagram || '');
+  const [name, setName] = useState(initialArtist?.name || '');
   const [activeTab, setActiveTab] = useState('profile');
 
   const t = theme === 'light'
@@ -55,7 +56,10 @@ export default function ArtistProfile() {
   const handleSave = async () => {
     if (!artist?.id) return;
     setSaving(true);
-    await base44.entities.Artist.update(artist.id, { bio, instagram });
+    const updates = { bio, instagram };
+    if (name && name !== artist.name) updates.name = name;
+    await base44.entities.Artist.update(artist.id, updates);
+    if (updates.name) setArtist(a => ({ ...a, name }));
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
     setSaving(false);
@@ -115,6 +119,10 @@ export default function ArtistProfile() {
         <div className="p-6" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>INFORMACJE</p>
           <div className="space-y-4">
+            <div>
+              <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>NAZWA ARTYSTY</label>
+              <input type="text" value={name} onChange={e => setName(e.target.value)} style={inputStyle} />
+            </div>
             <div>
               <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>BIO</label>
               <textarea rows={5} value={bio} onChange={e => setBio(e.target.value)} style={{ ...inputStyle, resize: 'none' }} />
