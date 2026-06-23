@@ -3,6 +3,8 @@ import { base44 } from '@/api/base44Client';
 import { Send, Loader2, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 import BookingCard from '@/components/dashboard/BookingCard';
+import MessageContent from '@/components/panel/MessageContent';
+import AttachmentBar from '@/components/panel/AttachmentBar';
 
 export default function PanelMessages({ theme, userEmail, userName, roleLabel }) {
   const t = theme === 'light'
@@ -13,6 +15,7 @@ export default function PanelMessages({ theme, userEmail, userName, roleLabel })
   const [loading, setLoading] = useState(true);
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
+  const [pendingAttachments, setPendingAttachments] = useState([]);
   const messagesEndRef = useRef(null);
 
   const load = async () => {
@@ -67,8 +70,10 @@ export default function PanelMessages({ theme, userEmail, userName, roleLabel })
         message_type: 'text',
         subject: roleLabel,
         is_read: false,
+        attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
       });
       setReplyText('');
+      setPendingAttachments([]);
       await load();
     } catch (e) {
       console.error('Send failed:', e);
@@ -143,9 +148,7 @@ export default function PanelMessages({ theme, userEmail, userName, roleLabel })
                       background: isMe ? t.adminBubble : t.bubbleBg,
                       borderRadius: '2px',
                     }}>
-                      <p style={{ fontSize: '13px', color: isMe ? '#F5F0EB' : t.text, lineHeight: 1.5, wordBreak: 'break-word' }}>
-                        {msg.message}
-                      </p>
+                      <MessageContent message={msg} t={t} isAdmin={isMe} />
                     </div>
                     <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, marginTop: '4px', textAlign: isMe ? 'right' : 'left' }}>
                       {format(new Date(msg.created_date), 'dd.MM.yyyy HH:mm')}
@@ -160,6 +163,7 @@ export default function PanelMessages({ theme, userEmail, userName, roleLabel })
 
         {/* Input */}
         <div className="p-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
+          <AttachmentBar attachments={pendingAttachments} setAttachments={setPendingAttachments} t={t} />
           <div className="flex gap-2">
             <textarea
               value={replyText}

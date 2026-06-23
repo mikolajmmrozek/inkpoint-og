@@ -30,7 +30,7 @@
         "system"
       ],
       "default": "client",
-      "description": "Kto wys\u0142a\u0142 wiadomo\u015b\u0107: client, admin, system"
+      "description": "Kto wysy\u0142a\u0142 wiadomo\u015b\u0107: client, admin, system"
     },
     "message_type": {
       "type": "string",
@@ -45,6 +45,29 @@
     "booking_id": {
       "type": "string",
       "description": "ID powi\u0105zanej rezerwacji (dla kart rezerwacji i zmian statusu)"
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "image",
+              "pdf",
+              "file"
+            ]
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Za\u0142\u0105czniki (zdj\u0119cia, PDF, pliki)"
     }
   },
   "required": [

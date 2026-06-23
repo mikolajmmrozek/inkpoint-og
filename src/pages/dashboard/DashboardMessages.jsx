@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Trash2, Send, ArrowLeft, Mail, MailOpen, Loader2, Search, X, Plus } from 'lucide-react';
 import NewMessageModal from '@/components/dashboard/NewMessageModal';
+import MessageContent from '@/components/panel/MessageContent';
+import AttachmentBar from '@/components/panel/AttachmentBar';
 import { useTheme } from './Dashboard';
 import { format } from 'date-fns';
 import BookingCard from '@/components/dashboard/BookingCard';
@@ -21,6 +23,7 @@ export default function DashboardMessages() {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showNewMessage, setShowNewMessage] = useState(false);
+  const [pendingAttachments, setPendingAttachments] = useState([]);
   const messagesEndRef = useRef(null);
 
   const load = async () => {
@@ -125,6 +128,7 @@ export default function DashboardMessages() {
         sender_type: 'admin',
         message_type: 'text',
         is_read: true,
+        attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
       });
       // Send email notification to client
       try {
@@ -137,6 +141,7 @@ export default function DashboardMessages() {
         console.warn('Email notification failed:', e);
       }
       setReplyText('');
+      setPendingAttachments([]);
       await load();
     } catch (e) {
       console.error('Reply failed:', e);
@@ -161,6 +166,7 @@ export default function DashboardMessages() {
   const getMessagePreview = (msg) => {
     if (msg.message_type === 'booking_card') return '🎫 Nowa rezerwacja';
     if (msg.message_type === 'status_change') return '🔄 Zmiana statusu rezerwacji';
+    if (msg.attachments && msg.attachments.length > 0) return `📎 ${msg.attachments.length} załącznik(ów)`;
     return (msg.sender_type === 'admin' ? 'Ty: ' : '') + (msg.message || '').slice(0, 60);
   };
 
@@ -322,9 +328,7 @@ export default function DashboardMessages() {
                           background: isAdmin ? t.adminBubble : t.bubbleBg,
                           borderRadius: '2px',
                         }}>
-                          <p style={{ fontSize: '14px', color: isAdmin ? '#F5F0EB' : t.text, lineHeight: 1.5, wordBreak: 'break-word' }}>
-                            {msg.message}
-                          </p>
+                          <MessageContent message={msg} t={t} isAdmin={isAdmin} />
                         </div>
                         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: theme === 'light' ? 'rgba(0,0,0,0.35)' : 'rgba(245,240,235,0.4)', letterSpacing: '0.05em', marginTop: '4px', textAlign: isAdmin ? 'right' : 'left' }}>
                           {msg.sender_type === 'admin' ? 'Romans Tattoo · ' : ''}
@@ -339,6 +343,7 @@ export default function DashboardMessages() {
 
               {/* Reply box */}
               <div className="p-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
+                <AttachmentBar attachments={pendingAttachments} setAttachments={setPendingAttachments} t={t} />
                 <div className="flex gap-2">
                   <textarea
                     value={replyText}

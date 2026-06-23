@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Search, Send, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import AttachmentBar from '@/components/panel/AttachmentBar';
 
 export default function NewMessageModal({ onClose, onSent, t }) {
   const [recipientType, setRecipientType] = useState('client');
@@ -9,6 +10,7 @@ export default function NewMessageModal({ onClose, onSent, t }) {
   const [selectedRecipient, setSelectedRecipient] = useState(null);
   const [messageText, setMessageText] = useState('');
   const [sending, setSending] = useState(false);
+  const [pendingAttachments, setPendingAttachments] = useState([]);
   const [clients, setClients] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -76,6 +78,7 @@ export default function NewMessageModal({ onClose, onSent, t }) {
         sender_type: 'admin',
         message_type: 'text',
         is_read: true,
+        attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
       });
       try {
         await base44.integrations.Core.SendEmail({
@@ -198,6 +201,7 @@ export default function NewMessageModal({ onClose, onSent, t }) {
         {/* Message */}
         <div className="mb-4">
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>WIADOMOŚĆ</p>
+          <AttachmentBar attachments={pendingAttachments} setAttachments={setPendingAttachments} t={t} />
           <textarea
             value={messageText}
             onChange={e => setMessageText(e.target.value)}
