@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Bell } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 /**
  * Element menu bocznego z licznikiem nieprzeczytanych powiadomień.
- * Kliknięcie otwiera panel powiadomień.
+ * Mobile/tablet: Link do strony powiadomień.
+ * Desktop: przycisk otwierający panel popup.
  */
-export default function NotificationSidebarItem({ userEmail, theme, onClick }) {
+export default function NotificationSidebarItem({ userEmail, theme, onClick, notificationsPath }) {
   const [unreadCount, setUnreadCount] = useState(0);
 
   const inactiveColor = theme === 'light' ? 'rgba(0,0,0,0.55)' : 'rgba(245,240,235,0.65)';
-  const textColor = theme === 'light' ? '#111111' : '#F5F0EB';
 
   const loadCount = async () => {
     if (!userEmail) return;
@@ -26,12 +27,8 @@ export default function NotificationSidebarItem({ userEmail, theme, onClick }) {
     return () => { if (typeof unsubscribe === 'function') unsubscribe(); };
   }, [userEmail]);
 
-  return (
-    <button
-      onClick={onClick}
-      className="flex items-center gap-3 px-4 py-3 w-full transition-all duration-200 hover:opacity-70"
-      style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: inactiveColor }}
-    >
+  const inner = (
+    <>
       <div style={{ position: 'relative' }}>
         <Bell size={14} color={inactiveColor} />
         {unreadCount > 0 && (
@@ -51,6 +48,29 @@ export default function NotificationSidebarItem({ userEmail, theme, onClick }) {
       <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', color: inactiveColor }}>
         Powiadomienia
       </span>
-    </button>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile/tablet: link do strony powiadomień */}
+      <Link
+        to={notificationsPath}
+        onClick={onClick}
+        className="flex items-center gap-3 px-4 py-3 w-full transition-all duration-200 hover:opacity-70 lg:hidden"
+        style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: inactiveColor }}
+      >
+        {inner}
+      </Link>
+
+      {/* Desktop: przycisk otwierający popup */}
+      <button
+        onClick={onClick}
+        className="hidden lg:flex items-center gap-3 px-4 py-3 w-full transition-all duration-200 hover:opacity-70"
+        style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: inactiveColor }}
+      >
+        {inner}
+      </button>
+    </>
   );
 }

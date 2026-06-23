@@ -88,6 +88,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
             <NotificationSidebarItem
               userEmail={userEmail}
               theme={theme}
+              notificationsPath="/dashboard/notifications"
               onClick={() => { setSidebarOpen(false); onNotifClick(); }}
             />
           </div>
