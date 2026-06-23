@@ -74,7 +74,13 @@ export default function DashboardServices() {
   useEffect(() => { load(); }, []);
 
   const openNew = () => { setForm({ ...EMPTY_FORM }); setEditing('new'); };
-  const openEdit = (s) => { setForm({ ...EMPTY_FORM, ...s, artist_ids: s.artist_ids || [], min_advance_booking: { ...EMPTY_FORM.min_advance_booking, ...(s.min_advance_booking || {}) } }); setEditing(s); };
+  const openEdit = (s) => { 
+    const minAdvanceBooking = s.min_advance_booking && typeof s.min_advance_booking === 'object' 
+      ? { ...EMPTY_FORM.min_advance_booking, ...s.min_advance_booking }
+      : { ...EMPTY_FORM.min_advance_booking };
+    setForm({ ...EMPTY_FORM, ...s, artist_ids: s.artist_ids || [], min_advance_booking: minAdvanceBooking }); 
+    setEditing(s); 
+  };
   const closeModal = () => setEditing(null);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
