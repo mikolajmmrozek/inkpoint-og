@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { FileText, X, ExternalLink, Copy, Shield, AlertTriangle, Search, Download, Mail, Trash2, Settings, Loader2, Edit3, Printer } from 'lucide-react';
+import { FileText, X, ExternalLink, Copy, Shield, AlertTriangle, Search, Download, Mail, Trash2, Settings, Loader2, Edit3, Printer, CheckCheck } from 'lucide-react';
 import { format } from 'date-fns';
 import { useTheme } from './Dashboard';
 import { AnimatePresence } from 'framer-motion';
@@ -385,6 +385,16 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
     }
   };
 
+  const markAllFormsAsRead = async () => {
+    const unread = filteredForms.filter(f => !f.is_read);
+    if (unread.length === 0) return;
+    try {
+      await Promise.all(unread.map(f => base44.entities.HealthForm.update(f.id, { is_read: true })));
+      const unreadIds = new Set(unread.map(f => f.id));
+      setForms(prev => prev.map(f => unreadIds.has(f.id) ? { ...f, is_read: true } : f));
+    } catch (e) {}
+  };
+
   const deleteForm = async (form) => {
     if (!window.confirm(`Czy na pewno chcesz usunąć ankietę dla ${getClientName(form)}?`)) return;
     await base44.entities.HealthForm.delete(form.id);
@@ -555,7 +565,16 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
                 style={{ background: 'transparent', border: 'none', outline: 'none', color: t.text, fontSize: '11px', width: '100%', fontFamily: 'Inter' }}
               />
             </div>
-          </div>
+            {filteredForms.some(f => !f.is_read) && (
+              <button
+                onClick={markAllFormsAsRead}
+                className="mt-2 flex items-center gap-2"
+                style={{ ...mono, fontSize: '8px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: '0.5px solid ' + t.fuchsia, padding: '5px 10px', cursor: 'pointer' }}
+              >
+                <CheckCheck size={11} /> Oznacz wszystkie jako przeczytane
+              </button>
+            )}
+            </div>
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
