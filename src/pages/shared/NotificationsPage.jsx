@@ -83,7 +83,11 @@ export default function NotificationsPage() {
 
   const handleClick = (notif) => {
     if (!notif.is_read) markRead(notif.id);
-    if (notif.link_path) navigate(notif.link_path);
+    if (notif.link_path) {
+      // Use link_data if available (e.g., email parameter for messages)
+      const url = notif.link_data ? `${notif.link_path}?email=${encodeURIComponent(notif.link_data)}` : notif.link_path;
+      navigate(url);
+    }
   };
 
   const totalPages = Math.ceil(notifications.length / pageSize);
