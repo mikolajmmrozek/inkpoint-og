@@ -115,38 +115,53 @@ export default function NotificationPanel({ open, onClose, userEmail, theme }) {
               <p style={{ fontSize: '14px', color: t.muted }}>Brak powiadomień</p>
             </div>
           ) : (
-            notifications.map(notif => {
-              const Icon = CATEGORY_ICONS[notif.category] || Bell;
-              const color = CATEGORY_COLORS[notif.category] || '#9ca3af';
-              return (
-                <div
-                  key={notif.id}
-                  onClick={() => handleClick(notif)}
-                  className="flex gap-3 p-4 cursor-pointer transition-colors hover:opacity-80"
-                  style={{ borderBottom: `0.5px solid ${t.border}`, background: !notif.is_read ? t.unreadBg : 'transparent' }}
-                >
-                  <div className="flex-shrink-0 mt-0.5">
-                    <Icon size={14} color={color} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p style={{ fontSize: '13px', color: t.text, fontWeight: !notif.is_read ? 500 : 400, marginBottom: '2px' }}>
-                      {notif.title}
-                    </p>
-                    <p style={{ fontSize: '12px', color: t.muted, lineHeight: 1.5, marginBottom: '4px' }}>
-                      {notif.message}
-                    </p>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.05em' }}>
-                      {format(new Date(notif.created_date), 'dd.MM.yyyy HH:mm')}
-                    </p>
-                  </div>
-                  {!notif.is_read && (
-                    <div className="flex-shrink-0 mt-1.5">
-                      <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: t.fuchsia }} />
-                    </div>
-                  )}
+            <>
+              {notifications.slice(0, 10).map(notif => {
+                const Icon = CATEGORY_ICONS[notif.category] || Bell;
+                const color = CATEGORY_COLORS[notif.category] || '#9ca3af';
+                return (
+                  <div
+                     key={notif.id}
+                     onClick={() => handleClick(notif)}
+                     className="flex gap-3 p-4 cursor-pointer transition-colors hover:opacity-80"
+                     style={{ borderBottom: `0.5px solid ${t.border}`, background: !notif.is_read ? t.unreadBg : 'transparent' }}
+                   >
+                     <div className="flex-shrink-0 mt-0.5">
+                       <Icon size={14} color={color} />
+                     </div>
+                     <div className="flex-1 min-w-0">
+                       <p style={{ fontSize: '13px', color: t.text, fontWeight: !notif.is_read ? 500 : 400, marginBottom: '2px' }}>
+                         {notif.title}
+                       </p>
+                       <p style={{ fontSize: '12px', color: t.muted, lineHeight: 1.5, marginBottom: '4px' }}>
+                         {notif.message}
+                       </p>
+                       <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.05em' }}>
+                         {format(new Date(notif.created_date), 'dd.MM.yyyy HH:mm')}
+                       </p>
+                     </div>
+                     {!notif.is_read && (
+                       <div className="flex-shrink-0 mt-1.5">
+                         <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: t.fuchsia }} />
+                       </div>
+                     )}
+                   </div>
+                );
+              })}
+              {notifications.length > 10 && (
+                <div className="p-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
+                  <button
+                    onClick={() => {
+                      onClose();
+                      navigate('/dashboard/notifications');
+                    }}
+                    style={{ width: '100%', padding: '10px', fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', border: `0.5px solid ${t.fuchsia}`, cursor: 'pointer' }}
+                  >
+                    Pokaż wszystkie
+                  </button>
                 </div>
-              );
-            })
+              )}
+            </>
           )}
         </div>
       </div>
