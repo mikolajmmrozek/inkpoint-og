@@ -327,6 +327,7 @@ export default function DashboardMessages() {
                           padding: '10px 14px',
                           background: isAdmin ? t.adminBubble : t.bubbleBg,
                           borderRadius: '2px',
+                          color: isAdmin ? '#F5F0EB' : t.text,
                         }}>
                           <MessageContent message={msg} t={t} isAdmin={isAdmin} />
                         </div>
