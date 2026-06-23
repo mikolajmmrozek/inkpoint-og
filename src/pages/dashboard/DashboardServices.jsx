@@ -604,7 +604,7 @@ export default function DashboardServices() {
                         {label('Jednostka')}
                         <select
                           value={form.min_advance_booking?.unit || 'minutes'}
-                          onChange={e => set('min_advance_booking', { ...form.min_advance_booking, unit: e.target.value })}
+                          onChange={e => set('min_advance_booking', { ...(form.min_advance_booking || {}), unit: e.target.value })}
                           style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: theme === 'light' ? 'light' : 'dark' }}
                         >
                           <option value="minutes">Minuty</option>
@@ -620,9 +620,10 @@ export default function DashboardServices() {
                           max={form.min_advance_booking?.unit === 'days' ? 30 : form.min_advance_booking?.unit === 'hours' ? 999 : 999}
                           step={form.min_advance_booking?.unit === 'minutes' ? 15 : 1}
                           value={form.min_advance_booking?.value || 0}
-                          onChange={e => set('min_advance_booking', { ...form.min_advance_booking, value: Number(e.target.value) })}
-                          {...inp('min_advance_booking_value', 'number')}
+                          onChange={e => set('min_advance_booking', { ...(form.min_advance_booking || {}), value: Number(e.target.value) })}
                           style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }}
+                          onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
+                          onBlur={e => e.target.style.borderBottomColor = t.border}
                         />
                       </div>
                     </div>
