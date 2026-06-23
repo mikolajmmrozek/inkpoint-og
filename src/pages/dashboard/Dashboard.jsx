@@ -217,7 +217,7 @@ export default function Dashboard() {
               <div className="hidden lg:block">
                 <NotificationBell userEmail={user.email} theme={theme} onClick={() => setNotifOpen(true)} />
               </div>
-              <div className="w-2 h-2 rounded-full" style={{ background: '#FF007F' }} />
+              <div className="w-2 h-2 rounded-full" style={{ background: '#16a34a' }} />
               <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: mutedColor, letterSpacing: '0.1em' }}>
                 {user?.email}
               </p>
