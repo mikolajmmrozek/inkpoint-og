@@ -1,0 +1,219 @@
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { X, Search, Send, Loader2 } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
+
+export default function NewMessageModal({ onClose, onSent, t }) {
+  const [recipientType, setRecipientType] = useState('client');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedRecipient, setSelectedRecipient] = useState(null);
+  const [messageText, setMessageText] = useState('');
+  const [sending, setSending] = useState(false);
+  const [clients, setClients] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      base44.entities.Client.list('-created_date', 500),
+      base44.entities.User.list(),
+    ]).then(([c, u]) => {
+      setClients(c);
+      setUsers(u);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, []);
+
+  const searchResults = (() => {
+    const q = searchQuery.toLowerCase().trim();
+    if (recipientType === 'client') {
+      let base = clients.map(c => ({
+        id: c.id,
+        name: c.name || `${c.first_name || ''} ${c.last_name || ''}`.trim(),
+        email: c.email || '',
+        phone: c.phone || '',
+        type: 'Klient',
+      })).filter(r => r.email);
+      if (!q) return base.slice(0, 20);
+      return base.filter(r =>
+        r.name.toLowerCase().includes(q) ||
+        r.email.toLowerCase().includes(q) ||
+        r.phone.toLowerCase().includes(q)
+      ).slice(0, 20);
+    } else {
+      let base = users.map(u => ({
+        id: u.id,
+        name: u.full_name || u.email,
+        email: u.email || '',
+        phone: '',
+        type: u.role === 'artist' ? 'Artysta' : 'Admin',
+      })).filter(r => r.email);
+      if (!q) return base.slice(0, 20);
+      return base.filter(r =>
+        r.name.toLowerCase().includes(q) ||
+        r.email.toLowerCase().includes(q)
+      ).slice(0, 20);
+    }
+  })();
+
+  const handleSend = async () => {
+    if (!selectedRecipient || !messageText.trim()) return;
+    setSending(true);
+    try {
+      await base44.entities.ContactMessage.create({
+        name: 'Romans Tattoo',
+        email: selectedRecipient.email,
+        phone: selectedRecipient.phone || '',
+        message: messageText,
+        sender_type: 'admin',
+        message_type: 'text',
+        is_read: true,
+      });
+      try {
+        await base44.integrations.Core.SendEmail({
+          to: selectedRecipient.email,
+          subject: 'Wiadomość od Romans Tattoo',
+          body: messageText,
+        });
+      } catch (e) {}
+      onSent();
+    } catch (e) {
+      console.error('New message failed:', e);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.75)' }} onClick={onClose}>
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        className="w-full max-w-lg max-h-[85vh] overflow-y-auto"
+        style={{ border: `0.5px solid ${t.border}`, background: t.bg || '#0A0A0A', padding: '32px' }}
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>NOWA WIADOMOŚĆ</p>
+            <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.6rem', color: t.title, letterSpacing: '0.04em' }}>Wyślij wiadomość</h3>
+          </div>
+          <button onClick={onClose} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Recipient type toggle */}
+        <div className="mb-4">
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>ODBIORCA</p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => { setRecipientType('client'); setSelectedRecipient(null); setSearchQuery(''); }}
+              style={{ flex: 1, padding: '10px', border: `0.5px solid ${recipientType === 'client' ? '#FF007F' : t.border}`, color: recipientType === 'client' ? '#FF007F' : t.muted, background: recipientType === 'client' ? 'rgba(255,0,127,0.08)' : 'transparent', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer' }}
+            >
+              KLIENT
+            </button>
+            <button
+              onClick={() => { setRecipientType('studio'); setSelectedRecipient(null); setSearchQuery(''); }}
+              style={{ flex: 1, padding: '10px', border: `0.5px solid ${recipientType === 'studio' ? '#FF007F' : t.border}`, color: recipientType === 'studio' ? '#FF007F' : t.muted, background: recipientType === 'studio' ? 'rgba(255,0,127,0.08)' : 'transparent', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer' }}
+            >
+              ARTYSTA / ADMIN
+            </button>
+          </div>
+        </div>
+
+        {/* Search */}
+        <div className="mb-4">
+          <div className="flex items-center gap-2" style={{ border: `0.5px solid ${searchQuery ? '#FF007F' : t.border}`, padding: '8px 12px' }}>
+            <Search size={12} color={searchQuery ? '#FF007F' : t.muted} />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder={recipientType === 'client' ? 'Szukaj po imieniu, nazwisku, emailu...' : 'Szukaj po imieniu lub emailu...'}
+              style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontFamily: 'Inter, sans-serif', fontSize: '12px', color: t.text }}
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: 0 }}>
+                <X size={12} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Search results or selected recipient */}
+        {selectedRecipient ? (
+          <div className="mb-4 p-3" style={{ border: '0.5px solid rgba(255,0,127,0.3)', background: 'rgba(255,0,127,0.04)' }}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p style={{ fontSize: '13px', color: t.text, fontWeight: 500 }}>{selectedRecipient.name}</p>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{selectedRecipient.email}{selectedRecipient.phone ? ` · ${selectedRecipient.phone}` : ''}</p>
+              </div>
+              <button onClick={() => setSelectedRecipient(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}>
+                <X size={14} />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="mb-4" style={{ border: `0.5px solid ${t.border}`, maxHeight: '200px', overflowY: 'auto' }}>
+            {loading ? (
+              <div className="py-8 text-center">
+                <Loader2 size={16} className="animate-spin mx-auto" color="#FF007F" />
+              </div>
+            ) : searchResults.length === 0 ? (
+              <div className="py-8 text-center">
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK WYNIKÓW</p>
+              </div>
+            ) : searchResults.map(r => (
+              <button
+                key={r.id}
+                onClick={() => setSelectedRecipient(r)}
+                className="w-full text-left px-3 py-2 transition-colors"
+                style={{ borderBottom: `0.5px solid ${t.border}`, background: 'transparent', cursor: 'pointer' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,0,127,0.05)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p style={{ fontSize: '13px', color: t.text }}>{r.name}</p>
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{r.email}</p>
+                  </div>
+                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.08em', textTransform: 'uppercase', border: '0.5px solid rgba(255,0,127,0.3)', padding: '2px 6px' }}>{r.type}</span>
+
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Message */}
+        <div className="mb-4">
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>WIADOMOŚĆ</p>
+          <textarea
+            value={messageText}
+            onChange={e => setMessageText(e.target.value)}
+            rows={4}
+            placeholder="Wpisz wiadomość..."
+            style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '10px 12px', fontSize: '13px', color: t.text, fontFamily: 'Inter, sans-serif', resize: 'vertical', outline: 'none' }}
+            onFocus={e => e.target.style.borderColor = '#FF007F'}
+            onBlur={e => e.target.style.borderColor = t.border}
+          />
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-3">
+          <button
+            onClick={handleSend}
+            disabled={sending || !selectedRecipient || !messageText.trim()}
+            className="btn-oxblood flex-1 flex items-center justify-center gap-2"
+            style={{ opacity: (!selectedRecipient || !messageText.trim()) ? 0.5 : 1 }}
+          >
+            {sending ? <Loader2 size={13} className="animate-spin" /> : <><Send size={13} /> WYŚLIJ</>}
+          </button>
+          <button onClick={onClose} className="btn-ghost-parchment">ANULUJ</button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}

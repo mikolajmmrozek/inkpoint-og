@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Trash2, Send, ArrowLeft, Mail, MailOpen, Loader2, Search, X } from 'lucide-react';
+import { Trash2, Send, ArrowLeft, Mail, MailOpen, Loader2, Search, X, Plus } from 'lucide-react';
+import NewMessageModal from '@/components/dashboard/NewMessageModal';
 import { useTheme } from './Dashboard';
 import { format } from 'date-fns';
 import BookingCard from '@/components/dashboard/BookingCard';
@@ -19,6 +20,7 @@ export default function DashboardMessages() {
   const [sending, setSending] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showNewMessage, setShowNewMessage] = useState(false);
   const messagesEndRef = useRef(null);
 
   const load = async () => {
@@ -166,13 +168,18 @@ export default function DashboardMessages() {
   return (
     <div>
       {/* Header */}
-      <div className="mb-8">
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
-          SKRZYNKA ODBIORCZA
-        </p>
-        <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>
-          Wiadomości
-        </h2>
+      <div className="mb-6 flex items-start justify-between flex-wrap gap-4">
+        <div>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
+            SKRZYNKA ODBIORCZA
+          </p>
+          <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>
+            Wiadomości
+          </h2>
+        </div>
+        <button onClick={() => setShowNewMessage(true)} className="flex items-center gap-2 btn-oxblood md:mt-7" style={{ padding: '10px 20px' }}>
+          <Plus size={13} /> NOWA WIADOMOŚĆ
+        </button>
       </div>
 
       {/* Search bar */}
@@ -372,6 +379,14 @@ export default function DashboardMessages() {
         onCancel={() => setDeleteConfirm(null)}
         theme={theme}
       />
+
+      {showNewMessage && (
+        <NewMessageModal
+          t={t}
+          onClose={() => setShowNewMessage(false)}
+          onSent={() => { setShowNewMessage(false); load(); }}
+        />
+      )}
     </div>
   );
 }

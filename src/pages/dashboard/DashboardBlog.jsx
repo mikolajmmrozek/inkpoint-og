@@ -103,7 +103,7 @@ export default function DashboardBlog() {
 
   return (
     <div>
-      <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="mb-6 flex items-start justify-between flex-wrap gap-4">
         <div>
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
             ZARZĄDZANIE
@@ -112,8 +112,8 @@ export default function DashboardBlog() {
             Blog
           </h2>
         </div>
-        <button onClick={openNew} className="flex items-center gap-2 btn-oxblood w-full md:w-auto justify-center">
-          <Plus size={14} /> NOWY POST
+        <button onClick={openNew} className="flex items-center gap-2 btn-oxblood md:mt-7" style={{ padding: '10px 20px' }}>
+          <Plus size={13} /> NOWY POST
         </button>
       </div>
 

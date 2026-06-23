@@ -64,17 +64,17 @@ export default function DashboardFAQ() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-start justify-between flex-wrap gap-4 mb-8">
         <div>
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>TREŚĆ STRONY</p>
           <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: textColor, lineHeight: 1, letterSpacing: '0.04em' }}>FAQ</h1>
         </div>
         <button
           onClick={openNew}
-          className="flex items-center gap-2 px-4 py-2"
-          style={{ background: '#FF007F', color: '#F5F0EB', fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }}
+          className="flex items-center gap-2 btn-oxblood md:mt-7"
+          style={{ padding: '10px 20px' }}
         >
-          <Plus size={14} /> Dodaj pytanie
+          <Plus size={13} /> DODAJ PYTANIE
         </button>
       </div>
 

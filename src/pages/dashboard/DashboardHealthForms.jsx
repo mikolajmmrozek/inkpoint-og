@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { FileText, X, ExternalLink, Copy, Shield, AlertTriangle, Search, Download, Mail, Trash2, Settings, Loader2, Edit3, Printer, CheckCheck } from 'lucide-react';
+import { FileText, X, ExternalLink, Copy, Shield, AlertTriangle, Search, Download, Mail, Trash2, Settings, Loader2, Edit3, Printer, CheckCheck, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { useTheme } from './Dashboard';
 import { AnimatePresence } from 'framer-motion';
@@ -425,12 +425,13 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
           <h2 style={{ ...display, fontSize: '2.5rem', color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>Ankiety Zdrowotne</h2>
         </div>
         <a
-          href="/dashboard/form-template"
-          title="Edytuj szablon formularza"
-          className="flex items-center gap-2 btn-oxblood"
-          style={{ padding: '10px 20px' }}
+          href={generalFormLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 btn-oxblood md:mt-7"
+          style={{ padding: '10px 20px', textDecoration: 'none' }}
         >
-          <Settings size={13} /> EDYTUJ SZABLON
+          <Plus size={13} /> NOWA ANKIETA
         </a>
       </div>
 
@@ -442,9 +443,18 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
 
       {/* General form link section */}
       <div className="mb-6 p-4" style={{ border: `0.5px solid ${t.border}`, background: 'rgba(255,0,127,0.03)' }}>
-        <p style={{ ...mono, fontSize: '8px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>
-          LINK OGÓLNY DO ANKIETY
-        </p>
+        <div className="flex items-center justify-between mb-3">
+          <p style={{ ...mono, fontSize: '8px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+            LINK OGÓLNY DO ANKIETY
+          </p>
+          <a
+            href="/dashboard/form-template"
+            className="flex items-center gap-1.5"
+            style={{ ...mono, fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', textDecoration: 'none' }}
+          >
+            <Settings size={10} /> EDYTUJ SZABLON
+          </a>
+        </div>
         <div className="flex items-center gap-2">
           <div style={{ flex: 1, padding: '8px 10px', border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: '2px' }}>
             <p style={{ ...mono, fontSize: '9px', color: t.muted, wordBreak: 'break-all' }}>{generalFormLink}</p>

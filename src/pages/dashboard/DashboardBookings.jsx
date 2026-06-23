@@ -406,34 +406,31 @@ export default function DashboardBookings() {
               Rezerwacje
             </h2>
           </div>
-          <div className="flex items-center gap-2 md:mt-7">
-            <button
-              onClick={() => {
-                const today = new Date();
-                const todayStr = format(today, 'yyyy-MM-dd');
-                setSelectedDate(today);
-                if (viewMode === 'list') {
-                  setListTab('upcoming');
-                  let base = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
-                  if (artistFilter !== 'all') base = base.filter(b => b.artist_id === artistFilter);
-                  const upcoming = [...base].filter(b => (b.session_date || '') >= todayStr).sort((a, b) => (a.session_date || '').localeCompare(b.session_date || ''));
-                  const todayIdx = upcoming.findIndex(b => b.session_date === todayStr);
-                  setListPage(todayIdx >= 0 ? Math.floor(todayIdx / PAGE_SIZE) : 0);
-                }
-              }}
-              className="btn-oxblood flex items-center gap-2"
-              style={{ padding: '10px 20px' }}
-            >
-              DZISIAJ
-            </button>
-            <button onClick={handleNewBooking} className="flex items-center gap-2 btn-oxblood" style={{ padding: '10px 20px' }}>
-              <Plus size={13} /> NOWA SESJA
-            </button>
-          </div>
+          <button onClick={handleNewBooking} className="flex items-center gap-2 btn-oxblood md:mt-7" style={{ padding: '10px 20px' }}>
+            <Plus size={13} /> NOWA SESJA
+          </button>
         </div>
 
         {/* Row 1: view toggle + actions */}
         <div className="flex items-center gap-2 flex-wrap mb-3">
+          <button
+            onClick={() => {
+              const today = new Date();
+              const todayStr = format(today, 'yyyy-MM-dd');
+              setSelectedDate(today);
+              if (viewMode === 'list') {
+                setListTab('upcoming');
+                let base = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
+                if (artistFilter !== 'all') base = base.filter(b => b.artist_id === artistFilter);
+                const upcoming = [...base].filter(b => (b.session_date || '') >= todayStr).sort((a, b) => (a.session_date || '').localeCompare(b.session_date || ''));
+                const todayIdx = upcoming.findIndex(b => b.session_date === todayStr);
+                setListPage(todayIdx >= 0 ? Math.floor(todayIdx / PAGE_SIZE) : 0);
+              }
+            }}
+            style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}
+          >
+            DZISIAJ
+          </button>
           <div className="flex" style={{ border: `0.5px solid ${t.border}` }}>
             {[{ mode: 'calendar', icon: Calendar }, { mode: 'day', icon: Clock }, { mode: 'list', icon: List }, { mode: 'pending', icon: Inbox }].map(({ mode, icon: Icon }) => (
               <button
