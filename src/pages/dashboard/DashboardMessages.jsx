@@ -50,13 +50,13 @@ export default function DashboardMessages() {
     return () => { if (typeof unsubscribe === 'function') unsubscribe(); };
   }, []);
 
-  // Polling fallback — refresh every 5 seconds in case WebSocket misses events
+  // Polling fallback — refresh every 30 seconds in case WebSocket misses events
   useEffect(() => {
     const interval = setInterval(() => {
       base44.entities.ContactMessage.list('-created_date', 200)
         .then(data => setAllMessages(data))
         .catch(() => {});
-    }, 5000);
+    }, 30000);
     return () => clearInterval(interval);
   }, []);
 

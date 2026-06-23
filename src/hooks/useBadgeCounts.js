@@ -182,8 +182,8 @@ export function useBadgeCounts({ role, userEmail }) {
       } catch (e) {}
     }
 
-    // Polling fallback (10s)
-    const interval = setInterval(loadAll, 10000);
+    // Polling fallback (45s)
+    const interval = setInterval(loadAll, 45000);
 
     return () => {
       cancelled = true;
