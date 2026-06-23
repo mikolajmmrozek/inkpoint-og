@@ -97,10 +97,10 @@ export const AuthProvider = ({ children }) => {
       setUser(currentUser);
       setIsAuthenticated(true);
       
-      // Notify admins of first login
-      if (currentUser && !currentUser.last_login) {
+      // Notify admins of first login (backend checks first_login_notified flag)
+      if (currentUser && !currentUser.first_login_notified) {
         try {
-          await base44.functions.invoke('handleNewUserLogin', { is_first_login: true });
+          await base44.functions.invoke('handleNewUserLogin', {});
         } catch (e) {
           console.error('Failed to notify admins:', e);
         }
