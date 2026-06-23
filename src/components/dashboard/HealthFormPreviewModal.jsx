@@ -32,32 +32,44 @@ export default function HealthFormPreviewModal({ bookingId, healthFormId, client
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
     const load = async () => {
-      let forms;
-      const tplArr = await base44.entities.HealthFormTemplate.filter({ key: 'default' });
-      if (healthFormId) {
-        const f = await base44.entities.HealthForm.get(healthFormId);
-        forms = f ? [f] : [];
-      } else if (bookingId) {
-        forms = await base44.entities.HealthForm.filter({ booking_id: bookingId }, '-form_filled_date', 1);
-        // Fallback: jeśli nie znaleziono po booking_id, szukaj po client_name
-        if (forms.length === 0 && clientName) {
-          const byName = await base44.entities.HealthForm.filter({ client_name: clientName }, '-form_filled_date', 1);
-          forms = byName;
-        }
+      if (!healthFormId && !bookingId) {
+        setLoading(false);
+        return;
       }
-      if (tplArr.length > 0) setTemplate(tplArr[0]);
-      if (tplArr.length > 0) setTemplate(tplArr[0]);
-      if (forms.length > 0) {
-        setForm(forms[0]);
-        if (forms[0].is_minor) {
-          const gc = await base44.entities.GuardianConsentForm.filter({ health_form_id: forms[0].id }, '-form_filled_date', 1);
-          if (gc.length > 0) setGuardian(gc[0]);
+      try {
+        // Fetch template + form in parallel to reduce API calls
+        const tplPromise = base44.entities.HealthFormTemplate.filter({ key: 'default' });
+        let formPromise;
+        if (healthFormId) {
+          formPromise = base44.entities.HealthForm.get(healthFormId).then(f => (f ? [f] : []));
+        } else {
+          formPromise = base44.entities.HealthForm.filter({ booking_id: bookingId }, '-form_filled_date', 1).then(forms => {
+            if (forms.length === 0 && clientName) {
+              return base44.entities.HealthForm.filter({ client_name: clientName }, '-form_filled_date', 1);
+            }
+            return forms;
+          });
         }
+        const [tplArr, forms] = await Promise.all([tplPromise, formPromise]);
+        if (cancelled) return;
+        if (tplArr?.length > 0) setTemplate(tplArr[0]);
+        if (forms?.length > 0) {
+          setForm(forms[0]);
+          if (forms[0].is_minor) {
+            const gc = await base44.entities.GuardianConsentForm.filter({ health_form_id: forms[0].id }, '-form_filled_date', 1);
+            if (!cancelled && gc.length > 0) setGuardian(gc[0]);
+          }
+        }
+      } catch (e) {
+        if (!cancelled) console.error('HealthForm load error:', e);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      setLoading(false);
     };
     load();
+    return () => { cancelled = true; };
   }, [bookingId, healthFormId]);
 
   const MEDICAL = [
