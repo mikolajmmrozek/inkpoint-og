@@ -184,11 +184,12 @@ export default function DashboardUsers() {
           </div>
         ) : (
           <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
-            {users.map((u, i) => {
+            {users.filter(u => u.role === 'artist' || u.role === 'admin').map((u, i) => {
               const linkedArtist = artists.find(a => a.id === u.artist_id);
+              const filtered = users.filter(uu => uu.role === 'artist' || uu.role === 'admin');
               return (
                 <div key={u.id} className="flex items-center justify-between p-4 gap-4"
-                  style={{ borderBottom: i < users.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }}>
+                  style={{ borderBottom: i < filtered.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }}>
                   <div className="min-w-0 flex-1">
                     <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{u.full_name || u.email}</p>
                     <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px' }}>
