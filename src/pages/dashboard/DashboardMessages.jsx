@@ -8,9 +8,12 @@ import { useTheme } from './Dashboard';
 import { format } from 'date-fns';
 import BookingCard from '@/components/dashboard/BookingCard';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
+import { useEffect as useEffectHook } from 'react';
+import { useLocation } from 'react-router-dom';
 
 export default function DashboardMessages() {
   const { theme } = useTheme();
+  const location = useLocation();
   const t = theme === 'light'
     ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.65)', fuchsia: '#FF007F', hover: 'rgba(0,0,0,0.03)', cardBg: '#FFFFFF', bubbleBg: 'rgba(0,0,0,0.06)', adminBubble: '#FF007F' }
     : { bg: 'rgba(24,24,24,0.95)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.75)', fuchsia: '#FF007F', hover: 'rgba(255,255,255,0.05)', cardBg: 'transparent', bubbleBg: 'rgba(255,255,255,0.06)', adminBubble: '#FF007F' };
@@ -18,6 +21,13 @@ export default function DashboardMessages() {
   const [allMessages, setAllMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedEmail, setSelectedEmail] = useState(null);
+
+  // Check URL for email parameter from notification
+  useEffectHook(() => {
+    const params = new URLSearchParams(location.search);
+    const email = params.get('email');
+    if (email) setSelectedEmail(email);
+  }, [location.search]);
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null);

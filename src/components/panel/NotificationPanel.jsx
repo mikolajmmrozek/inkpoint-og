@@ -58,9 +58,14 @@ export default function NotificationPanel({ open, onClose, userEmail, theme }) {
 
   const handleClick = (notif) => {
     if (!notif.is_read) markRead(notif.id);
-    if (notif.link_path) {
+    let targetPath = notif.link_path;
+    // For message notifications, route to conversation with sender email encoded in URL
+    if (notif.category === 'message' && notif.link_data) {
+      targetPath = `${notif.link_path}?email=${encodeURIComponent(notif.link_data)}`;
+    }
+    if (targetPath) {
       onClose();
-      navigate(notif.link_path);
+      navigate(targetPath);
     }
   };
 

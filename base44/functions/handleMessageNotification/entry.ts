@@ -32,6 +32,7 @@ Deno.serve(async (req) => {
           message: `${msg.name || 'Klient'}: ${preview}${msg.message && msg.message.length > 80 ? '...' : ''}`,
           category: 'message',
           link_path: '/dashboard/messages',
+          link_data: msg.email,
           is_read: false,
         });
       }
@@ -44,6 +45,7 @@ Deno.serve(async (req) => {
         message: `${preview}${msg.message && msg.message.length > 80 ? '...' : ''}`,
         category: 'message',
         link_path: '/panel/messages',
+        link_data: msg.email,
         is_read: false,
       });
     }
