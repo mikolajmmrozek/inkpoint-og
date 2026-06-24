@@ -130,7 +130,7 @@ export default function DashboardArtists() {
     const file = e.target.files[0];
     if (!file) return;
     setUploading(true);
-    const compressed = await compressImage(file, { maxWidth: 256, maxHeight: 256, quality: 0.72 });
+    const compressed = await compressImage(file, { maxWidth: 1200, maxHeight: 1200, quality: 0.85 });
     const { file_url } = await base44.integrations.Core.UploadFile({ file: compressed });
     setForm(f => ({ ...f, photo_url: file_url }));
     setUploading(false);
