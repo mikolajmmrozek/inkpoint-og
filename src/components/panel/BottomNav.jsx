@@ -58,7 +58,7 @@ export default function BottomNav({ theme, calendarPath, messagesPath, notificat
     const interval = setInterval(() => {
       loadCount();
       loadMessages();
-    }, 15000);
+    }, 60000);
     return () => {
       if (typeof unsubNotif === 'function') unsubNotif();
       if (typeof unsubMsg === 'function') unsubMsg();

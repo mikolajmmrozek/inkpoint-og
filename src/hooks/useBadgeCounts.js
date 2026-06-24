@@ -195,8 +195,8 @@ export function useBadgeCounts({ role, userEmail }) {
       } catch (e) {}
     }
 
-    // Polling fallback (15s) — szybszy refresh dla artystów i admina
-    const interval = setInterval(loadAll, 15000);
+    // Polling fallback (60s) — realtime subscriptions handle live updates
+    const interval = setInterval(loadAll, 60000);
 
     return () => {
       cancelled = true;
