@@ -79,7 +79,7 @@ export default function ArtistStats() {
       <div className="grid grid-cols-3 gap-4 mb-8">
         {[
           { label: 'Sesji', value: totalSessions },
-          { label: 'Przychód studia', value: `${totalRevenue} zł` },
+          { label: 'Łączna kwota', value: `${totalRevenue} zł` },
           { label: `Mój zarobek (${cut}%)`, value: `${totalEarning} zł` },
         ].map(kpi => (
           <div key={kpi.label} className="p-4" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
@@ -119,7 +119,7 @@ export default function ArtistStats() {
       {viewMode === 'monthly' && (
         <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
           <div className="grid grid-cols-4 gap-4 p-3" style={{ borderBottom: `0.5px solid ${t.rowBorder}` }}>
-            {['Miesiąc', 'Sesje', 'Przychód studia', 'Mój zarobek'].map(h => (
+            {['Miesiąc', 'Sesje', 'Łączna kwota', 'Mój zarobek'].map(h => (
               <p key={h} style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{h}</p>
             ))}
           </div>
@@ -138,7 +138,7 @@ export default function ArtistStats() {
       {viewMode === 'daily' && (
         <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
           <div className="grid grid-cols-4 gap-4 p-3" style={{ borderBottom: `0.5px solid ${t.rowBorder}` }}>
-            {['Data', 'Sesje', 'Przychód studia', 'Mój zarobek'].map(h => (
+            {['Data', 'Sesje', 'Łączna kwota', 'Mój zarobek'].map(h => (
               <p key={h} style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{h}</p>
             ))}
           </div>
