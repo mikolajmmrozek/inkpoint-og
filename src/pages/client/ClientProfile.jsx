@@ -129,22 +129,7 @@ export default function ClientProfile() {
               <input readOnly value={form.phone || '—'} style={readOnlyStyle} />
             )}
           </div>
-          <div>
-            {label('Notatki / Preferencje')}
-            {editing ? (
-              <textarea
-                rows={4}
-                style={{ ...inputStyle, resize: 'none' }}
-                value={form.notes}
-                onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-                placeholder="Alergie, preferencje, ważne informacje..."
-                onFocus={e => e.target.style.borderBottomColor = t.fuchsia}
-                onBlur={e => e.target.style.borderBottomColor = t.border}
-              />
-            ) : (
-              <input readOnly value={form.notes || '—'} style={readOnlyStyle} />
-            )}
-          </div>
+
         </div>
 
         {editing && (
