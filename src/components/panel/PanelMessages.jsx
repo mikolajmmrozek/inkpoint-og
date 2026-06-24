@@ -146,6 +146,7 @@ export default function PanelMessages({ theme, userEmail, userName, roleLabel })
                     <div style={{
                       padding: '10px 14px',
                       background: isMe ? t.adminBubble : t.bubbleBg,
+                      color: isMe ? '#F5F0EB' : t.text,
                       borderRadius: '2px',
                     }}>
                       <MessageContent message={msg} t={t} isAdmin={isMe} />

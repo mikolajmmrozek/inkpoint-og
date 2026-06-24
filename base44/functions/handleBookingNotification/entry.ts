@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
       }
     } else if (eventType === 'update') {
       // Booking confirmed or completed — auto-mark admin notification as read
-      if (oldBooking && booking.status !== oldBooking.status && (booking.status === 'confirmed' || booking.status === 'completed') && booking.id) {
+      if (oldBooking && booking.status !== oldBooking.status && (booking.status === 'confirmed' || booking.status === 'completed' || booking.status === 'cancelled') && booking.id) {
         try {
           const adminNotifs = await base44.asServiceRole.entities.Notification.filter(
             { booking_id: booking.id, category: 'booking', is_read: false },
@@ -81,20 +81,32 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Booking confirmed — notify the assigned artist
-      if (oldBooking && booking.status !== oldBooking.status && booking.status === 'confirmed' && booking.artist_id) {
+      // Booking confirmed or cancelled — notify the assigned artist
+      if (oldBooking && booking.status !== oldBooking.status && (booking.status === 'confirmed' || booking.status === 'cancelled') && booking.artist_id) {
         try {
           const artistUser = await base44.asServiceRole.entities.User.filter({ 'data.artist_id': booking.artist_id }, null, 1);
           if (artistUser.length > 0 && artistUser[0].email) {
-            notifications.push({
-              target_email: artistUser[0].email,
-              title: 'Nowa potwierdzona rezerwacja',
-              message: `Rezerwacja klienta ${booking.client_name || '—'} na ${booking.session_date || '—'}${booking.session_time ? ' o ' + booking.session_time : ''} została potwierdzona`,
-              category: 'booking',
-              link_path: '/artist/schedule',
-              is_read: false,
-              booking_id: booking.id,
-            });
+            if (booking.status === 'confirmed') {
+              notifications.push({
+                target_email: artistUser[0].email,
+                title: 'Nowa potwierdzona rezerwacja',
+                message: `Rezerwacja klienta ${booking.client_name || '—'} na ${booking.session_date || '—'}${booking.session_time ? ' o ' + booking.session_time : ''} została potwierdzona`,
+                category: 'booking',
+                link_path: '/artist/schedule',
+                is_read: false,
+                booking_id: booking.id,
+              });
+            } else if (booking.status === 'cancelled') {
+              notifications.push({
+                target_email: artistUser[0].email,
+                title: 'Rezerwacja anulowana',
+                message: `Rezerwacja klienta ${booking.client_name || '—'} na ${booking.session_date || '—'}${booking.session_time ? ' o ' + booking.session_time : ''} została anulowana`,
+                category: 'booking',
+                link_path: '/artist/schedule',
+                is_read: false,
+                booking_id: booking.id,
+              });
+            }
           }
         } catch (e) {}
       }
