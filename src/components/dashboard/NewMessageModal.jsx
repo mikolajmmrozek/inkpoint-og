@@ -16,14 +16,16 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      base44.entities.Client.list('-created_date', 500),
-      base44.entities.User.list(),
-    ]).then(([c, u]) => {
-      setClients(c);
-      setUsers(u);
-    }).catch(e => { console.error('Load failed:', e); })
-    .finally(() => setLoading(false));
+    let done = 0;
+    const finish = () => { done++; if (done >= 2) setLoading(false); };
+    base44.entities.Client.list('-created_date', 500)
+      .then(setClients)
+      .catch(e => console.error('Client load failed:', e))
+      .finally(finish);
+    base44.entities.User.list()
+      .then(setUsers)
+      .catch(e => console.error('User load failed:', e))
+      .finally(finish);
   }, []);
 
   const searchResults = (() => {
