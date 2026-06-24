@@ -108,7 +108,7 @@ export default function ArtistProfile() {
             )}
             <label style={{ cursor: 'pointer' }}>
               <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
-              <span className="btn-ghost-parchment" style={{ fontSize: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono, monospace', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', padding: '8px 16px', border: `0.5px solid ${t.text}`, color: t.text, cursor: 'pointer', transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
                 <Upload size={12} /> {uploading ? 'WYSYŁAM...' : 'ZMIEŃ ZDJĘCIE'}
               </span>
             </label>
