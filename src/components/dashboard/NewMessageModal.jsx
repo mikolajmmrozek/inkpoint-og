@@ -22,8 +22,8 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
       .then(setClients)
       .catch(e => console.error('Client load failed:', e))
       .finally(finish);
-    base44.entities.User.list()
-      .then(setUsers)
+    base44.entities.User.list('-created_date', 500)
+      .then(u => { console.log('Users loaded:', u.length, u.map(x => ({ email: x.email, role: x.role }))); setUsers(u); })
       .catch(e => console.error('User load failed:', e))
       .finally(finish);
   }, []);
