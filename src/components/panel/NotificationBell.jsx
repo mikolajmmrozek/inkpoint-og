@@ -1,16 +1,21 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
+import { getNotificationEmail } from '@/lib/adminConstants';
 import { Bell } from 'lucide-react';
 
 export default function NotificationBell({ userEmail, theme, onClick, size = 18, showLabel = false }) {
+  const { user } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
+
+  const notifEmail = getNotificationEmail(user?.role, userEmail);
 
   const inactiveColor = theme === 'light' ? 'rgba(0,0,0,0.55)' : 'rgba(245,240,235,0.65)';
 
   const loadCount = async () => {
     if (!userEmail) return;
     try {
-      const all = await base44.entities.Notification.filter({ target_email: userEmail }, '-created_date', 100);
+      const all = await base44.entities.Notification.filter({ target_email: notifEmail }, '-created_date', 100);
       setUnreadCount(all.filter(n => !n.is_read).length);
     } catch (e) {}
   };
@@ -23,7 +28,7 @@ export default function NotificationBell({ userEmail, theme, onClick, size = 18,
       if (typeof unsubscribe === 'function') unsubscribe();
       clearInterval(interval);
     };
-  }, [userEmail]);
+  }, [notifEmail]);
 
   return (
     <button

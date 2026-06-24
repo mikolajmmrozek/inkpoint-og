@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { getNotificationEmail } from '@/lib/adminConstants';
 
 /**
  * Centralny hook pobierający liczniki nieprzeczytanych wiadomości,
@@ -67,7 +68,7 @@ export function useBadgeCounts({ role, userEmail }) {
       // Powiadomienia
       try {
         const notifs = await base44.entities.Notification.filter(
-          { target_email: userEmail, is_read: false },
+          { target_email: getNotificationEmail(role, userEmail), is_read: false },
           '-created_date',
           100
         );

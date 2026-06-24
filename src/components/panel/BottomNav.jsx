@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Calendar, MessageSquare, Bell } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { getNotificationEmail } from '@/lib/adminConstants';
 
 /**
  * Przypięty pasek nawigacji na dole dla widoków mobilnych i tabletów.
@@ -24,7 +25,7 @@ export default function BottomNav({ theme, calendarPath, messagesPath, notificat
   const loadCount = async () => {
     if (!userEmail) return;
     try {
-      const all = await base44.entities.Notification.filter({ target_email: userEmail }, '-created_date', 100);
+      const all = await base44.entities.Notification.filter({ target_email: getNotificationEmail(role, userEmail) }, '-created_date', 100);
       setUnreadCount(all.filter(n => !n.is_read).length);
     } catch (e) {}
   };

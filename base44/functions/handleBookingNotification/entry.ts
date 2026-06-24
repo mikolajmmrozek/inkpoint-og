@@ -19,19 +19,15 @@ Deno.serve(async (req) => {
     if (eventType === 'create') {
       // New booking — notify all admins
       if (booking.source === 'online_form') {
-        const admins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
-        for (const admin of admins) {
-          if (!admin.email) continue;
-          notifications.push({
-            target_email: admin.email,
-            title: 'Nowa rezerwacja online',
-            message: `${booking.client_name || 'Klient'} — ${booking.session_date || '—'}${booking.session_time ? ' o ' + booking.session_time : ''}`,
-            category: 'booking',
-            link_path: '/dashboard/bookings?view=pending',
-            is_read: false,
-            booking_id: booking.id,
-          });
-        }
+        notifications.push({
+          target_email: 'tattoo.wolsztyn@gmail.com',
+          title: 'Nowa rezerwacja online',
+          message: `${booking.client_name || 'Klient'} — ${booking.session_date || '—'}${booking.session_time ? ' o ' + booking.session_time : ''}`,
+          category: 'booking',
+          link_path: '/dashboard/bookings?view=pending',
+          is_read: false,
+          booking_id: booking.id,
+        });
       }
       // Notify the assigned artist on any new booking
       if (booking.artist_id) {

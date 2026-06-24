@@ -21,21 +21,17 @@ Deno.serve(async (req) => {
     const notifications = [];
 
     if (msg.sender_type === 'client') {
-      // Client sent a message → notify all admins
-      const admins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
+      // Client sent a message → notify shared admin inbox
       const preview = (msg.message || '').slice(0, 80);
-      for (const admin of admins) {
-        if (!admin.email) continue;
-        notifications.push({
-          target_email: admin.email,
-          title: 'Nowa wiadomość',
-          message: `${msg.name || 'Klient'}: ${preview}${msg.message && msg.message.length > 80 ? '...' : ''}`,
-          category: 'message',
-          link_path: '/dashboard/messages',
-          link_data: msg.email,
-          is_read: false,
-        });
-      }
+      notifications.push({
+        target_email: 'tattoo.wolsztyn@gmail.com',
+        title: 'Nowa wiadomość',
+        message: `${msg.name || 'Klient'}: ${preview}${msg.message && msg.message.length > 80 ? '...' : ''}`,
+        category: 'message',
+        link_path: '/dashboard/messages',
+        link_data: msg.email,
+        is_read: false,
+      });
     } else if (msg.sender_type === 'admin' && msg.email) {
       // Admin replied → notify the recipient (client or artist)
       const preview = (msg.message || '').slice(0, 80);

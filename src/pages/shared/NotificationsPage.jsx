@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
+import { getNotificationEmail } from '@/lib/adminConstants';
 import { useOutletContext } from 'react-router-dom';
 import { Bell, CheckCheck, Calendar, MessageSquare, Info, FileText, Trash2, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
@@ -26,7 +27,7 @@ export default function NotificationsPage() {
     ? { bg: '#FFFFFF', border: '#E5E5E5', text: '#111111', muted: 'rgba(0,0,0,0.5)', fuchsia: '#FF007F', unreadBg: 'rgba(255,0,127,0.03)' }
     : { bg: '#0A0A0A', border: '#262626', text: '#F5F0EB', muted: 'rgba(245,240,235,0.5)', fuchsia: '#FF007F', unreadBg: 'rgba(255,0,127,0.04)' };
 
-  const userEmail = user?.email;
+  const userEmail = getNotificationEmail(user?.role, user?.email);
 
   const load = async () => {
     if (!userEmail) return;

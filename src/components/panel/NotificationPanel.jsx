@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
+import { getNotificationEmail } from '@/lib/adminConstants';
 import { X, Bell, CheckCheck, Calendar, MessageSquare, Info, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
@@ -9,8 +11,11 @@ const CATEGORY_COLORS = { booking: '#FF007F', message: '#3b82f6', system: '#9ca3
 
 export default function NotificationPanel({ open, onClose, userEmail, theme }) {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const notifEmail = getNotificationEmail(user?.role, userEmail);
 
   const t = theme === 'light'
     ? { bg: '#FFFFFF', border: '#E5E5E5', text: '#111111', muted: 'rgba(0,0,0,0.5)', fuchsia: '#FF007F', unreadBg: 'rgba(255,0,127,0.03)' }
@@ -19,14 +24,14 @@ export default function NotificationPanel({ open, onClose, userEmail, theme }) {
   const load = async () => {
     if (!userEmail) return;
     try {
-      const data = await base44.entities.Notification.filter({ target_email: userEmail }, '-created_date', 100);
+      const data = await base44.entities.Notification.filter({ target_email: notifEmail }, '-created_date', 100);
       setNotifications(data);
     } catch (e) {} finally { setLoading(false); }
   };
 
   useEffect(() => {
     if (open) load();
-  }, [open, userEmail]);
+  }, [open, notifEmail]);
 
   useEffect(() => {
     const unsubscribe = base44.entities.Notification.subscribe((event) => {
