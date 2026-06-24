@@ -51,6 +51,12 @@ export default function HeroSlider() {
 
   return (
     <section className="relative w-full overflow-hidden h-screen md:h-[150vh] lg:h-[160vh]">
+      <svg className="absolute" width="0" height="0">
+        <filter id="sharpen-hero">
+          <feConvolveMatrix order="3" preserveAlpha="true"
+            kernelMatrix="0 -0.5 0 -0.5 3 -0.5 0 -0.5 0" />
+        </filter>
+      </svg>
       {/* Background image */}
       <AnimatePresence mode="wait">
         <motion.div
@@ -65,7 +71,7 @@ export default function HeroSlider() {
             src={optimizeUrl(slide?.photo_url)}
             alt={slide?.name}
             className="w-full h-full object-cover"
-            style={{ filter: 'brightness(0.50) contrast(1.1)' }}
+            style={{ filter: slide?.slug === 'matys' ? 'url(#sharpen-hero) brightness(0.50) contrast(1.15)' : 'brightness(0.50) contrast(1.1)' }}
             loading="eager"
             decoding="async"
           />

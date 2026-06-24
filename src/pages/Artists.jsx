@@ -82,6 +82,13 @@ export default function Artists() {
         </motion.div>
       </div>
 
+      <svg className="absolute" width="0" height="0">
+        <filter id="sharpen-list">
+          <feConvolveMatrix order="3" preserveAlpha="true"
+            kernelMatrix="0 -0.5 0 -0.5 3 -0.5 0 -0.5 0" />
+        </filter>
+      </svg>
+
       <div className="px-8 md:px-16">
         {loading ? (
           <div className="grid md:grid-cols-3 gap-8">
@@ -105,7 +112,7 @@ export default function Artists() {
                       src={artist.photo_url || 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&q=80'}
                       alt={artist.name}
                       className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
-                      style={{ filter: 'brightness(0.6) contrast(1.1)' }}
+                      style={{ filter: artist.slug === 'matys' ? 'url(#sharpen-list) brightness(0.6) contrast(1.15)' : 'brightness(0.6) contrast(1.1)' }}
                     />
                     <div className="absolute inset-0 transition-all duration-500 group-hover:bg-oxblood/10" style={{ background: 'linear-gradient(to top, rgba(10,10,10,0.9) 0%, rgba(10,10,10,0.1) 60%)' }} />
                     
