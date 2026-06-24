@@ -74,7 +74,6 @@ export default function ArtistProfile() {
                   src={artist?.photo_url || MOCK.photo_url}
                   alt={artist?.name}
                   className="w-full h-full object-cover"
-                  style={{ filter: 'brightness(0.8) contrast(1.1)' }}
                 />
               </div>
 
