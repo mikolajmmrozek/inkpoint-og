@@ -22,9 +22,18 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
       .then(setClients)
       .catch(e => console.error('Client load failed:', e))
       .finally(finish);
-    base44.entities.User.list('-created_date', 500)
-      .then(u => { console.log('Users loaded:', u.length, u.map(x => ({ email: x.email, role: x.role }))); setUsers(u); })
-      .catch(e => console.error('User load failed:', e))
+    base44.functions.invoke('getStudioStaff', {})
+      .then(res => {
+        const staff = res.data?.staff || [];
+        setUsers(staff.map(s => ({ id: s.id, email: s.email, full_name: s.name, role: s.role })));
+      })
+      .catch(e => {
+        console.error('Staff load failed, falling back to User.list:', e);
+        base44.entities.User.list('-created_date', 500)
+          .then(setUsers)
+          .catch(e2 => console.error('User fallback failed:', e2))
+          .finally(finish);
+      })
       .finally(finish);
   }, []);
 
