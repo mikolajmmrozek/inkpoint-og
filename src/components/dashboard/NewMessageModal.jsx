@@ -16,14 +16,18 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      base44.entities.Client.list('-created_date', 500),
-      base44.entities.User.list(),
-    ]).then(([c, u]) => {
-      setClients(c);
-      setUsers(u);
-      setLoading(false);
-    }).catch(() => setLoading(false));
+    let doneClients = false, doneUsers = false;
+    const checkDone = () => { if (doneClients && doneUsers) setLoading(false); };
+
+    base44.entities.Client.list('-created_date', 500)
+      .then(c => setClients(c))
+      .catch(() => {})
+      .finally(() => { doneClients = true; checkDone(); });
+
+    base44.entities.User.list('-created_date', 500)
+      .then(u => setUsers(u))
+      .catch(() => {})
+      .finally(() => { doneUsers = true; checkDone(); });
   }, []);
 
   const searchResults = (() => {
