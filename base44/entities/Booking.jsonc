@@ -81,7 +81,12 @@
       "type": "string"
     },
     "notes": {
-      "type": "string"
+      "type": "string",
+      "description": "Notatki od klienta (z formularza online)"
+    },
+    "admin_notes": {
+      "type": "string",
+      "description": "Notatki admina dla tej sesji"
     },
     "source": {
       "type": "string",

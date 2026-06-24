@@ -176,6 +176,12 @@ export default function BookingCard({ bookingId, t, theme, onAction, readOnly = 
           {booking.estimated_price != null && (
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: t.fuchsia }}>{booking.estimated_price} PLN</p>
           )}
+          {booking.notes && (
+            <p style={{ fontSize: '12px', color: t.muted }}>Notatki klienta: <span style={{ color: t.text }}>{booking.notes}</span></p>
+          )}
+          {booking.admin_notes && (
+            <p style={{ fontSize: '12px', color: t.muted }}>Notatki admina: <span style={{ color: t.text }}>{booking.admin_notes}</span></p>
+          )}
         </div>
 
         {/* Reference images */}

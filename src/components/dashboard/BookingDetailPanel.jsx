@@ -217,8 +217,9 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
        ['Opis projektu', booking.tattoo_description || '—'],
        ['Cena', booking.estimated_price ? `${booking.estimated_price} PLN` : '—'],
        ['Depozyt', booking.deposit_paid ? '✓ Wpłacony' : '✗ Brak'],
-       ['Notatki', booking.notes || '—'],
-      ].map(([label, value]) => (
+       ['Notatki klienta', booking.notes || '—'],
+       ['Notatki admina', booking.admin_notes || '—'],
+       ].map(([label, value]) => (
        <div key={label} className="mb-3 pb-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '3px' }}>{label}</p>
          <p style={{ color: t.muted, fontSize: '12px', lineHeight: 1.5, wordBreak: 'break-word' }}>{value}</p>

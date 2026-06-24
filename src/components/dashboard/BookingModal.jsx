@@ -48,6 +48,8 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
         client_first_name: first || '',
         client_last_name: last.join(' ') || '',
         session_end_time: b.session_end_time || calcEndTime(b.session_time, b.session_duration),
+        admin_notes: b.admin_notes || '',
+        client_notes: '',
       };
     }
     const p = b?._prefill ? b : null;
@@ -68,6 +70,8 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
       tattoo_description: p?.tattoo_description || '',
       tattoo_placement: p?.tattoo_placement || '',
       notes: '',
+      admin_notes: '',
+      client_notes: '',
       status: 'pending',
       deposit_paid: false,
       estimated_price: p?.estimated_price || '',
@@ -100,6 +104,21 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
         if (svc?.name) setServiceQuery(svc.name);
       }
     }).catch(() => {});
+  }, []);
+
+  // Load client notes when editing an existing booking (fetch Client by email)
+  useEffect(() => {
+    if (!isNew && form.client_email) {
+      const email = form.client_email.toLowerCase().trim();
+      base44.entities.Client.filter({}, '-created_date', 500)
+        .then(clients => {
+          const match = clients.find(c => (c.email || '').toLowerCase().trim() === email);
+          if (match && match.notes) {
+            setForm(f => ({ ...f, client_notes: match.notes }));
+          }
+        })
+        .catch(() => {});
+    }
   }, []);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
@@ -172,6 +191,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
       client_last_name: client.last_name || '',
       client_email: client.email || '',
       client_phone: client.phone || '',
+      client_notes: client.notes || '',
       ...(session ? {
         artist_id: session.artist_id || '',
         artist_name: session.artist_name || '',
@@ -189,10 +209,14 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
     if (client._isNew) {
       setSelectedClient(null);
       const [first, ...last] = client.name.split(' ');
-      set('client_first_name', first || '');
-      set('client_last_name', last.join(' ') || '');
-      set('client_email', '');
-      set('client_phone', '');
+      setForm(f => ({
+        ...f,
+        client_first_name: first || '',
+        client_last_name: last.join(' ') || '',
+        client_email: '',
+        client_phone: '',
+        client_notes: '',
+      }));
     } else if (client._lastSession) {
       // Always show repeat prompt when last session exists
       setRepeatPrompt({ client, lastSession: client._lastSession });
@@ -212,7 +236,8 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
   const handleSave = async () => {
     setSaving(true);
     const fullName = `${form.client_first_name || ''} ${form.client_last_name || ''}`.trim();
-    const data = { ...form, client_name: fullName, estimated_price: form.estimated_price ? Math.round(Number(form.estimated_price) * 100) / 100 : undefined };
+    const { client_notes, ...rest } = form;
+    const data = { ...rest, client_name: fullName, estimated_price: form.estimated_price ? Math.round(Number(form.estimated_price) * 100) / 100 : undefined };
     delete data.client_first_name;
     delete data.client_last_name;
 
@@ -257,7 +282,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
       }
 
       if (existingClient?.id) {
-        // Existing client — update with any new data and increment session count
+        // Existing client — update with any new data, increment session count, and save client notes
         await base44.entities.Client.update(existingClient.id, {
           first_name: form.client_first_name || existingClient.first_name,
           last_name: form.client_last_name || existingClient.last_name,
@@ -265,9 +290,10 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
           email: form.client_email || existingClient.email,
           phone: form.client_phone || existingClient.phone,
           total_sessions: (existingClient.total_sessions || 0) + 1,
+          notes: client_notes || existingClient.notes || '',
         });
       } else if (fullName) {
-        // Truly new client — create record
+        // Truly new client — create record with client notes
         await base44.entities.Client.create({
           first_name: form.client_first_name,
           last_name: form.client_last_name,
@@ -275,10 +301,26 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
           email: form.client_email,
           phone: form.client_phone,
           total_sessions: 1,
+          notes: client_notes || '',
         });
       }
     } else {
       await base44.entities.Booking.update(booking.id, data);
+      // Update client notes on the Client entity when editing
+      if (form.client_email) {
+        const email = form.client_email.toLowerCase().trim();
+        try {
+          const allClients = await base44.entities.Client.list('-created_date', 500);
+          const clientMatch = allClients.find(c => (c.email || '').toLowerCase().trim() === email);
+          if (clientMatch) {
+            await base44.entities.Client.update(clientMatch.id, {
+              notes: client_notes || clientMatch.notes || '',
+            });
+          }
+        } catch (e) {
+          console.error('Failed to update client notes:', e);
+        }
+      }
     }
 
     setSaving(false);
@@ -641,8 +683,22 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
             <div className="mb-4">{label('Opis projektu')}
               <textarea rows={3} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} value={form.tattoo_description || ''} onChange={e => set('tattoo_description', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
             </div>
-            <div>{label('Notatki adminów')}
-              <textarea rows={2} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} value={form.notes || ''} onChange={e => set('notes', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            {/* Notatki o kliencie — persistent, stored on Client entity */}
+            <div className="mb-4">
+              {label('Notatki o kliencie (widoczne przy każdej sesji)')}
+              <textarea rows={2} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} value={form.client_notes || ''} onChange={e => set('client_notes', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} placeholder="Np. spóźnia się, alergia na lateks..." />
+            </div>
+            {/* Notatki od klienta — read-only, from online form */}
+            {form.notes ? (
+              <div className="mb-4">
+                {label('Notatki od klienta (z formularza)')}
+                <p style={{ padding: '10px 0', fontSize: '13px', color: t.muted, fontFamily: 'Inter, sans-serif', borderBottom: `0.5px solid ${t.border}`, lineHeight: 1.5 }}>{form.notes}</p>
+              </div>
+            ) : null}
+            {/* Notatki admina — session-specific */}
+            <div>
+              {label('Notatki admina (tylko dla tej sesji)')}
+              <textarea rows={2} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} value={form.admin_notes || ''} onChange={e => set('admin_notes', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} placeholder="Notatki wewnętrzne dla tej sesji..." />
             </div>
           </div>
 
