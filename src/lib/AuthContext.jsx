@@ -97,10 +97,15 @@ export const AuthProvider = ({ children }) => {
       setUser(currentUser);
       setIsAuthenticated(true);
       
-      // Notify admins of first login (backend checks first_login_notified flag)
+      // Notify admins of first login (backend checks first_login_notified flag + applies pending role)
       if (currentUser && !currentUser.first_login_notified) {
         try {
-          await base44.functions.invoke('handleNewUserLogin', {});
+          const result = await base44.functions.invoke('handleNewUserLogin', {});
+          // If a pending role was applied (e.g. artist), re-fetch user to get updated role
+          if (result?.data?.roleApplied) {
+            const updatedUser = await base44.auth.me();
+            setUser(updatedUser);
+          }
         } catch (e) {
           console.error('Failed to notify admins:', e);
         }

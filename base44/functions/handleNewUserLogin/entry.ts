@@ -6,35 +6,51 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    // Check if already notified — flag on User entity
-    if (user.first_login_notified) {
-      return Response.json({ success: true });
+    let roleApplied = false;
+
+    // Check for pending staff invite by email
+    const pending = await base44.asServiceRole.entities.PendingStaffInvite.filter({
+      email: user.email
+    });
+
+    if (pending.length > 0) {
+      const invite = pending[0];
+      const updateData = { role: invite.role };
+      if (invite.artist_id) {
+        updateData.artist_id = invite.artist_id;
+      }
+      if (invite.artist_name) {
+        updateData.display_name = invite.artist_name;
+      }
+      await base44.asServiceRole.entities.User.update(user.id, updateData);
+      // Delete the pending invite record
+      await base44.asServiceRole.entities.PendingStaffInvite.delete(invite.id);
+      roleApplied = true;
     }
 
-    // Get all admins
-    const admins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
+    // Notify admins of first login — flag on User entity
+    if (!user.first_login_notified) {
+      const admins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
+      const notifications = admins.map(admin => ({
+        target_email: admin.email,
+        title: 'Nowy użytkownik zarejestrował się',
+        message: `${user.full_name || user.email} zalogował się w aplikacji po raz pierwszy.`,
+        category: 'system',
+        link_path: '/dashboard/users',
+      }));
 
-    // Create notification for each admin
-    const notifications = admins.map(admin => ({
-      target_email: admin.email,
-      title: 'Nowy użytkownik zarejestrował się',
-      message: `${user.full_name || user.email} zalogował się w aplikacji po raz pierwszy.`,
-      category: 'system',
-      link_path: '/dashboard/clients',
-    }));
+      if (notifications.length > 0) {
+        await base44.asServiceRole.entities.Notification.bulkCreate(notifications);
+      }
 
-    if (notifications.length > 0) {
-      await base44.asServiceRole.entities.Notification.bulkCreate(notifications);
+      try {
+        await base44.asServiceRole.entities.User.update(user.id, { first_login_notified: true });
+      } catch (e) {
+        console.error('Failed to mark first_login_notified:', e);
+      }
     }
 
-    // Mark that we've notified for this user — prevent repeat notifications
-    try {
-      await base44.asServiceRole.entities.User.update(user.id, { first_login_notified: true });
-    } catch (e) {
-      console.error('Failed to mark first_login_notified:', e);
-    }
-
-    return Response.json({ success: true });
+    return Response.json({ success: true, roleApplied });
   } catch (error) {
     console.error('handleNewUserLogin failed:', error);
     return Response.json({ error: error.message }, { status: 500 });

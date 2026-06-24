@@ -1,0 +1,30 @@
+{
+  "name": "PendingStaffInvite",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string",
+      "description": "E-mail zaproszonej osoby (klucz dopasowania)"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "artist",
+        "admin"
+      ],
+      "description": "Oczekuj\u0105ca rola do ustawienia po pierwszym logowaniu"
+    },
+    "artist_id": {
+      "type": "string",
+      "description": "ID powi\u0105zanego profilu artysty (je\u015bli rola = artist)"
+    },
+    "artist_name": {
+      "type": "string",
+      "description": "Nazwa artysty (cache)"
+    }
+  },
+  "required": [
+    "email",
+    "role"
+  ]
+}

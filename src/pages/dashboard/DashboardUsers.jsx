@@ -43,9 +43,19 @@ export default function DashboardUsers() {
     setInviteError('');
     setInviteSuccess(null);
     try {
-      // Platform inviteUser only accepts 'user' or 'admin' — 'artist' must be set after registration
+      // Platform inviteUser only accepts 'user' or 'admin' — 'artist' is applied on first login via pending invite
       const platformRole = inviteRole === 'artist' ? 'user' : inviteRole;
       await base44.users.inviteUser(inviteEmail, platformRole);
+      // For artist role, store pending assignment to be applied automatically on first login
+      if (inviteRole === 'artist') {
+        const linkedArtist = artists.find(a => a.id === inviteArtistId);
+        await base44.entities.PendingStaffInvite.create({
+          email: inviteEmail,
+          role: 'artist',
+          artist_id: inviteArtistId || null,
+          artist_name: linkedArtist?.name || null,
+        });
+      }
       setInviteSuccess({ email: inviteEmail, role: inviteRole, artistId: inviteArtistId });
       setInviteEmail('');
       setInviteArtistId('');
@@ -169,7 +179,7 @@ export default function DashboardUsers() {
         </div>
 
         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.08em', marginTop: '12px' }}>
-          Użytkownik otrzyma e-mail z linkiem do rejestracji. Jeśli wybrałeś rolę Artysta — po zalogowaniu użytkownika kliknij EDYTUJ przy jego koncie, ustaw rolę na Artysta i powiąż z profilem.
+          Użytkownik otrzyma e-mail z linkiem do rejestracji. Rola i profil artysty zostaną ustawione automatycznie po pierwszym logowaniu.
         </p>
       </div>
 
