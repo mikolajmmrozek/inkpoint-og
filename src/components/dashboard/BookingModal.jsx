@@ -232,19 +232,26 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
       if (!existingClient && fullName) {
         const allClients = await base44.entities.Client.list('-created_date', 500);
         const email = (form.client_email || '').toLowerCase().trim();
-        const phone = (form.client_phone || '').trim();
+        const normalizePhone = (p) => (p || '').replace(/\D/g, '');
+        const phone = normalizePhone(form.client_phone);
         const nameLower = fullName.toLowerCase().trim();
 
         existingClient = allClients.find(c => {
           const cEmail = (c.email || '').toLowerCase().trim();
-          const cPhone = (c.phone || '').trim();
+          const cPhone = normalizePhone(c.phone);
           const cName = (c.name || '').toLowerCase().trim();
           // Match by email (if both provided)
           if (email && cEmail && email === cEmail) return true;
-          // Match by phone (if both provided)
+          // Match by phone (if both provided and non-empty after normalization)
           if (phone && cPhone && phone === cPhone) return true;
-          // Match by name only if the existing client has NO email and NO phone
-          if (!cEmail && !cPhone && cName === nameLower) return true;
+          // Match by name if no conflicting data (different email or phone)
+          if (cName && cName === nameLower) {
+            // Conflicting email? (both have email but they differ)
+            if (email && cEmail && email !== cEmail) return false;
+            // Conflicting phone? (both have phone but they differ)
+            if (phone && cPhone && phone !== cPhone) return false;
+            return true;
+          }
           return false;
         }) || null;
       }
