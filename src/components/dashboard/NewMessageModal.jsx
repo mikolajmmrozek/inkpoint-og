@@ -24,9 +24,9 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
       .catch(() => {})
       .finally(() => { doneClients = true; checkDone(); });
 
-    base44.entities.User.list('-created_date', 500)
-      .then(u => setUsers(u))
-      .catch(() => {})
+    base44.entities.User.filter({}, '-created_date', 500)
+      .then(u => { setUsers(u); })
+      .catch(e => { console.error('User load failed:', e); })
       .finally(() => { doneUsers = true; checkDone(); });
   }, []);
 
