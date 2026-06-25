@@ -92,15 +92,84 @@ Deno.serve(async (req) => {
 
     // ── Helper: delete event from all OTHER artists' calendars (cleanup on artist change) ──
     async function cleanupOrphanedEvent(eventId, excludeArtistId, headers) {
-      if (!eventId) return;
+      if (!eventId) return { deleted_from: [], errors: [] };
+      const encodedId = encodeURIComponent(eventId);
       const allArtists = await base44.asServiceRole.entities.Artist.list();
+      const deletedFrom = [];
+      const errors = [];
       for (const a of allArtists) {
         if (a.id === excludeArtistId || !a.gcal_calendar_id) continue;
-        await fetch(
-          `https://www.googleapis.com/calendar/v3/calendars/${a.gcal_calendar_id}/events/${eventId}`,
-          { method: 'DELETE', headers }
-        ).catch(() => {});
+        try {
+          const delRes = await fetch(
+            `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(a.gcal_calendar_id)}/events/${encodedId}`,
+            { method: 'DELETE', headers }
+          );
+          if (delRes.ok || delRes.status === 404) {
+            if (delRes.ok) deletedFrom.push(a.name || a.id);
+          } else {
+            const errBody = await delRes.text().catch(() => '');
+            errors.push(`${a.name}: DELETE ${delRes.status} ${errBody.slice(0, 100)}`);
+          }
+        } catch (e) {
+          errors.push(`${a.name}: ${e.message}`);
+        }
       }
+      // Also try primary calendar (in case event was created there in older system)
+      try {
+        const delRes = await fetch(
+          `https://www.googleapis.com/calendar/v3/calendars/primary/events/${encodedId}`,
+          { method: 'DELETE', headers }
+        );
+        if (delRes.ok) deletedFrom.push('primary');
+      } catch (_) {}
+      return { deleted_from: deletedFrom, errors };
+    }
+
+    // ── Helper: search all OTHER artists' calendars for events matching this booking by date+client, delete orphans ──
+    async function cleanupOrphanedByContent(bk, headers) {
+      if (!bk.session_date) return { deleted_from: [], errors: [] };
+      const allArtists = await base44.asServiceRole.entities.Artist.list();
+      const deletedFrom = [];
+      const errors = [];
+      // Search window: the session date (full day in Europe/Warsaw)
+      const dateStr = bk.session_date;
+      const timeMin = `${dateStr}T00:00:00+02:00`;
+      const timeMax = `${dateStr}T23:59:59+02:00`;
+      const clientName = (bk.client_name || '').toLowerCase().trim();
+      for (const a of allArtists) {
+        if (a.id === bk.artist_id || !a.gcal_calendar_id) continue;
+        try {
+          const listRes = await fetch(
+            `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(a.gcal_calendar_id)}/events?timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}&singleEvents=true`,
+            { method: 'GET', headers }
+          );
+          if (!listRes.ok) continue;
+          const listData = await listRes.json();
+          const events = listData.items || [];
+          for (const ev of events) {
+            // Match by client name in summary or description
+            const summary = (ev.summary || '').toLowerCase();
+            const description = (ev.description || '').toLowerCase();
+            const matchesClient = clientName && (summary.includes(clientName) || description.includes(clientName));
+            // Also match by gcal_event_id if present
+            const matchesId = bk.gcal_event_id && ev.id === bk.gcal_event_id;
+            if (matchesClient || matchesId) {
+              const delRes = await fetch(
+                `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(a.gcal_calendar_id)}/events/${encodeURIComponent(ev.id)}`,
+                { method: 'DELETE', headers }
+              );
+              if (delRes.ok || delRes.status === 204) {
+                deletedFrom.push(`${a.name}: "${ev.summary}"`);
+              } else if (delRes.status !== 404) {
+                errors.push(`${a.name}: DELETE ${delRes.status}`);
+              }
+            }
+          }
+        } catch (e) {
+          errors.push(`${a.name}: ${e.message}`);
+        }
+      }
+      return { deleted_from: deletedFrom, errors };
     }
 
     // ── Helper: sync a single booking to the artist's calendar ──
@@ -112,16 +181,19 @@ Deno.serve(async (req) => {
 
       const calendarId = await ensureArtistCalendar(artist, headers);
 
-      // If cancelled and has gcal_event_id, delete the event
+      // If cancelled and has gcal_event_id, delete the event from THIS calendar AND all others
       if (bk.status === 'cancelled' && bk.gcal_event_id) {
+        const encodedId = encodeURIComponent(bk.gcal_event_id);
         const delRes = await fetch(
-          `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${bk.gcal_event_id}`,
+          `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodedId}`,
           { method: 'DELETE', headers }
         );
-        if (delRes.ok || delRes.status === 404) {
+        // Also clean up from ALL other artists' calendars
+        const cleanup = await cleanupOrphanedEvent(bk.gcal_event_id, bk.artist_id, headers);
+        if (delRes.ok || delRes.status === 404 || cleanup.deleted_from.length > 0) {
           await base44.asServiceRole.entities.Booking.update(bk.id, { gcal_event_id: '' });
         }
-        return { action: 'deleted' };
+        return { action: 'deleted', cleanup };
       }
 
       // Skip if cancelled or missing date/time
@@ -132,23 +204,43 @@ Deno.serve(async (req) => {
       const eventBody = buildEventBody(bk);
 
       if (bk.gcal_event_id) {
+        const encodedId = encodeURIComponent(bk.gcal_event_id);
         // Update existing event
         const res = await fetch(
-          `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${bk.gcal_event_id}`,
+          `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodedId}`,
           { method: 'PUT', headers, body: JSON.stringify(eventBody) }
         );
-        if (res.ok) return { action: 'updated' };
+        if (res.ok) {
+          // Event exists in this calendar — still clean up stale copies in OTHER artists' calendars
+          const cleanup = await cleanupOrphanedEvent(bk.gcal_event_id, bk.artist_id, headers);
+          // Also search by content (date+client) to catch orphans with DIFFERENT event IDs from prior artist changes
+          const contentCleanup = await cleanupOrphanedByContent(bk, headers);
+          const combined = {
+            deleted_from: [...(cleanup.deleted_from || []), ...(contentCleanup.deleted_from || [])],
+            errors: [...(cleanup.errors || []), ...(contentCleanup.errors || [])],
+          };
+          if (combined.deleted_from.length > 0) {
+            console.log(`[manageGoogleCalendar] Cleaned orphaned events for booking ${bk.id}:`, JSON.stringify(combined.deleted_from));
+          }
+          return { action: 'updated', cleanup: combined };
+        }
         if (res.status !== 404) {
           const errBody = await res.text().catch(() => '');
           throw new Error(`Update failed: ${res.status} ${errBody.slice(0, 200)}`);
         }
-        // 404 = event not in this artist's calendar (possibly artist changed) — delete from old artist's calendar
-        await cleanupOrphanedEvent(bk.gcal_event_id, bk.artist_id, headers);
+        // 404 = event not in this artist's calendar (artist changed) — delete from old artist's calendar
+        const cleanup = await cleanupOrphanedEvent(bk.gcal_event_id, bk.artist_id, headers);
+        const contentCleanup = await cleanupOrphanedByContent(bk, headers);
+        const combined = {
+          deleted_from: [...(cleanup.deleted_from || []), ...(contentCleanup.deleted_from || [])],
+          errors: [...(cleanup.errors || []), ...(contentCleanup.errors || [])],
+        };
+        console.log(`[manageGoogleCalendar] Artist changed for booking ${bk.id}, cleanup:`, JSON.stringify(combined));
       }
 
       // Create new event
       const res = await fetch(
-        `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events`,
+        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`,
         { method: 'POST', headers, body: JSON.stringify(eventBody) }
       );
       if (res.ok) {
