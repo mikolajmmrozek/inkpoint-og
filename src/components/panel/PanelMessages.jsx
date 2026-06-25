@@ -16,7 +16,19 @@ export default function PanelMessages({ theme, userEmail, userName, roleLabel })
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
   const [pendingAttachments, setPendingAttachments] = useState([]);
+  const [messageTarget, setMessageTarget] = useState('admin'); // 'admin' | 'group'
+  const [recipientEmails, setRecipientEmails] = useState([]);
   const messagesEndRef = useRef(null);
+
+  // Load all staff emails on mount
+  useEffect(() => {
+    base44.functions.invoke('getStudioStaff', {})
+      .then(res => {
+        const staff = res.data?.staff || [];
+        setRecipientEmails(staff.map(s => s.email));
+      })
+      .catch(() => {});
+  }, []);
 
   const load = async () => {
     try {
@@ -62,16 +74,33 @@ export default function PanelMessages({ theme, userEmail, userName, roleLabel })
     if (!replyText.trim()) return;
     setSending(true);
     try {
-      await base44.entities.ContactMessage.create({
-        name: userName,
-        email: userEmail,
-        message: replyText,
-        sender_type: 'client',
-        message_type: 'text',
-        subject: roleLabel,
-        is_read: false,
-        attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
-      });
+      if (messageTarget === 'group') {
+        // Send to all staff members
+        await Promise.all(recipientEmails.map(email =>
+          base44.entities.ContactMessage.create({
+            name: userName,
+            email: email,
+            message: replyText,
+            sender_type: 'client',
+            message_type: 'text',
+            subject: `${roleLabel} - STUDIO`,
+            is_read: false,
+            attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
+          })
+        ));
+      } else {
+        // Send only to admin
+        await base44.entities.ContactMessage.create({
+          name: userName,
+          email: userEmail,
+          message: replyText,
+          sender_type: 'client',
+          message_type: 'text',
+          subject: roleLabel,
+          is_read: false,
+          attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
+        });
+      }
       setReplyText('');
       setPendingAttachments([]);
       await load();
@@ -164,6 +193,23 @@ export default function PanelMessages({ theme, userEmail, userName, roleLabel })
 
         {/* Input */}
         <div className="p-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
+          {/* Message target toggle for artists */}
+          {roleLabel === 'ARTYSTA' && (
+            <div className="mb-3 flex gap-2">
+              <button
+                onClick={() => setMessageTarget('admin')}
+                style={{ flex: 1, padding: '8px', border: `0.5px solid ${messageTarget === 'admin' ? '#FF007F' : t.border}`, color: messageTarget === 'admin' ? '#FF007F' : t.muted, background: messageTarget === 'admin' ? 'rgba(255,0,127,0.08)' : 'transparent', fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer' }}
+              >
+                DO ADMINA
+              </button>
+              <button
+                onClick={() => setMessageTarget('group')}
+                style={{ flex: 1, padding: '8px', border: `0.5px solid ${messageTarget === 'group' ? '#FF007F' : t.border}`, color: messageTarget === 'group' ? '#FF007F' : t.muted, background: messageTarget === 'group' ? 'rgba(255,0,127,0.08)' : 'transparent', fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer' }}
+              >
+                DO STUDIA
+              </button>
+            </div>
+          )}
           <AttachmentBar attachments={pendingAttachments} setAttachments={setPendingAttachments} t={t} />
           <div className="flex gap-2">
             <textarea
@@ -171,7 +217,7 @@ export default function PanelMessages({ theme, userEmail, userName, roleLabel })
               onChange={e => setReplyText(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
               rows={1}
-              placeholder="Napisz wiadomość..."
+              placeholder={messageTarget === 'group' ? 'Napisz wiadomość dla całego studia...' : 'Napisz wiadomość do admina...'}
               style={{ flex: 1, background: 'transparent', border: `0.5px solid ${t.border}`, padding: '10px 12px', fontSize: '13px', color: t.text, fontFamily: 'Inter, sans-serif', resize: 'none', outline: 'none', minHeight: '40px', maxHeight: '120px' }}
               onFocus={e => e.target.style.borderColor = t.fuchsia}
               onBlur={e => e.target.style.borderColor = t.border}

@@ -47,7 +47,6 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
         phone: c.phone || '',
         type: 'Klient',
       })).filter(r => r.email);
-      // Merge in logged-in users with role 'user' (clients with accounts)
       const clientEmails = new Set(base.map(r => r.email));
       users.filter(u => u.role === 'user').forEach(u => {
         const email = (u.email || '').toLowerCase().trim();
@@ -61,7 +60,7 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
         r.email.toLowerCase().includes(q) ||
         r.phone.toLowerCase().includes(q)
       ).slice(0, 20);
-    } else {
+    } else if (recipientType === 'staff') {
       let base = users.filter(u => u.role === 'artist' || u.role === 'admin').map(u => ({
         id: u.id,
         name: u.full_name || u.email,
@@ -74,6 +73,8 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
         r.name.toLowerCase().includes(q) ||
         r.email.toLowerCase().includes(q)
       ).slice(0, 20);
+    } else if (recipientType === 'group') {
+      return [];
     }
   })();
 
@@ -81,23 +82,41 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
     if (!selectedRecipient || !messageText.trim()) return;
     setSending(true);
     try {
-      await base44.entities.ContactMessage.create({
-        name: 'Romans Tattoo',
-        email: selectedRecipient.email,
-        phone: selectedRecipient.phone || '',
-        message: messageText,
-        sender_type: 'admin',
-        message_type: 'text',
-        is_read: true,
-        attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
-      });
-      try {
-        await base44.integrations.Core.SendEmail({
-          to: selectedRecipient.email,
-          subject: 'Wiadomość od Romans Tattoo',
-          body: messageText,
+      // If sending to studio group, create message for all staff
+      if (recipientType === 'group') {
+        const allStaff = users.filter(u => u.role === 'artist' || u.role === 'admin');
+        await Promise.all(allStaff.map(staff =>
+          base44.entities.ContactMessage.create({
+            name: 'Romans Tattoo',
+            email: staff.email,
+            phone: '',
+            message: messageText,
+            sender_type: 'admin',
+            message_type: 'text',
+            subject: 'STUDIO',
+            is_read: true,
+            attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
+          })
+        ));
+      } else {
+        await base44.entities.ContactMessage.create({
+          name: 'Romans Tattoo',
+          email: selectedRecipient.email,
+          phone: selectedRecipient.phone || '',
+          message: messageText,
+          sender_type: 'admin',
+          message_type: 'text',
+          is_read: true,
+          attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
         });
-      } catch (e) {}
+        try {
+          await base44.integrations.Core.SendEmail({
+            to: selectedRecipient.email,
+            subject: 'Wiadomość od Romans Tattoo',
+            body: messageText,
+          });
+        } catch (e) {}
+      }
       onSent();
     } catch (e) {
       console.error('New message failed:', e);
@@ -137,8 +156,14 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
               KLIENT
             </button>
             <button
-              onClick={() => { setRecipientType('studio'); setSelectedRecipient(null); setSearchQuery(''); }}
-              style={{ flex: 1, padding: '10px', border: `0.5px solid ${recipientType === 'studio' ? '#FF007F' : t.border}`, color: recipientType === 'studio' ? '#FF007F' : t.muted, background: recipientType === 'studio' ? 'rgba(255,0,127,0.08)' : 'transparent', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer' }}
+              onClick={() => { setRecipientType('staff'); setSelectedRecipient(null); setSearchQuery(''); }}
+              style={{ flex: 1, padding: '10px', border: `0.5px solid ${recipientType === 'staff' ? '#FF007F' : t.border}`, color: recipientType === 'staff' ? '#FF007F' : t.muted, background: recipientType === 'staff' ? 'rgba(255,0,127,0.08)' : 'transparent', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer' }}
+            >
+              PRACOWNIK
+            </button>
+            <button
+              onClick={() => { setRecipientType('group'); setSelectedRecipient(null); setSearchQuery(''); }}
+              style={{ flex: 1, padding: '10px', border: `0.5px solid ${recipientType === 'group' ? '#FF007F' : t.border}`, color: recipientType === 'group' ? '#FF007F' : t.muted, background: recipientType === 'group' ? 'rgba(255,0,127,0.08)' : 'transparent', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer' }}
             >
               STUDIO
             </button>
@@ -164,8 +189,14 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
           </div>
         </div>
 
-        {/* Search results or selected recipient */}
-        {selectedRecipient ? (
+        {/* Search results or selected recipient / group info */}
+        {recipientType === 'group' ? (
+          <div className="mb-4 p-3" style={{ border: '0.5px solid rgba(255,0,127,0.3)', background: 'rgba(255,0,127,0.04)' }}>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>CZAT GRUPOWY STUDIA</p>
+            <p style={{ fontSize: '13px', color: t.text, marginBottom: '8px' }}>Wiadomość zostanie wysłana do wszystkich artystów i adminów.</p>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>Adresaci: {users.filter(u => u.role === 'artist' || u.role === 'admin').length} osób</p>
+          </div>
+        ) : selectedRecipient ? (
           <div className="mb-4 p-3" style={{ border: '0.5px solid rgba(255,0,127,0.3)', background: 'rgba(255,0,127,0.04)' }}>
             <div className="flex items-center justify-between">
               <div>
@@ -228,9 +259,9 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
         <div className="flex gap-3">
           <button
             onClick={handleSend}
-            disabled={sending || !selectedRecipient || !messageText.trim()}
+            disabled={sending || (recipientType !== 'group' && !selectedRecipient) || !messageText.trim()}
             className="btn-oxblood flex-1 flex items-center justify-center gap-2"
-            style={{ opacity: (!selectedRecipient || !messageText.trim()) ? 0.5 : 1 }}
+            style={{ opacity: (recipientType !== 'group' && !selectedRecipient) || !messageText.trim() ? 0.5 : 1 }}
           >
             {sending ? <Loader2 size={13} className="animate-spin" /> : <><Send size={13} /> WYŚLIJ</>}
           </button>
