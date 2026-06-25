@@ -198,6 +198,8 @@ export default function DashboardBookings() {
     await base44.entities.Booking.update(id, { status });
     setBookings(b => b.map(x => x.id === id ? { ...x, status } : x));
     if (selected?.id === id) setSelected(s => ({ ...s, status }));
+    // Auto-sync to Google Calendar (silent — no error if not connected)
+    base44.functions.invoke('manageGoogleCalendar', { action: 'sync_one', booking_id: id }).catch(() => {});
 
     if (status === 'completed') {
       const booking = bookings.find(b => b.id === id);

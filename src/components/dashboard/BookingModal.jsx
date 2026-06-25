@@ -240,6 +240,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
     const data = { ...rest, client_name: fullName, estimated_price: form.estimated_price ? Math.round(Number(form.estimated_price) * 100) / 100 : undefined };
     delete data.client_first_name;
     delete data.client_last_name;
+    let savedBookingId = booking?.id;
 
     // Generate unique session_id if new booking
     if (isNew && !data.session_id) {
@@ -249,7 +250,8 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
     }
 
     if (isNew) {
-      await base44.entities.Booking.create(data);
+      const created = await base44.entities.Booking.create(data);
+      savedBookingId = created?.id;
       // Upsert client in Client database
       let existingClient = selectedClient;
 
@@ -325,6 +327,10 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
 
     setSaving(false);
     onSaved();
+    // Auto-sync to Google Calendar (silent — no error if not connected)
+    if (savedBookingId) {
+      base44.functions.invoke('manageGoogleCalendar', { action: 'sync_one', booking_id: savedBookingId }).catch(() => {});
+    }
   };
 
   const inp = (field, type = 'text') => ({

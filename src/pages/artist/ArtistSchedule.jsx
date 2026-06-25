@@ -87,9 +87,11 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
     setSaving(true);
     const fullName = `${form.client_first_name || ''} ${form.client_last_name || ''}`.trim() || form.client_name || clientQuery;
     const data = { ...form, client_name: fullName };
+    let savedBookingId = booking?.id;
     if (isNew) {
       data.session_id = `SES-${format(new Date(), 'yyyyMMdd')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-      await base44.entities.Booking.create(data);
+      const created = await base44.entities.Booking.create(data);
+      savedBookingId = created?.id;
       // Upsert client
       if (form.client_email) {
         const existing = await base44.entities.Client.filter({ email: form.client_email }, '-created_date', 1).catch(() => []);
@@ -104,6 +106,10 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
     }
     setSaving(false);
     onSaved();
+    // Auto-sync to Google Calendar (silent — no error if not connected)
+    if (savedBookingId) {
+      base44.functions.invoke('manageGoogleCalendar', { action: 'sync_one', booking_id: savedBookingId }).catch(() => {});
+    }
   };
 
   const handleStatusChange = async (newStatus) => {
@@ -111,11 +117,13 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
       // Mark as cancelled but keep visible for admin — artist cannot delete
       await base44.entities.Booking.update(booking.id, { status: 'cancelled' });
       onSaved();
+      base44.functions.invoke('manageGoogleCalendar', { action: 'sync_one', booking_id: booking.id }).catch(() => {});
       return;
     }
     await base44.entities.Booking.update(booking.id, { status: newStatus });
     setForm(f => ({ ...f, status: newStatus }));
     onSaved();
+    base44.functions.invoke('manageGoogleCalendar', { action: 'sync_one', booking_id: booking.id }).catch(() => {});
   };
 
   const filteredServices = artistServices.filter(s => !serviceQuery || s.name.toLowerCase().includes(serviceQuery.toLowerCase()));
