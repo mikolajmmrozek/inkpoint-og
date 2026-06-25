@@ -31,11 +31,15 @@ export default function ArtistMessages() {
       // Load all messages for this user (personal + group)
       const allMsgs = await base44.entities.ContactMessage.list('created_date', 300);
       
-      // Filter: keep messages where email is this user OR subject contains STUDIO
+      // Filter: keep messages where:
+      // 1. email is this user (personal message TO this user), OR
+      // 2. subject contains STUDIO (group message), OR
+      // 3. sender_email is this user (message sent BY this user)
       const combined = allMsgs.filter(m => {
         const msgEmail = (m.email || '').toLowerCase().trim();
+        const senderEmail = (m.sender_email || '').toLowerCase().trim();
         const hasStudio = m.subject?.includes('STUDIO');
-        return msgEmail === userEmail || hasStudio;
+        return msgEmail === userEmail || hasStudio || senderEmail === userEmail;
       }).sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
       
       setAllMessages(combined);
@@ -64,9 +68,10 @@ export default function ArtistMessages() {
       if (!event.data) return;
       const userEmail = (user?.email || '').toLowerCase().trim();
       const msgEmail = (event.data.email || '').toLowerCase().trim();
+      const senderEmail = (event.data.sender_email || '').toLowerCase().trim();
       const hasStudio = event.data.subject?.includes('STUDIO');
-      // Include if message is for this user OR if it's a group message
-      if (msgEmail !== userEmail && !hasStudio) return;
+      // Include if message is for this user OR if it's a group message OR if sent by this user
+      if (msgEmail !== userEmail && !hasStudio && senderEmail !== userEmail) return;
       if (event.type === 'create') {
         setAllMessages(prev => prev.some(m => m.id === event.data.id) ? prev : [...prev, event.data]);
       } else if (event.type === 'update') {
@@ -86,8 +91,9 @@ export default function ArtistMessages() {
         .then(allMsgs => {
           const combined = allMsgs.filter(m => {
             const msgEmail = (m.email || '').toLowerCase().trim();
+            const senderEmail = (m.sender_email || '').toLowerCase().trim();
             const hasStudio = m.subject?.includes('STUDIO');
-            return msgEmail === userEmail || hasStudio;
+            return msgEmail === userEmail || hasStudio || senderEmail === userEmail;
           }).sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
           setAllMessages(combined);
         })
