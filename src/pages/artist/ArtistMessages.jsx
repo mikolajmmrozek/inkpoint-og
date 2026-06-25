@@ -149,10 +149,11 @@ export default function ArtistMessages() {
   };
 
   const send = async () => {
-    if (!replyText.trim() || !selectedThread) return;
+    if (!replyText.trim()) return;
     setSending(true);
     try {
-      if (selectedThread.type === 'studio') {
+      const isStudio = selectedThread?.type === 'studio' || selectedThread?.id === 'studio';
+      if (isStudio) {
         // Always fetch fresh staff list for group messages
         const res = await base44.functions.invoke('getStudioStaff', {});
         const allStaff = (res.data?.staff || []).filter(s => s.role === 'artist' || s.role === 'admin');
