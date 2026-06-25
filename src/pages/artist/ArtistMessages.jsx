@@ -28,15 +28,15 @@ export default function ArtistMessages() {
   const load = async () => {
     try {
       const userEmail = (user?.email || '').toLowerCase().trim();
-      // Load personal messages + all group messages (regardless of recipient email)
-      const personalMsgs = await base44.entities.ContactMessage.filter({ email: userEmail }, 'created_date', 300);
-      const groupMsgs = await base44.entities.ContactMessage.list('created_date', 300);
+      // Load all messages for this user (personal + group)
+      const allMsgs = await base44.entities.ContactMessage.list('created_date', 300);
       
-      // Combine: personal messages + any group messages with STUDIO subject
-      const combined = [
-        ...personalMsgs,
-        ...groupMsgs.filter(m => m.subject?.includes('STUDIO') && !personalMsgs.some(p => p.id === m.id))
-      ].sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
+      // Filter: keep messages where email is this user OR subject contains STUDIO
+      const combined = allMsgs.filter(m => {
+        const msgEmail = (m.email || '').toLowerCase().trim();
+        const hasStudio = m.subject?.includes('STUDIO');
+        return msgEmail === userEmail || hasStudio;
+      }).sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
       
       setAllMessages(combined);
     } catch (e) {
@@ -64,7 +64,9 @@ export default function ArtistMessages() {
       if (!event.data) return;
       const userEmail = (user?.email || '').toLowerCase().trim();
       const msgEmail = (event.data.email || '').toLowerCase().trim();
-      if (msgEmail !== userEmail) return;
+      const hasStudio = event.data.subject?.includes('STUDIO');
+      // Include if message is for this user OR if it's a group message
+      if (msgEmail !== userEmail && !hasStudio) return;
       if (event.type === 'create') {
         setAllMessages(prev => prev.some(m => m.id === event.data.id) ? prev : [...prev, event.data]);
       } else if (event.type === 'update') {
@@ -80,15 +82,13 @@ export default function ArtistMessages() {
   useEffect(() => {
     const interval = setInterval(() => {
       const userEmail = (user?.email || '').toLowerCase().trim();
-      Promise.all([
-        base44.entities.ContactMessage.filter({ email: userEmail }, 'created_date', 300),
-        base44.entities.ContactMessage.list('created_date', 300)
-      ])
-        .then(([personalMsgs, groupMsgs]) => {
-          const combined = [
-            ...personalMsgs,
-            ...groupMsgs.filter(m => m.subject?.includes('STUDIO') && !personalMsgs.some(p => p.id === m.id))
-          ].sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
+      base44.entities.ContactMessage.list('created_date', 300)
+        .then(allMsgs => {
+          const combined = allMsgs.filter(m => {
+            const msgEmail = (m.email || '').toLowerCase().trim();
+            const hasStudio = m.subject?.includes('STUDIO');
+            return msgEmail === userEmail || hasStudio;
+          }).sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
           setAllMessages(combined);
         })
         .catch(() => {});
