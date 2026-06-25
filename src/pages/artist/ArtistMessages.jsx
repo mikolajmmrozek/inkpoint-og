@@ -163,10 +163,10 @@ export default function ArtistMessages() {
           const res = await base44.functions.invoke('getStudioStaff', {});
           const freshStaff = res.data?.staff || [];
           const allStaff = freshStaff.filter(s => s.role === 'artist' || s.role === 'admin');
-          
+
           await Promise.all(allStaff.map(staff =>
             base44.entities.ContactMessage.create({
-              name: artist?.name || user?.full_name,
+              name: user?.full_name || artist?.name,
               email: (staff.email || '').toLowerCase().trim(),
               message: replyText,
               sender_type: 'client',
@@ -180,7 +180,7 @@ export default function ArtistMessages() {
           const allStaff = staffList.filter(s => s.role === 'artist' || s.role === 'admin');
           await Promise.all(allStaff.map(staff =>
             base44.entities.ContactMessage.create({
-              name: artist?.name || user?.full_name,
+              name: user?.full_name || artist?.name,
               email: (staff.email || '').toLowerCase().trim(),
               message: replyText,
               sender_type: 'client',
