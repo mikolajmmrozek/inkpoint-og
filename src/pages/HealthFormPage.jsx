@@ -365,34 +365,44 @@ export default function HealthFormPage() {
       const fullName = `${form.client_first_name} ${form.client_last_name}`.trim();
       const formData = { ...form, client_name: fullName, is_minor: isMinor, is_draft: false };
 
+      // 1. Save the health form — this is the critical part
       let savedForm;
       if (draftId) {
         savedForm = await base44.entities.HealthForm.update(draftId, formData);
-        // update returns void in some SDK versions, so use draftId
         if (!savedForm?.id) savedForm = { id: draftId };
       } else {
         savedForm = await base44.entities.HealthForm.create(formData);
       }
 
+      // 2. Secondary operations — don't fail the whole submission if these fail
+      //    The form itself is already saved, which is what matters most.
+      const warnings = [];
+
       if (isMinor) {
-        const guardianBody = guardian.body_placement || form.body_placement || '';
-        await base44.entities.GuardianConsentForm.create({
-          ...guardian,
-          body_placement: guardianBody,
-          health_form_id: savedForm.id,
-          booking_id: form.booking_id,
-          minor_client_name: fullName,
-          minor_date_of_birth: form.date_of_birth,
-        });
+        try {
+          const guardianBody = guardian.body_placement || form.body_placement || '';
+          await base44.entities.GuardianConsentForm.create({
+            ...guardian,
+            body_placement: guardianBody,
+            health_form_id: savedForm.id,
+            booking_id: form.booking_id,
+            minor_client_name: fullName,
+            minor_date_of_birth: form.date_of_birth,
+          });
+        } catch (e) { warnings.push('zapis formularza opiekuna'); }
       }
 
       if (booking) {
-        await base44.entities.Booking.update(booking.id, { health_form_completed: true });
+        try {
+          await base44.entities.Booking.update(booking.id, { health_form_completed: true });
+        } catch (e) { warnings.push('aktualizacja rezerwacji'); }
       }
 
-      // Create/update client record automatically
-      await upsertClient(form);
+      try {
+        await upsertClient(form);
+      } catch (e) { warnings.push('zapis danych klienta'); }
 
+      // Form is saved — show success even if secondary ops had issues
       setSubmitted(true);
     } catch (err) {
       console.error('Health form submit error:', err);
