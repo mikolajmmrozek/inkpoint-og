@@ -21,6 +21,7 @@ export default function ArtistMessages() {
   const [sending, setSending] = useState(false);
   const [pendingAttachments, setPendingAttachments] = useState([]);
   const [staffList, setStaffList] = useState([]);
+  const [artists, setArtists] = useState([]);
   const messagesEndRef = useRef(null);
 
   // Load messages and staff
@@ -48,9 +49,13 @@ export default function ArtistMessages() {
   useEffect(() => {
     load();
     // Load staff for avatars
-    base44.functions.invoke('getStudioStaff', {})
-      .then(res => {
-        setStaffList(res.data?.staff || []);
+    Promise.all([
+      base44.functions.invoke('getStudioStaff', {}),
+      base44.entities.Artist.list()
+    ])
+      .then(([staffRes, artistsList]) => {
+        setStaffList(staffRes.data?.staff || []);
+        setArtists(artistsList || []);
       })
       .catch(() => {});
 
@@ -147,8 +152,18 @@ export default function ArtistMessages() {
       return { type: 'photo', src: staff.photo_url, name: staff.name };
     }
     
+    // Check if sender is an artist and has photo_url
+    const senderArtist = artists.find(a => {
+      if (a.user_id) return a.user_id === message.email;
+      return a.name === message.name;
+    });
+    
+    if (senderArtist?.photo_url) {
+      return { type: 'photo', src: senderArtist.photo_url, name: senderArtist.name };
+    }
+    
     // Use message.name for display, extract initials
-    const displayName = staff?.name || message.name || message.email;
+    const displayName = staff?.name || senderArtist?.name || message.name || message.email;
     const initials = displayName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
     return { type: 'initials', text: initials, name: displayName };
   };
