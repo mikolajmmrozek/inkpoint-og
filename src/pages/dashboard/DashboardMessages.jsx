@@ -1,72 +1,51 @@
 import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Trash2, Send, ArrowLeft, Mail, MailOpen, Loader2, Search, X, Plus } from 'lucide-react';
-import NewMessageModal from '@/components/dashboard/NewMessageModal';
+import { Send, ArrowLeft, Loader2, MessageSquare } from 'lucide-react';
 import MessageContent from '@/components/panel/MessageContent';
 import AttachmentBar from '@/components/panel/AttachmentBar';
 import { useTheme } from './Dashboard';
 import { format } from 'date-fns';
-import BookingCard from '@/components/dashboard/BookingCard';
-import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
-import { useLocation } from 'react-router-dom';
 
 export default function DashboardMessages() {
   const { theme } = useTheme();
-  const location = useLocation();
   const t = theme === 'light'
     ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.65)', fuchsia: '#FF007F', hover: 'rgba(0,0,0,0.03)', cardBg: '#FFFFFF', bubbleBg: 'rgba(0,0,0,0.06)', adminBubble: '#FF007F' }
     : { bg: 'rgba(24,24,24,0.95)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.75)', fuchsia: '#FF007F', hover: 'rgba(255,255,255,0.05)', cardBg: 'transparent', bubbleBg: 'rgba(255,255,255,0.06)', adminBubble: '#FF007F' };
 
   const [allMessages, setAllMessages] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedEmail, setSelectedEmail] = useState(null);
-
-  // Check URL for email parameter from notification and auto-select
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const email = params.get('email');
-    if (email) {
-      // Normalize email to match thread format (lowercase, trimmed)
-      const normalizedEmail = (email || '').toLowerCase().trim();
-      setSelectedEmail(normalizedEmail);
-    }
-  }, [location.search]);
-
-  // Mark thread as read when selectedEmail changes and scroll to bottom
-  useEffect(() => {
-    if (selectedEmail && allMessages.length > 0) {
-      markThreadRead(selectedEmail);
-      setTimeout(() => {
-        const container = messagesEndRef.current?.parentElement;
-        if (container) {
-          container.scrollTop = container.scrollHeight;
-        }
-      }, 150);
-    }
-  }, [selectedEmail, allMessages.length]);
-
+  const [staff, setStaff] = useState([]);
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showNewMessage, setShowNewMessage] = useState(false);
   const [pendingAttachments, setPendingAttachments] = useState([]);
   const messagesEndRef = useRef(null);
 
   const load = async () => {
-    const data = await base44.entities.ContactMessage.list('-created_date', 200);
-    setAllMessages(data);
-    setLoading(false);
+    try {
+      // Load only group messages (subject contains STUDIO)
+      const data = await base44.entities.ContactMessage.list('-created_date', 500);
+      const groupMsgs = data.filter(m => m.subject?.includes('STUDIO')).sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
+      setAllMessages(groupMsgs);
+      
+      // Load staff
+      const staffRes = await base44.functions.invoke('getStudioStaff', {});
+      setStaff(staffRes.data?.staff || []);
+    } catch (e) {
+      console.error('Load failed:', e);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     load();
-    // Realtime subscription — live updates when new messages arrive
+    // Realtime subscription — live updates for group messages
     const unsubscribe = base44.entities.ContactMessage.subscribe((event) => {
+      if (!event.data || !event.data.subject?.includes('STUDIO')) return;
       if (event.type === 'create') {
         setAllMessages(prev => {
           if (prev.some(m => m.id === event.data.id)) return prev;
-          return [event.data, ...prev];
+          return [...prev, event.data].sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
         });
       } else if (event.type === 'update') {
         setAllMessages(prev => prev.map(m => m.id === event.data.id ? { ...m, ...event.data } : m));
@@ -77,355 +56,171 @@ export default function DashboardMessages() {
     return () => { if (typeof unsubscribe === 'function') unsubscribe(); };
   }, []);
 
-  // Polling fallback — refresh every 2 minutes in case WebSocket misses events
+  // Polling fallback — refresh every 30 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      base44.entities.ContactMessage.list('-created_date', 200)
-        .then(data => setAllMessages(data))
+      base44.entities.ContactMessage.list('-created_date', 500)
+        .then(data => {
+          const groupMsgs = data.filter(m => m.subject?.includes('STUDIO')).sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
+          setAllMessages(groupMsgs);
+        })
         .catch(() => {});
-    }, 120000);
+    }, 30000);
     return () => clearInterval(interval);
   }, []);
 
-  // Group messages by email to form threads
-  const threads = (() => {
-    const grouped = {};
-    allMessages.forEach(msg => {
-      const key = (msg.email || '').toLowerCase().trim();
-      if (!key) return;
-      if (!grouped[key]) grouped[key] = [];
-      grouped[key].push(msg);
-    });
-    return Object.entries(grouped).map(([email, msgs]) => {
-      const sorted = [...msgs].sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
-      const latest = [...msgs].sort((a, b) => new Date(b.created_date) - new Date(a.created_date))[0];
-      return {
-        email,
-        messages: sorted,
-        lastMessage: latest,
-        unreadCount: msgs.filter(m => !m.is_read && m.sender_type !== 'admin').length,
-        clientName: msgs.find(m => m.sender_type === 'client')?.name || msgs[0].name,
-        phone: msgs[0].phone,
-      };
-    }).sort((a, b) => new Date(b.lastMessage.created_date) - new Date(a.lastMessage.created_date));
-  })();
-
-  const filteredThreads = searchQuery.trim()
-    ? threads.filter(th => {
-        const q = searchQuery.toLowerCase().trim();
-        return (th.clientName || '').toLowerCase().includes(q) ||
-               (th.email || '').toLowerCase().includes(q) ||
-               (th.phone || '').toLowerCase().includes(q) ||
-               th.messages.some(m =>
-                 (m.message || '').toLowerCase().includes(q) ||
-                 (m.subject || '').toLowerCase().includes(q) ||
-                 (m.name || '').toLowerCase().includes(q)
-               );
-      })
-    : threads;
-
-  const selectedThread = threads.find(th => th.email === selectedEmail);
-
-  const markThreadRead = async (email) => {
-    const thread = threads.find(th => th.email === email);
-    if (!thread) return;
-    const unread = thread.messages.filter(m => !m.is_read);
-    if (unread.length > 0) {
-      setAllMessages(msgs => msgs.map(m => unread.find(u => u.id === m.id) ? { ...m, is_read: true } : m));
-      await Promise.all(unread.map(m => base44.entities.ContactMessage.update(m.id, { is_read: true })));
+  const getAvatar = (message) => {
+    let staffMember = staff.find(s => s.email === message.email);
+    
+    if (!staffMember && message.name) {
+      staffMember = staff.find(s => s.name === message.name);
     }
+    
+    if (staffMember && staffMember.photo_url) {
+      return { type: 'photo', src: staffMember.photo_url, name: staffMember.name };
+    }
+    
+    const displayName = staffMember?.name || message.name || message.email;
+    const initials = displayName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    return { type: 'initials', text: initials, name: displayName };
   };
 
-  const handleSelectThread = (email) => {
-    const normalizedEmail = (email || '').toLowerCase().trim();
-    setSelectedEmail(normalizedEmail);
-    markThreadRead(normalizedEmail);
-    setTimeout(() => {
-      const container = messagesEndRef.current?.parentElement;
-      if (container) {
-        container.scrollTop = container.scrollHeight;
-      }
-    }, 150);
-  };
-
-  const sendReply = async () => {
-    if (!replyText.trim() || !selectedEmail) return;
+  const send = async () => {
+    if (!replyText.trim()) return;
     setSending(true);
-    const thread = threads.find(th => th.email === selectedEmail);
     try {
-      await base44.entities.ContactMessage.create({
-        name: 'Romans Tattoo',
-        email: selectedEmail,
-        phone: thread?.phone || '',
-        message: replyText,
-        sender_type: 'admin',
-        message_type: 'text',
-        is_read: true,
-        attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
-      });
-      // Send email notification to client
-      try {
-        await base44.integrations.Core.SendEmail({
-          to: selectedEmail,
-          subject: 'Wiadomość od Romans Tattoo',
-          body: replyText,
-        });
-      } catch (e) {
-        console.warn('Email notification failed:', e);
-      }
+      // Send to all staff members
+      const staffRes = await base44.functions.invoke('getStudioStaff', {});
+      const allStaff = (staffRes.data?.staff || []).filter(s => s.role === 'artist' || s.role === 'admin');
+
+      await Promise.all(allStaff.map(staffMember =>
+        base44.entities.ContactMessage.create({
+          name: 'Romans Tattoo',
+          email: (staffMember.email || '').toLowerCase().trim(),
+          message: replyText,
+          sender_type: 'admin',
+          message_type: 'text',
+          subject: 'STUDIO',
+          is_read: true,
+          attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
+        })
+      ));
       setReplyText('');
       setPendingAttachments([]);
       await load();
     } catch (e) {
-      console.error('Reply failed:', e);
+      console.error('Send failed:', e);
     } finally {
       setSending(false);
     }
-  };
-
-  const deleteThread = async (email) => {
-    const thread = threads.find(th => th.email === email);
-    if (!thread) return;
-    await Promise.all(thread.messages.map(m => base44.entities.ContactMessage.delete(m.id)));
-    setAllMessages(msgs => msgs.filter(m => (m.email || '').toLowerCase() !== email));
-    if (selectedEmail === email) setSelectedEmail(null);
-    setDeleteConfirm(null);
-  };
-
-  const onBookingAction = () => {
-    load();
-  };
-
-  const getMessagePreview = (msg) => {
-    if (msg.message_type === 'booking_card') return '🎫 Nowa rezerwacja';
-    if (msg.message_type === 'status_change') return '🔄 Zmiana statusu rezerwacji';
-    if (msg.attachments && msg.attachments.length > 0) return `📎 ${msg.attachments.length} załącznik(ów)`;
-    return (msg.sender_type === 'admin' ? 'Ty: ' : '') + (msg.message || '').slice(0, 60);
   };
 
   // ============ RENDER ============
   return (
     <div>
       {/* Header */}
-      <div className="mb-6 flex items-start justify-between flex-wrap gap-4">
-        <div>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
-            SKRZYNKA ODBIORCZA
-          </p>
-          <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>
-            Wiadomości
-          </h2>
-        </div>
-        <button onClick={() => setShowNewMessage(true)} className="flex items-center gap-2 btn-oxblood md:mt-7" style={{ padding: '10px 20px' }}>
-          <Plus size={13} /> NOWA WIADOMOŚĆ
-        </button>
+      <div className="mb-6">
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
+          CZAT GRUPOWY
+        </p>
+        <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>
+          Studio
+        </h2>
       </div>
 
-      {/* Search bar */}
-      <div className="mb-6 relative">
-        <Search size={14} color={t.muted} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-          placeholder="Szukaj po imieniu, emailu, telefonie, treści wiadomości..."
-          style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '12px 14px 12px 38px', fontSize: '13px', color: t.text, fontFamily: 'Inter, sans-serif', outline: 'none' }}
-          onFocus={e => e.target.style.borderColor = t.fuchsia}
-          onBlur={e => e.target.style.borderColor = t.border}
-        />
-        {searchQuery && (
-          <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}>
-            <X size={14} />
-          </button>
-        )}
-      </div>
-
-      <div className="grid lg:grid-cols-5 gap-6">
-        {/* Thread List */}
-        <div className={`lg:col-span-2 ${selectedEmail ? 'hidden lg:block' : 'block'}`} style={{ border: `0.5px solid ${t.border}`, background: t.bg, minHeight: '500px' }}>
+      {/* Messages Container */}
+      <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, maxHeight: 'calc(100vh - 200px)', minHeight: '500px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-4">
           {loading ? (
-            <div className="flex items-center justify-center py-20">
+            <div className="flex items-center justify-center h-full">
               <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
             </div>
-          ) : filteredThreads.length === 0 ? (
-            <div className="py-20 text-center">
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted, letterSpacing: '0.1em' }}>
-                 BRAK WIADOMOŚCI
-               </p>
+          ) : allMessages.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-center">
+              <MessageSquare size={32} color={t.muted} style={{ marginBottom: '16px' }} />
+              <p style={{ fontSize: '14px', color: t.muted }}>Brak wiadomości w czacie grupowym</p>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted, marginTop: '8px', letterSpacing: '0.1em' }}>Wysyłaj wiadomości do wszystkich pracowników poniżej</p>
             </div>
-          ) : filteredThreads.map((th, i) => (
-            <div
-              key={th.email}
-              className="flex items-center gap-3 p-4 cursor-pointer transition-colors hover:opacity-70"
-              style={{ borderBottom: i < filteredThreads.length - 1 ? `0.5px solid ${t.border}` : 'none', borderLeft: selectedEmail === th.email ? `3px solid ${t.fuchsia}` : '3px solid transparent', background: selectedEmail === th.email ? 'rgba(255,0,127,0.1)' : 'transparent', paddingLeft: '13px' }}
-              onClick={() => handleSelectThread(th.email)}
-            >
-              <div className="flex-shrink-0">
-                {th.unreadCount > 0 ? (
-                  <Mail size={14} color={t.fuchsia} />
-                ) : (
-                  <MailOpen size={14} color={t.muted} />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-2">
-                  <p style={{ color: th.unreadCount > 0 ? t.text : t.muted, fontSize: '14px', fontWeight: th.unreadCount > 0 ? 500 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {th.clientName}
-                    {th.messages.some(m => m.subject === 'ARTYSTA') && (
-                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#FF007F', letterSpacing: '0.1em', marginLeft: '6px', border: '0.5px solid rgba(255,0,127,0.4)', padding: '1px 4px' }}>ARTYSTA</span>
+          ) : (
+            allMessages.map((msg) => {
+              const isAdmin = msg.sender_type === 'admin';
+              const avatar = !isAdmin ? getAvatar(msg) : null;
+
+              return (
+                <div key={msg.id} className={`flex gap-3 ${isAdmin ? 'justify-end' : 'justify-start'}`}>
+                  {!isAdmin && avatar && (
+                    <div style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      flexShrink: 0,
+                      marginTop: '2px',
+                      background: avatar.type === 'photo' ? 'transparent' : 'rgba(255,0,127,0.2)',
+                      border: avatar.type === 'photo' ? 'none' : `0.5px solid rgba(255,0,127,0.3)`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      overflow: 'hidden',
+                    }}>
+                      {avatar.type === 'photo' ? (
+                        <img src={avatar.src} alt={avatar.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <span style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '10px', color: '#FF007F', fontWeight: 600 }}>
+                          {avatar.text}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  <div style={{ maxWidth: '75%' }}>
+                    {!isAdmin && (
+                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, marginBottom: '2px' }}>
+                        {avatar?.name || msg.email}
+                      </p>
                     )}
-                  </p>
-                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: theme === 'light' ? 'rgba(0,0,0,0.35)' : 'rgba(245,240,235,0.4)', letterSpacing: '0.05em', flexShrink: 0 }}>
-                    {format(new Date(th.lastMessage.created_date), 'dd.MM HH:mm')}
-                  </span>
+                    <div style={{
+                      padding: '10px 14px',
+                      background: isAdmin ? t.adminBubble : t.bubbleBg,
+                      color: isAdmin ? '#F5F0EB' : t.text,
+                      borderRadius: '2px',
+                    }}>
+                      <MessageContent message={msg} t={t} isAdmin={isAdmin} />
+                    </div>
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, marginTop: '4px', textAlign: isAdmin ? 'right' : 'left' }}>
+                      {format(new Date(msg.created_date), 'dd.MM.yyyy HH:mm')}
+                    </p>
+                  </div>
                 </div>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: theme === 'light' ? 'rgba(0,0,0,0.35)' : 'rgba(245,240,235,0.4)', letterSpacing: '0.03em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {getMessagePreview(th.lastMessage)}
-                </p>
-              </div>
-              {th.unreadCount > 0 && (
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#F5F0EB', background: t.fuchsia, padding: '2px 6px', borderRadius: '10px', flexShrink: 0 }}>
-                  {th.unreadCount}
-                </span>
-              )}
-            </div>
-          ))}
+              );
+            })
+          )}
+          <div ref={messagesEndRef} />
         </div>
 
-        {/* Conversation View */}
-        <div className={`lg:col-span-3 ${selectedEmail ? 'flex' : 'hidden'} lg:flex`} style={{ border: `0.5px solid ${t.border}`, background: t.bg, maxHeight: 'calc(100vh - 160px)', minHeight: '400px', flexDirection: 'column', overflow: 'hidden' }}>
-          {selectedThread ? (
-            <>
-              {/* Thread header */}
-              <div className="flex items-center gap-3 p-4" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-                <button onClick={() => setSelectedEmail(null)} className="lg:hidden" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
-                  <ArrowLeft size={16} />
-                </button>
-                <div className="flex-1">
-                  <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.4rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
-                    {selectedThread.clientName}
-                  </h3>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: theme === 'light' ? 'rgba(0,0,0,0.35)' : 'rgba(245,240,235,0.4)', letterSpacing: '0.06em' }}>
-                    {selectedThread.email} {selectedThread.phone ? `· ${selectedThread.phone}` : ''}
-                  </p>
-                </div>
-                <button onClick={() => setDeleteConfirm(selectedThread)} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0 }}>
-                  <Trash2 size={14} />
-                </button>
-              </div>
-
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {selectedThread.messages.map((msg) => {
-                  const isAdmin = msg.sender_type === 'admin';
-                  const isSystem = msg.sender_type === 'system' || msg.message_type === 'status_change';
-                  const isBookingCard = msg.message_type === 'booking_card';
-
-                  // Booking card
-                  if (isBookingCard) {
-                    return (
-                      <div key={msg.id} className="flex flex-col items-center">
-                        <BookingCard bookingId={msg.booking_id} t={t} theme={theme} onAction={onBookingAction} />
-                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.05em', marginTop: '4px' }}>
-                          {format(new Date(msg.created_date), 'dd.MM.yyyy HH:mm')}
-                        </p>
-                      </div>
-                    );
-                  }
-
-                  // Status change notification
-                  if (msg.message_type === 'status_change') {
-                    return (
-                      <div key={msg.id} className="flex justify-center">
-                        <div style={{ background: 'rgba(255,0,127,0.06)', border: `0.5px solid rgba(255,0,127,0.2)`, padding: '10px 16px', maxWidth: '80%', textAlign: 'center' }}>
-                          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '4px' }}>
-                            STATUS REZERWACJI
-                          </p>
-                          <p style={{ fontSize: '13px', color: t.text, lineHeight: 1.5 }}>
-                            {msg.message}
-                          </p>
-                          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.05em', marginTop: '6px' }}>
-                            {format(new Date(msg.created_date), 'dd.MM.yyyy HH:mm')}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  }
-
-                  // Text message bubble
-                  return (
-                    <div key={msg.id} className={`flex ${isAdmin ? 'justify-end' : 'justify-start'}`}>
-                      <div style={{ maxWidth: '75%' }}>
-                        <div style={{
-                          padding: '10px 14px',
-                          background: isAdmin ? t.adminBubble : t.bubbleBg,
-                          borderRadius: '2px',
-                          color: isAdmin ? '#F5F0EB' : t.text,
-                        }}>
-                          <MessageContent message={msg} t={t} isAdmin={isAdmin} />
-                        </div>
-                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: theme === 'light' ? 'rgba(0,0,0,0.35)' : 'rgba(245,240,235,0.4)', letterSpacing: '0.05em', marginTop: '4px', textAlign: isAdmin ? 'right' : 'left' }}>
-                          {msg.sender_type === 'admin' ? 'Romans Tattoo · ' : ''}
-                          {format(new Date(msg.created_date), 'dd.MM.yyyy HH:mm')}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-                <div ref={messagesEndRef} />
-              </div>
-
-              {/* Reply box */}
-              <div className="p-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
-                <AttachmentBar attachments={pendingAttachments} setAttachments={setPendingAttachments} t={t} />
-                <div className="flex gap-2">
-                  <textarea
-                    value={replyText}
-                    onChange={e => setReplyText(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendReply(); } }}
-                    rows={1}
-                    placeholder="Napisz odpowiedź..."
-                    style={{ flex: 1, background: 'transparent', border: `0.5px solid ${t.border}`, padding: '10px 12px', fontSize: '13px', color: t.text, fontFamily: 'Inter, sans-serif', resize: 'none', outline: 'none', minHeight: '40px', maxHeight: '120px' }}
-                    onFocus={e => e.target.style.borderColor = t.fuchsia}
-                    onBlur={e => e.target.style.borderColor = t.border}
-                  />
-                  <button
-                    onClick={sendReply}
-                    disabled={sending || !replyText.trim()}
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px', background: 'linear-gradient(135deg, #FF007F, #CC0066)', border: 'none', cursor: sending || !replyText.trim() ? 'not-allowed' : 'pointer', opacity: sending || !replyText.trim() ? 0.4 : 1, transition: 'all 0.3s' }}
-                  >
-                    {sending ? <Loader2 size={14} className="animate-spin" color="#F5F0EB" /> : <Send size={14} color="#F5F0EB" />}
-                  </button>
-                </div>
-
-              </div>
-            </>
-          ) : (
-            <div className="hidden lg:flex items-center justify-center h-full py-20">
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted, letterSpacing: '0.1em' }}>
-                 WYBIERZ WĄTEK
-               </p>
-            </div>
-          )}
+        {/* Input */}
+        <div className="p-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
+          <AttachmentBar attachments={pendingAttachments} setAttachments={setPendingAttachments} t={t} />
+          <div className="flex gap-2">
+            <textarea
+              value={replyText}
+              onChange={e => setReplyText(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
+              rows={1}
+              placeholder="Napisz wiadomość dla całego studia..."
+              style={{ flex: 1, background: 'transparent', border: `0.5px solid ${t.border}`, padding: '10px 12px', fontSize: '13px', color: t.text, fontFamily: 'Inter, sans-serif', resize: 'none', outline: 'none', minHeight: '40px', maxHeight: '120px' }}
+              onFocus={e => e.target.style.borderColor = t.fuchsia}
+              onBlur={e => e.target.style.borderColor = t.border}
+            />
+            <button
+              onClick={send}
+              disabled={sending || !replyText.trim()}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px', background: 'linear-gradient(135deg, #FF007F, #CC0066)', border: 'none', cursor: sending || !replyText.trim() ? 'not-allowed' : 'pointer', opacity: sending || !replyText.trim() ? 0.4 : 1, transition: 'all 0.3s' }}
+            >
+              {sending ? <Loader2 size={14} className="animate-spin" color="#F5F0EB" /> : <Send size={14} color="#F5F0EB" />}
+            </button>
+          </div>
         </div>
       </div>
-
-      <ConfirmDeleteDialog
-        open={!!deleteConfirm}
-        title="Usuń wątek"
-        message={`Czy na pewno chcesz usunąć cały wątek z klientem "${deleteConfirm?.clientName}"? Wszystkie wiadomości zostaną trwale usunięte.`}
-        onConfirm={() => deleteThread(deleteConfirm.email)}
-        onCancel={() => setDeleteConfirm(null)}
-        theme={theme}
-      />
-
-      {showNewMessage && (
-        <NewMessageModal
-          t={t}
-          onClose={() => setShowNewMessage(false)}
-          onSent={() => { setShowNewMessage(false); load(); }}
-        />
-      )}
     </div>
   );
-}
+  }
