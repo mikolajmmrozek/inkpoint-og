@@ -27,8 +27,17 @@ export default function ArtistMessages() {
   const load = async () => {
     try {
       const userEmail = (user?.email || '').toLowerCase().trim();
-      const data = await base44.entities.ContactMessage.filter({ email: userEmail }, 'created_date', 200);
-      setAllMessages(data);
+      // Load personal messages + all group messages (regardless of recipient email)
+      const personalMsgs = await base44.entities.ContactMessage.filter({ email: userEmail }, 'created_date', 300);
+      const groupMsgs = await base44.entities.ContactMessage.list('created_date', 300);
+      
+      // Combine: personal messages + any group messages with STUDIO subject
+      const combined = [
+        ...personalMsgs,
+        ...groupMsgs.filter(m => m.subject?.includes('STUDIO') && !personalMsgs.some(p => p.id === m.id))
+      ].sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
+      
+      setAllMessages(combined);
     } catch (e) {
       console.error('Load failed:', e);
     } finally {
@@ -66,8 +75,17 @@ export default function ArtistMessages() {
   useEffect(() => {
     const interval = setInterval(() => {
       const userEmail = (user?.email || '').toLowerCase().trim();
-      base44.entities.ContactMessage.filter({ email: userEmail }, 'created_date', 200)
-        .then(data => setAllMessages(data))
+      Promise.all([
+        base44.entities.ContactMessage.filter({ email: userEmail }, 'created_date', 300),
+        base44.entities.ContactMessage.list('created_date', 300)
+      ])
+        .then(([personalMsgs, groupMsgs]) => {
+          const combined = [
+            ...personalMsgs,
+            ...groupMsgs.filter(m => m.subject?.includes('STUDIO') && !personalMsgs.some(p => p.id === m.id))
+          ].sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
+          setAllMessages(combined);
+        })
         .catch(() => {});
     }, 30000);
     return () => clearInterval(interval);
