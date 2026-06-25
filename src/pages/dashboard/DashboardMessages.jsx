@@ -113,6 +113,7 @@ export default function DashboardMessages() {
         // Send to all staff
         const staffRes = await base44.functions.invoke('getStudioStaff', {});
         const allStaff = (staffRes.data?.staff || []).filter(s => s.role === 'artist' || s.role === 'admin');
+        const adminEmail = (await base44.auth.me()).email || '';
         await Promise.all(allStaff.map(staffMember =>
           base44.entities.ContactMessage.create({
             name: 'Romans Tattoo',
@@ -122,6 +123,7 @@ export default function DashboardMessages() {
             message_type: 'text',
             subject: 'STUDIO',
             is_read: true,
+            sender_email: adminEmail.toLowerCase().trim(),
             attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
           })
         ));
