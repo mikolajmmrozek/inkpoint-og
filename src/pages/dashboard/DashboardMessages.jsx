@@ -105,7 +105,8 @@ export default function DashboardMessages() {
   };
 
   const send = async () => {
-    if (!replyText.trim() || !selectedThread) return;
+    if (!replyText.trim()) return;
+    if (selectedTab === 'private' && !selectedThread) return;
     setSending(true);
     try {
       if (selectedTab === 'studio') {
