@@ -798,6 +798,10 @@ export default function ArtistSchedule() {
         setArtistServices(svcs.filter(s => !s.artist_ids?.length || s.artist_ids.includes(artist.id)));
       });
     }, 1200);
+    // Auto-sync to Google Calendar in background (picks up new client-submitted bookings)
+    setTimeout(() => {
+      base44.functions.invoke('manageGoogleCalendar', { action: 'sync' }).catch(() => {});
+    }, 2000);
   }, [artist?.id]);
 
   const handleDayClick = (day) => {
