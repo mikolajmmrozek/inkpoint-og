@@ -173,41 +173,23 @@ export default function ArtistMessages() {
     setSending(true);
     try {
       if (selectedThread.type === 'studio') {
-        // Send to all staff members - fetch fresh staff list to ensure all users
-        if (!staffList || staffList.length === 0) {
-          const res = await base44.functions.invoke('getStudioStaff', {});
-          const freshStaff = res.data?.staff || [];
-          const allStaff = freshStaff.filter(s => s.role === 'artist' || s.role === 'admin');
+        // Always fetch fresh staff list for group messages
+        const res = await base44.functions.invoke('getStudioStaff', {});
+        const allStaff = (res.data?.staff || []).filter(s => s.role === 'artist' || s.role === 'admin');
 
-          await Promise.all(allStaff.map(staff =>
-            base44.entities.ContactMessage.create({
-              name: user?.full_name || artist?.name,
-              email: (staff.email || '').toLowerCase().trim(),
-              message: replyText,
-              sender_type: 'client',
-              message_type: 'text',
-              subject: 'ARTYSTA - STUDIO',
-              is_read: false,
-              attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
-              sender_email: (user?.email || '').toLowerCase().trim(),
-            })
-          ));
-          } else {
-           const allStaff = staffList.filter(s => s.role === 'artist' || s.role === 'admin');
-           await Promise.all(allStaff.map(staff =>
-             base44.entities.ContactMessage.create({
-               name: user?.full_name || artist?.name,
-               email: (staff.email || '').toLowerCase().trim(),
-               message: replyText,
-               sender_type: 'client',
-               message_type: 'text',
-               subject: 'ARTYSTA - STUDIO',
-               is_read: false,
-               attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
-               sender_email: (user?.email || '').toLowerCase().trim(),
-             })
-           ));
-        }
+        await Promise.all(allStaff.map(staff =>
+          base44.entities.ContactMessage.create({
+            name: user?.full_name || artist?.name,
+            email: (staff.email || '').toLowerCase().trim(),
+            message: replyText,
+            sender_type: 'client',
+            message_type: 'text',
+            subject: 'ARTYSTA - STUDIO',
+            is_read: false,
+            attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
+            sender_email: (user?.email || '').toLowerCase().trim(),
+          })
+        ));
       } else {
         // Send to admin only
         await base44.entities.ContactMessage.create({
