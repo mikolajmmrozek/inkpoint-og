@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { X, Zap, History, CalendarPlus } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import ClientSearch from './ClientSearch';
+import ReferenceImagesUpload from './ReferenceImagesUpload';
 
 const inputStyle = {
   background: 'transparent',
@@ -50,6 +51,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
         session_end_time: b.session_end_time || calcEndTime(b.session_time, b.session_duration),
         admin_notes: b.admin_notes || '',
         client_notes: '',
+        reference_images: b.reference_images || [],
       };
     }
     const p = b?._prefill ? b : null;
@@ -78,6 +80,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
       health_form_completed: false,
       service_id: p?.service_id || '',
       service_name: p?.service_name || '',
+      reference_images: [],
     };
   };
   const [form, setForm] = useState(() => buildForm(booking));
@@ -688,6 +691,15 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
             <div className="mb-4">{label('Miejsce na ciele')}<input {...inp('tattoo_placement')} /></div>
             <div className="mb-4">{label('Opis projektu')}
               <textarea rows={3} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} value={form.tattoo_description || ''} onChange={e => set('tattoo_description', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            </div>
+            {/* Reference images */}
+            <div className="mb-4">
+              {label('Zdjęcia referencyjne')}
+              <ReferenceImagesUpload
+                images={form.reference_images || []}
+                onChange={(imgs) => set('reference_images', imgs)}
+                t={t}
+              />
             </div>
             {/* Notatki o kliencie — persistent, stored on Client entity */}
             <div className="mb-4">

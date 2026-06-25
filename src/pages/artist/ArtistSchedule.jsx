@@ -7,6 +7,7 @@ import { pl } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
 import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
 import AvailabilityEditModal from '@/components/dashboard/AvailabilityEditModal';
+import ReferenceImagesUpload from '@/components/dashboard/ReferenceImagesUpload';
 import { getAvailabilityForDay } from '@/components/dashboard/ArtistScheduleEditor';
 
 const STATUS_COLORS = { pending: '#FF007F', confirmed: '#16a34a', completed: '#2563eb', cancelled: '#9ca3af' };
@@ -27,9 +28,9 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
       session_time: '', session_end_time: '', session_duration: 0,
       tattoo_description: '', tattoo_placement: '', estimated_price: '',
       service_id: '', service_name: '', notes: '', status: 'pending', deposit_paid: false,
-      artist_id: artist.id, artist_name: artist.name,
+      artist_id: artist.id, artist_name: artist.name, reference_images: [],
     };
-    return { ...booking };
+    return { ...booking, reference_images: booking?.reference_images || [] };
   });
   const [saving, setSaving] = useState(false);
   const [showHealthForm, setShowHealthForm] = useState(false);
@@ -318,6 +319,17 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
               <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>TATUAŻ / ZABIEG</p>
               <div className="mb-3">{label('Miejsce na ciele')}<input {...inp('tattoo_placement')} /></div>
               <div className="mb-3">{label('Opis')}<textarea rows={2} style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif', resize: 'none' }} value={form.tattoo_description || ''} onChange={e => setForm(f => ({ ...f, tattoo_description: e.target.value }))} /></div>
+              <div className="mb-3">
+                {label('Zdjęcia referencyjne')}
+                <ReferenceImagesUpload
+                  images={form.reference_images || []}
+                  onChange={(imgs) => setForm(f => ({ ...f, reference_images: imgs }))}
+                  t={theme === 'light'
+                    ? { border: '#E5E5E5', muted: 'rgba(0,0,0,0.4)' }
+                    : { border: '#262626', muted: 'rgba(245,240,235,0.4)' }
+                  }
+                />
+              </div>
               <div>{label('Notatki')}<textarea rows={2} style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif', resize: 'none' }} value={form.notes || ''} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} /></div>
             </div>
 
