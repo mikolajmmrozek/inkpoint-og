@@ -302,7 +302,7 @@ export default function ArtistMessages() {
                   </div>
                 ) : (
                   selectedThread.messages.map(msg => {
-                    const isMe = msg.sender_type === 'client';
+                    const isMe = msg.email?.toLowerCase().trim() === user?.email?.toLowerCase().trim();
                     const avatar = !isMe ? getAvatar(msg) : null;
                     
                     return (
