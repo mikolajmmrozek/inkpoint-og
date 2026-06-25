@@ -259,9 +259,9 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
         <div className="flex gap-3">
           <button
             onClick={handleSend}
-            disabled={sending || (recipientType !== 'group' && !selectedRecipient) || !messageText.trim()}
+            disabled={sending || !messageText.trim() || (recipientType !== 'group' && !selectedRecipient)}
             className="btn-oxblood flex-1 flex items-center justify-center gap-2"
-            style={{ opacity: (recipientType !== 'group' && !selectedRecipient) || !messageText.trim() ? 0.5 : 1 }}
+            style={{ opacity: !messageText.trim() || (recipientType !== 'group' && !selectedRecipient) ? 0.5 : 1 }}
           >
             {sending ? <Loader2 size={13} className="animate-spin" /> : <><Send size={13} /> WYŚLIJ</>}
           </button>
