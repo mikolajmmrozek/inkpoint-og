@@ -90,6 +90,19 @@ Deno.serve(async (req) => {
       };
     }
 
+    // ── Helper: delete event from all OTHER artists' calendars (cleanup on artist change) ──
+    async function cleanupOrphanedEvent(eventId, excludeArtistId, headers) {
+      if (!eventId) return;
+      const allArtists = await base44.asServiceRole.entities.Artist.list();
+      for (const a of allArtists) {
+        if (a.id === excludeArtistId || !a.gcal_calendar_id) continue;
+        await fetch(
+          `https://www.googleapis.com/calendar/v3/calendars/${a.gcal_calendar_id}/events/${eventId}`,
+          { method: 'DELETE', headers }
+        ).catch(() => {});
+      }
+    }
+
     // ── Helper: sync a single booking to the artist's calendar ──
     async function syncBooking(bk, headers) {
       if (!bk.artist_id) return { action: 'skipped', reason: 'no_artist' };
@@ -129,7 +142,8 @@ Deno.serve(async (req) => {
           const errBody = await res.text().catch(() => '');
           throw new Error(`Update failed: ${res.status} ${errBody.slice(0, 200)}`);
         }
-        // 404 = event was deleted from Google Calendar, fall through to create
+        // 404 = event not in this artist's calendar (possibly artist changed) — delete from old artist's calendar
+        await cleanupOrphanedEvent(bk.gcal_event_id, bk.artist_id, headers);
       }
 
       // Create new event
