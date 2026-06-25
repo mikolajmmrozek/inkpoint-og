@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
 import AvailabilityEditModal from '@/components/dashboard/AvailabilityEditModal';
 import { getAvailabilityForDay } from '@/components/dashboard/ArtistScheduleEditor';
+import GoogleCalendarSync from '@/components/artist/GoogleCalendarSync';
 
 const STATUS_COLORS = { pending: '#FF007F', confirmed: '#16a34a', completed: '#2563eb', cancelled: '#9ca3af' };
 const STATUS_LABELS = { pending: 'Oczekuje', confirmed: 'Potwierdzona', completed: 'Zakończona', cancelled: 'Anulowana' };
@@ -811,6 +812,9 @@ export default function ArtistSchedule() {
           <Plus size={13} /> NOWA SESJA
         </button>
       </div>
+
+      {/* Google Calendar sync */}
+      <GoogleCalendarSync theme={theme} />
 
       {/* View toggle */}
       <div className="flex gap-2 mb-6 flex-wrap">

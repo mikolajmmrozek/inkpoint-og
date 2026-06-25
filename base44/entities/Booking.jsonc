@@ -96,6 +96,10 @@
       ],
       "default": "dashboard",
       "description": "\u0179r\u00f3d\u0142o rezerwacji: online_form = klient sam przez formularz, dashboard = admin/artysta"
+    },
+    "gcal_event_id": {
+      "type": "string",
+      "description": "ID wydarzenia w Google Calendar (do synchronizacji)"
     }
   },
   "required": [
