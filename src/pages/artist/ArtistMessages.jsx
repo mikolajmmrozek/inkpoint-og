@@ -92,13 +92,13 @@ export default function ArtistMessages() {
   const threads = (() => {
     const adminThread = {
       id: 'admin',
-      label: 'Chat z adminem',
+      label: 'Manager',
       messages: allMessages.filter(m => !m.subject?.includes('STUDIO')).sort((a, b) => new Date(a.created_date) - new Date(b.created_date)),
       type: 'admin',
     };
     const studioThread = {
       id: 'studio',
-      label: 'Chat studia (wszyscy pracownicy)',
+      label: 'Studio (grupowy)',
       messages: allMessages.filter(m => m.subject?.includes('STUDIO')).sort((a, b) => new Date(a.created_date) - new Date(b.created_date)),
       type: 'studio',
     };
