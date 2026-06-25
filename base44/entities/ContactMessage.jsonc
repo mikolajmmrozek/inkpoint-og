@@ -46,6 +46,10 @@
       "type": "string",
       "description": "ID powi\u0105zanej rezerwacji (dla kart rezerwacji i zmian statusu)"
     },
+    "sender_email": {
+      "type": "string",
+      "description": "Email nadawcy wiadomo\u015bci (do filtrowania w czacie grupowym)"
+    },
     "attachments": {
       "type": "array",
       "items": {
