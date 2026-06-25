@@ -131,32 +131,19 @@ export default function ArtistMessages() {
   };
 
   const getAvatar = (message) => {
-    // message.name contains the sender's name, find staff by name or email
-    let staff = null;
-    if (message.sender_type === 'admin') {
-      // Admin message - look up by name or as fallback by email
-      staff = staffList.find(s => s.name === message.name) || staffList.find(s => s.email === message.email);
-    } else {
-      // Client message - look up the sender
-      staff = staffList.find(s => s.email === message.email);
-    }
+    const senderEmail = (message.sender_email || message.email || '').toLowerCase().trim();
+    let staff = staffList.find(s => (s.email || '').toLowerCase().trim() === senderEmail);
     
     if (staff?.photo_url) {
       return { type: 'photo', src: staff.photo_url, name: staff.name };
     }
     
-    // Check if sender is an artist and has photo_url
-    const senderArtist = artists.find(a => {
-      if (a.user_id) return a.user_id === message.email;
-      return a.name === message.name;
-    });
-    
+    const senderArtist = artists.find(a => (a.user_id || '').toLowerCase().trim() === senderEmail) || artists.find(a => a.name === message.name);
     if (senderArtist?.photo_url) {
       return { type: 'photo', src: senderArtist.photo_url, name: senderArtist.name };
     }
     
-    // Use message.name for display, extract initials
-    const displayName = staff?.name || senderArtist?.name || message.name || message.email;
+    const displayName = staff?.name || senderArtist?.name || message.name || senderEmail;
     const initials = displayName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
     return { type: 'initials', text: initials, name: displayName };
   };
@@ -175,7 +162,7 @@ export default function ArtistMessages() {
             name: user?.full_name || artist?.name,
             email: (staff.email || '').toLowerCase().trim(),
             message: replyText,
-            sender_type: 'client',
+            sender_type: 'admin',
             message_type: 'text',
             subject: 'STUDIO',
             is_read: false,
