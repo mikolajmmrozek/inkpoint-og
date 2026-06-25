@@ -68,18 +68,18 @@ export default function NotificationsPage() {
   };
 
   const deleteNotification = async (id, e) => {
-    e.stopPropagation();
+    if (e) e.stopPropagation();
     try {
       await base44.entities.Notification.delete(id);
       setNotifications(prev => prev.filter(n => n.id !== id));
-    } catch (e) {}
+    } catch (err) { console.error('Delete notification error:', err); }
   };
 
   const deleteAll = async () => {
     try {
       await Promise.all(notifications.map(n => base44.entities.Notification.delete(n.id)));
       setNotifications([]);
-    } catch (e) {}
+    } catch (err) { console.error('Delete all error:', err); }
   };
 
   const handleClick = (notif) => {

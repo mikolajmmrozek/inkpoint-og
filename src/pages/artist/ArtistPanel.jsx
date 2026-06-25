@@ -2,10 +2,11 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { Calendar, BarChart2, User, LogOut, Menu, X, Sun, Moon, MessageSquare } from 'lucide-react';
+import { Calendar, BarChart2, User, LogOut, Menu, X, Sun, Moon, MessageSquare, Bell } from 'lucide-react';
 import BottomNav from '@/components/panel/BottomNav';
 import NotificationBell from '@/components/panel/NotificationBell';
 import NotificationPanel from '@/components/panel/NotificationPanel';
+import NotificationSidebarItem from '@/components/panel/NotificationSidebarItem';
 import SidebarBadge from '@/components/panel/SidebarBadge';
 import { useBadgeCounts } from '@/hooks/useBadgeCounts';
 
@@ -20,7 +21,7 @@ const NAV = [
   { path: '/artist/messages', label: 'Wiadomości', icon: MessageSquare },
 ];
 
-function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, artist, userEmail }) {
+function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, artist, userEmail, onNotifClick }) {
   const location = useLocation();
   const isActive = (nav) => nav.exact ? location.pathname === nav.path : location.pathname.startsWith(nav.path);
   const counts = useBadgeCounts({ role: 'artist', userEmail });
@@ -75,6 +76,16 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, artist, user
               </Link>
             );
           })}
+          {/* Notifications */}
+          <div className="mt-3 pt-3" style={{ borderTop: `0.5px solid ${border}` }}>
+            <NotificationSidebarItem
+              userEmail={userEmail}
+              theme={theme}
+              notificationsPath="/artist/notifications"
+              onMobileClick={() => setSidebarOpen(false)}
+              onDesktopClick={() => { setSidebarOpen(false); onNotifClick(); }}
+            />
+          </div>
         </nav>
 
         <div className="p-6 space-y-2" style={{ borderTop: `0.5px solid ${border}` }}>
@@ -177,7 +188,7 @@ export default function ArtistPanel() {
   return (
     <ArtistThemeContext.Provider value={{ theme, toggleTheme, artist }}>
       <div className="min-h-screen flex" style={{ background: bg, color: textColor }}>
-        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} theme={theme} toggleTheme={toggleTheme} artist={artist} userEmail={user.email} />
+        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} theme={theme} toggleTheme={toggleTheme} artist={artist} userEmail={user.email} onNotifClick={() => setNotifOpen(true)} />
         <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
           <div className="flex items-center gap-4 px-6 py-4" style={{ borderBottom: `0.5px solid ${border}`, background: topBarBg }}>
             <button onClick={() => setSidebarOpen(true)} className="lg:hidden" style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer', padding: '8px' }}>
