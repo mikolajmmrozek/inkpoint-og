@@ -106,22 +106,9 @@ export default function ArtistMessages() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [allMessages, selectedThread]);
 
-  // Group messages into threads and mark as read when thread is selected
   useEffect(() => {
-    if (selectedThread && selectedThread.messages) {
-      const unreadIds = selectedThread.messages
-        .filter(m => !m.is_read && m.sender_type === 'admin')
-        .map(m => m.id);
-      
-      if (unreadIds.length > 0) {
-        Promise.all(unreadIds.map(id => base44.entities.Notification.updateMany({ link_data: user?.email }, { is_read: true })))
-          .catch(() => {});
-        Promise.all(unreadIds.map(id => base44.entities.ContactMessage.update(id, { is_read: true })))
-          .then(() => setAllMessages(prev => prev.map(m => unreadIds.includes(m.id) ? { ...m, is_read: true } : m)))
-          .catch(() => {});
-      }
-    }
-  }, [selectedThread?.id, user?.email]);
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [allMessages, selectedThread]);
 
   const threads = (() => {
     const adminThread = {
@@ -190,7 +177,7 @@ export default function ArtistMessages() {
             message: replyText,
             sender_type: 'client',
             message_type: 'text',
-            subject: 'ARTYSTA - STUDIO',
+            subject: 'STUDIO',
             is_read: false,
             attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
             sender_email: (user?.email || '').toLowerCase().trim(),
