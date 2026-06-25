@@ -96,9 +96,18 @@ export default function GoogleCalendarSync({ theme }) {
             {connected ? 'Kalendarz połączony' : 'Połącz swój kalendarz Google'}
           </p>
           {syncResult && (
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#16a34a', letterSpacing: '0.08em', marginTop: '4px' }}>
-              ✓ Utworzono: {syncResult.created} · Zaktualizowano: {syncResult.updated}
-            </p>
+            <>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#16a34a', letterSpacing: '0.08em', marginTop: '4px' }}>
+                ✓ Utworzono: {syncResult.created} · Zaktualizowano: {syncResult.updated}
+                {syncResult.skipped > 0 ? ` · Pominięto: ${syncResult.skipped}` : ''}
+                {` / ${syncResult.total}`}
+              </p>
+              {syncResult.errors?.length > 0 && (
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#FF007F', letterSpacing: '0.04em', marginTop: '2px', wordBreak: 'break-word' }}>
+                  ⚠ {syncResult.errors[0]}
+                </p>
+              )}
+            </>
           )}
           {error && (
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.08em', marginTop: '4px' }}>

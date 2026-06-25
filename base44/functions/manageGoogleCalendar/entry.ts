@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
     // ── STATUS: check if the user has connected their Google Calendar ──
     if (action === 'status') {
       try {
-        const conn = await base44.asServiceRole.connectors.getCurrentAppUserConnection(CONNECTOR_ID);
+        const conn = await base44.connectors.getCurrentAppUserConnection(CONNECTOR_ID);
         return Response.json({ connected: !!conn?.accessToken });
       } catch {
         return Response.json({ connected: false });
@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
     if (action === 'sync') {
       let conn;
       try {
-        conn = await base44.asServiceRole.connectors.getCurrentAppUserConnection(CONNECTOR_ID);
+        conn = await base44.connectors.getCurrentAppUserConnection(CONNECTOR_ID);
       } catch {
         return Response.json({ error: 'Not connected to Google Calendar' }, { status: 400 });
       }
@@ -52,10 +52,12 @@ Deno.serve(async (req) => {
 
       let created = 0;
       let updated = 0;
+      let skipped = 0;
+      const errors = [];
 
       for (const bk of bookings) {
         // Build start/end datetime
-        if (!bk.session_date || !bk.session_time) continue;
+        if (!bk.session_date || !bk.session_time) { skipped++; continue; }
 
         const startDate = `${bk.session_date}T${bk.session_time}:00`;
         let endDate;
@@ -96,7 +98,12 @@ Deno.serve(async (req) => {
             `https://www.googleapis.com/calendar/v3/calendars/primary/events/${bk.gcal_event_id}`,
             { method: 'PUT', headers, body: JSON.stringify(eventBody) }
           );
-          if (res.ok) updated++;
+          if (res.ok) {
+            updated++;
+          } else {
+            const errBody = await res.text().catch(() => '');
+            errors.push(`Update ${bk.client_name}: ${res.status} ${errBody.slice(0, 200)}`);
+          }
         } else {
           // Create new event
           const res = await fetch(
@@ -109,6 +116,9 @@ Deno.serve(async (req) => {
               await base44.entities.Booking.update(bk.id, { gcal_event_id: data.id });
               created++;
             }
+          } else {
+            const errBody = await res.text().catch(() => '');
+            errors.push(`Create ${bk.client_name}: ${res.status} ${errBody.slice(0, 200)}`);
           }
         }
       }
@@ -117,7 +127,9 @@ Deno.serve(async (req) => {
         success: true,
         created,
         updated,
+        skipped,
         total: bookings.length,
+        errors: errors.slice(0, 5),
       });
     }
 
