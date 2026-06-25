@@ -3,7 +3,8 @@
   "type": "object",
   "properties": {
     "booking_id": {
-      "type": "string"
+      "type": "string",
+      "description": "ID powi\u0105zanej rezerwacji (opcjonalne \u2014 ankieta mo\u017ce by\u0107 wype\u0142niona bez rezerwacji)"
     },
     "client_first_name": {
       "type": "string"
@@ -320,7 +321,6 @@
     }
   },
   "required": [
-    "booking_id",
     "client_name",
     "client_email",
     "date_of_birth",
