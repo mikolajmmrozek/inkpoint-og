@@ -125,19 +125,45 @@ Deno.serve(async (req) => {
       return { deleted_from: deletedFrom, errors };
     }
 
-    // ── Helper: search all OTHER artists' calendars for events matching this booking by date+client, delete orphans ──
-    async function cleanupOrphanedByContent(bk, headers) {
+    // ── Helper: search a single calendar for an event matching by client name + date ──
+    async function findEventByContent(calendarId, bk, headers) {
+      if (!bk.session_date || !calendarId) return null;
+      const dateStr = bk.session_date;
+      const timeMin = `${dateStr}T00:00:00+02:00`;
+      const timeMax = `${dateStr}T23:59:59+02:00`;
+      const clientName = (bk.client_name || '').toLowerCase().trim();
+      if (!clientName) return null;
+      try {
+        const listRes = await fetch(
+          `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}&singleEvents=true`,
+          { method: 'GET', headers }
+        );
+        if (!listRes.ok) return null;
+        const listData = await listRes.json();
+        const events = listData.items || [];
+        return events.find(ev => {
+          const summary = (ev.summary || '').toLowerCase();
+          const description = (ev.description || '').toLowerCase();
+          return summary.includes(clientName) || description.includes(clientName);
+        }) || null;
+      } catch {
+        return null;
+      }
+    }
+
+    // ── Helper: search ALL artists' calendars (or exclude current) for events matching by date+client, delete orphans ──
+    async function cleanupOrphanedByContent(bk, headers, includeCurrentArtist = false) {
       if (!bk.session_date) return { deleted_from: [], errors: [] };
       const allArtists = await base44.asServiceRole.entities.Artist.list();
       const deletedFrom = [];
       const errors = [];
-      // Search window: the session date (full day in Europe/Warsaw)
       const dateStr = bk.session_date;
       const timeMin = `${dateStr}T00:00:00+02:00`;
       const timeMax = `${dateStr}T23:59:59+02:00`;
       const clientName = (bk.client_name || '').toLowerCase().trim();
       for (const a of allArtists) {
-        if (a.id === bk.artist_id || !a.gcal_calendar_id) continue;
+        if (!includeCurrentArtist && a.id === bk.artist_id) continue;
+        if (!a.gcal_calendar_id) continue;
         try {
           const listRes = await fetch(
             `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(a.gcal_calendar_id)}/events?timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}&singleEvents=true`,
@@ -147,11 +173,9 @@ Deno.serve(async (req) => {
           const listData = await listRes.json();
           const events = listData.items || [];
           for (const ev of events) {
-            // Match by client name in summary or description
             const summary = (ev.summary || '').toLowerCase();
             const description = (ev.description || '').toLowerCase();
             const matchesClient = clientName && (summary.includes(clientName) || description.includes(clientName));
-            // Also match by gcal_event_id if present
             const matchesId = bk.gcal_event_id && ev.id === bk.gcal_event_id;
             if (matchesClient || matchesId) {
               const delRes = await fetch(
@@ -181,78 +205,123 @@ Deno.serve(async (req) => {
 
       const calendarId = await ensureArtistCalendar(artist, headers);
 
-      // If cancelled and has gcal_event_id, delete the event from THIS calendar AND all others
-      if (bk.status === 'cancelled' && bk.gcal_event_id) {
-        const encodedId = encodeURIComponent(bk.gcal_event_id);
-        const delRes = await fetch(
-          `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodedId}`,
-          { method: 'DELETE', headers }
-        );
-        // Also clean up from ALL other artists' calendars
-        const cleanup = await cleanupOrphanedEvent(bk.gcal_event_id, bk.artist_id, headers);
-        if (delRes.ok || delRes.status === 404 || cleanup.deleted_from.length > 0) {
-          await base44.asServiceRole.entities.Booking.update(bk.id, { gcal_event_id: '' });
+      // ── CANCELLED: delete event from ALL calendars (by ID + by content) ──
+      if (bk.status === 'cancelled') {
+        const deletedFrom = [];
+        const errors = [];
+        // Delete by gcal_event_id in current calendar
+        if (bk.gcal_event_id) {
+          const encodedId = encodeURIComponent(bk.gcal_event_id);
+          try {
+            const delRes = await fetch(
+              `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodedId}`,
+              { method: 'DELETE', headers }
+            );
+            if (delRes.ok) deletedFrom.push(`${artist.name} (by ID)`);
+            else if (delRes.status !== 404) {
+              const errBody = await delRes.text().catch(() => '');
+              errors.push(`DELETE current: ${delRes.status} ${errBody.slice(0, 100)}`);
+            }
+          } catch (e) { errors.push(`DELETE current: ${e.message}`); }
         }
-        return { action: 'deleted', cleanup };
+        // Also delete by gcal_event_id in all OTHER artists' calendars
+        if (bk.gcal_event_id) {
+          const idCleanup = await cleanupOrphanedEvent(bk.gcal_event_id, bk.artist_id, headers);
+          deletedFrom.push(...idCleanup.deleted_from);
+          errors.push(...idCleanup.errors);
+        }
+        // Also search ALL calendars (including current) by content and delete any matching events
+        const contentCleanup = await cleanupOrphanedByContent(bk, headers, true);
+        deletedFrom.push(...contentCleanup.deleted_from);
+        errors.push(...contentCleanup.errors);
+
+        // Always clear gcal_event_id — we tried every method to delete
+        await base44.asServiceRole.entities.Booking.update(bk.id, { gcal_event_id: '' });
+        if (deletedFrom.length > 0) {
+          console.log(`[manageGoogleCalendar] Cancelled booking ${bk.id}, deleted events:`, JSON.stringify(deletedFrom));
+        }
+        return { action: 'deleted', cleanup: { deleted_from: deletedFrom, errors } };
       }
 
-      // Skip if cancelled or missing date/time
-      if (bk.status === 'cancelled' || !bk.session_date || !bk.session_time) {
+      // Skip if missing date/time
+      if (!bk.session_date || !bk.session_time) {
         return { action: 'skipped' };
       }
 
       const eventBody = buildEventBody(bk);
+      let updatedEventId = null;
 
+      // ── Step 1: Try to update by gcal_event_id ──
       if (bk.gcal_event_id) {
         const encodedId = encodeURIComponent(bk.gcal_event_id);
-        // Update existing event
         const res = await fetch(
           `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodedId}`,
           { method: 'PUT', headers, body: JSON.stringify(eventBody) }
         );
         if (res.ok) {
-          // Event exists in this calendar — still clean up stale copies in OTHER artists' calendars
-          const cleanup = await cleanupOrphanedEvent(bk.gcal_event_id, bk.artist_id, headers);
-          // Also search by content (date+client) to catch orphans with DIFFERENT event IDs from prior artist changes
-          const contentCleanup = await cleanupOrphanedByContent(bk, headers);
-          const combined = {
-            deleted_from: [...(cleanup.deleted_from || []), ...(contentCleanup.deleted_from || [])],
-            errors: [...(cleanup.errors || []), ...(contentCleanup.errors || [])],
-          };
-          if (combined.deleted_from.length > 0) {
-            console.log(`[manageGoogleCalendar] Cleaned orphaned events for booking ${bk.id}:`, JSON.stringify(combined.deleted_from));
-          }
-          return { action: 'updated', cleanup: combined };
-        }
-        if (res.status !== 404) {
+          updatedEventId = bk.gcal_event_id;
+        } else if (res.status !== 404) {
           const errBody = await res.text().catch(() => '');
           throw new Error(`Update failed: ${res.status} ${errBody.slice(0, 200)}`);
         }
-        // 404 = event not in this artist's calendar (artist changed) — delete from old artist's calendar
-        const cleanup = await cleanupOrphanedEvent(bk.gcal_event_id, bk.artist_id, headers);
-        const contentCleanup = await cleanupOrphanedByContent(bk, headers);
-        const combined = {
-          deleted_from: [...(cleanup.deleted_from || []), ...(contentCleanup.deleted_from || [])],
-          errors: [...(cleanup.errors || []), ...(contentCleanup.errors || [])],
-        };
-        console.log(`[manageGoogleCalendar] Artist changed for booking ${bk.id}, cleanup:`, JSON.stringify(combined));
+        // 404 = event not in this calendar (stale ID or artist changed) — fall through to content search
       }
 
-      // Create new event
-      const res = await fetch(
-        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`,
-        { method: 'POST', headers, body: JSON.stringify(eventBody) }
-      );
-      if (res.ok) {
-        const data = await res.json();
-        if (data.id) {
-          await base44.asServiceRole.entities.Booking.update(bk.id, { gcal_event_id: data.id });
-          return { action: 'created', gcal_event_id: data.id };
+      // ── Step 2: If not updated by ID, search current calendar by content (client name + date) ──
+      if (!updatedEventId) {
+        const foundEvent = await findEventByContent(calendarId, bk, headers);
+        if (foundEvent) {
+          const res = await fetch(
+            `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(foundEvent.id)}`,
+            { method: 'PUT', headers, body: JSON.stringify(eventBody) }
+          );
+          if (res.ok) {
+            updatedEventId = foundEvent.id;
+            // Save the found event ID to booking (in case it was different from stored gcal_event_id)
+            if (foundEvent.id !== bk.gcal_event_id) {
+              await base44.asServiceRole.entities.Booking.update(bk.id, { gcal_event_id: foundEvent.id });
+            }
+          } else if (res.status !== 404) {
+            const errBody = await res.text().catch(() => '');
+            throw new Error(`Content-based update failed: ${res.status} ${errBody.slice(0, 200)}`);
+          }
         }
-      } else {
-        const errBody = await res.text().catch(() => '');
-        throw new Error(`Create failed: ${res.status} ${errBody.slice(0, 200)}`);
       }
+
+      // ── Step 3: If still not updated, create new event ──
+      let action = 'updated';
+      if (!updatedEventId) {
+        action = 'created';
+        const res = await fetch(
+          `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`,
+          { method: 'POST', headers, body: JSON.stringify(eventBody) }
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (data.id) {
+            updatedEventId = data.id;
+            await base44.asServiceRole.entities.Booking.update(bk.id, { gcal_event_id: data.id });
+          }
+        } else {
+          const errBody = await res.text().catch(() => '');
+          throw new Error(`Create failed: ${res.status} ${errBody.slice(0, 200)}`);
+        }
+      }
+
+      // ── Step 4: Clean up ALL other artists' calendars (by ID + by content) ──
+      const idCleanup = bk.gcal_event_id
+        ? await cleanupOrphanedEvent(bk.gcal_event_id, bk.artist_id, headers)
+        : { deleted_from: [], errors: [] };
+      const contentCleanup = await cleanupOrphanedByContent(bk, headers, false);
+      const combined = {
+        deleted_from: [...(idCleanup.deleted_from || []), ...(contentCleanup.deleted_from || [])],
+        errors: [...(idCleanup.errors || []), ...(contentCleanup.errors || [])],
+      };
+      if (combined.deleted_from.length > 0) {
+        console.log(`[manageGoogleCalendar] Cleaned orphaned events for booking ${bk.id}:`, JSON.stringify(combined.deleted_from));
+      }
+
+      return { action, gcal_event_id: updatedEventId, cleanup: combined };
     }
 
     // ── STATUS: check if SHARED connection is active ──
