@@ -72,7 +72,23 @@ export default function ArtistMessages() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [allMessages, selectedThread]);
 
-  // Group messages into threads
+  // Group messages into threads and mark as read when thread is selected
+  useEffect(() => {
+    if (selectedThread && selectedThread.messages) {
+      const unreadIds = selectedThread.messages
+        .filter(m => !m.is_read && m.sender_type === 'admin')
+        .map(m => m.id);
+      
+      if (unreadIds.length > 0) {
+        Promise.all(unreadIds.map(id => base44.entities.Notification.updateMany({ link_data: user?.email }, { is_read: true })))
+          .catch(() => {});
+        Promise.all(unreadIds.map(id => base44.entities.ContactMessage.update(id, { is_read: true })))
+          .then(() => setAllMessages(prev => prev.map(m => unreadIds.includes(m.id) ? { ...m, is_read: true } : m)))
+          .catch(() => {});
+      }
+    }
+  }, [selectedThread?.id, user?.email]);
+
   const threads = (() => {
     const adminThread = {
       id: 'admin',
@@ -93,30 +109,59 @@ export default function ArtistMessages() {
     return staffList.find(s => s.email === email);
   };
 
-  const getAvatar = (email) => {
-    const staff = getStaffMember(email);
+  const getAvatar = (message) => {
+    // message.name contains the sender's name, find staff by name or email
+    let staff = null;
+    if (message.sender_type === 'admin') {
+      // Admin message - look up by name or as fallback by email
+      staff = staffList.find(s => s.name === message.name) || staffList.find(s => s.email === message.email);
+    } else {
+      // Client message - look up the sender
+      staff = staffList.find(s => s.email === message.email);
+    }
+    
     if (staff?.photo_url) {
       return { type: 'photo', src: staff.photo_url, name: staff.name };
     }
-    const initials = staff?.name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || email[0].toUpperCase();
-    return { type: 'initials', text: initials, name: staff?.name || email };
+    
+    // Use message.name for display, extract initials
+    const displayName = staff?.name || message.name || message.email;
+    const initials = displayName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    return { type: 'initials', text: initials, name: displayName };
   };
 
   const send = async () => {
     if (!replyText.trim() || !selectedThread) return;
     setSending(true);
     try {
-      const subject = selectedThread.type === 'studio' ? `ARTYSTA - STUDIO` : `ARTYSTA`;
-      await base44.entities.ContactMessage.create({
-        name: artist?.name || user?.full_name,
-        email: user?.email,
-        message: replyText,
-        sender_type: 'client',
-        message_type: 'text',
-        subject: subject,
-        is_read: false,
-        attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
-      });
+      if (selectedThread.type === 'studio') {
+        // Send to all staff members
+        const allStaff = staffList.filter(s => s.role === 'artist' || s.role === 'admin');
+        await Promise.all(allStaff.map(staff =>
+          base44.entities.ContactMessage.create({
+            name: artist?.name || user?.full_name,
+            email: staff.email,
+            message: replyText,
+            sender_type: 'client',
+            message_type: 'text',
+            subject: 'ARTYSTA - STUDIO',
+            is_read: false,
+            attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
+          })
+        ));
+      } else {
+        // Send to admin only
+        await base44.entities.ContactMessage.create({
+          name: artist?.name || user?.full_name,
+          email: user?.email,
+          message: replyText,
+          sender_type: 'client',
+          message_type: 'text',
+          subject: 'ARTYSTA',
+          is_read: false,
+          attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
+        });
+      }
       setReplyText('');
       setPendingAttachments([]);
       await load();
@@ -216,7 +261,7 @@ export default function ArtistMessages() {
                 ) : (
                   selectedThread.messages.map(msg => {
                     const isMe = msg.sender_type === 'client';
-                    const avatar = !isMe ? getAvatar(msg.email) : null;
+                    const avatar = !isMe ? getAvatar(msg) : null;
                     
                     return (
                       <div key={msg.id} className={`flex gap-3 ${isMe ? 'justify-end' : 'justify-start'}`}>
