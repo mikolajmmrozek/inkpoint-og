@@ -256,7 +256,8 @@ Deno.serve(async (req) => {
       try {
         conn = await base44.asServiceRole.connectors.getConnection('googlecalendar');
       } catch {
-        return Response.json({ error: 'Studio Google Calendar not connected' }, { status: 400 });
+        // No shared connection — silently skip (APP_USER sync handles it when artist opens app)
+        return Response.json({ success: true, action: 'skipped', reason: 'no_shared_connection' });
       }
 
       const accessToken = conn.accessToken;
