@@ -189,22 +189,24 @@ export default function ArtistMessages() {
               subject: 'ARTYSTA - STUDIO',
               is_read: false,
               attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
+              sender_email: (user?.email || '').toLowerCase().trim(),
             })
           ));
-        } else {
-          const allStaff = staffList.filter(s => s.role === 'artist' || s.role === 'admin');
-          await Promise.all(allStaff.map(staff =>
-            base44.entities.ContactMessage.create({
-              name: user?.full_name || artist?.name,
-              email: (staff.email || '').toLowerCase().trim(),
-              message: replyText,
-              sender_type: 'client',
-              message_type: 'text',
-              subject: 'ARTYSTA - STUDIO',
-              is_read: false,
-              attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
-            })
-          ));
+          } else {
+           const allStaff = staffList.filter(s => s.role === 'artist' || s.role === 'admin');
+           await Promise.all(allStaff.map(staff =>
+             base44.entities.ContactMessage.create({
+               name: user?.full_name || artist?.name,
+               email: (staff.email || '').toLowerCase().trim(),
+               message: replyText,
+               sender_type: 'client',
+               message_type: 'text',
+               subject: 'ARTYSTA - STUDIO',
+               is_read: false,
+               attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
+               sender_email: (user?.email || '').toLowerCase().trim(),
+             })
+           ));
         }
       } else {
         // Send to admin only
@@ -317,7 +319,7 @@ export default function ArtistMessages() {
                   </div>
                 ) : (
                   selectedThread.messages.map(msg => {
-                    const isMe = msg.email?.toLowerCase().trim() === user?.email?.toLowerCase().trim();
+                    const isMe = (msg.sender_email || msg.email)?.toLowerCase().trim() === user?.email?.toLowerCase().trim();
                     const avatar = !isMe ? getAvatar(msg) : null;
                     
                     return (
