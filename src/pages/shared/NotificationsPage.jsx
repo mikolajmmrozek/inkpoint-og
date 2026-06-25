@@ -21,6 +21,8 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
+  const [deletingAll, setDeletingAll] = useState(false);
   const pageSize = 15;
 
   const t = theme === 'light'
@@ -76,10 +78,13 @@ export default function NotificationsPage() {
   };
 
   const deleteAll = async () => {
+    setDeletingAll(true);
     try {
       await Promise.all(notifications.map(n => base44.entities.Notification.delete(n.id)));
       setNotifications([]);
     } catch (err) { console.error('Delete all error:', err); }
+    setDeletingAll(false);
+    setConfirmDeleteAll(false);
   };
 
   const handleClick = (notif) => {
@@ -115,7 +120,7 @@ export default function NotificationsPage() {
             </button>
           )}
           {notifications.length > 0 && (
-            <button onClick={deleteAll} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF4444', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer' }}>
+            <button onClick={() => setConfirmDeleteAll(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF4444', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer' }}>
               <Trash2 size={12} /> Usuń wszystkie
             </button>
           )}
@@ -199,6 +204,32 @@ export default function NotificationsPage() {
           </button>
           </div>
           )}
+
+      {/* Confirmation modal — delete all */}
+      {confirmDeleteAll && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.85)' }} onClick={() => setConfirmDeleteAll(false)}>
+          <div className="w-full max-w-sm" style={{ background: t.bg, border: `0.5px solid ${t.border}`, padding: '36px' }} onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-2 mb-4">
+              <Trash2 size={16} color="#FF4444" />
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF4444', letterSpacing: '0.2em', textTransform: 'uppercase' }}>USUŃ WSZYSTKIE</p>
+            </div>
+            <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.6rem', fontWeight: 400, color: t.text, letterSpacing: '0.04em', marginBottom: '12px' }}>
+              Czy na pewno?
+            </h3>
+            <p style={{ fontSize: '13px', color: t.muted, lineHeight: 1.6, marginBottom: '24px' }}>
+              Czy na pewno chcesz usunąć wszystkie powiadomienia ({notifications.length})? Tej operacji nie można cofnąć.
+            </p>
+            <div className="flex gap-3">
+              <button onClick={deleteAll} disabled={deletingAll} className="btn-oxblood flex-1" style={{ opacity: deletingAll ? 0.5 : 1 }}>
+                {deletingAll ? 'USUWANIE...' : 'TAK, USUŃ'}
+              </button>
+              <button onClick={() => setConfirmDeleteAll(false)} className="btn-ghost-parchment" style={{ flex: 1 }}>
+                ANULUJ
+              </button>
+            </div>
           </div>
-          );
-          }
+        </div>
+      )}
+      </div>
+    );
+  }
