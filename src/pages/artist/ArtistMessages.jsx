@@ -153,6 +153,7 @@ export default function ArtistMessages() {
     setSending(true);
     try {
       const isStudio = selectedThread?.type === 'studio' || selectedThread?.id === 'studio';
+      console.log('Send triggered - isStudio:', isStudio, 'selectedThread:', selectedThread);
       if (isStudio) {
         // Always fetch fresh staff list for group messages
         const res = await base44.functions.invoke('getStudioStaff', {});
