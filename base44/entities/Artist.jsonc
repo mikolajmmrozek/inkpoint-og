@@ -66,6 +66,10 @@
       "type": "number",
       "default": 999,
       "description": "Display order (lower = first)"
+    },
+    "gcal_calendar_id": {
+      "type": "string",
+      "description": "ID dedykowanego kalendarza Google Calendar dla tego artysty (auto-utoworzone)"
     }
   },
   "required": [
