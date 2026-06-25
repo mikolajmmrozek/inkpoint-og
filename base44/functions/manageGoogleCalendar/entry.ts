@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
     // ── STATUS: check if the user has connected their Google Calendar ──
     if (action === 'status') {
       try {
-        const conn = await base44.connectors.getCurrentAppUserConnection(CONNECTOR_ID);
+        const conn = await base44.asServiceRole.connectors.getCurrentAppUserConnection(CONNECTOR_ID);
         return Response.json({ connected: !!conn?.accessToken });
       } catch {
         return Response.json({ connected: false });
@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
     if (action === 'sync') {
       let conn;
       try {
-        conn = await base44.connectors.getCurrentAppUserConnection(CONNECTOR_ID);
+        conn = await base44.asServiceRole.connectors.getCurrentAppUserConnection(CONNECTOR_ID);
       } catch {
         return Response.json({ error: 'Not connected to Google Calendar' }, { status: 400 });
       }
