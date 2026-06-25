@@ -395,7 +395,9 @@ export default function HealthFormPage() {
 
       setSubmitted(true);
     } catch (err) {
-      setSubmitError('Wystąpił błąd podczas zapisywania. Spróbuj ponownie.');
+      console.error('Health form submit error:', err);
+      const msg = err?.message || err?.toString?.() || '';
+      setSubmitError(msg ? `Błąd zapisu: ${msg}` : 'Wystąpił błąd podczas zapisywania. Spróbuj ponownie.');
     } finally {
       setSubmitting(false);
     }
