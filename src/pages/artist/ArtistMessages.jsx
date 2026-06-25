@@ -26,7 +26,8 @@ export default function ArtistMessages() {
   // Load messages and staff
   const load = async () => {
     try {
-      const data = await base44.entities.ContactMessage.filter({ email: user?.email }, 'created_date', 200);
+      const userEmail = (user?.email || '').toLowerCase().trim();
+      const data = await base44.entities.ContactMessage.filter({ email: userEmail }, 'created_date', 200);
       setAllMessages(data);
     } catch (e) {
       console.error('Load failed:', e);
@@ -46,7 +47,10 @@ export default function ArtistMessages() {
 
     // Subscriptions
     const unsubscribe = base44.entities.ContactMessage.subscribe((event) => {
-      if (!event.data || event.data.email !== user?.email) return;
+      if (!event.data) return;
+      const userEmail = (user?.email || '').toLowerCase().trim();
+      const msgEmail = (event.data.email || '').toLowerCase().trim();
+      if (msgEmail !== userEmail) return;
       if (event.type === 'create') {
         setAllMessages(prev => prev.some(m => m.id === event.data.id) ? prev : [...prev, event.data]);
       } else if (event.type === 'update') {
@@ -61,7 +65,8 @@ export default function ArtistMessages() {
   // Polling fallback
   useEffect(() => {
     const interval = setInterval(() => {
-      base44.entities.ContactMessage.filter({ email: user?.email }, 'created_date', 200)
+      const userEmail = (user?.email || '').toLowerCase().trim();
+      base44.entities.ContactMessage.filter({ email: userEmail }, 'created_date', 200)
         .then(data => setAllMessages(data))
         .catch(() => {});
     }, 30000);
@@ -135,25 +140,44 @@ export default function ArtistMessages() {
     setSending(true);
     try {
       if (selectedThread.type === 'studio') {
-        // Send to all staff members
-        const allStaff = staffList.filter(s => s.role === 'artist' || s.role === 'admin');
-        await Promise.all(allStaff.map(staff =>
-          base44.entities.ContactMessage.create({
-            name: artist?.name || user?.full_name,
-            email: staff.email,
-            message: replyText,
-            sender_type: 'client',
-            message_type: 'text',
-            subject: 'ARTYSTA - STUDIO',
-            is_read: false,
-            attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
-          })
-        ));
+        // Send to all staff members - fetch fresh staff list to ensure all users
+        if (!staffList || staffList.length === 0) {
+          const res = await base44.functions.invoke('getStudioStaff', {});
+          const freshStaff = res.data?.staff || [];
+          const allStaff = freshStaff.filter(s => s.role === 'artist' || s.role === 'admin');
+          
+          await Promise.all(allStaff.map(staff =>
+            base44.entities.ContactMessage.create({
+              name: artist?.name || user?.full_name,
+              email: (staff.email || '').toLowerCase().trim(),
+              message: replyText,
+              sender_type: 'client',
+              message_type: 'text',
+              subject: 'ARTYSTA - STUDIO',
+              is_read: false,
+              attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
+            })
+          ));
+        } else {
+          const allStaff = staffList.filter(s => s.role === 'artist' || s.role === 'admin');
+          await Promise.all(allStaff.map(staff =>
+            base44.entities.ContactMessage.create({
+              name: artist?.name || user?.full_name,
+              email: (staff.email || '').toLowerCase().trim(),
+              message: replyText,
+              sender_type: 'client',
+              message_type: 'text',
+              subject: 'ARTYSTA - STUDIO',
+              is_read: false,
+              attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
+            })
+          ));
+        }
       } else {
         // Send to admin only
         await base44.entities.ContactMessage.create({
           name: artist?.name || user?.full_name,
-          email: user?.email,
+          email: (user?.email || '').toLowerCase().trim(),
           message: replyText,
           sender_type: 'client',
           message_type: 'text',
