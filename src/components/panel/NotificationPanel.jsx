@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 const CATEGORY_ICONS = { booking: Calendar, message: MessageSquare, system: Info, health_form: FileText };
 const CATEGORY_COLORS = { booking: '#FF007F', message: '#3b82f6', system: '#9ca3af', health_form: '#f59e0b' };
 
-export default function NotificationPanel({ open, onClose, userEmail, theme }) {
+export default function NotificationPanel({ open, onClose, userEmail, theme, notificationsPath = '/dashboard/notifications' }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [notifications, setNotifications] = useState([]);
@@ -157,9 +157,9 @@ export default function NotificationPanel({ open, onClose, userEmail, theme }) {
                 <div className="p-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
                   <button
                     onClick={() => {
-                      onClose();
-                      navigate('/dashboard/notifications');
-                    }}
+                       onClose();
+                       navigate(notificationsPath);
+                     }}
                     style={{ width: '100%', padding: '10px', fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', border: `0.5px solid ${t.fuchsia}`, cursor: 'pointer' }}
                   >
                     Pokaż wszystkie

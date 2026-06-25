@@ -63,9 +63,9 @@ export default function NotificationSidebarItem({ userEmail, theme, onMobileClic
         {inner}
       </Link>
 
-      {/* Desktop: link do dashboard notifications */}
+      {/* Desktop: link do strony powiadomień */}
       <Link
-        to="/dashboard/notifications"
+        to={notificationsPath}
         className="hidden lg:flex items-center gap-3 px-4 py-3 w-full transition-all duration-200 hover:opacity-70"
         style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: inactiveColor }}
       >

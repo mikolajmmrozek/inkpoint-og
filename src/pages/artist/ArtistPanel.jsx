@@ -219,7 +219,7 @@ export default function ArtistPanel() {
           </div>
         </div>
         <BottomNav theme={theme} role="artist" calendarPath="/artist/schedule" messagesPath="/artist/messages" notificationsPath="/artist/notifications" userEmail={user.email} />
-        <NotificationPanel open={notifOpen} onClose={() => setNotifOpen(false)} userEmail={user.email} theme={theme} />
+        <NotificationPanel open={notifOpen} onClose={() => setNotifOpen(false)} userEmail={user.email} theme={theme} notificationsPath="/artist/notifications" />
       </div>
     </ArtistThemeContext.Provider>
   );
