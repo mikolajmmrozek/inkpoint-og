@@ -21,46 +21,23 @@ Deno.serve(async (req) => {
     const notifications = [];
 
     if (msg.sender_type === 'client') {
-      // Client sent a message
+      // Client sent a message → notify shared admin inbox
       const preview = (msg.message || '').slice(0, 80);
-      
-      if (msg.subject?.includes('STUDIO')) {
-        // Group message to all staff — notify all staff members except the sender
-        const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 500);
-        const staff = allUsers.filter(u => u.role === 'artist' || u.role === 'admin');
-        const senderEmail = (msg.email || '').toLowerCase().trim();
-        
-        staff.forEach(s => {
-          if ((s.email || '').toLowerCase().trim() !== senderEmail) {
-            notifications.push({
-              target_email: s.email,
-              title: `Nowa wiadomość w czacie studia od ${msg.name}`,
-              message: `${preview}${msg.message && msg.message.length > 80 ? '...' : ''}`,
-              category: 'message',
-              link_path: '/dashboard/messages',
-              link_data: msg.email,
-              is_read: false,
-            });
-          }
-        });
-      } else {
-        // Direct message to admin
-        notifications.push({
-          target_email: 'tattoo.wolsztyn@gmail.com',
-          title: 'Nowa wiadomość',
-          message: `${msg.name || 'Klient'}: ${preview}${msg.message && msg.message.length > 80 ? '...' : ''}`,
-          category: 'message',
-          link_path: '/dashboard/messages',
-          link_data: msg.email,
-          is_read: false,
-        });
-      }
+      notifications.push({
+        target_email: 'tattoo.wolsztyn@gmail.com',
+        title: 'Nowa wiadomość',
+        message: `${msg.name || 'Klient'}: ${preview}${msg.message && msg.message.length > 80 ? '...' : ''}`,
+        category: 'message',
+        link_path: '/dashboard/messages',
+        link_data: msg.email,
+        is_read: false,
+      });
     } else if (msg.sender_type === 'admin' && msg.email) {
       // Admin replied → notify the recipient (client or artist)
       const preview = (msg.message || '').slice(0, 80);
       const recipientEmail = msg.email.toLowerCase().trim();
       
-      // Check if recipient is an artist or a client
+      // Check if recipient is an artist or a client (search all users, then match case-insensitive)
       const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 500);
       const user = allUsers.find(u => (u.email || '').toLowerCase().trim() === recipientEmail);
       const isArtist = user && user.role === 'artist';
