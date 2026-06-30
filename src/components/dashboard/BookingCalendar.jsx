@@ -18,8 +18,14 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
   const days = eachDayOfInterval({ start: startOfMonth(viewMonth), end: endOfMonth(viewMonth) });
   const startPad = (getDay(startOfMonth(viewMonth)) + 6) % 7; // Monday start
 
+  const sortByTime = (arr) => [...arr].sort((a, b) => {
+    const ta = (a.session_time || '99:99').replace(':', '');
+    const tb = (b.session_time || '99:99').replace(':', '');
+    return ta.localeCompare(tb);
+  });
+
   const getBookingsForDay = (day) =>
-    bookings.filter(b => b.session_date && isSameDay(new Date(b.session_date), day));
+    sortByTime(bookings.filter(b => b.session_date && isSameDay(new Date(b.session_date), day)));
 
   const selectedDayBookings = getBookingsForDay(effectiveSelectedDate);
 

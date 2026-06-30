@@ -35,7 +35,11 @@ export default function ClientSessions() {
     if (b.status === 'cancelled') return false;
     const d = b.session_date ? parseISO(b.session_date) : null;
     return d && (isAfter(d, today) || isToday(d));
-  }).sort((a, b) => (a.session_date || '').localeCompare(b.session_date || ''));
+  }).sort((a, b) => {
+    const dc = (a.session_date || '').localeCompare(b.session_date || '');
+    if (dc !== 0) return dc;
+    return (a.session_time || '').localeCompare(b.session_time || '');
+  });
 
   const past = bookings.filter(b => {
     const d = b.session_date ? parseISO(b.session_date) : null;
