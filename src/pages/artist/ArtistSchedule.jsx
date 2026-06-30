@@ -386,7 +386,9 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
   const startPad = (getDay(startOfMonth(viewMonth)) + 6) % 7;
   const today = new Date();
   const WEEKDAYS = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Ndz'];
-  const selectedDayBookings = bookings.filter(b => b.session_date && isSameDay(new Date(b.session_date), selectedDate));
+  const selectedDayBookings = bookings
+    .filter(b => b.session_date && isSameDay(new Date(b.session_date), selectedDate))
+    .sort((a, b) => (a.session_time || '').localeCompare(b.session_time || ''));
 
   // Get availability badge for a day: 'free' | 'block' | null
   const getAvailBadge = (day) => {
