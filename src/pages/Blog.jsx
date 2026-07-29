@@ -92,7 +92,7 @@ export default function Blog() {
                 transition={{ duration: 0.8 }}
                 className="mb-16"
               >
-                <Link to={`/blog/${featured.slug || featured.id}`} className="group grid grid-cols-1 md:grid-cols-2 gap-0 overflow-hidden">
+                <Link to={`/blog/${featured.slug || featured.id}`} className="group grid grid-cols-1 md:grid-cols-2 gap-0">
                   <div className="relative overflow-hidden aspect-[4/3] min-w-0">
                     {resolveCover(featured) ? (
                       <img
@@ -162,7 +162,7 @@ export default function Blog() {
                         <div className="w-full h-full" style={{ background: 'linear-gradient(135deg, #1a1a1a, #262626)' }} />
                       )}
                     </div>
-                    <div className="flex gap-2 mb-3">
+                    <div className="flex flex-wrap gap-2 mb-3">
                       {(post.tags || []).slice(0, 2).map(tag => (
                         <span key={tag} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.1em', border: '0.5px solid #FF007F', padding: '2px 6px', textTransform: 'uppercase' }}>
                           {tag}
