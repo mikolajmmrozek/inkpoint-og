@@ -252,14 +252,8 @@ export default function DashboardClients() {
 
   return (
     <div>
-      <div className="mb-4 flex justify-end">
-        <button onClick={openNew} className="flex items-center gap-2 btn-oxblood" style={{ padding: '8px 16px' }}>
-          <Plus size={13} /> NOWY KLIENT
-        </button>
-      </div>
-
-      {/* Stats row */}
-      <div className="flex gap-4 mb-4 flex-wrap">
+      {/* Stats row + new client button */}
+      <div className="flex gap-4 mb-4 flex-wrap items-center">
         {[
           { label: 'Wszyscy klienci', value: clients.length, filter: 'all' },
           { label: 'Nowi (7 dni)', value: clients.filter(c => isNewClient(c)).length, filter: 'new' },
@@ -267,6 +261,11 @@ export default function DashboardClients() {
         ].map(s => (
           <StatsTile key={s.label} label={s.label} value={s.value} active={clientFilter === s.filter} onClick={() => setClientFilter(clientFilter === s.filter ? 'all' : s.filter)} t={t} />
         ))}
+        <div className="ml-auto">
+          <button onClick={openNew} className="flex items-center gap-2 btn-oxblood" style={{ padding: '8px 16px' }}>
+            <Plus size={13} /> NOWY KLIENT
+          </button>
+        </div>
       </div>
 
       {/* Search — full width above list */}
