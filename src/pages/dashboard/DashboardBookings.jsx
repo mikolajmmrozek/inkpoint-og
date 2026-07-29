@@ -138,12 +138,12 @@ function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPa
           return (
             <div key={date}>
               <div className="flex items-center gap-3 mb-2">
-                <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: isPast ? '#9ca3af' : isToday ? '#f59e0b' : '#16a34a', flexShrink: 0 }} />
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: isPast ? t.muted : isToday ? '#f59e0b' : t.muted }}>
+                <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: isPast ? '#9ca3af' : isToday ? '#f59e0b' : '#16a34a', flexShrink: 0 }} />
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: isPast ? t.muted : isToday ? '#f59e0b' : t.muted }}>
                   {isToday ? `DZIŚ — ${dayLabel}` : dayLabel}
                 </p>
                 <div style={{ flex: 1, height: '0.5px', background: t.border }} />
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>
+                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: t.muted }}>
                   {items.length} {items.length === 1 ? 'sesja' : 'sesji'}
                 </span>
               </div>
