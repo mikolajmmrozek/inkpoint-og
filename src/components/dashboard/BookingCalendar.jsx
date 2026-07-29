@@ -68,6 +68,8 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
           const isSelected = isSameDay(day, effectiveSelectedDate);
           const isToday = isSameDay(day, today);
           const dayOff = getArtistsOffForDate(availabilityRecords, artists, artistFilter, format(day, 'yyyy-MM-dd'));
+          const isOffDay = dayOff.length > 0;
+          const offTitle = isOffDay ? dayOff.map(o => `${o.artist.name}${o.note ? ` (${o.note})` : ''}`).join(', ') : '';
 
           return (
             <button
@@ -75,16 +77,25 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
               onClick={() => onDayClick(day)}
               className="relative flex flex-col items-center py-2 transition-all duration-200"
               style={{
-                background: isSelected ? 'rgba(255,0,127,0.1)' : 'transparent',
-                border: isSelected ? `0.5px solid #FF007F` : (searchQuery && dayBookings.length > 0) ? `0.5px solid #FF007F` : isToday ? `0.5px solid ${t.border}` : '0.5px solid transparent',
+                background: isOffDay
+                  ? 'repeating-linear-gradient(45deg, rgba(255,0,127,0.10) 0px, rgba(255,0,127,0.10) 3px, rgba(255,0,127,0.03) 3px, rgba(255,0,127,0.03) 8px)'
+                  : (isSelected ? 'rgba(255,0,127,0.1)' : 'transparent'),
+                border: isOffDay ? `0.5px solid rgba(255,0,127,0.35)` : isSelected ? `0.5px solid #FF007F` : (searchQuery && dayBookings.length > 0) ? `0.5px solid #FF007F` : isToday ? `0.5px solid ${t.border}` : '0.5px solid transparent',
                 cursor: 'pointer',
                 minHeight: '52px',
+                opacity: isOffDay && !isSelected ? 0.75 : 1,
               }}
+              title={offTitle}
             >
+              {isOffDay && (
+                <span style={{ position: 'absolute', top: '2px', left: '3px', fontFamily: 'JetBrains Mono', fontSize: '6px', color: '#FF007F', letterSpacing: '0.02em', lineHeight: 1 }} >
+                  {dayOff.length}
+                </span>
+              )}
               <span style={{
                 fontFamily: 'JetBrains Mono',
                 fontSize: '11px',
-                color: isSelected ? '#FF007F' : isToday ? t.title : isSameMonth(day, viewMonth) ? t.text : t.muted,
+                color: isSelected ? '#FF007F' : isOffDay ? '#FF007F' : isToday ? t.title : isSameMonth(day, viewMonth) ? t.text : t.muted,
                 fontWeight: isToday ? 600 : 400,
               }}>
                 {format(day, 'd')}
@@ -99,10 +110,6 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
                     <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: t.muted }}>+{dayBookings.length - 3}</span>
                   )}
                 </div>
-              )}
-              {/* Off-day indicator */}
-              {dayOff.length > 0 && (
-                <div style={{ position: 'absolute', top: '3px', right: '3px', width: '5px', height: '5px', borderRadius: '1px',                 background: '#FF007F', opacity: 0.85 }} title={dayOff.map(o => `${o.artist.name}${o.note ? ` (${o.note})` : ''}`).join(', ')} />
               )}
             </button>
           );
