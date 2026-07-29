@@ -5,17 +5,14 @@ import { UserPlus, Search, History } from 'lucide-react';
 export default function ClientSearch({ value, onSelect, t }) {
   const [query, setQuery] = useState(value?.name || '');
   const [clients, setClients] = useState([]);
-  const [loaded, setLoaded] = useState(false);
   const [filtered, setFiltered] = useState([]);
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
-  // Lazy load — only when user starts typing
-  const ensureLoaded = () => {
-    if (loaded) return;
-    setLoaded(true);
+  // Load clients on mount so the list is ready before the user types
+  useEffect(() => {
     base44.entities.Client.list('-created_date', 2000).then(setClients).catch(() => {});
-  };
+  }, []);
 
   useEffect(() => {
     if (!query.trim()) { setFiltered([]); return; }
@@ -76,8 +73,8 @@ export default function ClientSearch({ value, onSelect, t }) {
           style={{ ...inputStyle, paddingLeft: '20px' }}
           placeholder="Szukaj klienta po imieniu, emailu, telefonie..."
           value={query}
-          onChange={e => { setQuery(e.target.value); setOpen(true); ensureLoaded(); }}
-          onFocus={e => { setOpen(true); e.target.style.borderBottomColor = '#FF007F'; ensureLoaded(); }}
+          onChange={e => { setQuery(e.target.value); setOpen(true); }}
+          onFocus={e => { setOpen(true); e.target.style.borderBottomColor = '#FF007F'; }}
           onBlur={e => e.target.style.borderBottomColor = t.border}
         />
       </div>
