@@ -4,6 +4,8 @@ import { X, Zap, History, CalendarPlus } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import ClientSearch from './ClientSearch';
 import ReferenceImagesUpload from './ReferenceImagesUpload';
+import { findTimeOffConflict, findDoubleBookingConflict } from '@/lib/bookingConflicts';
+import BookingConflictModal from '@/components/booking/BookingConflictModal';
 
 const inputStyle = {
   background: 'transparent',
@@ -34,6 +36,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
   const [selectedClient, setSelectedClient] = useState(null);
   const [repeatPrompt, setRepeatPrompt] = useState(null); // { client, lastSession }
   const [manualEndTime, setManualEndTime] = useState(false);
+  const [conflict, setConflict] = useState(null);
   const calcEndTime = (startTime, durationMinutes) => {
     if (!startTime || !durationMinutes) return '';
     const [h, m] = startTime.split(':').map(Number);
@@ -237,6 +240,25 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
   };
 
   const handleSave = async () => {
+    // Check for conflicts (time off + double booking) before saving
+    if (form.artist_id && form.session_date && form.session_time) {
+      try {
+        const [availRecords, dayBookings] = await Promise.all([
+          base44.entities.ArtistAvailability.filter({ artist_id: form.artist_id }, '-date', 500),
+          base44.entities.Booking.filter({ artist_id: form.artist_id, session_date: form.session_date }, '-created_date', 100),
+        ]);
+        const timeOff = findTimeOffConflict(availRecords, form.session_date, form.session_time, form.session_end_time);
+        const doubleBooking = findDoubleBookingConflict(dayBookings, form.session_date, form.session_time, form.session_end_time, booking?.id);
+        if (timeOff || doubleBooking) {
+          setConflict({ timeOff, doubleBooking });
+          return;
+        }
+      } catch (e) {}
+    }
+    doSave();
+  };
+
+  const doSave = async () => {
     setSaving(true);
     const fullName = `${form.client_first_name || ''} ${form.client_last_name || ''}`.trim();
     const { client_notes, ...rest } = form;
@@ -746,6 +768,15 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
         </div>
       </motion.div>
     </div>
+
+    {conflict && (
+      <BookingConflictModal
+        conflicts={conflict}
+        theme={t.bg === '#FFFFFF' ? 'light' : 'dark'}
+        onConfirm={() => { setConflict(null); doSave(); }}
+        onCancel={() => setConflict(null)}
+      />
+    )}
     </>
   );
 }

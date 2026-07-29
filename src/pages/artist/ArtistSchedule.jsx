@@ -9,6 +9,8 @@ import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModa
 import AvailabilityEditModal from '@/components/dashboard/AvailabilityEditModal';
 import ReferenceImagesUpload from '@/components/dashboard/ReferenceImagesUpload';
 import { getAvailabilityForDay } from '@/components/dashboard/ArtistScheduleEditor';
+import { findTimeOffConflict, findDoubleBookingConflict } from '@/lib/bookingConflicts';
+import BookingConflictModal from '@/components/booking/BookingConflictModal';
 
 const STATUS_COLORS = { pending: '#FF007F', confirmed: '#16a34a', completed: '#2563eb', cancelled: '#9ca3af' };
 const STATUS_LABELS = { pending: 'Oczekuje', confirmed: 'Potwierdzona', completed: 'Zakończona', cancelled: 'Anulowana' };
@@ -16,7 +18,7 @@ const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
 const MINUTES = ['00', '15', '30', '45'];
 
 // ── Booking Detail / Edit Modal ──────────────────────────────────────────────
-function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, onSaved }) {
+function BookingModal({ booking, isNew, artist, artistServices, theme, availabilityRecords, allBookings, onClose, onSaved }) {
   const t = theme === 'light'
     ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', inputBorder: '#CCCCCC' }
     : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', inputBorder: '#262626' };
@@ -40,6 +42,7 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [serviceQuery, setServiceQuery] = useState(isNew ? '' : (booking?.service_name || ''));
   const [showServiceSugg, setShowServiceSugg] = useState(false);
+  const [conflict, setConflict] = useState(null);
 
   const inp = (field, type = 'text') => ({
     type,
@@ -83,7 +86,19 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
     setShowServiceSugg(false);
   };
 
-  const handleSave = async () => {
+  const checkConflicts = () => {
+    const timeOff = findTimeOffConflict(availabilityRecords, form.session_date, form.session_time, form.session_end_time);
+    const doubleBooking = findDoubleBookingConflict(allBookings, form.session_date, form.session_time, form.session_end_time, booking?.id);
+    return timeOff || doubleBooking ? { timeOff, doubleBooking } : null;
+  };
+
+  const handleSave = () => {
+    const c = checkConflicts();
+    if (c) { setConflict(c); return; }
+    doSave();
+  };
+
+  const doSave = async () => {
     setSaving(true);
     const fullName = `${form.client_first_name || ''} ${form.client_last_name || ''}`.trim() || form.client_name || clientQuery;
     const data = { ...form, client_name: fullName };
@@ -374,6 +389,15 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
             ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F' }
             : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F' }
           }
+        />
+      )}
+
+      {conflict && (
+        <BookingConflictModal
+          conflicts={conflict}
+          theme={theme}
+          onConfirm={() => { setConflict(null); doSave(); }}
+          onCancel={() => setConflict(null)}
         />
       )}
     </div>
@@ -890,6 +914,26 @@ export default function ArtistSchedule() {
             </div>
           </div>
 
+          {/* Availability info for selected day */}
+          {(() => {
+            const dateStr = format(selectedDate, 'yyyy-MM-dd');
+            const ex = getAvailabilityRecordForDate(dateStr);
+            const dow = selectedDate.getDay();
+            const recurringOff = availabilityRecords.find(r => r.type === 'recurring' && r.day_of_week === dow && r.is_available === false);
+            const record = ex || (recurringOff ? { is_available: false, start_time: recurringOff.start_time, end_time: recurringOff.end_time, note: recurringOff.note || 'Cykliczne wolne' } : null);
+            if (!record) return null;
+            const color = record.is_available ? '#16a34a' : '#FF007F';
+            const label = record.is_available ? 'Dyspozycja' : 'Wolne';
+            const timeStr = record.start_time && record.end_time ? `${record.start_time}–${record.end_time}` : 'Cały dzień';
+            return (
+              <div className="flex items-center gap-2 mb-3 px-3 py-2" style={{ border: `0.5px solid ${color}40`, background: `${color}08` }}>
+                <div style={{ width: '6px', height: '6px', borderRadius: '1px', background: color, flexShrink: 0 }} />
+                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color, letterSpacing: '0.06em' }}>{label} · {timeStr}</span>
+                {record.note && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color, opacity: 0.7, marginLeft: '4px' }}>{record.note}</span>}
+              </div>
+            );
+          })()}
+
           {loading ? (
             <div className="p-8 text-center" style={{ border: `0.5px solid ${t.cardBorder}` }}><div className="w-8 h-px mx-auto animate-pulse" style={{ background: '#FF007F' }} /></div>
           ) : dayBookings.length === 0 ? (
@@ -941,6 +985,8 @@ export default function ArtistSchedule() {
             artist={artist}
             artistServices={artistServices}
             theme={theme}
+            availabilityRecords={availabilityRecords}
+            allBookings={bookings}
             onClose={() => setSelectedBooking(null)}
             onSaved={() => { setSelectedBooking(null); loadBookings(); }}
           />
@@ -952,6 +998,8 @@ export default function ArtistSchedule() {
             artist={artist}
             artistServices={artistServices}
             theme={theme}
+            availabilityRecords={availabilityRecords}
+            allBookings={bookings}
             onClose={() => setShowNewModal(false)}
             onSaved={() => { setShowNewModal(false); loadBookings(); }}
           />
