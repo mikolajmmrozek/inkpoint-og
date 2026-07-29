@@ -122,6 +122,8 @@ export default function BlogPost() {
   );
 
   const allImages = post.images || [];
+  const coverInImages = allImages.some(img => (img?.url || img) === post.cover_image_url);
+  const sidebarImages = (!post.cover_image_url || coverInImages) ? allImages : [...allImages, { url: post.cover_image_url, caption: post.title }];
 
   return (
     <PageLayout>
@@ -189,7 +191,7 @@ export default function BlogPost() {
           </div>
 
           {/* Desktop: 2-col layout if media exists, else full width text */}
-          {(post.video_url || allImages.length > 0) ? (
+          {(post.video_url || sidebarImages.length > 0) ? (
             <div className="lg:grid lg:grid-cols-5 lg:gap-12">
               {/* Text — 3 cols */}
               <div className="lg:col-span-3">
@@ -203,9 +205,9 @@ export default function BlogPost() {
                 {post.video_url && (
                   <video src={post.video_url} controls className="w-full" style={{ background: '#0A0A0A' }} />
                 )}
-                {allImages.length > 0 && (
+                {sidebarImages.length > 0 && (
                   <div className="space-y-3">
-                    {allImages.map((img, i) => (
+                    {sidebarImages.map((img, i) => (
                       <div key={i} className="cursor-pointer overflow-hidden group" onClick={() => setLightboxIndex(i)}>
                         <img
                           src={img?.url || img}
@@ -236,18 +238,6 @@ export default function BlogPost() {
               <ImageMosaic images={allImages} onOpen={setLightboxIndex} />
             </div>
           )}
-
-          {/* Full uncropped cover preview at the bottom */}
-          {post.cover_image_url && (
-            <div className="mt-12">
-              <img
-                src={post.cover_image_url}
-                alt={post.title}
-                className="w-full h-auto"
-                style={{ filter: 'brightness(0.85) contrast(1.05)' }}
-              />
-            </div>
-          )}
         </motion.div>
       </div>
 
@@ -255,11 +245,11 @@ export default function BlogPost() {
       <AnimatePresence>
         {lightboxIndex !== null && (
           <Lightbox
-            images={allImages}
+            images={sidebarImages}
             currentIndex={lightboxIndex}
             onClose={() => setLightboxIndex(null)}
-            onNext={(idx) => setLightboxIndex(idx !== undefined ? idx : (lightboxIndex + 1) % allImages.length)}
-            onPrev={() => setLightboxIndex((lightboxIndex - 1 + allImages.length) % allImages.length)}
+            onNext={(idx) => setLightboxIndex(idx !== undefined ? idx : (lightboxIndex + 1) % sidebarImages.length)}
+            onPrev={() => setLightboxIndex((lightboxIndex - 1 + sidebarImages.length) % sidebarImages.length)}
           />
         )}
       </AnimatePresence>
