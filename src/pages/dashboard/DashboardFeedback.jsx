@@ -132,27 +132,8 @@ export default function DashboardFeedback() {
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-end gap-2">
-        <a
-          href={surveyUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn-oxblood flex items-center gap-2"
-          style={{ padding: '8px 16px', textDecoration: 'none' }}
-        >
-          <ExternalLink size={13} /> WYSTAW OPINIĘ
-        </a>
-        <button
-          onClick={handleCopyLink}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${t.border}`, color: copied ? '#16a34a' : t.muted, background: 'transparent', cursor: 'pointer', transition: 'color 0.2s' }}
-        >
-          {copied ? <Check size={13} /> : <Copy size={13} />}
-          {copied ? 'SKOPIOWANO!' : 'KOPIUJ LINK'}
-        </button>
-      </div>
-
-      {/* Stats */}
-      <div className="flex gap-4 mb-8 flex-wrap">
+      {/* Stats + survey button */}
+      <div className="flex gap-4 mb-2 flex-wrap items-center">
         {[
           { label: 'Łączna liczba', value: feedbacks.length },
           { label: 'Śr. ocena ogólna', value: avg(ratings) + (ratings.length ? ' ★' : '') },
@@ -161,6 +142,27 @@ export default function DashboardFeedback() {
         ].map(stat => (
           <StatsTile key={stat.label} label={stat.label} value={stat.value} t={t} />
         ))}
+        <div className="ml-auto">
+          <a
+            href={surveyUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-oxblood flex items-center gap-2"
+            style={{ padding: '8px 16px', textDecoration: 'none' }}
+          >
+            <ExternalLink size={13} /> WYSTAW OPINIĘ
+          </a>
+        </div>
+      </div>
+
+      <div className="mb-8 flex justify-end">
+        <button
+          onClick={handleCopyLink}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${t.border}`, color: copied ? '#16a34a' : t.muted, background: 'transparent', cursor: 'pointer', transition: 'color 0.2s' }}
+        >
+          {copied ? <Check size={13} /> : <Copy size={13} />}
+          {copied ? 'SKOPIOWANO!' : 'KOPIUJ LINK'}
+        </button>
       </div>
 
       {/* Tabs */}
