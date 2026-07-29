@@ -132,12 +132,23 @@ export default function HealthFormPage() {
   // Save draft after each step change
   const saveDraft = async (currentForm, currentDraftId) => {
     const fullName = `${currentForm.client_first_name} ${currentForm.client_last_name}`.trim();
-    const draftData = { ...currentForm, client_name: fullName || 'Draft', is_draft: true };
+    // Update existing record in place — preserves its is_draft status (no spurious drafts when editing a completed form)
     if (currentDraftId) {
-      await base44.entities.HealthForm.update(currentDraftId, draftData).catch(() => {});
+      await base44.entities.HealthForm.update(currentDraftId, { ...currentForm, client_name: fullName }).catch(() => {});
       return currentDraftId;
-    } else if (currentForm.client_first_name || currentForm.client_email) {
-      const created = await base44.entities.HealthForm.create(draftData).catch(() => null);
+    }
+    // Before creating a new draft, reuse an existing draft for the same email (avoids duplicate drafts)
+    const email = (currentForm.client_email || '').toLowerCase().trim();
+    if (email) {
+      const existingDrafts = await base44.entities.HealthForm.filter({ client_email: currentForm.client_email, is_draft: true }, '-updated_date', 1).catch(() => []);
+      if (existingDrafts[0]?.id) {
+        setDraftId(existingDrafts[0].id);
+        await base44.entities.HealthForm.update(existingDrafts[0].id, { ...currentForm, client_name: fullName }).catch(() => {});
+        return existingDrafts[0].id;
+      }
+    }
+    if (currentForm.client_first_name || currentForm.client_email) {
+      const created = await base44.entities.HealthForm.create({ ...currentForm, client_name: fullName || 'Draft', is_draft: true }).catch(() => null);
       if (created?.id) {
         setDraftId(created.id);
         return created.id;
@@ -246,6 +257,7 @@ export default function HealthFormPage() {
               if (merged[k] === null || merged[k] === undefined) merged[k] = false;
             });
             setForm(() => merged);
+            setDraftId(existing.id);
             if (existing.booking_id) {
               const bk = await base44.entities.Booking.filter({ id: existing.booking_id }).then(r => r[0]);
               if (bk) setBooking(bk);
