@@ -8,6 +8,7 @@ import { format, isToday, isPast, parseISO, addDays, subDays } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
 import ClientSearch from '@/components/dashboard/ClientSearch';
+import { pluralSesji } from '@/utils';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -499,7 +500,7 @@ export default function ArtistHome() {
                   <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#FF007F', flexShrink: 0 }} />
                   <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: t.muted }}>{formatDayHeader(date)}</p>
                   <div style={{ flex: 1, height: '0.5px', background: t.cardBorder }} />
-                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{items.length} {items.length === 1 ? 'sesja' : 'sesje'}</span>
+                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{items.length} {pluralSesji(items.length)}</span>
                 </div>
                 <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
                   {items.map((b, i) => (

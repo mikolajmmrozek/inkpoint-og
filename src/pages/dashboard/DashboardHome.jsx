@@ -11,6 +11,7 @@ import BookingModal from '@/components/dashboard/BookingModal';
 import HealthFormBadge from '@/components/booking/HealthFormBadge';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { buildHealthFormStatusMap, resolveBookingHealthStatus } from '@/lib/healthFormStatus';
+import { pluralSesji } from '@/utils';
 
 export default function DashboardHome() {
   const { theme } = useTheme();
@@ -254,7 +255,7 @@ export default function DashboardHome() {
                     </p>
                     <div style={{ flex: 1, height: '0.5px', background: t.cardBorder }} />
                     <span style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: t.muted }}>
-                      {items.length} {items.length === 1 ? 'sesja' : 'sesji'}
+                      {items.length} {pluralSesji(items.length)}
                     </span>
                   </div>
 
