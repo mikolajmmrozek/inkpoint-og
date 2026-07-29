@@ -160,29 +160,19 @@ export default function DashboardServices() {
 
   return (
     <div>
-      <div className="mb-4 flex justify-end">
-        <button onClick={openNew} className="flex items-center gap-2 btn-oxblood" style={{ padding: '8px 16px' }}>
-          <Plus size={13} /> NOWA USŁUGA
-        </button>
-      </div>
-
-      {/* Search */}
-      <div className="mb-4" style={{ position: 'relative' }}>
-        <Search size={13} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: t.muted, pointerEvents: 'none' }} />
-        <input
-          type="text"
-          placeholder="Szukaj usługi..."
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-          style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '10px 36px', fontSize: '13px', color: t.text, fontFamily: 'Inter, sans-serif', outline: 'none' }}
-          onFocus={e => e.target.style.borderColor = '#FF007F'}
-          onBlur={e => e.target.style.borderColor = t.border}
-        />
-        {searchQuery && (
-          <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}>
-            <X size={12} />
+      {/* Stats + new service button */}
+      <div className="flex gap-4 mb-6 flex-wrap items-center">
+        {[
+          { label: 'Wszystkich usług', value: services.length },
+          { label: 'Aktywnych', value: services.filter(s => s.is_active !== false).length },
+        ].map(s => (
+          <StatsTile key={s.label} label={s.label} value={s.value} t={t} />
+        ))}
+        <div className="ml-auto">
+          <button onClick={openNew} className="flex items-center gap-2 btn-oxblood" style={{ padding: '8px 16px' }}>
+            <Plus size={13} /> NOWA USŁUGA
           </button>
-        )}
+        </div>
       </div>
 
       {/* Filters */}
@@ -242,14 +232,23 @@ export default function DashboardServices() {
         )}
       </div>
 
-      {/* Stats */}
-      <div className="flex gap-4 mb-6 flex-wrap">
-        {[
-          { label: 'Wszystkich usług', value: services.length },
-          { label: 'Aktywnych', value: services.filter(s => s.is_active !== false).length },
-        ].map(s => (
-          <StatsTile key={s.label} label={s.label} value={s.value} t={t} />
-        ))}
+      {/* Search — directly above list */}
+      <div className="mb-4" style={{ position: 'relative' }}>
+        <Search size={13} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: t.muted, pointerEvents: 'none' }} />
+        <input
+          type="text"
+          placeholder="Szukaj usługi..."
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '10px 36px', fontSize: '13px', color: t.text, fontFamily: 'Inter, sans-serif', outline: 'none' }}
+          onFocus={e => e.target.style.borderColor = '#FF007F'}
+          onBlur={e => e.target.style.borderColor = t.border}
+        />
+        {searchQuery && (
+          <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}>
+            <X size={12} />
+          </button>
+        )}
       </div>
 
       {/* List */}
