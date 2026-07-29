@@ -29,7 +29,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, artist, user
   const bg = theme === 'light' ? '#FFFFFF' : '#0A0A0A';
   const border = theme === 'light' ? '#E5E5E5' : '#262626';
   const textColor = theme === 'light' ? '#111111' : '#F5F0EB';
-  const mutedColor = theme === 'light' ? 'rgba(0,0,0,0.4)' : 'rgba(245,240,235,0.4)';
+  const mutedColor = theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.75)';
 
   return (
     <>
@@ -72,7 +72,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, artist, user
                   <Icon size={14} color={active ? '#FF007F' : (theme === 'light' ? 'rgba(0,0,0,0.3)' : 'rgba(245,240,235,0.3)')} />
                   {nav.path === '/artist/messages' && counts.messages > 0 && <SidebarBadge type="count" value={counts.messages} />}
                 </div>
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{nav.label}</span>
+                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{nav.label}</span>
               </Link>
             );
           })}
@@ -95,7 +95,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, artist, user
             style={{ color: mutedColor, background: 'transparent', border: 'none', cursor: 'pointer' }}
           >
             {theme === 'light' ? <Moon size={14} /> : <Sun size={14} />}
-            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
               {theme === 'light' ? 'Ciemny motyw' : 'Jasny motyw'}
             </span>
           </button>
@@ -105,7 +105,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, artist, user
             style={{ color: mutedColor, background: 'transparent', border: 'none', cursor: 'pointer' }}
           >
             <LogOut size={14} />
-            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Wyloguj się</span>
+            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Wyloguj się</span>
           </button>
           <Link to="/" className="flex items-center gap-3 px-4 py-2 w-full" style={{ color: mutedColor, fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             ← Wróć na stronę
@@ -182,7 +182,7 @@ export default function ArtistPanel() {
   const bg = theme === 'light' ? '#F8F8F8' : '#0A0A0A';
   const topBarBg = theme === 'light' ? '#FFFFFF' : '#0A0A0A';
   const border = theme === 'light' ? '#E5E5E5' : '#262626';
-  const mutedColor = theme === 'light' ? 'rgba(0,0,0,0.4)' : 'rgba(245,240,235,0.4)';
+  const mutedColor = theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.75)';
   const textColor = theme === 'light' ? '#111111' : '#F5F0EB';
 
   return (

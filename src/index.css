@@ -52,7 +52,7 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
-    font-size: 18px;
+    font-size: 20px;
     line-height: 1.6;
     letter-spacing: -0.01em;
     overflow-x: hidden;

@@ -43,7 +43,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
         <button onClick={() => setViewMonth(m => subMonths(m, 1))} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
           <ChevronLeft size={18} />
         </button>
-        <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.4rem', fontWeight: 400, color: t.title, letterSpacing: '0.08em' }}>
+        <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.5rem', fontWeight: 400, color: t.title, letterSpacing: '0.08em' }}>
           {format(viewMonth, 'LLLL yyyy', { locale: pl }).toUpperCase()}
         </p>
         <button onClick={() => setViewMonth(m => addMonths(m, 1))} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
@@ -54,7 +54,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
       {/* Weekday headers */}
       <div className="grid grid-cols-7 mb-2">
         {WEEKDAYS.map(d => (
-          <div key={d} className="text-center py-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.1em' }}>
+          <div key={d} className="text-center py-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted, letterSpacing: '0.1em' }}>
             {d}
           </div>
         ))}
@@ -98,13 +98,13 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
               title={offTitle}
             >
               {isOffDay && (
-                <span style={{ position: 'absolute', top: '2px', left: '3px', fontFamily: 'JetBrains Mono', fontSize: '6px', color: '#FF007F', letterSpacing: '0.02em', lineHeight: 1 }} >
+                <span style={{ position: 'absolute', top: '2px', left: '3px', fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.02em', lineHeight: 1 }} >
                   {dayOff.length}
                 </span>
               )}
               <span style={{
                 fontFamily: 'JetBrains Mono',
-                fontSize: '11px',
+                fontSize: '14px',
                 color: isSelected ? '#FF007F' : isOffDay ? '#FF007F' : isToday ? t.title : isSameMonth(day, viewMonth) ? t.text : t.muted,
                 fontWeight: isToday ? 600 : 400,
               }}>
@@ -129,7 +129,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
       {/* Selected day sessions / empty state */}
       {(selectedDayBookings.length > 0 || selectedDate) && (
         <div className="mt-6" style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '16px' }}>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>
             Sesje — {format(effectiveSelectedDate, 'EEEE, d MMMM', { locale: pl }).toUpperCase()}
           </p>
           {selectedDayOff.length > 0 && (
@@ -159,9 +159,9 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
                   <div key={b.id} onClick={() => onBookingClick?.(b)} style={{ borderBottom: i < selectedDayBookings.length - 1 ? `0.5px solid ${t.border}` : 'none', padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,0,127,0.04)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                     {/* Time */}
                     <div className="flex-shrink-0 text-center" style={{ minWidth: '48px' }}>
-                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: STATUS_COLORS[b.status] || t.fuchsia, letterSpacing: '0.05em' }}>{b.session_time}</p>
+                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', color: STATUS_COLORS[b.status] || t.fuchsia, letterSpacing: '0.05em' }}>{b.session_time}</p>
                       {b.session_end_time ? (
-                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted }}>→ {b.session_end_time}</p>
+                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>→ {b.session_end_time}</p>
                       ) : null}
                     </div>
                     
@@ -177,12 +177,12 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
                         </div>
                       ) : null}
                       <div className="min-w-0">
-                        <p style={{ color: t.text, fontSize: '14px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.client_name}</p>
-                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <p style={{ color: t.text, fontSize: '15px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.client_name}</p>
+                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {b.artist_name}{b.tattoo_placement ? ` · ${b.tattoo_placement}` : ''}
                         </p>
                         {b.service_name && (
-                          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.08em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', opacity: 0.8 }}>
+                          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', opacity: 0.8 }}>
                             {b.service_name}
                           </p>
                         )}
@@ -193,9 +193,9 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
                     <div className="flex items-center gap-3 flex-shrink-0">
                       <HealthFormBadge status={resolveBookingHealthStatus(b, healthStatusMap)} fontSize="7px" style={{ padding: '2px 5px' }} />
                       {b.service_id && (b.estimated_price === 0 || b.estimated_price === null || b.estimated_price === undefined || b.estimated_price === '') ? (
-                        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>BEZPŁATNA</span>
+                        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.06em' }}>BEZPŁATNA</span>
                       ) : b.estimated_price > 0 ? (
-                        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{b.estimated_price} PLN</span>
+                        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>{b.estimated_price} PLN</span>
                       ) : null}
                       <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: STATUS_COLORS[b.status] || t.muted }} />
                     </div>
@@ -212,7 +212,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
         {Object.entries(STATUS_COLORS).map(([status, color]) => (
           <div key={status} className="flex items-center gap-1.5">
             <div className="rounded-full" style={{ width: '6px', height: '6px', background: color }} />
-            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{status}</span>
+            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{status}</span>
           </div>
         ))}
       </div>

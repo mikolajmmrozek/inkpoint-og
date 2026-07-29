@@ -69,7 +69,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, clientName, 
                   <Icon size={14} color={active ? '#FF007F' : (theme === 'light' ? 'rgba(0,0,0,0.55)' : 'rgba(245,240,235,0.65)')} />
                   {nav.path === '/panel/messages' && counts.messages > 0 && <SidebarBadge type="count" value={counts.messages} />}
                 </div>
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{nav.label}</span>
+                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{nav.label}</span>
               </Link>
             );
           })}
@@ -82,7 +82,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, clientName, 
             style={{ color: mutedColor, background: 'transparent', border: 'none', cursor: 'pointer' }}
           >
             {theme === 'light' ? <Moon size={14} /> : <Sun size={14} />}
-            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
               {theme === 'light' ? 'Ciemny motyw' : 'Jasny motyw'}
             </span>
           </button>
@@ -92,7 +92,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, clientName, 
             style={{ color: mutedColor, background: 'transparent', border: 'none', cursor: 'pointer' }}
           >
             <LogOut size={14} />
-            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Wyloguj się</span>
+            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Wyloguj się</span>
           </button>
           <Link to="/" className="flex items-center gap-3 px-4 py-2 w-full mt-1" style={{ color: theme === 'light' ? 'rgba(0,0,0,0.45)' : 'rgba(245,240,235,0.5)', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             ← Wróć na stronę
