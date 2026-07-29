@@ -50,8 +50,11 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
       const [first, ...last] = (b.client_name || '').split(' ');
       return {
         ...b,
+        client_name: b.client_name || '',
         client_first_name: first || '',
         client_last_name: last.join(' ') || '',
+        client_email: b.client_email || '',
+        client_phone: b.client_phone || '',
         session_end_time: b.session_end_time || calcEndTime(b.session_time, b.session_duration),
         admin_notes: b.admin_notes || '',
         client_notes: '',
@@ -70,7 +73,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
       artist_id: p?.artist_id || '',
       artist_name: p?.artist_name || '',
       session_date: p?.session_date || defaultDate || '',
-      session_time: p?.session_time || '',
+      session_time: p?.session_time || '09:00',
       session_end_time: '',
       session_duration: p?.session_duration || 0,
       tattoo_description: p?.tattoo_description || '',
@@ -89,10 +92,10 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
   };
   const [form, setForm] = useState(() => buildForm(booking));
 
-  // Re-initialize form when booking prop changes (e.g. repeat session selected)
+  // Re-initialize form when booking prop changes (e.g. editing a different booking)
   useEffect(() => {
     setForm(buildForm(booking));
-  }, [booking?.service_id, booking?.artist_id, booking?.client_email, booking?.tattoo_placement]);
+  }, [booking?.id, booking?._prefill]);
 
   useEffect(() => {
     Promise.all([
@@ -521,6 +524,18 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                 ))}
               </div>
             </div>
+            {/* Artist — right below categories */}
+            <div className="mb-4 mt-4">
+              {label('Artysta')}
+              <select
+                value={form.artist_id || ''}
+                onChange={e => handleArtist(e.target.value)}
+                style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
+              >
+                <option value="">Wybierz artystę</option>
+                {artists.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+              </select>
+            </div>
             <div style={{ position: 'relative' }}>
               {label('Wybierz usługę (opcjonalnie)')}
               <div style={{ position: 'relative' }}>
@@ -591,19 +606,6 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
           {/* Session */}
           <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>SESJA</p>
-            <div className="mb-4">
-              <div>
-                {label('Artysta')}
-                <select
-                  value={form.artist_id || ''}
-                  onChange={e => handleArtist(e.target.value)}
-                  style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
-                >
-                  <option value="">Wybierz artystę</option>
-                  {artists.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-                </select>
-              </div>
-            </div>
             <div className="mb-4">
               <div>{label('Data *')}<input {...inp('session_date', 'date')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }} /></div>
             </div>
