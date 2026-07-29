@@ -63,7 +63,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
         style={{ background: bg, borderRight: `0.5px solid ${border}` }}
       >
         {/* Logo / collapse toggle — matches top bar height (px-6 py-4) */}
-        <div className="flex items-center px-2 py-4 justify-between" style={{ borderBottom: `0.5px solid ${border}` }}>
+        <div className="flex items-center px-2 py-4 justify-between" style={{ borderBottom: `0.5px solid ${border}`, minHeight: '68.6px' }}>
           <div className={collapsed ? 'lg:hidden' : ''}>
             <p style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, fontSize: '1.6rem', color: textColor, letterSpacing: '0.08em', lineHeight: 1 }}>ROMANS</p>
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', lineHeight: 1, marginTop: '2px' }}>DASHBOARD</p>
