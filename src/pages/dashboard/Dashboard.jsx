@@ -62,13 +62,13 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
         className={`fixed top-0 left-0 h-full z-50 w-64 flex flex-col transition-all duration-500 lg:translate-x-0 ${collapsed ? 'lg:w-16' : 'lg:w-64'} ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
         style={{ background: bg, borderRight: `0.5px solid ${border}` }}
       >
-        {/* Logo / collapse toggle */}
-        <div className={`flex items-center ${collapsed ? 'lg:justify-center lg:p-2' : 'justify-between p-8'}`} style={{ borderBottom: `0.5px solid ${border}` }}>
+        {/* Logo / collapse toggle — matches top bar height (px-6 py-4) */}
+        <div className={`flex items-center px-6 py-4 ${collapsed ? 'lg:justify-center' : 'justify-between'}`} style={{ borderBottom: `0.5px solid ${border}` }}>
           <div className={collapsed ? 'lg:hidden' : ''}>
-            <p style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, fontSize: '2.5rem', color: textColor, letterSpacing: '0.08em', lineHeight: 1 }}>ROMANS</p>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase' }}>DASHBOARD</p>
+            <p style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, fontSize: '1.6rem', color: textColor, letterSpacing: '0.08em', lineHeight: 1 }}>ROMANS</p>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', lineHeight: 1, marginTop: '2px' }}>DASHBOARD</p>
           </div>
-          <button onClick={() => setSidebarOpen(false)} className="lg:hidden" style={{ color: mutedColor }}>
+          <button onClick={() => setSidebarOpen(false)} className="lg:hidden" style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer' }}>
             <X size={18} />
           </button>
           <button onClick={onToggleCollapse} className="hidden lg:flex items-center justify-center" style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer', padding: '8px' }}>
@@ -77,7 +77,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
         </div>
 
         {/* Nav */}
-        <nav className={`flex-1 p-6 space-y-1 overflow-y-auto ${collapsed ? 'lg:p-2' : ''}`}>
+        <nav className={`flex-1 p-6 space-y-1 overflow-y-auto overflow-x-hidden ${collapsed ? 'lg:p-2' : ''}`}>
           {NAV.map(nav => {
             const Icon = nav.icon;
             const active = isActive(nav);
@@ -113,6 +113,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
               notificationsPath="/dashboard/notifications"
               onMobileClick={() => setSidebarOpen(false)}
               onDesktopClick={() => { setSidebarOpen(false); onNotifClick(); }}
+              collapsed={collapsed}
             />
           </div>
         </nav>

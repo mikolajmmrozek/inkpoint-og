@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
  * Mobile/tablet: Link do strony powiadomień.
  * Desktop: przycisk otwierający panel popup.
  */
-export default function NotificationSidebarItem({ userEmail, theme, onMobileClick, onDesktopClick, notificationsPath }) {
+export default function NotificationSidebarItem({ userEmail, theme, onMobileClick, onDesktopClick, notificationsPath, collapsed }) {
   const [unreadCount, setUnreadCount] = useState(0);
 
   const inactiveColor = theme === 'light' ? 'rgba(0,0,0,0.55)' : 'rgba(245,240,235,0.65)';
@@ -66,10 +66,32 @@ export default function NotificationSidebarItem({ userEmail, theme, onMobileClic
       {/* Desktop: link do strony powiadomień */}
       <Link
         to={notificationsPath}
-        className="hidden lg:flex items-center gap-3 px-4 py-3 w-full transition-all duration-200 hover:opacity-70"
+        onClick={onDesktopClick}
+        className={`hidden lg:flex items-center gap-3 px-4 py-3 w-full transition-all duration-200 hover:opacity-70 ${collapsed ? 'lg:justify-center lg:px-2' : ''}`}
         style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: inactiveColor }}
+        title={collapsed ? 'Powiadomienia' : ''}
       >
-        {inner}
+        <div style={{ position: 'relative' }}>
+          <Bell size={20} color={inactiveColor} />
+          {unreadCount > 0 && (
+            <span style={{
+              position: 'absolute', top: '-3px', right: '-5px',
+              minWidth: '14px', height: '14px',
+              background: '#FF007F', color: '#F5F0EB',
+              fontSize: '8px', fontWeight: 600,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              borderRadius: '7px', padding: '0 3px',
+              fontFamily: 'JetBrains Mono',
+            }}>
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
+        </div>
+        {!collapsed && (
+          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase', color: inactiveColor }}>
+            Powiadomienia
+          </span>
+        )}
       </Link>
     </>
   );
