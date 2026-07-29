@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
-import { Star, Mail, Eye, EyeOff, Trash2, X, Check, Plus, GripVertical } from 'lucide-react';
+import { Star, Mail, Eye, EyeOff, Trash2, X, Check, Plus, GripVertical, Copy, ExternalLink } from 'lucide-react';
 import StatsTile from '@/components/dashboard/StatsTile';
 
 function StarDisplay({ value, size = 12 }) {
@@ -43,7 +43,16 @@ export default function DashboardFeedback() {
 
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('reviews'); // 'reviews' | 'config'
+  const [copied, setCopied] = useState(false);
   const [sortBy, setSortBy] = useState('newest'); // 'newest' | 'oldest' | 'highest' | 'lowest'
+
+  const surveyUrl = `${window.location.origin}/feedback`;
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(surveyUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
   const [configForm, setConfigForm] = useState(null);
   const [savingConfig, setSavingConfig] = useState(false);
 
@@ -129,10 +138,23 @@ export default function DashboardFeedback() {
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>ZARZĄDZANIE</p>
           <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>Opinie</h2>
         </div>
-        <div className="md:mt-7 max-w-xs text-right">
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', lineHeight: 1.6 }}>
-            Opinie zbierane wyłącznie od zweryfikowanych klientów po ukończonej sesji
-          </p>
+        <div className="flex items-center gap-2 md:mt-7">
+          <a
+            href={surveyUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-oxblood flex items-center gap-2"
+            style={{ padding: '10px 20px', textDecoration: 'none' }}
+          >
+            <ExternalLink size={13} /> WYSTAW OPINIĘ
+          </a>
+          <button
+            onClick={handleCopyLink}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '10px 20px', border: `0.5px solid ${t.border}`, color: copied ? '#16a34a' : t.muted, background: 'transparent', cursor: 'pointer', transition: 'color 0.2s' }}
+          >
+            {copied ? <Check size={13} /> : <Copy size={13} />}
+            {copied ? 'SKOPIOWANO!' : 'KOPIUJ LINK'}
+          </button>
         </div>
       </div>
 
