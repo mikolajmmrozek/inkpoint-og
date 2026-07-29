@@ -127,7 +127,9 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
             style={{ color: mutedColor, background: 'transparent', border: 'none', cursor: 'pointer' }}
             title={collapsed ? (theme === 'light' ? 'Ciemny motyw' : 'Jasny motyw') : ''}
           >
-            {theme === 'light' ? <Moon size={16} className="shrink-0" /> : <Sun size={16} className="shrink-0" />}
+            <div className="shrink-0 flex items-center justify-center" style={{ width: 20 }}>
+              {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+            </div>
             <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
               {theme === 'light' ? 'Ciemny motyw' : 'Jasny motyw'}
             </span>
@@ -139,13 +141,17 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
             style={{ color: mutedColor, background: 'transparent', border: 'none', cursor: 'pointer' }}
             title={collapsed ? 'Wyloguj się' : ''}
           >
-            <LogOut size={16} className="shrink-0" />
+            <div className="shrink-0 flex items-center justify-center" style={{ width: 20 }}>
+              <LogOut size={16} />
+            </div>
             <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
               Wyloguj się
             </span>
           </button>
           <Link to="/" className="flex items-center gap-3 px-4 py-1.5 w-full whitespace-nowrap overflow-hidden" style={{ color: mutedColor, fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }} title={collapsed ? 'Wróć na stronę' : ''}>
-            <HomeIcon size={16} className="shrink-0" />
+            <div className="shrink-0 flex items-center justify-center" style={{ width: 20 }}>
+              <HomeIcon size={16} />
+            </div>
             <span>Wróć na stronę</span>
           </Link>
         </div>
