@@ -142,7 +142,7 @@ export default function DashboardFeedback() {
         ].map(stat => (
           <StatsTile key={stat.label} label={stat.label} value={stat.value} t={t} />
         ))}
-        <div className="ml-auto">
+        <div className="ml-auto flex flex-col items-end gap-2">
           <a
             href={surveyUrl}
             target="_blank"
@@ -152,17 +152,14 @@ export default function DashboardFeedback() {
           >
             <ExternalLink size={13} /> WYSTAW OPINIĘ
           </a>
+          <button
+            onClick={handleCopyLink}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${t.border}`, color: copied ? '#16a34a' : t.muted, background: 'transparent', cursor: 'pointer', transition: 'color 0.2s' }}
+          >
+            {copied ? <Check size={13} /> : <Copy size={13} />}
+            {copied ? 'SKOPIOWANO!' : 'KOPIUJ LINK'}
+          </button>
         </div>
-      </div>
-
-      <div className="mb-8 flex justify-end">
-        <button
-          onClick={handleCopyLink}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${t.border}`, color: copied ? '#16a34a' : t.muted, background: 'transparent', cursor: 'pointer', transition: 'color 0.2s' }}
-        >
-          {copied ? <Check size={13} /> : <Copy size={13} />}
-          {copied ? 'SKOPIOWANO!' : 'KOPIUJ LINK'}
-        </button>
       </div>
 
       {/* Tabs */}
