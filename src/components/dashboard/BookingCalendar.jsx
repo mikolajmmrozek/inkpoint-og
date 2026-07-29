@@ -158,10 +158,10 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
                 return (
                   <div key={b.id} onClick={() => onBookingClick?.(b)} style={{ borderBottom: i < selectedDayBookings.length - 1 ? `0.5px solid ${t.border}` : 'none', padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,0,127,0.04)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                     {/* Time */}
-                    <div className="flex-shrink-0 text-center" style={{ minWidth: '48px' }}>
-                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', color: STATUS_COLORS[b.status] || t.fuchsia, letterSpacing: '0.05em' }}>{b.session_time}</p>
+                    <div className="flex-shrink-0 text-center" style={{ minWidth: '52px' }}>
+                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '16px', color: STATUS_COLORS[b.status] || t.fuchsia, letterSpacing: '0.05em' }}>{b.session_time}</p>
                       {b.session_end_time ? (
-                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>→ {b.session_end_time}</p>
+                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted }}>→ {b.session_end_time}</p>
                       ) : null}
                     </div>
                     
