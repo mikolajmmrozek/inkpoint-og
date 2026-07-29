@@ -63,9 +63,9 @@ export default function NotificationSidebarItem({ userEmail, theme, onMobileClic
         {inner}
       </Link>
 
-      {/* Desktop: link do strony powiadomień */}
-      <Link
-        to={notificationsPath}
+      {/* Desktop: przycisk otwierający panel powiadomień (popup z prawej) */}
+      <button
+        type="button"
         onClick={onDesktopClick}
         className={`hidden lg:flex items-center gap-3 px-4 py-3 w-full transition-all duration-200 hover:opacity-70 ${collapsed ? 'lg:justify-center lg:px-2' : ''}`}
         style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: inactiveColor }}
@@ -92,7 +92,7 @@ export default function NotificationSidebarItem({ userEmail, theme, onMobileClic
             Powiadomienia
           </span>
         )}
-      </Link>
+      </button>
     </>
   );
 }
