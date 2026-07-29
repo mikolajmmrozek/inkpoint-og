@@ -12,6 +12,9 @@ import { getAvailabilityForDay } from '@/components/dashboard/ArtistScheduleEdit
 import { findTimeOffConflict, findDoubleBookingConflict } from '@/lib/bookingConflicts';
 import BookingConflictModal from '@/components/booking/BookingConflictModal';
 import { recomputeClientTotalSessions } from '@/lib/clientStats';
+import { buildHealthFormStatusMap, resolveBookingHealthStatus } from '@/lib/healthFormStatus';
+import HealthFormBadge from '@/components/booking/HealthFormBadge';
+import ReferenceImagesGallery from '@/components/booking/ReferenceImagesGallery';
 
 const STATUS_COLORS = { pending: '#FF007F', confirmed: '#16a34a', completed: '#2563eb', cancelled: '#9ca3af' };
 const STATUS_LABELS = { pending: 'Oczekuje', confirmed: 'Potwierdzona', completed: 'Zakończona', cancelled: 'Anulowana' };
@@ -19,7 +22,7 @@ const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
 const MINUTES = ['00', '15', '30', '45'];
 
 // ── Booking Detail / Edit Modal ──────────────────────────────────────────────
-function BookingModal({ booking, isNew, artist, artistServices, theme, availabilityRecords, allBookings, onClose, onSaved }) {
+function BookingModal({ booking, isNew, artist, artistServices, theme, availabilityRecords, allBookings, onClose, onSaved, healthStatusMap }) {
   const t = theme === 'light'
     ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', inputBorder: '#CCCCCC' }
     : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', inputBorder: '#262626' };
@@ -179,7 +182,7 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, availabil
                 {STATUS_LABELS[form.status]}
               </span>
               {form.deposit_paid && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.08em' }}>✓ DEPOZYT</span>}
-              {!form.health_form_completed && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', padding: '3px 8px', border: '0.5px solid #FF007F', color: '#FF007F' }}>BRAK ANKIETY</span>}
+              <HealthFormBadge status={resolveBookingHealthStatus(form, healthStatusMap)} fontSize="8px" style={{ padding: '3px 8px' }} />
             </div>
 
             {/* Quick status change */}
@@ -220,6 +223,14 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, availabil
                 </div>
               ))}
             </div>
+
+            {/* Reference images gallery */}
+            {form.reference_images && form.reference_images.length > 0 && (
+              <div className="pt-2" style={{ borderTop: `0.5px solid ${t.border}` }}>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>ZDJĘCIA REFERENCYJNE ({form.reference_images.length})</p>
+                <ReferenceImagesGallery images={form.reference_images} theme={theme} t={theme === 'light' ? { border: '#E5E5E5' } : { border: '#262626' }} />
+              </div>
+            )}
 
             {/* Health form button */}
             {form.health_form_completed && (
@@ -407,7 +418,7 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, availabil
 }
 
 // ── Monthly Calendar View ────────────────────────────────────────────────────
-function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth, t, theme, onBookingClick, onAddBooking, availabilityRecords, onAvailabilityClick }) {
+function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth, t, theme, onBookingClick, onAddBooking, availabilityRecords, onAvailabilityClick, healthStatusMap }) {
   const days = eachDayOfInterval({ start: startOfMonth(viewMonth), end: endOfMonth(viewMonth) });
   const startPad = (getDay(startOfMonth(viewMonth)) + 6) % 7;
   const today = new Date();
@@ -552,6 +563,7 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
                   </p>
                 )}
                 {b.estimated_price > 0 && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginTop: '2px' }}>{b.estimated_price} zł</p>}
+                <div className="mt-1"><HealthFormBadge status={resolveBookingHealthStatus(b, healthStatusMap)} fontSize="7px" style={{ padding: '2px 5px' }} /></div>
               </div>
             ))}
           </div>
@@ -794,6 +806,7 @@ export default function ArtistSchedule() {
   const [showNewModal, setShowNewModal] = useState(false);
   const [artistServices, setArtistServices] = useState([]);
   const [availabilityRecords, setAvailabilityRecords] = useState([]);
+  const [healthStatusMap, setHealthStatusMap] = useState({});
   const [selectedAvailability, setSelectedAvailability] = useState(null); // { record, dateStr }
 
   const loadAvailability = useCallback(() => {
@@ -837,6 +850,10 @@ export default function ArtistSchedule() {
     base44.entities.Booking.filter({ artist_id: artist.id }, '-session_date', 150)
       .then(setBookings)
       .finally(() => setLoading(false));
+    // Load health forms to classify ankieta status badges
+    base44.entities.HealthForm.list('-created_date', 500)
+      .then(forms => setHealthStatusMap(buildHealthFormStatusMap(forms)))
+      .catch(() => {});
   }, [artist?.id]);
 
   useEffect(() => {
@@ -895,6 +912,7 @@ export default function ArtistSchedule() {
             onBookingClick={setSelectedBooking} onAddBooking={() => setShowNewModal(true)}
             availabilityRecords={availabilityRecords}
             onAvailabilityClick={setSelectedAvailability}
+            healthStatusMap={healthStatusMap}
           />
         </div>
       )}
@@ -979,9 +997,7 @@ export default function ArtistSchedule() {
                   {b.service_name && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', opacity: 0.8, marginTop: '2px' }}>{b.service_name}</p>}
                   <div className="flex items-center gap-3 mt-2 flex-wrap">
                     {b.estimated_price > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{b.estimated_price} zł</span>}
-                    {!b.health_form_completed && b.status !== 'cancelled' && (
-                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '2px 6px', border: '0.5px solid #FF007F', color: '#FF007F' }}>BRAK ANKIETY</span>
-                    )}
+                    {b.status !== 'cancelled' && <HealthFormBadge status={resolveBookingHealthStatus(b, healthStatusMap)} fontSize="7px" style={{ padding: '2px 6px' }} />}
                   </div>
                 </div>
               ))}
@@ -1003,6 +1019,7 @@ export default function ArtistSchedule() {
             allBookings={bookings}
             onClose={() => setSelectedBooking(null)}
             onSaved={() => { setSelectedBooking(null); loadBookings(); }}
+            healthStatusMap={healthStatusMap}
           />
         )}
         {showNewModal && (

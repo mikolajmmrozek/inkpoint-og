@@ -3,6 +3,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameDay, isSameMonth, addMonths, subMonths } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import { getArtistsOffForDate } from '@/lib/bookingConflicts';
+import { resolveBookingHealthStatus } from '@/lib/healthFormStatus';
+import HealthFormBadge from '@/components/booking/HealthFormBadge';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -11,7 +13,7 @@ const STATUS_COLORS = {
   cancelled: '#9ca3af',
 };
 
-export default function BookingCalendar({ bookings, onDayClick, selectedDate, t, artists = [], onAddBooking, searchQuery = '', onBookingClick, availabilityRecords = [], artistFilter = 'all' }) {
+export default function BookingCalendar({ bookings, onDayClick, selectedDate, t, artists = [], onAddBooking, searchQuery = '', onBookingClick, availabilityRecords = [], artistFilter = 'all', healthStatusMap = {} }) {
   const [viewMonth, setViewMonth] = useState(new Date());
   const today = new Date();
   const effectiveSelectedDate = selectedDate || today;
@@ -189,6 +191,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
                     
                     {/* Price + status */}
                     <div className="flex items-center gap-3 flex-shrink-0">
+                      <HealthFormBadge status={resolveBookingHealthStatus(b, healthStatusMap)} fontSize="7px" style={{ padding: '2px 5px' }} />
                       {b.service_id && (b.estimated_price === 0 || b.estimated_price === null || b.estimated_price === undefined || b.estimated_price === '') ? (
                         <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>BEZPŁATNA</span>
                       ) : b.estimated_price > 0 ? (

@@ -12,6 +12,8 @@ import BookingModal from '@/components/dashboard/BookingModal';
 import DailyScheduleView from '@/components/dashboard/DailyScheduleView.jsx';
 import { getArtistsOffForDate } from '@/lib/bookingConflicts';
 import { recomputeClientTotalSessions } from '@/lib/clientStats';
+import { buildHealthFormStatusMap, resolveBookingHealthStatus } from '@/lib/healthFormStatus';
+import HealthFormBadge from '@/components/booking/HealthFormBadge';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -22,7 +24,7 @@ const STATUS_COLORS = {
 
 const STATUS_OPTIONS = ['pending', 'confirmed', 'completed', 'cancelled'];
 
-function BookingRow({ b, i, items, selected, setSelected, artists, t }) {
+function BookingRow({ b, i, items, selected, setSelected, artists, t, healthStatusMap }) {
   return (
     <div
       className="flex items-center justify-between p-4 cursor-pointer transition-colors"
@@ -63,11 +65,9 @@ function BookingRow({ b, i, items, selected, setSelected, artists, t }) {
         </div>
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
-        {!b.health_form_completed && (
-          <span className="hidden sm:inline" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.08em', border: '0.5px solid #FF007F', padding: '2px 5px' }}>
-            ANKIETA
-          </span>
-        )}
+        <span className="hidden sm:inline">
+          <HealthFormBadge status={resolveBookingHealthStatus(b, healthStatusMap)} fontSize="8px" style={{ padding: '2px 5px' }} />
+        </span>
         {b.estimated_price && (
           <span className="hidden sm:inline" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{b.estimated_price} PLN</span>
         )}
@@ -80,7 +80,7 @@ function BookingRow({ b, i, items, selected, setSelected, artists, t }) {
   );
 }
 
-function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPageBookings, listPageCount, listPage, setListPage, listTab, setListTab, selected, setSelected, artists, t, setEditingBooking, setShowModal, availabilityRecords, artistFilter }) {
+function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPageBookings, listPageCount, listPage, setListPage, listTab, setListTab, selected, setSelected, artists, t, setEditingBooking, setShowModal, availabilityRecords, artistFilter, healthStatusMap }) {
   const getOffForDate = (dateStr) => getArtistsOffForDate(availabilityRecords, artists, artistFilter, dateStr);
   const todayStr = format(new Date(), 'yyyy-MM-dd');
 
@@ -155,7 +155,7 @@ function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPa
                 </div>
               ) : null; })()}
               <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-                {items.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={items} selected={selected} setSelected={setSelected} artists={artists} t={t} />)}
+                {items.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={items} selected={selected} setSelected={setSelected} artists={artists} t={t} healthStatusMap={healthStatusMap} />)}
               </div>
             </div>
           );
@@ -166,7 +166,7 @@ function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPa
 
   return (
     <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-      {listBookings.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={listBookings} selected={selected} setSelected={setSelected} artists={artists} t={t} />)}
+      {listBookings.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={listBookings} selected={selected} setSelected={setSelected} artists={artists} t={t} healthStatusMap={healthStatusMap} />)}
     </div>
   );
 }
@@ -181,6 +181,7 @@ export default function DashboardBookings() {
   const [bookings, setBookings] = useState([]);
   const [artists, setArtists] = useState([]);
   const [availabilityRecords, setAvailabilityRecords] = useState([]);
+  const [healthStatusMap, setHealthStatusMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [statusFilters, setStatusFilters] = useState(() => {
@@ -202,14 +203,16 @@ export default function DashboardBookings() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const load = async () => {
-    const [data, artistData, avail] = await Promise.all([
+    const [data, artistData, avail, healthForms] = await Promise.all([
       base44.entities.Booking.list('-session_date', 200),
       base44.entities.Artist.list(),
       base44.entities.ArtistAvailability.list(),
+      base44.entities.HealthForm.list('-created_date', 1000),
     ]);
     setBookings(data);
     setArtists(artistData);
     setAvailabilityRecords(avail);
+    setHealthStatusMap(buildHealthFormStatusMap(healthForms));
     setLoading(false);
   };
 
@@ -539,7 +542,7 @@ export default function DashboardBookings() {
                 </div>
                 {listBookings.length > 0 ? (
                   <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, marginTop: '4px' }}>
-                    {listBookings.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={listBookings} selected={selected} setSelected={setSelected} artists={artists} t={t} />)}
+                    {listBookings.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={listBookings} selected={selected} setSelected={setSelected} artists={artists} t={t} healthStatusMap={healthStatusMap} />)}
                   </div>
                 ) : (
                   <div className="py-6 text-center" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
@@ -564,6 +567,7 @@ export default function DashboardBookings() {
                 onBookingClick={handleBookingClick}
                 availabilityRecords={availabilityRecords}
                 artistFilter={artistFilters}
+                healthStatusMap={healthStatusMap}
               />
             )}
 
@@ -642,7 +646,7 @@ export default function DashboardBookings() {
                   return (
                     <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
                       {dayBookings.length > 0 ? (
-                        dayBookings.map((b, i, arr) => <BookingRow key={b.id} b={b} i={i} items={arr} selected={selected} setSelected={setSelected} artists={artists} t={t} />)
+                        dayBookings.map((b, i, arr) => <BookingRow key={b.id} b={b} i={i} items={arr} selected={selected} setSelected={setSelected} artists={artists} t={t} healthStatusMap={healthStatusMap} />)
                       ) : (
                         <div className="py-6 text-center">
                           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK SESJI W TEN DZIEŃ</p>
@@ -670,6 +674,7 @@ export default function DashboardBookings() {
                     setShowModal={setShowModal}
                     availabilityRecords={availabilityRecords}
                     artistFilter={artistFilters}
+                    healthStatusMap={healthStatusMap}
                   />
                 )}
               </div>
@@ -693,7 +698,7 @@ export default function DashboardBookings() {
                 </div>
               ) : (
                 <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-                  {pendingViewBookings.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={pendingViewBookings} selected={selected} setSelected={setSelected} artists={artists} t={t} />)}
+                  {pendingViewBookings.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={pendingViewBookings} selected={selected} setSelected={setSelected} artists={artists} t={t} healthStatusMap={healthStatusMap} />)}
                 </div>
               )}
             </div>
