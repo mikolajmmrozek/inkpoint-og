@@ -31,50 +31,53 @@ function BookingRow({ b, i, items, selected, setSelected, artists, t, healthStat
       style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selected?.id === b.id ? 'rgba(255,0,127,0.05)' : 'transparent' }}
       onClick={() => setSelected(b)}
     >
-      <div className="flex items-center gap-6 min-w-0">
-        <div className="flex-shrink-0 text-center" style={{ minWidth: '60px' }}>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.05em', marginBottom: '2px' }}>{b.session_date || '—'}</p>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: STATUS_COLORS[b.status] || t.fuchsia, letterSpacing: '0.05em' }}>{b.session_time || '—'}</p>
+      <div className="flex items-center gap-3 min-w-0 flex-1">
+        <div className="flex-shrink-0 text-center" style={{ minWidth: '48px' }}>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', color: STATUS_COLORS[b.status] || t.fuchsia, letterSpacing: '0.05em' }}>{b.session_time}</p>
           {b.session_end_time ? (
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted }}>→ {b.session_end_time}</p>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>→ {b.session_end_time}</p>
           ) : b.session_time && b.session_duration ? (() => {
             const [h, m] = b.session_time.split(':').map(Number);
             const endTotal = h * 60 + m + b.session_duration;
             const endH = String(Math.floor(endTotal / 60)).padStart(2, '0');
             const endM = String(endTotal % 60).padStart(2, '0');
-            return <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted }}>→ {endH}:{endM}</p>;
+            return <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>→ {endH}:{endM}</p>;
           })() : null}
         </div>
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
           {(() => {
             const artist = artists.find(a => a.id === b.artist_id);
             return artist?.photo_url ? (
-              <img src={artist.photo_url} alt={artist.name} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${t.border}`, flexShrink: 0 }} />
-            ) : b.artist_name ? (
-              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(255,0,127,0.12)', border: '1px solid rgba(255,0,127,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ fontSize: '10px', color: '#FF007F', fontFamily: 'Bebas Neue, system-ui' }}>{b.artist_name.charAt(0)}</span>
+              <img src={artist.photo_url} alt={artist.name} loading="lazy" width={40} height={40} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${t.border}`, flexShrink: 0 }} />
+            ) : (artist || b.artist_name) ? (
+              <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(255,0,127,0.1)', border: '0.5px solid rgba(255,0,127,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '15px', color: '#FF007F', letterSpacing: '0.05em' }}>
+                  {(artist?.name || b.artist_name || '').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
+                </span>
               </div>
             ) : null;
           })()}
           <div className="min-w-0">
-            <p style={{ color: t.text, fontSize: '14px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.client_name}</p>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <p style={{ color: t.text, fontSize: '15px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.client_name}</p>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {b.artist_name}{b.tattoo_placement ? ` · ${b.tattoo_placement}` : ''}
             </p>
+            {b.service_name && (
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', opacity: 0.8 }}>
+                {b.service_name}
+              </p>
+            )}
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-2 flex-shrink-0">
-        <span className="hidden sm:inline">
-          <HealthFormBadge status={resolveBookingHealthStatus(b, healthStatusMap)} fontSize="8px" style={{ padding: '2px 5px' }} />
-        </span>
-        {b.estimated_price && (
-          <span className="hidden sm:inline" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{b.estimated_price} PLN</span>
-        )}
-        <span className="hidden lg:inline" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 8px', border: `0.5px solid ${STATUS_COLORS[b.status] || t.border}`, color: STATUS_COLORS[b.status] || t.muted }}>
-          {b.status}
-        </span>
-        <div className="lg:hidden" style={{ width: '8px', height: '8px', borderRadius: '50%', background: STATUS_COLORS[b.status] || t.muted, flexShrink: 0 }} />
+      <div className="flex items-center gap-3 flex-shrink-0">
+        <HealthFormBadge status={resolveBookingHealthStatus(b, healthStatusMap)} fontSize="10px" style={{ padding: '3px 7px' }} />
+        {b.service_id && (b.estimated_price === 0 || b.estimated_price === null || b.estimated_price === undefined || b.estimated_price === '') ? (
+          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', color: t.muted, letterSpacing: '0.06em' }}>BEZPŁATNA</span>
+        ) : b.estimated_price > 0 ? (
+          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', color: t.muted }}>{b.estimated_price} PLN</span>
+        ) : null}
+        <div style={{ width: '11px', height: '11px', borderRadius: '50%', background: STATUS_COLORS[b.status] || t.muted }} />
       </div>
     </div>
   );
