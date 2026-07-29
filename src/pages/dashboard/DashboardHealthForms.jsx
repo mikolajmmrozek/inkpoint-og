@@ -419,17 +419,13 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
 
   return (
     <div>
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <p style={{ ...mono, fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>DANE MEDYCZNE</p>
-          <h2 style={{ ...display, fontSize: '2.5rem', color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>Ankiety Zdrowotne</h2>
-        </div>
+      <div className="mb-4 flex justify-end">
         <a
           href={generalFormLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 btn-oxblood md:mt-7"
-          style={{ padding: '10px 20px', textDecoration: 'none' }}
+          className="flex items-center gap-2 btn-oxblood"
+          style={{ padding: '8px 16px', textDecoration: 'none' }}
         >
           <Plus size={13} /> NOWA ANKIETA
         </a>

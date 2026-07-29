@@ -103,11 +103,6 @@ export default function DashboardUsers() {
 
   return (
     <div>
-      <div className="mb-10">
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>UŻYTKOWNICY</p>
-        <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>Zarządzanie dostępem</h1>
-      </div>
-
       {/* Invite form */}
       <div className="p-6 mb-8" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
         <div className="flex items-center gap-2 mb-6">

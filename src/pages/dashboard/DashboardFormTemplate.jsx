@@ -149,11 +149,6 @@ export default function DashboardFormTemplate() {
 
   return (
     <div>
-      <div className="mb-6">
-        <p style={{ ...mono, fontSize: '10px', color: fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>KONFIGURACJA</p>
-        <h2 style={{ ...display, fontSize: '2.5rem', color: fg, lineHeight: 1, letterSpacing: '0.04em' }}>Szablon Ankiety</h2>
-      </div>
-
       <div className="space-y-3">
 
         {/* ── PYTANIA MEDYCZNE ── */}

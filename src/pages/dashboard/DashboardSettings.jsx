@@ -124,15 +124,6 @@ export default function DashboardSettings() {
 
   return (
     <div>
-      <div className="mb-8">
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
-          PERSONALIZACJA STRONY
-        </p>
-        <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>
-          Ustawienia
-        </h2>
-      </div>
-
       {/* Tabs */}
       <div className="flex gap-2 mb-6 flex-wrap">
         {['hero', 'about', 'contact', 'branding'].map(tab => (

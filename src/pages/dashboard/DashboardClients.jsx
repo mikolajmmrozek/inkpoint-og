@@ -252,12 +252,8 @@ export default function DashboardClients() {
 
   return (
     <div>
-      <div className="mb-6 flex items-start justify-between flex-wrap gap-4">
-        <div>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>BAZA DANYCH</p>
-          <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>Klienci</h2>
-        </div>
-        <button onClick={openNew} className="flex items-center gap-2 btn-oxblood md:mt-7" style={{ padding: '10px 20px' }}>
+      <div className="mb-4 flex justify-end">
+        <button onClick={openNew} className="flex items-center gap-2 btn-oxblood" style={{ padding: '8px 16px' }}>
           <Plus size={13} /> NOWY KLIENT
         </button>
       </div>

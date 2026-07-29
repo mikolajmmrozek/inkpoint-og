@@ -398,11 +398,6 @@ export default function DashboardDocuments() {
 
   return (
     <div>
-      <div className="mb-8">
-        <p style={{ ...mono, fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>ZAWARTOŚĆ STUDIA</p>
-        <h2 style={{ ...display, fontSize: '2.5rem', color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>Dokumenty</h2>
-      </div>
-
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />

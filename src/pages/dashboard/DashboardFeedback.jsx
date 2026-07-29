@@ -132,30 +132,23 @@ export default function DashboardFeedback() {
 
   return (
     <div>
-      {/* Header */}
-      <div className="mb-6 flex items-start justify-between flex-wrap gap-4">
-        <div>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>ZARZĄDZANIE</p>
-          <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>Opinie</h2>
-        </div>
-        <div className="flex items-center gap-2 md:mt-7">
-          <a
-            href={surveyUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-oxblood flex items-center gap-2"
-            style={{ padding: '10px 20px', textDecoration: 'none' }}
-          >
-            <ExternalLink size={13} /> WYSTAW OPINIĘ
-          </a>
-          <button
-            onClick={handleCopyLink}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '10px 20px', border: `0.5px solid ${t.border}`, color: copied ? '#16a34a' : t.muted, background: 'transparent', cursor: 'pointer', transition: 'color 0.2s' }}
-          >
-            {copied ? <Check size={13} /> : <Copy size={13} />}
-            {copied ? 'SKOPIOWANO!' : 'KOPIUJ LINK'}
-          </button>
-        </div>
+      <div className="mb-4 flex items-center justify-end gap-2">
+        <a
+          href={surveyUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-oxblood flex items-center gap-2"
+          style={{ padding: '8px 16px', textDecoration: 'none' }}
+        >
+          <ExternalLink size={13} /> WYSTAW OPINIĘ
+        </a>
+        <button
+          onClick={handleCopyLink}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${t.border}`, color: copied ? '#16a34a' : t.muted, background: 'transparent', cursor: 'pointer', transition: 'color 0.2s' }}
+        >
+          {copied ? <Check size={13} /> : <Copy size={13} />}
+          {copied ? 'SKOPIOWANO!' : 'KOPIUJ LINK'}
+        </button>
       </div>
 
       {/* Stats */}

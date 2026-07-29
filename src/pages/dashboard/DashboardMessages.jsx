@@ -206,38 +206,28 @@ export default function DashboardMessages() {
   // ============ RENDER ============
   return (
     <div>
-      {/* Header */}
-      <div className="mb-6 flex items-start justify-between flex-wrap gap-4">
-        <div>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
-            SKRZYNKA ODBIORCZA
-          </p>
-          <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>
-            Wiadomości
-          </h2>
+      {/* Search bar + new message */}
+      <div className="mb-4 flex items-center gap-3">
+        <div className="flex-1 relative">
+          <Search size={14} color={t.muted} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Szukaj po imieniu, emailu, telefonie, treści wiadomości..."
+            style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '12px 14px 12px 38px', fontSize: '13px', color: t.text, fontFamily: 'Inter, sans-serif', outline: 'none' }}
+            onFocus={e => e.target.style.borderColor = t.fuchsia}
+            onBlur={e => e.target.style.borderColor = t.border}
+          />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}>
+              <X size={14} />
+            </button>
+          )}
         </div>
-        <button onClick={() => setShowNewMessage(true)} className="flex items-center gap-2 btn-oxblood md:mt-7" style={{ padding: '10px 20px' }}>
+        <button onClick={() => setShowNewMessage(true)} className="flex items-center gap-2 btn-oxblood flex-shrink-0" style={{ padding: '10px 16px' }}>
           <Plus size={13} /> NOWA WIADOMOŚĆ
         </button>
-      </div>
-
-      {/* Search bar */}
-      <div className="mb-6 relative">
-        <Search size={14} color={t.muted} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-          placeholder="Szukaj po imieniu, emailu, telefonie, treści wiadomości..."
-          style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '12px 14px 12px 38px', fontSize: '13px', color: t.text, fontFamily: 'Inter, sans-serif', outline: 'none' }}
-          onFocus={e => e.target.style.borderColor = t.fuchsia}
-          onBlur={e => e.target.style.borderColor = t.border}
-        />
-        {searchQuery && (
-          <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}>
-            <X size={14} />
-          </button>
-        )}
       </div>
 
       <div className="grid lg:grid-cols-5 gap-6">
