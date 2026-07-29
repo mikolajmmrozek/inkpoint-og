@@ -91,9 +91,6 @@ export default function Footer() {
           <p className="text-micro" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.1em' }}>
             © 2026 ROMANS TATTOO. WSZELKIE PRAWA ZASTRZEŻONE.
           </p>
-          <Link to="/dashboard" className="text-micro text-parchment/20 hover:text-parchment/60 transition-colors" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.2)', letterSpacing: '0.1em' }}>
-            PANEL ADMINA
-          </Link>
         </div>
       </div>
     </footer>
