@@ -146,19 +146,37 @@ export default function HealthFormPage() {
     return currentDraftId;
   };
 
-  // Create or update client record
+  // Create or update client record — dedup by email, then phone, then name (avoids duplicates for minors without email)
   const upsertClient = async (currentForm) => {
-    if (!currentForm.client_email && !currentForm.client_phone) return;
+    if (!currentForm.client_email && !currentForm.client_phone && !currentForm.client_first_name) return;
     const fullName = `${currentForm.client_first_name} ${currentForm.client_last_name}`.trim();
-    const existing = currentForm.client_email
-      ? await base44.entities.Client.filter({ email: currentForm.client_email }, '-created_date', 1).catch(() => [])
-      : [];
-    if (existing.length > 0) {
-      await base44.entities.Client.update(existing[0].id, {
-        first_name: currentForm.client_first_name || existing[0].first_name,
-        last_name: currentForm.client_last_name || existing[0].last_name,
-        name: fullName || existing[0].name,
-        phone: currentForm.client_phone || existing[0].phone,
+    const email = (currentForm.client_email || '').toLowerCase().trim();
+    const phone = (currentForm.client_phone || '').replace(/\D/g, '');
+    const nameLower = fullName.toLowerCase().trim();
+
+    const allClients = await base44.entities.Client.list('-created_date', 500).catch(() => []);
+    const existing = allClients.find(c => {
+      const cEmail = (c.email || '').toLowerCase().trim();
+      const cPhone = (c.phone || '').replace(/\D/g, '');
+      const cName = (c.name || '').toLowerCase().trim();
+      if (email && cEmail && email === cEmail) return true;
+      if (phone && cPhone && phone === cPhone) return true;
+      if (nameLower && cName && cName === nameLower) {
+        // Name match is only valid if no conflicting email/phone
+        if (email && cEmail && email !== cEmail) return false;
+        if (phone && cPhone && phone !== cPhone) return false;
+        return true;
+      }
+      return false;
+    });
+
+    if (existing) {
+      await base44.entities.Client.update(existing.id, {
+        first_name: currentForm.client_first_name || existing.first_name,
+        last_name: currentForm.client_last_name || existing.last_name,
+        name: fullName || existing.name,
+        email: currentForm.client_email || existing.email,
+        phone: currentForm.client_phone || existing.phone,
       }).catch(() => {});
     } else {
       await base44.entities.Client.create({
