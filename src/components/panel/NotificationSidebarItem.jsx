@@ -30,7 +30,7 @@ export default function NotificationSidebarItem({ userEmail, theme, onMobileClic
   const inner = (
     <>
       <div style={{ position: 'relative' }}>
-        <Bell size={14} color={inactiveColor} />
+        <Bell size={20} color={inactiveColor} />
         {unreadCount > 0 && (
           <span style={{
             position: 'absolute', top: '-3px', right: '-5px',
@@ -45,7 +45,7 @@ export default function NotificationSidebarItem({ userEmail, theme, onMobileClic
           </span>
         )}
       </div>
-      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', color: inactiveColor }}>
+      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase', color: inactiveColor }}>
         Powiadomienia
       </span>
     </>
