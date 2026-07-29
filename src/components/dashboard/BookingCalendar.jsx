@@ -177,10 +177,22 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
                         </div>
                       ) : null}
                       <div className="min-w-0">
-                        <p style={{ color: t.text, fontSize: '15px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.client_name}</p>
-                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {b.artist_name}{b.tattoo_placement ? ` · ${b.tattoo_placement}` : ''}
-                        </p>
+                        {(() => {
+                          const parts = (b.client_name || '').split(' ');
+                          const first = parts[0] || '';
+                          const last = parts.slice(1).join(' ');
+                          return (
+                            <>
+                              <p style={{ color: t.text, fontSize: '15px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.15 }}>{first}</p>
+                              {last && <p style={{ color: t.text, fontSize: '13px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.15 }}>{last}</p>}
+                            </>
+                          );
+                        })()}
+                        {b.tattoo_placement && (
+                          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {b.tattoo_placement}
+                          </p>
+                        )}
                         {b.service_name && (
                           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', opacity: 0.8 }}>
                             {b.service_name}
