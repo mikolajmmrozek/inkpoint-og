@@ -8,6 +8,8 @@ import { AnimatePresence } from 'framer-motion';
 import { useTheme } from './Dashboard';
 import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
 import BookingModal from '@/components/dashboard/BookingModal';
+import HealthFormBadge from '@/components/booking/HealthFormBadge';
+import { buildHealthFormStatusMap, resolveBookingHealthStatus } from '@/lib/healthFormStatus';
 
 export default function DashboardHome() {
   const { theme } = useTheme();
@@ -18,6 +20,8 @@ export default function DashboardHome() {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [editingBooking, setEditingBooking] = useState(null);
   const [allBookings, setAllBookings] = useState([]);
+  const [artists, setArtists] = useState([]);
+  const [healthStatusMap, setHealthStatusMap] = useState({});
   const [previewForm, setPreviewForm] = useState(null); // { id?, bookingId?, clientName }
 
   useEffect(() => {
@@ -26,8 +30,12 @@ export default function DashboardHome() {
       base44.entities.ContactMessage.filter({ is_read: false }),
       base44.entities.HealthForm.list('-created_date', 10),
       base44.entities.HealthForm.filter({ is_draft: true }, '-created_date', 50),
-    ]).then(([bookings, messages, forms, drafts]) => {
+      base44.entities.Artist.list(),
+      base44.entities.HealthForm.list('-created_date', 300),
+    ]).then(([bookings, messages, forms, drafts, artistData, healthForms]) => {
       setAllBookings(bookings);
+      setArtists(artistData);
+      setHealthStatusMap(buildHealthFormStatusMap(healthForms));
       setDraftForms(drafts);
       const pending = bookings.filter(b => b.status === 'pending');
       setStats({
@@ -37,10 +45,15 @@ export default function DashboardHome() {
         forms: forms.length,
       });
 
-      // Group pending+confirmed by date, sorted ascending
+      // Group pending+confirmed by date, sorted ascending — limit to 10 sessions total
       const active = bookings.filter(b => b.status === 'pending' || b.status === 'confirmed');
+      const sortedActive = [...active].sort((a, b) =>
+        (a.session_date || '').localeCompare(b.session_date || '') ||
+        (a.session_time || '').localeCompare(b.session_time || '')
+      );
+      const limited = sortedActive.slice(0, 10);
       const grouped = {};
-      active.forEach(b => {
+      limited.forEach(b => {
         const day = b.session_date || 'Brak daty';
         if (!grouped[day]) grouped[day] = [];
         grouped[day].push(b);
@@ -60,8 +73,8 @@ export default function DashboardHome() {
   };
 
   const t = theme === 'light'
-    ? { label: '#FF007F', title: '#111111', muted: 'rgba(0,0,0,0.4)', cardBg: '#FFFFFF', cardBorder: '#E5E5E5', value: '#111111', rowHover: 'rgba(0,0,0,0.03)', rowBorder: '#E5E5E5', pageBg: '#D5D5D5' }
-    : { label: '#FF007F', title: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', cardBg: 'rgba(255,255,255,0.06)', cardBorder: '#262626', value: '#F5F0EB', rowHover: 'rgba(255,255,255,0.05)', rowBorder: '#262626', pageBg: '#0A0A0A' };
+    ? { label: '#FF007F', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.62)', fuchsia: '#FF007F', border: '#E5E5E5', cardBg: '#FFFFFF', cardBorder: '#E5E5E5', value: '#111111', rowHover: 'rgba(0,0,0,0.03)', rowBorder: '#E5E5E5', pageBg: '#D5D5D5' }
+    : { label: '#FF007F', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.72)', fuchsia: '#FF007F', border: '#262626', cardBg: 'rgba(255,255,255,0.06)', cardBorder: '#262626', value: '#F5F0EB', rowHover: 'rgba(255,255,255,0.05)', rowBorder: '#262626', pageBg: '#0A0A0A' };
 
   const KPI = [
     { label: 'Wszystkie rezerwacje', value: stats.bookings, icon: Calendar, link: '/dashboard/bookings' },
@@ -69,6 +82,24 @@ export default function DashboardHome() {
     { label: 'Nowe wiadomości', value: stats.messages, icon: MessageSquare, link: '/dashboard/messages' },
     { label: 'Ankiety zdrowotne', value: stats.forms, icon: FileText, link: '/dashboard/health-forms' },
   ];
+
+  const buildPendingByDay = (bookingsArr) => {
+    const active = bookingsArr.filter(b => b.status === 'pending' || b.status === 'confirmed');
+    const sortedActive = [...active].sort((a, b) =>
+      (a.session_date || '').localeCompare(b.session_date || '') ||
+      (a.session_time || '').localeCompare(b.session_time || '')
+    );
+    const limited = sortedActive.slice(0, 10);
+    const grouped = {};
+    limited.forEach(b => {
+      const day = b.session_date || 'Brak daty';
+      if (!grouped[day]) grouped[day] = [];
+      grouped[day].push(b);
+    });
+    return Object.entries(grouped)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, items]) => ({ date, items }));
+  };
 
   return (
     <div>
@@ -193,46 +224,68 @@ export default function DashboardHome() {
                 <div key={date}>
                   {/* Day header */}
                   <div className="flex items-center gap-3 mb-2">
-                    <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: isPast ? '#FF007F' : isToday ? '#f59e0b' : '#16a34a', flexShrink: 0 }} />
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: isPast ? '#FF007F' : isToday ? '#f59e0b' : t.muted }}>
+                    <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: isPast ? '#9ca3af' : isToday ? '#f59e0b' : '#16a34a', flexShrink: 0 }} />
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: isPast ? t.muted : isToday ? '#f59e0b' : t.muted }}>
                       {isToday ? `DZIŚ — ${dayLabel}` : isPast ? `PRZETERMINOWANE — ${dayLabel}` : dayLabel}
                     </p>
-                    <div style={{ flex: 1, height: '0.5px', background: isPast ? 'rgba(255,0,127,0.3)' : t.cardBorder }} />
-                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: isPast ? '#FF007F' : t.muted, letterSpacing: '0.08em', textAlign: 'right', display: 'block' }}>
-                      {items.length} {items.length === 1 ? 'sesja' : 'sesje'}
+                    <div style={{ flex: 1, height: '0.5px', background: t.cardBorder }} />
+                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: t.muted }}>
+                      {items.length} {items.length === 1 ? 'sesja' : 'sesji'}
                     </span>
                   </div>
 
                   {/* Sessions */}
                   <div style={{ border: `0.5px solid ${isPast ? 'rgba(255,0,127,0.4)' : t.cardBorder}`, background: t.cardBg }}>
-                    {items.map((b, i) => (
-                      <div key={b.id} onClick={() => setSelectedBooking(b)} className="flex items-center justify-between p-4 cursor-pointer transition-colors" style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none', background: 'transparent' }} onMouseEnter={e => e.currentTarget.style.background = t.rowHover} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                        <div className="flex items-center gap-4">
-                          <div>
-                            <p style={{ color: t.value, fontSize: '14px', fontWeight: 500 }}>{b.client_name}</p>
-                            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
-                              {b.artist_name && `${b.artist_name} · `}{b.session_time && `${b.session_time}${b.session_end_time ? `–${b.session_end_time}` : ''}`}
-                              {b.tattoo_placement && ` · ${b.tattoo_placement}`}
-                            </p>
+                    {items.map((b, i) => {
+                      const artist = artists.find(a => a.id === b.artist_id);
+                      return (
+                        <div key={b.id} onClick={() => setSelectedBooking(b)} className="flex items-center justify-between p-4 cursor-pointer transition-colors" style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none', background: 'transparent' }} onMouseEnter={e => e.currentTarget.style.background = t.rowHover} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="flex-shrink-0 text-center" style={{ minWidth: '52px' }}>
+                              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '16px', color: STATUS_COLORS[b.status] || t.fuchsia, letterSpacing: '0.05em' }}>{b.session_time}</p>
+                              {b.session_end_time ? (
+                                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted }}>→ {b.session_end_time}</p>
+                              ) : b.session_time && b.session_duration ? (() => {
+                                const [h, m] = b.session_time.split(':').map(Number);
+                                const endTotal = h * 60 + m + b.session_duration;
+                                return <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted }}>→ {String(Math.floor(endTotal / 60)).padStart(2, '0')}:{String(endTotal % 60).padStart(2, '0')}</p>;
+                              })() : null}
+                            </div>
+                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                              {artist?.photo_url ? (
+                                <img src={artist.photo_url} alt={artist.name} loading="lazy" width={40} height={40} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${t.border}`, flexShrink: 0 }} />
+                              ) : (artist || b.artist_name) ? (
+                                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(255,0,127,0.1)', border: '0.5px solid rgba(255,0,127,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                  <span style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '15px', color: '#FF007F', letterSpacing: '0.05em' }}>
+                                    {(artist?.name || b.artist_name || '').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
+                                  </span>
+                                </div>
+                              ) : null}
+                              <div className="min-w-0">
+                                <p style={{ color: t.text, fontSize: '15px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.client_name}</p>
+                                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {b.artist_name}{b.tattoo_placement ? ` · ${b.tattoo_placement}` : ''}
+                                </p>
+                                {b.service_name && (
+                                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', opacity: 0.8 }}>
+                                    {b.service_name}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 flex-shrink-0">
+                            <HealthFormBadge status={resolveBookingHealthStatus(b, healthStatusMap)} fontSize="10px" style={{ padding: '3px 7px' }} />
+                            {b.service_id && (b.estimated_price === 0 || b.estimated_price === null || b.estimated_price === undefined || b.estimated_price === '') ? (
+                              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', color: t.muted, letterSpacing: '0.06em' }}>BEZPŁATNA</span>
+                            ) : b.estimated_price > 0 ? (
+                              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', color: t.muted }}>{b.estimated_price} PLN</span>
+                            ) : null}
+                            <div style={{ width: '11px', height: '11px', borderRadius: '50%', background: STATUS_COLORS[b.status] || t.muted }} />
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          {!b.health_form_completed && (
-                            <span title="Brak ankiety zdrowotnej" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '3px 8px', border: '0.5px solid #FF007F', color: '#FF007F', background: 'rgba(255,0,127,0.08)' }}>
-                              ANKIETA
-                            </span>
-                          )}
-                          {b.estimated_price && (
-                            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>
-                              {b.estimated_price} zł
-                            </span>
-                          )}
-                          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status] || '#FF007F'}`, color: STATUS_COLORS[b.status] || '#FF007F' }}>
-                            {b.status?.toUpperCase()}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               );
@@ -249,15 +302,11 @@ export default function DashboardHome() {
           onClose={() => setSelectedBooking(null)}
           onStatusChange={(id, status) => {
             base44.entities.Booking.update(id, { status }).then((updated) => {
-              setAllBookings(prev => prev.map(b => b.id === id ? updated : b));
-              const active = allBookings.map(b => b.id === id ? updated : b).filter(b => b.status === 'pending' || b.status === 'confirmed');
-              const grouped = {};
-              active.forEach(b => {
-                const day = b.session_date || 'Brak daty';
-                if (!grouped[day]) grouped[day] = [];
-                grouped[day].push(b);
+              setAllBookings(prev => {
+                const next = prev.map(b => b.id === id ? updated : b);
+                setPendingByDay(buildPendingByDay(next));
+                return next;
               });
-              setPendingByDay(Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b)).map(([date, items]) => ({ date, items })));
             });
           }}
           onEdit={() => { setEditingBooking(selectedBooking); setSelectedBooking(null); }}
@@ -268,16 +317,11 @@ export default function DashboardHome() {
             setSelectedBooking(null);
           }}
           onUpdate={(updated) => {
-            setAllBookings(prev => prev.map(b => b.id === updated.id ? updated : b));
-            // Refresh active list
-            const pending = allBookings.map(b => b.id === updated.id ? updated : b).filter(b => b.status === 'pending' || b.status === 'confirmed');
-            const grouped = {};
-            pending.forEach(b => {
-              const day = b.session_date || 'Brak daty';
-              if (!grouped[day]) grouped[day] = [];
-              grouped[day].push(b);
+            setAllBookings(prev => {
+              const next = prev.map(b => b.id === updated.id ? updated : b);
+              setPendingByDay(buildPendingByDay(next));
+              return next;
             });
-            setPendingByDay(Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b)).map(([date, items]) => ({ date, items })));
             setSelectedBooking(null);
           }}
         />
@@ -312,14 +356,7 @@ export default function DashboardHome() {
           onSaved={() => {
             base44.entities.Booking.list('-created_date', 200).then(bookings => {
               setAllBookings(bookings);
-              const pending = bookings.filter(b => b.status === 'pending' || b.status === 'confirmed');
-              const grouped = {};
-              pending.forEach(b => {
-                const day = b.session_date || 'Brak daty';
-                if (!grouped[day]) grouped[day] = [];
-                grouped[day].push(b);
-              });
-              setPendingByDay(Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b)).map(([date, items]) => ({ date, items })));
+              setPendingByDay(buildPendingByDay(bookings));
             });
             setEditingBooking(null);
           }}
