@@ -103,28 +103,18 @@ export default function NotificationsPage() {
 
   return (
     <div>
-      {/* Header */}
-      <div className="mb-8 flex items-center justify-between flex-wrap gap-2">
-        <div>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
-            POWIADOMIENIA
-          </p>
-          <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.text, letterSpacing: '0.04em', lineHeight: 1 }}>
-            Powiadomienia
-          </h2>
-        </div>
-        <div className="flex gap-2">
-          {notifications.some(n => !n.is_read) && (
-            <button onClick={markAllRead} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer' }}>
-              <CheckCheck size={12} /> Przeczytane
-            </button>
-          )}
-          {notifications.length > 0 && (
-            <button onClick={() => setConfirmDeleteAll(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF4444', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer' }}>
-              <Trash2 size={12} /> Usuń wszystkie
-            </button>
-          )}
-        </div>
+      {/* Actions */}
+      <div className="mb-6 flex items-center justify-end flex-wrap gap-2">
+        {notifications.some(n => !n.is_read) && (
+          <button onClick={markAllRead} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer' }}>
+            <CheckCheck size={12} /> Przeczytane
+          </button>
+        )}
+        {notifications.length > 0 && (
+          <button onClick={() => setConfirmDeleteAll(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF4444', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer' }}>
+            <Trash2 size={12} /> Usuń wszystkie
+          </button>
+        )}
       </div>
 
       {/* List */}
