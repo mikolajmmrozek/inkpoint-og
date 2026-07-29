@@ -96,6 +96,7 @@ export default function ClientSearch({ value, onSelect, t }) {
             >
               <div className="flex items-center justify-between gap-2">
                 <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{client.name}</p>
+                {client.is_blocked && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '1px 4px', marginLeft: '6px' }}>ZABLOKOWANY</span>}
                 {(client.total_sessions || 0) > 0 && (
                   <div className="flex items-center gap-1" style={{ flexShrink: 0 }}>
                     <History size={9} color="#FF007F" />

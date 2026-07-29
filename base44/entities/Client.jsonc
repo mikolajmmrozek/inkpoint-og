@@ -53,6 +53,11 @@
       "type": "boolean",
       "default": false,
       "description": "Czy profil klienta zosta\u0142 ju\u017c przejrzany przez admina (do wska\u017anika \"nowi klienci\")"
+    },
+    "is_blocked": {
+      "type": "boolean",
+      "default": false,
+      "description": "Czy klient jest zablokowany \u2014 traci mo\u017cliwo\u015b\u0107 rezerwacji sesji i wysy\u0142ania wiadomo\u015bci, bez informowania o blokadzie"
     }
   },
   "required": [

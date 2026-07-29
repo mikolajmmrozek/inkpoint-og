@@ -148,6 +148,15 @@ export default function Booking() {
   const handleSubmit = async () => {
     scrollToTop();
     setSubmitting(true);
+    // Sprawdź czy klient nie jest zablokowany (cisza — bez info o blokadzie)
+    try {
+      const existing = await base44.entities.Client.filter({ email: data.client_email }, '-created_date', 1);
+      if (existing[0]?.is_blocked) {
+        setSubmitting(false);
+        alert('Nie udało się utworzyć rezerwacji. Spróbuj ponownie później.');
+        return;
+      }
+    } catch (e) {}
     const fullName = `${data.client_first_name} ${data.client_last_name}`.trim();
     const bookingData = { ...data, client_name: fullName, status: 'pending', health_form_completed: false, source: 'online_form' };
     delete bookingData.client_first_name;

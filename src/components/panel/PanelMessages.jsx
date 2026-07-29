@@ -44,6 +44,15 @@ export default function PanelMessages({ theme, userEmail, userName, roleLabel })
     return () => { if (typeof unsubscribe === 'function') unsubscribe(); };
   }, [userEmail]);
 
+  // Sprawdź czy klient jest zablokowany (tylko rola KLIENT)
+  const [isBlocked, setIsBlocked] = useState(false);
+  useEffect(() => {
+    if (roleLabel !== 'KLIENT') return;
+    base44.entities.Client.filter({ email: userEmail }, '-created_date', 1)
+      .then(res => setIsBlocked(!!res[0]?.is_blocked))
+      .catch(() => {});
+  }, [userEmail, roleLabel]);
+
   // Polling fallback — refresh every 30 seconds in case WebSocket misses events
   useEffect(() => {
     const interval = setInterval(() => {
@@ -60,6 +69,10 @@ export default function PanelMessages({ theme, userEmail, userName, roleLabel })
 
   const send = async () => {
     if (!replyText.trim()) return;
+    if (isBlocked) {
+      alert('Nie udało się wysłać wiadomości. Spróbuj ponownie później.');
+      return;
+    }
     setSending(true);
     try {
       await base44.entities.ContactMessage.create({

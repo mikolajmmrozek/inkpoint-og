@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
-import { Search, Edit2, Trash2, X, Plus, ChevronDown, ChevronUp, CalendarPlus, Merge, Loader2, UserPlus, Check } from 'lucide-react';
+import { Search, Edit2, Trash2, X, Plus, ChevronDown, ChevronUp, CalendarPlus, Merge, Loader2, UserPlus, Check, Ban } from 'lucide-react';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 import BookingModal from '@/components/dashboard/BookingModal';
 import { format } from 'date-fns';
@@ -127,6 +127,11 @@ export default function DashboardClients() {
     } catch (err) {
       setInviteStatus(s => ({ ...s, [client.id]: 'error' }));
     }
+  };
+
+  const handleToggleBlock = async (client) => {
+    await base44.entities.Client.update(client.id, { is_blocked: !client.is_blocked });
+    setClients(cs => cs.map(c => c.id === client.id ? { ...c, is_blocked: !client.is_blocked } : c));
   };
 
   const filtered = clients
@@ -310,7 +315,7 @@ export default function DashboardClients() {
                 <div className="md:hidden px-4 py-3 flex items-center justify-between cursor-pointer" style={{ borderBottom: `0.5px solid ${t.border}`, background: isExpanded ? 'rgba(255,0,127,0.03)' : 'transparent' }} onClick={() => setExpandedClient(isExpanded ? null : c.id)}>
                   <div className="flex items-center gap-2">
                     <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{c.name}</p>
-                    {isNewClient(c) && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#16a34a', border: '0.5px solid #16a34a', padding: '1px 4px' }}>NOWY</span>}
+                    {isNewClient(c) && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#16a34a', border: '0.5px solid #16a34a', padding: '1px 4px' }}>NOWY</span>}{c.is_blocked && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '1px 4px', marginLeft: '4px' }}>ZABLOKOWANY</span>}
                   </div>
                   <div className="flex gap-2">
                      {c.email && getClientStatus(c) === 'inactive' && (
@@ -319,6 +324,7 @@ export default function DashboardClients() {
                      <ClientMessageButton client={c} t={t} users={users} />
                      <button onClick={(e) => { e.stopPropagation(); openNewSession(c); }} style={{ color: '#16a34a', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} title="Nowa sesja"><CalendarPlus size={13} /></button>
                      <button onClick={(e) => { e.stopPropagation(); setMergeSource(c); setMergeTarget(null); setMergeSearch(''); }} style={{ color: '#a855f7', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} title="Połącz"><Merge size={13} /></button>
+                     <button onClick={(e) => { e.stopPropagation(); handleToggleBlock(c); }} style={{ color: c.is_blocked ? '#FF007F' : t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} title={c.is_blocked ? 'Odblokuj klienta' : 'Zablokuj klienta'}><Ban size={13} /></button>
                      <button onClick={(e) => { e.stopPropagation(); openEdit(c); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><Edit2 size={13} /></button>
                      <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(c); }} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><Trash2 size={13} /></button>
                    </div>
@@ -337,7 +343,7 @@ export default function DashboardClients() {
                     <div>
                       <div className="flex items-center gap-2">
                         <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{c.name}</p>
-                        {isNewClient(c) && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#16a34a', border: '0.5px solid #16a34a', padding: '1px 4px' }}>NOWY</span>}
+                        {isNewClient(c) && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#16a34a', border: '0.5px solid #16a34a', padding: '1px 4px' }}>NOWY</span>}{c.is_blocked && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '1px 4px', marginLeft: '4px' }}>ZABLOKOWANY</span>}
                       </div>
                       {c.notes && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.notes}</p>}
                     </div>
@@ -372,6 +378,7 @@ export default function DashboardClients() {
                     <ClientMessageButton client={c} t={t} users={users} />
                     <button onClick={(e) => { e.stopPropagation(); openNewSession(c); }} style={{ color: '#16a34a', background: 'none', border: 'none', cursor: 'pointer' }} title="Nowa sesja"><CalendarPlus size={13} /></button>
                     <button onClick={(e) => { e.stopPropagation(); setMergeSource(c); setMergeTarget(null); setMergeSearch(''); }} style={{ color: '#a855f7', background: 'none', border: 'none', cursor: 'pointer' }} title="Połącz z innym klientem"><Merge size={13} /></button>
+                    <button onClick={(e) => { e.stopPropagation(); handleToggleBlock(c); }} style={{ color: c.is_blocked ? '#FF007F' : t.muted, background: 'none', border: 'none', cursor: 'pointer' }} title={c.is_blocked ? 'Odblokuj klienta' : 'Zablokuj klienta'}><Ban size={13} /></button>
                     <button onClick={(e) => { e.stopPropagation(); openEdit(c); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Edit2 size={13} /></button>
                     <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(c); }} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={13} /></button>
                   </div>
