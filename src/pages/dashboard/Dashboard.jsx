@@ -209,8 +209,8 @@ export default function Dashboard() {
                <Menu size={20} />
              </button>
              <div className="flex items-center gap-2">
-              <p style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, fontSize: '1.75rem', color: textColor, letterSpacing: '0.08em', lineHeight: 1 }}>ROMANS</p>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase' }}>DASHBOARD</p>
+              <p style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, fontSize: '2.25rem', color: textColor, letterSpacing: '0.08em', lineHeight: 1 }}>ROMANS</p>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase' }}>DASHBOARD</p>
              </div>
              <div className="flex-1" />
             <div className="flex items-center gap-3">
