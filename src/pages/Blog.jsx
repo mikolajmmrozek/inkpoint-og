@@ -92,8 +92,8 @@ export default function Blog() {
                 transition={{ duration: 0.8 }}
                 className="mb-16"
               >
-                <Link to={`/blog/${featured.slug || featured.id}`} className="group grid md:grid-cols-2 gap-0">
-                  <div className="relative overflow-hidden aspect-[4/3]">
+                <Link to={`/blog/${featured.slug || featured.id}`} className="group grid grid-cols-1 md:grid-cols-2 gap-0 overflow-hidden">
+                  <div className="relative overflow-hidden aspect-[4/3] min-w-0">
                     {resolveCover(featured) ? (
                       <img
                         src={resolveCover(featured)}
@@ -106,18 +106,18 @@ export default function Blog() {
                       <div className="w-full h-full" style={{ background: 'linear-gradient(135deg, #1a1a1a, #262626)' }} />
                     )}
                   </div>
-                  <div className="p-6 md:p-12 flex flex-col justify-center">
-                    <div className="flex gap-2 mb-6">
+                  <div className="p-6 md:p-12 flex flex-col justify-center min-w-0">
+                    <div className="flex flex-wrap gap-2 mb-6">
                       {(featured.tags || []).map(tag => (
                         <span key={tag} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', border: '0.5px solid #FF007F', padding: '3px 8px', textTransform: 'uppercase' }}>
                           {tag}
                         </span>
                       ))}
                     </div>
-                    <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.2rem', fontWeight: 600, color: '#F5F0EB', lineHeight: 1.1 }}>
+                    <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(1.7rem, 6vw, 2.2rem)', fontWeight: 600, color: '#F5F0EB', lineHeight: 1.1, overflowWrap: 'break-word' }}>
                       {featured.title}
                     </h2>
-                    <p className="mt-4 text-sm leading-relaxed" style={{ color: 'rgba(245,240,235,0.5)', fontSize: '14px', lineHeight: 1.8 }}>
+                    <p className="mt-4 text-sm leading-relaxed" style={{ color: 'rgba(245,240,235,0.5)', fontSize: '14px', lineHeight: 1.8, overflowWrap: 'break-word' }}>
                       {featured.excerpt}
                     </p>
                     <div className="mt-8 flex items-center justify-between">
