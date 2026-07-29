@@ -68,8 +68,8 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
             <p style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, fontSize: '1.6rem', color: textColor, letterSpacing: '0.08em', lineHeight: 1 }}>ROMANS</p>
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', lineHeight: 1, marginTop: '2px' }}>DASHBOARD</p>
           </div>
-          <button onClick={() => setSidebarOpen(false)} className="lg:hidden" style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer' }}>
-            <X size={18} />
+          <button onClick={() => setSidebarOpen(false)} className="lg:hidden flex items-center justify-center" style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer', padding: '8px', minWidth: '44px', minHeight: '44px' }}>
+            <X size={20} />
           </button>
           <button onClick={onToggleCollapse} className="hidden lg:flex items-center justify-center ml-auto" style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
             {collapsed ? <PanelLeftOpen size={20} className="shrink-0" /> : <PanelLeftClose size={20} className="shrink-0" />}
