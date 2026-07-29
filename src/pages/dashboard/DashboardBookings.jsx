@@ -148,9 +148,9 @@ function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPa
                 </span>
               </div>
               {date !== 'Brak daty' && (() => { const off = getOffForDate(date); return off.length > 0 ? (
-                <div className="mb-2" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+                <div className="mb-2" style={{ border: '0.5px solid rgba(255,0,127,0.25)', background: 'rgba(255,0,127,0.05)' }}>
                   {off.map((o, i) => (
-                    <div key={i} className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: i < off.length - 1 ? `0.5px solid ${t.border}` : 'none' }}>
+                    <div key={i} className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: i < off.length - 1 ? '0.5px solid rgba(255,0,127,0.2)' : 'none' }}>
                       <div style={{ width: '6px', height: '6px', borderRadius: '1px', background: '#FF007F', flexShrink: 0 }} />
                       <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.06em' }}>WOLNE · {o.artist.name}{o.timeRange ? ` · ${o.timeRange}` : ' · cały dzień'}{o.note ? ` · ${o.note}` : ''}</span>
                     </div>
