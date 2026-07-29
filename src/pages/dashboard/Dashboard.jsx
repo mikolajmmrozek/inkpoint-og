@@ -236,10 +236,10 @@ export default function Dashboard() {
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      <div className="min-h-screen flex" style={{ background: bg, color: textColor }}>
+      <div className="min-h-screen flex overflow-x-hidden" style={{ background: bg, color: textColor }}>
         <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} theme={theme} toggleTheme={toggleTheme} userEmail={user.email} onNotifClick={() => setNotifOpen(true)} collapsed={sidebarCollapsed} onToggleCollapse={toggleSidebarCollapse} />
 
-        <div className={`flex-1 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'} flex flex-col min-h-screen transition-all duration-500`}>
+        <div className={`flex-1 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'} flex flex-col min-h-screen min-w-0 transition-all duration-500`}>
           {/* Top bar */}
            <div className="flex items-center gap-3 lg:gap-4 px-4 lg:px-6 py-4 lg:py-6 min-h-[72px] lg:min-h-[96px]" style={{ borderBottom: `0.5px solid ${border}`, background: topBarBg }}>
              <button onClick={() => setSidebarOpen(true)} className="lg:hidden flex items-center justify-center" style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer', padding: '8px', minWidth: '44px', minHeight: '44px' }}>
@@ -263,7 +263,7 @@ export default function Dashboard() {
              </div>
           </div>
 
-          <div className="flex-1 p-6 lg:p-10 overflow-y-auto pb-20 lg:pb-10">
+          <div className="flex-1 p-4 lg:p-10 overflow-y-auto overflow-x-hidden min-w-0 pb-20 lg:pb-10">
             <Outlet context={{ theme }} />
           </div>
         </div>
