@@ -53,7 +53,7 @@ export default function Contact() {
   const inputStyle = {
     background: 'transparent',
     border: 'none',
-    borderBottom: '0.5px solid #262626',
+    borderBottom: '0.5px solid #595959',
     color: '#F5F0EB',
     padding: '12px 0',
     fontSize: '15px',
@@ -98,7 +98,7 @@ export default function Contact() {
               <form onSubmit={handleSubmit} className="space-y-8">
                 <div className="grid grid-cols-2 gap-8">
                   <div>
-                    <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                    <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.75)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                       Imię i Nazwisko *
                     </label>
                     <input
@@ -107,11 +107,11 @@ export default function Contact() {
                       value={form.name}
                       onChange={e => setForm({ ...form, name: e.target.value })}
                       onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
-                      onBlur={e => e.target.style.borderBottomColor = '#262626'}
+                      onBlur={e => e.target.style.borderBottomColor = '#595959'}
                     />
                   </div>
                   <div>
-                    <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                    <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.75)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                       Email *
                     </label>
                     <input
@@ -121,13 +121,13 @@ export default function Contact() {
                       value={form.email}
                       onChange={e => setForm({ ...form, email: e.target.value })}
                       onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
-                      onBlur={e => e.target.style.borderBottomColor = '#262626'}
+                      onBlur={e => e.target.style.borderBottomColor = '#595959'}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                  <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.75)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                     Telefon
                   </label>
                   <input
@@ -135,12 +135,12 @@ export default function Contact() {
                     value={form.phone}
                     onChange={e => setForm({ ...form, phone: e.target.value })}
                     onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
-                    onBlur={e => e.target.style.borderBottomColor = '#262626'}
+                    onBlur={e => e.target.style.borderBottomColor = '#595959'}
                   />
                 </div>
 
                 <div>
-                  <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                  <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.75)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                     Temat
                   </label>
                   <input
@@ -148,22 +148,22 @@ export default function Contact() {
                     value={form.subject}
                     onChange={e => setForm({ ...form, subject: e.target.value })}
                     onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
-                    onBlur={e => e.target.style.borderBottomColor = '#262626'}
+                    onBlur={e => e.target.style.borderBottomColor = '#595959'}
                   />
                 </div>
 
                 <div>
-                  <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                  <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.75)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                     Wiadomość *
                   </label>
                   <textarea
                     required
                     rows={5}
-                    style={{ ...inputStyle, resize: 'none' }}
+                    style={{ background: 'rgba(255,255,255,0.04)', border: '0.5px solid #595959', borderRadius: '2px', padding: '12px', color: '#F5F0EB', fontSize: '15px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif', resize: 'none', transition: 'border-color 0.3s' }}
                     value={form.message}
                     onChange={e => setForm({ ...form, message: e.target.value })}
-                    onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
-                    onBlur={e => e.target.style.borderBottomColor = '#262626'}
+                    onFocus={e => e.target.style.borderColor = '#FF007F'}
+                    onBlur={e => e.target.style.borderColor = '#595959'}
                   />
                 </div>
 
