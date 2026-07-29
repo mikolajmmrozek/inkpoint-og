@@ -220,8 +220,8 @@ export default function DashboardHome() {
                   <div>
                     {/* Day header */}
                     <div className="flex items-center gap-3 mb-2">
-                      <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#f59e0b', flexShrink: 0 }} />
-                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#f59e0b' }}>
+                      <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#16a34a', flexShrink: 0 }} />
+                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#16a34a' }}>
                         DZISIAJ — {todayLabel}
                       </p>
                       <div style={{ flex: 1, height: '0.5px', background: t.cardBorder }} />
