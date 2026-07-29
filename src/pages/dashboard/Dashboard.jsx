@@ -152,6 +152,7 @@ export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem('dashboardTheme') || 'light');
+  const location = useLocation();
 
   const toggleTheme = () => {
     const next = theme === 'light' ? 'dark' : 'light';
@@ -201,6 +202,9 @@ export default function Dashboard() {
   const textColor = theme === 'light' ? '#111111' : '#F5F0EB';
   const mutedColor = theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.75)';
 
+  const currentNav = NAV.find(n => n.exact ? location.pathname === n.path : location.pathname.startsWith(n.path));
+  const currentLabel = currentNav?.label || (location.pathname === '/dashboard/notifications' ? 'Powiadomienia' : 'Przegląd');
+
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <div className="min-h-screen flex" style={{ background: bg, color: textColor }}>
@@ -212,7 +216,14 @@ export default function Dashboard() {
              <button onClick={() => setSidebarOpen(true)} className="lg:hidden flex items-center justify-center" style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer', padding: '8px', minWidth: '44px', minHeight: '44px' }}>
                <Menu size={20} />
              </button>
-            <div className="flex-1" />
+             {/* Dynamic page title */}
+             <div className="flex items-center gap-3 min-w-0">
+               <div className="min-w-0">
+                 <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', lineHeight: 1 }}>PANEL</p>
+                 <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.6rem', fontWeight: 400, color: textColor, letterSpacing: '0.04em', lineHeight: 1, marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentLabel}</h1>
+               </div>
+             </div>
+             <div className="flex-1" />
             <div className="flex items-center gap-3">
               <div className="hidden lg:block">
                 <NotificationBell userEmail={user.email} theme={theme} onClick={() => setNotifOpen(true)} />
