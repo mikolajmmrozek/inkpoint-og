@@ -67,7 +67,7 @@ export default function NotificationSidebarItem({ userEmail, theme, onMobileClic
       <Link
         to={notificationsPath}
         onClick={onMobileClick}
-        className={`hidden lg:flex items-center gap-3 px-4 py-3 w-full transition-all duration-200 hover:opacity-70`}
+        className="hidden lg:flex items-center gap-3 px-4 py-3 w-full whitespace-nowrap overflow-hidden hover:opacity-70 transition-colors duration-200"
         style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: inactiveColor }}
         title={collapsed ? 'Powiadomienia' : ''}
       >
@@ -87,11 +87,9 @@ export default function NotificationSidebarItem({ userEmail, theme, onMobileClic
             </span>
           )}
         </div>
-        {!collapsed && (
-          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase', color: inactiveColor }}>
-            Powiadomienia
-          </span>
-        )}
+        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase', color: inactiveColor }}>
+          Powiadomienia
+        </span>
       </Link>
     </>
   );

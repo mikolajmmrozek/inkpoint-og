@@ -63,7 +63,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
         style={{ background: bg, borderRight: `0.5px solid ${border}` }}
       >
         {/* Logo / collapse toggle — matches top bar height (px-6 py-4) */}
-        <div className={`flex items-center px-6 py-4 ${collapsed ? 'lg:justify-center' : 'justify-between'}`} style={{ borderBottom: `0.5px solid ${border}` }}>
+        <div className="flex items-center px-2 py-4 justify-between" style={{ borderBottom: `0.5px solid ${border}` }}>
           <div className={collapsed ? 'lg:hidden' : ''}>
             <p style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, fontSize: '1.6rem', color: textColor, letterSpacing: '0.08em', lineHeight: 1 }}>ROMANS</p>
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', lineHeight: 1, marginTop: '2px' }}>DASHBOARD</p>
@@ -71,13 +71,13 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden" style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer' }}>
             <X size={18} />
           </button>
-          <button onClick={onToggleCollapse} className="hidden lg:flex items-center justify-center" style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer', padding: '8px' }}>
+          <button onClick={onToggleCollapse} className="hidden lg:flex items-center justify-center ml-auto" style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
             {collapsed ? <PanelLeftOpen size={20} /> : <PanelLeftClose size={20} />}
           </button>
         </div>
 
         {/* Nav */}
-        <nav className={`flex-1 p-6 space-y-1 overflow-y-auto overflow-x-hidden ${collapsed ? 'lg:p-2' : ''}`}>
+        <nav className="flex-1 px-2 py-6 space-y-1 overflow-y-auto overflow-x-hidden">
           {NAV.map(nav => {
             const Icon = nav.icon;
             const active = isActive(nav);
@@ -86,7 +86,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
               <Link
                 key={nav.path}
                 to={nav.path}
-                className={`flex items-center gap-3 px-4 py-3 transition-all duration-200`}
+                className="flex items-center gap-3 px-4 py-3 whitespace-nowrap overflow-hidden transition-colors duration-200"
                 style={{
                   background: active ? 'rgba(255,0,127,0.08)' : 'transparent',
                   borderLeft: active ? '2px solid #FF007F' : '2px solid transparent',
@@ -99,7 +99,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
                   <Icon size={20} color={active ? '#FF007F' : (theme === 'light' ? 'rgba(0,0,0,0.55)' : 'rgba(245,240,235,0.65)')} />
                   {badge && <SidebarBadge type={badge.type} value={badge.value} />}
                 </div>
-                <span className={collapsed ? 'lg:hidden' : ''} style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                   {nav.label}
                 </span>
               </Link>
@@ -119,34 +119,34 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
         </nav>
 
         {/* Bottom actions */}
-        <div className={`p-6 space-y-2 ${collapsed ? 'lg:p-2' : ''}`} style={{ borderTop: `0.5px solid ${border}` }}>
+        <div className="px-2 py-6 space-y-2" style={{ borderTop: `0.5px solid ${border}` }}>
           {/* Theme toggle */}
           <button
             onClick={toggleTheme}
-            className={`flex items-center gap-3 px-4 py-1.5 w-full transition-all duration-200 hover:opacity-70`}
+            className="flex items-center gap-3 px-4 py-1.5 w-full whitespace-nowrap overflow-hidden hover:opacity-70 transition-colors duration-200"
             style={{ color: mutedColor, background: 'transparent', border: 'none', cursor: 'pointer' }}
             title={collapsed ? (theme === 'light' ? 'Ciemny motyw' : 'Jasny motyw') : ''}
           >
             {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
-            <span className={collapsed ? 'lg:hidden' : ''} style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
               {theme === 'light' ? 'Ciemny motyw' : 'Jasny motyw'}
             </span>
           </button>
 
           <button
             onClick={() => base44.auth.logout('/')}
-            className={`flex items-center gap-3 px-4 py-1.5 w-full transition-all duration-200 hover:opacity-70`}
+            className="flex items-center gap-3 px-4 py-1.5 w-full whitespace-nowrap overflow-hidden hover:opacity-70 transition-colors duration-200"
             style={{ color: mutedColor, background: 'transparent', border: 'none', cursor: 'pointer' }}
             title={collapsed ? 'Wyloguj się' : ''}
           >
             <LogOut size={16} />
-            <span className={collapsed ? 'lg:hidden' : ''} style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
               Wyloguj się
             </span>
           </button>
-          <Link to="/" className={`flex items-center gap-3 px-4 py-1.5 w-full`} style={{ color: mutedColor, fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }} title={collapsed ? 'Wróć na stronę' : ''}>
-            <HomeIcon size={16} className={collapsed ? '' : ''} />
-            <span className={collapsed ? 'lg:hidden' : ''}>Wróć na stronę</span>
+          <Link to="/" className="flex items-center gap-3 px-4 py-1.5 w-full whitespace-nowrap overflow-hidden" style={{ color: mutedColor, fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }} title={collapsed ? 'Wróć na stronę' : ''}>
+            <HomeIcon size={16} />
+            <span>Wróć na stronę</span>
           </Link>
         </div>
       </aside>
