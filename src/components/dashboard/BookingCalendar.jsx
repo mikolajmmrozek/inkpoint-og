@@ -129,7 +129,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
       {/* Selected day sessions / empty state */}
       {(selectedDayBookings.length > 0 || selectedDate) && (
         <div className="mt-6" style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '16px' }}>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', color: t.fuchsia, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
             Sesje — {format(effectiveSelectedDate, 'EEEE, d MMMM', { locale: pl }).toUpperCase()}
           </p>
           {selectedDayOff.length > 0 && (
