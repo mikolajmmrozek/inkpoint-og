@@ -62,13 +62,9 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
         className={`fixed top-0 left-0 h-full z-50 w-64 flex flex-col transition-transform duration-500 lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
         style={{ background: bg, borderRight: `0.5px solid ${border}` }}
       >
-        {/* Logo */}
-        <div className="p-8 flex items-center justify-between" style={{ borderBottom: `0.5px solid ${border}` }}>
-          <div>
-            <p style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, fontSize: '2.5rem', color: textColor, letterSpacing: '0.08em', lineHeight: 1 }}>ROMANS</p>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase' }}>DASHBOARD</p>
-          </div>
-          <button onClick={() => setSidebarOpen(false)} className="lg:hidden" style={{ color: mutedColor }}>
+        {/* Mobile close */}
+        <div className="lg:hidden flex justify-end p-4" style={{ borderBottom: `0.5px solid ${border}` }}>
+          <button onClick={() => setSidebarOpen(false)} style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer' }}>
             <X size={18} />
           </button>
         </div>
@@ -212,7 +208,11 @@ export default function Dashboard() {
              <button onClick={() => setSidebarOpen(true)} className="lg:hidden flex items-center justify-center" style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer', padding: '8px', minWidth: '44px', minHeight: '44px' }}>
                <Menu size={20} />
              </button>
-            <div className="flex-1" />
+             <div className="flex items-center gap-2">
+              <p style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, fontSize: '1.75rem', color: textColor, letterSpacing: '0.08em', lineHeight: 1 }}>ROMANS</p>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase' }}>DASHBOARD</p>
+             </div>
+             <div className="flex-1" />
             <div className="flex items-center gap-3">
               <div className="hidden lg:block">
                 <NotificationBell userEmail={user.email} theme={theme} onClick={() => setNotifOpen(true)} />
