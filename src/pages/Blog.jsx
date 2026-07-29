@@ -106,7 +106,7 @@ export default function Blog() {
                       <div className="w-full h-full" style={{ background: 'linear-gradient(135deg, #1a1a1a, #262626)' }} />
                     )}
                   </div>
-                  <div className="p-8 md:p-12 flex flex-col justify-center border border-border md:border-l-0">
+                  <div className="p-6 md:p-12 flex flex-col justify-center">
                     <div className="flex gap-2 mb-6">
                       {(featured.tags || []).map(tag => (
                         <span key={tag} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', border: '0.5px solid #FF007F', padding: '3px 8px', textTransform: 'uppercase' }}>
