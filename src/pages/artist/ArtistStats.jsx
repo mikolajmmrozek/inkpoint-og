@@ -60,11 +60,6 @@ export default function ArtistStats() {
 
   return (
     <div>
-      <div className="mb-8">
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>MOJE WYNIKI</p>
-        <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '3rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>Statystyki</h1>
-      </div>
-
       {/* Year selector */}
       <div className="flex items-center gap-2 mb-8">
         {[year - 1, year, year + 1 > new Date().getFullYear() ? null : year + 1].filter(Boolean).map(y => (

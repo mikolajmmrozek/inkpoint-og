@@ -388,9 +388,8 @@ export default function ArtistHome() {
 
   return (
     <div>
-      <div className="mb-10">
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>PANEL ARTYSTY</p>
-        <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '3rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>
+      <div className="mb-6">
+        <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.4rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>
           Cześć, {artist.name?.split(' ')[0]}
         </h1>
       </div>

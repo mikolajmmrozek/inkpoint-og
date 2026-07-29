@@ -73,11 +73,6 @@ export default function ArtistProfile() {
 
   return (
     <div>
-      <div className="mb-6">
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>MÓJ PROFIL</p>
-        <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '3rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>{artist?.name}</h1>
-      </div>
-
       {/* Tabs */}
       <div className="flex mb-6" style={{ borderBottom: `0.5px solid ${t.cardBorder}` }}>
         {[['profile', 'Profil'], ['schedule', 'Mój Grafik']].map(([key, lbl]) => (

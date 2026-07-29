@@ -882,25 +882,19 @@ export default function ArtistSchedule() {
 
   return (
     <div>
-      {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
-        <div>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>MÓJ KALENDARZ</p>
-          <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.4rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>Harmonogram</h1>
+      {/* View toggle + new session */}
+      <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
+        <div className="flex gap-2 flex-wrap">
+          {[['month', 'MIESIĘCZNY'], ['hourly', 'GODZINOWY'], ['list', 'LISTA']].map(([mode, lbl]) => (
+            <button key={mode} onClick={() => setViewMode(mode)}
+              style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '7px 12px', border: `0.5px solid ${viewMode === mode ? '#FF007F' : t.cardBorder}`, color: viewMode === mode ? '#FF007F' : t.muted, background: viewMode === mode ? 'rgba(255,0,127,0.08)' : 'transparent', cursor: 'pointer' }}>
+              {lbl}
+            </button>
+          ))}
         </div>
         <button onClick={() => setShowNewModal(true)} className="btn-oxblood" style={{ fontSize: '10px', display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
           <Plus size={13} /> NOWA SESJA
         </button>
-      </div>
-
-      {/* View toggle */}
-      <div className="flex gap-2 mb-6 flex-wrap">
-        {[['month', 'MIESIĘCZNY'], ['hourly', 'GODZINOWY'], ['list', 'LISTA']].map(([mode, lbl]) => (
-          <button key={mode} onClick={() => setViewMode(mode)}
-            style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '7px 12px', border: `0.5px solid ${viewMode === mode ? '#FF007F' : t.cardBorder}`, color: viewMode === mode ? '#FF007F' : t.muted, background: viewMode === mode ? 'rgba(255,0,127,0.08)' : 'transparent', cursor: 'pointer', flex: '1 0 auto' }}>
-            {lbl}
-          </button>
-        ))}
       </div>
 
       {/* Monthly view */}
