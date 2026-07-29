@@ -64,14 +64,15 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
       >
         {/* Logo / collapse toggle — matches top bar height (px-6 py-4) */}
         <div className="flex items-center px-2 py-4 justify-between" style={{ borderBottom: `0.5px solid ${border}`, minHeight: '68.6px' }}>
-          <div className={collapsed ? 'lg:hidden' : ''}>
-            <p style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, fontSize: '1.6rem', color: textColor, letterSpacing: '0.08em', lineHeight: 1 }}>ROMANS</p>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', lineHeight: 1, marginTop: '2px' }}>DASHBOARD</p>
+          <div className={`flex-1 min-w-0 overflow-hidden whitespace-nowrap pl-4 transition-opacity duration-300 ${collapsed ? 'lg:opacity-0' : ''}`}>
+            <p style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, fontSize: '1.6rem', color: textColor, letterSpacing: '0.08em', lineHeight: 1, margin: 0 }}>
+              ROMANS <span style={{ color: '#FF007F' }}>TATTOO</span>
+            </p>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden flex items-center justify-center" style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer', padding: '8px', minWidth: '44px', minHeight: '44px' }}>
             <X size={20} />
           </button>
-          <button onClick={onToggleCollapse} className="hidden lg:flex items-center justify-center ml-auto" style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
+          <button onClick={onToggleCollapse} className="hidden lg:flex items-center justify-center ml-auto shrink-0" style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
             {collapsed ? <PanelLeftOpen size={20} className="shrink-0" /> : <PanelLeftClose size={20} className="shrink-0" />}
           </button>
         </div>
