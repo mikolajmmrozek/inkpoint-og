@@ -191,13 +191,13 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
                     
                     {/* Price + status */}
                     <div className="flex items-center gap-3 flex-shrink-0">
-                      <HealthFormBadge status={resolveBookingHealthStatus(b, healthStatusMap)} fontSize="7px" style={{ padding: '2px 5px' }} />
+                      <HealthFormBadge status={resolveBookingHealthStatus(b, healthStatusMap)} fontSize="10px" style={{ padding: '3px 7px' }} />
                       {b.service_id && (b.estimated_price === 0 || b.estimated_price === null || b.estimated_price === undefined || b.estimated_price === '') ? (
-                        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.06em' }}>BEZPŁATNA</span>
+                        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', color: t.muted, letterSpacing: '0.06em' }}>BEZPŁATNA</span>
                       ) : b.estimated_price > 0 ? (
-                        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>{b.estimated_price} PLN</span>
+                        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', color: t.muted }}>{b.estimated_price} PLN</span>
                       ) : null}
-                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: STATUS_COLORS[b.status] || t.muted }} />
+                      <div style={{ width: '11px', height: '11px', borderRadius: '50%', background: STATUS_COLORS[b.status] || t.muted }} />
                     </div>
                   </div>
                 );
