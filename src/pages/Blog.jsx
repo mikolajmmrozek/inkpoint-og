@@ -36,6 +36,19 @@ const MOCK_POSTS = [
   },
 ];
 
+// Robust cover resolver — handles string, array, or fallback to images[] without re-saving data
+const resolveCover = (post) => {
+  const c = post?.cover_image_url;
+  if (typeof c === 'string' && c) return c;
+  if (Array.isArray(c) && c.length > 0) return typeof c[0] === 'string' ? c[0] : (c[0]?.url || null);
+  const imgs = post?.images;
+  if (Array.isArray(imgs) && imgs.length > 0) {
+    const first = imgs[0];
+    return typeof first === 'string' ? first : (first?.url || null);
+  }
+  return null;
+};
+
 export default function Blog() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -81,14 +94,19 @@ export default function Blog() {
               >
                 <Link to={`/blog/${featured.slug || featured.id}`} className="group grid md:grid-cols-2 gap-0">
                   <div className="relative overflow-hidden aspect-[4/3]">
-                    <img
-                      src={featured.cover_image_url}
-                      alt={featured.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      style={{ filter: 'brightness(0.65) contrast(1.1)' }}
-                    />
+                    {resolveCover(featured) ? (
+                      <img
+                        src={resolveCover(featured)}
+                        alt={featured.title}
+                        loading="lazy"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        style={{ filter: 'brightness(0.65) contrast(1.1)' }}
+                      />
+                    ) : (
+                      <div className="w-full h-full" style={{ background: 'linear-gradient(135deg, #1a1a1a, #262626)' }} />
+                    )}
                   </div>
-                  <div className="p-8 md:p-12 flex flex-col justify-center" style={{ border: '0.5px solid #262626', borderLeft: 'none' }}>
+                  <div className="p-8 md:p-12 flex flex-col justify-center border border-border md:border-l-0">
                     <div className="flex gap-2 mb-6">
                       {(featured.tags || []).map(tag => (
                         <span key={tag} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', border: '0.5px solid #FF007F', padding: '3px 8px', textTransform: 'uppercase' }}>
@@ -132,12 +150,17 @@ export default function Blog() {
                 >
                   <Link to={`/blog/${post.slug || post.id}`} className="group block">
                     <div className="relative overflow-hidden aspect-[4/3] mb-6">
-                      <img
-                        src={post.cover_image_url}
-                        alt={post.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        style={{ filter: 'brightness(0.65) contrast(1.1)' }}
-                      />
+                      {resolveCover(post) ? (
+                        <img
+                          src={resolveCover(post)}
+                          alt={post.title}
+                          loading="lazy"
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          style={{ filter: 'brightness(0.65) contrast(1.1)' }}
+                        />
+                      ) : (
+                        <div className="w-full h-full" style={{ background: 'linear-gradient(135deg, #1a1a1a, #262626)' }} />
+                      )}
                     </div>
                     <div className="flex gap-2 mb-3">
                       {(post.tags || []).slice(0, 2).map(tag => (
