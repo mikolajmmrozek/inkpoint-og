@@ -29,20 +29,24 @@ Deno.serve(async (req) => {
           booking_id: booking.id,
         });
       }
-      // Notify the assigned artist only on online_form bookings (dashboard = admin/artist created it themselves)
-      if (booking.source === 'online_form' && booking.artist_id) {
+      // Notify the assigned artist on new booking — client (online) or admin created it,
+      // but NOT when the artist created it themselves.
+      if (booking.artist_id) {
         try {
           const artistUser = await base44.asServiceRole.entities.User.filter({ 'data.artist_id': booking.artist_id }, null, 1);
           if (artistUser.length > 0 && artistUser[0].email) {
-            notifications.push({
-              target_email: artistUser[0].email,
-              title: 'Nowa rezerwacja',
-              message: `Rezerwacja klienta ${booking.client_name || '—'} na ${booking.session_date || '—'}${booking.session_time ? ' o ' + booking.session_time : ''}`,
-              category: 'booking',
-              link_path: '/artist/schedule',
-              is_read: false,
-              booking_id: booking.id,
-            });
+            const artistSelfCreated = booking.source === 'dashboard' && booking.created_by_id && artistUser[0].id === booking.created_by_id;
+            if (!artistSelfCreated) {
+              notifications.push({
+                target_email: artistUser[0].email,
+                title: 'Nowa rezerwacja',
+                message: `Rezerwacja klienta ${booking.client_name || '—'} na ${booking.session_date || '—'}${booking.session_time ? ' o ' + booking.session_time : ''}`,
+                category: 'booking',
+                link_path: '/artist/schedule',
+                is_read: false,
+                booking_id: booking.id,
+              });
+            }
           }
         } catch (e) {}
       }
