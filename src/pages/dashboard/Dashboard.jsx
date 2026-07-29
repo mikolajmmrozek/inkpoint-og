@@ -86,7 +86,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
               <Link
                 key={nav.path}
                 to={nav.path}
-                className={`flex items-center gap-3 px-4 py-3 transition-all duration-200 ${collapsed ? 'lg:justify-center lg:px-2' : ''}`}
+                className={`flex items-center gap-3 px-4 py-3 transition-all duration-200`}
                 style={{
                   background: active ? 'rgba(255,0,127,0.08)' : 'transparent',
                   borderLeft: active ? '2px solid #FF007F' : '2px solid transparent',
@@ -123,7 +123,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
           {/* Theme toggle */}
           <button
             onClick={toggleTheme}
-            className={`flex items-center gap-3 px-4 py-1.5 w-full transition-all duration-200 hover:opacity-70 ${collapsed ? 'lg:justify-center lg:px-2' : ''}`}
+            className={`flex items-center gap-3 px-4 py-1.5 w-full transition-all duration-200 hover:opacity-70`}
             style={{ color: mutedColor, background: 'transparent', border: 'none', cursor: 'pointer' }}
             title={collapsed ? (theme === 'light' ? 'Ciemny motyw' : 'Jasny motyw') : ''}
           >
@@ -135,7 +135,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
 
           <button
             onClick={() => base44.auth.logout('/')}
-            className={`flex items-center gap-3 px-4 py-1.5 w-full transition-all duration-200 hover:opacity-70 ${collapsed ? 'lg:justify-center lg:px-2' : ''}`}
+            className={`flex items-center gap-3 px-4 py-1.5 w-full transition-all duration-200 hover:opacity-70`}
             style={{ color: mutedColor, background: 'transparent', border: 'none', cursor: 'pointer' }}
             title={collapsed ? 'Wyloguj się' : ''}
           >
@@ -144,7 +144,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
               Wyloguj się
             </span>
           </button>
-          <Link to="/" className={`flex items-center gap-3 px-4 py-1.5 w-full ${collapsed ? 'lg:justify-center lg:px-2' : ''}`} style={{ color: mutedColor, fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }} title={collapsed ? 'Wróć na stronę' : ''}>
+          <Link to="/" className={`flex items-center gap-3 px-4 py-1.5 w-full`} style={{ color: mutedColor, fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }} title={collapsed ? 'Wróć na stronę' : ''}>
             <HomeIcon size={16} className={collapsed ? '' : ''} />
             <span className={collapsed ? 'lg:hidden' : ''}>Wróć na stronę</span>
           </Link>
