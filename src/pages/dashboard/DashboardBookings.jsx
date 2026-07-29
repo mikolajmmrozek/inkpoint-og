@@ -32,16 +32,16 @@ function BookingRow({ b, i, items, selected, setSelected, artists, t, healthStat
       onClick={() => setSelected(b)}
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
-        <div className="flex-shrink-0 text-center" style={{ minWidth: '48px' }}>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', color: STATUS_COLORS[b.status] || t.fuchsia, letterSpacing: '0.05em' }}>{b.session_time}</p>
+        <div className="flex-shrink-0 text-center" style={{ minWidth: '52px' }}>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '16px', color: STATUS_COLORS[b.status] || t.fuchsia, letterSpacing: '0.05em' }}>{b.session_time}</p>
           {b.session_end_time ? (
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>→ {b.session_end_time}</p>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted }}>→ {b.session_end_time}</p>
           ) : b.session_time && b.session_duration ? (() => {
             const [h, m] = b.session_time.split(':').map(Number);
             const endTotal = h * 60 + m + b.session_duration;
             const endH = String(Math.floor(endTotal / 60)).padStart(2, '0');
             const endM = String(endTotal % 60).padStart(2, '0');
-            return <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>→ {endH}:{endM}</p>;
+            return <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted }}>→ {endH}:{endM}</p>;
           })() : null}
         </div>
         <div className="flex items-center gap-3 min-w-0 flex-1">
