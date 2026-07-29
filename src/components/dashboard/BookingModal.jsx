@@ -142,9 +142,12 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
     setArtists(allArtists);
   };
 
-  const filteredServices = selectedCategory
-    ? allServices.filter(s => s.category === selectedCategory)
-    : allServices;
+  const filteredServices = allServices.filter(s => {
+    if (selectedCategory && s.category !== selectedCategory) return false;
+    // When an artist is selected, show only services they can perform (or services with no artist restriction)
+    if (form.artist_id && s.artist_ids && s.artist_ids.length > 0 && !s.artist_ids.includes(form.artist_id)) return false;
+    return true;
+  });
 
   const handleService = (serviceId, nameTxt) => {
     if (!serviceId) {
@@ -189,6 +192,15 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
     const a = artists.find(x => x.id === id);
     set('artist_id', id);
     set('artist_name', a?.name || '');
+    // If the currently selected service is not available for this artist, clear it
+    if (form.service_id) {
+      const svc = allServices.find(s => s.id === form.service_id);
+      if (svc?.artist_ids && svc.artist_ids.length > 0 && !svc.artist_ids.includes(id)) {
+        set('service_id', '');
+        set('service_name', '');
+        setServiceQuery('');
+      }
+    }
   };
 
   const applyClientToForm = (client, session = null) => {
