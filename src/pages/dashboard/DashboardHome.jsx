@@ -203,8 +203,9 @@ export default function DashboardHome() {
         ) : (
           <div className="space-y-4">
             {(() => {
-              const todayStr = new Date().toISOString().split('T')[0];
-              const hasToday = pendingByDay.some(d => d.date === todayStr);
+               const now = new Date();
+               const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+               const hasToday = pendingByDay.some(d => d.date === todayStr);
               if (!hasToday) {
                 const todayObj = new Date();
                 todayObj.setHours(0, 0, 0, 0);
