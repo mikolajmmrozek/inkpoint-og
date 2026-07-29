@@ -419,22 +419,21 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
 
   return (
     <div>
-      <div className="mb-4 flex justify-end">
-        <a
-          href={generalFormLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 btn-oxblood"
-          style={{ padding: '8px 16px', textDecoration: 'none' }}
-        >
-          <Plus size={13} /> NOWA ANKIETA
-        </a>
-      </div>
-
-      {/* Stats tiles */}
-      <div className="flex gap-4 mb-6 flex-wrap">
+      {/* Stats tiles + new button */}
+      <div className="flex gap-4 mb-6 flex-wrap items-center">
         <StatsTile label="Wszystkie ankiety" value={completedForms.length} active={formFilter === 'all'} onClick={() => setFormFilter('all')} t={t} />
         <StatsTile label="Nowe (nieprzeczytane)" value={completedForms.filter(f => !f.is_read).length} active={formFilter === 'unread'} onClick={() => setFormFilter(formFilter === 'unread' ? 'all' : 'unread')} t={t} />
+        <div className="ml-auto">
+          <a
+            href={generalFormLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 btn-oxblood"
+            style={{ padding: '8px 16px', textDecoration: 'none' }}
+          >
+            <Plus size={13} /> NOWA ANKIETA
+          </a>
+        </div>
       </div>
 
       {/* General form link section */}
