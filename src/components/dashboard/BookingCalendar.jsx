@@ -69,7 +69,9 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
           const isToday = isSameDay(day, today);
           const dayOff = getArtistsOffForDate(availabilityRecords, artists, artistFilter, format(day, 'yyyy-MM-dd'));
           const isOffDay = dayOff.length > 0;
-          const offTitle = isOffDay ? dayOff.map(o => `${o.artist.name}${o.note ? ` (${o.note})` : ''}`).join(', ') : '';
+          // Full-day off = no time range on any entry; partial = at least one entry has a time range
+          const isFullDayOff = isOffDay && dayOff.every(o => !o.timeRange);
+          const offTitle = isOffDay ? dayOff.map(o => `${o.artist.name}${o.note ? ` (${o.note})` : ''}${o.timeRange ? ` · ${o.timeRange}` : ' · cały dzień'}`).join(', ') : '';
 
           return (
             <button
@@ -77,13 +79,19 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
               onClick={() => onDayClick(day)}
               className="relative flex flex-col items-center py-2 transition-all duration-200"
               style={{
-                background: isOffDay
-                  ? 'repeating-linear-gradient(45deg, rgba(255,0,127,0.10) 0px, rgba(255,0,127,0.10) 3px, rgba(255,0,127,0.03) 3px, rgba(255,0,127,0.03) 8px)'
-                  : (isSelected ? 'rgba(255,0,127,0.1)' : 'transparent'),
-                border: isOffDay ? `0.5px solid rgba(255,0,127,0.35)` : isSelected ? `0.5px solid #FF007F` : (searchQuery && dayBookings.length > 0) ? `0.5px solid #FF007F` : isToday ? `0.5px solid ${t.border}` : '0.5px solid transparent',
+                background: isSelected
+                  ? 'rgba(255,0,127,0.12)'
+                  : isFullDayOff
+                    ? 'repeating-linear-gradient(45deg, rgba(255,0,127,0.10) 0px, rgba(255,0,127,0.10) 3px, rgba(255,0,127,0.03) 3px, rgba(255,0,127,0.03) 8px)'
+                    : 'transparent',
+                border: isSelected
+                  ? '0.5px solid #FF007F'
+                  : isOffDay
+                    ? '0.5px solid rgba(255,0,127,0.35)'
+                    : (searchQuery && dayBookings.length > 0) ? `0.5px solid #FF007F` : isToday ? `0.5px solid ${t.border}` : '0.5px solid transparent',
                 cursor: 'pointer',
                 minHeight: '52px',
-                opacity: isOffDay && !isSelected ? 0.75 : 1,
+                opacity: isFullDayOff && !isSelected ? 0.75 : 1,
               }}
               title={offTitle}
             >

@@ -455,16 +455,19 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
           const isToday = isSameDay(day, today);
           const avail = getAvailBadge(day);
           const isBlocked = avail && avail.type === 'block';
+          const isFullDayOff = isBlocked && !avail.record.start_time && !avail.record.end_time;
           return (
             <button key={day.toISOString()} onClick={() => onDayClick(day)}
               style={{
                 minHeight: '52px', padding: '6px 4px',
-                border: isBlocked ? `0.5px solid rgba(255,0,127,0.35)` : `0.5px solid ${isSelected ? '#FF007F' : isToday ? t.cardBorder : 'transparent'}`,
-                background: isBlocked
-                  ? 'repeating-linear-gradient(45deg, rgba(255,0,127,0.10) 0px, rgba(255,0,127,0.10) 3px, rgba(255,0,127,0.03) 3px, rgba(255,0,127,0.03) 8px)'
-                  : (isSelected ? 'rgba(255,0,127,0.08)' : 'transparent'),
+                border: isSelected ? `0.5px solid #FF007F` : isBlocked ? `0.5px solid rgba(255,0,127,0.35)` : isToday ? `0.5px solid ${t.cardBorder}` : `0.5px solid transparent`,
+                background: isSelected
+                  ? 'rgba(255,0,127,0.12)'
+                  : isFullDayOff
+                    ? 'repeating-linear-gradient(45deg, rgba(255,0,127,0.10) 0px, rgba(255,0,127,0.10) 3px, rgba(255,0,127,0.03) 3px, rgba(255,0,127,0.03) 8px)'
+                    : 'transparent',
                 cursor: 'pointer', textAlign: 'center', position: 'relative',
-                opacity: isBlocked && !isSelected ? 0.75 : 1,
+                opacity: isFullDayOff && !isSelected ? 0.75 : 1,
               }}>
               {avail && avail.type === 'free' && (
                 <div style={{ position: 'absolute', top: '2px', right: '2px', width: '5px', height: '5px', borderRadius: '1px', background: '#16a34a', opacity: 0.7 }} />
