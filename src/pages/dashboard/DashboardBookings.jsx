@@ -182,8 +182,16 @@ export default function DashboardBookings() {
   const [availabilityRecords, setAvailabilityRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
-  const [filter, setFilter] = useState(searchParams.get('filter') || 'all');
-  const [artistFilter, setArtistFilter] = useState('all');
+  const [statusFilters, setStatusFilters] = useState(() => {
+    const f = searchParams.get('filter');
+    return f ? [f] : [];
+  });
+  const [artistFilters, setArtistFilters] = useState([]);
+
+  const toggleStatus = (s) => setStatusFilters(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
+  const toggleArtist = (id) => setArtistFilters(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  const statusMatch = (b) => statusFilters.length === 0 || statusFilters.includes(b.status);
+  const artistMatch = (b) => artistFilters.length === 0 || artistFilters.includes(b.artist_id);
   const [viewMode, setViewMode] = useState(searchParams.get('view') || 'calendar');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showModal, setShowModal] = useState(false);
@@ -236,7 +244,7 @@ export default function DashboardBookings() {
   useEffect(() => {
     if (viewMode !== 'list') return;
     setListPage(0);
-  }, [viewMode, filter, artistFilter, listTab]);
+  }, [viewMode, statusFilters, artistFilters, listTab]);
 
   const handleBookingClick = useCallback((b) => setSelected(b), []);
   const handleNewBookingRequest = useCallback(({ artist, time, date }) => {
@@ -300,8 +308,7 @@ export default function DashboardBookings() {
   };
 
   const listBookings = (() => {
-    let base = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
-    if (artistFilter !== 'all') base = base.filter(b => b.artist_id === artistFilter);
+    let base = bookings.filter(b => statusMatch(b) && artistMatch(b));
     
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -349,8 +356,7 @@ export default function DashboardBookings() {
   const dayViewBookings = (() => {
     if (viewMode !== 'day') return [];
     if (!selectedDate || !(selectedDate instanceof Date) || isNaN(selectedDate)) return [];
-    let base = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
-    if (artistFilter !== 'all') base = base.filter(b => b.artist_id === artistFilter);
+    let base = bookings.filter(b => statusMatch(b) && artistMatch(b));
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       base = base.filter(b =>
@@ -371,8 +377,7 @@ export default function DashboardBookings() {
   const selectedDateStr = selectedDate && selectedDate instanceof Date && !isNaN(selectedDate) ? format(selectedDate, 'yyyy-MM-dd') : null;
 
   const calendarBookings = (() => {
-    let base = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
-    if (artistFilter !== 'all') base = base.filter(b => b.artist_id === artistFilter);
+    let base = bookings.filter(b => statusMatch(b) && artistMatch(b));
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       base = base.filter(b =>
@@ -391,7 +396,8 @@ export default function DashboardBookings() {
   const pendingViewBookings = (() => {
     if (viewMode !== 'pending') return [];
     let base = bookings.filter(b => b.status === 'pending' || b.status === 'cancelled');
-    if (artistFilter !== 'all') base = base.filter(b => b.artist_id === artistFilter);
+    if (statusFilters.length > 0) base = base.filter(b => statusFilters.includes(b.status));
+    if (artistFilters.length > 0) base = base.filter(b => artistFilters.includes(b.artist_id));
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       base = base.filter(b =>
@@ -434,8 +440,7 @@ export default function DashboardBookings() {
               setSelectedDate(today);
               if (viewMode === 'list') {
                 setListTab('upcoming');
-                let base = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
-                if (artistFilter !== 'all') base = base.filter(b => b.artist_id === artistFilter);
+                let base = bookings.filter(b => statusMatch(b) && artistMatch(b));
                 const upcoming = [...base].filter(b => (b.session_date || '') >= todayStr).sort((a, b) => (a.session_date || '').localeCompare(b.session_date || ''));
                 const todayIdx = upcoming.findIndex(b => b.session_date === todayStr);
                 setListPage(todayIdx >= 0 ? Math.floor(todayIdx / PAGE_SIZE) : 0);
@@ -469,20 +474,25 @@ export default function DashboardBookings() {
 
         {/* Row 2: filters */}
         <div className="flex items-center gap-1 flex-wrap mb-3">
-          <button onClick={() => setArtistFilter('all')} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilter === 'all' ? t.fuchsia : t.border}`, color: artistFilter === 'all' ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
+          <button onClick={() => setArtistFilters([])} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilters.length === 0 ? t.fuchsia : t.border}`, color: artistFilters.length === 0 ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
             Wszyscy
           </button>
           {artists.map(a => (
-            <button key={a.id} onClick={() => setArtistFilter(a.id)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilter === a.id ? t.fuchsia : t.border}`, color: artistFilter === a.id ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
+            <button key={a.id} onClick={() => toggleArtist(a.id)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilters.includes(a.id) ? t.fuchsia : t.border}`, color: artistFilters.includes(a.id) ? t.fuchsia : t.muted, background: artistFilters.includes(a.id) ? 'rgba(255,0,127,0.06)' : 'transparent', cursor: 'pointer', flexShrink: 0 }}>
               {a.name}
             </button>
           ))}
           <div style={{ width: '0.5px', height: '16px', background: t.border, margin: '0 4px' }} />
-          {(viewMode === 'pending' ? ['all', 'pending', 'cancelled'] : ['all', ...STATUS_OPTIONS]).map(s => (
-            <button key={s} onClick={() => setFilter(s)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${filter === s ? t.fuchsia : t.border}`, color: filter === s ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
+          {(viewMode === 'pending' ? ['pending', 'cancelled'] : STATUS_OPTIONS).map(s => (
+            <button key={s} onClick={() => toggleStatus(s)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${statusFilters.includes(s) ? t.fuchsia : t.border}`, color: statusFilters.includes(s) ? t.fuchsia : t.muted, background: statusFilters.includes(s) ? 'rgba(255,0,127,0.06)' : 'transparent', cursor: 'pointer', flexShrink: 0 }}>
               {s === 'all' ? 'Wszystkie' : s}
             </button>
           ))}
+          {statusFilters.length > 0 && (
+            <button onClick={() => setStatusFilters([])} style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
+              ✕ Wszystkie
+            </button>
+          )}
         </div>
 
         {/* Row 3: search */}
@@ -547,7 +557,7 @@ export default function DashboardBookings() {
                 searchQuery={searchQuery}
                 onBookingClick={handleBookingClick}
                 availabilityRecords={availabilityRecords}
-                artistFilter={artistFilter}
+                artistFilter={artistFilters}
               />
             )}
 
@@ -561,7 +571,7 @@ export default function DashboardBookings() {
                 onBookingClick={handleBookingClick}
                 onNewBookingRequest={handleNewBookingRequest}
                 t={t}
-                artistFilter={artistFilter}
+                artistFilter={artistFilters}
                 availabilityRecords={availabilityRecords}
               />
             )}
@@ -653,7 +663,7 @@ export default function DashboardBookings() {
                     setEditingBooking={setEditingBooking}
                     setShowModal={setShowModal}
                     availabilityRecords={availabilityRecords}
-                    artistFilter={artistFilter}
+                    artistFilter={artistFilters}
                   />
                 )}
               </div>

@@ -54,9 +54,14 @@ export function isArtistOffOnDate(records, artistId, dateStr) {
 }
 
 // List of artists who are off on a given date, respecting an optional artist filter.
+// artistFilter may be: an array of artist IDs (empty = all active artists),
+// a single ID string, or 'all'. Empty array/string 'all' = no filter.
 export function getArtistsOffForDate(records, artists, artistFilter, dateStr) {
-  const list = artistFilter && artistFilter !== 'all'
-    ? (artists || []).filter(a => a.id === artistFilter)
+  const arr = Array.isArray(artistFilter)
+    ? artistFilter
+    : (artistFilter && artistFilter !== 'all' ? [artistFilter] : []);
+  const list = arr.length > 0
+    ? (artists || []).filter(a => arr.includes(a.id))
     : (artists || []).filter(a => a.is_active !== false);
   return list
     .map(a => ({ artist: a, ...isArtistOffOnDate(records, a.id, dateStr) }))

@@ -175,6 +175,14 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
   const dateStr = useMemo(() => format(selectedDate, 'yyyy-MM-dd'), [selectedDate]);
   const showNowLine = useMemo(() => isToday(selectedDate), [selectedDate]);
   const activeArtists = useMemo(() => artists.filter(a => a.is_active !== false), [artists]);
+  const selectedArtistIds = useMemo(() => Array.isArray(artistFilter)
+    ? artistFilter
+    : (artistFilter && artistFilter !== 'all' ? [artistFilter] : []),
+    [artistFilter]);
+  const displayedArtists = useMemo(() => selectedArtistIds.length > 0
+    ? activeArtists.filter(a => selectedArtistIds.includes(a.id))
+    : activeArtists,
+    [activeArtists, selectedArtistIds]);
 
   const dayBookings = useMemo(
     () => bookings.filter(b => b.session_date === dateStr),
@@ -226,7 +234,7 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
       {/* Artist headers (sticky) */}
       <div style={{ display: 'flex', width: '100%', borderBottom: `0.5px solid ${t.border}` }}>
         <div style={{ width: '44px', flexShrink: 0, borderLeft: `0.5px solid ${t.border}` }} />
-        {(artistFilter === 'all' ? activeArtists : activeArtists.filter(a => a.id === artistFilter)).map(a => {
+        {displayedArtists.map(a => {
           const off = availabilityRecords.length > 0 ? isArtistOffOnDate(availabilityRecords, a.id, dateStr) : { off: false };
           return (
           <div key={`header-${a.id}`} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '8px 4px', gap: '4px', borderLeft: `0.5px solid ${t.border}` }}>
@@ -256,8 +264,7 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
           <TimeAxis muted={t.muted} />
           <div style={{ flex: 1, position: 'relative', minWidth: 0, display: 'flex' }}>
             {(() => {
-              const displayed = artistFilter === 'all' ? activeArtists : activeArtists.filter(a => a.id === artistFilter);
-              return displayed.map((a, idx) => (
+              return displayedArtists.map((a, idx) => (
                 <ArtistColumn
                   key={a.id}
                   artist={a}
@@ -266,7 +273,7 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
                   onBookingClick={onBookingClick}
                   border={t.border}
                   t={t}
-                  isLast={idx === displayed.length - 1}
+                  isLast={idx === displayedArtists.length - 1}
                   availability={availabilityRecords.length > 0 ? getAvailabilityForDay(availabilityRecords, a.id, dateStr) : null}
                 />
               ));
