@@ -235,8 +235,10 @@ Deno.serve(async (req) => {
         deletedFrom.push(...contentCleanup.deleted_from);
         errors.push(...contentCleanup.errors);
 
-        // Always clear gcal_event_id — we tried every method to delete
-        await base44.asServiceRole.entities.Booking.update(bk.id, { gcal_event_id: '' });
+        // Clear gcal_event_id only if it was set — a no-op update would re-trigger this automation
+        if (bk.gcal_event_id) {
+          await base44.asServiceRole.entities.Booking.update(bk.id, { gcal_event_id: '' });
+        }
         if (deletedFrom.length > 0) {
           console.log(`[manageGoogleCalendar] Cancelled booking ${bk.id}, deleted events:`, JSON.stringify(deletedFrom));
         }
