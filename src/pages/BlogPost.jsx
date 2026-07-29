@@ -236,6 +236,18 @@ export default function BlogPost() {
               <ImageMosaic images={allImages} onOpen={setLightboxIndex} />
             </div>
           )}
+
+          {/* Full uncropped cover preview at the bottom */}
+          {post.cover_image_url && (
+            <div className="mt-12">
+              <img
+                src={post.cover_image_url}
+                alt={post.title}
+                className="w-full h-auto"
+                style={{ filter: 'brightness(0.85) contrast(1.05)' }}
+              />
+            </div>
+          )}
         </motion.div>
       </div>
 

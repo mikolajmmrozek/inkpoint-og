@@ -93,7 +93,7 @@ export default function Blog() {
                 className="mb-16"
               >
                 <Link to={`/blog/${featured.slug || featured.id}`} className="group grid grid-cols-1 md:grid-cols-2 gap-0">
-                  <div className="relative overflow-hidden aspect-[4/3] min-w-0">
+                  <div className="relative overflow-hidden aspect-[4/3] md:aspect-auto md:h-full min-w-0">
                     {resolveCover(featured) ? (
                       <img
                         src={resolveCover(featured)}
