@@ -2,7 +2,7 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Calendar, Users, BookOpen, MessageSquare, FileText, LogOut, BarChart2, Menu, X, Sun, Moon, Settings, UserCircle, PieChart, Star, FolderOpen, Scissors, ShieldCheck, Bell } from 'lucide-react';
+import { Calendar, Users, BookOpen, MessageSquare, FileText, LogOut, BarChart2, Menu, X, Sun, Moon, Settings, UserCircle, PieChart, Star, FolderOpen, Scissors, ShieldCheck, Bell, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import BottomNav from '@/components/panel/BottomNav';
 import NotificationBell from '@/components/panel/NotificationBell';
 import NotificationPanel from '@/components/panel/NotificationPanel';
@@ -41,7 +41,7 @@ const getBadgeForPath = (path, counts) => {
   return map[path] || null;
 };
 
-function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, onNotifClick }) {
+function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, onNotifClick, collapsed, onToggleCollapse }) {
   const location = useLocation();
   const counts = useBadgeCounts({ role: 'admin', userEmail });
 
@@ -59,22 +59,25 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
       )}
 
       <aside
-        className={`fixed top-0 left-0 h-full z-50 w-64 flex flex-col transition-transform duration-500 lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`fixed top-0 left-0 h-full z-50 w-64 flex flex-col transition-all duration-500 lg:translate-x-0 ${collapsed ? 'lg:w-16' : 'lg:w-64'} ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
         style={{ background: bg, borderRight: `0.5px solid ${border}` }}
       >
-        {/* Logo */}
-        <div className="p-8 flex items-center justify-between" style={{ borderBottom: `0.5px solid ${border}` }}>
-          <div>
+        {/* Logo / collapse toggle */}
+        <div className={`flex items-center ${collapsed ? 'lg:justify-center lg:p-2' : 'justify-between p-8'}`} style={{ borderBottom: `0.5px solid ${border}` }}>
+          <div className={collapsed ? 'lg:hidden' : ''}>
             <p style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, fontSize: '2.5rem', color: textColor, letterSpacing: '0.08em', lineHeight: 1 }}>ROMANS</p>
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase' }}>DASHBOARD</p>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden" style={{ color: mutedColor }}>
             <X size={18} />
           </button>
+          <button onClick={onToggleCollapse} className="hidden lg:flex items-center justify-center" style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer', padding: '8px' }}>
+            {collapsed ? <PanelLeftOpen size={20} /> : <PanelLeftClose size={20} />}
+          </button>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 p-6 space-y-1 overflow-y-auto">
+        <nav className={`flex-1 p-6 space-y-1 overflow-y-auto ${collapsed ? 'lg:p-2' : ''}`}>
           {NAV.map(nav => {
             const Icon = nav.icon;
             const active = isActive(nav);
@@ -83,19 +86,20 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
               <Link
                 key={nav.path}
                 to={nav.path}
-                className="flex items-center gap-3 px-4 py-3 transition-all duration-200"
+                className={`flex items-center gap-3 px-4 py-3 transition-all duration-200 ${collapsed ? 'lg:justify-center lg:px-2' : ''}`}
                 style={{
                   background: active ? 'rgba(255,0,127,0.08)' : 'transparent',
                   borderLeft: active ? '2px solid #FF007F' : '2px solid transparent',
                   color: active ? textColor : mutedColor,
                 }}
                 onClick={() => setSidebarOpen(false)}
+                title={collapsed ? nav.label : ''}
               >
                 <div style={{ position: 'relative' }}>
                   <Icon size={20} color={active ? '#FF007F' : (theme === 'light' ? 'rgba(0,0,0,0.55)' : 'rgba(245,240,235,0.65)')} />
                   {badge && <SidebarBadge type={badge.type} value={badge.value} />}
                 </div>
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                <span className={collapsed ? 'lg:hidden' : ''} style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                   {nav.label}
                 </span>
               </Link>
@@ -114,31 +118,34 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
         </nav>
 
         {/* Bottom actions */}
-        <div className="p-6 space-y-2" style={{ borderTop: `0.5px solid ${border}` }}>
+        <div className={`p-6 space-y-2 ${collapsed ? 'lg:p-2' : ''}`} style={{ borderTop: `0.5px solid ${border}` }}>
           {/* Theme toggle */}
           <button
             onClick={toggleTheme}
-            className="flex items-center gap-3 px-4 py-3 w-full transition-all duration-200 hover:opacity-70"
+            className={`flex items-center gap-3 px-4 py-3 w-full transition-all duration-200 hover:opacity-70 ${collapsed ? 'lg:justify-center lg:px-2' : ''}`}
             style={{ color: mutedColor, background: 'transparent', border: 'none', cursor: 'pointer' }}
+            title={collapsed ? (theme === 'light' ? 'Ciemny motyw' : 'Jasny motyw') : ''}
           >
             {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            <span className={collapsed ? 'lg:hidden' : ''} style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
               {theme === 'light' ? 'Ciemny motyw' : 'Jasny motyw'}
             </span>
           </button>
 
           <button
             onClick={() => base44.auth.logout('/')}
-            className="flex items-center gap-3 px-4 py-3 w-full transition-all duration-200 hover:opacity-70"
+            className={`flex items-center gap-3 px-4 py-3 w-full transition-all duration-200 hover:opacity-70 ${collapsed ? 'lg:justify-center lg:px-2' : ''}`}
             style={{ color: mutedColor, background: 'transparent', border: 'none', cursor: 'pointer' }}
+            title={collapsed ? 'Wyloguj się' : ''}
           >
             <LogOut size={20} />
-            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            <span className={collapsed ? 'lg:hidden' : ''} style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
               Wyloguj się
             </span>
           </button>
-          <Link to="/" className="flex items-center gap-3 px-4 py-2 w-full mt-1" style={{ color: theme === 'light' ? 'rgba(0,0,0,0.5)' : 'rgba(245,240,235,0.55)', fontFamily: 'JetBrains Mono', fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-            ← Wróć na stronę
+          <Link to="/" className={`flex items-center gap-3 px-4 py-2 w-full mt-1 ${collapsed ? 'lg:justify-center lg:px-2' : ''}`} style={{ color: theme === 'light' ? 'rgba(0,0,0,0.5)' : 'rgba(245,240,235,0.55)', fontFamily: 'JetBrains Mono', fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase' }} title={collapsed ? 'Wróć na stronę' : ''}>
+            <span className={collapsed ? 'lg:hidden' : ''}>← Wróć na stronę</span>
+            <span className={collapsed ? 'hidden lg:block' : 'hidden'}>←</span>
           </Link>
         </div>
       </aside>
@@ -152,12 +159,19 @@ export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem('dashboardTheme') || 'light');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('dashboardSidebarCollapsed') === 'true');
   const location = useLocation();
 
   const toggleTheme = () => {
     const next = theme === 'light' ? 'dark' : 'light';
     setTheme(next);
     localStorage.setItem('dashboardTheme', next);
+  };
+
+  const toggleSidebarCollapse = () => {
+    const next = !sidebarCollapsed;
+    setSidebarCollapsed(next);
+    localStorage.setItem('dashboardSidebarCollapsed', String(next));
   };
 
   useEffect(() => {
@@ -208,9 +222,9 @@ export default function Dashboard() {
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <div className="min-h-screen flex" style={{ background: bg, color: textColor }}>
-        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} theme={theme} toggleTheme={toggleTheme} userEmail={user.email} onNotifClick={() => setNotifOpen(true)} />
+        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} theme={theme} toggleTheme={toggleTheme} userEmail={user.email} onNotifClick={() => setNotifOpen(true)} collapsed={sidebarCollapsed} onToggleCollapse={toggleSidebarCollapse} />
 
-        <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
+        <div className={`flex-1 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'} flex flex-col min-h-screen transition-all duration-500`}>
           {/* Top bar */}
            <div className="flex items-center gap-4 px-6 py-4" style={{ borderBottom: `0.5px solid ${border}`, background: topBarBg }}>
              <button onClick={() => setSidebarOpen(true)} className="lg:hidden flex items-center justify-center" style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer', padding: '8px', minWidth: '44px', minHeight: '44px' }}>
