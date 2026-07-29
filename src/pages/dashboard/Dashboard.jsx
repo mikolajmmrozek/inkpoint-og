@@ -2,7 +2,7 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Calendar, Users, BookOpen, MessageSquare, FileText, LogOut, BarChart2, Menu, X, Sun, Moon, Settings, UserCircle, PieChart, Star, FolderOpen, Scissors, ShieldCheck, Bell, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { Calendar, Users, BookOpen, MessageSquare, FileText, LogOut, BarChart2, Menu, X, Sun, Moon, Settings, UserCircle, PieChart, Star, FolderOpen, Scissors, ShieldCheck, Bell, PanelLeftClose, PanelLeftOpen, Home as HomeIcon } from 'lucide-react';
 import BottomNav from '@/components/panel/BottomNav';
 import NotificationBell from '@/components/panel/NotificationBell';
 import NotificationPanel from '@/components/panel/NotificationPanel';
@@ -123,30 +123,30 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
           {/* Theme toggle */}
           <button
             onClick={toggleTheme}
-            className={`flex items-center gap-3 px-4 py-3 w-full transition-all duration-200 hover:opacity-70 ${collapsed ? 'lg:justify-center lg:px-2' : ''}`}
+            className={`flex items-center gap-3 px-4 py-1.5 w-full transition-all duration-200 hover:opacity-70 ${collapsed ? 'lg:justify-center lg:px-2' : ''}`}
             style={{ color: mutedColor, background: 'transparent', border: 'none', cursor: 'pointer' }}
             title={collapsed ? (theme === 'light' ? 'Ciemny motyw' : 'Jasny motyw') : ''}
           >
-            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-            <span className={collapsed ? 'lg:hidden' : ''} style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+            <span className={collapsed ? 'lg:hidden' : ''} style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
               {theme === 'light' ? 'Ciemny motyw' : 'Jasny motyw'}
             </span>
           </button>
 
           <button
             onClick={() => base44.auth.logout('/')}
-            className={`flex items-center gap-3 px-4 py-3 w-full transition-all duration-200 hover:opacity-70 ${collapsed ? 'lg:justify-center lg:px-2' : ''}`}
+            className={`flex items-center gap-3 px-4 py-1.5 w-full transition-all duration-200 hover:opacity-70 ${collapsed ? 'lg:justify-center lg:px-2' : ''}`}
             style={{ color: mutedColor, background: 'transparent', border: 'none', cursor: 'pointer' }}
             title={collapsed ? 'Wyloguj się' : ''}
           >
-            <LogOut size={20} />
-            <span className={collapsed ? 'lg:hidden' : ''} style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            <LogOut size={16} />
+            <span className={collapsed ? 'lg:hidden' : ''} style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
               Wyloguj się
             </span>
           </button>
-          <Link to="/" className={`flex items-center gap-3 px-4 py-2 w-full mt-1 ${collapsed ? 'lg:justify-center lg:px-2' : ''}`} style={{ color: theme === 'light' ? 'rgba(0,0,0,0.5)' : 'rgba(245,240,235,0.55)', fontFamily: 'JetBrains Mono', fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase' }} title={collapsed ? 'Wróć na stronę' : ''}>
-            <span className={collapsed ? 'lg:hidden' : ''}>← Wróć na stronę</span>
-            <span className={collapsed ? 'hidden lg:block' : 'hidden'}>←</span>
+          <Link to="/" className={`flex items-center gap-3 px-4 py-1.5 w-full ${collapsed ? 'lg:justify-center lg:px-2' : ''}`} style={{ color: mutedColor, fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }} title={collapsed ? 'Wróć na stronę' : ''}>
+            <HomeIcon size={16} className={collapsed ? '' : ''} />
+            <span className={collapsed ? 'lg:hidden' : ''}>Wróć na stronę</span>
           </Link>
         </div>
       </aside>
