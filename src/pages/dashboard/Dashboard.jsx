@@ -92,10 +92,10 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
                 onClick={() => setSidebarOpen(false)}
               >
                 <div style={{ position: 'relative' }}>
-                  <Icon size={14} color={active ? '#FF007F' : (theme === 'light' ? 'rgba(0,0,0,0.55)' : 'rgba(245,240,235,0.65)')} />
+                  <Icon size={20} color={active ? '#FF007F' : (theme === 'light' ? 'rgba(0,0,0,0.55)' : 'rgba(245,240,235,0.65)')} />
                   {badge && <SidebarBadge type={badge.type} value={badge.value} />}
                 </div>
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                   {nav.label}
                 </span>
               </Link>
@@ -121,8 +121,8 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
             className="flex items-center gap-3 px-4 py-3 w-full transition-all duration-200 hover:opacity-70"
             style={{ color: mutedColor, background: 'transparent', border: 'none', cursor: 'pointer' }}
           >
-            {theme === 'light' ? <Moon size={14} /> : <Sun size={14} />}
-            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
               {theme === 'light' ? 'Ciemny motyw' : 'Jasny motyw'}
             </span>
           </button>
@@ -132,12 +132,12 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
             className="flex items-center gap-3 px-4 py-3 w-full transition-all duration-200 hover:opacity-70"
             style={{ color: mutedColor, background: 'transparent', border: 'none', cursor: 'pointer' }}
           >
-            <LogOut size={14} />
-            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            <LogOut size={20} />
+            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
               Wyloguj się
             </span>
           </button>
-          <Link to="/" className="flex items-center gap-3 px-4 py-2 w-full mt-1" style={{ color: theme === 'light' ? 'rgba(0,0,0,0.5)' : 'rgba(245,240,235,0.55)', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+          <Link to="/" className="flex items-center gap-3 px-4 py-2 w-full mt-1" style={{ color: theme === 'light' ? 'rgba(0,0,0,0.5)' : 'rgba(245,240,235,0.55)', fontFamily: 'JetBrains Mono', fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             ← Wróć na stronę
           </Link>
         </div>
