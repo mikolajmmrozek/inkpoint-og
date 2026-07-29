@@ -14,17 +14,17 @@ export default function ClientSearch({ value, onSelect, t }) {
   const ensureLoaded = () => {
     if (loaded) return;
     setLoaded(true);
-    base44.entities.Client.list('-created_date', 150).then(setClients).catch(() => {});
+    base44.entities.Client.list('-created_date', 2000).then(setClients).catch(() => {});
   };
 
   useEffect(() => {
     if (!query.trim()) { setFiltered([]); return; }
-    const q = query.toLowerCase();
-    setFiltered(clients.filter(c =>
-      c.name?.toLowerCase().includes(q) ||
-      c.email?.toLowerCase().includes(q) ||
-      c.phone?.includes(q)
-    ).slice(0, 8));
+    // Token-based matching: every whitespace-separated token must appear in name/email/phone
+    const tokens = query.toLowerCase().trim().split(/\s+/);
+    setFiltered(clients.filter(c => {
+      const haystack = `${(c.name || '')} ${(c.email || '')} ${(c.phone || '')}`.toLowerCase();
+      return tokens.every(tok => haystack.includes(tok));
+    }).slice(0, 8));
   }, [query, clients]);
 
   useEffect(() => {
