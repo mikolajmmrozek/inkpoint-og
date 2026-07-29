@@ -102,7 +102,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
               )}
               {/* Off-day indicator */}
               {dayOff.length > 0 && (
-                <div style={{ position: 'absolute', top: '3px', right: '3px', width: '5px', height: '5px', borderRadius: '1px', background: '#f59e0b', opacity: 0.85 }} title={dayOff.map(o => `${o.artist.name}${o.note ? ` (${o.note})` : ''}`).join(', ')} />
+                <div style={{ position: 'absolute', top: '3px', right: '3px', width: '5px', height: '5px', borderRadius: '1px',                 background: '#FF007F', opacity: 0.85 }} title={dayOff.map(o => `${o.artist.name}${o.note ? ` (${o.note})` : ''}`).join(', ')} />
               )}
             </button>
           );
@@ -118,9 +118,9 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
           {selectedDayOff.length > 0 && (
             <div className="mb-3 space-y-1">
               {selectedDayOff.map((o, i) => (
-                <div key={i} className="flex items-center gap-2 px-3 py-2" style={{ border: `0.5px solid #f59e0b40`, background: '#f59e0b0d' }}>
-                  <div style={{ width: '6px', height: '6px', borderRadius: '1px', background: '#f59e0b', flexShrink: 0 }} />
-                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#f59e0b', letterSpacing: '0.06em' }}>
+                <div key={i} className="flex items-center gap-2 px-3 py-2" style={{ border: `0.5px solid #FF007F40`, background: '#FF007F0d' }}>
+                  <div style={{ width: '6px', height: '6px', borderRadius: '1px', background: '#FF007F', flexShrink: 0 }} />
+                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.06em' }}>
                     WOLNE · {o.artist.name}{o.timeRange ? ` · ${o.timeRange}` : ' · cały dzień'}{o.note ? ` · ${o.note}` : ''}
                   </span>
                 </div>

@@ -146,9 +146,9 @@ function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPa
               {date !== 'Brak daty' && (() => { const off = getOffForDate(date); return off.length > 0 ? (
                 <div className="flex flex-wrap gap-2 mb-2">
                   {off.map((o, i) => (
-                    <span key={i} className="flex items-center gap-1.5 px-2 py-1" style={{ border: '0.5px solid #f59e0b40', background: '#f59e0b0d' }}>
-                      <div style={{ width: '5px', height: '5px', borderRadius: '1px', background: '#f59e0b' }} />
-                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#f59e0b', letterSpacing: '0.06em' }}>WOLNE · {o.artist.name}{o.timeRange ? ` · ${o.timeRange}` : ' · cały dzień'}{o.note ? ` · ${o.note}` : ''}</span>
+                    <span key={i} className="flex items-center gap-1.5 px-2 py-1" style={{ border: '0.5px solid #FF007F40', background: '#FF007F0d' }}>
+                      <div style={{ width: '5px', height: '5px', borderRadius: '1px', background: '#FF007F' }} />
+                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.06em' }}>WOLNE · {o.artist.name}{o.timeRange ? ` · ${o.timeRange}` : ' · cały dzień'}{o.note ? ` · ${o.note}` : ''}</span>
                     </span>
                   ))}
                 </div>

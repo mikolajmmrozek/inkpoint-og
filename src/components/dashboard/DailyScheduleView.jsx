@@ -239,17 +239,17 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
           return (
           <div key={`header-${a.id}`} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '8px 4px', gap: '4px', borderLeft: `0.5px solid ${t.border}` }}>
             {a.photo_url ? (
-              <img src={a.photo_url} alt={a.name} loading="lazy" width={28} height={28} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${off.off ? '#f59e0b' : t.border}`, flexShrink: 0, opacity: off.off ? 0.55 : 1 }} />
+              <img src={a.photo_url} alt={a.name} loading="lazy" width={28} height={28} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${off.off ? '#FF007F' : t.border}`, flexShrink: 0, opacity: off.off ? 0.55 : 1 }} />
             ) : (
-              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: off.off ? 'rgba(245,158,11,0.15)' : 'rgba(255,0,127,0.15)', border: `1px solid ${off.off ? '#f59e0b' : t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ fontSize: '11px', color: off.off ? '#f59e0b' : '#FF007F', fontFamily: 'Bebas Neue, system-ui' }}>{a.name.charAt(0)}</span>
+              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: off.off ? 'rgba(255,0,127,0.15)' : 'rgba(255,0,127,0.15)', border: `1px solid ${off.off ? '#FF007F' : t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ fontSize: '11px', color: off.off ? '#FF007F' : '#FF007F', fontFamily: 'Bebas Neue, system-ui' }}>{a.name.charAt(0)}</span>
               </div>
             )}
-            <p className="hidden sm:block" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: off.off ? '#f59e0b' : t.muted, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <p className="hidden sm:block" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: off.off ? '#FF007F' : t.muted, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {a.name}
             </p>
             {off.off && (
-              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#f59e0b', letterSpacing: '0.08em', textTransform: 'uppercase', border: '0.5px solid #f59e0b', padding: '1px 4px' }} title={off.note || ''}>
+              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#FF007F', letterSpacing: '0.08em', textTransform: 'uppercase', border: '0.5px solid #FF007F', padding: '1px 4px' }} title={off.note || ''}>
                 {off.note ? off.note.toUpperCase().slice(0, 10) : 'URLOP'}
               </span>
             )}
