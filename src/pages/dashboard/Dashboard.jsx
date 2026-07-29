@@ -63,11 +63,10 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
         style={{ background: bg, borderRight: `0.5px solid ${border}` }}
       >
         {/* Logo / collapse toggle — matches top bar height (px-6 py-4) */}
-        <div className="flex items-center px-2 py-4 justify-between" style={{ borderBottom: `0.5px solid ${border}`, minHeight: '68.6px' }}>
-          <div className={`flex-1 min-w-0 overflow-hidden whitespace-nowrap pl-4 transition-opacity duration-300 ${collapsed ? 'lg:opacity-0' : ''}`}>
-            <p style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, fontSize: '1.6rem', color: textColor, letterSpacing: '0.08em', lineHeight: 1, margin: 0 }}>
-              ROMANS <span style={{ color: '#FF007F' }}>TATTOO</span>
-            </p>
+        <div className="flex items-center px-2 py-6 justify-between" style={{ borderBottom: `0.5px solid ${border}`, minHeight: '96px' }}>
+          <div className={`flex-1 min-w-0 overflow-hidden pl-4 transition-opacity duration-300 ${collapsed ? 'lg:opacity-0' : ''}`}>
+            <p style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, fontSize: '2.1rem', color: textColor, letterSpacing: '0.08em', lineHeight: 1, margin: 0 }}>ROMANS</p>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: '#FF007F', letterSpacing: '0.2em', lineHeight: 1, marginTop: '3px', textTransform: 'uppercase' }}>TATTOO</p>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden flex items-center justify-center" style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer', padding: '8px', minWidth: '44px', minHeight: '44px' }}>
             <X size={20} />
@@ -234,15 +233,15 @@ export default function Dashboard() {
 
         <div className={`flex-1 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'} flex flex-col min-h-screen transition-all duration-500`}>
           {/* Top bar */}
-           <div className="flex items-center gap-4 px-6 py-4" style={{ borderBottom: `0.5px solid ${border}`, background: topBarBg }}>
+           <div className="flex items-center gap-4 px-6 py-6" style={{ borderBottom: `0.5px solid ${border}`, background: topBarBg, minHeight: '96px' }}>
              <button onClick={() => setSidebarOpen(true)} className="lg:hidden flex items-center justify-center" style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer', padding: '8px', minWidth: '44px', minHeight: '44px' }}>
                <Menu size={20} />
              </button>
              {/* Dynamic page title */}
              <div className="flex items-center gap-3 min-w-0">
                <div className="min-w-0">
-                 <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', lineHeight: 1 }}>PANEL</p>
-                 <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.6rem', fontWeight: 400, color: textColor, letterSpacing: '0.04em', lineHeight: 1, marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentLabel}</h1>
+                 <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', lineHeight: 1 }}>PANEL</p>
+                 <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2rem', fontWeight: 400, color: textColor, letterSpacing: '0.04em', lineHeight: 1, marginTop: '3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentLabel}</h1>
                </div>
              </div>
              <div className="flex-1" />
