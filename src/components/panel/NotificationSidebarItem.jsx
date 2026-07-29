@@ -29,7 +29,7 @@ export default function NotificationSidebarItem({ userEmail, theme, onMobileClic
 
   const inner = (
     <>
-      <div style={{ position: 'relative' }}>
+      <div className="shrink-0" style={{ position: 'relative' }}>
         <Bell size={20} color={inactiveColor} />
         {unreadCount > 0 && (
           <span style={{
@@ -71,7 +71,7 @@ export default function NotificationSidebarItem({ userEmail, theme, onMobileClic
         style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: inactiveColor }}
         title={collapsed ? 'Powiadomienia' : ''}
       >
-        <div style={{ position: 'relative' }}>
+        <div className="shrink-0" style={{ position: 'relative' }}>
           <Bell size={20} color={inactiveColor} />
           {unreadCount > 0 && (
             <span style={{

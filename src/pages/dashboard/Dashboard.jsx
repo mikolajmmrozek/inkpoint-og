@@ -72,7 +72,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
             <X size={18} />
           </button>
           <button onClick={onToggleCollapse} className="hidden lg:flex items-center justify-center ml-auto" style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
-            {collapsed ? <PanelLeftOpen size={20} /> : <PanelLeftClose size={20} />}
+            {collapsed ? <PanelLeftOpen size={20} className="shrink-0" /> : <PanelLeftClose size={20} className="shrink-0" />}
           </button>
         </div>
 
@@ -95,7 +95,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
                 onClick={() => setSidebarOpen(false)}
                 title={collapsed ? nav.label : ''}
               >
-                <div style={{ position: 'relative' }}>
+                <div className="shrink-0" style={{ position: 'relative' }}>
                   <Icon size={20} color={active ? '#FF007F' : (theme === 'light' ? 'rgba(0,0,0,0.55)' : 'rgba(245,240,235,0.65)')} />
                   {badge && <SidebarBadge type={badge.type} value={badge.value} />}
                 </div>
@@ -127,7 +127,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
             style={{ color: mutedColor, background: 'transparent', border: 'none', cursor: 'pointer' }}
             title={collapsed ? (theme === 'light' ? 'Ciemny motyw' : 'Jasny motyw') : ''}
           >
-            {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+            {theme === 'light' ? <Moon size={16} className="shrink-0" /> : <Sun size={16} className="shrink-0" />}
             <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
               {theme === 'light' ? 'Ciemny motyw' : 'Jasny motyw'}
             </span>
@@ -139,13 +139,13 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
             style={{ color: mutedColor, background: 'transparent', border: 'none', cursor: 'pointer' }}
             title={collapsed ? 'Wyloguj się' : ''}
           >
-            <LogOut size={16} />
+            <LogOut size={16} className="shrink-0" />
             <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
               Wyloguj się
             </span>
           </button>
           <Link to="/" className="flex items-center gap-3 px-4 py-1.5 w-full whitespace-nowrap overflow-hidden" style={{ color: mutedColor, fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }} title={collapsed ? 'Wróć na stronę' : ''}>
-            <HomeIcon size={16} />
+            <HomeIcon size={16} className="shrink-0" />
             <span>Wróć na stronę</span>
           </Link>
         </div>
