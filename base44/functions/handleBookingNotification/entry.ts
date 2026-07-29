@@ -29,8 +29,8 @@ Deno.serve(async (req) => {
           booking_id: booking.id,
         });
       }
-      // Notify the assigned artist on any new booking
-      if (booking.artist_id) {
+      // Notify the assigned artist only on online_form bookings (dashboard = admin/artist created it themselves)
+      if (booking.source === 'online_form' && booking.artist_id) {
         try {
           const artistUser = await base44.asServiceRole.entities.User.filter({ 'data.artist_id': booking.artist_id }, null, 1);
           if (artistUser.length > 0 && artistUser[0].email) {
