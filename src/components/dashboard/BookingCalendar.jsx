@@ -158,10 +158,10 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
                 return (
                   <div key={b.id} onClick={() => onBookingClick?.(b)} style={{ borderBottom: i < selectedDayBookings.length - 1 ? `0.5px solid ${t.border}` : 'none', padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,0,127,0.04)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                     {/* Time */}
-                    <div className="flex-shrink-0 text-center" style={{ minWidth: '52px' }}>
-                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '16px', color: STATUS_COLORS[b.status] || t.fuchsia, letterSpacing: '0.05em' }}>{b.session_time}</p>
+                    <div className="flex-shrink-0 text-center" style={{ minWidth: '42px' }}>
+                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', color: STATUS_COLORS[b.status] || t.fuchsia, letterSpacing: '0.05em' }}>{b.session_time}</p>
                       {b.session_end_time ? (
-                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted }}>→ {b.session_end_time}</p>
+                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>→ {b.session_end_time}</p>
                       ) : null}
                     </div>
                     
@@ -190,14 +190,16 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
                     </div>
                     
                     {/* Price + status */}
-                    <div className="flex items-center gap-3 flex-shrink-0">
-                      <HealthFormBadge status={resolveBookingHealthStatus(b, healthStatusMap)} fontSize="10px" style={{ padding: '3px 7px' }} />
-                      {b.service_id && (b.estimated_price === 0 || b.estimated_price === null || b.estimated_price === undefined || b.estimated_price === '') ? (
-                        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', color: t.muted, letterSpacing: '0.06em' }}>BEZPŁATNA</span>
-                      ) : b.estimated_price > 0 ? (
-                        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', color: t.muted }}>{b.estimated_price} PLN</span>
-                      ) : null}
-                      <div style={{ width: '11px', height: '11px', borderRadius: '50%', background: STATUS_COLORS[b.status] || t.muted }} />
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="flex flex-col items-end gap-1">
+                        {b.service_id && (b.estimated_price === 0 || b.estimated_price === null || b.estimated_price === undefined || b.estimated_price === '') ? (
+                          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted, letterSpacing: '0.04em' }}>BEZPŁATNA</span>
+                        ) : b.estimated_price > 0 ? (
+                          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted }}>{b.estimated_price} PLN</span>
+                        ) : null}
+                        <HealthFormBadge status={resolveBookingHealthStatus(b, healthStatusMap)} fontSize="8px" style={{ padding: '1px 4px' }} />
+                      </div>
+                      <div style={{ width: '9px', height: '9px', borderRadius: '50%', background: STATUS_COLORS[b.status] || t.muted }} />
                     </div>
                   </div>
                 );
