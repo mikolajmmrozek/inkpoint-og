@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { AnimatePresence } from 'framer-motion';
@@ -202,21 +202,34 @@ export default function DashboardBookings() {
   const [listTab, setListTab] = useState('upcoming');
   const [searchQuery, setSearchQuery] = useState('');
 
+  const [loadError, setLoadError] = useState(null);
+  const loadedOnce = useRef(false);
+
   const load = async () => {
-    const [data, artistData, avail, healthForms] = await Promise.all([
-      base44.entities.Booking.list('-session_date', 200),
-      base44.entities.Artist.list(),
-      base44.entities.ArtistAvailability.list(),
-      base44.entities.HealthForm.list('-created_date', 1000),
-    ]);
-    setBookings(data);
-    setArtists(artistData);
-    setAvailabilityRecords(avail);
-    setHealthStatusMap(buildHealthFormStatusMap(healthForms));
-    setLoading(false);
+    setLoadError(null);
+    try {
+      const [data, artistData, avail, healthForms] = await Promise.all([
+        base44.entities.Booking.list('-session_date', 200),
+        base44.entities.Artist.list(),
+        base44.entities.ArtistAvailability.list(),
+        base44.entities.HealthForm.list('-created_date', 300),
+      ]);
+      setBookings(data);
+      setArtists(artistData);
+      setAvailabilityRecords(avail);
+      setHealthStatusMap(buildHealthFormStatusMap(healthForms));
+    } catch (err) {
+      setLoadError(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    if (loadedOnce.current) return;
+    loadedOnce.current = true;
+    load();
+  }, []);
 
   const updateStatus = async (id, status) => {
     await base44.entities.Booking.update(id, { status });
@@ -424,6 +437,14 @@ export default function DashboardBookings() {
 
   return (
     <div>
+      {loadError && bookings.length === 0 && (
+        <div className="mb-6 p-6 text-center" style={{ border: `0.5px solid ${t.border}` }}>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: '#FF007F', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px' }}>
+            ⚠ Nie udało się pobrać danych (limit zapytań). Spróbuj ponownie za chwilę.
+          </p>
+          <button onClick={load} className="btn-oxblood" style={{ fontSize: '11px' }}>SPRÓBUJ PONOWNIE</button>
+        </div>
+      )}
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-start justify-between flex-wrap gap-4 mb-3">
