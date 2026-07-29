@@ -27,6 +27,42 @@ export function getExceptionForDate(records, dateStr) {
   return exceptions.find(r => r.repeat && r.repeat !== 'none' && matchesRepeatOnDate(r, dateStr)) || null;
 }
 
+// Determine whether an artist is off (unavailable) on a given date.
+// Returns { off: boolean, note, timeRange, isException }.
+export function isArtistOffOnDate(records, artistId, dateStr) {
+  const dow = new Date(dateStr + 'T12:00:00').getDay();
+  const artistRecords = (records || []).filter(r => r.artist_id === artistId);
+  const ex = getExceptionForDate(artistRecords, dateStr);
+  if (ex) {
+    return {
+      off: ex.is_available === false,
+      note: ex.note || '',
+      timeRange: ex.start_time ? `${ex.start_time}–${ex.end_time}` : null,
+      isException: true,
+    };
+  }
+  const recurringOff = artistRecords.find(r => r.type === 'recurring' && r.day_of_week === dow && r.is_available === false);
+  if (recurringOff) {
+    return {
+      off: true,
+      note: recurringOff.note || 'Cykliczne wolne',
+      timeRange: recurringOff.start_time ? `${recurringOff.start_time}–${recurringOff.end_time}` : null,
+      isException: false,
+    };
+  }
+  return { off: false, note: '', timeRange: null, isException: false };
+}
+
+// List of artists who are off on a given date, respecting an optional artist filter.
+export function getArtistsOffForDate(records, artists, artistFilter, dateStr) {
+  const list = artistFilter && artistFilter !== 'all'
+    ? (artists || []).filter(a => a.id === artistFilter)
+    : (artists || []).filter(a => a.is_active !== false);
+  return list
+    .map(a => ({ artist: a, ...isArtistOffOnDate(records, a.id, dateStr) }))
+    .filter(x => x.off);
+}
+
 function minToLabel(min) {
   if (min == null) return '';
   return `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;

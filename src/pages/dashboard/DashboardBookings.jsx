@@ -10,6 +10,7 @@ import BookingCalendar from '@/components/dashboard/BookingCalendar';
 import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
 import BookingModal from '@/components/dashboard/BookingModal';
 import DailyScheduleView from '@/components/dashboard/DailyScheduleView.jsx';
+import { getArtistsOffForDate } from '@/lib/bookingConflicts';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -78,7 +79,8 @@ function BookingRow({ b, i, items, selected, setSelected, artists, t }) {
   );
 }
 
-function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPageBookings, listPageCount, listPage, setListPage, listTab, setListTab, selected, setSelected, artists, t, setEditingBooking, setShowModal }) {
+function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPageBookings, listPageCount, listPage, setListPage, listTab, setListTab, selected, setSelected, artists, t, setEditingBooking, setShowModal, availabilityRecords, artistFilter }) {
+  const getOffForDate = (dateStr) => getArtistsOffForDate(availabilityRecords, artists, artistFilter, dateStr);
   const todayStr = format(new Date(), 'yyyy-MM-dd');
 
   if (listBookings.length === 0) {
@@ -141,6 +143,16 @@ function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPa
                   {items.length} {items.length === 1 ? 'sesja' : 'sesji'}
                 </span>
               </div>
+              {date !== 'Brak daty' && (() => { const off = getOffForDate(date); return off.length > 0 ? (
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {off.map((o, i) => (
+                    <span key={i} className="flex items-center gap-1.5 px-2 py-1" style={{ border: '0.5px solid #f59e0b40', background: '#f59e0b0d' }}>
+                      <div style={{ width: '5px', height: '5px', borderRadius: '1px', background: '#f59e0b' }} />
+                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#f59e0b', letterSpacing: '0.06em' }}>WOLNE · {o.artist.name}{o.timeRange ? ` · ${o.timeRange}` : ' · cały dzień'}{o.note ? ` · ${o.note}` : ''}</span>
+                    </span>
+                  ))}
+                </div>
+              ) : null; })()}
               <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
                 {items.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={items} selected={selected} setSelected={setSelected} artists={artists} t={t} />)}
               </div>
@@ -534,6 +546,8 @@ export default function DashboardBookings() {
                 onAddBooking={handleNewBooking}
                 searchQuery={searchQuery}
                 onBookingClick={handleBookingClick}
+                availabilityRecords={availabilityRecords}
+                artistFilter={artistFilter}
               />
             )}
 
@@ -638,6 +652,8 @@ export default function DashboardBookings() {
                     t={t}
                     setEditingBooking={setEditingBooking}
                     setShowModal={setShowModal}
+                    availabilityRecords={availabilityRecords}
+                    artistFilter={artistFilter}
                   />
                 )}
               </div>

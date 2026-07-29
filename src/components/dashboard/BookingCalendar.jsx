@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameDay, isSameMonth, addMonths, subMonths } from 'date-fns';
 import { pl } from 'date-fns/locale';
+import { getArtistsOffForDate } from '@/lib/bookingConflicts';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -10,7 +11,7 @@ const STATUS_COLORS = {
   cancelled: '#9ca3af',
 };
 
-export default function BookingCalendar({ bookings, onDayClick, selectedDate, t, artists = [], onAddBooking, searchQuery = '', onBookingClick }) {
+export default function BookingCalendar({ bookings, onDayClick, selectedDate, t, artists = [], onAddBooking, searchQuery = '', onBookingClick, availabilityRecords = [], artistFilter = 'all' }) {
   const [viewMonth, setViewMonth] = useState(new Date());
   const today = new Date();
   const effectiveSelectedDate = selectedDate || today;
@@ -28,6 +29,8 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
     sortByTime(bookings.filter(b => b.session_date && isSameDay(new Date(b.session_date), day)));
 
   const selectedDayBookings = getBookingsForDay(effectiveSelectedDate);
+  const selectedDateStr = format(effectiveSelectedDate, 'yyyy-MM-dd');
+  const selectedDayOff = getArtistsOffForDate(availabilityRecords, artists, artistFilter, selectedDateStr);
 
   const WEEKDAYS = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Ndz'];
 
@@ -64,6 +67,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
           const dayBookings = getBookingsForDay(day);
           const isSelected = isSameDay(day, effectiveSelectedDate);
           const isToday = isSameDay(day, today);
+          const dayOff = getArtistsOffForDate(availabilityRecords, artists, artistFilter, format(day, 'yyyy-MM-dd'));
 
           return (
             <button
@@ -96,6 +100,10 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
                   )}
                 </div>
               )}
+              {/* Off-day indicator */}
+              {dayOff.length > 0 && (
+                <div style={{ position: 'absolute', top: '3px', right: '3px', width: '5px', height: '5px', borderRadius: '1px', background: '#f59e0b', opacity: 0.85 }} title={dayOff.map(o => `${o.artist.name}${o.note ? ` (${o.note})` : ''}`).join(', ')} />
+              )}
             </button>
           );
         })}
@@ -107,6 +115,18 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>
             Sesje — {format(effectiveSelectedDate, 'EEEE, d MMMM', { locale: pl }).toUpperCase()}
           </p>
+          {selectedDayOff.length > 0 && (
+            <div className="mb-3 space-y-1">
+              {selectedDayOff.map((o, i) => (
+                <div key={i} className="flex items-center gap-2 px-3 py-2" style={{ border: `0.5px solid #f59e0b40`, background: '#f59e0b0d' }}>
+                  <div style={{ width: '6px', height: '6px', borderRadius: '1px', background: '#f59e0b', flexShrink: 0 }} />
+                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#f59e0b', letterSpacing: '0.06em' }}>
+                    WOLNE · {o.artist.name}{o.timeRange ? ` · ${o.timeRange}` : ' · cały dzień'}{o.note ? ` · ${o.note}` : ''}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
           {selectedDayBookings.length === 0 && !searchQuery.trim() ? (
             <div className="py-8 text-center" style={{ border: `0.5px solid ${t.border}`, background: 'rgba(255,0,127,0.02)' }}>
               <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em', marginBottom: '12px' }}>BRAK SESJI W TEN DZIEŃ</p>

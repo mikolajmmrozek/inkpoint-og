@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, addDays, subDays, isToday } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import { getAvailabilityForDay } from '@/components/dashboard/ArtistScheduleEditor';
+import { isArtistOffOnDate } from '@/lib/bookingConflicts';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -225,20 +226,28 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
       {/* Artist headers (sticky) */}
       <div style={{ display: 'flex', width: '100%', borderBottom: `0.5px solid ${t.border}` }}>
         <div style={{ width: '44px', flexShrink: 0, borderLeft: `0.5px solid ${t.border}` }} />
-        {(artistFilter === 'all' ? activeArtists : activeArtists.filter(a => a.id === artistFilter)).map(a => (
+        {(artistFilter === 'all' ? activeArtists : activeArtists.filter(a => a.id === artistFilter)).map(a => {
+          const off = availabilityRecords.length > 0 ? isArtistOffOnDate(availabilityRecords, a.id, dateStr) : { off: false };
+          return (
           <div key={`header-${a.id}`} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '8px 4px', gap: '4px', borderLeft: `0.5px solid ${t.border}` }}>
             {a.photo_url ? (
-              <img src={a.photo_url} alt={a.name} loading="lazy" width={28} height={28} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${t.border}`, flexShrink: 0 }} />
+              <img src={a.photo_url} alt={a.name} loading="lazy" width={28} height={28} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${off.off ? '#f59e0b' : t.border}`, flexShrink: 0, opacity: off.off ? 0.55 : 1 }} />
             ) : (
-              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(255,0,127,0.15)', border: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ fontSize: '11px', color: '#FF007F', fontFamily: 'Bebas Neue, system-ui' }}>{a.name.charAt(0)}</span>
+              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: off.off ? 'rgba(245,158,11,0.15)' : 'rgba(255,0,127,0.15)', border: `1px solid ${off.off ? '#f59e0b' : t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ fontSize: '11px', color: off.off ? '#f59e0b' : '#FF007F', fontFamily: 'Bebas Neue, system-ui' }}>{a.name.charAt(0)}</span>
               </div>
             )}
-            <p className="hidden sm:block" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <p className="hidden sm:block" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: off.off ? '#f59e0b' : t.muted, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {a.name}
             </p>
+            {off.off && (
+              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#f59e0b', letterSpacing: '0.08em', textTransform: 'uppercase', border: '0.5px solid #f59e0b', padding: '1px 4px' }} title={off.note || ''}>
+                {off.note ? off.note.toUpperCase().slice(0, 10) : 'URLOP'}
+              </span>
+            )}
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Timeline body */}
