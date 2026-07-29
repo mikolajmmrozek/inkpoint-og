@@ -213,7 +213,7 @@ export default function DashboardHome() {
               const todayStr = new Date().toISOString().split('T')[0];
               const hasToday = pendingByDay.some(d => d.date === todayStr);
               if (!hasToday) return (
-                <div className="py-3 px-4 flex items-center gap-2" style={{ border: `0.5px solid #16a34a`, background: t.cardBg }}>
+                <div className="py-3 px-4 flex items-center justify-center gap-2" style={{ border: `0.5px solid #16a34a`, background: t.cardBg }}>
                   <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#16a34a', flexShrink: 0 }} />
                   <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
                     BRAK SESJI DZIŚ
