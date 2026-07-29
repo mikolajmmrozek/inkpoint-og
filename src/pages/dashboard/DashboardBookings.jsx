@@ -152,7 +152,7 @@ function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPa
                   {off.map((o, i) => (
                     <div key={i} className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: i < off.length - 1 ? '0.5px solid rgba(255,0,127,0.2)' : 'none' }}>
                       <div style={{ width: '6px', height: '6px', borderRadius: '1px', background: '#FF007F', flexShrink: 0 }} />
-                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.06em' }}>WOLNE · {o.artist.name}{o.timeRange ? ` · ${o.timeRange}` : ' · cały dzień'}{o.note ? ` · ${o.note}` : ''}</span>
+                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.06em', flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>WOLNE · {o.artist.name}{o.timeRange ? ` · ${o.timeRange}` : ' · cały dzień'}{o.note ? ` · ${o.note}` : ''}</span>
                     </div>
                   ))}
                 </div>
@@ -607,8 +607,8 @@ export default function DashboardBookings() {
                     <button onClick={() => { if (!searchQuery.trim()) setSelectedDate(d => subDays(d, 1)); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px', opacity: searchQuery.trim() ? 0.3 : 1 }}>
                       <ChevronLeft size={16} />
                     </button>
-                    <div className="text-center">
-                      <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.2rem', color: t.title, letterSpacing: '0.08em', lineHeight: 1 }}>
+                    <div className="text-center flex-1 min-w-0 px-2">
+                      <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.2rem', color: t.title, letterSpacing: '0.08em', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {format(selectedDate, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase()}
                       </p>
                       <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: selectedDateStr && listBookings.filter(b => b.session_date === selectedDateStr).length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>

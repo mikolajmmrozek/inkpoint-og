@@ -8,6 +8,7 @@ import NotificationBell from '@/components/panel/NotificationBell';
 import NotificationPanel from '@/components/panel/NotificationPanel';
 import NotificationSidebarItem from '@/components/panel/NotificationSidebarItem';
 import SidebarBadge from '@/components/panel/SidebarBadge';
+import StudioAvatar from '@/components/panel/StudioAvatar';
 import { useBadgeCounts } from '@/hooks/useBadgeCounts';
 
 export const ThemeContext = createContext({ theme: 'light', toggleTheme: () => {} });
@@ -63,7 +64,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
         style={{ background: bg, borderRight: `0.5px solid ${border}` }}
       >
         {/* Logo / collapse toggle — matches top bar height (px-6 py-4) */}
-        <div className="flex items-center px-2 py-6 justify-between" style={{ borderBottom: `0.5px solid ${border}`, minHeight: '96px' }}>
+        <div className="flex items-center px-2 py-4 lg:py-6 justify-between min-h-[72px] lg:min-h-[96px]" style={{ borderBottom: `0.5px solid ${border}` }}>
           <div className={`flex-1 min-w-0 overflow-hidden pl-4 transition-opacity duration-300 ${collapsed ? 'lg:opacity-0' : ''}`}>
             <p style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, fontSize: '2.1rem', color: textColor, letterSpacing: '0.08em', lineHeight: 1, margin: 0 }}>ROMANS</p>
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: '#FF007F', letterSpacing: '0.2em', lineHeight: 1, marginTop: '3px', textTransform: 'uppercase' }}>TATTOO</p>
@@ -168,6 +169,7 @@ export default function Dashboard() {
   const [theme, setTheme] = useState(() => localStorage.getItem('dashboardTheme') || 'light');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('dashboardSidebarCollapsed') === 'true');
   const location = useLocation();
+  const [studioProfile, setStudioProfile] = useState(null);
 
   const toggleTheme = () => {
     const next = theme === 'light' ? 'dark' : 'light';
@@ -180,6 +182,12 @@ export default function Dashboard() {
     setSidebarCollapsed(next);
     localStorage.setItem('dashboardSidebarCollapsed', String(next));
   };
+
+  useEffect(() => {
+    base44.entities.Artist.filter({ name: 'Studio' })
+      .then(list => setStudioProfile(list[0] || null))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!isLoadingAuth) {
@@ -233,7 +241,7 @@ export default function Dashboard() {
 
         <div className={`flex-1 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'} flex flex-col min-h-screen transition-all duration-500`}>
           {/* Top bar */}
-           <div className="flex items-center gap-4 px-6 py-6" style={{ borderBottom: `0.5px solid ${border}`, background: topBarBg, minHeight: '96px' }}>
+           <div className="flex items-center gap-3 lg:gap-4 px-4 lg:px-6 py-4 lg:py-6 min-h-[72px] lg:min-h-[96px]" style={{ borderBottom: `0.5px solid ${border}`, background: topBarBg }}>
              <button onClick={() => setSidebarOpen(true)} className="lg:hidden flex items-center justify-center" style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer', padding: '8px', minWidth: '44px', minHeight: '44px' }}>
                <Menu size={20} />
              </button>
@@ -246,14 +254,13 @@ export default function Dashboard() {
              </div>
              <div className="flex-1" />
             <div className="flex items-center gap-3">
-              <div className="hidden lg:block">
-                <NotificationBell userEmail={user.email} theme={theme} onClick={() => setNotifOpen(true)} />
-              </div>
-              <div className="w-2 h-2 rounded-full" style={{ background: '#16a34a' }} />
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: mutedColor, letterSpacing: '0.1em' }}>
-                {user?.email}
-              </p>
-            </div>
+               <div className="hidden lg:block">
+                 <NotificationBell userEmail={user.email} theme={theme} onClick={() => setNotifOpen(true)} />
+               </div>
+               <Link to="/dashboard" title="Profil studia">
+                 <StudioAvatar studio={studioProfile} theme={theme} size={38} />
+               </Link>
+             </div>
           </div>
 
           <div className="flex-1 p-6 lg:p-10 overflow-y-auto pb-20 lg:pb-10">

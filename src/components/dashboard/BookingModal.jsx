@@ -440,8 +440,8 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        className="w-full max-w-2xl max-h-screen overflow-y-auto"
-        style={{ border: `0.5px solid ${t.border}`, background: t.bg === '#FFFFFF' ? '#FFFFFF' : '#0A0A0A', padding: '40px' }}
+        className="w-full max-w-2xl max-h-screen overflow-y-auto p-5 sm:p-10"
+        style={{ border: `0.5px solid ${t.border}`, background: t.bg === '#FFFFFF' ? '#FFFFFF' : '#0A0A0A' }}
         onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-8">

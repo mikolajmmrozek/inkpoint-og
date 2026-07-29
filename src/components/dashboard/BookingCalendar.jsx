@@ -37,7 +37,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
   const WEEKDAYS = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Ndz'];
 
   return (
-    <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '24px' }}>
+    <div className="p-3 sm:p-6" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
       {/* Month nav */}
       <div className="flex items-center justify-between mb-6">
         <button onClick={() => setViewMonth(m => subMonths(m, 1))} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
@@ -137,7 +137,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
               {selectedDayOff.map((o, i) => (
                 <div key={i} className="flex items-center gap-2 px-3 py-2" style={{ border: `0.5px solid #FF007F40`, background: '#FF007F0d' }}>
                   <div style={{ width: '6px', height: '6px', borderRadius: '1px', background: '#FF007F', flexShrink: 0 }} />
-                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.06em' }}>
+                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.06em', flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     WOLNE · {o.artist.name}{o.timeRange ? ` · ${o.timeRange}` : ' · cały dzień'}{o.note ? ` · ${o.note}` : ''}
                   </span>
                 </div>

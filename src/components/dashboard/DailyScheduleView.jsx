@@ -223,7 +223,7 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
         <button onClick={() => onDateChange(subDays(selectedDate, 1))} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
           <ChevronLeft size={16} />
         </button>
-        <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.3rem', fontWeight: 400, color: t.title, letterSpacing: '0.08em' }}>
+        <p className="flex-1 min-w-0 text-center truncate" style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(1rem, 4vw, 1.3rem)', fontWeight: 400, color: t.title, letterSpacing: '0.08em' }}>
           {format(selectedDate, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase()}
         </p>
         <button onClick={() => onDateChange(addDays(selectedDate, 1))} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
