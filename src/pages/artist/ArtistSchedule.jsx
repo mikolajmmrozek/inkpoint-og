@@ -11,6 +11,7 @@ import ReferenceImagesUpload from '@/components/dashboard/ReferenceImagesUpload'
 import { getAvailabilityForDay } from '@/components/dashboard/ArtistScheduleEditor';
 import { findTimeOffConflict, findDoubleBookingConflict } from '@/lib/bookingConflicts';
 import BookingConflictModal from '@/components/booking/BookingConflictModal';
+import { recomputeClientTotalSessions } from '@/lib/clientStats';
 
 const STATUS_COLORS = { pending: '#FF007F', confirmed: '#16a34a', completed: '#2563eb', cancelled: '#9ca3af' };
 const STATUS_LABELS = { pending: 'Oczekuje', confirmed: 'Potwierdzona', completed: 'Zakończona', cancelled: 'Anulowana' };
@@ -107,18 +108,17 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, availabil
       data.session_id = `SES-${format(new Date(), 'yyyyMMdd')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
       const created = await base44.entities.Booking.create(data);
       savedBookingId = created?.id;
-      // Upsert client
+      // Upsert client (basic info only; total_sessions recomputed from completed bookings)
       if (form.client_email) {
         const existing = await base44.entities.Client.filter({ email: form.client_email }, '-created_date', 1).catch(() => []);
-        if (existing.length > 0) {
-          await base44.entities.Client.update(existing[0].id, { total_sessions: (existing[0].total_sessions || 0) + 1 });
-        } else {
-          await base44.entities.Client.create({ first_name: form.client_first_name, last_name: form.client_last_name, name: fullName, email: form.client_email, phone: form.client_phone, total_sessions: 1 });
+        if (existing.length === 0) {
+          await base44.entities.Client.create({ first_name: form.client_first_name, last_name: form.client_last_name, name: fullName, email: form.client_email, phone: form.client_phone });
         }
       }
     } else {
       await base44.entities.Booking.update(booking.id, data);
     }
+    if (form.client_email) recomputeClientTotalSessions(form.client_email).catch(() => {});
     setSaving(false);
     onSaved();
     // Auto-sync to Google Calendar (silent — no error if not connected)
@@ -131,12 +131,14 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, availabil
     if (newStatus === 'cancelled') {
       // Mark as cancelled but keep visible for admin — artist cannot delete
       await base44.entities.Booking.update(booking.id, { status: 'cancelled' });
+      if (form.client_email) recomputeClientTotalSessions(form.client_email).catch(() => {});
       onSaved();
       base44.functions.invoke('manageGoogleCalendar', { action: 'sync_one', booking_id: booking.id }).catch(() => {});
       return;
     }
     await base44.entities.Booking.update(booking.id, { status: newStatus });
     setForm(f => ({ ...f, status: newStatus }));
+    if (form.client_email) recomputeClientTotalSessions(form.client_email).catch(() => {});
     onSaved();
     base44.functions.invoke('manageGoogleCalendar', { action: 'sync_one', booking_id: booking.id }).catch(() => {});
   };

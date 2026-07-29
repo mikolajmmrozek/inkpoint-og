@@ -6,6 +6,7 @@ import ClientSearch from './ClientSearch';
 import ReferenceImagesUpload from './ReferenceImagesUpload';
 import { findTimeOffConflict, findDoubleBookingConflict } from '@/lib/bookingConflicts';
 import BookingConflictModal from '@/components/booking/BookingConflictModal';
+import { recomputeClientTotalSessions } from '@/lib/clientStats';
 
 const inputStyle = {
   background: 'transparent',
@@ -316,7 +317,6 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
           name: fullName,
           email: form.client_email || existingClient.email,
           phone: form.client_phone || existingClient.phone,
-          total_sessions: (existingClient.total_sessions || 0) + 1,
           notes: client_notes || existingClient.notes || '',
         });
       } else if (fullName) {
@@ -327,7 +327,6 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
           name: fullName,
           email: form.client_email,
           phone: form.client_phone,
-          total_sessions: 1,
           notes: client_notes || '',
         });
       }
@@ -350,6 +349,8 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
       }
     }
 
+    // Recompute client's completed session count (excludes cancelled)
+    if (form.client_email) recomputeClientTotalSessions(form.client_email).catch(() => {});
     setSaving(false);
     onSaved();
     // Auto-sync to Google Calendar (silent — no error if not connected)

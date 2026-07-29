@@ -11,6 +11,7 @@ import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
 import BookingModal from '@/components/dashboard/BookingModal';
 import DailyScheduleView from '@/components/dashboard/DailyScheduleView.jsx';
 import { getArtistsOffForDate } from '@/lib/bookingConflicts';
+import { recomputeClientTotalSessions } from '@/lib/clientStats';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -221,8 +222,11 @@ export default function DashboardBookings() {
     // Auto-sync to Google Calendar (silent — no error if not connected)
     base44.functions.invoke('manageGoogleCalendar', { action: 'sync_one', booking_id: id }).catch(() => {});
 
+    const booking = bookings.find(b => b.id === id);
+    // Recompute client's completed session count (excludes cancelled)
+    if (booking?.client_email) recomputeClientTotalSessions(booking.client_email).catch(() => {});
+
     if (status === 'completed') {
-      const booking = bookings.find(b => b.id === id);
       if (booking?.client_email) {
         const surveyLink = `${window.location.origin}/feedback?booking_id=${id}`;
         const configRes = await base44.entities.FeedbackSurveyConfig.filter({ key: 'default' }).catch(() => []);
@@ -236,9 +240,11 @@ export default function DashboardBookings() {
   };
 
   const deleteBooking = async (id) => {
+    const bk = bookings.find(b => b.id === id);
     await base44.entities.Booking.delete(id);
     setBookings(b => b.filter(x => x.id !== id));
     setSelected(null);
+    if (bk?.client_email) recomputeClientTotalSessions(bk.client_email).catch(() => {});
   };
 
   useEffect(() => {
