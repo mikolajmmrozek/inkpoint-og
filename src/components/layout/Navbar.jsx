@@ -44,10 +44,10 @@ export default function Navbar() {
         <div className="px-8 md:px-16 flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex flex-col leading-none">
-            <span className="font-display text-2xl font-700 text-parchment tracking-tight" style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, color: '#F5F0EB', letterSpacing: '0.08em', fontSize: '1.6rem' }}>
+            <span className="font-display text-2xl font-700 text-parchment tracking-tight" style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, color: '#F5F0EB', letterSpacing: '0.08em', fontSize: '2.1rem' }}>
               ROMANS
             </span>
-            <span className="text-micro text-oxblood" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.2em', color: '#FF007F' }}>
+            <span className="text-micro text-oxblood" style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.2em', color: '#FF007F' }}>
               TATTOO
             </span>
           </Link>
@@ -61,7 +61,7 @@ export default function Navbar() {
               className={`text-micro transition-all duration-300 hover:text-oxblood ${
               location.pathname === link.href ? 'text-oxblood' : 'text-parchment/60'}`
               }
-              style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: location.pathname === link.href ? '#FF007F' : 'rgba(245,240,235,0.85)' }}>
+              style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', letterSpacing: '0.12em', textTransform: 'uppercase', color: location.pathname === link.href ? '#FF007F' : 'rgba(245,240,235,0.85)' }}>
               
                 {link.label}
               </Link>
@@ -95,12 +95,12 @@ export default function Navbar() {
                 e.currentTarget.style.background = 'rgba(255,0,127,0.04)';
               }}>
               
-              <User size={15} className="login-icon" color="#FF007F" style={{ flexShrink: 0 }} />
+              <User size={17} className="login-icon" color="#FF007F" style={{ flexShrink: 0 }} />
               <span
                 className="login-label"
                 style={{
                   fontFamily: 'JetBrains Mono, monospace',
-                  fontSize: '10px',
+                  fontSize: '12px',
                   fontWeight: 500,
                   letterSpacing: '0.1em',
                   textTransform: 'uppercase',
@@ -115,7 +115,7 @@ export default function Navbar() {
                 {isAuthenticated ? 'MOJE KONTO' : 'ZALOGUJ SIĘ'}
               </span>
             </button>
-            <Link to="/booking" className="btn-oxblood animate-pulse-oxblood" style={{ padding: '10px 24px', fontSize: '11px' }}>
+            <Link to="/booking" className="btn-oxblood animate-pulse-oxblood" style={{ padding: '11px 26px', fontSize: '13px' }}>
               Umów Sesję
             </Link>
           </div>
