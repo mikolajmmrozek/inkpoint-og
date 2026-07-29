@@ -48,6 +48,11 @@
     "last_login": {
       "type": "string",
       "description": "Data ostatniego logowania klienta (ISO)"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false,
+      "description": "Czy profil klienta zosta\u0142 ju\u017c przejrzany przez admina (do wska\u017anika \"nowi klienci\")"
     }
   },
   "required": [

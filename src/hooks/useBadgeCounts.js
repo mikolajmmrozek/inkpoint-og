@@ -87,15 +87,13 @@ export function useBadgeCounts({ role, userEmail }) {
         } catch (e) {}
 
         try {
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
           const healthForms = await base44.entities.HealthForm.filter(
-            {},
+            { is_read: false },
             '-created_date',
-            50
+            100
           );
           results.newHealthForms = healthForms.filter(
-            (f) => new Date(f.created_date) >= today
+            (f) => !f.is_draft
           ).length;
         } catch (e) {}
 
@@ -109,16 +107,12 @@ export function useBadgeCounts({ role, userEmail }) {
         } catch (e) {}
 
         try {
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
           const clients = await base44.entities.Client.filter(
-            {},
+            { is_read: false },
             '-created_date',
-            50
+            100
           );
-          results.newClients = clients.filter(
-            (c) => new Date(c.created_date) >= today
-          ).length;
+          results.newClients = clients.length;
         } catch (e) {}
       }
 
@@ -181,6 +175,12 @@ export function useBadgeCounts({ role, userEmail }) {
       try {
         unsubs.push(
           base44.entities.HealthForm.subscribe(() => loadAll())
+        );
+      } catch (e) {}
+
+      try {
+        unsubs.push(
+          base44.entities.Client.subscribe(() => loadAll())
         );
       } catch (e) {}
 

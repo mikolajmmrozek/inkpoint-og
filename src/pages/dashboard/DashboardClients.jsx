@@ -63,6 +63,11 @@ export default function DashboardClients() {
     setHealthForms(formData);
     setUsers(userData);
     setLoading(false);
+    // Oznacz wszystkich nieprzeczytanych klientów jako przeczytanych — admin przejrzał listę
+    base44.entities.Client.updateMany(
+      { is_read: { $ne: true } },
+      { $set: { is_read: true } }
+    ).catch(() => {});
   };
 
   useEffect(() => { load(); }, []);
