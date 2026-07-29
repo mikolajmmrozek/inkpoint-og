@@ -94,9 +94,17 @@ export default function NotificationPanel({ open, onClose, userEmail, theme, not
               Powiadomienia
             </h2>
           </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: '4px' }}>
-            <X size={18} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => { onClose(); navigate(notificationsPath); }}
+              style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', border: `0.5px solid ${t.fuchsia}`, padding: '6px 12px', cursor: 'pointer' }}
+            >
+              Pokaż wszystkie
+            </button>
+            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: '4px' }}>
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         {/* Mark all read */}
