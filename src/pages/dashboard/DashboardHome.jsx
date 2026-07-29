@@ -209,6 +209,18 @@ export default function DashboardHome() {
           </div>
         ) : (
           <div className="space-y-4">
+            {(() => {
+              const todayStr = new Date().toISOString().split('T')[0];
+              const hasToday = pendingByDay.some(d => d.date === todayStr);
+              if (!hasToday) return (
+                <div className="p-6 text-center" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
+                    ✓ BRAK SESJI DZIŚ
+                  </p>
+                </div>
+              );
+              return null;
+            })()}
             {pendingByDay.map(({ date, items }) => {
               const dateObj = date !== 'Brak daty' ? new Date(date) : null;
               const today = new Date();
