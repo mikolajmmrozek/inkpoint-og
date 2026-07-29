@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
 import PageLayout from '../components/layout/PageLayout';
+import { LogIn, AlertCircle, CheckCircle2, ShieldCheck } from 'lucide-react';
 
 const DEFAULT_CONFIG = {
   intro_text: 'Twoja opinia jest dla nas bardzo ważna. Zajmie to tylko chwilę.',
@@ -23,7 +24,7 @@ function StarRating({ value, onChange, label }) {
   const [hovered, setHovered] = useState(0);
   return (
     <div className="mb-6">
-      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.5)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>
+      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.65)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>
         {label}
       </p>
       <div className="flex gap-2">
@@ -36,7 +37,7 @@ function StarRating({ value, onChange, label }) {
             onClick={() => onChange(star)}
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', fontSize: '28px', transition: 'transform 0.15s', transform: (hovered || value) >= star ? 'scale(1.1)' : 'scale(1)' }}
           >
-            <span style={{ color: (hovered || value) >= star ? '#FF007F' : 'rgba(245,240,235,0.2)' }}>★</span>
+            <span style={{ color: (hovered || value) >= star ? '#FF007F' : 'rgba(245,240,235,0.25)' }}>★</span>
           </button>
         ))}
       </div>
@@ -45,11 +46,11 @@ function StarRating({ value, onChange, label }) {
 }
 
 const inputStyle = {
-  background: 'transparent',
-  border: 'none',
-  borderBottom: '0.5px solid #262626',
+  background: 'rgba(255,255,255,0.04)',
+  border: '0.5px solid #595959',
+  borderRadius: '2px',
   color: '#F5F0EB',
-  padding: '12px 0',
+  padding: '12px',
   fontSize: '15px',
   width: '100%',
   outline: 'none',
@@ -58,12 +59,20 @@ const inputStyle = {
 
 export default function FeedbackSurvey() {
   const params = new URLSearchParams(window.location.search);
-  const bookingId = params.get('booking_id');
+  const bookingIdParam = params.get('booking_id');
 
+  const [authChecking, setAuthChecking] = useState(true);
+  const [user, setUser] = useState(null);
   const [config, setConfig] = useState(DEFAULT_CONFIG);
+  const [completedBookings, setCompletedBookings] = useState([]);
+  const [loadingBookings, setLoadingBookings] = useState(true);
+  const [selectedBookingId, setSelectedBookingId] = useState('');
   const [booking, setBooking] = useState(null);
+  const [existingFeedback, setExistingFeedback] = useState(null);
+  const [loadingBooking, setLoadingBooking] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [denyReason, setDenyReason] = useState(null);
   const [form, setForm] = useState({
     client_name: '',
     rating_overall: 0,
@@ -77,19 +86,56 @@ export default function FeedbackSurvey() {
   });
 
   useEffect(() => {
-    base44.entities.FeedbackSurveyConfig.filter({ key: 'default' })
-      .then(res => { if (res.length > 0) setConfig({ ...DEFAULT_CONFIG, ...res[0] }); })
-      .catch(() => {});
-
-    if (bookingId) {
-      base44.entities.Booking.get(bookingId)
-        .then(b => {
-          setBooking(b);
-          setForm(f => ({ ...f, client_name: b.client_name || '', client_email: b.client_email || '' }));
-        })
+    let mounted = true;
+    (async () => {
+      base44.entities.FeedbackSurveyConfig.filter({ key: 'default' })
+        .then(res => { if (mounted && res.length > 0) setConfig({ ...DEFAULT_CONFIG, ...res[0] }); })
         .catch(() => {});
-    }
+
+      const ok = await base44.auth.isAuthenticated().catch(() => false);
+      if (!ok) { if (mounted) setAuthChecking(false); return; }
+      const me = await base44.auth.me().catch(() => null);
+      if (!mounted) return;
+      setUser(me);
+      setAuthChecking(false);
+
+      if (!me?.email) { setLoadingBookings(false); return; }
+
+      try {
+        const all = await base44.entities.Booking.filter({ client_email: me.email, status: 'completed' }, '-session_date', 100);
+        if (!mounted) return;
+        setCompletedBookings(all);
+        if (bookingIdParam) {
+          const match = all.find(b => b.id === bookingIdParam);
+          if (!match) {
+            setDenyReason('Ta sesja nie należy do Twojego konta lub nie jest ukończona. Wybierz sesję z listy poniżej.');
+            setSelectedBookingId('');
+          } else {
+            setSelectedBookingId(bookingIdParam);
+          }
+        }
+      } catch (_) {}
+      if (mounted) setLoadingBookings(false);
+    })();
+    return () => { mounted = false; };
   }, []);
+
+  useEffect(() => {
+    if (!selectedBookingId) { setBooking(null); setExistingFeedback(null); return; }
+    setLoadingBooking(true);
+    setExistingFeedback(null);
+    base44.entities.Booking.get(selectedBookingId)
+      .then(async (b) => {
+        setBooking(b);
+        setForm(f => ({ ...f, client_name: b.client_name || user?.full_name || '' }));
+        try {
+          const existing = await base44.entities.Feedback.filter({ booking_id: selectedBookingId }, '-created_date', 1);
+          setExistingFeedback(existing[0] || null);
+        } catch (_) {}
+      })
+      .catch(() => {})
+      .finally(() => setLoadingBooking(false));
+  }, [selectedBookingId]);
 
   const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
@@ -102,16 +148,50 @@ export default function FeedbackSurvey() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!booking) return;
     await base44.entities.Feedback.create({
       ...form,
-      booking_id: bookingId || '',
-      artist_id: booking?.artist_id || '',
-      artist_name: booking?.artist_name || '',
-      client_email: form.client_email || booking?.client_email || '',
+      booking_id: booking.id,
+      artist_id: booking.artist_id || '',
+      artist_name: booking.artist_name || '',
+      client_email: user?.email || booking.client_email || '',
       is_published: false,
     });
     setSubmitted(true);
   };
+
+  if (authChecking) {
+    return (
+      <PageLayout noFooter>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="w-8 h-px animate-pulse" style={{ background: '#FF007F' }} />
+        </div>
+      </PageLayout>
+    );
+  }
+
+  if (!user) {
+    return (
+      <PageLayout noFooter>
+        <div className="pt-32 pb-20 px-8 max-w-md mx-auto text-center">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <LogIn size={28} color="#FF007F" style={{ margin: '0 auto 16px' }} />
+            <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: '#F5F0EB', letterSpacing: '0.04em', marginBottom: '16px' }}>Wymagane logowanie</h1>
+            <p style={{ color: 'rgba(245,240,235,0.65)', fontSize: '15px', lineHeight: 1.7, marginBottom: '32px' }}>
+              Aby wystawić opinię, zaloguj się na swoje konto. Opinie zbieramy wyłącznie od zweryfikowanych klientów po ukończonej sesji.
+            </p>
+            <button
+              onClick={() => base44.auth.redirectToLogin(window.location.pathname + window.location.search)}
+              className="btn-oxblood"
+              style={{ fontSize: '11px' }}
+            >
+              ZALOGUJ SIĘ
+            </button>
+          </motion.div>
+        </div>
+      </PageLayout>
+    );
+  }
 
   if (submitted) {
     return (
@@ -124,16 +204,43 @@ export default function FeedbackSurvey() {
               <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '3rem', fontWeight: 400, color: '#F5F0EB', lineHeight: 1, letterSpacing: '0.04em' }}>
                 {config.thank_you_text}
               </h2>
-              <a href="/" style={{ display: 'inline-block', marginTop: '32px', fontFamily: 'JetBrains Mono', fontSize: '13px', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#FF007F', textDecoration: 'none', padding: '12px 28px', border: '0.5px solid #FF007F' }} onMouseEnter={e => e.target.style.background = '#FF007F'} onMouseEnter={e => e.target.style.color = '#0A0A0A'} onMouseLeave={e => e.target.style.background = 'transparent'} onMouseLeave={e => e.target.style.color = '#FF007F'}>
+              <a href="/" style={{ display: 'inline-block', marginTop: '32px', fontFamily: 'JetBrains Mono', fontSize: '13px', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#FF007F', textDecoration: 'none', padding: '12px 28px', border: '0.5px solid #FF007F' }} onMouseEnter={e => { e.target.style.background = '#FF007F'; e.target.style.color = '#0A0A0A'; }} onMouseLeave={e => { e.target.style.background = 'transparent'; e.target.style.color = '#FF007F'; }}>
                 POWRÓT NA STRONĘ GŁÓWNĄ
               </a>
             </div>
           </motion.div>
           <div style={{ paddingBottom: '40px', textAlign: 'center' }}>
-            <a href="/feedback" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.3)', textDecoration: 'none', letterSpacing: '0.08em' }} onMouseEnter={e => e.target.style.color = 'rgba(245,240,235,0.6)'} onMouseLeave={e => e.target.style.color = 'rgba(245,240,235,0.3)'}>
-              NOWA ANKIETA
+            <a href="/panel" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.5)', textDecoration: 'none', letterSpacing: '0.08em' }} onMouseEnter={e => e.target.style.color = 'rgba(245,240,235,0.8)'} onMouseLeave={e => e.target.style.color = 'rgba(245,240,235,0.5)'}>
+              MÓJ PANEL
             </a>
           </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  if (loadingBookings) {
+    return (
+      <PageLayout noFooter>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="w-8 h-px animate-pulse" style={{ background: '#FF007F' }} />
+        </div>
+      </PageLayout>
+    );
+  }
+
+  if (completedBookings.length === 0) {
+    return (
+      <PageLayout noFooter>
+        <div className="pt-32 pb-20 px-8 max-w-md mx-auto text-center">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <AlertCircle size={28} color="#FF007F" style={{ margin: '0 auto 16px' }} />
+            <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: '#F5F0EB', letterSpacing: '0.04em', marginBottom: '16px' }}>Brak sesji do oceny</h1>
+            <p style={{ color: 'rgba(245,240,235,0.65)', fontSize: '15px', lineHeight: 1.7, marginBottom: '32px' }}>
+              Opinie mogą wystawiać wyłącznie zweryfikowani klienci po ukończonej sesji. Nie masz jeszcze ukończonych sesji, które mógłbyś ocenić.
+            </p>
+            <a href="/panel" className="btn-ghost-parchment" style={{ fontSize: '10px', textDecoration: 'none' }}>MÓJ PANEL</a>
+          </motion.div>
         </div>
       </PageLayout>
     );
@@ -146,104 +253,150 @@ export default function FeedbackSurvey() {
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>
             ANKIETA SATYSFAKCJI
           </p>
-          <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(3rem, 7vw, 5rem)', fontWeight: 400, lineHeight: 0.9, color: '#F5F0EB', letterSpacing: '0.04em', marginBottom: '24px' }}>
+          <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(3rem, 7vw, 5rem)', fontWeight: 400, lineHeight: 0.9, color: '#F5F0EB', letterSpacing: '0.04em', marginBottom: '16px' }}>
             Twoja Opinia
           </h1>
-          {booking && (
-            <p style={{ color: 'rgba(245,240,235,0.5)', fontSize: '14px', marginBottom: '8px' }}>
-              Sesja z <span style={{ color: '#FF007F' }}>{booking.artist_name}</span> · {booking.session_date}
-            </p>
-          )}
-          <p style={{ color: 'rgba(245,240,235,0.4)', fontSize: '14px', lineHeight: 1.7, marginBottom: '48px' }}>
+
+          <div className="mb-6 flex items-center gap-2 px-3 py-2" style={{ background: 'rgba(22,163,74,0.08)', border: '0.5px solid rgba(22,163,74,0.35)' }}>
+            <ShieldCheck size={13} color="#16a34a" />
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Zweryfikowany klient</p>
+          </div>
+
+          <p style={{ color: 'rgba(245,240,235,0.65)', fontSize: '14px', lineHeight: 1.7, marginBottom: '32px' }}>
             {config.intro_text}
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Name */}
-            <div className="mb-8">
-              <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
-                Imię *
-              </label>
-              <input
-                required
-                style={inputStyle}
-                value={form.client_name}
-                onChange={e => setForm(f => ({ ...f, client_name: e.target.value }))}
-                onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
-                onBlur={e => e.target.style.borderBottomColor = '#262626'}
-              />
-            </div>
+          {/* Session selector */}
+          <div className="mb-8">
+            <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.65)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+              Wybierz sesję do oceny *
+            </label>
+            <select
+              value={selectedBookingId}
+              onChange={e => setSelectedBookingId(e.target.value)}
+              style={{ ...inputStyle, colorScheme: 'dark', cursor: 'pointer' }}
+            >
+              <option value="">— wybierz sesję —</option>
+              {completedBookings.map(b => (
+                <option key={b.id} value={b.id}>
+                  {b.session_date} · {b.artist_name}{b.service_name ? ` · ${b.service_name}` : ''}{b.tattoo_placement ? ` · ${b.tattoo_placement}` : ''}
+                </option>
+              ))}
+            </select>
+            {denyReason && (
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', marginTop: '8px', letterSpacing: '0.06em' }}>⚠ {denyReason}</p>
+            )}
+          </div>
 
-            <div style={{ height: '0.5px', background: 'rgba(255,0,127,0.2)', margin: '32px 0' }} />
+          {selectedBookingId && loadingBooking && (
+            <div className="mb-8"><div className="w-8 h-px animate-pulse" style={{ background: '#FF007F' }} /></div>
+          )}
 
-            <StarRating value={form.rating_overall} onChange={v => setForm(f => ({ ...f, rating_overall: v }))} label={config.question_overall + ' *'} />
-            <StarRating value={form.rating_artist} onChange={v => setForm(f => ({ ...f, rating_artist: v }))} label={config.question_artist + ' *'} />
-            {config.show_rating_studio && <StarRating value={form.rating_studio} onChange={v => setForm(f => ({ ...f, rating_studio: v }))} label={config.question_studio} />}
-            {config.show_rating_cleanliness && <StarRating value={form.rating_cleanliness} onChange={v => setForm(f => ({ ...f, rating_cleanliness: v }))} label={config.question_cleanliness} />}
-            {config.show_rating_value && <StarRating value={form.rating_value} onChange={v => setForm(f => ({ ...f, rating_value: v }))} label={config.question_value} />}
-
-            <div style={{ height: '0.5px', background: 'rgba(255,0,127,0.2)', margin: '32px 0' }} />
-
-            {/* Short review */}
-            <div className="mb-6">
-              <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
-                {config.question_short_review} *
-              </label>
-              <textarea
-                required
-                rows={3}
-                maxLength={200}
-                style={{ ...inputStyle, resize: 'none' }}
-                value={form.short_review}
-                onChange={e => setForm(f => ({ ...f, short_review: e.target.value }))}
-                onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
-                onBlur={e => e.target.style.borderBottomColor = '#262626'}
-              />
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.3)', marginTop: '4px' }}>
-                {form.short_review.length}/200
+          {selectedBookingId && booking && existingFeedback && (
+            <div className="mb-8 px-4 py-4" style={{ border: '0.5px solid rgba(22,163,74,0.4)', background: 'rgba(22,163,74,0.06)' }}>
+              <div className="flex items-center gap-2 mb-3">
+                <CheckCircle2 size={14} color="#16a34a" />
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Opinia już wystawiona</p>
+              </div>
+              <p style={{ color: '#F5F0EB', fontSize: '14px', lineHeight: 1.6 }}>"{existingFeedback.short_review}"</p>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.5)', marginTop: '6px' }}>
+                Ocena ogólna: {existingFeedback.rating_overall}★ · {new Date(existingFeedback.created_date).toLocaleDateString('pl-PL')}
               </p>
             </div>
+          )}
 
-            {/* Full review */}
-            <div className="mb-6">
-              <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
-                {config.question_full_review}
-              </label>
-              <textarea
-                rows={4}
-                style={{ ...inputStyle, resize: 'none' }}
-                value={form.full_review}
-                onChange={e => setForm(f => ({ ...f, full_review: e.target.value }))}
-                onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
-                onBlur={e => e.target.style.borderBottomColor = '#262626'}
-              />
-            </div>
+          {selectedBookingId && booking && !existingFeedback && (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div style={{ height: '0.5px', background: 'rgba(255,0,127,0.2)', margin: '8px 0 32px' }} />
 
-            {/* Photo upload */}
-            {config.show_photo_upload && (
-              <div className="mb-8">
-                <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '12px' }}>
-                  Zdjęcie tatuażu / piercingu (opcjonalne)
-                </label>
-                {form.tattoo_photo_url && (
-                  <img src={form.tattoo_photo_url} alt="" className="w-32 h-32 object-cover mb-4" style={{ filter: 'brightness(0.8)' }} />
-                )}
-                <label className="btn-ghost-parchment inline-block cursor-pointer" style={{ fontSize: '10px', padding: '8px 16px' }}>
-                  {uploading ? 'PRZESYŁANIE...' : 'DODAJ ZDJĘCIE'}
-                  <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
-                </label>
+              {/* Session summary */}
+              <div className="mb-6 px-3 py-2" style={{ border: '0.5px solid #595959', background: 'rgba(255,255,255,0.03)' }}>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.65)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '4px' }}>Ocenasz sesję</p>
+                <p style={{ color: '#F5F0EB', fontSize: '14px' }}>
+                  {booking.session_date} · <span style={{ color: '#FF007F' }}>{booking.artist_name}</span>{booking.service_name ? ` · ${booking.service_name}` : ''}{booking.tattoo_placement ? ` · ${booking.tattoo_placement}` : ''}
+                </p>
               </div>
-            )}
 
-            <button
-              type="submit"
-              disabled={!form.rating_overall || !form.rating_artist || !form.short_review}
-              className="btn-oxblood w-full"
-              style={{ opacity: (!form.rating_overall || !form.rating_artist || !form.short_review) ? 0.5 : 1 }}
-            >
-              WYŚLIJ OPINIĘ
-            </button>
-          </form>
+              {/* Name */}
+              <div className="mb-8">
+                <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.65)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+                  Imię *
+                </label>
+                <input
+                  required
+                  style={inputStyle}
+                  value={form.client_name}
+                  onChange={e => setForm(f => ({ ...f, client_name: e.target.value }))}
+                />
+              </div>
+
+              <div style={{ height: '0.5px', background: 'rgba(255,0,127,0.2)', margin: '32px 0' }} />
+
+              <StarRating value={form.rating_overall} onChange={v => setForm(f => ({ ...f, rating_overall: v }))} label={config.question_overall + ' *'} />
+              <StarRating value={form.rating_artist} onChange={v => setForm(f => ({ ...f, rating_artist: v }))} label={config.question_artist + ' *'} />
+              {config.show_rating_studio && <StarRating value={form.rating_studio} onChange={v => setForm(f => ({ ...f, rating_studio: v }))} label={config.question_studio} />}
+              {config.show_rating_cleanliness && <StarRating value={form.rating_cleanliness} onChange={v => setForm(f => ({ ...f, rating_cleanliness: v }))} label={config.question_cleanliness} />}
+              {config.show_rating_value && <StarRating value={form.rating_value} onChange={v => setForm(f => ({ ...f, rating_value: v }))} label={config.question_value} />}
+
+              <div style={{ height: '0.5px', background: 'rgba(255,0,127,0.2)', margin: '32px 0' }} />
+
+              {/* Short review */}
+              <div className="mb-6">
+                <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.65)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+                  {config.question_short_review} *
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  maxLength={200}
+                  style={{ ...inputStyle, resize: 'none' }}
+                  value={form.short_review}
+                  onChange={e => setForm(f => ({ ...f, short_review: e.target.value }))}
+                />
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.5)', marginTop: '4px' }}>
+                  {form.short_review.length}/200
+                </p>
+              </div>
+
+              {/* Full review */}
+              <div className="mb-6">
+                <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.65)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+                  {config.question_full_review}
+                </label>
+                <textarea
+                  rows={4}
+                  style={{ ...inputStyle, resize: 'none' }}
+                  value={form.full_review}
+                  onChange={e => setForm(f => ({ ...f, full_review: e.target.value }))}
+                />
+              </div>
+
+              {/* Photo upload */}
+              {config.show_photo_upload && (
+                <div className="mb-8">
+                  <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.65)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '12px' }}>
+                    Zdjęcie tatuażu / piercingu (opcjonalne)
+                  </label>
+                  {form.tattoo_photo_url && (
+                    <img src={form.tattoo_photo_url} alt="" className="w-32 h-32 object-cover mb-4" style={{ filter: 'brightness(0.8)' }} />
+                  )}
+                  <label className="btn-ghost-parchment inline-block cursor-pointer" style={{ fontSize: '10px', padding: '8px 16px' }}>
+                    {uploading ? 'PRZESYŁANIE...' : 'DODAJ ZDJĘCIE'}
+                    <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+                  </label>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={!form.rating_overall || !form.rating_artist || !form.short_review}
+                className="btn-oxblood w-full"
+                style={{ opacity: (!form.rating_overall || !form.rating_artist || !form.short_review) ? 0.5 : 1 }}
+              >
+                WYŚLIJ OPINIĘ
+              </button>
+            </form>
+          )}
         </motion.div>
       </div>
     </PageLayout>

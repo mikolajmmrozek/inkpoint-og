@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
-import { Star, Mail, Eye, EyeOff, Trash2, X, Check, Plus, GripVertical, Copy, ExternalLink } from 'lucide-react';
+import { Star, Mail, Eye, EyeOff, Trash2, X, Check, Plus, GripVertical } from 'lucide-react';
 import StatsTile from '@/components/dashboard/StatsTile';
 
 function StarDisplay({ value, size = 12 }) {
@@ -38,27 +38,23 @@ const DEFAULT_CONFIG = {
 export default function DashboardFeedback() {
   const { theme } = useTheme();
   const t = theme === 'light'
-    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F', pageBg: '#F8F8F8' }
-    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F', pageBg: '#0A0A0A' };
+    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.6)', fuchsia: '#FF007F', pageBg: '#F8F8F8' }
+    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.65)', fuchsia: '#FF007F', pageBg: '#0A0A0A' };
 
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('reviews'); // 'reviews' | 'config'
-  const [copied, setCopied] = useState(false);
   const [sortBy, setSortBy] = useState('newest'); // 'newest' | 'oldest' | 'highest' | 'lowest'
-
-  const surveyUrl = `${window.location.origin}/feedback`;
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(surveyUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
   const [configForm, setConfigForm] = useState(null);
   const [savingConfig, setSavingConfig] = useState(false);
 
   const { data: feedbacks = [] } = useQuery({
     queryKey: ['feedback'],
     queryFn: () => base44.entities.Feedback.list('-created_date', 100),
+  });
+
+  const { data: bookings = [] } = useQuery({
+    queryKey: ['feedbackBookings'],
+    queryFn: () => base44.entities.Booking.list('-session_date', 200),
   });
 
   const { data: configData = [] } = useQuery({
@@ -112,9 +108,9 @@ export default function DashboardFeedback() {
   };
 
   const inputStyle = {
-    background: 'transparent',
+    background: theme === 'light' ? 'rgba(0,0,0,0.02)' : 'rgba(255,255,255,0.04)',
     border: 'none',
-    borderBottom: `0.5px solid ${t.border}`,
+    borderBottom: `0.5px solid ${theme === 'light' ? '#CCCCCC' : '#595959'}`,
     color: t.text,
     padding: '8px 0',
     fontSize: '14px',
@@ -133,23 +129,10 @@ export default function DashboardFeedback() {
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>ZARZĄDZANIE</p>
           <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>Opinie</h2>
         </div>
-        <div className="flex items-center gap-2 md:mt-7">
-          <a
-            href={surveyUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-oxblood flex items-center gap-2"
-            style={{ padding: '10px 20px', textDecoration: 'none' }}
-          >
-            <ExternalLink size={13} /> WYSTAW OPINIĘ
-          </a>
-          <button
-            onClick={handleCopyLink}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '10px 20px', border: `0.5px solid ${t.border}`, color: copied ? '#16a34a' : t.muted, background: 'transparent', cursor: 'pointer', transition: 'color 0.2s' }}
-          >
-            {copied ? <Check size={13} /> : <Copy size={13} />}
-            {copied ? 'SKOPIOWANO!' : 'KOPIUJ LINK'}
-          </button>
+        <div className="md:mt-7 max-w-xs text-right">
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', lineHeight: 1.6 }}>
+            Opinie zbierane wyłącznie od zweryfikowanych klientów po ukończonej sesji
+          </p>
         </div>
       </div>
 
@@ -210,6 +193,15 @@ export default function DashboardFeedback() {
                     <StarDisplay value={fb.rating_overall} />
                     <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{new Date(fb.created_date).toLocaleDateString('pl-PL')}</span>
                   </div>
+                  {(() => {
+                    const fbBooking = bookings.find(b => b.id === fb.booking_id);
+                    if (!fbBooking) return null;
+                    return (
+                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em', marginBottom: '6px' }}>
+                        {fbBooking.session_date}{fbBooking.service_name ? ` · ${fbBooking.service_name}` : ''}{fbBooking.tattoo_placement ? ` · ${fbBooking.tattoo_placement}` : ''}
+                      </p>
+                    );
+                  })()}
                   {fb.short_review && (
                     <p style={{ color: t.text, fontSize: '14px', lineHeight: 1.6, marginBottom: '8px' }}>"{fb.short_review}"</p>
                   )}
