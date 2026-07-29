@@ -248,8 +248,8 @@ export default function DashboardHome() {
                 <div key={date}>
                   {/* Day header */}
                   <div className="flex items-center gap-3 mb-2">
-                    <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: isPast ? '#9ca3af' : isToday ? '#f59e0b' : '#16a34a', flexShrink: 0 }} />
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: isPast ? t.muted : isToday ? '#f59e0b' : t.muted }}>
+                    <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: isPast ? '#9ca3af' : isToday ? '#16a34a' : '#16a34a', flexShrink: 0 }} />
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: isPast ? t.muted : isToday ? '#16a34a' : t.muted }}>
                       {isToday ? `DZISIAJ — ${dayLabel}` : isPast ? `PRZETERMINOWANE — ${dayLabel}` : dayLabel}
                     </p>
                     <div style={{ flex: 1, height: '0.5px', background: t.cardBorder }} />
