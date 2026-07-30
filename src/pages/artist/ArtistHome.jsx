@@ -403,7 +403,7 @@ export default function ArtistHome() {
             <motion.div key={kpi.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
               <Link to={kpi.link} className="block p-6 h-full" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
                 <Icon size={16} color="#FF007F" className="mb-4" />
-                <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.2rem', fontWeight: 400, color: t.value, lineHeight: 1, letterSpacing: '0.04em' }}>
+                <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.value, lineHeight: 1, letterSpacing: '0.04em' }}>
                   {loading ? '—' : kpi.value}
                 </p>
                 <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px' }}>{kpi.label}</p>
@@ -428,26 +428,26 @@ export default function ArtistHome() {
             {overdueGroups.length > 0 && (
               <div>
                 <div className="flex items-center gap-3 mb-2">
-                  <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#FF007F', flexShrink: 0 }} />
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#FF007F' }}>DO ROZLICZENIA / PRZETERMINOWANE</p>
+                  <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#FF007F', flexShrink: 0 }} />
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#FF007F' }}>DO ROZLICZENIA / PRZETERMINOWANE</p>
                   <div style={{ flex: 1, height: '0.5px', background: 'rgba(255,0,127,0.3)' }} />
                 </div>
                 {overdueGroups.map(([date, items]) => (
                   <div key={date} className="mb-3">
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px', opacity: 0.7 }}>{formatDayHeader(date)}</p>
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px', opacity: 0.7 }}>{formatDayHeader(date)}</p>
                     <div style={{ border: '0.5px solid rgba(255,0,127,0.4)', background: t.cardBg }}>
                       {items.map((b, i) => (
                         <div key={b.id} onClick={() => setSelectedBooking(b)} className="flex items-center justify-between p-4 cursor-pointer" style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }} onMouseEnter={e => e.currentTarget.style.background = t.rowHover} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                           <div className="flex-1">
-                            <p style={{ color: t.value, fontSize: '14px', fontWeight: 500 }}>{b.client_name}</p>
-                            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
+                            <p style={{ color: t.value, fontSize: '15px', fontWeight: 500 }}>{b.client_name}</p>
+                            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px' }}>
                               {b.session_time ? `${b.session_time} · ` : ''}{b.tattoo_placement || ''}
                             </p>
-                            {b.service_name && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', opacity: 0.8, marginTop: '2px' }}>{b.service_name}</p>}
+                            {b.service_name && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', opacity: 0.8, marginTop: '2px' }}>{b.service_name}</p>}
                           </div>
                           <div className="flex items-end gap-3 flex-shrink-0 ml-4">
-                            {b.estimated_price > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{b.estimated_price} zł</span>}
-                            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status] }}>
+                            {b.estimated_price > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: t.muted }}>{b.estimated_price} zł</span>}
+                            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status] }}>
                               {b.status?.toUpperCase()}
                             </span>
                           </div>
@@ -462,8 +462,8 @@ export default function ArtistHome() {
             {/* Today — always show */}
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#16a34a', flexShrink: 0 }} />
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#16a34a' }}>DZIŚ — {todayLabel}</p>
+                <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#16a34a', flexShrink: 0 }} />
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#16a34a' }}>DZIŚ — {todayLabel}</p>
                 <div style={{ flex: 1, height: '0.5px', background: 'rgba(22,163,74,0.3)' }} />
               </div>
               {todayBookings.length === 0 ? (
@@ -475,15 +475,15 @@ export default function ArtistHome() {
                   {todayBookings.map((b, i) => (
                     <div key={b.id} onClick={() => setSelectedBooking(b)} className="flex items-center justify-between p-4 cursor-pointer" style={{ borderBottom: i < todayBookings.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }} onMouseEnter={e => e.currentTarget.style.background = t.rowHover} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                       <div className="flex-1">
-                        <p style={{ color: t.value, fontSize: '14px', fontWeight: 500 }}>{b.client_name}</p>
-                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
+                        <p style={{ color: t.value, fontSize: '15px', fontWeight: 500 }}>{b.client_name}</p>
+                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px' }}>
                           {b.session_time ? `${b.session_time} · ` : ''}{b.tattoo_placement || ''}
                         </p>
-                        {b.service_name && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', opacity: 0.8, marginTop: '2px' }}>{b.service_name}</p>}
+                        {b.service_name && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', opacity: 0.8, marginTop: '2px' }}>{b.service_name}</p>}
                       </div>
                       <div className="flex items-end gap-3 flex-shrink-0 ml-4">
-                        {b.estimated_price > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{b.estimated_price} zł</span>}
-                        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status] }}>
+                        {b.estimated_price > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: t.muted }}>{b.estimated_price} zł</span>}
+                        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status] }}>
                           {b.status?.toUpperCase()}
                         </span>
                       </div>
@@ -497,24 +497,24 @@ export default function ArtistHome() {
             {upcomingGroups.filter(([d]) => d !== todayStr).map(([date, items]) => (
               <div key={date}>
                 <div className="flex items-center gap-3 mb-2">
-                  <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#FF007F', flexShrink: 0 }} />
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: t.muted }}>{formatDayHeader(date)}</p>
+                  <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#FF007F', flexShrink: 0 }} />
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: t.muted }}>{formatDayHeader(date)}</p>
                   <div style={{ flex: 1, height: '0.5px', background: t.cardBorder }} />
-                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{items.length} {pluralSesji(items.length)}</span>
+                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: t.muted }}>{items.length} {pluralSesji(items.length)}</span>
                 </div>
                 <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
                   {items.map((b, i) => (
                     <div key={b.id} onClick={() => setSelectedBooking(b)} className="flex items-center justify-between p-4 cursor-pointer" style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }} onMouseEnter={e => e.currentTarget.style.background = t.rowHover} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                       <div className="flex-1">
-                        <p style={{ color: t.value, fontSize: '14px', fontWeight: 500 }}>{b.client_name}</p>
-                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
+                        <p style={{ color: t.value, fontSize: '15px', fontWeight: 500 }}>{b.client_name}</p>
+                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px' }}>
                           {b.session_time ? `${b.session_time} · ` : ''}{b.tattoo_placement || ''}
                         </p>
-                        {b.service_name && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', opacity: 0.8, marginTop: '2px' }}>{b.service_name}</p>}
+                        {b.service_name && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', opacity: 0.8, marginTop: '2px' }}>{b.service_name}</p>}
                       </div>
                       <div className="flex items-end gap-3 flex-shrink-0 ml-4">
-                        {b.estimated_price > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{b.estimated_price} zł</span>}
-                        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status] }}>
+                        {b.estimated_price > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: t.muted }}>{b.estimated_price} zł</span>}
+                        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status] }}>
                           {b.status?.toUpperCase()}
                         </span>
                       </div>

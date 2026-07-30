@@ -77,8 +77,8 @@ export default function ArtistStats() {
           { label: 'Łączna kwota', value: `${totalRevenue} zł` },
           { label: `Mój zarobek (${cut}%)`, value: `${totalEarning} zł` },
         ].map(kpi => (
-          <div key={kpi.label} className="p-4" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
-            <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.8rem', color: t.text, lineHeight: 1, letterSpacing: '0.04em' }}>{loading ? '—' : kpi.value}</p>
+          <div key={kpi.label} className="p-5" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+            <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.2rem', color: t.text, lineHeight: 1, letterSpacing: '0.04em' }}>{loading ? '—' : kpi.value}</p>
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '4px' }}>{kpi.label}</p>
           </div>
         ))}
@@ -120,10 +120,10 @@ export default function ArtistStats() {
           </div>
           {monthlyData.map((row, i) => (
             <div key={row.label} className="grid grid-cols-4 gap-4 p-3" style={{ borderBottom: i < monthlyData.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none', opacity: row.sessions === 0 ? 0.4 : 1 }}>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text, letterSpacing: '0.06em' }}>{row.label}</p>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text }}>{row.sessions}</p>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>{row.revenue} zł</p>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: row.myEarning > 0 ? '#FF007F' : t.muted }}>{row.myEarning} zł</p>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', color: t.text, letterSpacing: '0.06em' }}>{row.label}</p>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.text }}>{row.sessions}</p>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted }}>{row.revenue} zł</p>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: row.myEarning > 0 ? '#FF007F' : t.muted }}>{row.myEarning} zł</p>
             </div>
           ))}
         </div>
@@ -144,10 +144,10 @@ export default function ArtistStats() {
           ) : (
             dailyData.map((row, i) => (
               <div key={row.date} className="grid grid-cols-4 gap-4 p-3" style={{ borderBottom: i < dailyData.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none', opacity: row.sessions === 0 ? 0.4 : 1 }}>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text, letterSpacing: '0.06em' }}>{row.date}</p>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text }}>{row.sessions}</p>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>{row.revenue} zł</p>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: row.myEarning > 0 ? '#FF007F' : t.muted }}>{row.myEarning} zł</p>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', color: t.text, letterSpacing: '0.06em' }}>{row.date}</p>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.text }}>{row.sessions}</p>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted }}>{row.revenue} zł</p>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: row.myEarning > 0 ? '#FF007F' : t.muted }}>{row.myEarning} zł</p>
               </div>
             ))
           )}
