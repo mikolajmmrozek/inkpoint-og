@@ -571,7 +571,7 @@ export default function HealthFormPage() {
 
           {/* Language selector */}
           <div className="mb-8 relative">
-            <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: textMuted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+            <label style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: textMuted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
               {t.langSelect}
             </label>
             <div style={{ position: 'relative' }}>
@@ -599,7 +599,7 @@ export default function HealthFormPage() {
 
           {/* First visit? */}
           <div className="mb-6">
-            <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: textMuted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+            <label style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: textMuted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
               {t.firstVisitQuestion || 'Czy to Twoja pierwsza wizyta w naszym studio?'} *
             </label>
             <div className="flex gap-3">
@@ -607,7 +607,7 @@ export default function HealthFormPage() {
                 <button
                   key={String(v)}
                   onClick={() => setIsFirstVisit(v)}
-                  style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 20px', border: `0.5px solid ${isFirstVisit === v ? '#FF007F' : borderColor}`, color: isFirstVisit === v ? '#FF007F' : textMuted, background: isFirstVisit === v ? 'rgba(255,0,127,0.08)' : 'transparent', cursor: 'pointer', flex: 1 }}
+                  style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 20px', border: `0.5px solid ${isFirstVisit === v ? '#FF007F' : borderColor}`, color: isFirstVisit === v ? '#FF007F' : textMuted, background: isFirstVisit === v ? 'rgba(255,0,127,0.08)' : (theme === 'light' ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.06)'), cursor: 'pointer', flex: 1 }}
                 >
                   {v ? t.yes : t.no}
                 </button>
@@ -618,7 +618,7 @@ export default function HealthFormPage() {
           {/* Returning client email */}
           {isFirstVisit === false && (
             <div className="mb-6">
-              <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: textMuted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+              <label style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: textMuted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
                 {t.returningEmailLabel || 'Adres e-mail z poprzedniej wizyty'} *
               </label>
               <input
@@ -635,7 +635,7 @@ export default function HealthFormPage() {
           <div className="flex justify-end mb-4">
             <button
               onClick={toggleTheme}
-              style={{ background: 'none', border: `0.5px solid ${borderColor}`, cursor: 'pointer', color: textMuted, padding: '6px 12px', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}
+              style={{ background: theme === 'light' ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.06)', border: `0.5px solid ${borderColor}`, cursor: 'pointer', color: textMuted, padding: '8px 14px', fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase' }}
             >
               {theme === 'dark' ? '☀ Jasny' : '☾ Ciemny'}
             </button>
@@ -694,7 +694,7 @@ export default function HealthFormPage() {
           {/* Theme toggle */}
           <button
             onClick={toggleTheme}
-            style={{ background: 'none', border: `0.5px solid ${borderColor}`, cursor: 'pointer', color: textMuted, padding: '8px 12px', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap', flexShrink: 0, marginTop: '4px' }}
+            style={{ background: theme === 'light' ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.06)', border: `0.5px solid ${borderColor}`, cursor: 'pointer', color: textMuted, padding: '8px 14px', fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap', flexShrink: 0, marginTop: '4px' }}
           >
             {theme === 'dark' ? '☀ Jasny' : '☾ Ciemny'}
           </button>
