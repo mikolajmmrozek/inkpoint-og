@@ -63,25 +63,22 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
         {isError && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', marginTop: '6px', letterSpacing: '0.08em' }}>⚠ {t?.required || 'WYMAGANE'}</p>}
       </div>
 
-      {/* Custom declaration fields */}
+      {/* Custom declaration fields — line-separated, black text, no boxes */}
       {customFields.length > 0 && (
-        <div className="space-y-4 pt-4">
+        <div>
           {customFields.map(field => (
-            <div key={field.field_key}>
+            <div key={field.field_key} className="py-4" style={{ borderBottom: `0.5px solid ${borderColor}` }}>
               {field.label && (
                 <TranslatedLabel
                   text={field.label}
                   lang={lang}
-                  style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: textMuted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+                  style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '6px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
                 />
               )}
-              <textarea
-                rows={1}
-                readOnly
-                style={{ ...inputStyle, resize: 'none', overflow: 'hidden', whiteSpace: 'pre-wrap' }}
-                value={form[field.field_key] || ''}
-                ref={el => { if (el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; } }}
-                placeholder={field.placeholder || field.label}
+              <TranslatedParagraph
+                text={form[field.field_key] || field.placeholder || field.label || ''}
+                lang={lang}
+                style={{ color: textPrimary, fontSize: '15px', lineHeight: 1.7, wordBreak: 'break-word', overflowWrap: 'break-word', margin: 0 }}
               />
             </div>
           ))}
