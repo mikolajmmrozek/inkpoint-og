@@ -107,9 +107,9 @@ export default function BottomNav({ theme, calendarPath, messagesPath, notificat
         const color = item.active ? activeColor : inactiveColor;
 
         const inner = (
-          <div className="flex flex-col items-center gap-1 py-2" style={{ minWidth: '60px' }}>
+          <div className="flex flex-col items-center gap-1.5 py-4" style={{ minWidth: '72px' }}>
             <div style={{ position: 'relative' }}>
-              <Icon size={20} color={color} />
+              <Icon size={24} color={color} />
               {item.badge > 0 && (
                 <span style={{
                   position: 'absolute', top: '-2px', right: '-4px',
@@ -127,7 +127,7 @@ export default function BottomNav({ theme, calendarPath, messagesPath, notificat
             <span
               style={{
                 fontFamily: 'JetBrains Mono',
-                fontSize: '7px',
+                fontSize: '9px',
                 letterSpacing: '0.1em',
                 textTransform: 'uppercase',
                 color,
