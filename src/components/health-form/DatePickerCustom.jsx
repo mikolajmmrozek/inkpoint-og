@@ -25,11 +25,11 @@ export default function DatePickerCustom({ value, onChange, showErrors, t, textP
   const bc = borderColor || '#262626';
 
   const selectStyle = {
-    background: 'transparent',
-    border: 'none',
-    borderBottom: showErrors && !value ? '1px solid #FF007F' : `0.5px solid ${bc}`,
+    background: 'rgba(128,128,128,0.06)',
+    border: `0.5px solid ${showErrors && !value ? '#FF007F' : bc}`,
+    borderRadius: '4px',
     color: tc,
-    padding: '10px 8px',
+    padding: '10px 10px',
     fontSize: '16px',
     outline: 'none',
     fontFamily: 'Inter, sans-serif',
@@ -38,7 +38,7 @@ export default function DatePickerCustom({ value, onChange, showErrors, t, textP
 
   return (
     <div>
-      <label style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: showErrors && !value ? '#FF007F' : tm, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+      <label style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: showErrors && !value ? '#FF007F' : tm, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
         {t.dateOfBirth} * {showErrors && !value && '(wymagane)'}
       </label>
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>

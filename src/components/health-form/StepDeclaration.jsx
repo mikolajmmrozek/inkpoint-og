@@ -46,7 +46,7 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
                 <TranslatedLabel
                   text={field.label}
                   lang={lang}
-                  style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: textMuted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+                  style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: textMuted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
                 />
               )}
               <textarea

@@ -6,7 +6,7 @@ export default function StepPersonal({ form, setField, t, inputStyle, showErrors
     : false;
 
   const labelStyle = (error) => ({
-    fontFamily: 'JetBrains Mono', fontSize: '10px',
+    fontFamily: 'JetBrains Mono', fontSize: '11px',
     color: error ? '#FF007F' : textMuted,
     letterSpacing: '0.15em', textTransform: 'uppercase',
     display: 'block', marginBottom: '6px'
@@ -14,7 +14,7 @@ export default function StepPersonal({ form, setField, t, inputStyle, showErrors
 
   const inp = (field, required) => ({
     ...inputStyle,
-    borderBottomColor: showErrors && required && !form[field] ? '#FF007F' : borderColor
+    borderColor: showErrors && required && !form[field] ? '#FF007F' : borderColor
   });
 
   return (
@@ -88,7 +88,7 @@ export default function StepPersonal({ form, setField, t, inputStyle, showErrors
                 textTransform: 'uppercase', padding: '11px 22px',
                 border: `0.5px solid ${form.procedure_type === p ? '#FF007F' : showErrors && !form.procedure_type ? '#FF007F' : borderColor}`,
                 color: form.procedure_type === p ? '#FF007F' : showErrors && !form.procedure_type ? '#FF007F' : textMuted,
-                background: form.procedure_type === p ? 'rgba(255,0,127,0.08)' : showErrors && !form.procedure_type ? 'rgba(255,0,127,0.08)' : 'transparent',
+                background: form.procedure_type === p ? 'rgba(255,0,127,0.08)' : showErrors && !form.procedure_type ? 'rgba(255,0,127,0.08)' : 'rgba(128,128,128,0.06)',
                 cursor: 'pointer'
               }}>
               {p === 'TATUAŻ' ? t.tattoo : t.piercing}

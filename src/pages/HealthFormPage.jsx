@@ -341,11 +341,11 @@ export default function HealthFormPage() {
   };
 
   const inputStyle = {
-    background: 'transparent',
-    border: 'none',
-    borderBottom: `0.5px solid ${inputBorderBottom}`,
+    background: theme === 'light' ? '#FFFFFF' : 'rgba(255,255,255,0.04)',
+    border: `0.5px solid ${borderColor}`,
+    borderRadius: '4px',
     color: inputColor,
-    padding: '14px 0',
+    padding: '12px 14px',
     fontSize: '16px',
     width: '100%',
     outline: 'none',
