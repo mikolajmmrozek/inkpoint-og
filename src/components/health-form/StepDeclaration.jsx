@@ -27,13 +27,6 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
 
   return (
     <div className="space-y-0">
-      {/* Section title — mirrors consent blocks heading style */}
-      {declaration.label && (
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-          {declaration.label}{declaration.required && ' *'}
-        </p>
-      )}
-
       {/* Declaration paragraphs — line-separated, black text, no boxes (like step 5) */}
       {paragraphs.map((para, i) => (
         <div key={i} className="py-4" style={{ borderBottom: `0.5px solid ${borderColor}` }}>
@@ -65,6 +58,13 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
             </div>
           ))}
         </div>
+      )}
+
+      {/* Section title at the bottom — mirrors consent blocks heading style */}
+      {declaration.label && (
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '16px 0 4px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+          {declaration.label}{declaration.required && ' *'}
+        </p>
       )}
 
       {/* Single accept checkbox at the very bottom — covers all declaration statements */}
