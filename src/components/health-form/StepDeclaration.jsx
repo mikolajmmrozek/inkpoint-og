@@ -22,19 +22,42 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
   if (!declaration) return <div style={{ color: textMuted, fontSize: '15px' }}>Brak konfiguracji oświadczenia. Uzupełnij dane w ustawieniach szablonu.</div>;
 
   const isError = showErrors && declaration.required && !form[declaration.field_key];
+  const checked = !!form[declaration.field_key];
 
   return (
     <div className="space-y-6">
-      {/* Declaration content */}
-      <div>
-        {(declaration.content || '').split(/\n+/).filter(p => p.trim()).map((para, i) => (
-          <TranslatedParagraph
-            key={i}
-            text={para.trim()}
-            lang={lang}
-            style={{ color: textPrimary, opacity: 0.9, fontSize: '15px', lineHeight: 1.7, wordBreak: 'break-word', overflowWrap: 'break-word', padding: '10px 0', margin: 0 }}
-          />
-        ))}
+      {/* Declaration block — mirrors ConsentBlock structure for consistency with step 5 */}
+      <div className="py-4" style={{ borderBottom: isError ? '0.5px solid #FF007F' : `0.5px solid ${borderColor}` }}>
+        <div style={{ marginBottom: '10px' }}>
+          {declaration.label && (
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+              {declaration.label}{declaration.required && ' *'} {isError && `(${(t?.required || 'WYMAGANE').toLowerCase()})`}
+            </p>
+          )}
+          <div>
+            {(declaration.content || '').split(/\n+/).filter(p => p.trim()).map((para, i) => (
+              <TranslatedParagraph
+                key={i}
+                text={para.trim()}
+                lang={lang}
+                style={{ color: textPrimary, fontSize: '15px', lineHeight: 1.7, wordBreak: 'break-word', overflowWrap: 'break-word', margin: 0, marginBottom: '6px' }}
+              />
+            ))}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => setField(declaration.field_key, !checked)}
+          className="flex items-center gap-3"
+          style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+        >
+          <div style={{ width: '16px', height: '16px', border: `0.5px solid ${checked ? '#16a34a' : isError ? '#FF007F' : borderColor}`, background: checked ? '#16a34a' : isError ? 'rgba(255,0,127,0.1)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            {checked && <span style={{ color: '#fff', fontSize: '10px', lineHeight: 1 }}>✓</span>}
+          </div>
+          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', color: checked ? '#16a34a' : isError ? '#FF007F' : textMuted }}>
+            {checked ? `✓ ${t?.accepted || 'ZAAKCEPTOWANO'}` : isError ? `⚠ ${t?.required || 'WYMAGANE'}` : t?.clickToAccept || 'KLIKNIJ ABY ZAAKCEPTOWAĆ'}
+          </span>
+        </button>
       </div>
 
       {/* Custom declaration fields */}
@@ -61,26 +84,6 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
           ))}
         </div>
       )}
-
-      {/* Main declaration consent */}
-      <div style={{ paddingTop: '20px' }}>
-        <button
-          type="button"
-          onClick={() => setField(declaration.field_key, !form[declaration.field_key])}
-          className="flex items-center gap-3 w-full"
-          style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-        >
-          <div style={{ width: '18px', height: '18px', border: `0.5px solid ${form[declaration.field_key] ? '#16a34a' : isError ? '#FF007F' : borderColor}`, background: form[declaration.field_key] ? '#16a34a' : isError ? 'rgba(255,0,127,0.1)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            {form[declaration.field_key] && <span style={{ color: '#fff', fontSize: '11px', lineHeight: 1, fontWeight: 'bold' }}>✓</span>}
-          </div>
-          <TranslatedSpan
-            text={declaration.label}
-            lang={lang}
-            style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase', color: form[declaration.field_key] ? '#16a34a' : isError ? '#FF007F' : textMuted, whiteSpace: 'pre-wrap', wordBreak: 'break-word', textAlign: 'left' }}
-          />
-        </button>
-        {isError && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', marginTop: '6px', letterSpacing: '0.08em' }}>⚠ {t?.required || 'WYMAGANE'}</p>}
-      </div>
     </div>
   );
 }
