@@ -35,7 +35,7 @@ export default function StepGuardian({ guardian, setGuardianField, form, t, inpu
                   const curr = guardian.procedure_type || [];
                   setGuardianField('procedure_type', selected ? curr.filter(x => x !== p) : [...curr, p]);
                 }}
-                style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '11px 22px', border: `0.5px solid ${selected ? '#FF007F' : showErrors && !guardian.procedure_type?.length ? '#FF007F' : borderColor}`, color: selected ? '#FF007F' : showErrors && !guardian.procedure_type?.length ? '#FF007F' : textMuted, background: selected ? 'rgba(255,0,127,0.08)' : showErrors && !guardian.procedure_type?.length ? 'rgba(255,0,127,0.08)' : 'rgba(128,128,128,0.06)', cursor: 'pointer' }}>
+                style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '11px 22px', border: `0.5px solid ${selected ? '#FF007F' : showErrors && !guardian.procedure_type?.length ? '#FF007F' : borderColor}`, color: selected ? '#FF007F' : showErrors && !guardian.procedure_type?.length ? '#FF007F' : textMuted, background: selected ? 'rgba(255,0,127,0.08)' : showErrors && !guardian.procedure_type?.length ? 'rgba(255,0,127,0.08)' : 'rgba(255,255,255,0.06)', cursor: 'pointer' }}>
                 {p === 'TATUAŻ' ? t.tattoo : t.piercing}
               </button>
             );

@@ -88,7 +88,7 @@ export default function StepPersonal({ form, setField, t, inputStyle, showErrors
                 textTransform: 'uppercase', padding: '11px 22px',
                 border: `0.5px solid ${form.procedure_type === p ? '#FF007F' : showErrors && !form.procedure_type ? '#FF007F' : borderColor}`,
                 color: form.procedure_type === p ? '#FF007F' : showErrors && !form.procedure_type ? '#FF007F' : textMuted,
-                background: form.procedure_type === p ? 'rgba(255,0,127,0.08)' : showErrors && !form.procedure_type ? 'rgba(255,0,127,0.08)' : 'rgba(128,128,128,0.06)',
+                background: form.procedure_type === p ? 'rgba(255,0,127,0.08)' : showErrors && !form.procedure_type ? 'rgba(255,0,127,0.08)' : 'rgba(255,255,255,0.06)',
                 cursor: 'pointer'
               }}>
               {p === 'TATUAŻ' ? t.tattoo : t.piercing}

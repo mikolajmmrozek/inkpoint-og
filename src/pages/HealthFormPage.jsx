@@ -341,7 +341,7 @@ export default function HealthFormPage() {
   };
 
   const inputStyle = {
-    background: theme === 'light' ? '#FFFFFF' : 'rgba(255,255,255,0.04)',
+    background: theme === 'light' ? '#FFFFFF' : 'rgba(255,255,255,0.09)',
     border: `0.5px solid ${borderColor}`,
     borderRadius: '4px',
     color: inputColor,

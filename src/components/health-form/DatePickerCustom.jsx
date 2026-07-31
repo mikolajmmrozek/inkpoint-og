@@ -25,7 +25,7 @@ export default function DatePickerCustom({ value, onChange, showErrors, t, textP
   const bc = borderColor || '#262626';
 
   const selectStyle = {
-    background: 'rgba(128,128,128,0.06)',
+    background: 'rgba(255,255,255,0.09)',
     border: `0.5px solid ${showErrors && !value ? '#FF007F' : bc}`,
     borderRadius: '4px',
     color: tc,
