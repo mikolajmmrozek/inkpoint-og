@@ -45,24 +45,6 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
         </div>
       ))}
 
-      {/* Single accept checkbox at the bottom — covers all declaration statements */}
-      <div className="py-4" style={{ borderBottom: isError ? '0.5px solid #FF007F' : `0.5px solid ${borderColor}` }}>
-        <button
-          type="button"
-          onClick={() => setField(declaration.field_key, !checked)}
-          className="flex items-center gap-3"
-          style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-        >
-          <div style={{ width: '16px', height: '16px', border: `0.5px solid ${checked ? '#16a34a' : isError ? '#FF007F' : borderColor}`, background: checked ? '#16a34a' : isError ? 'rgba(255,0,127,0.1)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            {checked && <span style={{ color: '#fff', fontSize: '10px', lineHeight: 1 }}>✓</span>}
-          </div>
-          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', color: checked ? '#16a34a' : isError ? '#FF007F' : textMuted }}>
-            {checked ? `✓ ${t?.accepted || 'ZAAKCEPTOWANO'}` : isError ? `⚠ ${t?.required || 'WYMAGANE'}` : t?.clickToAccept || 'KLIKNIJ ABY ZAAKCEPTOWAĆ'}
-          </span>
-        </button>
-        {isError && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', marginTop: '6px', letterSpacing: '0.08em' }}>⚠ {t?.required || 'WYMAGANE'}</p>}
-      </div>
-
       {/* Custom declaration fields — line-separated, black text, no boxes */}
       {customFields.length > 0 && (
         <div>
@@ -84,6 +66,24 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
           ))}
         </div>
       )}
+
+      {/* Single accept checkbox at the very bottom — covers all declaration statements */}
+      <div className="py-4">
+        <button
+          type="button"
+          onClick={() => setField(declaration.field_key, !checked)}
+          className="flex items-center gap-3"
+          style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+        >
+          <div style={{ width: '16px', height: '16px', border: `0.5px solid ${checked ? '#16a34a' : isError ? '#FF007F' : borderColor}`, background: checked ? '#16a34a' : isError ? 'rgba(255,0,127,0.1)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            {checked && <span style={{ color: '#fff', fontSize: '10px', lineHeight: 1 }}>✓</span>}
+          </div>
+          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', color: checked ? '#16a34a' : isError ? '#FF007F' : textMuted }}>
+            {checked ? `✓ ${t?.accepted || 'ZAAKCEPTOWANO'}` : isError ? `⚠ ${t?.required || 'WYMAGANE'}` : t?.clickToAccept || 'KLIKNIJ ABY ZAAKCEPTOWAĆ'}
+          </span>
+        </button>
+        {isError && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', marginTop: '6px', letterSpacing: '0.08em' }}>⚠ {t?.required || 'WYMAGANE'}</p>}
+      </div>
     </div>
   );
 }
