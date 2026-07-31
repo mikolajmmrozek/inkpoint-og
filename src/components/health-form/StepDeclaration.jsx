@@ -23,28 +23,30 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
 
   const isError = showErrors && declaration.required && !form[declaration.field_key];
   const checked = !!form[declaration.field_key];
+  const paragraphs = (declaration.content || '').split(/\n+/).filter(p => p.trim());
 
   return (
-    <div className="space-y-6">
-      {/* Declaration block — mirrors ConsentBlock structure for consistency with step 5 */}
-      <div className="py-4" style={{ borderBottom: isError ? '0.5px solid #FF007F' : `0.5px solid ${borderColor}` }}>
-        <div style={{ marginBottom: '10px' }}>
-          {declaration.label && (
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-              {declaration.label}{declaration.required && ' *'} {isError && `(${(t?.required || 'WYMAGANE').toLowerCase()})`}
-            </p>
-          )}
-          <div>
-            {(declaration.content || '').split(/\n+/).filter(p => p.trim()).map((para, i) => (
-              <TranslatedParagraph
-                key={i}
-                text={para.trim()}
-                lang={lang}
-                style={{ color: textPrimary, fontSize: '15px', lineHeight: 1.7, wordBreak: 'break-word', overflowWrap: 'break-word', margin: 0, marginBottom: '6px' }}
-              />
-            ))}
-          </div>
+    <div className="space-y-0">
+      {/* Section title — mirrors consent blocks heading style */}
+      {declaration.label && (
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+          {declaration.label}{declaration.required && ' *'}
+        </p>
+      )}
+
+      {/* Declaration paragraphs — line-separated, black text, no boxes (like step 5) */}
+      {paragraphs.map((para, i) => (
+        <div key={i} className="py-4" style={{ borderBottom: `0.5px solid ${borderColor}` }}>
+          <TranslatedParagraph
+            text={para.trim()}
+            lang={lang}
+            style={{ color: textPrimary, fontSize: '15px', lineHeight: 1.7, wordBreak: 'break-word', overflowWrap: 'break-word', margin: 0 }}
+          />
         </div>
+      ))}
+
+      {/* Single accept checkbox at the bottom — covers all declaration statements */}
+      <div className="py-4" style={{ borderBottom: isError ? '0.5px solid #FF007F' : `0.5px solid ${borderColor}` }}>
         <button
           type="button"
           onClick={() => setField(declaration.field_key, !checked)}
@@ -58,11 +60,12 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
             {checked ? `✓ ${t?.accepted || 'ZAAKCEPTOWANO'}` : isError ? `⚠ ${t?.required || 'WYMAGANE'}` : t?.clickToAccept || 'KLIKNIJ ABY ZAAKCEPTOWAĆ'}
           </span>
         </button>
+        {isError && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', marginTop: '6px', letterSpacing: '0.08em' }}>⚠ {t?.required || 'WYMAGANE'}</p>}
       </div>
 
       {/* Custom declaration fields */}
       {customFields.length > 0 && (
-        <div className="space-y-4">
+        <div className="space-y-4 pt-4">
           {customFields.map(field => (
             <div key={field.field_key}>
               {field.label && (
