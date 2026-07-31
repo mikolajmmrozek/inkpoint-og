@@ -9,7 +9,7 @@ export default function LangDropdown({ lang, setLang, template, theme }) {
   const isDark = theme === 'dark' || !theme;
   const dropBg = isDark ? '#0A0A0A' : '#FFFFFF';
   const borderColor = isDark ? '#262626' : '#E5E5E5';
-  const textColor = isDark ? 'rgba(245,240,235,0.6)' : 'rgba(0,0,0,0.5)';
+  const textColor = isDark ? 'rgba(245,240,235,0.75)' : 'rgba(0,0,0,0.75)';
   const innerBorder = isDark ? '#1a1a1a' : '#F0F0F0';
 
   const handleSelect = async (code) => {

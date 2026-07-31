@@ -117,7 +117,7 @@ export default function HealthFormPage() {
   const bg = theme === 'light' ? '#F8F8F8' : '#0A0A0A';
   const cardBg = theme === 'light' ? '#FFFFFF' : '#0A0A0A';
   const textPrimary = theme === 'light' ? '#0A0A0A' : '#F5F0EB';
-  const textMuted = theme === 'light' ? 'rgba(0,0,0,0.6)' : 'rgba(245,240,235,0.6)';
+  const textMuted = theme === 'light' ? 'rgba(0,0,0,0.8)' : 'rgba(245,240,235,0.78)';
   const borderColor = theme === 'light' ? '#E5E5E5' : '#262626';
   const inputBorderBottom = theme === 'light' ? '#CCCCCC' : '#262626';
   const inputColor = theme === 'light' ? '#111111' : '#F5F0EB';
@@ -345,8 +345,8 @@ export default function HealthFormPage() {
     border: 'none',
     borderBottom: `0.5px solid ${inputBorderBottom}`,
     color: inputColor,
-    padding: '12px 0',
-    fontSize: '14px',
+    padding: '14px 0',
+    fontSize: '16px',
     width: '100%',
     outline: 'none',
     fontFamily: 'Inter, sans-serif',

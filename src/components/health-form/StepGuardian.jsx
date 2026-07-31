@@ -2,7 +2,7 @@ import SignatureCanvas from './SignatureCanvas';
 
 export default function StepGuardian({ guardian, setGuardianField, form, t, inputStyle, showErrors, textPrimary, textMuted, borderColor, theme }) {
   const labelStyle = (error) => ({
-    fontFamily: 'JetBrains Mono', fontSize: '8px',
+    fontFamily: 'JetBrains Mono', fontSize: '10px',
     color: error ? '#FF007F' : textMuted,
     letterSpacing: '0.15em', textTransform: 'uppercase',
     display: 'block', marginBottom: '6px'
@@ -11,7 +11,7 @@ export default function StepGuardian({ guardian, setGuardianField, form, t, inpu
   return (
     <div className="space-y-6">
       <div className="px-4 py-3 mb-4" style={{ background: 'rgba(255,0,127,0.06)', border: '0.5px solid rgba(255,0,127,0.2)' }}>
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.1em', lineHeight: 1.6 }}>{t.guardianInfo}</p>
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.1em', lineHeight: 1.6 }}>{t.guardianInfo}</p>
       </div>
 
       <div>
@@ -35,7 +35,7 @@ export default function StepGuardian({ guardian, setGuardianField, form, t, inpu
                   const curr = guardian.procedure_type || [];
                   setGuardianField('procedure_type', selected ? curr.filter(x => x !== p) : [...curr, p]);
                 }}
-                style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 20px', border: `0.5px solid ${selected ? '#FF007F' : showErrors && !guardian.procedure_type?.length ? '#FF007F' : borderColor}`, color: selected ? '#FF007F' : showErrors && !guardian.procedure_type?.length ? '#FF007F' : textMuted, background: selected ? 'rgba(255,0,127,0.08)' : showErrors && !guardian.procedure_type?.length ? 'rgba(255,0,127,0.08)' : 'transparent', cursor: 'pointer' }}>
+                style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '11px 22px', border: `0.5px solid ${selected ? '#FF007F' : showErrors && !guardian.procedure_type?.length ? '#FF007F' : borderColor}`, color: selected ? '#FF007F' : showErrors && !guardian.procedure_type?.length ? '#FF007F' : textMuted, background: selected ? 'rgba(255,0,127,0.08)' : showErrors && !guardian.procedure_type?.length ? 'rgba(255,0,127,0.08)' : 'transparent', cursor: 'pointer' }}>
                 {p === 'TATUAŻ' ? t.tattoo : t.piercing}
               </button>
             );
@@ -68,7 +68,7 @@ export default function StepGuardian({ guardian, setGuardianField, form, t, inpu
       </div>
 
       <div className="py-4 px-4" style={{ border: `0.5px solid ${borderColor}`, background: 'transparent' }}>
-        <p style={{ color: textMuted, fontSize: '13px', lineHeight: 1.7, marginBottom: '16px' }}>{t.guardianConsentText}</p>
+        <p style={{ color: textMuted, fontSize: '15px', lineHeight: 1.7, marginBottom: '16px' }}>{t.guardianConsentText}</p>
       </div>
 
       <SignatureCanvas

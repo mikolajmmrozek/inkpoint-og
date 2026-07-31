@@ -29,8 +29,8 @@ export default function DatePickerCustom({ value, onChange, showErrors, t, textP
     border: 'none',
     borderBottom: showErrors && !value ? '1px solid #FF007F' : `0.5px solid ${bc}`,
     color: tc,
-    padding: '8px 8px',
-    fontSize: '14px',
+    padding: '10px 8px',
+    fontSize: '16px',
     outline: 'none',
     fontFamily: 'Inter, sans-serif',
     flex: 1,
@@ -38,7 +38,7 @@ export default function DatePickerCustom({ value, onChange, showErrors, t, textP
 
   return (
     <div>
-      <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: showErrors && !value ? '#FF007F' : tm, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+      <label style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: showErrors && !value ? '#FF007F' : tm, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
         {t.dateOfBirth} * {showErrors && !value && '(wymagane)'}
       </label>
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>

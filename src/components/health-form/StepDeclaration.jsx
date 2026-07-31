@@ -19,7 +19,7 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
   const declaration = templateData?.declaration_of_will || null;
   const customFields = templateData?.declaration_fields || [];
 
-  if (!declaration) return <div style={{ color: textMuted, fontSize: '14px' }}>Brak konfiguracji oświadczenia. Uzupełnij dane w ustawieniach szablonu.</div>;
+  if (!declaration) return <div style={{ color: textMuted, fontSize: '15px' }}>Brak konfiguracji oświadczenia. Uzupełnij dane w ustawieniach szablonu.</div>;
 
   const isError = showErrors && declaration.required && !form[declaration.field_key];
 
@@ -32,7 +32,7 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
             key={i}
             text={para.trim()}
             lang={lang}
-            style={{ color: textPrimary, opacity: 0.8, fontSize: '13px', lineHeight: 1.7, wordBreak: 'break-word', overflowWrap: 'break-word', padding: '10px 0', margin: 0 }}
+            style={{ color: textPrimary, opacity: 0.9, fontSize: '15px', lineHeight: 1.7, wordBreak: 'break-word', overflowWrap: 'break-word', padding: '10px 0', margin: 0 }}
           />
         ))}
       </div>
@@ -46,7 +46,7 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
                 <TranslatedLabel
                   text={field.label}
                   lang={lang}
-                  style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: textMuted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+                  style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: textMuted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
                 />
               )}
               <textarea
@@ -76,10 +76,10 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
           <TranslatedSpan
             text={declaration.label}
             lang={lang}
-            style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.08em', textTransform: 'uppercase', color: form[declaration.field_key] ? '#16a34a' : isError ? '#FF007F' : textMuted, whiteSpace: 'pre-wrap', wordBreak: 'break-word', textAlign: 'left' }}
+            style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase', color: form[declaration.field_key] ? '#16a34a' : isError ? '#FF007F' : textMuted, whiteSpace: 'pre-wrap', wordBreak: 'break-word', textAlign: 'left' }}
           />
         </button>
-        {isError && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', marginTop: '6px', letterSpacing: '0.08em' }}>⚠ {t?.required || 'WYMAGANE'}</p>}
+        {isError && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', marginTop: '6px', letterSpacing: '0.08em' }}>⚠ {t?.required || 'WYMAGANE'}</p>}
       </div>
     </div>
   );

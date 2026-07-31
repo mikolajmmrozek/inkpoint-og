@@ -6,7 +6,7 @@ export default function StepPersonal({ form, setField, t, inputStyle, showErrors
     : false;
 
   const labelStyle = (error) => ({
-    fontFamily: 'JetBrains Mono', fontSize: '8px',
+    fontFamily: 'JetBrains Mono', fontSize: '10px',
     color: error ? '#FF007F' : textMuted,
     letterSpacing: '0.15em', textTransform: 'uppercase',
     display: 'block', marginBottom: '6px'
@@ -84,8 +84,8 @@ export default function StepPersonal({ form, setField, t, inputStyle, showErrors
           {['TATUAŻ', 'PIERCING'].map(p => (
             <button type="button" key={p} onClick={() => setField('procedure_type', p)}
               style={{
-                fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em',
-                textTransform: 'uppercase', padding: '10px 20px',
+                fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em',
+                textTransform: 'uppercase', padding: '11px 22px',
                 border: `0.5px solid ${form.procedure_type === p ? '#FF007F' : showErrors && !form.procedure_type ? '#FF007F' : borderColor}`,
                 color: form.procedure_type === p ? '#FF007F' : showErrors && !form.procedure_type ? '#FF007F' : textMuted,
                 background: form.procedure_type === p ? 'rgba(255,0,127,0.08)' : showErrors && !form.procedure_type ? 'rgba(255,0,127,0.08)' : 'transparent',

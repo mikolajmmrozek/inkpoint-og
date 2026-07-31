@@ -7,22 +7,22 @@ function YesNoRow({ label, fieldKey, descKey, form, setField, t, inputStyle, lan
   return (
     <div className="py-3" style={{ borderBottom: `0.5px solid ${borderColor}` }}>
       <div className="flex items-center justify-between gap-4">
-        <p style={{ color: textPrimary, fontSize: '14px', lineHeight: 1.4, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{translatedLabel}{required && <span style={{ color: '#FF007F' }}> *</span>}</p>
+        <p style={{ color: textPrimary, fontSize: '16px', lineHeight: 1.4, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{translatedLabel}{required && <span style={{ color: '#FF007F' }}> *</span>}</p>
         <div className="flex gap-2 flex-shrink-0">
           {[true, false].map(v => (
             <button type="button" key={String(v)} onClick={() => setField(fieldKey, v)}
-              style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 14px', border: `0.5px solid ${val === v ? (v ? '#FF007F' : '#16a34a') : isError ? '#FF007F' : borderColor}`, color: val === v ? (v ? '#FF007F' : '#16a34a') : textMuted, background: 'transparent', cursor: 'pointer' }}>
+              style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${val === v ? (v ? '#FF007F' : '#16a34a') : isError ? '#FF007F' : borderColor}`, color: val === v ? (v ? '#FF007F' : '#16a34a') : textMuted, background: 'transparent', cursor: 'pointer' }}>
               {v ? t.yes : t.no}
             </button>
           ))}
         </div>
       </div>
-      {isError && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', marginTop: '4px', letterSpacing: '0.08em' }}>⚠ {t?.required || 'WYMAGANE'}</p>}
+      {isError && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', marginTop: '4px', letterSpacing: '0.08em' }}>⚠ {t?.required || 'WYMAGANE'}</p>}
       {val === true && descKey && (
         <input
           type="text"
           placeholder={t.describeIfYes}
-          style={{ ...inputStyle, marginTop: '8px', fontSize: '13px' }}
+          style={{ ...inputStyle, marginTop: '8px', fontSize: '15px' }}
           value={form[descKey] || ''}
           onChange={e => setField(descKey, e.target.value)}
         />
@@ -46,7 +46,7 @@ export default function StepMedical({ form, setField, t, inputStyle, showErrors,
         <TranslatedText
           text={sectionIntro}
           lang={lang}
-          style={{ color: textMuted, fontSize: '13px', marginBottom: '20px', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+          style={{ color: textMuted, fontSize: '15px', marginBottom: '20px', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
         />
       )}
       <div>
