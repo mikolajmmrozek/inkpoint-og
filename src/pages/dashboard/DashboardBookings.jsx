@@ -14,6 +14,7 @@ import { getArtistsOffForDate } from '@/lib/bookingConflicts';
 import { recomputeClientTotalSessions } from '@/lib/clientStats';
 import { buildHealthFormStatusMap, resolveBookingHealthStatus } from '@/lib/healthFormStatus';
 import HealthFormBadge from '@/components/booking/HealthFormBadge';
+import GroupedBookingList from '@/components/booking/GroupedBookingList';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -545,7 +546,7 @@ export default function DashboardBookings() {
             {/* Search results above calendar */}
             {viewMode === 'calendar' && searchQuery.trim() && (
               <div className="mb-6">
-                <div style={{ padding: '10px 16px', background: t.bg, border: `0.5px solid ${t.border}` }}>
+                <div style={{ padding: '10px 16px', background: t.bg, border: `0.5px solid ${t.border}`, marginBottom: '12px' }}>
                   <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.1rem', color: t.title, letterSpacing: '0.08em' }}>
                     WYNIKI WYSZUKIWANIA
                   </p>
@@ -553,17 +554,12 @@ export default function DashboardBookings() {
                     {listBookings.length} {listBookings.length === 1 ? 'SESJA' : listBookings.length >= 2 && listBookings.length <= 4 ? 'SESJE' : 'SESJI'}
                   </p>
                 </div>
-                {listBookings.length > 0 ? (
-                  <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, marginTop: '4px' }}>
-                    {listBookings.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={listBookings} selected={selected} setSelected={setSelected} artists={artists} t={t} healthStatusMap={healthStatusMap} />)}
-                  </div>
-                ) : (
-                  <div className="py-6 text-center" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
-                      BRAK PASUJĄCYCH SESJI
-                    </p>
-                  </div>
-                )}
+                <GroupedBookingList
+                  bookings={listBookings}
+                  t={t}
+                  emptyMessage="BRAK PASUJĄCYCH SESJI"
+                  renderRow={(b, i, items) => <BookingRow key={b.id} b={b} i={i} items={items} selected={selected} setSelected={setSelected} artists={artists} t={t} healthStatusMap={healthStatusMap} />}
+                />
               </div>
             )}
 

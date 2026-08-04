@@ -15,11 +15,47 @@ import { recomputeClientTotalSessions } from '@/lib/clientStats';
 import { buildHealthFormStatusMap, resolveBookingHealthStatus } from '@/lib/healthFormStatus';
 import HealthFormBadge from '@/components/booking/HealthFormBadge';
 import ReferenceImagesGallery from '@/components/booking/ReferenceImagesGallery';
+import GroupedBookingList from '@/components/booking/GroupedBookingList';
 
 const STATUS_COLORS = { pending: '#FF007F', confirmed: '#16a34a', completed: '#2563eb', cancelled: '#9ca3af' };
 const STATUS_LABELS = { pending: 'Oczekuje', confirmed: 'Potwierdzona', completed: 'Zakończona', cancelled: 'Anulowana' };
 const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
 const MINUTES = ['00', '15', '30', '45'];
+
+// ── Booking list row (for search results) ────────────────────────────────────
+function ArtistBookingRow({ b, i, items, t, healthStatusMap, onSelect }) {
+  const endDisplay = b.session_end_time ? `→ ${b.session_end_time}` : b.session_time && b.session_duration ? (() => {
+    const [h, m] = b.session_time.split(':').map(Number);
+    const endTotal = h * 60 + m + b.session_duration;
+    return `→ ${String(Math.floor(endTotal / 60)).padStart(2, '0')}:${String(endTotal % 60).padStart(2, '0')}`;
+  })() : null;
+  return (
+    <div
+      className="flex items-center justify-between p-4 cursor-pointer transition-colors"
+      style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none', opacity: b.status === 'cancelled' ? 0.5 : 1 }}
+      onClick={() => onSelect(b)}
+      onMouseEnter={e => e.currentTarget.style.background = t.rowHover}
+      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+    >
+      <div className="flex items-center gap-3 min-w-0 flex-1">
+        <div className="flex-shrink-0 text-center" style={{ minWidth: '52px' }}>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '16px', color: STATUS_COLORS[b.status] || '#FF007F', letterSpacing: '0.05em' }}>{b.session_time || '—'}</p>
+          {endDisplay && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted }}>{endDisplay}</p>}
+        </div>
+        <div className="min-w-0">
+          <p style={{ color: t.text, fontSize: '15px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.client_name}</p>
+          {b.tattoo_placement && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.tattoo_placement}</p>}
+          {b.service_name && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', opacity: 0.8 }}>{b.service_name}</p>}
+        </div>
+      </div>
+      <div className="flex items-center gap-3 flex-shrink-0">
+        <HealthFormBadge status={resolveBookingHealthStatus(b, healthStatusMap)} fontSize="10px" style={{ padding: '3px 7px' }} />
+        {b.estimated_price > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', color: t.muted }}>{b.estimated_price} PLN</span>}
+        <div style={{ width: '11px', height: '11px', borderRadius: '50%', background: STATUS_COLORS[b.status] || t.muted }} />
+      </div>
+    </div>
+  );
+}
 
 // ── Booking Detail / Edit Modal ──────────────────────────────────────────────
 function BookingModal({ booking, isNew, artist, artistServices, theme, availabilityRecords, allBookings, onClose, onSaved, healthStatusMap }) {
@@ -808,6 +844,7 @@ export default function ArtistSchedule() {
   const [availabilityRecords, setAvailabilityRecords] = useState([]);
   const [healthStatusMap, setHealthStatusMap] = useState({});
   const [selectedAvailability, setSelectedAvailability] = useState(null); // { record, dateStr }
+  const [searchQuery, setSearchQuery] = useState('');
 
   const loadAvailability = useCallback(() => {
     if (!artist?.id) return;
@@ -880,6 +917,19 @@ export default function ArtistSchedule() {
     .filter(b => b.session_date && isSameDay(new Date(b.session_date), selectedDate))
     .sort((a, b) => (a.session_time || '').localeCompare(b.session_time || ''));
 
+  const searchResults = (() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase();
+    return bookings.filter(b =>
+      (b.client_name || '').toLowerCase().includes(q) ||
+      (b.session_id || '').toLowerCase().includes(q) ||
+      (b.client_email || '').toLowerCase().includes(q) ||
+      (b.client_phone || '').includes(searchQuery) ||
+      (b.tattoo_placement || '').toLowerCase().includes(q) ||
+      (b.notes || '').toLowerCase().includes(q)
+    ).sort((a, b) => (a.session_date || '').localeCompare(b.session_date || '') || (a.session_time || '').localeCompare(b.session_time || ''));
+  })();
+
   return (
     <div>
       {/* View toggle + new session */}
@@ -897,6 +947,43 @@ export default function ArtistSchedule() {
         </button>
       </div>
 
+      {/* Search bar */}
+      <div className="mb-4">
+        <div className="flex items-center gap-2 w-full" style={{ border: `0.5px solid ${searchQuery ? '#FF007F' : t.cardBorder}`, padding: '8px 14px', background: t.cardBg }}>
+          <Search size={12} color={searchQuery ? '#FF007F' : t.muted} />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Szukaj klienta, emailu, miejsca, sesji..."
+            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text, letterSpacing: '0.05em' }}
+          />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: 0 }}>
+              <X size={12} />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Search results — grouped by day */}
+      {searchQuery.trim() && (
+        <div className="mb-6">
+          <div style={{ padding: '10px 16px', background: t.cardBg, border: `0.5px solid ${t.cardBorder}`, marginBottom: '12px' }}>
+            <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.1rem', color: t.title, letterSpacing: '0.08em' }}>WYNIKI WYSZUKIWANIA</p>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: searchResults.length > 0 ? '#FF007F' : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
+              {searchResults.length} {searchResults.length === 1 ? 'SESJA' : searchResults.length >= 2 && searchResults.length <= 4 ? 'SESJE' : 'SESJI'}
+            </p>
+          </div>
+          <GroupedBookingList
+            bookings={searchResults}
+            t={{ border: t.cardBorder, bg: t.cardBg, muted: t.muted, text: t.text }}
+            emptyMessage="BRAK PASUJĄCYCH SESJI"
+            renderRow={(b, i, items) => <ArtistBookingRow key={b.id} b={b} i={i} items={items} t={t} healthStatusMap={healthStatusMap} onSelect={setSelectedBooking} />}
+          />
+        </div>
+      )}
+
       {/* Monthly view */}
       {viewMode === 'month' && (
         <div className="p-4" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
@@ -912,7 +999,7 @@ export default function ArtistSchedule() {
       )}
 
       {/* Hourly day view */}
-      {viewMode === 'hourly' && (
+      {viewMode === 'hourly' && !searchQuery.trim() && (
         <HourlyDayView
           bookings={bookings}
           selectedDate={selectedDate}
@@ -927,7 +1014,7 @@ export default function ArtistSchedule() {
       )}
 
       {/* List view */}
-      {viewMode === 'list' && (
+      {viewMode === 'list' && !searchQuery.trim() && (
         <div>
           <div className="flex items-center justify-between gap-2 mb-4 flex-wrap">
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
