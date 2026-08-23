@@ -405,6 +405,21 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
     setSelected(null);
   };
 
+  const dismissAllReminders = () => {
+    if (!window.confirm(`Ukryć wszystkie przypomnienia (${pendingBookings.length})?`)) return;
+    const next = [...dismissedReminders, ...pendingBookings.map(b => b.id)];
+    setDismissedReminders(next);
+    localStorage.setItem('dismissedFormReminders', JSON.stringify(next));
+  };
+
+  const deleteAllDrafts = async () => {
+    if (!window.confirm(`Czy na pewno chcesz usunąć wszystkie niedokończone ankiety (${filteredDrafts.length})?`)) return;
+    try {
+      await base44.entities.HealthForm.deleteMany({ id: { $in: filteredDrafts.map(f => f.id) } });
+      setForms(prev => prev.filter(f => !f.is_draft));
+    } catch (e) {}
+  };
+
   const generalFormLink = `${window.location.origin}/health-form`;
   const [copiedGeneral, setCopiedGeneral] = useState(false);
 
@@ -469,10 +484,13 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
       {/* Pending links section */}
       {pendingBookings.length > 0 && (
         <div className="mb-6" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-          <div className="px-4 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
+          <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: `0.5px solid ${t.border}` }}>
             <p style={{ ...mono, fontSize: '8px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
               REZERWACJE BEZ ANKIETY — WYŚLIJ LINK
             </p>
+            <button onClick={dismissAllReminders} className="flex items-center gap-1.5" style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${t.border}`, padding: '4px 10px', cursor: 'pointer' }}>
+              <X size={10} /> UKRYJ WSZYSTKIE ({pendingBookings.length})
+            </button>
           </div>
           {pendingBookings.slice(0, 5).map((b, i) => (
             <div key={b.id} className="flex items-center justify-between px-4 py-3"
@@ -514,10 +532,13 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
       {/* Drafts section */}
       {filteredDrafts.length > 0 && (
         <div className="mb-6" style={{ border: `0.5px solid rgba(255,165,0,0.4)`, background: 'rgba(255,165,0,0.03)' }}>
-          <div className="px-4 py-3" style={{ borderBottom: `0.5px solid rgba(255,165,0,0.3)` }}>
+          <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: `0.5px solid rgba(255,165,0,0.3)` }}>
             <p style={{ ...mono, fontSize: '8px', color: '#f97316', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
               NIEDOKOŃCZONE ANKIETY (DRAFT) — {filteredDrafts.length}
             </p>
+            <button onClick={deleteAllDrafts} className="flex items-center gap-1.5" style={{ ...mono, fontSize: '8px', color: '#FF007F', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #FF007F', padding: '4px 10px', cursor: 'pointer' }}>
+              <Trash2 size={10} /> USUŃ WSZYSTKIE ({filteredDrafts.length})
+            </button>
           </div>
           {filteredDrafts.map((form, i) => (
             <div key={form.id} className="flex items-center justify-between px-4 py-3"
