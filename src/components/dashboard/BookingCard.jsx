@@ -92,7 +92,7 @@ export default function BookingCard({ bookingId, t, theme, onAction, readOnly = 
 
       // Send email notification to client
       try {
-        await base44.integrations.Core.SendEmail({
+        await base44.functions.invoke('sendEmailViaResend', {
           to: booking.client_email,
           subject: getStatusEmailSubject(newStatus),
           body: getStatusMessage(newStatus, booking),

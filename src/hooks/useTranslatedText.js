@@ -6,6 +6,29 @@ const globalCache = {};
 // In-flight promise dedup
 const inFlight = {};
 
+// ── localStorage persistence (survives page reloads → avoids repeated LLM calls) ──
+const STORAGE_KEY = 'b44_translations_v1';
+
+try {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored) {
+    const parsed = JSON.parse(stored);
+    if (parsed && typeof parsed === 'object') Object.assign(globalCache, parsed);
+  }
+} catch (_) {}
+
+let saveTimer = null;
+function persistCache() {
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try {
+      const entries = Object.entries(globalCache);
+      const toStore = entries.length > 500 ? Object.fromEntries(entries.slice(-500)) : globalCache;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
+    } catch (_) {}
+  }, 1000);
+}
+
 const LANG_NAMES = {
   en: 'English', de: 'German', uk: 'Ukrainian', fr: 'French', es: 'Spanish',
   it: 'Italian', pt: 'Portuguese', ru: 'Russian', cs: 'Czech', sk: 'Slovak', hu: 'Hungarian'
@@ -24,6 +47,7 @@ export async function translateText(text, targetLang) {
   }).then(result => {
     const translated = typeof result === 'string' ? result.trim() : text;
     globalCache[key] = translated;
+    persistCache();
     delete inFlight[key];
     return translated;
   }).catch(() => {
@@ -47,7 +71,6 @@ export async function prewarmTranslations(template, targetLang) {
   (template.procedure_questions || []).forEach(q => addText(q.label));
   if (template.declaration_of_will) {
     addText(template.declaration_of_will.label);
-    // Split content into paragraphs (same way StepDeclaration does)
     (template.declaration_of_will.content || '').split(/\n+/).filter(p => p.trim()).forEach(p => addText(p.trim()));
   }
   (template.declaration_fields || []).forEach(f => { addText(f.label); addText(f.placeholder); });
@@ -74,6 +97,7 @@ ${JSON.stringify(toTranslate)}`,
           globalCache[`${original}__${targetLang}`] = translated.trim();
         }
       });
+      persistCache();
     }
   } catch (_) {
     // fallback: individual hooks will handle their own translation

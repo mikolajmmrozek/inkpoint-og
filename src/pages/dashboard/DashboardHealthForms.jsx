@@ -336,7 +336,7 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
   const sendConfirmationEmail = async (form) => {
     setSendingEmail(true);
     try {
-      await base44.integrations.Core.SendEmail({
+      await base44.functions.invoke('sendEmailViaResend', {
         to: form.client_email,
         subject: 'Potwierdzenie wypełnienia ankiety zdrowotnej',
         body: `Dzień dobry ${form.client_name},\n\nPotwierdzamy, że Twoja ankieta zdrowotna została pomyślnie zarejestrowana w naszym systemie.\n\nDane na dzień: ${safeFormat(form.form_filled_date, 'dd.MM.yyyy')}\n\nDo zobaczenia w studiu!\n\nRomans Tattoo`
@@ -350,7 +350,7 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
     setSendingLinkEmail(booking.id);
     try {
       const formLink = getFormLink(booking);
-      await base44.integrations.Core.SendEmail({
+      await base44.functions.invoke('sendEmailViaResend', {
         to: booking.client_email,
         subject: 'Wypełnij ankietę zdrowotną — Romans Tattoo',
         body: `Dzień dobry ${booking.client_name},\n\nBlesko się mamy! Aby przygotować się do Twojej sesji, prosimy o wypełnienie ankiety zdrowotnej.\n\nLink do ankiety:\n${formLink}\n\nAnkieta powinna być wypełniona przed dniem sesji: ${booking.session_date}\n\nJeśli masz pytania, skontaktuj się z nami.\n\nRomans Tattoo`
@@ -367,7 +367,7 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
     setSendingEditLink(true);
     try {
       const link = `${window.location.origin}/health-form?edit_form_id=${form.id}`;
-      await base44.integrations.Core.SendEmail({
+      await base44.functions.invoke('sendEmailViaResend', {
         to: form.client_email,
         subject: 'Popraw swoją ankietę zdrowotną — Romans Tattoo',
         body: `Dzień dobry ${form.client_name},\n\nProsimy o poprawienie danych w Twojej ankiecie zdrowotnej.\n\nKliknij poniższy link, aby edytować ankietę:\n${link}\n\nJeśli masz pytania, skontaktuj się z nami.\n\nRomans Tattoo`

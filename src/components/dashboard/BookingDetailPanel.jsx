@@ -81,7 +81,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
   const sendFormEmail = async () => {
     setSendingEmail(true);
     try {
-      await base44.integrations.Core.SendEmail({
+      await base44.functions.invoke('sendEmailViaResend', {
         to: booking.client_email,
         subject: 'Wypełnij ankietę zdrowotną — Romans Tattoo',
         body: `Dzień dobry ${booking.client_name},\n\nProsimy o wypełnienie ankiety zdrowotnej przed sesją (${booking.session_date}).\n\nLink do ankiety:\n${formUrl}\n\nDo zobaczenia w studiu!\n\nRomans Tattoo`

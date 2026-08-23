@@ -165,7 +165,7 @@ export default function DashboardMessages() {
       });
       // Send email notification to client
       try {
-        await base44.integrations.Core.SendEmail({
+        await base44.functions.invoke('sendEmailViaResend', {
           to: selectedEmail,
           subject: 'Wiadomość od Romans Tattoo',
           body: replyText,

@@ -20,7 +20,7 @@ export default function ClientMessageButton({ client, t, users }) {
       // User not logged in — send email
       setSending(true);
       try {
-        await base44.integrations.Core.SendEmail({
+        await base44.functions.invoke('sendEmailViaResend', {
           to: client.email,
           subject: 'Wiadomość od Romans Tattoo',
           body: `Cześć ${client.first_name || client.name}! Mamy dla Ciebie ważną wiadomość. Zaloguj się w aplikacji, aby ją przeczytać.`,
