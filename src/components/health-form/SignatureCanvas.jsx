@@ -32,9 +32,14 @@ export default function SignatureCanvas({ value, onChange, label, clearLabel, sh
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
+    const clientX = e.touches && e.touches.length > 0 ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches && e.touches.length > 0 ? e.touches[0].clientY : e.clientY;
+    if (clientX === undefined || clientY === undefined) return null;
+    let x = (clientX - rect.left) * scaleX;
+    let y = (clientY - rect.top) * scaleY;
+    x = Math.max(0, Math.min(x, canvas.width));
+    y = Math.max(0, Math.min(y, canvas.height));
+    return { x, y };
   };
 
   const startDraw = (e) => {
@@ -42,9 +47,10 @@ export default function SignatureCanvas({ value, onChange, label, clearLabel, sh
     drawing.current = true;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
-    const { x, y } = getPos(e, canvas);
+    const pos = getPos(e, canvas);
+    if (!pos) return;
     ctx.beginPath();
-    ctx.moveTo(x, y);
+    ctx.moveTo(pos.x, pos.y);
   };
 
   const draw = (e) => {
@@ -55,8 +61,9 @@ export default function SignatureCanvas({ value, onChange, label, clearLabel, sh
     ctx.strokeStyle = strokeColor;
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
-    const { x, y } = getPos(e, canvas);
-    ctx.lineTo(x, y);
+    const pos = getPos(e, canvas);
+    if (!pos) return;
+    ctx.lineTo(pos.x, pos.y);
     ctx.stroke();
     setIsEmpty(false);
   };
@@ -64,8 +71,12 @@ export default function SignatureCanvas({ value, onChange, label, clearLabel, sh
   const endDraw = () => {
     if (!drawing.current) return;
     drawing.current = false;
-    const dataUrl = canvasRef.current.toDataURL('image/png');
-    onChange(dataUrl);
+    try {
+      const dataUrl = canvasRef.current.toDataURL('image/png');
+      onChange(dataUrl);
+    } catch (e) {
+      // Canvas might be tainted — still allow saving
+    }
   };
 
   const clear = () => {

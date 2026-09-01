@@ -24,6 +24,15 @@ const HOURS_DUR = Array.from({ length: 13 }, (_, i) => String(i).padStart(2, '0'
 const MINUTES = ['00', '15', '30', '45'];
 const STATUS_OPTIONS = ['pending','confirmed','completed','cancelled'];
 
+const getDefaultSessionTime = () => {
+  const now = new Date();
+  const h = now.getHours();
+  const m = now.getMinutes();
+  const roundedM = Math.round(m / 15) * 15;
+  if (roundedM >= 60) return `${String((h + 1) % 24).padStart(2, '0')}:00`;
+  return `${String(h).padStart(2, '0')}:${String(roundedM).padStart(2, '0')}`;
+};
+
 export default function BookingModal({ booking, defaultDate, onClose, onSaved, t }) {
   const isNew = !booking || booking._prefill;
   const [artists, setArtists] = useState([]);
@@ -73,7 +82,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
       artist_id: p?.artist_id || '',
       artist_name: p?.artist_name || '',
       session_date: p?.session_date || defaultDate || '',
-      session_time: p?.session_time || '09:00',
+      session_time: p?.session_time || getDefaultSessionTime(),
       session_end_time: '',
       session_duration: p?.session_duration || 0,
       tattoo_description: p?.tattoo_description || '',
@@ -123,8 +132,14 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
       base44.entities.Client.filter({}, '-created_date', 500)
         .then(clients => {
           const match = clients.find(c => (c.email || '').toLowerCase().trim() === email);
-          if (match && match.notes) {
-            setForm(f => ({ ...f, client_notes: match.notes }));
+          if (match) {
+            setForm(f => ({
+              ...f,
+              client_notes: match.notes || f.client_notes || '',
+              client_first_name: f.client_first_name || match.first_name || '',
+              client_last_name: f.client_last_name || match.last_name || '',
+              client_phone: f.client_phone || match.phone || '',
+            }));
           }
         })
         .catch(() => {});
@@ -776,7 +791,12 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
         </div>
 
         <div className="flex gap-4 mt-8 pt-6" style={{ borderTop: `0.5px solid ${t.border}` }}>
-          <button onClick={handleSave} disabled={saving || !form.client_first_name || !form.session_date} className="btn-oxblood flex-1" style={{ opacity: (!form.client_first_name || !form.session_date) ? 0.5 : 1 }}>
+          <button onClick={() => {
+            if (saving) return;
+            if (!form.client_first_name) { alert('Brak imienia klienta — uzupełnij, aby zapisać.'); return; }
+            if (!form.session_date) { alert('Brak daty sesji — uzupełnij, aby zapisać.'); return; }
+            handleSave();
+          }} className="btn-oxblood flex-1" style={{ opacity: (saving || !form.client_first_name || !form.session_date) ? 0.5 : 1 }}>
             {saving ? 'ZAPISYWANIE...' : isNew ? 'DODAJ REZERWACJĘ' : 'ZAPISZ ZMIANY'}
           </button>
           <button onClick={onClose} className="btn-ghost-parchment">ANULUJ</button>

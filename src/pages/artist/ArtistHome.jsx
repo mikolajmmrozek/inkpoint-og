@@ -18,6 +18,15 @@ const STATUS_COLORS = {
 };
 const STATUS_LABELS = { pending: 'Oczekuje', confirmed: 'Potwierdzona', completed: 'Zakończona', cancelled: 'Anulowana' };
 
+const getDefaultSessionTime = () => {
+  const now = new Date();
+  const h = now.getHours();
+  const m = now.getMinutes();
+  const roundedM = Math.round(m / 15) * 15;
+  if (roundedM >= 60) return `${String((h + 1) % 24).padStart(2, '0')}:00`;
+  return `${String(h).padStart(2, '0')}:${String(roundedM).padStart(2, '0')}`;
+};
+
 // ── Booking Detail / View Modal ──────────────────────────────────────────────
 function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, onSaved }) {
   const t = theme === 'light'
@@ -29,14 +38,14 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
       const [first, ...last] = (b.client_name || '').split(' ');
       return {
         ...b,
-        client_first_name: first || '',
-        client_last_name: last.join(' ') || '',
+        client_first_name: b.client_first_name || first || '',
+        client_last_name: b.client_last_name || last.join(' ') || '',
       };
     }
     return {
       client_name: '', client_first_name: '', client_last_name: '', client_email: '', client_phone: '',
       session_date: b?.session_date || format(new Date(), 'yyyy-MM-dd'),
-      session_time: '', session_end_time: '', session_duration: 0,
+      session_time: b?.session_time || getDefaultSessionTime(), session_end_time: '', session_duration: 0,
       tattoo_description: '', tattoo_placement: '', estimated_price: '',
       service_id: '', service_name: '', notes: '', status: 'pending', deposit_paid: false,
       artist_id: artist.id, artist_name: artist.name,
@@ -54,6 +63,26 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
   useEffect(() => {
     setForm(buildForm(booking));
   }, [booking?.id]);
+
+  // Auto-populate client name from Client entity if missing on the booking
+  useEffect(() => {
+    if (!isNew && !form.client_first_name && form.client_email) {
+      base44.entities.Client.filter({ email: form.client_email }, '-created_date', 1)
+        .then(clients => {
+          if (clients.length > 0) {
+            const c = clients[0];
+            const [first, ...last] = (c.name || '').split(' ');
+            setForm(f => ({
+              ...f,
+              client_first_name: f.client_first_name || c.first_name || first || '',
+              client_last_name: f.client_last_name || c.last_name || last.join(' ') || '',
+              client_phone: f.client_phone || c.phone || '',
+            }));
+          }
+        })
+        .catch(() => {});
+    }
+  }, []);
 
   const handleSave = async () => {
     setSaving(true);
@@ -299,7 +328,11 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
             </div>
 
             <div className="flex gap-4 mt-8 pt-6" style={{ borderTop: `0.5px solid ${t.border}` }}>
-              <button onClick={handleSave} disabled={saving || !form.client_first_name} className="btn-oxblood flex-1" style={{ opacity: (!form.client_first_name) ? 0.5 : 1 }}>
+              <button onClick={() => {
+                if (saving) return;
+                if (!form.client_first_name) { alert('Brak imienia klienta — uzupełnij, aby zapisać.'); return; }
+                handleSave();
+              }} className="btn-oxblood flex-1" style={{ opacity: (saving || !form.client_first_name) ? 0.5 : 1 }}>
                 {saving ? 'ZAPISYWANIE...' : 'ZAPISZ ZMIANY'}
               </button>
               <button onClick={() => setEditing(false)} className="btn-ghost-parchment">ANULUJ</button>

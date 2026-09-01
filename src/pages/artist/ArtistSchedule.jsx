@@ -22,6 +22,15 @@ const STATUS_LABELS = { pending: 'Oczekuje', confirmed: 'Potwierdzona', complete
 const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
 const MINUTES = ['00', '15', '30', '45'];
 
+const getDefaultSessionTime = () => {
+  const now = new Date();
+  const h = now.getHours();
+  const m = now.getMinutes();
+  const roundedM = Math.round(m / 15) * 15;
+  if (roundedM >= 60) return `${String((h + 1) % 24).padStart(2, '0')}:00`;
+  return `${String(h).padStart(2, '0')}:${String(roundedM).padStart(2, '0')}`;
+};
+
 // ── Booking list row (for search results) ────────────────────────────────────
 function ArtistBookingRow({ b, i, items, t, healthStatusMap, onSelect }) {
   const endDisplay = b.session_end_time ? `→ ${b.session_end_time}` : b.session_time && b.session_duration ? (() => {
@@ -67,18 +76,44 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, availabil
     if (isNew) return {
       client_name: '', client_first_name: '', client_last_name: '', client_email: '', client_phone: '',
       session_date: booking?.session_date || format(new Date(), 'yyyy-MM-dd'),
-      session_time: '', session_end_time: '', session_duration: 0,
+      session_time: booking?.session_time || getDefaultSessionTime(), session_end_time: '', session_duration: 0,
       tattoo_description: '', tattoo_placement: '', estimated_price: '',
       service_id: '', service_name: '', notes: '', status: 'pending', deposit_paid: false,
       artist_id: artist.id, artist_name: artist.name, reference_images: [],
     };
-    return { ...booking, reference_images: booking?.reference_images || [] };
+    const [first, ...last] = (booking?.client_name || '').split(' ');
+    return {
+      ...booking,
+      client_first_name: booking?.client_first_name || first || '',
+      client_last_name: booking?.client_last_name || last.join(' ') || '',
+      reference_images: booking?.reference_images || [],
+    };
   });
   const [saving, setSaving] = useState(false);
   const [showHealthForm, setShowHealthForm] = useState(false);
   const [editing, setEditing] = useState(isNew);
   const [clientQuery, setClientQuery] = useState(isNew ? '' : (booking?.client_name || ''));
   const [clientSuggestions, setClientSuggestions] = useState([]);
+
+  // Auto-populate client name from Client entity if missing on the booking
+  useEffect(() => {
+    if (!isNew && !form.client_first_name && form.client_email) {
+      base44.entities.Client.filter({ email: form.client_email }, '-created_date', 1)
+        .then(clients => {
+          if (clients.length > 0) {
+            const c = clients[0];
+            const [first, ...last] = (c.name || '').split(' ');
+            setForm(f => ({
+              ...f,
+              client_first_name: f.client_first_name || c.first_name || first || '',
+              client_last_name: f.client_last_name || c.last_name || last.join(' ') || '',
+              client_phone: f.client_phone || c.phone || '',
+            }));
+          }
+        })
+        .catch(() => {});
+    }
+  }, []);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [serviceQuery, setServiceQuery] = useState(isNew ? '' : (booking?.service_name || ''));
   const [showServiceSugg, setShowServiceSugg] = useState(false);
@@ -420,7 +455,12 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, availabil
             </div>
 
             <div className="flex gap-3 pt-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
-              <button onClick={handleSave} disabled={saving || !form.client_first_name || !form.session_date} className="btn-oxblood flex-1" style={{ fontSize: '10px', opacity: saving || !form.client_first_name || !form.session_date ? 0.5 : 1 }}>
+              <button onClick={() => {
+                if (saving) return;
+                if (!form.client_first_name) { alert('Brak imienia klienta — uzupełnij, aby zapisać.'); return; }
+                if (!form.session_date) { alert('Brak daty sesji — uzupełnij, aby zapisać.'); return; }
+                handleSave();
+              }} className="btn-oxblood flex-1" style={{ fontSize: '10px', opacity: saving || !form.client_first_name || !form.session_date ? 0.5 : 1 }}>
                 {saving ? 'ZAPISUJĘ...' : isNew ? 'DODAJ SESJĘ' : 'ZAPISZ ZMIANY'}
               </button>
               <button onClick={() => isNew ? onClose() : setEditing(false)} className="btn-ghost-parchment" style={{ fontSize: '10px' }}>ANULUJ</button>
