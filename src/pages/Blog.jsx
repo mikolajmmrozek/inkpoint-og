@@ -66,7 +66,7 @@ export default function Blog() {
     <PageLayout>
       <div className="pt-40 pb-20 px-8 md:px-16">
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-          <p className="text-micro text-oxblood mb-6" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em' }}>
+          <p className="text-micro text-oxblood mb-6" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em' }}>
             WIEDZA & INSPIRACJE
           </p>
           <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(4rem, 9vw, 8rem)', fontWeight: 400, lineHeight: 0.9, color: '#F5F0EB', letterSpacing: '0.04em' }}>
@@ -109,7 +109,7 @@ export default function Blog() {
                   <div className="p-6 md:p-12 flex flex-col justify-center min-w-0">
                     <div className="flex flex-wrap gap-2 mb-6">
                       {(featured.tags || []).map(tag => (
-                        <span key={tag} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', border: '0.5px solid #FF007F', padding: '3px 8px', textTransform: 'uppercase' }}>
+                        <span key={tag} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', border: '0.5px solid var(--brand)', padding: '3px 8px', textTransform: 'uppercase' }}>
                           {tag}
                         </span>
                       ))}
@@ -164,7 +164,7 @@ export default function Blog() {
                     </div>
                     <div className="flex flex-wrap gap-2 mb-3">
                       {(post.tags || []).slice(0, 2).map(tag => (
-                        <span key={tag} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.1em', border: '0.5px solid #FF007F', padding: '2px 6px', textTransform: 'uppercase' }}>
+                        <span key={tag} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.1em', border: '0.5px solid var(--brand)', padding: '2px 6px', textTransform: 'uppercase' }}>
                           {tag}
                         </span>
                       ))}

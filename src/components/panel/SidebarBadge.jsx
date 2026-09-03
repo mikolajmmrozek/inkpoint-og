@@ -15,7 +15,7 @@ export default function SidebarBadge({ type, value }) {
           right: '-5px',
           minWidth: '14px',
           height: '14px',
-          background: '#FF007F',
+          background: 'var(--brand)',
           color: '#F5F0EB',
           fontSize: '8px',
           fontWeight: 600,
@@ -41,7 +41,7 @@ export default function SidebarBadge({ type, value }) {
         right: '-2px',
         width: '6px',
         height: '6px',
-        background: '#FF007F',
+        background: 'var(--brand)',
         borderRadius: '50%',
       }}
     />

@@ -63,7 +63,7 @@ export default function TermsAndConditions() {
           </>
         )}
         <div style={{ marginTop: '48px', paddingTop: '24px', borderTop: '0.5px solid #262626' }}>
-          <a href="/" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none' }}>
+          <a href="/" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none' }}>
             ← Powrót
           </a>
         </div>

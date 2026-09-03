@@ -35,7 +35,7 @@
     /* Custom tokens */
     --obsidian: #0A0A0A;
     --parchment: #F5F0EB;
-    --oxblood: #FF007F;
+    --oxblood: var(--brand);
     --steel: #262626;
     --font-display: 'Bebas Neue', 'Barlow Condensed', system-ui;
     --font-body: 'Inter', sans-serif;
@@ -149,7 +149,7 @@
     color: #F5F0EB;
   }
   .text-oxblood {
-    color: #8B1A1A;
+    color: var(--brand);
   }
   .bg-obsidian {
     background-color: #0A0A0A;
@@ -163,7 +163,7 @@
   }
   .border-oxblood-thin {
     border-width: 0.5px;
-    border-color: #8B1A1A;
+    border-color: var(--brand);
   }
   .text-display {
     font-family: var(--font-display);

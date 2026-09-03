@@ -74,13 +74,13 @@ export default function HeroSlider() {
 
       {/* Gradient overlay */}
       <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(10,10,10,0.75) 0%, rgba(10,10,10,0.25) 60%, rgba(10,10,10,0.5) 100%)' }} />
-      <div className="absolute bottom-0 left-0 right-0 h-64" style={{ background: 'linear-gradient(to top, rgba(255,0,127,0.12) 0%, transparent 100%)' }} />
+      <div className="absolute bottom-0 left-0 right-0 h-64" style={{ background: 'linear-gradient(to top, rgba(var(--brand-rgb),0.12) 0%, transparent 100%)' }} />
 
       {/* Content */}
       <div className="relative h-full flex flex-col justify-center px-8 md:px-16 lg:px-24 pb-24 md:pb-16">
         {/* Section label */}
         <div className="absolute top-8 left-8 md:left-16">
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>NASZ ZESPÓŁ</p>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>NASZ ZESPÓŁ</p>
           <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(1.5rem, 3vw, 2.5rem)', fontWeight: 400, color: '#F5F0EB', lineHeight: 0.95, letterSpacing: '0.04em' }}>Artyści</h2>
         </div>
         <AnimatePresence mode="wait">
@@ -92,7 +92,7 @@ export default function HeroSlider() {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
             className="max-w-2xl"
           >
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: '#FF007F', letterSpacing: '0.2em', marginBottom: '24px' }}>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: 'var(--brand)', letterSpacing: '0.2em', marginBottom: '24px' }}>
               {String(current + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')} — {specialties}
             </p>
 
@@ -109,7 +109,7 @@ export default function HeroSlider() {
               ))}
             </h2>
 
-            <div className="mt-8 h-px w-16" style={{ background: 'linear-gradient(to right, #FF007F, transparent)', height: '1px' }} />
+            <div className="mt-8 h-px w-16" style={{ background: 'linear-gradient(to right, var(--brand), transparent)', height: '1px' }} />
 
             <p className="mt-6 max-w-sm" style={{ color: 'rgba(245,240,235,0.85)', fontSize: '15px', lineHeight: 1.7 }}>
               {slide?.bio ? slide.bio.slice(0, 120) + (slide.bio.length > 120 ? '…' : '') : 'Każdy tatuaż to unikalna historia wyryta na skórze. Trwała, precyzyjna, Twoja.'}
@@ -139,7 +139,7 @@ export default function HeroSlider() {
                 display: 'block',
                 width: i === current ? '40px' : '16px',
                 height: '1px',
-                background: i === current ? '#FF007F' : 'rgba(245,240,235,0.5)',
+                background: i === current ? 'var(--brand)' : 'rgba(245,240,235,0.5)',
                 transition: 'all 0.5s',
                 }}
                 />
@@ -155,7 +155,7 @@ export default function HeroSlider() {
           <div className="w-px h-12 relative overflow-hidden" style={{ background: 'rgba(245,240,235,0.1)' }}>
             <motion.div
               className="w-full absolute top-0"
-              style={{ background: '#FF007F', height: '50%' }}
+              style={{ background: 'var(--brand)', height: '50%' }}
               animate={{ y: ['0%', '200%'] }}
               transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
             />

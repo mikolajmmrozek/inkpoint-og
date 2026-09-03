@@ -37,7 +37,7 @@ function FAQItem({ item, index }) {
         <motion.div
           animate={{ rotate: open ? 180 : 0 }}
           transition={{ duration: 0.3 }}
-          style={{ color: '#FF007F', flexShrink: 0, marginLeft: '16px' }}
+          style={{ color: 'var(--brand)', flexShrink: 0, marginLeft: '16px' }}
         >
           <ChevronDown size={18} />
         </motion.div>
@@ -78,14 +78,14 @@ export default function FAQ() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>
               POMOCY
             </p>
             <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(3rem, 8vw, 7rem)', fontWeight: 400, lineHeight: 0.9, color: '#F5F0EB', letterSpacing: '0.04em', marginBottom: '16px' }}>
               Najczęstsze<br />
-              <span style={{ color: '#FF007F' }}>Pytania</span>
+              <span style={{ color: 'var(--brand)' }}>Pytania</span>
             </h1>
-            <div style={{ width: '60px', height: '1px', background: 'linear-gradient(to right, #FF007F, transparent)', marginBottom: '48px' }} />
+            <div style={{ width: '60px', height: '1px', background: 'linear-gradient(to right, var(--brand), transparent)', marginBottom: '48px' }} />
           </motion.div>
 
           <div>

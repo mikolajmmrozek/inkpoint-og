@@ -76,8 +76,8 @@ export default function Navbar() {
               style={{
                 height: '38px',
                 borderRadius: '0.25rem',
-                border: '0.5px solid rgba(255,0,127,0.4)',
-                background: 'rgba(255,0,127,0.04)',
+                border: '0.5px solid rgba(var(--brand-rgb),0.4)',
+                background: 'rgba(var(--brand-rgb),0.04)',
                 padding: '0 10px',
                 cursor: 'pointer'
               }}
@@ -86,16 +86,16 @@ export default function Navbar() {
                 const label = e.currentTarget.querySelector('.login-label');
                 const icon = e.currentTarget.querySelector('.login-icon');
                 if (label) {label.style.maxWidth = '120px';label.style.opacity = '1';label.style.marginLeft = '8px';}
-                if (icon) {e.currentTarget.style.borderColor = 'var(--brand)';e.currentTarget.style.background = 'rgba(255,0,127,0.08)';}
+                if (icon) {e.currentTarget.style.borderColor = 'var(--brand)';e.currentTarget.style.background = 'rgba(var(--brand-rgb),0.08)';}
               }}
               onMouseLeave={(e) => {
                 const label = e.currentTarget.querySelector('.login-label');
                 if (label) {label.style.maxWidth = '0';label.style.opacity = '0';label.style.marginLeft = '0';}
-                e.currentTarget.style.borderColor = 'rgba(255,0,127,0.4)';
-                e.currentTarget.style.background = 'rgba(255,0,127,0.04)';
+                e.currentTarget.style.borderColor = 'rgba(var(--brand-rgb),0.4)';
+                e.currentTarget.style.background = 'rgba(var(--brand-rgb),0.04)';
               }}>
               
-              <User size={17} className="login-icon" color="#FF007F" style={{ flexShrink: 0 }} />
+              <User size={17} className="login-icon" color="var(--brand)" style={{ flexShrink: 0 }} />
               <span
                 className="login-label"
                 style={{
@@ -146,8 +146,8 @@ export default function Navbar() {
                 height: '42px',
                 padding: '0 12px',
                 borderRadius: '0',
-                border: '0.5px solid #FF007F',
-                background: 'rgba(255,0,127,0.06)',
+                border: '0.5px solid var(--brand)',
+                background: 'rgba(var(--brand-rgb),0.06)',
                 cursor: 'pointer',
                 fontFamily: 'JetBrains Mono, monospace',
                 fontSize: '10px',
@@ -156,7 +156,7 @@ export default function Navbar() {
                 textTransform: 'uppercase',
                 color: 'var(--brand)'
               }}>
-              <User size={15} color="#FF007F" />
+              <User size={15} color="var(--brand)" />
               {isAuthenticated ? 'MOJE KONTO' : 'ZALOGUJ SIĘ'}
             </button>
             <Link to="/booking" className="btn-oxblood flex items-center justify-center flex-1 whitespace-nowrap" style={{ height: '42px', padding: '0 12px', borderRadius: '0', fontSize: '10px', letterSpacing: '0.08em', textAlign: 'center' }}>

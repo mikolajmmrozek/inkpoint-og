@@ -47,7 +47,7 @@ export default function ArtistProfile() {
   if (loading) return (
     <PageLayout>
       <div className="h-screen flex items-center justify-center">
-        <div className="w-8 h-px animate-pulse" style={{ background: '#FF007F' }} />
+        <div className="w-8 h-px animate-pulse" style={{ background: 'var(--brand)' }} />
       </div>
     </PageLayout>
   );
@@ -80,7 +80,7 @@ export default function ArtistProfile() {
 
               <div className="flex gap-2 flex-wrap mb-4">
                 {(artist?.specialty || MOCK.specialty).map(s => (
-                  <span key={s} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', border: '0.5px solid #FF007F', padding: '3px 8px', textTransform: 'uppercase' }}>
+                  <span key={s} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', border: '0.5px solid var(--brand)', padding: '3px 8px', textTransform: 'uppercase' }}>
                     {s}
                   </span>
                 ))}
@@ -90,7 +90,7 @@ export default function ArtistProfile() {
                 {artist?.name || MOCK.name}
               </h1>
 
-              <div className="h-px w-8 mb-6" style={{ background: '#FF007F', height: '0.5px' }} />
+              <div className="h-px w-8 mb-6" style={{ background: 'var(--brand)', height: '0.5px' }} />
 
               <p className="text-sm leading-relaxed mb-8" style={{ color: 'rgba(245,240,235,0.6)', fontSize: '14px', lineHeight: 1.8 }}>
                 {artist?.bio || MOCK.bio}
@@ -98,7 +98,7 @@ export default function ArtistProfile() {
 
               {artist?.years_experience && (
                 <div className="mb-6">
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px' }}>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px' }}>
                     DOŚWIADCZENIE
                   </p>
                   <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2rem', fontWeight: 400, color: '#F5F0EB' }}>
@@ -113,7 +113,7 @@ export default function ArtistProfile() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 mb-8 hover:opacity-70 transition-opacity w-fit"
-                  style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.1em', fontWeight: 500, cursor: 'pointer' }}
+                  style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.1em', fontWeight: 500, cursor: 'pointer' }}
                 >
                   <Instagram size={16} />
                   Instagram
@@ -151,7 +151,7 @@ export default function ArtistProfile() {
                     className="w-full object-cover transition-all duration-700 group-hover:scale-105"
                     style={{ filter: 'brightness(0.75) contrast(1.1)', display: 'block' }}
                   />
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center" style={{ background: 'rgba(255,0,127,0.12)' }}>
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center" style={{ background: 'rgba(var(--brand-rgb),0.12)' }}>
                     <ZoomIn size={20} color="#F5F0EB" />
                   </div>
                   {img.caption && (

@@ -127,7 +127,7 @@ export default function DashboardHome() {
             >
               <Link to={kpi.link} className="block p-6 transition-all duration-300 h-full" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
                 <div className="flex items-start justify-between mb-4">
-                  <Icon size={16} color="#FF007F" />
+                  <Icon size={16} color="var(--brand)" />
                   <TrendingUp size={12} color={t.muted} />
                 </div>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 400, color: t.value, lineHeight: 1, letterSpacing: '0.04em' }}>
@@ -147,7 +147,7 @@ export default function DashboardHome() {
         <div className="mb-10">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <ClipboardList size={14} color="#FF007F" />
+              <ClipboardList size={14} color="var(--brand)" />
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                 NIEDOKOŃCZONE ANKIETY ({draftForms.length})
               </p>
@@ -175,7 +175,7 @@ export default function DashboardHome() {
                       {f.created_date ? ` · ${new Date(f.created_date).toLocaleDateString('pl-PL')}` : ''}
                     </p>
                   </div>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: '0.5px solid #FF007F', color: 'var(--brand)', flexShrink: 0 }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: '0.5px solid var(--brand)', color: 'var(--brand)', flexShrink: 0 }}>
                     DRAFT
                   </span>
                 </button>
@@ -189,7 +189,7 @@ export default function DashboardHome() {
       <div>
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
-            <AlertCircle size={14} color="#FF007F" />
+            <AlertCircle size={14} color="var(--brand)" />
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
               NADCHODZĄCE SESJE
             </p>

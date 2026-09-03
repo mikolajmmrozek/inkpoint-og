@@ -67,7 +67,7 @@ export default function Contact() {
     <PageLayout>
       <div className="pt-40 pb-20 px-8 md:px-16">
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-          <p className="text-micro text-oxblood mb-6" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em' }}>
+          <p className="text-micro text-oxblood mb-6" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em' }}>
             NAPISZ DO NAS
           </p>
           <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(4rem, 9vw, 8rem)', fontWeight: 400, lineHeight: 0.9, color: '#F5F0EB', letterSpacing: '0.04em' }}>
@@ -86,7 +86,7 @@ export default function Contact() {
           >
             {sent ? (
               <div className="py-16">
-                <div className="w-8 h-px mb-8" style={{ background: '#FF007F' }} />
+                <div className="w-8 h-px mb-8" style={{ background: 'var(--brand)' }} />
                 <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: '#F5F0EB', letterSpacing: '0.04em' }}>
                   Wiadomość wysłana
                 </h3>
@@ -106,7 +106,7 @@ export default function Contact() {
                       style={inputStyle}
                       value={form.name}
                       onChange={e => setForm({ ...form, name: e.target.value })}
-                      onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
+                      onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'}
                       onBlur={e => e.target.style.borderBottomColor = '#595959'}
                     />
                   </div>
@@ -120,7 +120,7 @@ export default function Contact() {
                       style={inputStyle}
                       value={form.email}
                       onChange={e => setForm({ ...form, email: e.target.value })}
-                      onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
+                      onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'}
                       onBlur={e => e.target.style.borderBottomColor = '#595959'}
                     />
                   </div>
@@ -134,7 +134,7 @@ export default function Contact() {
                     style={inputStyle}
                     value={form.phone}
                     onChange={e => setForm({ ...form, phone: e.target.value })}
-                    onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
+                    onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'}
                     onBlur={e => e.target.style.borderBottomColor = '#595959'}
                   />
                 </div>
@@ -147,7 +147,7 @@ export default function Contact() {
                     style={inputStyle}
                     value={form.subject}
                     onChange={e => setForm({ ...form, subject: e.target.value })}
-                    onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
+                    onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'}
                     onBlur={e => e.target.style.borderBottomColor = '#595959'}
                   />
                 </div>
@@ -162,7 +162,7 @@ export default function Contact() {
                     style={{ background: 'rgba(255,255,255,0.04)', border: '0.5px solid #595959', borderRadius: '2px', padding: '12px', color: '#F5F0EB', fontSize: '15px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif', resize: 'none', transition: 'border-color 0.3s' }}
                     value={form.message}
                     onChange={e => setForm({ ...form, message: e.target.value })}
-                    onFocus={e => e.target.style.borderColor = '#FF007F'}
+                    onFocus={e => e.target.style.borderColor = 'var(--brand)'}
                     onBlur={e => e.target.style.borderColor = '#595959'}
                   />
                 </div>
@@ -208,8 +208,8 @@ export default function Contact() {
               ].map(({ icon: Icon, label, value, link }) => (
                 <div key={label}>
                   <div className="flex items-center gap-2 mb-2">
-                    <Icon size={12} color="#C4196B" />
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                    <Icon size={12} color="var(--brand)" />
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                       {label}
                     </p>
                   </div>

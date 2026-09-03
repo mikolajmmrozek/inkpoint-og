@@ -52,7 +52,7 @@ module.exports = {
                 },
                 obsidian: '#0A0A0A',
                 parchment: '#F5F0EB',
-                oxblood: '#FF007F',
+                oxblood: 'var(--brand)',
                 steel: '#262626',
             },
             fontFamily: {

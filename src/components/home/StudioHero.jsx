@@ -36,7 +36,7 @@ export default function StudioHero() {
         />
       ) : (
         /* Fallback: animated gradient */
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 20% 50%, rgba(255,0,127,0.08) 0%, #0A0A0A 60%)' }} />
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 20% 50%, rgba(var(--brand-rgb),0.08) 0%, #0A0A0A 60%)' }} />
       )}
 
       {/* Overlays */}
@@ -45,8 +45,8 @@ export default function StudioHero() {
       <div className="absolute top-0 left-0 right-0 h-32" style={{ background: 'linear-gradient(to bottom, #0A0A0A, transparent)' }} />
 
       {/* Decorative fuchsia lines */}
-      <div className="absolute left-0 top-1/2 w-px h-40 -translate-y-1/2" style={{ background: 'linear-gradient(to bottom, transparent, #FF007F, transparent)' }} />
-      <div className="absolute right-0 top-1/2 w-px h-40 -translate-y-1/2" style={{ background: 'linear-gradient(to bottom, transparent, #FF007F, transparent)' }} />
+      <div className="absolute left-0 top-1/2 w-px h-40 -translate-y-1/2" style={{ background: 'linear-gradient(to bottom, transparent, var(--brand), transparent)' }} />
+      <div className="absolute right-0 top-1/2 w-px h-40 -translate-y-1/2" style={{ background: 'linear-gradient(to bottom, transparent, var(--brand), transparent)' }} />
 
       {/* Content */}
       <div className="relative z-10 w-full px-8 md:px-16 lg:px-24 flex flex-col items-start justify-center pt-24 pb-40">
@@ -61,7 +61,7 @@ export default function StudioHero() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3, duration: 0.8 }}
-            style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: '#FF007F', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: '24px' }}
+            style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: 'var(--brand)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: '24px' }}
           >
             ◆ &nbsp; WOLSZTYN, POLSKA &nbsp; ◆
           </motion.p>
@@ -80,7 +80,7 @@ export default function StudioHero() {
                 {i === 1 ? (
                   <>
                     <span style={{ color: '#F5F0EB' }}>{line.slice(0, -3)}</span>
-                    <span style={{ color: '#FF007F' }}>{line.slice(-3)}</span>
+                    <span style={{ color: 'var(--brand)' }}>{line.slice(-3)}</span>
                   </>
                 ) : line}
               </motion.span>
@@ -92,7 +92,7 @@ export default function StudioHero() {
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
             transition={{ delay: 0.8, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            style={{ width: '80px', height: '1px', background: 'linear-gradient(to right, #FF007F, transparent)', margin: '28px 0', transformOrigin: 'left' }}
+            style={{ width: '80px', height: '1px', background: 'linear-gradient(to right, var(--brand), transparent)', margin: '28px 0', transformOrigin: 'left' }}
           />
 
           {/* Subtext */}
@@ -138,7 +138,7 @@ export default function StudioHero() {
           <div className="w-px h-12 relative overflow-hidden" style={{ background: 'rgba(245,240,235,0.1)' }}>
             <motion.div
               className="w-full absolute top-0"
-              style={{ background: '#FF007F', height: '50%' }}
+              style={{ background: 'var(--brand)', height: '50%' }}
               animate={{ y: ['0%', '200%'] }}
               transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
             />

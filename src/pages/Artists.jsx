@@ -72,13 +72,13 @@ export default function Artists() {
     <PageLayout>
       <div className="pt-40 pb-20 px-8 md:px-16">
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-          <p className="text-micro text-oxblood mb-6" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em' }}>
+          <p className="text-micro text-oxblood mb-6" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em' }}>
             NASZ ZESPÓŁ
           </p>
           <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(4rem, 9vw, 8rem)', fontWeight: 400, lineHeight: 0.9, color: '#F5F0EB', letterSpacing: '0.04em' }}>
             Artyści
           </h1>
-          <div className="mt-6 h-px w-16" style={{ background: 'linear-gradient(to right, #FF007F, transparent)', height: '1px' }} />
+          <div className="mt-6 h-px w-16" style={{ background: 'linear-gradient(to right, var(--brand), transparent)', height: '1px' }} />
         </motion.div>
       </div>
 
@@ -112,7 +112,7 @@ export default function Artists() {
                     <div className="absolute bottom-0 left-0 right-0 p-8">
                       <div className="flex gap-2 mb-3 flex-wrap">
                         {(artist.specialty || []).slice(0, 2).map(s => (
-                          <span key={s} className="text-micro" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', border: '0.5px solid #FF007F', padding: '3px 8px' }}>
+                          <span key={s} className="text-micro" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', border: '0.5px solid var(--brand)', padding: '3px 8px' }}>
                             {s}
                           </span>
                         ))}
@@ -133,7 +133,7 @@ export default function Artists() {
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={e => e.stopPropagation()}
-                            style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#C4196B', letterSpacing: '0.1em', textTransform: 'uppercase' }}
+                            style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase' }}
                           >
                             IG ↗
                           </a>

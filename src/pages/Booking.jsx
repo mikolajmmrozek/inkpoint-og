@@ -180,7 +180,7 @@ export default function Booking() {
   if (checkingAuth) return (
     <PageLayout>
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-px animate-pulse" style={{ background: '#FF007F' }} />
+        <div className="w-8 h-px animate-pulse" style={{ background: 'var(--brand)' }} />
       </div>
     </PageLayout>
   );
@@ -189,8 +189,8 @@ export default function Booking() {
     <PageLayout>
       <div className="min-h-screen flex items-center justify-center px-8">
         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8 }} className="text-center max-w-lg">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-8" style={{ border: '0.5px solid #FF007F' }}>
-            <Check size={24} color="#FF007F" />
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-8" style={{ border: '0.5px solid var(--brand)' }}>
+            <Check size={24} color="var(--brand)" />
           </div>
           <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '3rem', fontWeight: 700, color: '#F5F0EB' }}>
             Przetwarzamy Twoje zgłoszenie
@@ -211,7 +211,7 @@ export default function Booking() {
       <div className="min-h-screen pt-32 pb-20 px-8 md:px-16 max-w-3xl mx-auto">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="mb-16">
-          <p className="text-micro text-oxblood mb-4" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em' }}>
+          <p className="text-micro text-oxblood mb-4" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em' }}>
             UMÓW SESJĘ
           </p>
           <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 700, lineHeight: 0.9, color: '#F5F0EB' }}>
@@ -224,16 +224,16 @@ export default function Booking() {
           <div className="flex items-center gap-0 mb-4">
             {STEPS.map((s, i) => (
               <div key={s} className="flex items-center flex-1">
-                <div className="w-2 h-2 rounded-full flex-shrink-0 transition-all duration-500" style={{ background: i <= step ? '#FF007F' : '#262626' }} />
+                <div className="w-2 h-2 rounded-full flex-shrink-0 transition-all duration-500" style={{ background: i <= step ? 'var(--brand)' : '#262626' }} />
                 {i < STEPS.length - 1 && (
-                  <div className="flex-1 h-px transition-all duration-700" style={{ background: i < step ? '#FF007F' : '#262626', height: '0.5px' }} />
+                  <div className="flex-1 h-px transition-all duration-700" style={{ background: i < step ? 'var(--brand)' : '#262626', height: '0.5px' }} />
                 )}
               </div>
             ))}
           </div>
           <div className="flex justify-between flex-wrap">
             {STEPS.map((s, i) => (
-              <p key={s} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: i === step ? '#FF007F' : 'rgba(245,240,235,0.25)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              <p key={s} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: i === step ? 'var(--brand)' : 'rgba(245,240,235,0.25)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                 {s}
               </p>
             ))}
@@ -254,7 +254,7 @@ export default function Booking() {
                   <button
                     onClick={() => navigate('/dashboard')}
                     className="w-full py-3 px-6 transition-all duration-300"
-                    style={{ border: '0.5px solid #FF007F', background: 'transparent', color: '#FF007F', fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer' }}
+                    style={{ border: '0.5px solid var(--brand)', background: 'transparent', color: 'var(--brand)', fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer' }}
                   >
                     Zaloguj się
                   </button>
@@ -264,25 +264,25 @@ export default function Booking() {
                       <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                         Imię *
                       </label>
-                      <input required style={inputStyle} value={data.client_first_name} onChange={e => update('client_first_name', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                      <input required style={inputStyle} value={data.client_first_name} onChange={e => update('client_first_name', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
                     </div>
                     <div>
                       <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                         Nazwisko *
                       </label>
-                      <input required style={inputStyle} value={data.client_last_name} onChange={e => update('client_last_name', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                      <input required style={inputStyle} value={data.client_last_name} onChange={e => update('client_last_name', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
                     </div>
                     <div className="md:col-span-2">
                       <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                         Email *
                       </label>
-                      <input required type="email" style={inputStyle} value={data.client_email} onChange={e => update('client_email', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                      <input required type="email" style={inputStyle} value={data.client_email} onChange={e => update('client_email', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
                     </div>
                     <div className="md:col-span-2">
                       <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                         Telefon
                       </label>
-                      <input style={inputStyle} value={data.client_phone} onChange={e => update('client_phone', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                      <input style={inputStyle} value={data.client_phone} onChange={e => update('client_phone', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
                     </div>
                   </div>
                 </div>
@@ -297,7 +297,7 @@ export default function Booking() {
                 </p>
                 {artistsLoading ? (
                   <div className="flex justify-center py-12">
-                    <div className="w-8 h-px animate-pulse" style={{ background: '#FF007F' }} />
+                    <div className="w-8 h-px animate-pulse" style={{ background: 'var(--brand)' }} />
                   </div>
                 ) : artists.map(artist => (
                   <button
@@ -305,8 +305,8 @@ export default function Booking() {
                     onClick={() => { update('artist_id', artist.id); update('artist_name', artist.name); }}
                     className="w-full text-left p-6 transition-all duration-300"
                     style={{
-                      border: data.artist_id === artist.id ? '0.5px solid #FF007F' : '0.5px solid #262626',
-                      background: data.artist_id === artist.id ? 'rgba(139,26,26,0.08)' : 'transparent',
+                      border: data.artist_id === artist.id ? '0.5px solid var(--brand)' : '0.5px solid #262626',
+                      background: data.artist_id === artist.id ? 'rgba(var(--brand-rgb),0.08)' : 'transparent',
                     }}
                   >
                     <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.4rem', fontWeight: 600, color: '#F5F0EB' }}>
@@ -314,7 +314,7 @@ export default function Booking() {
                     </h3>
                     <div className="flex flex-wrap gap-0 mt-2">
                       {(artist.specialty || []).map((s, idx, arr) => (
-                        <span key={s} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.1em' }}>
+                        <span key={s} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.1em' }}>
                           {s}{idx < arr.length - 1 ? <span style={{ color: 'rgba(255,0,127,0.35)', margin: '0 5px' }}>/</span> : ''}
                         </span>
                       ))}
@@ -341,8 +341,8 @@ export default function Booking() {
                       onClick={() => { update('service_id', service.id); update('service_name', service.name); }}
                       className="w-full text-left p-6 transition-all duration-300"
                       style={{
-                        border: data.service_id === service.id ? '0.5px solid #FF007F' : '0.5px solid #262626',
-                        background: data.service_id === service.id ? 'rgba(139,26,26,0.08)' : 'transparent',
+                        border: data.service_id === service.id ? '0.5px solid var(--brand)' : '0.5px solid #262626',
+                        background: data.service_id === service.id ? 'rgba(var(--brand-rgb),0.08)' : 'transparent',
                       }}
                     >
                       <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.2rem', fontWeight: 600, color: '#F5F0EB' }}>
@@ -372,19 +372,19 @@ export default function Booking() {
                   <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                     Miejsce na ciele *
                   </label>
-                  <input required style={inputStyle} value={data.tattoo_placement} onChange={e => update('tattoo_placement', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                  <input required style={inputStyle} value={data.tattoo_placement} onChange={e => update('tattoo_placement', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
                 </div>
                 <div>
                   <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                     Opis projektu / pomysłu *
                   </label>
-                  <textarea required rows={4} style={{ ...inputStyle, resize: 'none' }} value={data.tattoo_description} onChange={e => update('tattoo_description', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                  <textarea required rows={4} style={{ ...inputStyle, resize: 'none' }} value={data.tattoo_description} onChange={e => update('tattoo_description', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
                 </div>
                 <div>
                   <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                     Dodatkowe uwagi
                   </label>
-                  <textarea rows={2} style={{ ...inputStyle, resize: 'none' }} value={data.notes} onChange={e => update('notes', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
+                  <textarea rows={2} style={{ ...inputStyle, resize: 'none' }} value={data.notes} onChange={e => update('notes', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = '#262626'} />
                 </div>
                 <div>
                   <label className="text-micro block mb-3" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
@@ -396,8 +396,8 @@ export default function Booking() {
                   <label className="flex items-center justify-center py-6 border-dashed" style={{ borderWidth: '1px', borderColor: '#262626', cursor: data.reference_images.length >= 10 ? 'not-allowed' : 'pointer', opacity: data.reference_images.length >= 10 ? 0.5 : 1 }}>
                     <input type="file" multiple accept="image/*" onChange={handleImageUpload} disabled={data.reference_images.length >= 10 || uploadingImage} style={{ display: 'none' }} />
                     <div className="text-center">
-                      <Upload size={20} color="#FF007F" style={{ marginBottom: '6px', marginLeft: 'auto', marginRight: 'auto', display: 'block' }} />
-                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: '#FF007F', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                      <Upload size={20} color="var(--brand)" style={{ marginBottom: '6px', marginLeft: 'auto', marginRight: 'auto', display: 'block' }} />
+                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: 'var(--brand)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                         {uploadingImage ? 'Wczytywanie...' : 'Kliknij aby wybrać zdjęcia'}
                       </span>
                     </div>
@@ -407,8 +407,8 @@ export default function Booking() {
                       {data.reference_images.map((img, idx) => (
                         <div key={idx} className="relative group">
                           <img src={img} alt={`ref-${idx}`} className="w-full h-24 object-cover" style={{ border: '0.5px solid #262626' }} />
-                          <button onClick={() => removeImage(idx)} className="absolute top-1 right-1 p-1 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity" style={{ border: '0.5px solid #FF007F' }}>
-                            <X size={14} color="#FF007F" />
+                          <button onClick={() => removeImage(idx)} className="absolute top-1 right-1 p-1 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity" style={{ border: '0.5px solid var(--brand)' }}>
+                            <X size={14} color="var(--brand)" />
                           </button>
                         </div>
                       ))}
@@ -447,7 +447,7 @@ export default function Booking() {
                   ['Opis', data.tattoo_description],
                 ].map(([label, value]) => (
                   <div key={label} className="flex gap-4 pb-4" style={{ borderBottom: '0.5px solid #262626' }}>
-                    <p className="w-36 flex-shrink-0" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.1em', textTransform: 'uppercase', paddingTop: '2px' }}>
+                    <p className="w-36 flex-shrink-0" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase', paddingTop: '2px' }}>
                       {label}
                     </p>
                     <p style={{ color: '#F5F0EB', fontSize: '14px' }}>{value}</p>

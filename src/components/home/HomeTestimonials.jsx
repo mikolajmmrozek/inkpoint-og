@@ -6,7 +6,7 @@ function Stars({ value }) {
   return (
     <div style={{ fontSize: '16px', letterSpacing: '2px', marginBottom: '16px' }}>
       {[1, 2, 3, 4, 5].map(s => (
-        <span key={s} style={{ color: s <= value ? '#FF007F' : 'rgba(245,240,235,0.15)' }}>★</span>
+        <span key={s} style={{ color: s <= value ? 'var(--brand)' : 'rgba(245,240,235,0.15)' }}>★</span>
       ))}
     </div>
   );
@@ -24,7 +24,7 @@ export default function HomeTestimonials() {
     <section className="py-20 px-8 md:px-16">
       <div className="mb-12 flex items-end justify-between">
         <div>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
             CO MÓWIĄ KLIENCI
           </p>
           <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(2rem, 5vw, 4rem)', fontWeight: 400, color: '#F5F0EB', lineHeight: 0.95, letterSpacing: '0.04em' }}>
@@ -48,8 +48,8 @@ export default function HomeTestimonials() {
               "{fb.short_review}"
             </p>
             <div className="flex items-center gap-3">
-              <div style={{ width: '24px', height: '1px', background: '#FF007F' }} />
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              <div style={{ width: '24px', height: '1px', background: 'var(--brand)' }} />
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                 {fb.client_name}
               </p>
               {fb.artist_name && (

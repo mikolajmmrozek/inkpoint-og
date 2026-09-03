@@ -132,7 +132,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
       </div>
       {/* Status change */}
       <div className="mb-5">
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>ZMIEŃ STATUS</p>
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>ZMIEŃ STATUS</p>
         <div className="grid grid-cols-2 gap-2">
           {STATUS_OPTIONS.map(s => (
             <button
@@ -172,14 +172,14 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
           </button>
         </div>
       ) : (
-        <div className="mb-4 p-3" style={{ border: '0.5px solid rgba(255,0,127,0.3)', background: 'rgba(255,0,127,0.04)' }}>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
+        <div className="mb-4 p-3" style={{ border: '0.5px solid rgba(var(--brand-rgb),0.3)', background: 'rgba(var(--brand-rgb),0.04)' }}>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
             ANKIETA ZDROWOTNA — BRAK
           </p>
           <div className="flex gap-2">
             <button onClick={copyFormLink}
               className="flex items-center gap-1.5 flex-1 justify-center py-2"
-              style={{ border: '0.5px solid #FF007F', color: '#FF007F', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer' }}>
+              style={{ border: '0.5px solid var(--brand)', color: 'var(--brand)', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer' }}>
               {copied ? <><Check size={11} /> SKOPIOWANO</> : <><Copy size={11} /> LINK</>}
             </button>
             <button onClick={sendFormEmail} disabled={sendingEmail}
@@ -221,7 +221,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
        ['Notatki admina', booking.admin_notes || '—'],
        ].map(([label, value]) => (
        <div key={label} className="mb-3 pb-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '3px' }}>{label}</p>
+         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '3px' }}>{label}</p>
          <p style={{ color: t.muted, fontSize: '12px', lineHeight: 1.5, wordBreak: 'break-word' }}>{value}</p>
        </div>
       ))}
@@ -229,7 +229,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
       {/* Reference images */}
       {booking.reference_images && booking.reference_images.length > 0 && (
         <div className="mb-5">
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>REFERENCJE KLIENTA ({booking.reference_images.length})</p>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>REFERENCJE KLIENTA ({booking.reference_images.length})</p>
           <div className="grid grid-cols-3 gap-2">
             {booking.reference_images.map((imgUrl, idx) => (
               <div key={idx} className="relative group">
@@ -250,14 +250,14 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
       {/* Client notes */}
       {clientRecord && (
         <div className="mb-5">
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>NOTATKI O KLIENCIE</p>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>NOTATKI O KLIENCIE</p>
           <textarea
             value={clientNotes}
             onChange={e => { setClientNotes(e.target.value); setNotesSaved(false); }}
             rows={3}
             placeholder="Alergie, preferencje, uwagi..."
             style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '8px 10px', fontSize: '12px', color: t.title, fontFamily: 'Inter, sans-serif', resize: 'vertical', outline: 'none', lineHeight: 1.5 }}
-            onFocus={e => e.target.style.borderColor = '#FF007F'}
+            onFocus={e => e.target.style.borderColor = 'var(--brand)'}
             onBlur={e => e.target.style.borderColor = t.border}
           />
           <button
@@ -275,8 +275,8 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
       {clientHistory.length > 0 && (
         <div className="mb-5">
           <div className="flex items-center gap-2 mb-3">
-            <History size={10} color="#FF007F" />
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+            <History size={10} color="var(--brand)" />
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
               HISTORIA SESJI ({clientHistory.length})
             </p>
           </div>
@@ -317,7 +317,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
         <button
           onClick={() => setShowDeleteConfirm(true)}
           className="flex items-center gap-1.5 flex-1 justify-center py-2.5 transition-all hover:opacity-70"
-          style={{ border: `0.5px solid #FF007F`, color: '#FF007F', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer' }}
+          style={{ border: `0.5px solid var(--brand)`, color: 'var(--brand)', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer' }}
         >
           <Trash2 size={11} /> USUŃ
         </button>
@@ -402,7 +402,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
           <>
             <button
               onClick={(e) => { e.stopPropagation(); setLightboxImageIndex(i => (i - 1 + booking.reference_images.length) % booking.reference_images.length); }}
-              style={{ position: 'fixed', left: '12px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', border: 'none', cursor: 'pointer', color: '#FF007F', padding: '12px', opacity: 0.7, transition: 'opacity 0.2s', zIndex: 71 }}
+              style={{ position: 'fixed', left: '12px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', border: 'none', cursor: 'pointer', color: 'var(--brand)', padding: '12px', opacity: 0.7, transition: 'opacity 0.2s', zIndex: 71 }}
               onMouseEnter={e => e.target.style.opacity = '1'}
               onMouseLeave={e => e.target.style.opacity = '0.7'}
               title="Poprzednie"
@@ -411,7 +411,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); setLightboxImageIndex(i => (i + 1) % booking.reference_images.length); }}
-              style={{ position: 'fixed', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', border: 'none', cursor: 'pointer', color: '#FF007F', padding: '12px', opacity: 0.7, transition: 'opacity 0.2s', zIndex: 71 }}
+              style={{ position: 'fixed', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', border: 'none', cursor: 'pointer', color: 'var(--brand)', padding: '12px', opacity: 0.7, transition: 'opacity 0.2s', zIndex: 71 }}
               onMouseEnter={e => e.target.style.opacity = '1'}
               onMouseLeave={e => e.target.style.opacity = '0.7'}
               title="Następne"
@@ -444,7 +444,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
               a.click();
             document.body.removeChild(a);
           }}
-          style={{ position: 'fixed', bottom: '12px', right: '12px', background: 'rgba(255,0,127,0.9)', color: '#FFF', padding: '8px 12px', border: 'none', cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px', fontFamily: 'JetBrains Mono', fontSize: '10px', textTransform: 'uppercase', opacity: 0.7, transition: 'opacity 0.2s', zIndex: 71 }}
+          style={{ position: 'fixed', bottom: '12px', right: '12px', background: 'rgba(var(--brand-rgb),0.9)', color: '#FFF', padding: '8px 12px', border: 'none', cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px', fontFamily: 'JetBrains Mono', fontSize: '10px', textTransform: 'uppercase', opacity: 0.7, transition: 'opacity 0.2s', zIndex: 71 }}
           onMouseEnter={e => e.target.style.opacity = '1'}
           onMouseLeave={e => e.target.style.opacity = '0.7'}
         >

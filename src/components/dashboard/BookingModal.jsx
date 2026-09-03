@@ -394,7 +394,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
     style: { ...inputStyle, color: t.text, borderBottomColor: t.border },
     value: form[field] || '',
     onChange: e => set(field, e.target.value),
-    onFocus: e => e.target.style.borderBottomColor = '#FF007F',
+    onFocus: e => e.target.style.borderBottomColor = 'var(--brand)',
     onBlur: e => e.target.style.borderBottomColor = t.border,
   });
 
@@ -410,8 +410,8 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
         <div style={{ border: `0.5px solid ${t.border}`, background: t.bg === '#FFFFFF' ? '#FFFFFF' : '#0A0A0A', padding: '36px', maxWidth: '460px', width: '100%' }}>
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <History size={14} color="#FF007F" />
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase' }}>POWRACAJĄCY KLIENT</p>
+              <History size={14} color="var(--brand)" />
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase' }}>POWRACAJĄCY KLIENT</p>
             </div>
             <button onClick={() => { applyClientToForm(repeatPrompt.client); setRepeatPrompt(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}>
               <X size={14} />
@@ -431,7 +431,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
               </p>
             )}
             {repeatPrompt.lastSession.estimated_price > 0 && (
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', marginTop: '4px' }}>{repeatPrompt.lastSession.estimated_price} PLN</p>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', marginTop: '4px' }}>{repeatPrompt.lastSession.estimated_price} PLN</p>
             )}
           </div>
           <p style={{ fontSize: '13px', color: t.muted, marginBottom: '20px', lineHeight: 1.6 }}>
@@ -461,7 +461,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
       >
         <div className="flex justify-between items-center mb-8">
           <div>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>
               {isNew ? 'NOWA SESJA' : 'EDYTUJ SESJĘ'}
             </p>
             <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.8rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
@@ -476,7 +476,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
         <div className="space-y-6">
           {/* Client */}
           <div>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>KLIENT</p>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>KLIENT</p>
             {isNew && (
               <div className="mb-4">
                 {label('Szukaj istniejącego klienta')}
@@ -490,8 +490,8 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
             <div className="mt-4">{label('Email')}<input {...inp('client_email', 'email')} /></div>
             <div className="mt-4">{label('Telefon')}<input {...inp('client_phone')} /></div>
             {selectedClient && (
-              <div className="mt-3 p-3" style={{ background: 'rgba(255,0,127,0.04)', border: '0.5px solid rgba(255,0,127,0.2)' }}>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
+              <div className="mt-3 p-3" style={{ background: 'rgba(var(--brand-rgb),0.04)', border: '0.5px solid rgba(var(--brand-rgb),0.2)' }}>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
                   ISTNIEJĄCY KLIENT · {selectedClient.total_sessions || 0} SESJI
                 </p>
                 {selectedClient._lastSession ? (
@@ -530,7 +530,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
 
           {/* Service */}
           <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>USŁUGA</p>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>USŁUGA</p>
             {/* Category toggles */}
             <div className="mb-4">
               {label('Kategoria')}
@@ -541,9 +541,9 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                     type="button"
                     onClick={() => handleCategoryChange(val)}
                     style={{
-                      border: `0.5px solid ${selectedCategory === val ? '#FF007F' : t.border}`,
-                      color: selectedCategory === val ? '#FF007F' : t.muted,
-                      background: selectedCategory === val ? 'rgba(255,0,127,0.08)' : 'transparent',
+                      border: `0.5px solid ${selectedCategory === val ? 'var(--brand)' : t.border}`,
+                      color: selectedCategory === val ? 'var(--brand)' : t.muted,
+                      background: selectedCategory === val ? 'rgba(var(--brand-rgb),0.08)' : 'transparent',
                       fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em',
                       padding: '6px 12px', cursor: 'pointer',
                     }}
@@ -577,7 +577,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                   }}
                   onFocus={() => setShowServiceSuggestions(true)}
                   onBlur={() => setTimeout(() => setShowServiceSuggestions(false), 150)}
-                  style={{ ...inputStyle, color: t.text, borderBottomColor: form.service_id ? '#FF007F' : t.border }}
+                  style={{ ...inputStyle, color: t.text, borderBottomColor: form.service_id ? 'var(--brand)' : t.border }}
                 />
                 {serviceQuery && (
                   <button
@@ -608,7 +608,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                             handleService(s.id, s.name);
                           }}
                           style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 14px', background: 'none', border: 'none', borderBottom: `0.5px solid ${t.border}`, cursor: 'pointer', color: t.text, fontFamily: 'Inter, sans-serif', fontSize: '13px' }}
-                          onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,0,127,0.06)'}
+                          onMouseEnter={e => e.currentTarget.style.background = 'rgba(var(--brand-rgb),0.06)'}
                           onMouseLeave={e => e.currentTarget.style.background = 'none'}
                         >
                           <span>{s.name}</span>
@@ -621,9 +621,9 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
               })()}
             </div>
             {form.service_id && (
-              <div className="mt-3 px-3 py-2 flex items-center gap-2" style={{ background: 'rgba(255,0,127,0.05)', border: '0.5px solid rgba(255,0,127,0.2)' }}>
-                <Zap size={10} color="#FF007F" />
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>
+              <div className="mt-3 px-3 py-2 flex items-center gap-2" style={{ background: 'rgba(var(--brand-rgb),0.05)', border: '0.5px solid rgba(var(--brand-rgb),0.2)' }}>
+                <Zap size={10} color="var(--brand)" />
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em' }}>
                   USŁUGA WYBRANA · CENA I CZAS UZUPEŁNIONE AUTOMATYCZNIE
                 </p>
               </div>
@@ -632,7 +632,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
 
           {/* Session */}
           <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>SESJA</p>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>SESJA</p>
             <div className="mb-4">
               <div>{label('Data *')}<input {...inp('session_date', 'date')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }} /></div>
             </div>
@@ -739,10 +739,10 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
 
           {/* Tattoo */}
           <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>TATUAŻ</p>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>TATUAŻ</p>
             <div className="mb-4">{label('Miejsce na ciele')}<input {...inp('tattoo_placement')} /></div>
             <div className="mb-4">{label('Opis projektu')}
-              <textarea rows={3} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} value={form.tattoo_description || ''} onChange={e => set('tattoo_description', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+              <textarea rows={3} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} value={form.tattoo_description || ''} onChange={e => set('tattoo_description', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
             </div>
             {/* Reference images */}
             <div className="mb-4">
@@ -756,7 +756,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
             {/* Notatki o kliencie — persistent, stored on Client entity */}
             <div className="mb-4">
               {label('Notatki o kliencie (widoczne przy każdej sesji)')}
-              <textarea rows={2} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} value={form.client_notes || ''} onChange={e => set('client_notes', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} placeholder="Np. spóźnia się, alergia na lateks..." />
+              <textarea rows={2} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} value={form.client_notes || ''} onChange={e => set('client_notes', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} placeholder="Np. spóźnia się, alergia na lateks..." />
             </div>
             {/* Notatki od klienta — read-only, from online form */}
             {form.notes ? (
@@ -768,7 +768,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
             {/* Notatki admina — session-specific */}
             <div>
               {label('Notatki admina (tylko dla tej sesji)')}
-              <textarea rows={2} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} value={form.admin_notes || ''} onChange={e => set('admin_notes', e.target.value)} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} placeholder="Notatki wewnętrzne dla tej sesji..." />
+              <textarea rows={2} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} value={form.admin_notes || ''} onChange={e => set('admin_notes', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} placeholder="Notatki wewnętrzne dla tej sesji..." />
             </div>
           </div>
 

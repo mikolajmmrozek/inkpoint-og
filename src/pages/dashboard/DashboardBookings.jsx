@@ -29,7 +29,7 @@ function BookingRow({ b, i, items, selected, setSelected, artists, t, healthStat
   return (
     <div
       className="flex items-center justify-between p-4 cursor-pointer transition-colors"
-      style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selected?.id === b.id ? 'rgba(255,0,127,0.05)' : 'transparent' }}
+      style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selected?.id === b.id ? 'rgba(var(--brand-rgb),0.05)' : 'transparent' }}
       onClick={() => setSelected(b)}
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -51,8 +51,8 @@ function BookingRow({ b, i, items, selected, setSelected, artists, t, healthStat
             return artist?.photo_url ? (
               <img src={artist.photo_url} alt={artist.name} loading="lazy" width={40} height={40} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${t.border}`, flexShrink: 0 }} />
             ) : (artist || b.artist_name) ? (
-              <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(255,0,127,0.1)', border: '0.5px solid rgba(255,0,127,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '15px', color: '#FF007F', letterSpacing: '0.05em' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(var(--brand-rgb),0.1)', border: '0.5px solid rgba(var(--brand-rgb),0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '15px', color: 'var(--brand)', letterSpacing: '0.05em' }}>
                   {(artist?.name || b.artist_name || '').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
                 </span>
               </div>
@@ -64,7 +64,7 @@ function BookingRow({ b, i, items, selected, setSelected, artists, t, healthStat
               {b.artist_name}{b.tattoo_placement ? ` · ${b.tattoo_placement}` : ''}
             </p>
             {b.service_name && (
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', opacity: 0.8 }}>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', opacity: 0.8 }}>
                 {b.service_name}
               </p>
             )}
@@ -149,11 +149,11 @@ function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPa
                 </span>
               </div>
               {date !== 'Brak daty' && (() => { const off = getOffForDate(date); return off.length > 0 ? (
-                <div className="mb-2" style={{ border: '0.5px solid rgba(255,0,127,0.25)', background: 'rgba(255,0,127,0.05)' }}>
+                <div className="mb-2" style={{ border: '0.5px solid rgba(var(--brand-rgb),0.25)', background: 'rgba(var(--brand-rgb),0.05)' }}>
                   {off.map((o, i) => (
-                    <div key={i} className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: i < off.length - 1 ? '0.5px solid rgba(255,0,127,0.2)' : 'none' }}>
-                      <div style={{ width: '6px', height: '6px', borderRadius: '1px', background: '#FF007F', flexShrink: 0 }} />
-                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.06em', flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>WOLNE · {o.artist.name}{o.timeRange ? ` · ${o.timeRange}` : ' · cały dzień'}{o.note ? ` · ${o.note}` : ''}</span>
+                    <div key={i} className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: i < off.length - 1 ? '0.5px solid rgba(var(--brand-rgb),0.2)' : 'none' }}>
+                      <div style={{ width: '6px', height: '6px', borderRadius: '1px', background: 'var(--brand)', flexShrink: 0 }} />
+                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.06em', flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>WOLNE · {o.artist.name}{o.timeRange ? ` · ${o.timeRange}` : ' · cały dzień'}{o.note ? ` · ${o.note}` : ''}</span>
                     </div>
                   ))}
                 </div>
@@ -179,8 +179,8 @@ export default function DashboardBookings() {
   const [searchParams] = useSearchParams();
   const { theme } = useTheme();
   const t = theme === 'light'
-    ? { bg: '#FFFFFF', pageBg: '#D5D5D5', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.62)', fuchsia: '#FF007F' }
-    : { bg: 'rgba(255,255,255,0.06)', pageBg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.72)', fuchsia: '#FF007F' };
+    ? { bg: '#FFFFFF', pageBg: '#D5D5D5', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.62)', fuchsia: 'var(--brand)' }
+    : { bg: 'rgba(255,255,255,0.06)', pageBg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.72)', fuchsia: 'var(--brand)' };
 
   const [bookings, setBookings] = useState([]);
   const [artists, setArtists] = useState([]);
@@ -443,7 +443,7 @@ export default function DashboardBookings() {
     <div>
       {loadError && bookings.length === 0 && (
         <div className="mb-6 p-6 text-center" style={{ border: `0.5px solid ${t.border}` }}>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: '#FF007F', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px' }}>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px' }}>
             ⚠ Nie udało się pobrać danych (limit zapytań). Spróbuj ponownie za chwilę.
           </p>
           <button onClick={load} className="btn-oxblood" style={{ fontSize: '11px' }}>SPRÓBUJ PONOWNIE</button>
@@ -477,13 +477,13 @@ export default function DashboardBookings() {
                 key={mode}
                 onClick={() => { setViewMode(mode); if (mode !== 'day' && mode !== 'calendar' && mode !== 'pending') setSelectedDate(new Date()); }}
                 className="p-2.5 transition-all"
-                style={{ background: viewMode === mode ? 'rgba(255,0,127,0.1)' : 'transparent', color: viewMode === mode ? '#FF007F' : t.muted, border: 'none', cursor: 'pointer' }}
+                style={{ background: viewMode === mode ? 'rgba(var(--brand-rgb),0.1)' : 'transparent', color: viewMode === mode ? 'var(--brand)' : t.muted, border: 'none', cursor: 'pointer' }}
                 title={mode === 'pending' ? 'Nowe rezerwacje (do weryfikacji)' : ''}
-                style={{ position: 'relative', background: viewMode === mode ? 'rgba(255,0,127,0.1)' : 'transparent', color: viewMode === mode ? '#FF007F' : t.muted, border: 'none', cursor: 'pointer' }}
+                style={{ position: 'relative', background: viewMode === mode ? 'rgba(var(--brand-rgb),0.1)' : 'transparent', color: viewMode === mode ? 'var(--brand)' : t.muted, border: 'none', cursor: 'pointer' }}
               >
                 <Icon size={14} />
                 {mode === 'pending' && pendingCount > 0 && (
-                  <span style={{ position: 'absolute', top: '-2px', right: '-2px', minWidth: '14px', height: '14px', background: '#FF007F', color: '#F5F0EB', fontSize: '8px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '7px', padding: '0 3px', fontFamily: 'JetBrains Mono' }}>
+                  <span style={{ position: 'absolute', top: '-2px', right: '-2px', minWidth: '14px', height: '14px', background: 'var(--brand)', color: '#F5F0EB', fontSize: '8px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '7px', padding: '0 3px', fontFamily: 'JetBrains Mono' }}>
                     {pendingCount > 9 ? '9+' : pendingCount}
                   </span>
                 )}
@@ -501,13 +501,13 @@ export default function DashboardBookings() {
             Wszyscy
           </button>
           {artists.map(a => (
-            <button key={a.id} onClick={() => toggleArtist(a.id)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilters.includes(a.id) ? t.fuchsia : t.border}`, color: artistFilters.includes(a.id) ? t.fuchsia : t.muted, background: artistFilters.includes(a.id) ? 'rgba(255,0,127,0.06)' : 'transparent', cursor: 'pointer', flexShrink: 0 }}>
+            <button key={a.id} onClick={() => toggleArtist(a.id)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilters.includes(a.id) ? t.fuchsia : t.border}`, color: artistFilters.includes(a.id) ? t.fuchsia : t.muted, background: artistFilters.includes(a.id) ? 'rgba(var(--brand-rgb),0.06)' : 'transparent', cursor: 'pointer', flexShrink: 0 }}>
               {a.name}
             </button>
           ))}
           <div style={{ width: '0.5px', height: '16px', background: t.border, margin: '0 4px' }} />
           {(viewMode === 'pending' ? ['pending', 'cancelled'] : STATUS_OPTIONS).map(s => (
-            <button key={s} onClick={() => toggleStatus(s)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${statusFilters.includes(s) ? t.fuchsia : t.border}`, color: statusFilters.includes(s) ? t.fuchsia : t.muted, background: statusFilters.includes(s) ? 'rgba(255,0,127,0.06)' : 'transparent', cursor: 'pointer', flexShrink: 0 }}>
+            <button key={s} onClick={() => toggleStatus(s)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${statusFilters.includes(s) ? t.fuchsia : t.border}`, color: statusFilters.includes(s) ? t.fuchsia : t.muted, background: statusFilters.includes(s) ? 'rgba(var(--brand-rgb),0.06)' : 'transparent', cursor: 'pointer', flexShrink: 0 }}>
               {s === 'all' ? 'Wszystkie' : s}
             </button>
           ))}
@@ -519,8 +519,8 @@ export default function DashboardBookings() {
         </div>
 
         {/* Row 3: search */}
-        <div className="flex items-center gap-2 w-full" style={{ border: `0.5px solid ${searchQuery ? '#FF007F' : t.border}`, padding: '8px 14px', background: t.bg }}>
-          <Search size={12} color={searchQuery ? '#FF007F' : t.muted} />
+        <div className="flex items-center gap-2 w-full" style={{ border: `0.5px solid ${searchQuery ? 'var(--brand)' : t.border}`, padding: '8px 14px', background: t.bg }}>
+          <Search size={12} color={searchQuery ? 'var(--brand)' : t.muted} />
           <input
             type="text"
             value={searchQuery}
@@ -626,9 +626,9 @@ export default function DashboardBookings() {
                         style={{
                           flex: 1, padding: '10px', fontFamily: 'JetBrains Mono', fontSize: '9px',
                           letterSpacing: '0.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer',
-                          background: listTab === tab.key ? 'rgba(255,0,127,0.08)' : 'transparent',
-                          color: listTab === tab.key ? '#FF007F' : t.muted,
-                          borderBottom: listTab === tab.key ? '1px solid #FF007F' : '1px solid transparent',
+                          background: listTab === tab.key ? 'rgba(var(--brand-rgb),0.08)' : 'transparent',
+                          color: listTab === tab.key ? 'var(--brand)' : t.muted,
+                          borderBottom: listTab === tab.key ? '1px solid var(--brand)' : '1px solid transparent',
                         }}
                       >
                         {tab.label}

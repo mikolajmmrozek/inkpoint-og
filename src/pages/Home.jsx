@@ -45,7 +45,7 @@ export default function Home() {
 
       {/* Divider */}
       <div className="px-8 md:px-16">
-        <div style={{ height: '1px', background: 'linear-gradient(to right, transparent, #FF007F, transparent)' }} />
+        <div style={{ height: '1px', background: 'linear-gradient(to right, transparent, var(--brand), transparent)' }} />
       </div>
 
       {/* Artist slider section */}
@@ -55,14 +55,14 @@ export default function Home() {
 
       {/* Divider */}
       <div className="px-8 md:px-16 my-0">
-        <div className="w-full" style={{ height: '1px', background: 'linear-gradient(to right, transparent, #FF007F, transparent)' }} />
+        <div className="w-full" style={{ height: '1px', background: 'linear-gradient(to right, transparent, var(--brand), transparent)' }} />
       </div>
 
       <HomeAbout />
 
       {/* Divider */}
       <div className="px-8 md:px-16">
-        <div className="w-full" style={{ height: '1px', background: 'linear-gradient(to right, transparent, #FF007F, transparent)' }} />
+        <div className="w-full" style={{ height: '1px', background: 'linear-gradient(to right, transparent, var(--brand), transparent)' }} />
       </div>
 
       {/* Gallery strip */}
@@ -70,7 +70,7 @@ export default function Home() {
         <div className="px-8 md:px-16 mb-12">
           <div className="flex items-end justify-between">
             <div>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
                 NASZE PRACE
               </p>
               <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(2rem, 5vw, 4rem)', fontWeight: 400, color: '#F5F0EB', lineHeight: 0.95, letterSpacing: '0.04em' }}>
@@ -108,13 +108,13 @@ export default function Home() {
       </section>
 
       <div className="px-8 md:px-16">
-        <div className="w-full" style={{ height: '1px', background: 'linear-gradient(to right, transparent, #FF007F, transparent)' }} />
+        <div className="w-full" style={{ height: '1px', background: 'linear-gradient(to right, transparent, var(--brand), transparent)' }} />
       </div>
 
       <HomeTestimonials />
 
       <div className="px-8 md:px-16">
-        <div className="w-full" style={{ height: '1px', background: 'linear-gradient(to right, transparent, #FF007F, transparent)' }} />
+        <div className="w-full" style={{ height: '1px', background: 'linear-gradient(to right, transparent, var(--brand), transparent)' }} />
       </div>
 
       <HomeCTA />

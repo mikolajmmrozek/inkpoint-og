@@ -105,7 +105,7 @@ export default function BlogPost() {
   if (loading) return (
     <PageLayout>
       <div className="h-screen flex items-center justify-center">
-        <div className="w-8 h-px animate-pulse" style={{ background: '#FF007F' }} />
+        <div className="w-8 h-px animate-pulse" style={{ background: 'var(--brand)' }} />
       </div>
     </PageLayout>
   );
@@ -141,7 +141,7 @@ export default function BlogPost() {
           <div className="absolute bottom-0 left-0 right-0 px-8 md:px-16 pb-12">
             <div className="flex gap-2 mb-4 flex-wrap">
               {(post.tags || []).map(tag => (
-                <span key={tag} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', border: '0.5px solid #FF007F', padding: '3px 8px', textTransform: 'uppercase' }}>
+                <span key={tag} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', border: '0.5px solid var(--brand)', padding: '3px 8px', textTransform: 'uppercase' }}>
                   {tag}
                 </span>
               ))}
@@ -163,7 +163,7 @@ export default function BlogPost() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
             <div className="flex gap-2 mb-4 flex-wrap">
               {(post.tags || []).map(tag => (
-                <span key={tag} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', border: '0.5px solid #FF007F', padding: '3px 8px', textTransform: 'uppercase' }}>
+                <span key={tag} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', border: '0.5px solid var(--brand)', padding: '3px 8px', textTransform: 'uppercase' }}>
                   {tag}
                 </span>
               ))}
