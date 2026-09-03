@@ -106,7 +106,7 @@ export default function Artists() {
                       alt={artist.name}
                       className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 media-darken-soft"
                     />
-                    <div className="absolute inset-0 transition-all duration-500 group-hover:bg-oxblood/10" style={{ background: 'linear-gradient(to top, hsl(var(--background) / 0.9) 0%, hsl(var(--background) / 0.1) 60%)' }} />
+                    <div className="absolute inset-0 transition-all duration-500 group-hover:bg-oxblood/10" style={{ background: 'linear-gradient(to top, hsl(var(--background) / 0.95) 0%, hsl(var(--background) / 0.5) 40%, hsl(var(--background) / 0.1) 85%)' }} />
                     
                     <div className="absolute bottom-0 left-0 right-0 p-8">
                       <div className="flex gap-2 mb-3 flex-wrap">

@@ -197,9 +197,6 @@
   .media-darken-soft {
     filter: brightness(0.6) contrast(1.1);
   }
-  :root[data-theme="light"] .media-darken {
-    filter: brightness(1.15) contrast(0.92) saturate(0.9);
-  }
   :root[data-theme="light"] .media-darken-video {
     filter: brightness(1.2) contrast(0.9) saturate(0.85);
   }

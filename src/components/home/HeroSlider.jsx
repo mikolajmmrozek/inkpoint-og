@@ -72,7 +72,7 @@ export default function HeroSlider() {
       </AnimatePresence>
 
       {/* Gradient overlay */}
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, hsl(var(--background) / 0.75) 0%, hsl(var(--background) / 0.25) 60%, hsl(var(--background) / 0.5) 100%)' }} />
+      <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(10,10,10,0.75) 0%, rgba(10,10,10,0.25) 60%, rgba(10,10,10,0.5) 100%)' }} />
       <div className="absolute bottom-0 left-0 right-0 h-64" style={{ background: 'linear-gradient(to top, rgb(var(--brand-rgb) /0.12) 0%, transparent 100%)' }} />
 
       {/* Content */}
@@ -80,7 +80,7 @@ export default function HeroSlider() {
         {/* Section label */}
         <div className="absolute top-8 left-8 md:left-16">
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>NASZ ZESPÓŁ</p>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.5rem, 3vw, 2.5rem)', fontWeight: 400, color: 'hsl(var(--foreground))', lineHeight: 0.95, letterSpacing: '0.04em' }}>Artyści</h2>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.5rem, 3vw, 2.5rem)', fontWeight: 400, color: '#F5F0EB', lineHeight: 0.95, letterSpacing: '0.04em' }}>Artyści</h2>
         </div>
         <AnimatePresence mode="wait">
           <motion.div
@@ -100,7 +100,7 @@ export default function HeroSlider() {
               fontSize: 'clamp(4rem, 10vw, 9rem)',
               fontWeight: 400,
               lineHeight: 0.9,
-              color: 'hsl(var(--foreground))',
+              color: '#F5F0EB',
               letterSpacing: '0.04em',
             }}>
               {(slide?.name || '').split(' ').map((word, i) => (
@@ -110,7 +110,7 @@ export default function HeroSlider() {
 
             <div className="mt-8 h-px w-16" style={{ background: 'linear-gradient(to right, var(--brand), transparent)', height: '1px' }} />
 
-            <p className="mt-6 max-w-sm" style={{ color: 'rgb(var(--foreground-rgb) / 0.85)', fontSize: '15px', lineHeight: 1.7 }}>
+            <p className="mt-6 max-w-sm" style={{ color: 'rgba(245,240,235,0.85)', fontSize: '15px', lineHeight: 1.7 }}>
               {slide?.bio ? slide.bio.slice(0, 120) + (slide.bio.length > 120 ? '…' : '') : 'Każdy tatuaż to unikalna historia wyryta na skórze. Trwała, precyzyjna, Twoja.'}
             </p>
 
@@ -138,7 +138,7 @@ export default function HeroSlider() {
                 display: 'block',
                 width: i === current ? '40px' : '16px',
                 height: '1px',
-                background: i === current ? 'var(--brand)' : 'rgb(var(--foreground-rgb) / 0.5)',
+                background: i === current ? 'var(--brand)' : 'rgba(245,240,235,0.5)',
                 transition: 'all 0.5s',
                 }}
                 />
@@ -148,10 +148,10 @@ export default function HeroSlider() {
 
         {/* Scroll hint */}
         <div className="absolute bottom-10 right-8 md:right-16 flex flex-col items-center gap-3">
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgb(var(--foreground-rgb) / 0.6)', letterSpacing: '0.2em', writingMode: 'vertical-rl' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.6)', letterSpacing: '0.2em', writingMode: 'vertical-rl' }}>
             SCROLL
           </p>
-          <div className="w-px h-12 relative overflow-hidden" style={{ background: 'rgb(var(--foreground-rgb) / 0.1)' }}>
+          <div className="w-px h-12 relative overflow-hidden" style={{ background: 'rgba(245,240,235,0.1)' }}>
             <motion.div
               className="w-full absolute top-0"
               style={{ background: 'var(--brand)', height: '50%' }}
