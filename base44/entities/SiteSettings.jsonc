@@ -111,10 +111,11 @@
         "original",
         "classic",
         "elegant",
-        "modern"
+        "modern",
+        "fraunces"
       ],
       "default": "original",
-      "description": "Pakiet czcionek: original, classic, elegant, modern"
+      "description": "Pakiet czcionek: original, classic, elegant, modern, fraunces"
     }
   },
   "required": [

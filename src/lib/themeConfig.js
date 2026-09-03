@@ -32,6 +32,14 @@ export const FONT_PACKAGES = {
     mono: "'JetBrains Mono', monospace",
     import: 'Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500',
   },
+  fraunces: {
+    label: 'Fraunces + Inter',
+    description: 'Fraunces (serif) · Inter · Inter — czyste, eleganckie',
+    display: "'Fraunces', Georgia, serif",
+    body: "'Inter', sans-serif",
+    mono: "'Inter', sans-serif",
+    import: 'Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=Inter:wght@300;400;500;600;700',
+  },
 };
 
 // 12 preset primary colors
