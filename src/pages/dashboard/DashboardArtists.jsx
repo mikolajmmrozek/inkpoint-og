@@ -52,7 +52,7 @@ export default function DashboardArtists() {
     const [moved] = next.splice(source.index, 1);
     next.splice(destination.index, 0, moved);
     setArtists(next);
-    await Promise.all(next.map((a, idx) => base44.entities.Artist.update(a.id, { order: idx })));
+    await base44.entities.Artist.bulkUpdate(next.map((a, idx) => ({ id: a.id, order: idx })));
   };
 
   useEffect(() => { load(); }, []);
