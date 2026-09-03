@@ -24,7 +24,7 @@ export default function SidebarBadge({ type, value }) {
           justifyContent: 'center',
           borderRadius: '7px',
           padding: '0 3px',
-          fontFamily: 'JetBrains Mono',
+          fontFamily: 'var(--font-mono)',
         }}
       >
         {value > 99 ? '99+' : value}

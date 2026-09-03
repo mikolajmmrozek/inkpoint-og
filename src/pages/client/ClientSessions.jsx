@@ -52,10 +52,10 @@ export default function ClientSessions() {
     <div>
       <div className="mb-8 flex items-end justify-between">
         <div>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>
             TWOJE SESJE
           </p>
-          <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>
             Rezerwacje
           </h1>
         </div>
@@ -74,7 +74,7 @@ export default function ClientSessions() {
             key={tbtn.key}
             onClick={() => setTab(tbtn.key)}
             style={{
-              fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase',
+              fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase',
               padding: '8px 16px', border: `0.5px solid ${tab === tbtn.key ? t.fuchsia : t.border}`,
               color: tab === tbtn.key ? t.fuchsia : t.muted,
               background: tab === tbtn.key ? 'rgb(var(--brand-rgb) /0.06)' : 'transparent',
@@ -91,7 +91,7 @@ export default function ClientSessions() {
         <div className="flex justify-center py-20"><div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} /></div>
       ) : displayed.length === 0 ? (
         <div className="py-16 text-center" style={{ border: `0.5px solid ${t.border}` }}>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
             BRAK SESJI
           </p>
         </div>

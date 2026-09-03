@@ -82,7 +82,7 @@ export default function ReferenceImagesGallery({ images = [], theme = 'dark', t 
                 >
                   <ChevronRight size={28} />
                 </button>
-                <span style={{ position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)', fontFamily: 'JetBrains Mono', fontSize: '11px', color: 'rgba(255,255,255,0.5)', zIndex: 71 }}>
+                <span style={{ position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)', fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'rgba(255,255,255,0.5)', zIndex: 71 }}>
                   {lightboxIndex + 1} / {images.length}
                 </span>
               </>
@@ -103,7 +103,7 @@ export default function ReferenceImagesGallery({ images = [], theme = 'dark', t 
                 a.click();
                 document.body.removeChild(a);
               }}
-              style={{ position: 'fixed', bottom: '12px', right: '12px', background: 'rgb(var(--brand-rgb) /0.9)', color: '#FFF', padding: '8px 12px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontFamily: 'JetBrains Mono', fontSize: '10px', textTransform: 'uppercase', zIndex: 71 }}
+              style={{ position: 'fixed', bottom: '12px', right: '12px', background: 'rgb(var(--brand-rgb) /0.9)', color: '#FFF', padding: '8px 12px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontFamily: 'var(--font-mono)', fontSize: '10px', textTransform: 'uppercase', zIndex: 71 }}
             >
               <Download size={11} />
             </button>

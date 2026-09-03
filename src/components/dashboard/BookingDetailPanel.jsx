@@ -123,7 +123,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
         style={{ borderLeft: `0.5px solid ${t.border}`, background: t.bg, padding: '24px', pointerEvents: showImageLightbox ? 'none' : 'auto' }}
       >
       <div className="flex justify-between items-start mb-2">
-        <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.5rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
           {booking.client_name}
         </h3>
         <button onClick={onClose} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
@@ -132,14 +132,14 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
       </div>
       {/* Status change */}
       <div className="mb-5">
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>ZMIEŃ STATUS</p>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>ZMIEŃ STATUS</p>
         <div className="grid grid-cols-2 gap-2">
           {STATUS_OPTIONS.map(s => (
             <button
               key={s}
               onClick={() => safeOnStatusChange(booking.id, s)}
               style={{
-                fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase',
+                fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase',
                 padding: '7px', border: `0.5px solid ${booking.status === s ? STATUS_COLORS[s] : t.border}`,
                 color: booking.status === s ? STATUS_COLORS[s] : t.muted,
                 background: 'transparent', cursor: 'pointer',
@@ -154,7 +154,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
         <div className="mb-4 p-3" style={{ border: '0.5px solid rgba(22,163,74,0.3)', background: 'rgba(22,163,74,0.04)' }}>
           <div className="flex items-center gap-2 mb-2">
             <FileText size={11} color="#16a34a" />
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
               ANKIETA ZDROWOTNA — WYPEŁNIONA
             </p>
           </div>
@@ -166,25 +166,25 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
                setShowFormPreview(true);
              }
            }}
-           style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#16a34a', background: 'transparent', padding: '7px 10px', border: '0.5px solid rgba(22,163,74,0.4)', marginTop: '6px', cursor: 'pointer', width: '100%' }}
+           style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#16a34a', background: 'transparent', padding: '7px 10px', border: '0.5px solid rgba(22,163,74,0.4)', marginTop: '6px', cursor: 'pointer', width: '100%' }}
           >
            <FileText size={10} /> PODGLĄD ANKIETY
           </button>
         </div>
       ) : (
         <div className="mb-4 p-3" style={{ border: '0.5px solid rgb(var(--brand-rgb) /0.3)', background: 'rgb(var(--brand-rgb) /0.04)' }}>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
             ANKIETA ZDROWOTNA — BRAK
           </p>
           <div className="flex gap-2">
             <button onClick={copyFormLink}
               className="flex items-center gap-1.5 flex-1 justify-center py-2"
-              style={{ border: '0.5px solid var(--brand)', color: 'var(--brand)', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer' }}>
+              style={{ border: '0.5px solid var(--brand)', color: 'var(--brand)', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer' }}>
               {copied ? <><Check size={11} /> SKOPIOWANO</> : <><Copy size={11} /> LINK</>}
             </button>
             <button onClick={sendFormEmail} disabled={sendingEmail}
               className="flex items-center gap-1.5 flex-1 justify-center py-2"
-              style={{ border: `0.5px solid ${emailSent ? '#16a34a' : t.border}`, color: emailSent ? '#16a34a' : t.muted, fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer', opacity: sendingEmail ? 0.6 : 1 }}>
+              style={{ border: `0.5px solid ${emailSent ? '#16a34a' : t.border}`, color: emailSent ? '#16a34a' : t.muted, fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer', opacity: sendingEmail ? 0.6 : 1 }}>
               {sendingEmail ? <Loader2 size={11} className="animate-spin" /> : emailSent ? <><Check size={11} /> WYSŁANO</> : <><Mail size={11} /> EMAIL</>}
             </button>
             <a href={formUrl} target="_blank" rel="noopener noreferrer"
@@ -221,7 +221,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
        ['Notatki admina', booking.admin_notes || '—'],
        ].map(([label, value]) => (
        <div key={label} className="mb-3 pb-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '3px' }}>{label}</p>
+         <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '3px' }}>{label}</p>
          <p style={{ color: t.muted, fontSize: '12px', lineHeight: 1.5, wordBreak: 'break-word' }}>{value}</p>
        </div>
       ))}
@@ -229,7 +229,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
       {/* Reference images */}
       {booking.reference_images && booking.reference_images.length > 0 && (
         <div className="mb-5">
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>REFERENCJE KLIENTA ({booking.reference_images.length})</p>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>REFERENCJE KLIENTA ({booking.reference_images.length})</p>
           <div className="grid grid-cols-3 gap-2">
             {booking.reference_images.map((imgUrl, idx) => (
               <div key={idx} className="relative group">
@@ -250,13 +250,13 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
       {/* Client notes */}
       {clientRecord && (
         <div className="mb-5">
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>NOTATKI O KLIENCIE</p>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>NOTATKI O KLIENCIE</p>
           <textarea
             value={clientNotes}
             onChange={e => { setClientNotes(e.target.value); setNotesSaved(false); }}
             rows={3}
             placeholder="Alergie, preferencje, uwagi..."
-            style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '8px 10px', fontSize: '12px', color: t.title, fontFamily: 'Inter, sans-serif', resize: 'vertical', outline: 'none', lineHeight: 1.5 }}
+            style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '8px 10px', fontSize: '12px', color: t.title, fontFamily: 'var(--font-body)', resize: 'vertical', outline: 'none', lineHeight: 1.5 }}
             onFocus={e => e.target.style.borderColor = 'var(--brand)'}
             onBlur={e => e.target.style.borderColor = t.border}
           />
@@ -264,7 +264,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
             onClick={saveNotes}
             disabled={savingNotes}
             className="flex items-center gap-1.5 mt-2 py-1.5 px-3"
-            style={{ border: `0.5px solid ${notesSaved ? '#16a34a' : t.border}`, color: notesSaved ? '#16a34a' : t.muted, fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer', opacity: savingNotes ? 0.6 : 1 }}
+            style={{ border: `0.5px solid ${notesSaved ? '#16a34a' : t.border}`, color: notesSaved ? '#16a34a' : t.muted, fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer', opacity: savingNotes ? 0.6 : 1 }}
           >
             {savingNotes ? <Loader2 size={10} className="animate-spin" /> : notesSaved ? <><Check size={10} /> ZAPISANO</> : <><Save size={10} /> ZAPISZ</>}
           </button>
@@ -276,7 +276,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
         <div className="mb-5">
           <div className="flex items-center gap-2 mb-3">
             <History size={10} color="var(--brand)" />
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
               HISTORIA SESJI ({clientHistory.length})
             </p>
           </div>
@@ -285,20 +285,20 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
               <div key={s.id} className="px-3 py-2" style={{ borderBottom: i < Math.min(clientHistory.length, 5) - 1 ? `0.5px solid ${t.border}` : 'none' }}>
                 <div className="flex items-center justify-between gap-2">
                   <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: { pending: '#FF007F', confirmed: '#16a34a', completed: '#2563eb', cancelled: '#9ca3af' }[s.status] || t.muted, flexShrink: 0 }} />
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, flex: 1 }}>{s.session_date || '—'}</p>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{s.status}</p>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, flex: 1 }}>{s.session_date || '—'}</p>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{s.status}</p>
                 </div>
                 {s.tattoo_placement && (
                   <p style={{ fontSize: '11px', color: t.title, marginTop: '2px', paddingLeft: '14px' }}>{s.tattoo_placement}{s.artist_name ? ` · ${s.artist_name}` : ''}</p>
                 )}
                 {s.estimated_price && (
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, paddingLeft: '14px' }}>{s.estimated_price} PLN</p>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, paddingLeft: '14px' }}>{s.estimated_price} PLN</p>
                 )}
               </div>
             ))}
           </div>
           {clientHistory.length > 5 && (
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.08em', marginTop: '6px', textAlign: 'right' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.08em', marginTop: '6px', textAlign: 'right' }}>
               + {clientHistory.length - 5} więcej sesji
             </p>
           )}
@@ -310,14 +310,14 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
         <button
           onClick={safeOnEdit}
           className="flex items-center gap-1.5 flex-1 justify-center py-2.5 transition-all hover:opacity-70"
-          style={{ border: `0.5px solid ${t.border}`, color: t.muted, fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer' }}
+          style={{ border: `0.5px solid ${t.border}`, color: t.muted, fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer' }}
         >
           <Edit size={11} /> EDYTUJ
         </button>
         <button
           onClick={() => setShowDeleteConfirm(true)}
           className="flex items-center gap-1.5 flex-1 justify-center py-2.5 transition-all hover:opacity-70"
-          style={{ border: `0.5px solid var(--brand)`, color: 'var(--brand)', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer' }}
+          style={{ border: `0.5px solid var(--brand)`, color: 'var(--brand)', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer' }}
         >
           <Trash2 size={11} /> USUŃ
         </button>
@@ -418,7 +418,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
             >
               <ChevronRight size={28} />
             </button>
-            <span style={{ position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)', fontFamily: 'JetBrains Mono', fontSize: '11px', color: 'rgba(255,255,255,0.5)', zIndex: 71 }}>
+            <span style={{ position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)', fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'rgba(255,255,255,0.5)', zIndex: 71 }}>
               {lightboxImageIndex + 1} / {booking.reference_images.length}
             </span>
           </>
@@ -444,7 +444,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
               a.click();
             document.body.removeChild(a);
           }}
-          style={{ position: 'fixed', bottom: '12px', right: '12px', background: 'rgb(var(--brand-rgb) /0.9)', color: '#FFF', padding: '8px 12px', border: 'none', cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px', fontFamily: 'JetBrains Mono', fontSize: '10px', textTransform: 'uppercase', opacity: 0.7, transition: 'opacity 0.2s', zIndex: 71 }}
+          style={{ position: 'fixed', bottom: '12px', right: '12px', background: 'rgb(var(--brand-rgb) /0.9)', color: '#FFF', padding: '8px 12px', border: 'none', cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px', fontFamily: 'var(--font-mono)', fontSize: '10px', textTransform: 'uppercase', opacity: 0.7, transition: 'opacity 0.2s', zIndex: 71 }}
           onMouseEnter={e => e.target.style.opacity = '1'}
           onMouseLeave={e => e.target.style.opacity = '0.7'}
         >

@@ -13,8 +13,8 @@ export default function StatsTile({ label, value, active = false, onClick, t }) 
         minWidth: '120px',
       }}
     >
-      <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2rem', fontWeight: 400, color: 'var(--brand)', lineHeight: 1 }}>{value}</p>
-      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: active ? 'var(--brand)' : t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '4px' }}>{label}</p>
+      <p style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 400, color: 'var(--brand)', lineHeight: 1 }}>{value}</p>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: active ? 'var(--brand)' : t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '4px' }}>{label}</p>
     </Tag>
   );
 }

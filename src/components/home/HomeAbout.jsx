@@ -38,11 +38,11 @@ export default function HomeAbout() {
           viewport={{ once: true }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
-          <p className="text-micro text-oxblood mb-8" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em' }}>
+          <p className="text-micro text-oxblood mb-8" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em' }}>
             O STUDIU
           </p>
           <h2 style={{
-            fontFamily: 'Bebas Neue, Barlow Condensed, system-ui',
+            fontFamily: 'var(--font-display)',
             fontSize: 'clamp(3rem, 6vw, 5.5rem)',
             fontWeight: 400,
             lineHeight: 0.95,
@@ -93,8 +93,8 @@ export default function HomeAbout() {
           <div className="absolute -bottom-6 -left-6 w-24 h-24" style={{ border: '0.5px solid var(--brand)', zIndex: -1 }} />
           {/* Stats badge */}
           <div className="absolute top-8 -right-4 bg-obsidian p-6" style={{ background: '#0A0A0A', border: '0.5px solid #262626' }}>
-            <p className="font-display text-4xl font-700" style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, color: 'var(--brand)', fontSize: '2.5rem', letterSpacing: '0.05em' }}>{data.about_stats_number}</p>
-            <p className="text-micro mt-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.7)', letterSpacing: '0.15em' }}>{data.about_stats_text}</p>
+            <p className="font-display text-4xl font-700" style={{ fontFamily: 'var(--font-display)', fontWeight: 400, color: 'var(--brand)', fontSize: '2.5rem', letterSpacing: '0.05em' }}>{data.about_stats_number}</p>
+            <p className="text-micro mt-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.7)', letterSpacing: '0.15em' }}>{data.about_stats_text}</p>
           </div>
         </motion.div>
       </div>

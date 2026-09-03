@@ -62,7 +62,7 @@ export default function ClientSearch({ value, onSelect, t }) {
     fontSize: '14px',
     width: '100%',
     outline: 'none',
-    fontFamily: 'Inter, sans-serif',
+    fontFamily: 'var(--font-body)',
   };
 
   return (
@@ -96,15 +96,15 @@ export default function ClientSearch({ value, onSelect, t }) {
             >
               <div className="flex items-center justify-between gap-2">
                 <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{client.name}</p>
-                {client.is_blocked && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: 'var(--brand)', border: '0.5px solid var(--brand)', padding: '1px 4px', marginLeft: '6px' }}>ZABLOKOWANY</span>}
+                {client.is_blocked && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', color: 'var(--brand)', border: '0.5px solid var(--brand)', padding: '1px 4px', marginLeft: '6px' }}>ZABLOKOWANY</span>}
                 {(client.total_sessions || 0) > 0 && (
                   <div className="flex items-center gap-1" style={{ flexShrink: 0 }}>
                     <History size={9} color="var(--brand)" />
-                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.08em' }}>{client.total_sessions} sesji</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.08em' }}>{client.total_sessions} sesji</span>
                   </div>
                 )}
               </div>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.05em', marginTop: '2px' }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.05em', marginTop: '2px' }}>
                 {[client.email, client.phone].filter(Boolean).join(' · ')}
               </p>
             </button>
@@ -120,7 +120,7 @@ export default function ClientSearch({ value, onSelect, t }) {
           >
             <UserPlus size={12} color="var(--brand)" />
             <div>
-              <p style={{ color: 'var(--brand)', fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em' }}>NOWY KLIENT</p>
+              <p style={{ color: 'var(--brand)', fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em' }}>NOWY KLIENT</p>
               <p style={{ color: t.muted, fontSize: '12px', marginTop: '1px' }}>Dodaj „{query}" jako nowego klienta</p>
             </div>
           </button>

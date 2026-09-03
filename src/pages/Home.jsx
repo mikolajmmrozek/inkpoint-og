@@ -70,14 +70,14 @@ export default function Home() {
         <div className="px-8 md:px-16 mb-12">
           <div className="flex items-end justify-between">
             <div>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
                 NASZE PRACE
               </p>
-              <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(2rem, 5vw, 4rem)', fontWeight: 400, color: '#F5F0EB', lineHeight: 0.95, letterSpacing: '0.04em' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 5vw, 4rem)', fontWeight: 400, color: '#F5F0EB', lineHeight: 0.95, letterSpacing: '0.04em' }}>
                 Galeria
               </h2>
             </div>
-            <Link to="/artists" className="text-micro" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.7)', letterSpacing: '0.15em', textDecoration: 'none' }}>
+            <Link to="/artists" className="text-micro" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgba(245,240,235,0.7)', letterSpacing: '0.15em', textDecoration: 'none' }}>
               WSZYSTKIE PRACE →
             </Link>
           </div>

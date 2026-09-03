@@ -118,8 +118,8 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
       >
         <div className="flex justify-between items-start mb-6">
           <div>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>NOWA WIADOMOŚĆ</p>
-            <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.6rem', color: t.title, letterSpacing: '0.04em' }}>Wyślij wiadomość</h3>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>NOWA WIADOMOŚĆ</p>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', color: t.title, letterSpacing: '0.04em' }}>Wyślij wiadomość</h3>
           </div>
           <button onClick={onClose} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
             <X size={18} />
@@ -128,17 +128,17 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
 
         {/* Recipient type toggle */}
         <div className="mb-4">
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>ODBIORCA</p>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>ODBIORCA</p>
           <div className="flex gap-2">
             <button
               onClick={() => { setRecipientType('client'); setSelectedRecipient(null); setSearchQuery(''); }}
-              style={{ flex: 1, padding: '10px', border: `0.5px solid ${recipientType === 'client' ? 'var(--brand)' : t.border}`, color: recipientType === 'client' ? 'var(--brand)' : t.muted, background: recipientType === 'client' ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer' }}
+              style={{ flex: 1, padding: '10px', border: `0.5px solid ${recipientType === 'client' ? 'var(--brand)' : t.border}`, color: recipientType === 'client' ? 'var(--brand)' : t.muted, background: recipientType === 'client' ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer' }}
             >
               KLIENT
             </button>
             <button
               onClick={() => { setRecipientType('studio'); setSelectedRecipient(null); setSearchQuery(''); }}
-              style={{ flex: 1, padding: '10px', border: `0.5px solid ${recipientType === 'studio' ? 'var(--brand)' : t.border}`, color: recipientType === 'studio' ? 'var(--brand)' : t.muted, background: recipientType === 'studio' ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer' }}
+              style={{ flex: 1, padding: '10px', border: `0.5px solid ${recipientType === 'studio' ? 'var(--brand)' : t.border}`, color: recipientType === 'studio' ? 'var(--brand)' : t.muted, background: recipientType === 'studio' ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer' }}
             >
               STUDIO
             </button>
@@ -154,7 +154,7 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder={recipientType === 'client' ? 'Szukaj po imieniu, nazwisku, emailu...' : 'Szukaj po imieniu lub emailu...'}
-              style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontFamily: 'Inter, sans-serif', fontSize: '12px', color: t.text }}
+              style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontFamily: 'var(--font-body)', fontSize: '12px', color: t.text }}
             />
             {searchQuery && (
               <button onClick={() => setSearchQuery('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: 0 }}>
@@ -170,7 +170,7 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
             <div className="flex items-center justify-between">
               <div>
                 <p style={{ fontSize: '13px', color: t.text, fontWeight: 500 }}>{selectedRecipient.name}</p>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{selectedRecipient.email}{selectedRecipient.phone ? ` · ${selectedRecipient.phone}` : ''}</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted }}>{selectedRecipient.email}{selectedRecipient.phone ? ` · ${selectedRecipient.phone}` : ''}</p>
               </div>
               <button onClick={() => setSelectedRecipient(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}>
                 <X size={14} />
@@ -185,7 +185,7 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
               </div>
             ) : searchResults.length === 0 ? (
               <div className="py-8 text-center">
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK WYNIKÓW</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK WYNIKÓW</p>
               </div>
             ) : searchResults.map(r => (
               <button
@@ -199,9 +199,9 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
                 <div className="flex items-center justify-between">
                   <div>
                     <p style={{ fontSize: '13px', color: t.text }}>{r.name}</p>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{r.email}</p>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted }}>{r.email}</p>
                   </div>
-                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.08em', textTransform: 'uppercase', border: '0.5px solid rgb(var(--brand-rgb) /0.3)', padding: '2px 6px' }}>{r.type}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.08em', textTransform: 'uppercase', border: '0.5px solid rgb(var(--brand-rgb) /0.3)', padding: '2px 6px' }}>{r.type}</span>
 
                 </div>
               </button>
@@ -211,14 +211,14 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
 
         {/* Message */}
         <div className="mb-4">
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>WIADOMOŚĆ</p>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>WIADOMOŚĆ</p>
           <AttachmentBar attachments={pendingAttachments} setAttachments={setPendingAttachments} t={t} />
           <textarea
             value={messageText}
             onChange={e => setMessageText(e.target.value)}
             rows={4}
             placeholder="Wpisz wiadomość..."
-            style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '10px 12px', fontSize: '13px', color: t.text, fontFamily: 'Inter, sans-serif', resize: 'vertical', outline: 'none' }}
+            style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '10px 12px', fontSize: '13px', color: t.text, fontFamily: 'var(--font-body)', resize: 'vertical', outline: 'none' }}
             onFocus={e => e.target.style.borderColor = 'var(--brand)'}
             onBlur={e => e.target.style.borderColor = t.border}
           />

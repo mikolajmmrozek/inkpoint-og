@@ -125,7 +125,7 @@ export default function DashboardFeedback() {
     fontSize: '14px',
     width: '100%',
     outline: 'none',
-    fontFamily: 'Inter, sans-serif',
+    fontFamily: 'var(--font-body)',
   };
 
   const cf = configForm || DEFAULT_CONFIG;
@@ -154,7 +154,7 @@ export default function DashboardFeedback() {
           </a>
           <button
             onClick={handleCopyLink}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${t.border}`, color: copied ? '#16a34a' : t.muted, background: 'transparent', cursor: 'pointer', transition: 'color 0.2s' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${t.border}`, color: copied ? '#16a34a' : t.muted, background: 'transparent', cursor: 'pointer', transition: 'color 0.2s' }}
           >
             {copied ? <Check size={13} /> : <Copy size={13} />}
             {copied ? 'SKOPIOWANO!' : 'KOPIUJ LINK'}
@@ -169,7 +169,7 @@ export default function DashboardFeedback() {
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             style={{
-              fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase',
+              fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase',
               padding: '12px 20px', background: 'transparent', border: 'none', cursor: 'pointer',
               color: activeTab === tab.id ? t.fuchsia : t.muted,
               borderBottom: activeTab === tab.id ? '2px solid var(--brand)' : '2px solid transparent',
@@ -186,16 +186,16 @@ export default function DashboardFeedback() {
         <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
           {/* Sort controls */}
           <div className="flex items-center gap-1 px-4 py-2 flex-wrap" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginRight: '6px' }}>SORTUJ:</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginRight: '6px' }}>SORTUJ:</span>
             {[{ key: 'newest', label: 'Najnowsze' }, { key: 'oldest', label: 'Najstarsze' }, { key: 'highest', label: 'Najwyższa ocena' }, { key: 'lowest', label: 'Najniższa ocena' }].map(opt => (
-              <button key={opt.key} onClick={() => setSortBy(opt.key)} style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 8px', border: `0.5px solid ${sortBy === opt.key ? t.fuchsia : t.border}`, color: sortBy === opt.key ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer' }}>
+              <button key={opt.key} onClick={() => setSortBy(opt.key)} style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 8px', border: `0.5px solid ${sortBy === opt.key ? t.fuchsia : t.border}`, color: sortBy === opt.key ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer' }}>
                 {opt.label}
               </button>
             ))}
           </div>
           {sortedFeedbacks.length === 0 ? (
             <div className="py-20 text-center">
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK OPINII</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK OPINII</p>
             </div>
           ) : sortedFeedbacks.map((fb, i) => (
             <div key={fb.id} style={{ borderBottom: i < sortedFeedbacks.length - 1 ? `0.5px solid ${t.border}` : 'none', padding: '20px' }}>
@@ -203,15 +203,15 @@ export default function DashboardFeedback() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-2 flex-wrap">
                     <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{fb.client_name}</p>
-                    {fb.artist_name && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.08em' }}>{fb.artist_name}</p>}
+                    {fb.artist_name && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.08em' }}>{fb.artist_name}</p>}
                     <StarDisplay value={fb.rating_overall} />
-                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{new Date(fb.created_date).toLocaleDateString('pl-PL')}</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted }}>{new Date(fb.created_date).toLocaleDateString('pl-PL')}</span>
                   </div>
                   {(() => {
                     const fbBooking = bookings.find(b => b.id === fb.booking_id);
                     if (!fbBooking) return null;
                     return (
-                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em', marginBottom: '6px' }}>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.06em', marginBottom: '6px' }}>
                         {fbBooking.session_date}{fbBooking.service_name ? ` · ${fbBooking.service_name}` : ''}{fbBooking.tattoo_placement ? ` · ${fbBooking.tattoo_placement}` : ''}
                       </p>
                     );
@@ -223,10 +223,10 @@ export default function DashboardFeedback() {
                     <p style={{ color: t.muted, fontSize: '13px', lineHeight: 1.6, marginBottom: '8px' }}>{fb.full_review}</p>
                   )}
                   <div className="flex gap-4 flex-wrap mt-2">
-                    {fb.rating_artist > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>Artysta: {fb.rating_artist}★</span>}
-                    {fb.rating_studio > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>Studio: {fb.rating_studio}★</span>}
-                    {fb.rating_cleanliness > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>Czystość: {fb.rating_cleanliness}★</span>}
-                    {fb.rating_value > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>Cena/Jakość: {fb.rating_value}★</span>}
+                    {fb.rating_artist > 0 && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted }}>Artysta: {fb.rating_artist}★</span>}
+                    {fb.rating_studio > 0 && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted }}>Studio: {fb.rating_studio}★</span>}
+                    {fb.rating_cleanliness > 0 && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted }}>Czystość: {fb.rating_cleanliness}★</span>}
+                    {fb.rating_value > 0 && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted }}>Cena/Jakość: {fb.rating_value}★</span>}
                   </div>
                   {fb.tattoo_photo_url && (
                     <img src={fb.tattoo_photo_url} alt="" className="mt-3 w-20 h-20 object-cover" style={{ filter: 'brightness(0.8)' }} />
@@ -268,25 +268,25 @@ export default function DashboardFeedback() {
         <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '32px' }}>
           <div className="space-y-6">
             <div>
-              <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Tekst wprowadzający</label>
+              <label style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Tekst wprowadzający</label>
               <textarea rows={2} style={{ ...inputStyle, resize: 'none' }} value={cf.intro_text || ''} onChange={e => setConfigForm(f => ({ ...f, intro_text: e.target.value }))} />
             </div>
             <div>
-              <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Wiadomość po wysłaniu opinii</label>
+              <label style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Wiadomość po wysłaniu opinii</label>
               <input style={inputStyle} value={cf.thank_you_text || ''} onChange={e => setConfigForm(f => ({ ...f, thank_you_text: e.target.value }))} />
             </div>
             <div>
-              <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Temat maila zapraszającego</label>
+              <label style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Temat maila zapraszającego</label>
               <input style={inputStyle} value={cf.email_subject || ''} onChange={e => setConfigForm(f => ({ ...f, email_subject: e.target.value }))} />
             </div>
             <div>
-              <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Treść maila (użyj {'{client_name}'} i {'{link}'})</label>
+              <label style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Treść maila (użyj {'{client_name}'} i {'{link}'})</label>
               <textarea rows={5} style={{ ...inputStyle, resize: 'none' }} value={cf.email_body || ''} onChange={e => setConfigForm(f => ({ ...f, email_body: e.target.value }))} />
             </div>
 
             {/* Questions editor */}
             <div>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>Pytania w ankiecie</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>Pytania w ankiecie</p>
               <div className="space-y-2 mb-4">
                 {(cf.questions || DEFAULT_QUESTIONS).map((q, idx) => (
                   <div key={q.id} style={{ border: `0.5px solid ${t.border}`, padding: '12px 16px', background: t.bg }}>
@@ -301,7 +301,7 @@ export default function DashboardFeedback() {
                           <select
                             value={q.type}
                             onChange={e => setConfigForm(f => ({ ...f, questions: f.questions.map((x, i) => i === idx ? { ...x, type: e.target.value } : x) }))}
-                            style={{ background: 'transparent', border: `0.5px solid ${t.border}`, color: t.muted, fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', padding: '4px 8px', cursor: 'pointer' }}
+                            style={{ background: 'transparent', border: `0.5px solid ${t.border}`, color: t.muted, fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.08em', padding: '4px 8px', cursor: 'pointer' }}
                           >
                             <option value="stars">⭐ Gwiazdki</option>
                             <option value="textarea">📝 Tekst (duży)</option>
@@ -311,13 +311,13 @@ export default function DashboardFeedback() {
                             <div onClick={() => setConfigForm(f => ({ ...f, questions: f.questions.map((x, i) => i === idx ? { ...x, required: !x.required } : x) }))} style={{ width: '14px', height: '14px', border: `0.5px solid ${q.required ? t.fuchsia : t.border}`, background: q.required ? 'rgb(var(--brand-rgb) /0.15)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                               {q.required && <Check size={9} color="var(--brand)" />}
                             </div>
-                            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, textTransform: 'uppercase' }}>Wymagane</span>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, textTransform: 'uppercase' }}>Wymagane</span>
                           </label>
                           <label className="flex items-center gap-2 cursor-pointer">
                             <div onClick={() => setConfigForm(f => ({ ...f, questions: f.questions.map((x, i) => i === idx ? { ...x, enabled: !x.enabled } : x) }))} style={{ width: '14px', height: '14px', border: `0.5px solid ${q.enabled ? '#16a34a' : t.border}`, background: q.enabled ? 'rgba(22,163,74,0.15)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                               {q.enabled && <Check size={9} color="#16a34a" />}
                             </div>
-                            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, textTransform: 'uppercase' }}>Widoczne</span>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, textTransform: 'uppercase' }}>Widoczne</span>
                           </label>
                         </div>
                       </div>
@@ -338,7 +338,7 @@ export default function DashboardFeedback() {
                     key={type}
                     type="button"
                     onClick={() => setConfigForm(f => ({ ...f, questions: [...(f.questions || []), { id: `custom_${Date.now()}`, label: type === 'stars' ? 'Nowa ocena gwiazdkowa' : 'Nowe pytanie tekstowe', type, required: false, enabled: true }] }))}
-                    style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                    style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
                   >
                     <Plus size={10} /> {type === 'stars' ? 'Gwiazdki' : type === 'textarea' ? 'Tekst długi' : 'Tekst krótki'}
                   </button>

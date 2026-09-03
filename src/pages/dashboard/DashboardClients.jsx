@@ -20,7 +20,7 @@ const inputStyle = {
   fontSize: '14px',
   width: '100%',
   outline: 'none',
-  fontFamily: 'Inter, sans-serif',
+  fontFamily: 'var(--font-body)',
 };
 
 export default function DashboardClients() {
@@ -248,7 +248,7 @@ export default function DashboardClients() {
   });
 
   const label = (text) => (
-    <label className="block mb-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>{text}</label>
+    <label className="block mb-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>{text}</label>
   );
 
   return (
@@ -276,7 +276,7 @@ export default function DashboardClients() {
           placeholder="Szukaj po nazwisku, emailu, telefonie..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          style={{ background: 'transparent', border: 'none', outline: 'none', color: t.text, fontSize: '13px', fontFamily: 'Inter', width: '100%' }}
+          style={{ background: 'transparent', border: 'none', outline: 'none', color: t.text, fontSize: '13px', fontFamily: 'var(--font-body)', width: '100%' }}
         />
         {search && (
           <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: 0 }}>
@@ -295,12 +295,12 @@ export default function DashboardClients() {
           {/* Header — hidden on mobile */}
           <div className="hidden md:grid grid-cols-12 px-4 py-2" style={{ borderBottom: `0.5px solid ${t.border}` }}>
             {['Imię i Nazwisko', 'Email', 'Telefon', 'Sesje', ''].map((h, i) => (
-              <p key={i} className={i === 0 ? 'col-span-4' : i === 1 ? 'col-span-3' : i === 2 ? 'col-span-2' : i === 3 ? 'col-span-1' : 'col-span-2 text-right'} style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>{h}</p>
+              <p key={i} className={i === 0 ? 'col-span-4' : i === 1 ? 'col-span-3' : i === 2 ? 'col-span-2' : i === 3 ? 'col-span-1' : 'col-span-2 text-right'} style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>{h}</p>
             ))}
           </div>
           {filtered.length === 0 ? (
             <div className="py-16 text-center">
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK KLIENTÓW</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK KLIENTÓW</p>
             </div>
           ) : filtered.map((c) => {
             const isExpanded = expandedClient === c.id;
@@ -311,7 +311,7 @@ export default function DashboardClients() {
                 <div className="md:hidden px-4 py-3 flex items-center justify-between cursor-pointer" style={{ borderBottom: `0.5px solid ${t.border}`, background: isExpanded ? 'rgb(var(--brand-rgb) /0.03)' : 'transparent' }} onClick={() => setExpandedClient(isExpanded ? null : c.id)}>
                   <div className="flex items-center gap-2">
                     <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{c.name}</p>
-                    {isNewClient(c) && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#16a34a', border: '0.5px solid #16a34a', padding: '1px 4px' }}>NOWY</span>}{c.is_blocked && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: 'var(--brand)', border: '0.5px solid var(--brand)', padding: '1px 4px', marginLeft: '4px' }}>ZABLOKOWANY</span>}
+                    {isNewClient(c) && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', color: '#16a34a', border: '0.5px solid #16a34a', padding: '1px 4px' }}>NOWY</span>}{c.is_blocked && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', color: 'var(--brand)', border: '0.5px solid var(--brand)', padding: '1px 4px', marginLeft: '4px' }}>ZABLOKOWANY</span>}
                   </div>
                   <div className="flex gap-2">
                      {c.email && getClientStatus(c) === 'inactive' && (
@@ -339,9 +339,9 @@ export default function DashboardClients() {
                     <div>
                       <div className="flex items-center gap-2">
                         <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{c.name}</p>
-                        {isNewClient(c) && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#16a34a', border: '0.5px solid #16a34a', padding: '1px 4px' }}>NOWY</span>}{c.is_blocked && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: 'var(--brand)', border: '0.5px solid var(--brand)', padding: '1px 4px', marginLeft: '4px' }}>ZABLOKOWANY</span>}
+                        {isNewClient(c) && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', color: '#16a34a', border: '0.5px solid #16a34a', padding: '1px 4px' }}>NOWY</span>}{c.is_blocked && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', color: 'var(--brand)', border: '0.5px solid var(--brand)', padding: '1px 4px', marginLeft: '4px' }}>ZABLOKOWANY</span>}
                       </div>
-                      {c.notes && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.notes}</p>}
+                      {c.notes && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.notes}</p>}
                     </div>
                   </div>
                   <div className="col-span-3 flex items-center gap-2">
@@ -353,19 +353,19 @@ export default function DashboardClients() {
                           const tip = st === 'active' ? 'Konto aktywne' : st === 'invited' ? 'Zaproszony — czeka na logowanie' : 'Brak konta — kliknij + aby zaprosić';
                           return <div title={tip} style={{ width: '6px', height: '6px', borderRadius: '50%', background: dotColor, flexShrink: 0 }} />;
                         })()}
-                        <a href={`mailto:${c.email}`} onClick={e => e.stopPropagation()} style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.04em', textDecoration: 'none' }} onMouseEnter={e => e.target.style.color = 'var(--brand)'} onMouseLeave={e => e.target.style.color = t.muted}>{c.email}</a>
+                        <a href={`mailto:${c.email}`} onClick={e => e.stopPropagation()} style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.04em', textDecoration: 'none' }} onMouseEnter={e => e.target.style.color = 'var(--brand)'} onMouseLeave={e => e.target.style.color = t.muted}>{c.email}</a>
                         {inviteStatus[c.id] === 'inviting' && <Loader2 size={11} className="animate-spin" color={t.muted} />}
                         {inviteStatus[c.id] === 'invited' && <Check size={11} color="#16a34a" />}
                       </>
                     ) : (
-                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>—</span>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted }}>—</span>
                     )}
                   </div>
                   <div className="col-span-2">
-                    {c.phone ? <a href={`tel:${c.phone}`} onClick={e => e.stopPropagation()} style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, textDecoration: 'none' }} onMouseEnter={e => e.target.style.color = 'var(--brand)'} onMouseLeave={e => e.target.style.color = t.muted}>{c.phone}</a> : <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>—</span>}
+                    {c.phone ? <a href={`tel:${c.phone}`} onClick={e => e.stopPropagation()} style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, textDecoration: 'none' }} onMouseEnter={e => e.target.style.color = 'var(--brand)'} onMouseLeave={e => e.target.style.color = t.muted}>{c.phone}</a> : <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted }}>—</span>}
                   </div>
                   <div className="col-span-1">
-                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: getClientData(c).sessions.filter(s => s.status === 'completed').length >= 2 ? t.fuchsia : t.muted, fontWeight: 600 }}>{getClientData(c).sessions.filter(s => s.status === 'completed').length}</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: getClientData(c).sessions.filter(s => s.status === 'completed').length >= 2 ? t.fuchsia : t.muted, fontWeight: 600 }}>{getClientData(c).sessions.filter(s => s.status === 'completed').length}</span>
                   </div>
                   <div className="col-span-2 flex justify-end gap-3">
                     {c.email && getClientStatus(c) === 'inactive' && (
@@ -384,7 +384,7 @@ export default function DashboardClients() {
                   <div style={{ background: 'rgb(var(--brand-rgb) /0.02)', borderBottom: `0.5px solid ${t.border}`, padding: '12px 20px' }}>
                     {sessions.length > 0 && (
                       <div className="mb-4">
-                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>Sesje ({sessions.length})</p>
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>Sesje ({sessions.length})</p>
                         {sessions.map(s => (
                           <p key={s.id} style={{ fontSize: '11px', color: t.text, marginBottom: '4px' }}>
                             <button
@@ -400,7 +400,7 @@ export default function DashboardClients() {
                     )}
                     {forms.length > 0 && (
                       <div>
-                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>Ankiety ({forms.length})</p>
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>Ankiety ({forms.length})</p>
                         {forms.map(f => (
                           <p key={f.id} style={{ fontSize: '11px', color: t.text, marginBottom: '4px' }}>
                             <button
@@ -460,17 +460,17 @@ export default function DashboardClients() {
       {newSessionClient && repeatPromptVisible && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.75)' }}>
           <div style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '36px', maxWidth: '460px', width: '100%' }}>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>NOWA SESJA</p>
-            <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.8rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em', marginBottom: '20px' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>NOWA SESJA</p>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em', marginBottom: '20px' }}>
               {newSessionClient.name}
             </h3>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em', marginBottom: '12px', textTransform: 'uppercase' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em', marginBottom: '12px', textTransform: 'uppercase' }}>
               Ostatnia sesja:
             </p>
             <div style={{ border: `0.5px solid ${t.border}`, padding: '14px 16px', marginBottom: '20px' }}>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.text, marginBottom: '4px' }}>{lastSessionForClient?.session_date} · {lastSessionForClient?.artist_name || '—'}</p>
-              {lastSessionForClient?.tattoo_placement && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>{lastSessionForClient.tattoo_placement}{lastSessionForClient.tattoo_description ? ` — ${lastSessionForClient.tattoo_description}` : ''}</p>}
-              {lastSessionForClient?.estimated_price && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', marginTop: '4px' }}>{lastSessionForClient.estimated_price} PLN</p>}
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: t.text, marginBottom: '4px' }}>{lastSessionForClient?.session_date} · {lastSessionForClient?.artist_name || '—'}</p>
+              {lastSessionForClient?.tattoo_placement && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted }}>{lastSessionForClient.tattoo_placement}{lastSessionForClient.tattoo_description ? ` — ${lastSessionForClient.tattoo_description}` : ''}</p>}
+              {lastSessionForClient?.estimated_price && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', marginTop: '4px' }}>{lastSessionForClient.estimated_price} PLN</p>}
             </div>
             <p style={{ fontSize: '13px', color: t.muted, marginBottom: '20px', lineHeight: 1.6 }}>
               Czy chcesz umówić ponownie z danymi z ostatniej sesji (artysta, opis, cena)?
@@ -483,7 +483,7 @@ export default function DashboardClients() {
                 NIE, NOWA SESJA
               </button>
             </div>
-            <button onClick={() => { setNewSessionClient(null); setRepeatPromptVisible(false); setLastSessionForClient(null); }} style={{ marginTop: '14px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', width: '100%', textAlign: 'center' }}>
+            <button onClick={() => { setNewSessionClient(null); setRepeatPromptVisible(false); setLastSessionForClient(null); }} style={{ marginTop: '14px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', width: '100%', textAlign: 'center' }}>
               ANULUJ
             </button>
           </div>
@@ -524,20 +524,20 @@ export default function DashboardClients() {
             <div className="flex justify-between items-center mb-2">
               <div className="flex items-center gap-2">
                 <Merge size={14} color="#a855f7" />
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#a855f7', letterSpacing: '0.2em', textTransform: 'uppercase' }}>ŁĄCZENIE KLIENTÓW</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#a855f7', letterSpacing: '0.2em', textTransform: 'uppercase' }}>ŁĄCZENIE KLIENTÓW</p>
               </div>
               <button onClick={() => setMergeSource(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}><X size={16} /></button>
             </div>
-            <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.8rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em', marginBottom: '20px' }}>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em', marginBottom: '20px' }}>
               Połącz duplikaty
             </h3>
 
             {/* Source */}
             <div className="mb-5">
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>DUPLIKAT (zostanie usunięty)</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>DUPLIKAT (zostanie usunięty)</p>
               <div style={{ border: `0.5px solid #a855f7`, padding: '12px 16px', background: 'rgba(168,85,247,0.05)' }}>
                 <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{mergeSource.name}</p>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginTop: '3px' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, marginTop: '3px' }}>
                   {[mergeSource.email, mergeSource.phone].filter(Boolean).join(' · ') || '—'} · {mergeSource.total_sessions || 0} sesji
                 </p>
               </div>
@@ -545,12 +545,12 @@ export default function DashboardClients() {
 
             {/* Target search */}
             <div className="mb-5">
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>DOCELOWY PROFIL (zostanie zachowany)</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>DOCELOWY PROFIL (zostanie zachowany)</p>
               {mergeTarget ? (
                 <div style={{ border: `0.5px solid #16a34a`, padding: '12px 16px', background: 'rgba(22,163,74,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div>
                     <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{mergeTarget.name}</p>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginTop: '3px' }}>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, marginTop: '3px' }}>
                       {[mergeTarget.email, mergeTarget.phone].filter(Boolean).join(' · ') || '—'} · {mergeTarget.total_sessions || 0} sesji
                     </p>
                   </div>
@@ -565,7 +565,7 @@ export default function DashboardClients() {
                       placeholder="Szukaj klienta docelowego..."
                       value={mergeSearch}
                       onChange={e => setMergeSearch(e.target.value)}
-                      style={{ background: 'transparent', border: 'none', outline: 'none', color: t.text, fontSize: '13px', fontFamily: 'Inter', width: '100%' }}
+                      style={{ background: 'transparent', border: 'none', outline: 'none', color: t.text, fontSize: '13px', fontFamily: 'var(--font-body)', width: '100%' }}
                     />
                   </div>
                   {mergeSearch.trim() && (
@@ -585,7 +585,7 @@ export default function DashboardClients() {
                             onMouseLeave={e => e.currentTarget.style.background = 'none'}
                           >
                             <p style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>{c.name}</p>
-                            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginTop: '2px' }}>
+                            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, marginTop: '2px' }}>
                               {[c.email, c.phone].filter(Boolean).join(' · ') || '—'} · {c.total_sessions || 0} sesji
                             </p>
                           </button>
@@ -598,7 +598,7 @@ export default function DashboardClients() {
 
             {mergeTarget && (
               <div className="mb-5 px-4 py-3" style={{ background: 'rgba(168,85,247,0.05)', border: `0.5px solid rgba(168,85,247,0.3)` }}>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#a855f7', letterSpacing: '0.1em', marginBottom: '4px' }}>PO POŁĄCZENIU:</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#a855f7', letterSpacing: '0.1em', marginBottom: '4px' }}>PO POŁĄCZENIU:</p>
                 <p style={{ fontSize: '12px', color: t.muted, lineHeight: 1.6 }}>
                   Wszystkie sesje i ankiety z <strong style={{ color: t.text }}>{mergeSource.name}</strong> zostaną przeniesione na <strong style={{ color: t.text }}>{mergeTarget.name}</strong>. Profil duplikatu zostanie usunięty.
                 </p>
@@ -634,7 +634,7 @@ export default function DashboardClients() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={() => setEditing(null)}>
           <div className="w-full max-w-lg" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '36px' }} onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-8">
-              <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.8rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
                 {editing === 'new' ? 'Nowy Klient' : 'Edytuj Klienta'}
               </h3>
               <button onClick={() => setEditing(null)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><X size={18} /></button>

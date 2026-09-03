@@ -22,9 +22,9 @@ export default function BookingConflictModal({ conflicts, theme = 'dark', onConf
       >
         <div className="flex items-center gap-2 mb-4">
           <AlertTriangle size={16} color={t.warn} />
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.warn, letterSpacing: '0.2em', textTransform: 'uppercase' }}>UWAGA — KONFLIKT</p>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.warn, letterSpacing: '0.2em', textTransform: 'uppercase' }}>UWAGA — KONFLIKT</p>
         </div>
-        <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.6rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em', marginBottom: '20px' }}>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em', marginBottom: '20px' }}>
           Zapisać mimo to?
         </h3>
 
@@ -33,24 +33,24 @@ export default function BookingConflictModal({ conflicts, theme = 'dark', onConf
             <div className="p-3" style={{ border: `0.5px solid ${t.warn}50`, background: `${t.warn}10` }}>
               <div className="flex items-center gap-2 mb-1">
                 <CalendarOff size={12} color={t.warn} />
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.warn, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Wolne</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.warn, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Wolne</span>
               </div>
               <p style={{ fontSize: '13px', color: t.text }}>
                 Artysta ma wolne w tym czasie: <strong>{timeOff.timeRange}</strong>
               </p>
-              {timeOff.note && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginTop: '4px' }}>{timeOff.note}</p>}
+              {timeOff.note && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, marginTop: '4px' }}>{timeOff.note}</p>}
             </div>
           )}
           {doubleBooking && (
             <div className="p-3" style={{ border: `0.5px solid rgb(var(--brand-rgb) / 0.31)`, background: 'rgb(var(--brand-rgb) /0.08)' }}>
               <div className="flex items-center gap-2 mb-1">
                 <Clock size={12} color="var(--brand)" />
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Nakładająca się sesja</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Nakładająca się sesja</span>
               </div>
               <p style={{ fontSize: '13px', color: t.text }}>
                 {doubleBooking.clientName} — <strong>{doubleBooking.timeRange}</strong>
               </p>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginTop: '4px' }}>W tym czasie jest już zapisana inna wizyta.</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, marginTop: '4px' }}>W tym czasie jest już zapisana inna wizyta.</p>
             </div>
           )}
         </div>

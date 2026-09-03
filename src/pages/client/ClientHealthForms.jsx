@@ -39,10 +39,10 @@ export default function ClientHealthForms() {
   return (
     <div>
       <div className="mb-8">
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>
           DOKUMENTY
         </p>
-        <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>
           Ankiety Zdrowotne
         </h1>
       </div>
@@ -50,7 +50,7 @@ export default function ClientHealthForms() {
       {/* Pending forms */}
       {pendingBookings.length > 0 && (
         <div className="mb-8">
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#f59e0b', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: '#f59e0b', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>
             DO WYPEŁNIENIA ({pendingBookings.length})
           </p>
           <div className="space-y-2">
@@ -67,10 +67,10 @@ export default function ClientHealthForms() {
                   <AlertCircle size={14} color="#f59e0b" />
                   <div>
                     <p style={{ fontSize: '13px', color: t.text }}>{b.session_date} {b.session_time && `· ${b.session_time}`}</p>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{b.artist_name || '—'}</p>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted }}>{b.artist_name || '—'}</p>
                   </div>
                 </div>
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#f59e0b', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: '#f59e0b', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                   WYPEŁNIJ →
                 </span>
               </a>
@@ -85,13 +85,13 @@ export default function ClientHealthForms() {
       ) : forms.length === 0 ? (
         <div className="py-16 text-center" style={{ border: `0.5px solid ${t.border}` }}>
           <FileText size={24} color={t.mutedLow} style={{ margin: '0 auto 12px' }} />
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
             BRAK UZUPEŁNIONYCH ANKIET
           </p>
         </div>
       ) : (
         <div>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>
             UZUPEŁNIONE ({forms.length})
           </p>
           <div className="space-y-2">
@@ -109,11 +109,11 @@ export default function ClientHealthForms() {
                     <p style={{ fontSize: '13px', color: t.text }}>
                       {f.form_filled_date ? format(parseISO(f.form_filled_date), 'd MMMM yyyy', { locale: pl }) : '—'}
                     </p>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginTop: '2px' }}>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, marginTop: '2px' }}>
                       {f.procedure_type || '—'}{f.body_placement ? ` · ${f.body_placement}` : ''}
                     </p>
                   </div>
-                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                     PODGLĄD →
                   </span>
                 </div>

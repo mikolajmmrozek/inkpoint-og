@@ -45,10 +45,10 @@ export default function MessageModal({ booking, client, user, theme = 'dark', on
       >
         <div className="flex justify-between items-center mb-6">
           <div>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>
               WIADOMOŚĆ DO STUDIA
             </p>
-            <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.4rem', color: t.title, letterSpacing: '0.04em' }}>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', color: t.title, letterSpacing: '0.04em' }}>
               {booking.session_date} {booking.session_time && `· ${booking.session_time}`}
             </h3>
           </div>
@@ -58,7 +58,7 @@ export default function MessageModal({ booking, client, user, theme = 'dark', on
         </div>
 
         <div className="mb-4">
-          <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+          <label style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
             TWOJA WIADOMOŚĆ
           </label>
           <textarea
@@ -76,7 +76,7 @@ export default function MessageModal({ booking, client, user, theme = 'dark', on
               fontSize: '14px',
               width: '100%',
               outline: 'none',
-              fontFamily: 'Inter, sans-serif',
+              fontFamily: 'var(--font-body)',
               resize: 'none',
             }}
             onFocus={e => e.target.style.borderBottomColor = t.fuchsia}

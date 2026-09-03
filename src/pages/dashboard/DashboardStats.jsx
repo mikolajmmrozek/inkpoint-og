@@ -134,8 +134,8 @@ export default function DashboardStats() {
     return [...ys].sort((a, b) => b - a);
   }, [paid]);
 
-  const mono = { fontFamily: 'JetBrains Mono' };
-  const display = { fontFamily: 'Bebas Neue, system-ui', fontWeight: 400 };
+  const mono = { fontFamily: 'var(--font-mono)' };
+  const display = { fontFamily: 'var(--font-display)', fontWeight: 400 };
 
   const KPICard = ({ label, value, sub }) => (
     <div className="p-5" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
@@ -199,10 +199,10 @@ export default function DashboardStats() {
             </p>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={monthlyData} barCategoryGap="30%">
-                <XAxis dataKey="name" tick={{ fontFamily: 'JetBrains Mono', fontSize: 9, fill: t.muted }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontFamily: 'JetBrains Mono', fontSize: 9, fill: t.muted }} axisLine={false} tickLine={false} width={60} tickFormatter={v => `${v} PLN`} />
+                <XAxis dataKey="name" tick={{ fontFamily: 'var(--font-mono)', fontSize: 9, fill: t.muted }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontFamily: 'var(--font-mono)', fontSize: 9, fill: t.muted }} axisLine={false} tickLine={false} width={60} tickFormatter={v => `${v} PLN`} />
                 <Tooltip
-                  contentStyle={{ background: theme === 'light' ? '#fff' : '#111', border: `0.5px solid ${t.border}`, fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text }}
+                  contentStyle={{ background: theme === 'light' ? '#fff' : '#111', border: `0.5px solid ${t.border}`, fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.text }}
                   formatter={(v) => [`${v} PLN`, 'Przychód']}
                   cursor={{ fill: 'rgb(var(--brand-rgb) /0.05)' }}
                 />

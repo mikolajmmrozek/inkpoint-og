@@ -15,7 +15,7 @@ const inputStyle = {
   fontSize: '14px',
   width: '100%',
   outline: 'none',
-  fontFamily: 'Inter, sans-serif',
+  fontFamily: 'var(--font-body)',
 };
 
 const EMPTY_FORM = {
@@ -139,7 +139,7 @@ export default function DashboardServices() {
   });
 
   const label = (text) => (
-    <label className="block mb-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>{text}</label>
+    <label className="block mb-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>{text}</label>
   );
 
   const getPriceDisplay = (s) => {
@@ -179,7 +179,7 @@ export default function DashboardServices() {
       <div className="mb-6 space-y-3">
         {/* Category filter */}
         <div>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>KATEGORIA</p>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>KATEGORIA</p>
           <div className="flex flex-wrap gap-2">
             {['', 'tattoo', 'piercing', 'studio'].map(cat => {
               const active = filterCategory === cat;
@@ -191,7 +191,7 @@ export default function DashboardServices() {
                     border: `0.5px solid ${active ? 'var(--brand)' : t.border}`,
                     color: active ? 'var(--brand)' : t.muted,
                     background: active ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent',
-                    fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase',
+                    fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase',
                     padding: '7px 14px', cursor: 'pointer',
                   }}
                 >
@@ -205,7 +205,7 @@ export default function DashboardServices() {
         {/* Artist filter */}
         {artists.length > 0 && (
           <div>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>ARTYSTA</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>ARTYSTA</p>
             <div className="flex flex-wrap gap-2">
               {[null, ...artists].map(a => {
                 const active = filterArtist === (a?.id || '');
@@ -218,7 +218,7 @@ export default function DashboardServices() {
                       border: `0.5px solid ${active ? 'var(--brand)' : t.border}`,
                       color: active ? 'var(--brand)' : t.muted,
                       background: active ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent',
-                      fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase',
+                      fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase',
                       padding: '7px 14px', cursor: 'pointer',
                     }}
                   >
@@ -240,7 +240,7 @@ export default function DashboardServices() {
           placeholder="Szukaj usługi..."
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
-          style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '10px 36px', fontSize: '13px', color: t.text, fontFamily: 'Inter, sans-serif', outline: 'none' }}
+          style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '10px 36px', fontSize: '13px', color: t.text, fontFamily: 'var(--font-body)', outline: 'none' }}
           onFocus={e => e.target.style.borderColor = 'var(--brand)'}
           onBlur={e => e.target.style.borderColor = t.border}
         />
@@ -258,7 +258,7 @@ export default function DashboardServices() {
         </div>
       ) : services.length === 0 ? (
         <div className="py-20 text-center" style={{ border: `0.5px solid ${t.border}` }}>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK USŁUG</p>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK USŁUG</p>
           <button onClick={openNew} className="mt-4 btn-oxblood" style={{ padding: '10px 24px' }}>DODAJ PIERWSZĄ USŁUGĘ</button>
         </div>
       ) : (
@@ -276,7 +276,7 @@ export default function DashboardServices() {
                 key={label || '_actions'}
                 onClick={() => key && handleSort(key)}
                 className={`${span} flex items-center gap-1`}
-                style={{ background: 'none', border: 'none', cursor: key ? 'pointer' : 'default', padding: 0, fontFamily: 'JetBrains Mono', fontSize: '8px', color: sortKey === key ? 'var(--brand)' : t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}
+                style={{ background: 'none', border: 'none', cursor: key ? 'pointer' : 'default', padding: 0, fontFamily: 'var(--font-mono)', fontSize: '8px', color: sortKey === key ? 'var(--brand)' : t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}
               >
                 {label}
                 {key && sortKey === key && (sortDir === 'asc' ? <ChevronUp size={10} /> : <ChevronDown size={10} />)}
@@ -318,31 +318,31 @@ export default function DashboardServices() {
                   <img src={s.image_url} alt={s.name} style={{ width: '36px', height: '36px', objectFit: 'cover', flexShrink: 0 }} />
                 ) : (
                   <div style={{ width: '36px', height: '36px', background: 'rgb(var(--brand-rgb) /0.1)', border: `0.5px solid rgb(var(--brand-rgb) /0.2)`, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ fontFamily: 'Bebas Neue', fontSize: '14px', color: 'var(--brand)' }}>{s.name?.[0]?.toUpperCase()}</span>
+                    <span style={{ fontFamily: 'var(--font-display)', fontSize: '14px', color: 'var(--brand)' }}>{s.name?.[0]?.toUpperCase()}</span>
                   </div>
                 )}
                 <div className="min-w-0">
                   <p style={{ color: t.text, fontSize: '14px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</p>
                   <div className="flex items-center gap-2 mt-1">
                     {s.category && (
-                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '1px 6px', border: '0.5px solid rgb(var(--brand-rgb) /0.4)', color: 'var(--brand)' }}>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '1px 6px', border: '0.5px solid rgb(var(--brand-rgb) /0.4)', color: 'var(--brand)' }}>
                         {s.category}
                       </span>
                     )}
-                    {s.short_description && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.short_description}</p>}
+                    {s.short_description && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.short_description}</p>}
                   </div>
                 </div>
               </div>
               <div className="col-span-2">
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted }}>
                   {s.duration_minutes ? `${s.duration_minutes} min` : '—'}
                 </p>
               </div>
               <div className="col-span-2">
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text }}>{getPriceDisplay(s)}</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.text }}>{getPriceDisplay(s)}</p>
               </div>
               <div className="col-span-3">
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {getArtistNames(s.artist_ids)}
                 </p>
               </div>
@@ -394,10 +394,10 @@ export default function DashboardServices() {
           <div className="w-full max-w-2xl max-h-screen overflow-y-auto" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '40px' }} onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-8">
               <div>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
                   {editing === 'new' ? 'NOWA USŁUGA' : 'EDYTUJ USŁUGĘ'}
                 </p>
-                <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.8rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
                   {editing === 'new' ? 'Dodaj usługę' : form.name}
                 </h3>
               </div>
@@ -407,7 +407,7 @@ export default function DashboardServices() {
             <div className="space-y-6">
               {/* Basic info */}
               <div>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>PODSTAWOWE INFO</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>PODSTAWOWE INFO</p>
                 <div className="mb-4">{label('Nazwa *')}<input {...inp('name')} /></div>
                 <div className="mb-4">
                   {label('Kategoria')}
@@ -432,13 +432,13 @@ export default function DashboardServices() {
 
               {/* Image */}
               <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>ZDJĘCIE</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>ZDJĘCIE</p>
                 {form.image_url && (
                   <div className="mb-3">
                     <img src={form.image_url} alt="preview" style={{ width: '120px', height: '80px', objectFit: 'cover', border: `0.5px solid ${t.border}` }} />
                   </div>
                 )}
-                <label className="flex items-center gap-2 cursor-pointer" style={{ border: `0.5px solid ${t.border}`, padding: '8px 14px', display: 'inline-flex', color: t.muted, fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                <label className="flex items-center gap-2 cursor-pointer" style={{ border: `0.5px solid ${t.border}`, padding: '8px 14px', display: 'inline-flex', color: t.muted, fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                   {uploadingImage ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
                   {uploadingImage ? 'WGRYWANIE...' : 'WGRAJ ZDJĘCIE'}
                   <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploadingImage} />
@@ -447,7 +447,7 @@ export default function DashboardServices() {
 
               {/* Duration & Price */}
               <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>CZAS I CENA</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>CZAS I CENA</p>
                 {/* Duration sliders */}
                 <div className="mb-6">
                   {label('Czas wykonania')}
@@ -458,32 +458,32 @@ export default function DashboardServices() {
                     const setDuration = (h, m) => set('duration_minutes', h * 60 + m);
                     return (
                       <div>
-                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', color: t.fuchsia, marginBottom: '14px', letterSpacing: '0.04em' }}>
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: t.fuchsia, marginBottom: '14px', letterSpacing: '0.04em' }}>
                           {totalMin === 0 ? '— brak —' : `${hours > 0 ? `${hours}h ` : ''}${minutes > 0 ? `${minutes} min` : ''}`}
                         </p>
                         <div className="mb-4">
                           <div className="flex justify-between mb-1">
-                            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Godziny: {hours}h</span>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Godziny: {hours}h</span>
                           </div>
                           <input
                             type="range" min={0} max={12} step={1} value={hours}
                             onChange={e => setDuration(Number(e.target.value), minutes)}
                             style={{ width: '100%', accentColor: 'var(--brand)', cursor: 'pointer' }}
                           />
-                          <div className="flex justify-between" style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: t.muted, marginTop: '2px' }}>
+                          <div className="flex justify-between" style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', color: t.muted, marginTop: '2px' }}>
                             {Array.from({length: 13}, (_, i) => <span key={i}>{i}</span>)}
                           </div>
                         </div>
                         <div>
                           <div className="flex justify-between mb-1">
-                            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Minuty: {minutes} min</span>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Minuty: {minutes} min</span>
                           </div>
                           <input
                             type="range" min={0} max={45} step={15} value={minutes}
                             onChange={e => setDuration(hours, Number(e.target.value))}
                             style={{ width: '100%', accentColor: 'var(--brand)', cursor: 'pointer' }}
                           />
-                          <div className="flex justify-between" style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: t.muted, marginTop: '2px' }}>
+                          <div className="flex justify-between" style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', color: t.muted, marginTop: '2px' }}>
                             {[0, 15, 30, 45].map(m => <span key={m}>{m}</span>)}
                           </div>
                         </div>
@@ -507,7 +507,7 @@ export default function DashboardServices() {
                     {label('Cena (PLN)')}
                     <input {...inp('price_fixed', 'number')} />
                     {(form.price_fixed === 0 || form.price_fixed === '0') && (
-                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.1em', marginTop: '4px' }}>BEZPŁATNA</p>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#16a34a', letterSpacing: '0.1em', marginTop: '4px' }}>BEZPŁATNA</p>
                     )}
                   </div>
                 ) : (
@@ -516,14 +516,14 @@ export default function DashboardServices() {
                       {label('Cena od (PLN)')}
                       <input {...inp('price_min', 'number')} />
                       {(form.price_min === 0 || form.price_min === '0') && (
-                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.1em', marginTop: '4px' }}>BEZPŁATNA</p>
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#16a34a', letterSpacing: '0.1em', marginTop: '4px' }}>BEZPŁATNA</p>
                       )}
                     </div>
                     <div>
                       {label('Cena do (PLN)')}
                       <input {...inp('price_max', 'number')} />
                       {(form.price_max === 0 || form.price_max === '0') && (
-                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.1em', marginTop: '4px' }}>BEZPŁATNA</p>
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#16a34a', letterSpacing: '0.1em', marginTop: '4px' }}>BEZPŁATNA</p>
                       )}
                     </div>
                   </div>
@@ -532,8 +532,8 @@ export default function DashboardServices() {
 
               {/* Artists */}
               <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px' }}>ARTYŚCI</p>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginBottom: '12px' }}>Brak zaznaczenia = wszyscy artyści</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px' }}>ARTYŚCI</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginBottom: '12px' }}>Brak zaznaczenia = wszyscy artyści</p>
                 <div className="flex flex-wrap gap-2">
                   {artists.map(a => {
                     const selected = form.artist_ids?.includes(a.id);
@@ -547,7 +547,7 @@ export default function DashboardServices() {
                           border: `0.5px solid ${selected ? 'var(--brand)' : t.border}`,
                           color: selected ? 'var(--brand)' : t.muted,
                           background: selected ? 'rgb(var(--brand-rgb) /0.06)' : 'transparent',
-                          fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer',
+                          fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer',
                         }}
                       >
                         {a.photo_url && <img src={a.photo_url} alt={a.name} style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover' }} />}
@@ -567,7 +567,7 @@ export default function DashboardServices() {
                       type="button"
                       onClick={() => set('is_active', !form.is_active)}
                       className="flex items-center gap-2"
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.is_active ? '#16a34a' : t.muted }}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.is_active ? '#16a34a' : t.muted }}
                     >
                       <div style={{ width: '12px', height: '12px', border: `0.5px solid ${form.is_active ? '#16a34a' : t.border}`, background: form.is_active ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {form.is_active && <span style={{ color: '#fff', fontSize: '8px' }}>✓</span>}
@@ -582,7 +582,7 @@ export default function DashboardServices() {
                       type="button"
                       onClick={() => set('members_only', !form.members_only)}
                       className="flex items-center gap-2"
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.members_only ? '#16a34a' : t.muted }}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.members_only ? '#16a34a' : t.muted }}
                     >
                       <div style={{ width: '12px', height: '12px', border: `0.5px solid ${form.members_only ? '#16a34a' : t.border}`, background: form.members_only ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {form.members_only && <span style={{ color: '#fff', fontSize: '8px' }}>✓</span>}
@@ -593,7 +593,7 @@ export default function DashboardServices() {
 
                   {/* Min advance booking */}
                   <div style={{ paddingTop: '12px' }}>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>Minimalne wyprzedzenie rezerwacji</p>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>Minimalne wyprzedzenie rezerwacji</p>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         {label('Jednostka')}
@@ -626,7 +626,7 @@ export default function DashboardServices() {
                       const unit = form.min_advance_booking?.unit || 'minutes';
                       const val = form.min_advance_booking?.value || 0;
                       let display = val === 0 ? 'Bez wymogów' : unit === 'minutes' ? `Za ${val} minut` : unit === 'hours' ? `Za ${val} h` : `Za ${val} dni`;
-                      return <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', marginTop: '8px', letterSpacing: '0.05em' }}>{display}</p>;
+                      return <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', marginTop: '8px', letterSpacing: '0.05em' }}>{display}</p>;
                     })()}
                   </div>
                 </div>

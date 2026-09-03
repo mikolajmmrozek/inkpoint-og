@@ -90,7 +90,7 @@ export default function NotificationPanel({ open, onClose, userEmail, theme, not
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>
               POWIADOMIENIA
             </p>
-            <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.8rem', fontWeight: 400, color: t.text, letterSpacing: '0.04em', lineHeight: 1 }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 400, color: t.text, letterSpacing: '0.04em', lineHeight: 1 }}>
               Powiadomienia
             </h2>
           </div>

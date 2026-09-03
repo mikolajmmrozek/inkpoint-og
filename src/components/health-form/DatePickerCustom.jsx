@@ -32,13 +32,13 @@ export default function DatePickerCustom({ value, onChange, showErrors, t, textP
     padding: '10px 10px',
     fontSize: '16px',
     outline: 'none',
-    fontFamily: 'Inter, sans-serif',
+    fontFamily: 'var(--font-body)',
     flex: 1,
   };
 
   return (
     <div>
-      <label style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: showErrors && !value ? 'var(--brand)' : tm, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+      <label style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: showErrors && !value ? 'var(--brand)' : tm, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
         {t.dateOfBirth} * {showErrors && !value && '(wymagane)'}
       </label>
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>

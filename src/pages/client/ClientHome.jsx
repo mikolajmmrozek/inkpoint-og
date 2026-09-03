@@ -44,10 +44,10 @@ export default function ClientHome() {
   return (
     <div>
       <div className="mb-10">
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>
           WITAJ
         </p>
-        <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '3rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '3rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>
           {client?.name || user?.full_name || 'Klient'}
         </h1>
       </div>
@@ -61,8 +61,8 @@ export default function ClientHome() {
           { label: 'Ankiety do wypełnienia', value: pendingForms.length, color: '#f59e0b' },
         ].map(s => (
           <div key={s.label} className="p-4" style={{ border: `0.5px solid ${t.border}`, background: t.panelBg }}>
-            <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2rem', fontWeight: 400, color: s.color, lineHeight: 1 }}>{s.value}</p>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '4px' }}>{s.label}</p>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 400, color: s.color, lineHeight: 1 }}>{s.value}</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '4px' }}>{s.label}</p>
           </div>
         ))}
       </div>
@@ -70,31 +70,31 @@ export default function ClientHome() {
       {/* Next session */}
       {nextSession ? (
         <div className="mb-8 p-6" style={{ border: '0.5px solid rgb(var(--brand-rgb) /0.3)', background: 'rgb(var(--brand-rgb) /0.03)' }}>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>
             NASTĘPNA SESJA
           </p>
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em' }}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em' }}>
                 {format(parseISO(nextSession.session_date), 'd MMMM yyyy', { locale: pl })}
               </h3>
               <div className="flex items-center gap-4 mt-2">
-                <span className="flex items-center gap-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>
+                <span className="flex items-center gap-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted }}>
                   <Clock size={11} /> {nextSession.session_time}
                 </span>
                 {nextSession.artist_name && (
-                  <span className="flex items-center gap-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>
+                  <span className="flex items-center gap-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted }}>
                     <User size={11} /> {nextSession.artist_name}
                   </span>
                 )}
               </div>
               {nextSession.tattoo_placement && (
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.mutedLow, marginTop: '6px' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.mutedLow, marginTop: '6px' }}>
                   {nextSession.tattoo_placement}
                 </p>
               )}
             </div>
-            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: STATUS_COLORS[nextSession.status], letterSpacing: '0.1em', textTransform: 'uppercase', padding: '3px 8px', border: `0.5px solid ${STATUS_COLORS[nextSession.status]}` }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: STATUS_COLORS[nextSession.status], letterSpacing: '0.1em', textTransform: 'uppercase', padding: '3px 8px', border: `0.5px solid ${STATUS_COLORS[nextSession.status]}` }}>
               {STATUS_LABELS[nextSession.status]}
             </span>
           </div>
@@ -107,7 +107,7 @@ export default function ClientHome() {
       ) : (
         <div className="mb-8 p-8 text-center" style={{ border: `0.5px solid ${t.border}`, background: t.panelBg }}>
           <Calendar size={24} color={t.mutedLow} style={{ margin: '0 auto 12px' }} />
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
             BRAK NADCHODZĄCYCH SESJI
           </p>
           <Link to="/booking" className="btn-oxblood mt-4 inline-block" style={{ fontSize: '9px', padding: '8px 16px', textDecoration: 'none' }}>
@@ -121,14 +121,14 @@ export default function ClientHome() {
         <Link to="/panel/sessions" className="flex items-center justify-between p-4 transition-all" style={{ border: `0.5px solid ${t.border}` }} onMouseEnter={e => e.currentTarget.style.borderColor = t.fuchsia} onMouseLeave={e => e.currentTarget.style.borderColor = t.border}>
           <span className="flex items-center gap-3">
             <Calendar size={14} color={t.fuchsia} />
-            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Twoje Sesje</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.text, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Twoje Sesje</span>
           </span>
           <ChevronRight size={14} color={t.mutedLow} />
         </Link>
         <Link to="/panel/health-forms" className="flex items-center justify-between p-4 transition-all" style={{ border: `0.5px solid ${t.border}` }} onMouseEnter={e => e.currentTarget.style.borderColor = t.fuchsia} onMouseLeave={e => e.currentTarget.style.borderColor = t.border}>
           <span className="flex items-center gap-3">
             <FileText size={14} color={t.fuchsia} />
-            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Ankiety Zdrowotne</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.text, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Ankiety Zdrowotne</span>
           </span>
           <ChevronRight size={14} color={t.mutedLow} />
         </Link>

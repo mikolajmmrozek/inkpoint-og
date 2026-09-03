@@ -113,7 +113,7 @@ export default function BlogPost() {
   if (!post) return (
     <PageLayout>
       <div className="pt-40 px-8 md:px-16 text-center">
-        <p style={{ color: 'rgba(245,240,235,0.4)', fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.2em' }}>
+        <p style={{ color: 'rgba(245,240,235,0.4)', fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.2em' }}>
           POST NIE ZNALEZIONY
         </p>
         <Link to="/blog" className="btn-ghost-parchment inline-block mt-8">Wróć do Bloga</Link>
@@ -141,12 +141,12 @@ export default function BlogPost() {
           <div className="absolute bottom-0 left-0 right-0 px-8 md:px-16 pb-12">
             <div className="flex gap-2 mb-4 flex-wrap">
               {(post.tags || []).map(tag => (
-                <span key={tag} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', border: '0.5px solid var(--brand)', padding: '3px 8px', textTransform: 'uppercase' }}>
+                <span key={tag} style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', border: '0.5px solid var(--brand)', padding: '3px 8px', textTransform: 'uppercase' }}>
                   {tag}
                 </span>
               ))}
             </div>
-            <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(2.5rem, 6vw, 5rem)', fontWeight: 400, color: '#F5F0EB', lineHeight: 0.95, letterSpacing: '0.03em' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.5rem, 6vw, 5rem)', fontWeight: 400, color: '#F5F0EB', lineHeight: 0.95, letterSpacing: '0.03em' }}>
               {post.title}
             </h1>
           </div>
@@ -154,7 +154,7 @@ export default function BlogPost() {
       )}
 
       <div className="px-8 md:px-16 lg:px-24 py-12 max-w-5xl mx-auto">
-        <Link to="/blog" className="text-micro mb-10 block" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.15em' }}>
+        <Link to="/blog" className="text-micro mb-10 block" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.15em' }}>
           ← BLOG
         </Link>
 
@@ -163,12 +163,12 @@ export default function BlogPost() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
             <div className="flex gap-2 mb-4 flex-wrap">
               {(post.tags || []).map(tag => (
-                <span key={tag} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', border: '0.5px solid var(--brand)', padding: '3px 8px', textTransform: 'uppercase' }}>
+                <span key={tag} style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', border: '0.5px solid var(--brand)', padding: '3px 8px', textTransform: 'uppercase' }}>
                   {tag}
                 </span>
               ))}
             </div>
-            <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 400, color: '#F5F0EB', lineHeight: 0.95, letterSpacing: '0.03em' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 400, color: '#F5F0EB', lineHeight: 0.95, letterSpacing: '0.03em' }}>
               {post.title}
             </h1>
           </motion.div>
@@ -177,13 +177,13 @@ export default function BlogPost() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }}>
           {/* Author / date bar */}
           <div className="flex items-center gap-4 mb-10 pb-8" style={{ borderBottom: '0.5px solid #262626' }}>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
               {post.author_name}
             </p>
             {post.published_at && (
               <>
                 <span style={{ color: '#262626' }}>|</span>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                   {format(new Date(post.published_at), 'dd MMMM yyyy', { locale: pl })}
                 </p>
               </>
@@ -216,7 +216,7 @@ export default function BlogPost() {
                           style={{ filter: 'brightness(0.85) contrast(1.05)' }}
                         />
                         {img?.caption && (
-                          <p className="mt-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.08em' }}>
+                          <p className="mt-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.08em' }}>
                             {img.caption}
                           </p>
                         )}

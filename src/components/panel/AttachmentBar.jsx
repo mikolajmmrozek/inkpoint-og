@@ -44,7 +44,7 @@ export default function AttachmentBar({ attachments, setAttachments, t }) {
               ) : (
                 <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '2px' }}>
                   <FileText size={14} color="var(--brand)" />
-                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: t.muted, textTransform: 'uppercase' }}>PDF</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', color: t.muted, textTransform: 'uppercase' }}>PDF</span>
                 </div>
               )}
               <button
@@ -57,7 +57,7 @@ export default function AttachmentBar({ attachments, setAttachments, t }) {
           ))}
         </div>
       )}
-      <label style={{ cursor: uploading ? 'wait' : 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 8px', border: `0.5px solid ${t.border}`, fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+      <label style={{ cursor: uploading ? 'wait' : 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 8px', border: `0.5px solid ${t.border}`, fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
         {uploading ? <Loader2 size={12} className="animate-spin" /> : <Paperclip size={12} />}
         {uploading ? 'WYSYŁANIE...' : 'ZAŁĄCZ PLIK'}
         <input type="file" multiple accept="image/*,application/pdf" onChange={handleFileSelect} style={{ display: 'none' }} disabled={uploading} />

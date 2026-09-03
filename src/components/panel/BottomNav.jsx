@@ -118,7 +118,7 @@ export default function BottomNav({ theme, calendarPath, messagesPath, notificat
                   fontSize: '8px', fontWeight: 600,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   borderRadius: '7px', padding: '0 3px',
-                  fontFamily: 'JetBrains Mono',
+                  fontFamily: 'var(--font-mono)',
                 }}>
                   {item.badge > 9 ? '9+' : item.badge}
                 </span>
@@ -126,7 +126,7 @@ export default function BottomNav({ theme, calendarPath, messagesPath, notificat
             </div>
             <span
               style={{
-                fontFamily: 'JetBrains Mono',
+                fontFamily: 'var(--font-mono)',
                 fontSize: '9px',
                 letterSpacing: '0.1em',
                 textTransform: 'uppercase',

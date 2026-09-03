@@ -59,7 +59,7 @@ export default function DashboardFAQ() {
 
   const closeForm = () => { setShowForm(false); setEditing(null); };
 
-  const inputStyle = { background: inputBg, border: `0.5px solid ${border}`, color: textColor, fontFamily: 'Inter, sans-serif', fontSize: '14px', padding: '10px 14px', width: '100%', outline: 'none', borderRadius: '2px' };
+  const inputStyle = { background: inputBg, border: `0.5px solid ${border}`, color: textColor, fontFamily: 'var(--font-body)', fontSize: '14px', padding: '10px 14px', width: '100%', outline: 'none', borderRadius: '2px' };
 
   return (
     <div>
@@ -80,13 +80,13 @@ export default function DashboardFAQ() {
             <button onClick={closeForm} className="absolute top-4 right-4" style={{ background: 'none', border: 'none', cursor: 'pointer', color: mutedColor }}>
               <X size={18} />
             </button>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '20px' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '20px' }}>
               {editing?.id ? 'EDYTUJ PYTANIE' : 'NOWE PYTANIE'}
             </p>
 
             <div className="space-y-4">
               <div>
-                <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: mutedColor, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Pytanie</label>
+                <label style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: mutedColor, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Pytanie</label>
                 <input
                   value={editing?.question || ''}
                   onChange={e => setEditing(prev => ({ ...prev, question: e.target.value }))}
@@ -95,7 +95,7 @@ export default function DashboardFAQ() {
                 />
               </div>
               <div>
-                <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: mutedColor, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Odpowiedź</label>
+                <label style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: mutedColor, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Odpowiedź</label>
                 <textarea
                   value={editing?.answer || ''}
                   onChange={e => setEditing(prev => ({ ...prev, answer: e.target.value }))}
@@ -105,7 +105,7 @@ export default function DashboardFAQ() {
                 />
               </div>
               <div>
-                <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: mutedColor, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Kolejność</label>
+                <label style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: mutedColor, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Kolejność</label>
                 <input
                   type="number"
                   value={editing?.order ?? 0}
@@ -120,11 +120,11 @@ export default function DashboardFAQ() {
                 onClick={handleSave}
                 disabled={createMut.isPending || updateMut.isPending}
                 className="flex items-center gap-2 px-5 py-2"
-                style={{ background: 'var(--brand)', color: '#F5F0EB', fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', opacity: (createMut.isPending || updateMut.isPending) ? 0.6 : 1 }}
+                style={{ background: 'var(--brand)', color: '#F5F0EB', fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', opacity: (createMut.isPending || updateMut.isPending) ? 0.6 : 1 }}
               >
                 <Save size={13} /> Zapisz
               </button>
-              <button onClick={closeForm} className="px-5 py-2" style={{ background: 'transparent', border: `0.5px solid ${border}`, color: mutedColor, fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer' }}>
+              <button onClick={closeForm} className="px-5 py-2" style={{ background: 'transparent', border: `0.5px solid ${border}`, color: mutedColor, fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer' }}>
                 Anuluj
               </button>
             </div>
@@ -148,7 +148,7 @@ export default function DashboardFAQ() {
         </div>
       ) : faqs.length === 0 ? (
         <div className="text-center py-20" style={{ border: `0.5px solid ${border}` }}>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: mutedColor, letterSpacing: '0.1em' }}>BRAK PYTAŃ — DODAJ PIERWSZE</p>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: mutedColor, letterSpacing: '0.1em' }}>BRAK PYTAŃ — DODAJ PIERWSZE</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -156,14 +156,14 @@ export default function DashboardFAQ() {
             <div key={item.id} className="flex items-start gap-4 p-5" style={{ border: `0.5px solid ${border}`, background: bg }}>
               <GripVertical size={14} style={{ color: mutedColor, marginTop: '3px', flexShrink: 0 }} />
               <div className="flex-1 min-w-0">
-                <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.1rem', color: textColor, letterSpacing: '0.04em', fontWeight: 400 }}>{item.question}</p>
-                <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', color: mutedColor, marginTop: '4px', lineHeight: 1.6 }} className="line-clamp-2">{item.answer}</p>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: textColor, letterSpacing: '0.04em', fontWeight: 400 }}>{item.question}</p>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: mutedColor, marginTop: '4px', lineHeight: 1.6 }} className="line-clamp-2">{item.answer}</p>
               </div>
               <div className="flex gap-2 flex-shrink-0">
                 <button
                   onClick={() => openEdit(item)}
                   className="px-3 py-1"
-                  style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: mutedColor, border: `0.5px solid ${border}`, background: 'transparent', cursor: 'pointer', letterSpacing: '0.1em', textTransform: 'uppercase' }}
+                  style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: mutedColor, border: `0.5px solid ${border}`, background: 'transparent', cursor: 'pointer', letterSpacing: '0.1em', textTransform: 'uppercase' }}
                 >
                   Edytuj
                 </button>

@@ -146,13 +146,13 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
       {/* Day tiles */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+          <label style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
             Wybierz dzień *
           </label>
           <button
             onClick={() => setShowCalendar(true)}
             className="flex items-center gap-2"
-            style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: '0.5px solid var(--brand)', color: 'var(--brand)', background: 'transparent', cursor: 'pointer' }}
+            style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: '0.5px solid var(--brand)', color: 'var(--brand)', background: 'transparent', cursor: 'pointer' }}
           >
             <Calendar size={13} /> KALENDARZ
           </button>
@@ -199,13 +199,13 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
                       textAlign: 'center',
                     }}
                   >
-                    <div style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: isSelected ? 'var(--brand)' : 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: isSelected ? 'var(--brand)' : 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                       {DAY_SHORT[day.getDay()]}
                     </div>
-                    <div style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.5rem', color: isSelected ? 'var(--brand)' : '#F5F0EB', lineHeight: 1, marginTop: '4px' }}>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: isSelected ? 'var(--brand)' : '#F5F0EB', lineHeight: 1, marginTop: '4px' }}>
                       {format(day, 'd')}
                     </div>
-                    <div style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: '2px' }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: '2px' }}>
                       {format(day, 'MMM', { locale: pl })}
                     </div>
                   </button>
@@ -233,12 +233,12 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
       {/* Time slots */}
       {selectedDate && (
         <div>
-          <label className="block mb-4" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+          <label className="block mb-4" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
             {format(parseISO(selectedDate), 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase()} — wybierz godzinę *
           </label>
           {allSlots.length === 0 || !allSlots.some(s => s.status === 'free') ? (
             <div className="py-8 text-center" style={{ border: '0.5px solid #262626' }}>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em' }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em' }}>
                 W TYM DNIU NIE MA WOLNYCH TERMINÓW
               </p>
             </div>
@@ -259,7 +259,7 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
                     style={{
                       border: `0.5px solid ${isSelected ? 'var(--brand)' : isBooked ? '#262626' : '#262626'}`,
                       background: isSelected ? 'rgb(var(--brand-rgb) /0.08)' : isBooked ? 'rgba(245,240,235,0.02)' : 'transparent',
-                      fontFamily: 'JetBrains Mono',
+                      fontFamily: 'var(--font-mono)',
                       fontSize: '11px',
                       color: isSelected ? 'var(--brand)' : isBooked ? 'rgba(245,240,235,0.2)' : 'rgba(245,240,235,0.5)',
                       letterSpacing: '0.05em',
@@ -290,7 +290,7 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
             >
               {/* Month nav */}
               <div className="flex items-center justify-between mb-6">
-                <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.4rem', color: '#F5F0EB', letterSpacing: '0.04em' }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', color: '#F5F0EB', letterSpacing: '0.04em' }}>
                   {format(viewMonth, 'LLLL yyyy', { locale: pl }).toUpperCase()}
                 </p>
                 <div className="flex items-center gap-3">
@@ -309,7 +309,7 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
               {/* Weekday headers */}
               <div className="grid grid-cols-7 mb-2">
                 {WEEKDAYS.map(d => (
-                  <div key={d} className="text-center py-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.08em' }}>{d}</div>
+                  <div key={d} className="text-center py-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.08em' }}>{d}</div>
                 ))}
               </div>
 
@@ -342,7 +342,7 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
                         <div style={{ position: 'absolute', bottom: '3px', left: '50%', transform: 'translateX(-50%)', width: '4px', height: '4px', borderRadius: '50%', background: 'var(--brand)' }} />
                       )}
                       <span style={{
-                        fontFamily: 'JetBrains Mono',
+                        fontFamily: 'var(--font-mono)',
                         fontSize: '11px',
                         color: isSelected ? 'var(--brand)' : isTodayDate ? '#F5F0EB' : 'rgba(245,240,235,0.5)',
                         fontWeight: isTodayDate ? 600 : 400,
@@ -358,11 +358,11 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
               <div className="flex items-center gap-4 mt-4 pt-4" style={{ borderTop: '0.5px solid #262626' }}>
                 <div className="flex items-center gap-2">
                   <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--brand)' }} />
-                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.08em' }}>WOLNE TERMINY</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.08em' }}>WOLNE TERMINY</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div style={{ width: '8px', height: '1px', background: 'rgba(245,240,235,0.15)' }} />
-                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.08em' }}>NIEDOSTĘPNE</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.08em' }}>NIEDOSTĘPNE</span>
                 </div>
               </div>
             </motion.div>

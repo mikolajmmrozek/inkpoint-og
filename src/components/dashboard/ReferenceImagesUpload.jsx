@@ -58,7 +58,7 @@ export default function ReferenceImagesUpload({ images = [], onChange, t, max = 
         style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
           padding: '14px', border: `0.5px dashed ${t.border}`, cursor: uploading ? 'wait' : 'pointer',
-          fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase',
+          fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase',
           color: uploading ? t.muted : 'var(--brand)', opacity: images.length >= max ? 0.4 : 1,
           pointerEvents: images.length >= max ? 'none' : 'auto',
         }}

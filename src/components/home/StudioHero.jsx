@@ -61,13 +61,13 @@ export default function StudioHero() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3, duration: 0.8 }}
-            style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: 'var(--brand)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: '24px' }}
+            style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--brand)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: '24px' }}
           >
             ◆ &nbsp; WOLSZTYN, POLSKA &nbsp; ◆
           </motion.p>
 
           {/* Main headline */}
-          <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, lineHeight: 0.88, letterSpacing: '0.02em', color: '#F5F0EB' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 400, lineHeight: 0.88, letterSpacing: '0.02em', color: '#F5F0EB' }}>
             {lines.map((line, i) => (
               <motion.span
                 key={i}
@@ -103,7 +103,7 @@ export default function StudioHero() {
             className="space-y-1 mb-12"
           >
             {sublines.map((line, i) => (
-              <p key={i} style={{ color: 'rgba(245,240,235,0.85)', fontSize: '16px', lineHeight: 1.7, fontFamily: 'Inter, sans-serif' }}>
+              <p key={i} style={{ color: 'rgba(245,240,235,0.85)', fontSize: '16px', lineHeight: 1.7, fontFamily: 'var(--font-body)' }}>
                 {line}
               </p>
             ))}
@@ -132,7 +132,7 @@ export default function StudioHero() {
           transition={{ delay: 1.5, duration: 1 }}
           className="absolute bottom-10 right-8 md:right-16 flex flex-col items-center gap-3"
         >
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.6)', letterSpacing: '0.2em', writingMode: 'vertical-rl' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.6)', letterSpacing: '0.2em', writingMode: 'vertical-rl' }}>
             SCROLL
           </p>
           <div className="w-px h-12 relative overflow-hidden" style={{ background: 'rgba(245,240,235,0.1)' }}>

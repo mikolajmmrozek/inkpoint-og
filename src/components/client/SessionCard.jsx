@@ -21,29 +21,29 @@ export default function SessionCard({ booking, theme = 'dark', onChangeRequest, 
     <div className="p-5" style={{ border: `0.5px solid ${t.border}`, opacity: isCancelled ? 0.5 : 1 }}>
       <div className="flex items-start justify-between gap-4 mb-3">
         <div>
-          <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.4rem', color: t.text, letterSpacing: '0.04em', lineHeight: 1 }}>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', color: t.text, letterSpacing: '0.04em', lineHeight: 1 }}>
             {dateStr}
           </h3>
           <div className="flex items-center gap-4 mt-2 flex-wrap">
             {booking.session_time && (
-              <span className="flex items-center gap-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>
+              <span className="flex items-center gap-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted }}>
                 <Clock size={10} /> {booking.session_time}
                 {booking.session_end_time ? `–${booking.session_end_time}` : ''}
               </span>
             )}
             {booking.artist_name && (
-              <span className="flex items-center gap-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>
+              <span className="flex items-center gap-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted }}>
                 <User size={10} /> {booking.artist_name}
               </span>
             )}
             {booking.tattoo_placement && (
-              <span className="flex items-center gap-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>
+              <span className="flex items-center gap-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted }}>
                 <MapPin size={10} /> {booking.tattoo_placement}
               </span>
             )}
           </div>
         </div>
-        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: STATUS_COLORS[booking.status], letterSpacing: '0.1em', textTransform: 'uppercase', padding: '3px 8px', border: `0.5px solid ${STATUS_COLORS[booking.status]}`, flexShrink: 0 }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: STATUS_COLORS[booking.status], letterSpacing: '0.1em', textTransform: 'uppercase', padding: '3px 8px', border: `0.5px solid ${STATUS_COLORS[booking.status]}`, flexShrink: 0 }}>
           {STATUS_LABELS[booking.status] || booking.status}
         </span>
       </div>
@@ -55,7 +55,7 @@ export default function SessionCard({ booking, theme = 'dark', onChangeRequest, 
       )}
 
       {booking.notes && (
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.mutedLow, marginTop: '6px', padding: '6px 10px', background: theme === 'light' ? 'rgba(0,0,0,0.02)' : 'rgba(255,255,255,0.02)', borderLeft: `1px solid ${t.fuchsia}` }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.mutedLow, marginTop: '6px', padding: '6px 10px', background: theme === 'light' ? 'rgba(0,0,0,0.02)' : 'rgba(255,255,255,0.02)', borderLeft: `1px solid ${t.fuchsia}` }}>
           {booking.notes}
         </p>
       )}
@@ -66,14 +66,14 @@ export default function SessionCard({ booking, theme = 'dark', onChangeRequest, 
           <button
             onClick={() => onChangeRequest(booking)}
             className="flex items-center gap-2"
-            style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: 'pointer' }}
+            style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: 'pointer' }}
           >
             <RefreshCw size={11} /> POPROŚ O ZMIANĘ TERMINU
           </button>
           <button
             onClick={() => onMessage(booking)}
             className="flex items-center gap-2"
-            style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}
+            style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}
           >
             <MessageSquare size={11} /> WYŚLIJ WIADOMOŚĆ
           </button>

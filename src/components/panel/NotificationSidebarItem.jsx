@@ -39,13 +39,13 @@ export default function NotificationSidebarItem({ userEmail, theme, onMobileClic
             fontSize: '8px', fontWeight: 600,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             borderRadius: '7px', padding: '0 3px',
-            fontFamily: 'JetBrains Mono',
+            fontFamily: 'var(--font-mono)',
           }}>
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </div>
-      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase', color: inactiveColor }}>
+      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase', color: inactiveColor }}>
         Powiadomienia
       </span>
     </>
@@ -81,13 +81,13 @@ export default function NotificationSidebarItem({ userEmail, theme, onMobileClic
               fontSize: '8px', fontWeight: 600,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               borderRadius: '7px', padding: '0 3px',
-              fontFamily: 'JetBrains Mono',
+              fontFamily: 'var(--font-mono)',
             }}>
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
         </div>
-        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase', color: inactiveColor }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase', color: inactiveColor }}>
           Powiadomienia
         </span>
       </Link>

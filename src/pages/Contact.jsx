@@ -59,7 +59,7 @@ export default function Contact() {
     fontSize: '15px',
     width: '100%',
     outline: 'none',
-    fontFamily: 'Inter, sans-serif',
+    fontFamily: 'var(--font-body)',
     transition: 'border-color 0.3s',
   };
 
@@ -67,10 +67,10 @@ export default function Contact() {
     <PageLayout>
       <div className="pt-40 pb-20 px-8 md:px-16">
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-          <p className="text-micro text-oxblood mb-6" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em' }}>
+          <p className="text-micro text-oxblood mb-6" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em' }}>
             NAPISZ DO NAS
           </p>
-          <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(4rem, 9vw, 8rem)', fontWeight: 400, lineHeight: 0.9, color: '#F5F0EB', letterSpacing: '0.04em' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(4rem, 9vw, 8rem)', fontWeight: 400, lineHeight: 0.9, color: '#F5F0EB', letterSpacing: '0.04em' }}>
             Kontakt
           </h1>
         </motion.div>
@@ -87,7 +87,7 @@ export default function Contact() {
             {sent ? (
               <div className="py-16">
                 <div className="w-8 h-px mb-8" style={{ background: 'var(--brand)' }} />
-                <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: '#F5F0EB', letterSpacing: '0.04em' }}>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 400, color: '#F5F0EB', letterSpacing: '0.04em' }}>
                   Wiadomość wysłana
                 </h3>
                 <p className="mt-4 text-sm" style={{ color: 'rgba(245,240,235,0.5)', fontSize: '14px' }}>
@@ -98,7 +98,7 @@ export default function Contact() {
               <form onSubmit={handleSubmit} className="space-y-8">
                 <div className="grid grid-cols-2 gap-8">
                   <div>
-                    <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.75)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                    <label className="text-micro block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.75)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                       Imię i Nazwisko *
                     </label>
                     <input
@@ -111,7 +111,7 @@ export default function Contact() {
                     />
                   </div>
                   <div>
-                    <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.75)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                    <label className="text-micro block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.75)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                       Email *
                     </label>
                     <input
@@ -127,7 +127,7 @@ export default function Contact() {
                 </div>
 
                 <div>
-                  <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.75)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                  <label className="text-micro block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.75)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                     Telefon
                   </label>
                   <input
@@ -140,7 +140,7 @@ export default function Contact() {
                 </div>
 
                 <div>
-                  <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.75)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                  <label className="text-micro block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.75)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                     Temat
                   </label>
                   <input
@@ -153,13 +153,13 @@ export default function Contact() {
                 </div>
 
                 <div>
-                  <label className="text-micro block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.75)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                  <label className="text-micro block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.75)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                     Wiadomość *
                   </label>
                   <textarea
                     required
                     rows={5}
-                    style={{ background: 'rgba(255,255,255,0.04)', border: '0.5px solid #595959', borderRadius: '2px', padding: '12px', color: '#F5F0EB', fontSize: '15px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif', resize: 'none', transition: 'border-color 0.3s' }}
+                    style={{ background: 'rgba(255,255,255,0.04)', border: '0.5px solid #595959', borderRadius: '2px', padding: '12px', color: '#F5F0EB', fontSize: '15px', width: '100%', outline: 'none', fontFamily: 'var(--font-body)', resize: 'none', transition: 'border-color 0.3s' }}
                     value={form.message}
                     onChange={e => setForm({ ...form, message: e.target.value })}
                     onFocus={e => e.target.style.borderColor = 'var(--brand)'}
@@ -209,7 +209,7 @@ export default function Contact() {
                 <div key={label}>
                   <div className="flex items-center gap-2 mb-2">
                     <Icon size={12} color="var(--brand)" />
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                       {label}
                     </p>
                   </div>

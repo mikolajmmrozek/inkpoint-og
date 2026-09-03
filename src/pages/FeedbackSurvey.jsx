@@ -24,7 +24,7 @@ function StarRating({ value, onChange, label }) {
   const [hovered, setHovered] = useState(0);
   return (
     <div className="mb-6">
-      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.65)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgba(245,240,235,0.65)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>
         {label}
       </p>
       <div className="flex gap-2">
@@ -54,7 +54,7 @@ const inputStyle = {
   fontSize: '15px',
   width: '100%',
   outline: 'none',
-  fontFamily: 'Inter, sans-serif',
+  fontFamily: 'var(--font-body)',
 };
 
 export default function FeedbackSurvey() {
@@ -176,7 +176,7 @@ export default function FeedbackSurvey() {
         <div className="pt-32 pb-20 px-8 max-w-md mx-auto text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <LogIn size={28} color="var(--brand)" style={{ margin: '0 auto 16px' }} />
-            <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: '#F5F0EB', letterSpacing: '0.04em', marginBottom: '16px' }}>Wymagane logowanie</h1>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 400, color: '#F5F0EB', letterSpacing: '0.04em', marginBottom: '16px' }}>Wymagane logowanie</h1>
             <p style={{ color: 'rgba(245,240,235,0.65)', fontSize: '15px', lineHeight: 1.7, marginBottom: '32px' }}>
               Aby wystawić opinię, zaloguj się na swoje konto. Opinie zbieramy wyłącznie od zweryfikowanych klientów po ukończonej sesji.
             </p>
@@ -200,17 +200,17 @@ export default function FeedbackSurvey() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-md flex-1 flex items-center justify-center">
             <div>
               <div className="text-5xl mb-8">★★★★★</div>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>DZIĘKUJEMY</p>
-              <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '3rem', fontWeight: 400, color: '#F5F0EB', lineHeight: 1, letterSpacing: '0.04em' }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>DZIĘKUJEMY</p>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '3rem', fontWeight: 400, color: '#F5F0EB', lineHeight: 1, letterSpacing: '0.04em' }}>
                 {config.thank_you_text}
               </h2>
-              <a href="/" style={{ display: 'inline-block', marginTop: '32px', fontFamily: 'JetBrains Mono', fontSize: '13px', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--brand)', textDecoration: 'none', padding: '12px 28px', border: '0.5px solid var(--brand)' }} onMouseEnter={e => { e.target.style.background = 'var(--brand)'; e.target.style.color = '#0A0A0A'; }} onMouseLeave={e => { e.target.style.background = 'transparent'; e.target.style.color = 'var(--brand)'; }}>
+              <a href="/" style={{ display: 'inline-block', marginTop: '32px', fontFamily: 'var(--font-mono)', fontSize: '13px', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--brand)', textDecoration: 'none', padding: '12px 28px', border: '0.5px solid var(--brand)' }} onMouseEnter={e => { e.target.style.background = 'var(--brand)'; e.target.style.color = '#0A0A0A'; }} onMouseLeave={e => { e.target.style.background = 'transparent'; e.target.style.color = 'var(--brand)'; }}>
                 POWRÓT NA STRONĘ GŁÓWNĄ
               </a>
             </div>
           </motion.div>
           <div style={{ paddingBottom: '40px', textAlign: 'center' }}>
-            <a href="/panel" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.5)', textDecoration: 'none', letterSpacing: '0.08em' }} onMouseEnter={e => e.target.style.color = 'rgba(245,240,235,0.8)'} onMouseLeave={e => e.target.style.color = 'rgba(245,240,235,0.5)'}>
+            <a href="/panel" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.5)', textDecoration: 'none', letterSpacing: '0.08em' }} onMouseEnter={e => e.target.style.color = 'rgba(245,240,235,0.8)'} onMouseLeave={e => e.target.style.color = 'rgba(245,240,235,0.5)'}>
               MÓJ PANEL
             </a>
           </div>
@@ -235,7 +235,7 @@ export default function FeedbackSurvey() {
         <div className="pt-32 pb-20 px-8 max-w-md mx-auto text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <AlertCircle size={28} color="var(--brand)" style={{ margin: '0 auto 16px' }} />
-            <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: '#F5F0EB', letterSpacing: '0.04em', marginBottom: '16px' }}>Brak sesji do oceny</h1>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 400, color: '#F5F0EB', letterSpacing: '0.04em', marginBottom: '16px' }}>Brak sesji do oceny</h1>
             <p style={{ color: 'rgba(245,240,235,0.65)', fontSize: '15px', lineHeight: 1.7, marginBottom: '32px' }}>
               Opinie mogą wystawiać wyłącznie zweryfikowani klienci po ukończonej sesji. Nie masz jeszcze ukończonych sesji, które mógłbyś ocenić.
             </p>
@@ -250,16 +250,16 @@ export default function FeedbackSurvey() {
     <PageLayout noFooter>
       <div className="pt-32 pb-20 px-8 md:px-16 max-w-2xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>
             ANKIETA SATYSFAKCJI
           </p>
-          <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(3rem, 7vw, 5rem)', fontWeight: 400, lineHeight: 0.9, color: '#F5F0EB', letterSpacing: '0.04em', marginBottom: '16px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(3rem, 7vw, 5rem)', fontWeight: 400, lineHeight: 0.9, color: '#F5F0EB', letterSpacing: '0.04em', marginBottom: '16px' }}>
             Twoja Opinia
           </h1>
 
           <div className="mb-6 flex items-center gap-2 px-3 py-2" style={{ background: 'rgba(22,163,74,0.08)', border: '0.5px solid rgba(22,163,74,0.35)' }}>
             <ShieldCheck size={13} color="#16a34a" />
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Zweryfikowany klient</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#16a34a', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Zweryfikowany klient</p>
           </div>
 
           <p style={{ color: 'rgba(245,240,235,0.65)', fontSize: '14px', lineHeight: 1.7, marginBottom: '32px' }}>
@@ -268,7 +268,7 @@ export default function FeedbackSurvey() {
 
           {/* Session selector */}
           <div className="mb-8">
-            <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.65)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+            <label style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.65)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
               Wybierz sesję do oceny *
             </label>
             <select
@@ -284,7 +284,7 @@ export default function FeedbackSurvey() {
               ))}
             </select>
             {denyReason && (
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', marginTop: '8px', letterSpacing: '0.06em' }}>⚠ {denyReason}</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', marginTop: '8px', letterSpacing: '0.06em' }}>⚠ {denyReason}</p>
             )}
           </div>
 
@@ -296,10 +296,10 @@ export default function FeedbackSurvey() {
             <div className="mb-8 px-4 py-4" style={{ border: '0.5px solid rgba(22,163,74,0.4)', background: 'rgba(22,163,74,0.06)' }}>
               <div className="flex items-center gap-2 mb-3">
                 <CheckCircle2 size={14} color="#16a34a" />
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Opinia już wystawiona</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#16a34a', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Opinia już wystawiona</p>
               </div>
               <p style={{ color: '#F5F0EB', fontSize: '14px', lineHeight: 1.6 }}>"{existingFeedback.short_review}"</p>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.5)', marginTop: '6px' }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.5)', marginTop: '6px' }}>
                 Ocena ogólna: {existingFeedback.rating_overall}★ · {new Date(existingFeedback.created_date).toLocaleDateString('pl-PL')}
               </p>
             </div>
@@ -311,7 +311,7 @@ export default function FeedbackSurvey() {
 
               {/* Session summary */}
               <div className="mb-6 px-3 py-2" style={{ border: '0.5px solid #595959', background: 'rgba(255,255,255,0.03)' }}>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.65)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '4px' }}>Ocenasz sesję</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.65)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '4px' }}>Ocenasz sesję</p>
                 <p style={{ color: '#F5F0EB', fontSize: '14px' }}>
                   {booking.session_date} · <span style={{ color: 'var(--brand)' }}>{booking.artist_name}</span>{booking.service_name ? ` · ${booking.service_name}` : ''}{booking.tattoo_placement ? ` · ${booking.tattoo_placement}` : ''}
                 </p>
@@ -319,7 +319,7 @@ export default function FeedbackSurvey() {
 
               {/* Name */}
               <div className="mb-8">
-                <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.65)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+                <label style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.65)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
                   Imię *
                 </label>
                 <input
@@ -342,7 +342,7 @@ export default function FeedbackSurvey() {
 
               {/* Short review */}
               <div className="mb-6">
-                <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.65)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+                <label style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.65)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
                   {config.question_short_review} *
                 </label>
                 <textarea
@@ -353,14 +353,14 @@ export default function FeedbackSurvey() {
                   value={form.short_review}
                   onChange={e => setForm(f => ({ ...f, short_review: e.target.value }))}
                 />
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.5)', marginTop: '4px' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.5)', marginTop: '4px' }}>
                   {form.short_review.length}/200
                 </p>
               </div>
 
               {/* Full review */}
               <div className="mb-6">
-                <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.65)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+                <label style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.65)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
                   {config.question_full_review}
                 </label>
                 <textarea
@@ -374,7 +374,7 @@ export default function FeedbackSurvey() {
               {/* Photo upload */}
               {config.show_photo_upload && (
                 <div className="mb-8">
-                  <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.65)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '12px' }}>
+                  <label style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.65)', letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '12px' }}>
                     Zdjęcie tatuażu / piercingu (opcjonalne)
                   </label>
                   {form.tattoo_photo_url && (

@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 
 const Row = ({ label, value, t }) => (
   <div className="mb-3 pb-3" style={{ borderBottom: `0.5px solid ${t?.border || '#262626'}` }}>
-    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '3px' }}>{label}</p>
+    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '3px' }}>{label}</p>
     <p style={{ color: t?.text || '#111111', fontSize: '13px', lineHeight: 1.5, wordBreak: 'break-word' }}>{value || '—'}</p>
   </div>
 );
@@ -15,7 +15,7 @@ const YesNo = ({ label, value, desc, t }) => (
   <div className="flex items-start justify-between gap-3 py-2" style={{ borderBottom: `0.5px solid ${t?.border || '#1a1a1a'}` }}>
     <p style={{ color: t?.text || '#F5F0EB', fontSize: '13px', lineHeight: 1.4, flex: 1 }}>{label}</p>
     <div className="text-right flex-shrink-0">
-      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', color: value === true ? 'var(--brand)' : value === false ? '#16a34a' : t?.muted || 'rgba(245,240,235,0.75)' }}>
+      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.08em', color: value === true ? 'var(--brand)' : value === false ? '#16a34a' : t?.muted || 'rgba(245,240,235,0.75)' }}>
         {value === true ? 'TAK' : value === false ? 'NIE' : '—'}
       </span>
       {value && desc && <p style={{ fontSize: '11px', color: t?.muted || 'rgba(245,240,235,0.75)', marginTop: '2px' }}>{desc}</p>}
@@ -108,8 +108,8 @@ export default function HealthFormPreviewModal({ bookingId, healthFormId, client
         >
           <div className="flex justify-between items-start mb-6">
             <div>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>ANKIETA ZDROWOTNA</p>
-              <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em', lineHeight: 1 }}>{clientName}</h2>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>ANKIETA ZDROWOTNA</p>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em', lineHeight: 1 }}>{clientName}</h2>
             </div>
             <div className="flex items-center gap-2">
               {allActions.map((action, i) => (
@@ -117,7 +117,7 @@ export default function HealthFormPreviewModal({ bookingId, healthFormId, client
                   key={i}
                   onClick={action.onClick}
                   title={action.label}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '7px', background: 'none', color: action.color || t.muted, border: `0.5px solid ${t.border}`, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '7px', background: 'none', color: action.color || t.muted, border: `0.5px solid ${t.border}`, cursor: 'pointer', whiteSpace: 'nowrap' }}
                 >
                   {action.icon || action.label}
                 </button>
@@ -133,16 +133,16 @@ export default function HealthFormPreviewModal({ bookingId, healthFormId, client
               <Loader2 size={20} className="animate-spin" style={{ color: 'var(--brand)' }} />
             </div>
           ) : !form ? (
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK DANYCH ANKIETY</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK DANYCH ANKIETY</p>
           ) : (
             <div>
               {/* Form selector — when client has multiple forms */}
               {formSelector && formSelector.forms && formSelector.forms.length > 1 && (
                 <div className="flex items-center gap-2 flex-wrap mb-5 pb-4" style={{ borderBottom: `0.5px solid ${t.border}`, background: 'rgb(var(--brand-rgb) /0.03)', padding: '8px 12px' }}>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginRight: '4px' }}>ANKIETY:</p>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginRight: '4px' }}>ANKIETY:</p>
                   {formSelector.forms.map(f => (
                     <button key={f.id} onClick={() => formSelector.onSelect(f)}
-                      style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.06em', padding: '3px 8px', border: `0.5px solid ${formSelector.selectedId === f.id ? t.fuchsia : t.border}`, color: formSelector.selectedId === f.id ? t.fuchsia : t.muted, background: formSelector.selectedId === f.id ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', cursor: 'pointer' }}
+                      style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.06em', padding: '3px 8px', border: `0.5px solid ${formSelector.selectedId === f.id ? t.fuchsia : t.border}`, color: formSelector.selectedId === f.id ? t.fuchsia : t.muted, background: formSelector.selectedId === f.id ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', cursor: 'pointer' }}
                     >
                       {f.form_filled_date ? format(new Date(f.form_filled_date), 'dd.MM.yyyy') : f.id?.slice(-4)}{f.is_update_only ? ' ↻' : ''}
                     </button>
@@ -151,7 +151,7 @@ export default function HealthFormPreviewModal({ bookingId, healthFormId, client
               )}
 
               {/* Personal */}
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>— DANE OSOBOWE</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>— DANE OSOBOWE</p>
               <Row label="Imię i nazwisko" value={form.client_name} t={t} />
               <Row label="Data urodzenia" value={form.date_of_birth} t={t} />
               <Row label="Email" value={form.client_email} t={t} />
@@ -167,9 +167,9 @@ export default function HealthFormPreviewModal({ bookingId, healthFormId, client
                 const flagged = MEDICAL.filter(([, key, descKey]) => form[key] === true || (descKey && form[descKey]));
                 return (
                   <>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', margin: '20px 0 12px' }}>— WYWIAD MEDYCZNY</p>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', margin: '20px 0 12px' }}>— WYWIAD MEDYCZNY</p>
                     {flagged.length === 0 ? (
-                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#16a34a', letterSpacing: '0.1em' }}>✓ Brak przeciwwskazań</p>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: '#16a34a', letterSpacing: '0.1em' }}>✓ Brak przeciwwskazań</p>
                     ) : flagged.map(([label, key, descKey]) => (
                       <YesNo key={key} label={label} value={form[key]} desc={descKey ? form[descKey] : null} t={t} />
                     ))}
@@ -183,7 +183,7 @@ export default function HealthFormPreviewModal({ bookingId, healthFormId, client
                 if (flagged.length === 0) return null;
                 return (
                   <>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', margin: '20px 0 12px' }}>— PYTANIA PRZEDZABIEGOWE</p>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', margin: '20px 0 12px' }}>— PYTANIA PRZEDZABIEGOWE</p>
                     {flagged.map(q => (
                       <YesNo key={q.field_key} label={q.label} value={form[q.field_key]} desc={form[`${q.field_key}_desc`]} t={t} />
                     ))}
@@ -202,13 +202,13 @@ export default function HealthFormPreviewModal({ bookingId, healthFormId, client
                 const missing = consentFields.filter(([, val]) => !val);
                 return (
                   <>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', margin: '20px 0 12px' }}>— ZGODY</p>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', margin: '20px 0 12px' }}>— ZGODY</p>
                     {missing.length === 0 ? (
-                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#16a34a', letterSpacing: '0.1em' }}>✓ Wszystkie zgody udzielone</p>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: '#16a34a', letterSpacing: '0.1em' }}>✓ Wszystkie zgody udzielone</p>
                     ) : missing.map(([label]) => (
                       <div key={label} className="flex items-center justify-between py-2" style={{ borderBottom: `0.5px solid ${t.border}` }}>
                         <p style={{ color: t.text, fontSize: '13px' }}>{label}</p>
-                        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)' }}>✗ BRAK</span>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)' }}>✗ BRAK</span>
                       </div>
                     ))}
                   </>
@@ -218,7 +218,7 @@ export default function HealthFormPreviewModal({ bookingId, healthFormId, client
               {/* Signature */}
               {form.client_signature && (
                 <div className="mt-4">
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>— PODPIS KLIENTA</p>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>— PODPIS KLIENTA</p>
                   <div style={{ background: '#ffffff', display: 'inline-block', padding: '8px', border: `0.5px solid ${t.border}` }}>
                     <img src={form.client_signature} alt="podpis" style={{ maxWidth: '200px', display: 'block' }} />
                   </div>
@@ -229,13 +229,13 @@ export default function HealthFormPreviewModal({ bookingId, healthFormId, client
               {guardian && (
                 <div className="mt-6">
                   <div className="p-4" style={{ border: '0.5px solid rgb(var(--brand-rgb) /0.3)', background: 'rgb(var(--brand-rgb) /0.04)' }}>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>— ZGODA OPIEKUNA</p>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>— ZGODA OPIEKUNA</p>
                     <Row label="Opiekun" value={guardian.guardian_name} t={t} />
                     <Row label="Telefon opiekuna" value={guardian.guardian_phone} t={t} />
                   </div>
                   {guardian.guardian_signature && (
                     <div className="mt-3">
-                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>— PODPIS OPIEKUNA</p>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>— PODPIS OPIEKUNA</p>
                       <div style={{ background: '#ffffff', display: 'inline-block', padding: '8px', border: `0.5px solid ${t.border}` }}>
                         <img src={guardian.guardian_signature} alt="podpis opiekuna" style={{ maxWidth: '200px', display: 'block' }} />
                       </div>

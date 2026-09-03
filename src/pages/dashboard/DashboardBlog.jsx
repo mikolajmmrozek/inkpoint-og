@@ -14,7 +14,7 @@ const inputStyle = {
   fontSize: '15px',
   width: '100%',
   outline: 'none',
-  fontFamily: 'Inter, sans-serif',
+  fontFamily: 'var(--font-body)',
 };
 
 export default function DashboardBlog() {
@@ -127,7 +127,7 @@ export default function DashboardBlog() {
               style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '40px' }}
             >
               <div className="flex justify-between items-center mb-8">
-                <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
                   {editing === 'new' ? 'Nowy Post' : 'Edytuj Post'}
                 </h3>
                 <button onClick={() => setEditing(null)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
@@ -137,39 +137,39 @@ export default function DashboardBlog() {
 
               <div className="space-y-8">
                 <div>
-                  <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Tytuł *</label>
+                  <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Tytuł *</label>
                   <input style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={form.title || ''} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                 </div>
 
                 <div>
-                  <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Skrót</label>
+                  <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Skrót</label>
                   <textarea rows={2} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} value={form.excerpt || ''} onChange={e => setForm(f => ({ ...f, excerpt: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                 </div>
 
                 <div>
-                  <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Treść</label>
+                  <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Treść</label>
                   <textarea rows={10} placeholder="Napisz treść posta..." style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'vertical', lineHeight: 1.8 }} value={form.content || ''} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                 </div>
 
                 <div className="grid grid-cols-2 gap-8">
                   <div>
-                    <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Autor</label>
+                    <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Autor</label>
                     <input style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={form.author_name || ''} onChange={e => setForm(f => ({ ...f, author_name: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                   </div>
                   <div>
-                    <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Tagi (przecinki)</label>
+                    <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Tagi (przecinki)</label>
                     <input style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={Array.isArray(form.tags) ? form.tags.join(', ') : (form.tags || '')} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Data publikacji</label>
+                  <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Data publikacji</label>
                   <input type="date" style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: theme === 'light' ? 'light' : 'dark' }} value={form.published_at || ''} onChange={e => setForm(f => ({ ...f, published_at: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                 </div>
 
                 {/* Cover image upload */}
                 <div>
-                  <label className="block mb-3" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Zdjęcie tytułowe</label>
+                  <label className="block mb-3" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Zdjęcie tytułowe</label>
                   {form.cover_image_url && (
                     <img src={form.cover_image_url} alt="Cover" className="w-32 h-20 object-cover mb-3" />
                   )}
@@ -181,7 +181,7 @@ export default function DashboardBlog() {
 
                 {/* Post images */}
                 <div>
-                  <label className="block mb-3" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                  <label className="block mb-3" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                     Zdjęcia w poście ({(form.images || []).length})
                   </label>
                   {(form.images || []).length > 0 && (
@@ -204,7 +204,7 @@ export default function DashboardBlog() {
 
                 {/* Video upload */}
                 <div>
-                  <label className="block mb-3" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Wideo (opcjonalne)</label>
+                  <label className="block mb-3" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Wideo (opcjonalne)</label>
                   {form.video_url && (
                     <video src={form.video_url} controls className="w-full max-h-40 mb-3" style={{ background: '#000' }} />
                   )}
@@ -219,7 +219,7 @@ export default function DashboardBlog() {
                   <button
                     onClick={() => setForm(f => ({ ...f, is_published: !f.is_published }))}
                     className="flex items-center gap-3 px-4 py-3 transition-all"
-                    style={{ border: `0.5px solid ${form.is_published ? '#16a34a' : t.border}`, color: form.is_published ? '#16a34a' : t.muted, background: 'transparent', cursor: 'pointer', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}
+                    style={{ border: `0.5px solid ${form.is_published ? '#16a34a' : t.border}`, color: form.is_published ? '#16a34a' : t.muted, background: 'transparent', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}
                   >
                     {form.is_published ? <Eye size={12} /> : <EyeOff size={12} />}
                     {form.is_published ? 'OPUBLIKOWANY' : 'SZKIC'}
@@ -254,7 +254,7 @@ export default function DashboardBlog() {
         <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
           {posts.length === 0 ? (
             <div className="py-20 text-center">
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
                 BRAK POSTÓW
               </p>
             </div>
@@ -267,14 +267,14 @@ export default function DashboardBlog() {
                )}
                <div className="min-w-0 flex-1">
                  <p style={{ color: t.text, fontSize: '13px', md: '14px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</p>
-                 <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', md: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
+                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', md: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
                    {post.author_name} · {post.published_at || 'Brak daty'}
                  </p>
                </div>
              </div>
              {/* Mobile: actions in a row */}
              <div className="flex items-center gap-1 md:gap-3 flex-shrink-0 w-full md:w-auto justify-end" style={{ marginTop: '8px', paddingRight: '4px' }}>
-               <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', md: '8px', letterSpacing: '0.1em', padding: '2px 6px', border: `0.5px solid ${post.is_published ? '#4A7C59' : '#262626'}`, color: post.is_published ? '#4A7C59' : 'rgba(245,240,235,0.3)' }}>
+               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', md: '8px', letterSpacing: '0.1em', padding: '2px 6px', border: `0.5px solid ${post.is_published ? '#4A7C59' : '#262626'}`, color: post.is_published ? '#4A7C59' : 'rgba(245,240,235,0.3)' }}>
                  {post.is_published ? 'LIVE' : 'SZKIC'}
                </span>
                <button onClick={() => togglePublish(post)} style={{ color: t.muted, cursor: 'pointer', background: 'none', border: 'none', padding: '6px', minWidth: '28px', minHeight: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

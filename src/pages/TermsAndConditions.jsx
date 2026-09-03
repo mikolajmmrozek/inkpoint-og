@@ -44,16 +44,16 @@ export default function TermsAndConditions() {
     <div style={{ minHeight: '100vh', background: '#0A0A0A', color: '#F5F0EB', padding: '60px 24px' }}>
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
         {loading ? (
-          <div style={{ textAlign: 'center', color: 'rgba(245,240,235,0.4)', fontFamily: 'JetBrains Mono', fontSize: '12px', letterSpacing: '0.1em' }}>
+          <div style={{ textAlign: 'center', color: 'rgba(245,240,235,0.4)', fontFamily: 'var(--font-mono)', fontSize: '12px', letterSpacing: '0.1em' }}>
             ŁADOWANIE...
           </div>
         ) : !terms ? (
-          <div style={{ textAlign: 'center', color: 'rgba(245,240,235,0.4)', fontFamily: 'JetBrains Mono', fontSize: '12px', letterSpacing: '0.1em' }}>
+          <div style={{ textAlign: 'center', color: 'rgba(245,240,235,0.4)', fontFamily: 'var(--font-mono)', fontSize: '12px', letterSpacing: '0.1em' }}>
             Brak regulaminu.
           </div>
         ) : (
           <>
-            <h1 style={{ fontFamily: 'Bebas Neue', fontSize: '48px', marginBottom: '32px', color: '#F5F0EB' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '48px', marginBottom: '32px', color: '#F5F0EB' }}>
               {terms.title}
             </h1>
             <div
@@ -63,7 +63,7 @@ export default function TermsAndConditions() {
           </>
         )}
         <div style={{ marginTop: '48px', paddingTop: '24px', borderTop: '0.5px solid #262626' }}>
-          <a href="/" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none' }}>
+          <a href="/" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none' }}>
             ← Powrót
           </a>
         </div>

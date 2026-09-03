@@ -10,7 +10,7 @@ export default function HealthFormBadge({ status = 'none', style, fontSize = '7p
   return (
     <span
       style={{
-        fontFamily: 'JetBrains Mono',
+        fontFamily: 'var(--font-mono)',
         fontSize,
         letterSpacing: '0.1em',
         textTransform: 'uppercase',

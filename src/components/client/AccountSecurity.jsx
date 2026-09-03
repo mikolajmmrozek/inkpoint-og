@@ -65,11 +65,11 @@ export default function AccountSecurity({ user, t }) {
     fontSize: '14px',
     width: '100%',
     outline: 'none',
-    fontFamily: 'Inter, sans-serif',
+    fontFamily: 'var(--font-body)',
   };
 
   const label = (text) => (
-    <label className="block mb-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>{text}</label>
+    <label className="block mb-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>{text}</label>
   );
 
   const ProviderIcon = isSocialLogin && authProvider.toLowerCase() === 'apple' ? Apple : Mail;
@@ -80,13 +80,13 @@ export default function AccountSecurity({ user, t }) {
   return (
     <div className="pt-6 mt-8" style={{ borderTop: `0.5px solid ${t.border}` }}>
       <div className="flex items-center justify-between mb-5">
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
           BEZPIECZEŃSTWO
         </p>
         {!editing && !isSocialLogin && (
           <button
             onClick={() => setEditing(true)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.fuchsia, display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.fuchsia, display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}
           >
             <Edit3 size={13} /> ZMIEŃ HASŁO
           </button>
@@ -100,7 +100,7 @@ export default function AccountSecurity({ user, t }) {
             <ProviderIcon size={16} color={isSocialLogin ? t.fuchsia : t.muted} />
           </div>
           <div>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '2px' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '2px' }}>
               METODA LOGOWANIA
             </p>
             <p style={{ fontSize: '13px', color: t.text, fontWeight: 500 }}>{providerLabel}</p>
@@ -151,7 +151,7 @@ export default function AccountSecurity({ user, t }) {
           </div>
 
           {error && (
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em' }}>✗ {error}</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em' }}>✗ {error}</p>
           )}
 
           <div className="flex items-center gap-4">
@@ -167,7 +167,7 @@ export default function AccountSecurity({ user, t }) {
               onClick={handleCancel}
               style={{
                 fontSize: '10px',
-                fontFamily: 'JetBrains Mono',
+                fontFamily: 'var(--font-mono)',
                 fontWeight: 500,
                 textTransform: 'uppercase',
                 letterSpacing: '0.1em',
@@ -186,7 +186,7 @@ export default function AccountSecurity({ user, t }) {
       )}
 
       {!isSocialLogin && !editing && changed && (
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.1em' }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#16a34a', letterSpacing: '0.1em' }}>
           ✓ HASŁO ZMIENIONE
         </p>
       )}

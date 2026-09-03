@@ -89,7 +89,7 @@ export default function GoogleCalendarSync({ theme }) {
       <div className="flex items-center gap-3">
         <Calendar size={16} color={connected ? '#16a34a' : 'var(--brand)'} />
         <div>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '2px' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '2px' }}>
             GOOGLE CALENDAR
           </p>
           <p style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>
@@ -97,20 +97,20 @@ export default function GoogleCalendarSync({ theme }) {
           </p>
           {syncResult && (
             <>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#16a34a', letterSpacing: '0.08em', marginTop: '4px' }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: '#16a34a', letterSpacing: '0.08em', marginTop: '4px' }}>
                 ✓ Utworzono: {syncResult.created} · Zaktualizowano: {syncResult.updated}
                 {syncResult.skipped > 0 ? ` · Pominięto: ${syncResult.skipped}` : ''}
                 {` / ${syncResult.total}`}
               </p>
               {syncResult.errors?.length > 0 && (
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: 'var(--brand)', letterSpacing: '0.04em', marginTop: '2px', wordBreak: 'break-word' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', color: 'var(--brand)', letterSpacing: '0.04em', marginTop: '2px', wordBreak: 'break-word' }}>
                   ⚠ {syncResult.errors[0]}
                 </p>
               )}
             </>
           )}
           {error && (
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.08em', marginTop: '4px' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.08em', marginTop: '4px' }}>
               ⚠ {error}
             </p>
           )}
@@ -123,14 +123,14 @@ export default function GoogleCalendarSync({ theme }) {
             <button
               onClick={handleSync}
               disabled={syncing}
-              style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 16px', background: syncing ? 'rgb(var(--brand-rgb) /0.3)' : 'linear-gradient(135deg, var(--brand) 0%, var(--brand) 100%)', color: '#F5F0EB', border: 'none', cursor: syncing ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+              style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 16px', background: syncing ? 'rgb(var(--brand-rgb) /0.3)' : 'linear-gradient(135deg, var(--brand) 0%, var(--brand) 100%)', color: '#F5F0EB', border: 'none', cursor: syncing ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
             >
               <RefreshCw size={12} className={syncing ? 'animate-spin' : ''} />
               {syncing ? 'SYNCHRONIZUJĘ...' : 'SYNCHRONIZUJ'}
             </button>
             <button
               onClick={handleDisconnect}
-              style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', background: 'transparent', color: t.muted, border: `0.5px solid ${t.border}`, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+              style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', background: 'transparent', color: t.muted, border: `0.5px solid ${t.border}`, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
             >
               <Unlink size={12} />
               ROZŁĄCZ
@@ -139,7 +139,7 @@ export default function GoogleCalendarSync({ theme }) {
         ) : (
           <button
             onClick={handleConnect}
-            style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 16px', background: 'linear-gradient(135deg, var(--brand) 0%, var(--brand) 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+            style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 16px', background: 'linear-gradient(135deg, var(--brand) 0%, var(--brand) 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
           >
             <Link2 size={12} />
             POŁĄCZ KALENDARZ

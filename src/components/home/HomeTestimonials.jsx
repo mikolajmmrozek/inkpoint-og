@@ -24,10 +24,10 @@ export default function HomeTestimonials() {
     <section className="py-20 px-8 md:px-16">
       <div className="mb-12 flex items-end justify-between">
         <div>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
             CO MÓWIĄ KLIENCI
           </p>
-          <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(2rem, 5vw, 4rem)', fontWeight: 400, color: '#F5F0EB', lineHeight: 0.95, letterSpacing: '0.04em' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 5vw, 4rem)', fontWeight: 400, color: '#F5F0EB', lineHeight: 0.95, letterSpacing: '0.04em' }}>
             Opinie
           </h2>
         </div>
@@ -49,11 +49,11 @@ export default function HomeTestimonials() {
             </p>
             <div className="flex items-center gap-3">
               <div style={{ width: '24px', height: '1px', background: 'var(--brand)' }} />
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                 {fb.client_name}
               </p>
               {fb.artist_name && (
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.6)', letterSpacing: '0.08em' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.6)', letterSpacing: '0.08em' }}>
                   · {fb.artist_name}
                 </p>
               )}

@@ -26,7 +26,7 @@ export default function LangDropdown({ lang, setLang, template, theme }) {
         <button
           onClick={() => setOpen(o => !o)}
           style={{
-            fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.08em',
+            fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.08em',
             padding: '6px 14px', border: `0.5px solid ${open ? 'var(--brand)' : borderColor}`,
             color: open ? 'var(--brand)' : textColor, background: 'transparent',
             cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
@@ -47,7 +47,7 @@ export default function LangDropdown({ lang, setLang, template, theme }) {
                   key={l.code}
                   onClick={() => handleSelect(l.code)}
                   style={{
-                    fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.08em',
+                    fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.08em',
                     padding: '8px 14px', border: 'none', borderBottom: `0.5px solid ${innerBorder}`,
                     color: lang === l.code ? 'var(--brand)' : textColor,
                     background: lang === l.code ? 'rgb(var(--brand-rgb) /0.06)' : 'transparent',

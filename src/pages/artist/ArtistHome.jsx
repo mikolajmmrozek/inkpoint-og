@@ -100,13 +100,13 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
     type,
     value: form[field] || '',
     onChange: e => set(field, e.target.value),
-    style: { background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif' },
+    style: { background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'var(--font-body)' },
     onFocus: e => e.target.style.borderBottomColor = 'var(--brand)',
     onBlur: e => e.target.style.borderBottomColor = t.inputBorder,
   });
 
   const label = txt => (
-    <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>{txt}</label>
+    <label style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>{txt}</label>
   );
 
   const handleStatusChange = async (newStatus) => {
@@ -133,14 +133,14 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
         {/* Header */}
         <div className="flex items-start justify-between mb-6">
           <div>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>{!editing ? 'PODGLĄD SESJI' : 'EDYTUJ SESJĘ'}</p>
-            <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em', lineHeight: 1 }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>{!editing ? 'PODGLĄD SESJI' : 'EDYTUJ SESJĘ'}</p>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em', lineHeight: 1 }}>
               {form.client_name}
             </h3>
           </div>
           <div className="flex items-center gap-2">
             {!editing && (
-              <button onClick={() => setEditing(true)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}>EDYTUJ</button>
+              <button onClick={() => setEditing(true)} style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}>EDYTUJ</button>
             )}
             <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}><X size={18} /></button>
           </div>
@@ -150,26 +150,26 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
         {!editing && (
           <div className="mb-6 space-y-4">
             <div className="flex items-center gap-3 flex-wrap">
-              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 12px', border: `0.5px solid ${STATUS_COLORS[form.status]}`, color: STATUS_COLORS[form.status] }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 12px', border: `0.5px solid ${STATUS_COLORS[form.status]}`, color: STATUS_COLORS[form.status] }}>
                 {STATUS_LABELS[form.status]}
               </span>
-              {form.deposit_paid && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.08em' }}>✓ DEPOZYT</span>}
-              {!form.health_form_completed && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', padding: '3px 8px', border: '0.5px solid var(--brand)', color: 'var(--brand)' }}>BRAK ANKIETY</span>}
+              {form.deposit_paid && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#16a34a', letterSpacing: '0.08em' }}>✓ DEPOZYT</span>}
+              {!form.health_form_completed && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', padding: '3px 8px', border: '0.5px solid var(--brand)', color: 'var(--brand)' }}>BRAK ANKIETY</span>}
             </div>
 
             {/* Quick status change */}
             {form.status !== 'cancelled' && (
               <div>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '6px' }}>ZMIEŃ STATUS</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '6px' }}>ZMIEŃ STATUS</p>
                 <div className="flex gap-2 flex-wrap">
                   {Object.entries(STATUS_LABELS).filter(([k]) => k !== form.status && k !== 'cancelled').map(([k, lbl]) => (
                     <button key={k} onClick={() => handleStatusChange(k)}
-                      style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[k]}`, color: STATUS_COLORS[k], background: 'transparent', cursor: 'pointer' }}>
+                      style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[k]}`, color: STATUS_COLORS[k], background: 'transparent', cursor: 'pointer' }}>
                       → {lbl}
                     </button>
                   ))}
                   <button onClick={() => handleStatusChange('cancelled')}
-                    style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 10px', border: '0.5px solid #9ca3af', color: '#9ca3af', background: 'transparent', cursor: 'pointer' }}>
+                    style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 10px', border: '0.5px solid #9ca3af', color: '#9ca3af', background: 'transparent', cursor: 'pointer' }}>
                     → Anuluj
                   </button>
                 </div>
@@ -190,7 +190,7 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
                 ['NOTATKI', form.notes],
               ].filter(([, v]) => v).map(([lbl, val]) => (
                 <div key={lbl}>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '2px' }}>{lbl}</p>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '2px' }}>{lbl}</p>
                   <p style={{ color: t.text, fontSize: '13px' }}>{val}</p>
                 </div>
               ))}
@@ -210,7 +210,7 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
           <div className="space-y-6">
             {/* Client */}
             <div>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>KLIENT</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>KLIENT</p>
               <div className="mb-4">
                 {label('Szukaj klienta z bazy')}
                 <ClientSearch value={form.client_name ? { name: form.client_name } : null} onSelect={(client) => {
@@ -230,7 +230,7 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
 
             {/* Service */}
             <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>USŁUGA</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>USŁUGA</p>
               <div style={{ position: 'relative' }}>
                 {label('Wybierz usługę (opcjonalnie)')}
                 <input
@@ -243,7 +243,7 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
                   }}
                   onFocus={() => setShowServiceSuggestions(true)}
                   onBlur={() => setTimeout(() => setShowServiceSuggestions(false), 150)}
-                  style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${form.service_id ? 'var(--brand)' : t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif' }}
+                  style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${form.service_id ? 'var(--brand)' : t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'var(--font-body)' }}
                 />
                 {showServiceSuggestions && (() => {
                   const q = (form.service_name || '').toLowerCase();
@@ -266,12 +266,12 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
                               if (s.duration_minutes) set('session_duration', s.duration_minutes);
                               setShowServiceSuggestions(false);
                             }}
-                            style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 14px', background: 'none', border: 'none', borderBottom: `0.5px solid ${t.border}`, cursor: 'pointer', color: t.text, fontFamily: 'Inter, sans-serif', fontSize: '13px' }}
+                            style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 14px', background: 'none', border: 'none', borderBottom: `0.5px solid ${t.border}`, cursor: 'pointer', color: t.text, fontFamily: 'var(--font-body)', fontSize: '13px' }}
                             onMouseEnter={e => e.currentTarget.style.background = 'rgb(var(--brand-rgb) /0.06)'}
                             onMouseLeave={e => e.currentTarget.style.background = 'none'}
                           >
                             <span>{s.name}</span>
-                            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginLeft: '8px' }}>{durStr}{priceStr}</span>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, marginLeft: '8px' }}>{durStr}{priceStr}</span>
                           </button>
                         );
                       })}
@@ -282,14 +282,14 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
               {form.service_id && (
                 <div className="mt-3 px-3 py-2 flex items-center gap-2" style={{ background: 'rgb(var(--brand-rgb) /0.05)', border: '0.5px solid rgb(var(--brand-rgb) /0.2)' }}>
                   <Zap size={10} color="var(--brand)" />
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em' }}>USŁUGA WYBRANA · CENA I CZAS UZUPEŁNIONE</p>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em' }}>USŁUGA WYBRANA · CENA I CZAS UZUPEŁNIONE</p>
                 </div>
               )}
             </div>
 
             {/* Session */}
             <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>TERMIN</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>TERMIN</p>
               <div className="mb-4">{label('Data *')}<input {...inp('session_date', 'date')} style={{ ...inp('session_date', 'date').style, colorScheme: theme === 'light' ? 'light' : 'dark' }} /></div>
               <div className="grid grid-cols-2 gap-6 mb-4">
                 <div>{label('Godzina start')}<input {...inp('session_time')} /></div>
@@ -297,7 +297,7 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
               </div>
               <div className="mb-4">{label('Cena (PLN)')}<input {...inp('estimated_price', 'number')} /></div>
               <div>{label('Status')}
-                <select value={form.status || 'pending'} onChange={e => set('status', e.target.value)} style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif', colorScheme: theme === 'light' ? 'light' : 'dark' }}>
+                <select value={form.status || 'pending'} onChange={e => set('status', e.target.value)} style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'var(--font-body)', colorScheme: theme === 'light' ? 'light' : 'dark' }}>
                   {Object.entries(STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                 </select>
               </div>
@@ -305,20 +305,20 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
 
             {/* Tattoo */}
             <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>TATUAŻ</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>TATUAŻ</p>
               <div className="mb-4">{label('Miejsce na ciele')}<input {...inp('tattoo_placement')} /></div>
               <div className="mb-4">{label('Opis projektu')}
-                <textarea rows={3} style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif', resize: 'none' }} value={form.tattoo_description || ''} onChange={e => set('tattoo_description', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.inputBorder} />
+                <textarea rows={3} style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'var(--font-body)', resize: 'none' }} value={form.tattoo_description || ''} onChange={e => set('tattoo_description', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.inputBorder} />
               </div>
               <div>{label('Notatki adminów')}
-                <textarea rows={2} style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif', resize: 'none' }} value={form.notes || ''} onChange={e => set('notes', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.inputBorder} />
+                <textarea rows={2} style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'var(--font-body)', resize: 'none' }} value={form.notes || ''} onChange={e => set('notes', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.inputBorder} />
               </div>
             </div>
 
             {/* Flags */}
             <div className="flex gap-6" style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
               {[['deposit_paid', 'Wpłacony depozyt'], ['health_form_completed', 'Ankieta zdrowotna']].map(([field, lbl]) => (
-                <button key={field} onClick={() => set(field, !form[field])} className="flex items-center gap-2" style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form[field] ? '#16a34a' : t.muted }}>
+                <button key={field} onClick={() => set(field, !form[field])} className="flex items-center gap-2" style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form[field] ? '#16a34a' : t.muted }}>
                   <div style={{ width: '12px', height: '12px', border: `0.5px solid ${form[field] ? '#16a34a' : t.border}`, background: form[field] ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {form[field] && <span style={{ color: '#fff', fontSize: '8px' }}>✓</span>}
                   </div>
@@ -424,7 +424,7 @@ export default function ArtistHome() {
   return (
     <div>
       <div className="mb-6">
-        <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.4rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.4rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>
           Cześć, {artist.name?.split(' ')[0]}
         </h1>
       </div>
@@ -436,10 +436,10 @@ export default function ArtistHome() {
             <motion.div key={kpi.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
               <Link to={kpi.link} className="block p-6 h-full" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
                 <Icon size={16} color="var(--brand)" className="mb-4" />
-                <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.value, lineHeight: 1, letterSpacing: '0.04em' }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 400, color: t.value, lineHeight: 1, letterSpacing: '0.04em' }}>
                   {loading ? '—' : kpi.value}
                 </p>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px' }}>{kpi.label}</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px' }}>{kpi.label}</p>
               </Link>
             </motion.div>
           );
@@ -448,8 +448,8 @@ export default function ArtistHome() {
 
       <div>
         <div className="flex items-center justify-between mb-4">
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>NADCHODZĄCE SESJE</p>
-          <Link to="/artist/schedule" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>WSZYSTKIE →</Link>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>NADCHODZĄCE SESJE</p>
+          <Link to="/artist/schedule" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>WSZYSTKIE →</Link>
         </div>
         {loading ? (
           <div className="p-8 text-center" style={{ border: `0.5px solid ${t.cardBorder}` }}>
@@ -462,25 +462,25 @@ export default function ArtistHome() {
               <div>
                 <div className="flex items-center gap-3 mb-2">
                   <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--brand)', flexShrink: 0 }} />
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--brand)' }}>DO ROZLICZENIA / PRZETERMINOWANE</p>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--brand)' }}>DO ROZLICZENIA / PRZETERMINOWANE</p>
                   <div style={{ flex: 1, height: '0.5px', background: 'rgb(var(--brand-rgb) /0.3)' }} />
                 </div>
                 {overdueGroups.map(([date, items]) => (
                   <div key={date} className="mb-3">
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px', opacity: 0.7 }}>{formatDayHeader(date)}</p>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px', opacity: 0.7 }}>{formatDayHeader(date)}</p>
                     <div style={{ border: '0.5px solid rgb(var(--brand-rgb) /0.4)', background: t.cardBg }}>
                       {items.map((b, i) => (
                         <div key={b.id} onClick={() => setSelectedBooking(b)} className="flex items-center justify-between p-4 cursor-pointer" style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }} onMouseEnter={e => e.currentTarget.style.background = t.rowHover} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                           <div className="flex-1">
                             <p style={{ color: t.value, fontSize: '15px', fontWeight: 500 }}>{b.client_name}</p>
-                            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px' }}>
+                            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px' }}>
                               {b.session_time ? `${b.session_time} · ` : ''}{b.tattoo_placement || ''}
                             </p>
-                            {b.service_name && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', opacity: 0.8, marginTop: '2px' }}>{b.service_name}</p>}
+                            {b.service_name && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', opacity: 0.8, marginTop: '2px' }}>{b.service_name}</p>}
                           </div>
                           <div className="flex items-end gap-3 flex-shrink-0 ml-4">
-                            {b.estimated_price > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: t.muted }}>{b.estimated_price} zł</span>}
-                            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status] }}>
+                            {b.estimated_price > 0 && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.muted }}>{b.estimated_price} zł</span>}
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status] }}>
                               {b.status?.toUpperCase()}
                             </span>
                           </div>
@@ -496,12 +496,12 @@ export default function ArtistHome() {
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#16a34a', flexShrink: 0 }} />
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#16a34a' }}>DZIŚ — {todayLabel}</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#16a34a' }}>DZIŚ — {todayLabel}</p>
                 <div style={{ flex: 1, height: '0.5px', background: 'rgba(22,163,74,0.3)' }} />
               </div>
               {todayBookings.length === 0 ? (
                 <div className="py-5 text-center" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK UMÓWIONYCH SESJI DZIŚ</p>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK UMÓWIONYCH SESJI DZIŚ</p>
                 </div>
               ) : (
                 <div style={{ border: `0.5px solid rgba(22,163,74,0.4)`, background: t.cardBg }}>
@@ -509,14 +509,14 @@ export default function ArtistHome() {
                     <div key={b.id} onClick={() => setSelectedBooking(b)} className="flex items-center justify-between p-4 cursor-pointer" style={{ borderBottom: i < todayBookings.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }} onMouseEnter={e => e.currentTarget.style.background = t.rowHover} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                       <div className="flex-1">
                         <p style={{ color: t.value, fontSize: '15px', fontWeight: 500 }}>{b.client_name}</p>
-                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px' }}>
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px' }}>
                           {b.session_time ? `${b.session_time} · ` : ''}{b.tattoo_placement || ''}
                         </p>
-                        {b.service_name && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', opacity: 0.8, marginTop: '2px' }}>{b.service_name}</p>}
+                        {b.service_name && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', opacity: 0.8, marginTop: '2px' }}>{b.service_name}</p>}
                       </div>
                       <div className="flex items-end gap-3 flex-shrink-0 ml-4">
-                        {b.estimated_price > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: t.muted }}>{b.estimated_price} zł</span>}
-                        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status] }}>
+                        {b.estimated_price > 0 && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.muted }}>{b.estimated_price} zł</span>}
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status] }}>
                           {b.status?.toUpperCase()}
                         </span>
                       </div>
@@ -531,23 +531,23 @@ export default function ArtistHome() {
               <div key={date}>
                 <div className="flex items-center gap-3 mb-2">
                   <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--brand)', flexShrink: 0 }} />
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: t.muted }}>{formatDayHeader(date)}</p>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: t.muted }}>{formatDayHeader(date)}</p>
                   <div style={{ flex: 1, height: '0.5px', background: t.cardBorder }} />
-                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: t.muted }}>{items.length} {pluralSesji(items.length)}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.muted }}>{items.length} {pluralSesji(items.length)}</span>
                 </div>
                 <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
                   {items.map((b, i) => (
                     <div key={b.id} onClick={() => setSelectedBooking(b)} className="flex items-center justify-between p-4 cursor-pointer" style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }} onMouseEnter={e => e.currentTarget.style.background = t.rowHover} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                       <div className="flex-1">
                         <p style={{ color: t.value, fontSize: '15px', fontWeight: 500 }}>{b.client_name}</p>
-                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px' }}>
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px' }}>
                           {b.session_time ? `${b.session_time} · ` : ''}{b.tattoo_placement || ''}
                         </p>
-                        {b.service_name && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', opacity: 0.8, marginTop: '2px' }}>{b.service_name}</p>}
+                        {b.service_name && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', opacity: 0.8, marginTop: '2px' }}>{b.service_name}</p>}
                       </div>
                       <div className="flex items-end gap-3 flex-shrink-0 ml-4">
-                        {b.estimated_price > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: t.muted }}>{b.estimated_price} zł</span>}
-                        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status] }}>
+                        {b.estimated_price > 0 && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.muted }}>{b.estimated_price} zł</span>}
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status] }}>
                           {b.status?.toUpperCase()}
                         </span>
                       </div>

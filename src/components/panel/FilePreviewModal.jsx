@@ -49,7 +49,7 @@ export default function FilePreviewModal({ attachment, onClose }) {
             target="_blank"
             rel="noopener noreferrer"
             onClick={e => e.stopPropagation()}
-            style={{ position: 'fixed', bottom: '20px', right: '20px', background: 'rgb(var(--brand-rgb) /0.9)', color: '#FFF', padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontSize: '10px', textTransform: 'uppercase', zIndex: 81, textDecoration: 'none' }}
+            style={{ position: 'fixed', bottom: '20px', right: '20px', background: 'rgb(var(--brand-rgb) /0.9)', color: '#FFF', padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-mono)', fontSize: '10px', textTransform: 'uppercase', zIndex: 81, textDecoration: 'none' }}
           >
             <Download size={14} /> POBIERZ
           </a>

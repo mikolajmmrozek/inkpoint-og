@@ -106,12 +106,12 @@ export default function NotificationsPage() {
       {/* Actions */}
       <div className="mb-6 flex items-center justify-end flex-wrap gap-2">
         {notifications.some(n => !n.is_read) && (
-          <button onClick={markAllRead} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer' }}>
+          <button onClick={markAllRead} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer' }}>
             <CheckCheck size={12} /> Przeczytane
           </button>
         )}
         {notifications.length > 0 && (
-          <button onClick={() => setConfirmDeleteAll(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF4444', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer' }}>
+          <button onClick={() => setConfirmDeleteAll(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#FF4444', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer' }}>
             <Trash2 size={12} /> Usuń wszystkie
           </button>
         )}
@@ -149,7 +149,7 @@ export default function NotificationsPage() {
                     <p style={{ fontSize: '12px', color: t.muted, lineHeight: 1.5, marginBottom: '4px' }}>
                       {notif.message}
                     </p>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.05em' }}>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.05em' }}>
                       {format(new Date(notif.created_date), 'dd.MM.yyyy HH:mm')}
                     </p>
                   </div>
@@ -178,17 +178,17 @@ export default function NotificationsPage() {
           <button
             onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
-            style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'JetBrains Mono', fontSize: '9px', color: currentPage === 1 ? t.muted : t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', opacity: currentPage === 1 ? 0.5 : 1 }}
+            style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)', fontSize: '9px', color: currentPage === 1 ? t.muted : t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', opacity: currentPage === 1 ? 0.5 : 1 }}
           >
             <ChevronLeft size={12} /> Nowsze
           </button>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em' }}>
             Strona {currentPage} z {totalPages}
           </p>
           <button
             onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
             disabled={currentPage === totalPages}
-            style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'JetBrains Mono', fontSize: '9px', color: currentPage === totalPages ? t.muted : t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', opacity: currentPage === totalPages ? 0.5 : 1 }}
+            style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)', fontSize: '9px', color: currentPage === totalPages ? t.muted : t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', opacity: currentPage === totalPages ? 0.5 : 1 }}
           >
             Starsze <ChevronRight size={12} />
           </button>
@@ -201,9 +201,9 @@ export default function NotificationsPage() {
           <div className="w-full max-w-sm" style={{ background: t.bg, border: `0.5px solid ${t.border}`, padding: '36px' }} onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-2 mb-4">
               <Trash2 size={16} color="#FF4444" />
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF4444', letterSpacing: '0.2em', textTransform: 'uppercase' }}>USUŃ WSZYSTKIE</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#FF4444', letterSpacing: '0.2em', textTransform: 'uppercase' }}>USUŃ WSZYSTKIE</p>
             </div>
-            <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.6rem', fontWeight: 400, color: t.text, letterSpacing: '0.04em', marginBottom: '12px' }}>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 400, color: t.text, letterSpacing: '0.04em', marginBottom: '12px' }}>
               Czy na pewno?
             </h3>
             <p style={{ fontSize: '13px', color: t.muted, lineHeight: 1.6, marginBottom: '24px' }}>

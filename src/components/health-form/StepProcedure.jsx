@@ -11,14 +11,14 @@ function ProcedureRow({ q, form, setField, t, inputStyle, showErrors, lang, text
         <div className="flex gap-2 flex-shrink-0">
           {[true, false].map(v => (
             <button type="button" key={String(v)} onClick={() => setField(q.field_key, v)}
-              style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${form[q.field_key] === v ? (v ? 'var(--brand)' : '#16a34a') : (showErrors && q.required && (form[q.field_key] === undefined || form[q.field_key] === null) ? 'var(--brand)' : borderColor)}`, color: form[q.field_key] === v ? (v ? 'var(--brand)' : '#16a34a') : textMuted, background: 'rgba(255,255,255,0.06)', cursor: 'pointer' }}>
+              style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${form[q.field_key] === v ? (v ? 'var(--brand)' : '#16a34a') : (showErrors && q.required && (form[q.field_key] === undefined || form[q.field_key] === null) ? 'var(--brand)' : borderColor)}`, color: form[q.field_key] === v ? (v ? 'var(--brand)' : '#16a34a') : textMuted, background: 'rgba(255,255,255,0.06)', cursor: 'pointer' }}>
               {v ? t.yes : t.no}
             </button>
           ))}
         </div>
       </div>
       {showErrors && q.required && (form[q.field_key] === null || form[q.field_key] === undefined) && (
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', marginTop: '4px', letterSpacing: '0.08em' }}>⚠ {t?.required || 'WYMAGANE'}</p>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', marginTop: '4px', letterSpacing: '0.08em' }}>⚠ {t?.required || 'WYMAGANE'}</p>
       )}
       {form[q.field_key] === true && q.has_description && (
         <input

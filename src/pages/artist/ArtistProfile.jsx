@@ -22,7 +22,7 @@ export default function ArtistProfile() {
 
   const inputStyle = {
     background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`,
-    color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif',
+    color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'var(--font-body)',
   };
 
   const handlePhotoUpload = async (e) => {
@@ -76,7 +76,7 @@ export default function ArtistProfile() {
       {/* Tabs */}
       <div className="flex mb-6" style={{ borderBottom: `0.5px solid ${t.cardBorder}` }}>
         {[['profile', 'Profil'], ['schedule', 'Mój Grafik']].map(([key, lbl]) => (
-          <button key={key} onClick={() => setActiveTab(key)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '8px 16px', background: 'transparent', border: 'none', borderBottom: `1.5px solid ${activeTab === key ? 'var(--brand)' : 'transparent'}`, color: activeTab === key ? 'var(--brand)' : t.muted, cursor: 'pointer', marginBottom: '-0.5px' }}>{lbl}</button>
+          <button key={key} onClick={() => setActiveTab(key)} style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '8px 16px', background: 'transparent', border: 'none', borderBottom: `1.5px solid ${activeTab === key ? 'var(--brand)' : 'transparent'}`, color: activeTab === key ? 'var(--brand)' : t.muted, cursor: 'pointer', marginBottom: '-0.5px' }}>{lbl}</button>
         ))}
       </div>
 
@@ -90,20 +90,20 @@ export default function ArtistProfile() {
       <div className="space-y-6" style={{ display: activeTab === 'profile' ? 'block' : 'none' }}>
         {/* Photo */}
         <div className="p-6" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>ZDJĘCIE PROFILOWE</p>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>ZDJĘCIE PROFILOWE</p>
           <div className="flex items-center gap-6">
             {artist?.photo_url ? (
               <img src={artist.photo_url} alt={artist.name} style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: `0.5px solid ${t.cardBorder}` }} />
             ) : (
               <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgb(var(--brand-rgb) /0.1)', border: '0.5px solid rgb(var(--brand-rgb) /0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '24px', color: 'var(--brand)' }}>
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: 'var(--brand)' }}>
                   {(artist?.name || '').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
                 </span>
               </div>
             )}
             <label style={{ cursor: 'pointer' }}>
               <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
-              <span style={{ fontSize: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono, monospace', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', padding: '8px 16px', border: `0.5px solid ${t.text}`, color: t.text, cursor: 'pointer', transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+              <span style={{ fontSize: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-mono)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', padding: '8px 16px', border: `0.5px solid ${t.text}`, color: t.text, cursor: 'pointer', transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
                 <Upload size={12} /> {uploading ? 'WYSYŁAM...' : 'ZMIEŃ ZDJĘCIE'}
               </span>
             </label>
@@ -112,18 +112,18 @@ export default function ArtistProfile() {
 
         {/* Bio & Instagram */}
         <div className="p-6" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>INFORMACJE</p>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>INFORMACJE</p>
           <div className="space-y-4">
             <div>
-              <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>NAZWA ARTYSTY</label>
+              <label style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>NAZWA ARTYSTY</label>
               <input type="text" value={name} onChange={e => setName(e.target.value)} style={inputStyle} />
             </div>
             <div>
-              <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>BIO</label>
+              <label style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>BIO</label>
               <textarea rows={5} value={bio} onChange={e => setBio(e.target.value)} style={{ ...inputStyle, resize: 'none' }} />
             </div>
             <div>
-              <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>INSTAGRAM (USERNAME)</label>
+              <label style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>INSTAGRAM (USERNAME)</label>
               <input type="text" value={instagram} onChange={e => setInstagram(e.target.value)} placeholder="@nazwa" style={inputStyle} />
             </div>
           </div>
@@ -135,7 +135,7 @@ export default function ArtistProfile() {
         {/* Portfolio */}
         <div className="p-6" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
           <div className="flex items-center justify-between mb-4">
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
               PORTFOLIO ({(artist?.portfolio_images || []).length} zdjęć)
             </p>
             <label style={{ cursor: 'pointer' }}>
@@ -146,7 +146,7 @@ export default function ArtistProfile() {
             </label>
           </div>
           {(artist?.portfolio_images || []).length === 0 ? (
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>Brak zdjęć w portfolio</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>Brak zdjęć w portfolio</p>
           ) : (
             <div className="grid grid-cols-3 gap-2">
               {(artist.portfolio_images || []).map((img, i) => (

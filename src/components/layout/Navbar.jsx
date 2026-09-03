@@ -99,7 +99,7 @@ export default function Navbar() {
               <span
                 className="login-label"
                 style={{
-                  fontFamily: 'JetBrains Mono, monospace',
+                  fontFamily: 'var(--font-mono)',
                   fontSize: '12px',
                   fontWeight: 500,
                   letterSpacing: '0.1em',
@@ -149,7 +149,7 @@ export default function Navbar() {
                 border: '0.5px solid var(--brand)',
                 background: 'rgb(var(--brand-rgb) /0.06)',
                 cursor: 'pointer',
-                fontFamily: 'JetBrains Mono, monospace',
+                fontFamily: 'var(--font-mono)',
                 fontSize: '10px',
                 fontWeight: 500,
                 letterSpacing: '0.08em',

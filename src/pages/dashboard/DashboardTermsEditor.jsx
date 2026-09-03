@@ -50,12 +50,12 @@ export default function DashboardTermsEditor() {
     fontSize: '14px',
     color: t.text,
     outline: 'none',
-    fontFamily: 'Inter',
+    fontFamily: 'var(--font-body)',
     width: '100%',
   };
 
-  const mono = { fontFamily: 'JetBrains Mono' };
-  const display = { fontFamily: 'Bebas Neue, system-ui', fontWeight: 400 };
+  const mono = { fontFamily: 'var(--font-mono)' };
+  const display = { fontFamily: 'var(--font-display)', fontWeight: 400 };
 
   return (
     <div>
@@ -87,7 +87,7 @@ export default function DashboardTermsEditor() {
               fontSize: '13px',
               color: t.text,
               outline: 'none',
-              fontFamily: 'Inter',
+              fontFamily: 'var(--font-body)',
               width: '100%',
               resize: 'vertical',
             }}

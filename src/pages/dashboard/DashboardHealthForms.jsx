@@ -214,7 +214,7 @@ export default function DashboardHealthForms() {
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:auto}
-  body{font-family:'Inter',Arial,sans-serif;font-size:7.5pt;color:#111;background:#fff}
+  body{font-family:'var(--font-body)',Arial,sans-serif;font-size:7.5pt;color:#111;background:#fff}
   .page{max-width:185mm;margin:0 auto;padding:6mm 0}
   .title-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px}
   h1{font-size:14pt;font-weight:800;letter-spacing:-0.5px}
@@ -430,8 +430,8 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
     setTimeout(() => setCopiedGeneral(false), 2000);
   };
 
-  const mono = { fontFamily: 'JetBrains Mono' };
-  const display = { fontFamily: 'Bebas Neue, system-ui', fontWeight: 400 };
+  const mono = { fontFamily: 'var(--font-mono)' };
+  const display = { fontFamily: 'var(--font-display)', fontWeight: 400 };
 
   return (
     <div>
@@ -598,7 +598,7 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
                 placeholder="Szukaj: imię, email, data, #ID..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                style={{ background: 'transparent', border: 'none', outline: 'none', color: t.text, fontSize: '11px', width: '100%', fontFamily: 'Inter' }}
+                style={{ background: 'transparent', border: 'none', outline: 'none', color: t.text, fontSize: '11px', width: '100%', fontFamily: 'var(--font-body)' }}
               />
             </div>
             {filteredForms.some(f => !f.is_read) && (
@@ -635,7 +635,7 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
                     onClick={() => handleSelectForm(form)}
                   >
                     <FileText size={13} color={form.is_minor ? 'var(--brand)' : t.fuchsia} />
-                    {group.some(f => !f.is_read) && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: 'var(--brand)', border: '0.5px solid var(--brand)', padding: '1px 4px' }}>NOWA</span>}
+                    {group.some(f => !f.is_read) && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', color: 'var(--brand)', border: '0.5px solid var(--brand)', padding: '1px 4px' }}>NOWA</span>}
                     <div className="flex-1 min-w-0">
                       <p style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>{getClientName(form)}</p>
                       <p style={{ ...mono, fontSize: '8px', color: t.muted, marginTop: '2px' }}>{form.client_email}</p>

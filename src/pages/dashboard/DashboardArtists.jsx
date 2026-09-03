@@ -19,7 +19,7 @@ const inputStyle = {
   fontSize: '15px',
   width: '100%',
   outline: 'none',
-  fontFamily: 'Inter, sans-serif',
+  fontFamily: 'var(--font-body)',
 };
 
 export default function DashboardArtists() {
@@ -167,7 +167,7 @@ export default function DashboardArtists() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }}>
             <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="w-full max-w-2xl max-h-screen overflow-y-auto" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '40px' }}>
               <div className="flex justify-between items-center mb-6">
-                <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
                   {editing === 'new' ? 'Nowy Artysta' : 'Edytuj Artystę'}
                 </h3>
                 <button onClick={() => setEditing(null)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
@@ -176,7 +176,7 @@ export default function DashboardArtists() {
               {/* Tabs */}
               <div className="flex mb-6" style={{ borderBottom: `0.5px solid ${t.border}` }}>
                 {[['profile', 'Profil'], ...(editing !== 'new' ? [['schedule', 'Grafik']] : [])].map(([key, lbl]) => (
-                  <button key={key} onClick={() => setActiveTab(key)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '8px 16px', background: 'transparent', border: 'none', borderBottom: `1.5px solid ${activeTab === key ? 'var(--brand)' : 'transparent'}`, color: activeTab === key ? 'var(--brand)' : t.muted, cursor: 'pointer', marginBottom: '-0.5px' }}>{lbl}</button>
+                  <button key={key} onClick={() => setActiveTab(key)} style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '8px 16px', background: 'transparent', border: 'none', borderBottom: `1.5px solid ${activeTab === key ? 'var(--brand)' : 'transparent'}`, color: activeTab === key ? 'var(--brand)' : t.muted, cursor: 'pointer', marginBottom: '-0.5px' }}>{lbl}</button>
                 ))}
               </div>
 
@@ -188,27 +188,27 @@ export default function DashboardArtists() {
               <div className="space-y-6" style={{ display: activeTab === 'profile' ? 'block' : 'none' }}>
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Imię i Nazwisko *</label>
+                    <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Imię i Nazwisko *</label>
                     <input style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={form.name || ''} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                   </div>
                   <div>
-                    <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Slug (URL)</label>
+                    <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Slug (URL)</label>
                     <input style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={form.slug || ''} onChange={e => setForm(f => ({ ...f, slug: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Bio</label>
+                  <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Bio</label>
                   <textarea rows={4} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} value={form.bio || ''} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                 </div>
 
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Specjalizacje (przecinki)</label>
+                    <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Specjalizacje (przecinki)</label>
                     <input style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={Array.isArray(form.specialty) ? form.specialty.join(', ') : (form.specialty || '')} onChange={e => setForm(f => ({ ...f, specialty: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                   </div>
                   <div>
-                    <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Lata doświadczenia</label>
+                    <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Lata doświadczenia</label>
                     <input type="number" style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={form.years_experience || ''} onChange={e => setForm(f => ({ ...f, years_experience: Number(e.target.value) }))} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                   </div>
                 </div>
@@ -216,11 +216,11 @@ export default function DashboardArtists() {
                 {/* Revenue split */}
                 <div style={{ border: `0.5px solid ${t.border}`, padding: '16px' }}>
                   <div className="flex items-center justify-between mb-3">
-                    <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Podział przychodu</label>
+                    <label style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Podział przychodu</label>
                     {editing !== 'new' && (
                       <button
                         onClick={() => setShowAddCommission(v => !v)}
-                        style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: showAddCommission ? 'var(--brand)' : t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${showAddCommission ? 'var(--brand)' : t.border}`, padding: '4px 10px', cursor: 'pointer' }}
+                        style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: showAddCommission ? 'var(--brand)' : t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${showAddCommission ? 'var(--brand)' : t.border}`, padding: '4px 10px', cursor: 'pointer' }}
                       >
                         + ZMIEŃ STAWKĘ
                       </button>
@@ -230,7 +230,7 @@ export default function DashboardArtists() {
                   {/* Bieżąca stawka (tylko do odczytu jeśli jest historia) */}
                   <div className="flex items-center gap-4 mb-3">
                     <div className="flex-1">
-                      <label className="block mb-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Artysta % (bieżące)</label>
+                      <label className="block mb-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Artysta % (bieżące)</label>
                       <input
                         type="number" min="0" max="100"
                         style={{ ...inputStyle, color: '#16a34a', borderBottomColor: t.border }}
@@ -241,21 +241,21 @@ export default function DashboardArtists() {
                         readOnly={editing !== 'new' && commissionHistory.length > 0}
                       />
                     </div>
-                    <div style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: t.muted }}>+</div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.muted }}>+</div>
                     <div className="flex-1">
-                      <label className="block mb-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Studio %</label>
+                      <label className="block mb-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Studio %</label>
                       <input type="number" readOnly style={{ ...inputStyle, color: 'var(--brand)', borderBottomColor: t.border, cursor: 'default' }} value={100 - (form.artist_cut_percent ?? 60)} />
                     </div>
-                    <div style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted }}>= 100%</div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: t.muted }}>= 100%</div>
                   </div>
 
                   {/* Formularz nowej zmiany */}
                   {showAddCommission && (
                     <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '14px', marginTop: '8px' }}>
-                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px' }}>Nowa stawka od daty:</p>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px' }}>Nowa stawka od daty:</p>
                       <div className="flex gap-4 items-end mb-3">
                         <div className="flex-1">
-                          <label className="block mb-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Nowy % artysty</label>
+                          <label className="block mb-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Nowy % artysty</label>
                           <input
                             type="number" min="0" max="100"
                             style={{ ...inputStyle, color: '#16a34a', borderBottomColor: t.border }}
@@ -266,7 +266,7 @@ export default function DashboardArtists() {
                           />
                         </div>
                         <div className="flex-1">
-                          <label className="block mb-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Obowiązuje od</label>
+                          <label className="block mb-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Obowiązuje od</label>
                           <input
                             type="date"
                             style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }}
@@ -278,7 +278,7 @@ export default function DashboardArtists() {
                         </div>
                       </div>
                       <div className="mb-3">
-                        <label className="block mb-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Notatka (opcjonalna)</label>
+                        <label className="block mb-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Notatka (opcjonalna)</label>
                         <input
                           type="text"
                           placeholder="np. podwyżka, zmiana umowy..."
@@ -300,19 +300,19 @@ export default function DashboardArtists() {
                     <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '12px', marginTop: '14px' }}>
                       <div className="flex items-center gap-2 mb-3">
                         <History size={10} color={t.muted} />
-                        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Historia stawek</p>
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Historia stawek</p>
                       </div>
                       <div className="space-y-2">
                         {commissionHistory.map((entry, i) => (
                           <div key={entry.id} className="flex items-center justify-between" style={{ padding: '8px 10px', background: i === 0 ? 'rgba(22,163,74,0.06)' : 'transparent', border: `0.5px solid ${i === 0 ? 'rgba(22,163,74,0.3)' : t.border}` }}>
                             <div>
-                              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: i === 0 ? '#16a34a' : t.text, fontWeight: i === 0 ? 600 : 400 }}>
+                              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: i === 0 ? '#16a34a' : t.text, fontWeight: i === 0 ? 600 : 400 }}>
                                 {entry.cut_percent}% artysta / {100 - entry.cut_percent}% studio
                               </span>
                               <div className="flex items-center gap-3 mt-0.5">
-                                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>od {entry.effective_from}</span>
-                                {entry.note && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted }}>· {entry.note}</span>}
-                                {i === 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#16a34a', letterSpacing: '0.1em', border: '0.5px solid rgba(22,163,74,0.4)', padding: '1px 5px' }}>BIEŻĄCA</span>}
+                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>od {entry.effective_from}</span>
+                                {entry.note && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted }}>· {entry.note}</span>}
+                                {i === 0 && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', color: '#16a34a', letterSpacing: '0.1em', border: '0.5px solid rgba(22,163,74,0.4)', padding: '1px 5px' }}>BIEŻĄCA</span>}
                               </div>
                             </div>
                             {i > 0 && (
@@ -328,15 +328,15 @@ export default function DashboardArtists() {
                 </div>
 
                 <div>
-                  <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Instagram</label>
+                  <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Instagram</label>
                   <input style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={form.instagram || ''} onChange={e => setForm(f => ({ ...f, instagram: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                 </div>
 
                 {/* Photo upload */}
                 <div>
-                  <label className="block mb-3" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Zdjęcie profilowe</label>
+                  <label className="block mb-3" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Zdjęcie profilowe</label>
                   {form.photo_url && <img src={form.photo_url} alt="" className="w-24 h-24 object-cover mb-3" style={{ filter: 'brightness(0.7)' }} />}
-                  <label style={{ display: 'inline-block', cursor: 'pointer', fontFamily: 'JetBrains Mono', fontSize: '10px', padding: '8px 16px', background: 'transparent', border: `0.5px solid ${t.border}`, color: t.text, transition: 'all 0.2s ease' }} className="hover:opacity-70">
+                  <label style={{ display: 'inline-block', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '10px', padding: '8px 16px', background: 'transparent', border: `0.5px solid ${t.border}`, color: t.text, transition: 'all 0.2s ease' }} className="hover:opacity-70">
                     {uploading ? 'PRZESYŁANIE...' : 'WYBIERZ ZDJĘCIE'}
                     <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
                   </label>
@@ -344,7 +344,7 @@ export default function DashboardArtists() {
 
                 {/* Portfolio upload */}
                 <div>
-                  <label className="block mb-3" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                  <label className="block mb-3" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                     Portfolio ({(form.portfolio_images || []).length} zdjęć)
                   </label>
                   <div className="flex flex-wrap gap-2 mb-3">
@@ -357,7 +357,7 @@ export default function DashboardArtists() {
                       </div>
                     ))}
                   </div>
-                  <label style={{ display: 'inline-block', cursor: 'pointer', fontFamily: 'JetBrains Mono', fontSize: '10px', padding: '8px 16px', background: 'transparent', border: `0.5px solid ${t.border}`, color: t.text, transition: 'all 0.2s ease' }} className="hover:opacity-70">
+                  <label style={{ display: 'inline-block', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '10px', padding: '8px 16px', background: 'transparent', border: `0.5px solid ${t.border}`, color: t.text, transition: 'all 0.2s ease' }} className="hover:opacity-70">
                     {uploading ? 'PRZESYŁANIE...' : 'DODAJ DO PORTFOLIO'}
                     <input type="file" accept="image/*" multiple onChange={handlePortfolioUpload} className="hidden" />
                   </label>
@@ -369,7 +369,7 @@ export default function DashboardArtists() {
                     type="button"
                     onClick={() => setForm(f => ({ ...f, is_visible: f.is_visible === false ? true : false }))}
                     className="flex items-center gap-2"
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.is_visible === false ? t.muted : '#16a34a' }}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.is_visible === false ? t.muted : '#16a34a' }}
                   >
                     <div style={{ width: '12px', height: '12px', border: `0.5px solid ${form.is_visible === false ? t.border : '#16a34a'}`, background: form.is_visible === false ? 'transparent' : '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       {form.is_visible !== false && <span style={{ color: '#fff', fontSize: '8px' }}>✓</span>}
@@ -385,7 +385,7 @@ export default function DashboardArtists() {
                     style={{
                       backgroundColor: 'transparent',
                       color: t.muted,
-                      fontFamily: 'JetBrains Mono, monospace',
+                      fontFamily: 'var(--font-mono)',
                       fontSize: '12px',
                       fontWeight: 500,
                       textTransform: 'uppercase',
@@ -432,7 +432,7 @@ export default function DashboardArtists() {
               <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }} ref={provided.innerRef} {...provided.droppableProps}>
                 {artists.length === 0 ? (
                   <div className="py-20 text-center">
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK ARTYSTÓW</p>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK ARTYSTÓW</p>
                   </div>
                 ) : artists.map((a, i) => (
                   <Draggable key={a.id} draggableId={a.id} index={i}>
@@ -447,14 +447,14 @@ export default function DashboardArtists() {
                             <img src={a.photo_url} alt="" style={{ width: '40px', height: '40px', objectFit: 'cover', flexShrink: 0 }} />
                           ) : (
                             <div style={{ width: '40px', height: '40px', flexShrink: 0, background: 'rgb(var(--brand-rgb) /0.1)', border: '0.5px solid rgb(var(--brand-rgb) /0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <span style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '14px', color: 'var(--brand)', letterSpacing: '0.05em' }}>
+                              <span style={{ fontFamily: 'var(--font-display)', fontSize: '14px', color: 'var(--brand)', letterSpacing: '0.05em' }}>
                                 {a.name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
                               </span>
                             </div>
                           )}
                           <div>
                             <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{a.name}</p>
-                            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
+                            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
                               {(a.specialty || []).join(', ')} · {a.years_experience} {a.years_experience === 1 ? 'rok' : [2,3,4].includes(a.years_experience) ? 'lata' : 'lat'}
                             </p>
                           </div>

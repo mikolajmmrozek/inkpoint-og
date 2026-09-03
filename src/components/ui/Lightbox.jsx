@@ -34,7 +34,7 @@ export default function Lightbox({ images, currentIndex, onClose, onNext, onPrev
       </button>
 
       {/* Counter */}
-      <div className="absolute top-6 left-6 z-10" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em' }}>
+      <div className="absolute top-6 left-6 z-10" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em' }}>
         {currentIndex + 1} / {images.length}
       </div>
 
@@ -67,7 +67,7 @@ export default function Lightbox({ images, currentIndex, onClose, onNext, onPrev
             style={{ maxHeight: '82vh', maxWidth: '90vw' }}
           />
           {img?.caption && (
-            <p className="mt-4" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+            <p className="mt-4" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
               {img.caption}
             </p>
           )}

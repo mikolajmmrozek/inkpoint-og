@@ -89,7 +89,7 @@ export default function SignatureCanvas({ value, onChange, label, clearLabel, sh
   return (
     <div>
       {label && (
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: showErrors && !value ? 'var(--brand)' : tm, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: showErrors && !value ? 'var(--brand)' : tm, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>
           {label} * {showErrors && !value && '(wymagane)'}
         </p>
       )}
@@ -109,13 +109,13 @@ export default function SignatureCanvas({ value, onChange, label, clearLabel, sh
         />
         {isEmpty && (
           <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: placeholderColor, letterSpacing: '0.1em' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: placeholderColor, letterSpacing: '0.1em' }}>
               ✍ {label || 'Sign here'}
             </p>
           </div>
         )}
       </div>
-      <button type="button" onClick={clear} style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: tm, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer', marginTop: '6px', padding: 0 }}>
+      <button type="button" onClick={clear} style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: tm, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer', marginTop: '6px', padding: 0 }}>
         ↺ {clearLabel || 'Clear'}
       </button>
     </div>

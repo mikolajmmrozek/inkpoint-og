@@ -31,7 +31,7 @@ function FAQItem({ item, index }) {
         className="w-full flex items-center justify-between py-6 text-left"
         style={{ background: 'none', border: 'none', cursor: 'pointer' }}
       >
-        <span style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(1.1rem, 2vw, 1.4rem)', color: '#F5F0EB', letterSpacing: '0.04em', fontWeight: 400 }}>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.1rem, 2vw, 1.4rem)', color: '#F5F0EB', letterSpacing: '0.04em', fontWeight: 400 }}>
           {item.question}
         </span>
         <motion.div
@@ -51,7 +51,7 @@ function FAQItem({ item, index }) {
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
             style={{ overflow: 'hidden' }}
           >
-            <p style={{ color: 'rgba(245,240,235,0.6)', fontSize: '15px', lineHeight: 1.8, paddingBottom: '24px', fontFamily: 'Inter, sans-serif' }}>
+            <p style={{ color: 'rgba(245,240,235,0.6)', fontSize: '15px', lineHeight: 1.8, paddingBottom: '24px', fontFamily: 'var(--font-body)' }}>
               {item.answer}
             </p>
           </motion.div>
@@ -78,10 +78,10 @@ export default function FAQ() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>
               POMOCY
             </p>
-            <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(3rem, 8vw, 7rem)', fontWeight: 400, lineHeight: 0.9, color: '#F5F0EB', letterSpacing: '0.04em', marginBottom: '16px' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(3rem, 8vw, 7rem)', fontWeight: 400, lineHeight: 0.9, color: '#F5F0EB', letterSpacing: '0.04em', marginBottom: '16px' }}>
               Najczęstsze<br />
               <span style={{ color: 'var(--brand)' }}>Pytania</span>
             </h1>

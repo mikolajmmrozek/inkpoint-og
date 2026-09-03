@@ -169,8 +169,8 @@ export default function DashboardDocuments() {
     }
   };
 
-  const mono = { fontFamily: 'JetBrains Mono' };
-  const display = { fontFamily: 'Bebas Neue, system-ui', fontWeight: 400 };
+  const mono = { fontFamily: 'var(--font-mono)' };
+  const display = { fontFamily: 'var(--font-display)', fontWeight: 400 };
   const inputStyle = {
     background: 'transparent',
     border: 'none',
@@ -179,7 +179,7 @@ export default function DashboardDocuments() {
     fontSize: '14px',
     color: t.text,
     outline: 'none',
-    fontFamily: 'Inter',
+    fontFamily: 'var(--font-body)',
     width: '100%',
   };
 
@@ -305,7 +305,7 @@ export default function DashboardDocuments() {
                     setViewLang(lang);
                     translateDoc(docData, viewDoc.kind, lang);
                   }}
-                  style={{ background: 'transparent', border: 'none', outline: 'none', color: t.text, fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', cursor: 'pointer' }}
+                  style={{ background: 'transparent', border: 'none', outline: 'none', color: t.text, fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.08em', cursor: 'pointer' }}
                 >
                   {LANG_OPTIONS.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
                 </select>

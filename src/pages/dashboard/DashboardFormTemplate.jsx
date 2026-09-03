@@ -59,7 +59,7 @@ function SectionCard({ title, color, open, onToggle, children, fg, borderCol, ca
       >
         <div className="flex items-center gap-3">
           <div style={{ width: '6px', height: '6px', background: open ? color : borderCol, borderRadius: '50%', transition: 'background 0.2s' }} />
-          <span style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.5rem', color: fg, letterSpacing: '0.04em' }}>{title}</span>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: fg, letterSpacing: '0.04em' }}>{title}</span>
         </div>
         {open ? <ChevronDown size={16} color={color} /> : <ChevronRight size={16} color="#555" />}
       </button>
@@ -141,11 +141,11 @@ export default function DashboardFormTemplate() {
     background: 'transparent', border: 'none',
     borderBottom: `0.5px solid ${borderCol}`,
     padding: '8px 0', fontSize: '13px', color: fg,
-    outline: 'none', fontFamily: 'Inter', width: '100%',
+    outline: 'none', fontFamily: 'var(--font-body)', width: '100%',
   };
 
-  const mono = { fontFamily: 'JetBrains Mono' };
-  const display = { fontFamily: 'Bebas Neue, system-ui', fontWeight: 400 };
+  const mono = { fontFamily: 'var(--font-mono)' };
+  const display = { fontFamily: 'var(--font-display)', fontWeight: 400 };
 
   return (
     <div>

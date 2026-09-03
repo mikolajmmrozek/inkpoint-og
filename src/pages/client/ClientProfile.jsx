@@ -48,7 +48,7 @@ export default function ClientProfile() {
   };
 
   const label = (text) => (
-    <label className="block mb-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>{text}</label>
+    <label className="block mb-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>{text}</label>
   );
 
   const readOnlyStyle = {
@@ -60,7 +60,7 @@ export default function ClientProfile() {
     fontSize: '14px',
     width: '100%',
     outline: 'none',
-    fontFamily: 'Inter, sans-serif',
+    fontFamily: 'var(--font-body)',
     cursor: 'default',
   };
 
@@ -73,16 +73,16 @@ export default function ClientProfile() {
     fontSize: '14px',
     width: '100%',
     outline: 'none',
-    fontFamily: 'Inter, sans-serif',
+    fontFamily: 'var(--font-body)',
   };
 
   return (
     <div>
       <div className="mb-8">
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>
           KONTO
         </p>
-        <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>
           Twój Profil
         </h1>
       </div>
@@ -90,13 +90,13 @@ export default function ClientProfile() {
       {/* ── DANE ── */}
       <div className="pt-6" style={{ borderTop: `0.5px solid ${t.border}` }}>
         <div className="flex items-center justify-between mb-5">
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
             DANE
           </p>
           {!editing && (
             <button
               onClick={() => setEditing(true)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.fuchsia, display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.fuchsia, display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}
             >
               <Edit3 size={13} /> EDYTUJ
             </button>
@@ -146,7 +146,7 @@ export default function ClientProfile() {
               onClick={handleCancel}
               style={{
                 fontSize: '10px',
-                fontFamily: 'JetBrains Mono',
+                fontFamily: 'var(--font-mono)',
                 fontWeight: 500,
                 textTransform: 'uppercase',
                 letterSpacing: '0.1em',
@@ -161,7 +161,7 @@ export default function ClientProfile() {
               ANULUJ
             </button>
             {saved && (
-              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.1em' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#16a34a', letterSpacing: '0.1em' }}>
                 ✓ ZAPISANO
               </span>
             )}

@@ -16,7 +16,7 @@ const inputStyle = {
   fontSize: '14px',
   width: '100%',
   outline: 'none',
-  fontFamily: 'Inter, sans-serif',
+  fontFamily: 'var(--font-body)',
 };
 
 const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
@@ -399,7 +399,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
   });
 
   const label = (text) => (
-    <label className="block mb-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>{text}</label>
+    <label className="block mb-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>{text}</label>
   );
 
   return (
@@ -411,27 +411,27 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <History size={14} color="var(--brand)" />
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase' }}>POWRACAJĄCY KLIENT</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase' }}>POWRACAJĄCY KLIENT</p>
             </div>
             <button onClick={() => { applyClientToForm(repeatPrompt.client); setRepeatPrompt(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}>
               <X size={14} />
             </button>
           </div>
-          <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.8rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em', marginBottom: '20px' }}>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em', marginBottom: '20px' }}>
             {repeatPrompt.client.name}
           </h3>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>OSTATNIA SESJA</p>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>OSTATNIA SESJA</p>
           <div style={{ border: `0.5px solid ${t.border}`, padding: '14px 16px', marginBottom: '20px' }}>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.text, marginBottom: '4px' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: t.text, marginBottom: '4px' }}>
               {repeatPrompt.lastSession.session_date}{repeatPrompt.lastSession.artist_name ? ` · ${repeatPrompt.lastSession.artist_name}` : ''}
             </p>
             {repeatPrompt.lastSession.tattoo_placement && (
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted }}>
                 {repeatPrompt.lastSession.tattoo_placement}{repeatPrompt.lastSession.tattoo_description ? ` — ${repeatPrompt.lastSession.tattoo_description}` : ''}
               </p>
             )}
             {repeatPrompt.lastSession.estimated_price > 0 && (
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', marginTop: '4px' }}>{repeatPrompt.lastSession.estimated_price} PLN</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', marginTop: '4px' }}>{repeatPrompt.lastSession.estimated_price} PLN</p>
             )}
           </div>
           <p style={{ fontSize: '13px', color: t.muted, marginBottom: '20px', lineHeight: 1.6 }}>
@@ -461,10 +461,10 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
       >
         <div className="flex justify-between items-center mb-8">
           <div>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>
               {isNew ? 'NOWA SESJA' : 'EDYTUJ SESJĘ'}
             </p>
-            <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.8rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
               {isNew ? 'Dodaj rezerwację' : form.client_name}
             </h3>
           </div>
@@ -476,7 +476,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
         <div className="space-y-6">
           {/* Client */}
           <div>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>KLIENT</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>KLIENT</p>
             {isNew && (
               <div className="mb-4">
                 {label('Szukaj istniejącego klienta')}
@@ -491,7 +491,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
             <div className="mt-4">{label('Telefon')}<input {...inp('client_phone')} /></div>
             {selectedClient && (
               <div className="mt-3 p-3" style={{ background: 'rgb(var(--brand-rgb) /0.04)', border: '0.5px solid rgb(var(--brand-rgb) /0.2)' }}>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
                   ISTNIEJĄCY KLIENT · {selectedClient.total_sessions || 0} SESJI
                 </p>
                 {selectedClient._lastSession ? (
@@ -501,7 +501,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                       {selectedClient._lastSession.artist_name ? ` · ${selectedClient._lastSession.artist_name}` : ''}
                       {selectedClient._lastSession.tattoo_placement ? ` · ${selectedClient._lastSession.tattoo_placement}` : ''}
                     </p>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginBottom: '8px', textTransform: 'uppercase' }}>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginBottom: '8px', textTransform: 'uppercase' }}>
                       Zaczytać dane z poprzedniej sesji?
                     </p>
                     <div className="flex gap-2">
@@ -530,7 +530,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
 
           {/* Service */}
           <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>USŁUGA</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>USŁUGA</p>
             {/* Category toggles */}
             <div className="mb-4">
               {label('Kategoria')}
@@ -544,7 +544,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                       border: `0.5px solid ${selectedCategory === val ? 'var(--brand)' : t.border}`,
                       color: selectedCategory === val ? 'var(--brand)' : t.muted,
                       background: selectedCategory === val ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent',
-                      fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em',
+                      fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em',
                       padding: '6px 12px', cursor: 'pointer',
                     }}
                   >{lbl}</button>
@@ -607,12 +607,12 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                             setShowServiceSuggestions(false);
                             handleService(s.id, s.name);
                           }}
-                          style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 14px', background: 'none', border: 'none', borderBottom: `0.5px solid ${t.border}`, cursor: 'pointer', color: t.text, fontFamily: 'Inter, sans-serif', fontSize: '13px' }}
+                          style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 14px', background: 'none', border: 'none', borderBottom: `0.5px solid ${t.border}`, cursor: 'pointer', color: t.text, fontFamily: 'var(--font-body)', fontSize: '13px' }}
                           onMouseEnter={e => e.currentTarget.style.background = 'rgb(var(--brand-rgb) /0.06)'}
                           onMouseLeave={e => e.currentTarget.style.background = 'none'}
                         >
                           <span>{s.name}</span>
-                          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginLeft: '8px' }}>{durStr}{priceStr}</span>
+                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, marginLeft: '8px' }}>{durStr}{priceStr}</span>
                         </button>
                       );
                     })}
@@ -623,7 +623,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
             {form.service_id && (
               <div className="mt-3 px-3 py-2 flex items-center gap-2" style={{ background: 'rgb(var(--brand-rgb) /0.05)', border: '0.5px solid rgb(var(--brand-rgb) /0.2)' }}>
                 <Zap size={10} color="var(--brand)" />
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em' }}>
                   USŁUGA WYBRANA · CENA I CZAS UZUPEŁNIONE AUTOMATYCZNIE
                 </p>
               </div>
@@ -632,7 +632,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
 
           {/* Session */}
           <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>SESJA</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>SESJA</p>
             <div className="mb-4">
               <div>{label('Data *')}<input {...inp('session_date', 'date')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }} /></div>
             </div>
@@ -739,7 +739,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
 
           {/* Tattoo */}
           <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>TATUAŻ</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>TATUAŻ</p>
             <div className="mb-4">{label('Miejsce na ciele')}<input {...inp('tattoo_placement')} /></div>
             <div className="mb-4">{label('Opis projektu')}
               <textarea rows={3} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} value={form.tattoo_description || ''} onChange={e => set('tattoo_description', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
@@ -762,7 +762,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
             {form.notes ? (
               <div className="mb-4">
                 {label('Notatki od klienta (z formularza)')}
-                <p style={{ padding: '10px 0', fontSize: '13px', color: t.muted, fontFamily: 'Inter, sans-serif', borderBottom: `0.5px solid ${t.border}`, lineHeight: 1.5 }}>{form.notes}</p>
+                <p style={{ padding: '10px 0', fontSize: '13px', color: t.muted, fontFamily: 'var(--font-body)', borderBottom: `0.5px solid ${t.border}`, lineHeight: 1.5 }}>{form.notes}</p>
               </div>
             ) : null}
             {/* Notatki admina — session-specific */}
@@ -779,7 +779,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                 key={field}
                 onClick={() => set(field, !form[field])}
                 className="flex items-center gap-2"
-                style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form[field] ? '#16a34a' : t.muted }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form[field] ? '#16a34a' : t.muted }}
               >
                 <div style={{ width: '12px', height: '12px', border: `0.5px solid ${form[field] ? '#16a34a' : t.border}`, background: form[field] ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {form[field] && <span style={{ color: '#fff', fontSize: '8px' }}>✓</span>}

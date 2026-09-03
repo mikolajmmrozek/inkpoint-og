@@ -80,8 +80,8 @@ export default function HeroSlider() {
       <div className="relative h-full flex flex-col justify-center px-8 md:px-16 lg:px-24 pb-24 md:pb-16">
         {/* Section label */}
         <div className="absolute top-8 left-8 md:left-16">
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>NASZ ZESPÓŁ</p>
-          <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(1.5rem, 3vw, 2.5rem)', fontWeight: 400, color: '#F5F0EB', lineHeight: 0.95, letterSpacing: '0.04em' }}>Artyści</h2>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>NASZ ZESPÓŁ</p>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.5rem, 3vw, 2.5rem)', fontWeight: 400, color: '#F5F0EB', lineHeight: 0.95, letterSpacing: '0.04em' }}>Artyści</h2>
         </div>
         <AnimatePresence mode="wait">
           <motion.div
@@ -92,12 +92,12 @@ export default function HeroSlider() {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
             className="max-w-2xl"
           >
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: 'var(--brand)', letterSpacing: '0.2em', marginBottom: '24px' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--brand)', letterSpacing: '0.2em', marginBottom: '24px' }}>
               {String(current + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')} — {specialties}
             </p>
 
             <h2 style={{
-              fontFamily: 'Bebas Neue, Barlow Condensed, system-ui',
+              fontFamily: 'var(--font-display)',
               fontSize: 'clamp(4rem, 10vw, 9rem)',
               fontWeight: 400,
               lineHeight: 0.9,
@@ -149,7 +149,7 @@ export default function HeroSlider() {
 
         {/* Scroll hint */}
         <div className="absolute bottom-10 right-8 md:right-16 flex flex-col items-center gap-3">
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'rgba(245,240,235,0.6)', letterSpacing: '0.2em', writingMode: 'vertical-rl' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.6)', letterSpacing: '0.2em', writingMode: 'vertical-rl' }}>
             SCROLL
           </p>
           <div className="w-px h-12 relative overflow-hidden" style={{ background: 'rgba(245,240,235,0.1)' }}>

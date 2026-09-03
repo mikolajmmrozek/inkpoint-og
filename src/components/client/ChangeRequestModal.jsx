@@ -55,10 +55,10 @@ export default function ChangeRequestModal({ booking, theme = 'dark', onClose, o
       >
         <div className="flex justify-between items-center mb-6">
           <div>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>
               ZMIANA TERMINU
             </p>
-            <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.6rem', color: t.title, letterSpacing: '0.04em' }}>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', color: t.title, letterSpacing: '0.04em' }}>
               Wybierz nowy termin
             </h3>
           </div>
@@ -69,7 +69,7 @@ export default function ChangeRequestModal({ booking, theme = 'dark', onClose, o
 
         {/* Current booking summary */}
         <div className="mb-6 p-3" style={{ border: `0.5px solid ${t.border}`, background: theme === 'light' ? 'rgba(0,0,0,0.02)' : 'rgba(255,255,255,0.02)' }}>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>
             OBECNY TERMIN
           </p>
           <p style={{ fontSize: '13px', color: t.text }}>

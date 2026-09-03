@@ -93,7 +93,7 @@ const BookingTile = memo(function BookingTile({ booking, onClick, t }) {
       onMouseEnter={e => e.currentTarget.style.background = `${color}30`}
       onMouseLeave={e => e.currentTarget.style.background = `${color}18`}
     >
-      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color, letterSpacing: '0.06em', lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color, letterSpacing: '0.06em', lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
         {booking.session_time}–{endTime}
       </p>
       {height >= 40 && (
@@ -102,12 +102,12 @@ const BookingTile = memo(function BookingTile({ booking, onClick, t }) {
         </p>
       )}
       {height >= 60 && booking.tattoo_placement && (
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {booking.tattoo_placement}
         </p>
       )}
       {height >= 80 && booking.estimated_price && (
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, marginTop: '1px' }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, marginTop: '1px' }}>
           {booking.estimated_price} PLN
         </p>
       )}
@@ -119,7 +119,7 @@ const TimeAxis = memo(function TimeAxis({ muted }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: `${TOTAL_HEIGHT}px`, width: '44px', flexShrink: 0, position: 'relative' }}>
       {HOURS.map(h => (
-        <div key={h} style={{ position: 'absolute', top: `${(h * 60 - DAY_START) * PX_PER_MIN}px`, left: '50%', transform: 'translate(-50%, -50%)', fontFamily: 'JetBrains Mono', fontSize: '8px', color: muted, letterSpacing: '0.05em', lineHeight: 1, whiteSpace: 'nowrap' }}>
+        <div key={h} style={{ position: 'absolute', top: `${(h * 60 - DAY_START) * PX_PER_MIN}px`, left: '50%', transform: 'translate(-50%, -50%)', fontFamily: 'var(--font-mono)', fontSize: '8px', color: muted, letterSpacing: '0.05em', lineHeight: 1, whiteSpace: 'nowrap' }}>
           {String(h).padStart(2, '0')}:00
         </div>
       ))}
@@ -223,7 +223,7 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
         <button onClick={() => onDateChange(subDays(selectedDate, 1))} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
           <ChevronLeft size={16} />
         </button>
-        <p className="flex-1 min-w-0 text-center truncate" style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(1rem, 4vw, 1.3rem)', fontWeight: 400, color: t.title, letterSpacing: '0.08em' }}>
+        <p className="flex-1 min-w-0 text-center truncate" style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1rem, 4vw, 1.3rem)', fontWeight: 400, color: t.title, letterSpacing: '0.08em' }}>
           {format(selectedDate, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase()}
         </p>
         <button onClick={() => onDateChange(addDays(selectedDate, 1))} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
@@ -242,14 +242,14 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
               <img src={a.photo_url} alt={a.name} loading="lazy" width={28} height={28} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${off.off ? 'var(--brand)' : t.border}`, flexShrink: 0, opacity: off.off ? 0.55 : 1 }} />
             ) : (
               <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: off.off ? 'rgb(var(--brand-rgb) /0.15)' : 'rgb(var(--brand-rgb) /0.15)', border: `1px solid ${off.off ? 'var(--brand)' : t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ fontSize: '11px', color: off.off ? 'var(--brand)' : 'var(--brand)', fontFamily: 'Bebas Neue, system-ui' }}>{a.name.charAt(0)}</span>
+                <span style={{ fontSize: '11px', color: off.off ? 'var(--brand)' : 'var(--brand)', fontFamily: 'var(--font-display)' }}>{a.name.charAt(0)}</span>
               </div>
             )}
-            <p className="hidden sm:block" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: off.off ? 'var(--brand)' : t.muted, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <p className="hidden sm:block" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: off.off ? 'var(--brand)' : t.muted, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {a.name}
             </p>
             {off.off && (
-              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: 'var(--brand)', letterSpacing: '0.08em', textTransform: 'uppercase', border: '0.5px solid var(--brand)', padding: '1px 4px' }} title={off.note || ''}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', color: 'var(--brand)', letterSpacing: '0.08em', textTransform: 'uppercase', border: '0.5px solid var(--brand)', padding: '1px 4px' }} title={off.note || ''}>
                 {off.note ? off.note.toUpperCase().slice(0, 10) : 'URLOP'}
               </span>
             )}
@@ -291,14 +291,14 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
           return (
             <div key={status} className="flex items-center gap-1.5">
               <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: color }} />
-              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                 {status} ({cnt})
               </span>
             </div>
           );
         })}
         {dayBookings.length === 0 && (
-          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>BRAK SESJI W TEN DZIEŃ</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>BRAK SESJI W TEN DZIEŃ</span>
         )}
       </div>
     </div>

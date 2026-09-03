@@ -34,15 +34,15 @@ function BookingRow({ b, i, items, selected, setSelected, artists, t, healthStat
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <div className="flex-shrink-0 text-center" style={{ minWidth: '52px' }}>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '16px', color: STATUS_COLORS[b.status] || t.fuchsia, letterSpacing: '0.05em' }}>{b.session_time}</p>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '16px', color: STATUS_COLORS[b.status] || t.fuchsia, letterSpacing: '0.05em' }}>{b.session_time}</p>
           {b.session_end_time ? (
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted }}>→ {b.session_end_time}</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: t.muted }}>→ {b.session_end_time}</p>
           ) : b.session_time && b.session_duration ? (() => {
             const [h, m] = b.session_time.split(':').map(Number);
             const endTotal = h * 60 + m + b.session_duration;
             const endH = String(Math.floor(endTotal / 60)).padStart(2, '0');
             const endM = String(endTotal % 60).padStart(2, '0');
-            return <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted }}>→ {endH}:{endM}</p>;
+            return <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: t.muted }}>→ {endH}:{endM}</p>;
           })() : null}
         </div>
         <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -52,7 +52,7 @@ function BookingRow({ b, i, items, selected, setSelected, artists, t, healthStat
               <img src={artist.photo_url} alt={artist.name} loading="lazy" width={40} height={40} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${t.border}`, flexShrink: 0 }} />
             ) : (artist || b.artist_name) ? (
               <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgb(var(--brand-rgb) /0.1)', border: '0.5px solid rgb(var(--brand-rgb) /0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '15px', color: 'var(--brand)', letterSpacing: '0.05em' }}>
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: '15px', color: 'var(--brand)', letterSpacing: '0.05em' }}>
                   {(artist?.name || b.artist_name || '').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
                 </span>
               </div>
@@ -60,11 +60,11 @@ function BookingRow({ b, i, items, selected, setSelected, artists, t, healthStat
           })()}
           <div className="min-w-0">
             <p style={{ color: t.text, fontSize: '15px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.client_name}</p>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {b.artist_name}{b.tattoo_placement ? ` · ${b.tattoo_placement}` : ''}
             </p>
             {b.service_name && (
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', opacity: 0.8 }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', opacity: 0.8 }}>
                 {b.service_name}
               </p>
             )}
@@ -74,9 +74,9 @@ function BookingRow({ b, i, items, selected, setSelected, artists, t, healthStat
       <div className="flex items-center gap-3 flex-shrink-0">
         <HealthFormBadge status={resolveBookingHealthStatus(b, healthStatusMap)} fontSize="10px" style={{ padding: '3px 7px' }} />
         {b.service_id && (b.estimated_price === 0 || b.estimated_price === null || b.estimated_price === undefined || b.estimated_price === '') ? (
-          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', color: t.muted, letterSpacing: '0.06em' }}>BEZPŁATNA</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '14px', color: t.muted, letterSpacing: '0.06em' }}>BEZPŁATNA</span>
         ) : b.estimated_price > 0 ? (
-          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', color: t.muted }}>{b.estimated_price} PLN</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '14px', color: t.muted }}>{b.estimated_price} PLN</span>
         ) : null}
         <div style={{ width: '11px', height: '11px', borderRadius: '50%', background: STATUS_COLORS[b.status] || t.muted }} />
       </div>
@@ -91,7 +91,7 @@ function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPa
   if (listBookings.length === 0) {
     return (
       <div className="py-12 text-center" style={{ border: `0.5px solid ${t.border}` }}>
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
           {viewMode === 'calendar' ? 'BRAK SESJI W TEN DZIEŃ' : 'BRAK REZERWACJI'}
         </p>
         {viewMode === 'calendar' && selectedDate && (
@@ -118,14 +118,14 @@ function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPa
             <button
               onClick={() => setListPage(p => Math.max(0, p - 1))}
               disabled={listPage === 0}
-              style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: listPage === 0 ? t.muted : t.fuchsia, background: 'none', border: 'none', cursor: listPage === 0 ? 'default' : 'pointer', opacity: listPage === 0 ? 0.4 : 1 }}
+              style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: listPage === 0 ? t.muted : t.fuchsia, background: 'none', border: 'none', cursor: listPage === 0 ? 'default' : 'pointer', opacity: listPage === 0 ? 0.4 : 1 }}
             >
               <ChevronLeft size={12} /> POPRZEDNIE
             </button>
             <button
               onClick={() => setListPage(p => Math.min(listPageCount - 1, p + 1))}
               disabled={listPage >= listPageCount - 1}
-              style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: listPage >= listPageCount - 1 ? t.muted : t.fuchsia, background: 'none', border: 'none', cursor: listPage >= listPageCount - 1 ? 'default' : 'pointer', opacity: listPage >= listPageCount - 1 ? 0.4 : 1 }}
+              style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: listPage >= listPageCount - 1 ? t.muted : t.fuchsia, background: 'none', border: 'none', cursor: listPage >= listPageCount - 1 ? 'default' : 'pointer', opacity: listPage >= listPageCount - 1 ? 0.4 : 1 }}
             >
               NASTĘPNE <ChevronRight size={12} />
             </button>
@@ -140,11 +140,11 @@ function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPa
             <div key={date}>
               <div className="flex items-center gap-3 mb-2">
                 <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: isPast ? '#9ca3af' : isToday ? '#f59e0b' : '#16a34a', flexShrink: 0 }} />
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: isPast ? t.muted : isToday ? '#f59e0b' : t.muted }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: isPast ? t.muted : isToday ? '#f59e0b' : t.muted }}>
                   {isToday ? `DZIŚ — ${dayLabel}` : dayLabel}
                 </p>
                 <div style={{ flex: 1, height: '0.5px', background: t.border }} />
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: t.muted }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.muted }}>
                   {items.length} {items.length === 1 ? 'sesja' : 'sesji'}
                 </span>
               </div>
@@ -153,7 +153,7 @@ function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPa
                   {off.map((o, i) => (
                     <div key={i} className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: i < off.length - 1 ? '0.5px solid rgb(var(--brand-rgb) /0.2)' : 'none' }}>
                       <div style={{ width: '6px', height: '6px', borderRadius: '1px', background: 'var(--brand)', flexShrink: 0 }} />
-                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.06em', flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>WOLNE · {o.artist.name}{o.timeRange ? ` · ${o.timeRange}` : ' · cały dzień'}{o.note ? ` · ${o.note}` : ''}</span>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.06em', flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>WOLNE · {o.artist.name}{o.timeRange ? ` · ${o.timeRange}` : ' · cały dzień'}{o.note ? ` · ${o.note}` : ''}</span>
                     </div>
                   ))}
                 </div>
@@ -443,7 +443,7 @@ export default function DashboardBookings() {
     <div>
       {loadError && bookings.length === 0 && (
         <div className="mb-6 p-6 text-center" style={{ border: `0.5px solid ${t.border}` }}>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px' }}>
             ⚠ Nie udało się pobrać danych (limit zapytań). Spróbuj ponownie za chwilę.
           </p>
           <button onClick={load} className="btn-oxblood" style={{ fontSize: '11px' }}>SPRÓBUJ PONOWNIE</button>
@@ -483,7 +483,7 @@ export default function DashboardBookings() {
               >
                 <Icon size={14} />
                 {mode === 'pending' && pendingCount > 0 && (
-                  <span style={{ position: 'absolute', top: '-2px', right: '-2px', minWidth: '14px', height: '14px', background: 'var(--brand)', color: '#F5F0EB', fontSize: '8px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '7px', padding: '0 3px', fontFamily: 'JetBrains Mono' }}>
+                  <span style={{ position: 'absolute', top: '-2px', right: '-2px', minWidth: '14px', height: '14px', background: 'var(--brand)', color: '#F5F0EB', fontSize: '8px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '7px', padding: '0 3px', fontFamily: 'var(--font-mono)' }}>
                     {pendingCount > 9 ? '9+' : pendingCount}
                   </span>
                 )}
@@ -497,22 +497,22 @@ export default function DashboardBookings() {
 
         {/* Row 2: filters */}
         <div className="flex items-center gap-1 flex-wrap mb-3">
-          <button onClick={() => setArtistFilters([])} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilters.length === 0 ? t.fuchsia : t.border}`, color: artistFilters.length === 0 ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
+          <button onClick={() => setArtistFilters([])} style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilters.length === 0 ? t.fuchsia : t.border}`, color: artistFilters.length === 0 ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
             Wszyscy
           </button>
           {artists.map(a => (
-            <button key={a.id} onClick={() => toggleArtist(a.id)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilters.includes(a.id) ? t.fuchsia : t.border}`, color: artistFilters.includes(a.id) ? t.fuchsia : t.muted, background: artistFilters.includes(a.id) ? 'rgb(var(--brand-rgb) /0.06)' : 'transparent', cursor: 'pointer', flexShrink: 0 }}>
+            <button key={a.id} onClick={() => toggleArtist(a.id)} style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilters.includes(a.id) ? t.fuchsia : t.border}`, color: artistFilters.includes(a.id) ? t.fuchsia : t.muted, background: artistFilters.includes(a.id) ? 'rgb(var(--brand-rgb) /0.06)' : 'transparent', cursor: 'pointer', flexShrink: 0 }}>
               {a.name}
             </button>
           ))}
           <div style={{ width: '0.5px', height: '16px', background: t.border, margin: '0 4px' }} />
           {(viewMode === 'pending' ? ['pending', 'cancelled'] : STATUS_OPTIONS).map(s => (
-            <button key={s} onClick={() => toggleStatus(s)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${statusFilters.includes(s) ? t.fuchsia : t.border}`, color: statusFilters.includes(s) ? t.fuchsia : t.muted, background: statusFilters.includes(s) ? 'rgb(var(--brand-rgb) /0.06)' : 'transparent', cursor: 'pointer', flexShrink: 0 }}>
+            <button key={s} onClick={() => toggleStatus(s)} style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${statusFilters.includes(s) ? t.fuchsia : t.border}`, color: statusFilters.includes(s) ? t.fuchsia : t.muted, background: statusFilters.includes(s) ? 'rgb(var(--brand-rgb) /0.06)' : 'transparent', cursor: 'pointer', flexShrink: 0 }}>
               {s === 'all' ? 'Wszystkie' : s}
             </button>
           ))}
           {statusFilters.length > 0 && (
-            <button onClick={() => setStatusFilters([])} style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
+            <button onClick={() => setStatusFilters([])} style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
               ✕ Wszystkie
             </button>
           )}
@@ -526,7 +526,7 @@ export default function DashboardBookings() {
             value={searchQuery}
             onChange={e => handleSearch(e.target.value)}
             placeholder="Szukaj klienta, sesji, emailu, miejsca..."
-            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text, letterSpacing: '0.05em' }}
+            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.text, letterSpacing: '0.05em' }}
           />
           {searchQuery && (
             <button onClick={() => setSearchQuery('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: 0 }}>
@@ -547,10 +547,10 @@ export default function DashboardBookings() {
             {viewMode === 'calendar' && searchQuery.trim() && (
               <div className="mb-6">
                 <div style={{ padding: '10px 16px', background: t.bg, border: `0.5px solid ${t.border}`, marginBottom: '12px' }}>
-                  <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.1rem', color: t.title, letterSpacing: '0.08em' }}>
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: t.title, letterSpacing: '0.08em' }}>
                     WYNIKI WYSZUKIWANIA
                   </p>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: listBookings.length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: listBookings.length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
                     {listBookings.length} {listBookings.length === 1 ? 'SESJA' : listBookings.length >= 2 && listBookings.length <= 4 ? 'SESJE' : 'SESJI'}
                   </p>
                 </div>
@@ -604,10 +604,10 @@ export default function DashboardBookings() {
                       <ChevronLeft size={16} />
                     </button>
                     <div className="text-center flex-1 min-w-0 px-2">
-                      <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.2rem', color: t.title, letterSpacing: '0.08em', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', color: t.title, letterSpacing: '0.08em', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {format(selectedDate, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase()}
                       </p>
-                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: selectedDateStr && listBookings.filter(b => b.session_date === selectedDateStr).length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: selectedDateStr && listBookings.filter(b => b.session_date === selectedDateStr).length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
                         {selectedDateStr ? listBookings.filter(b => b.session_date === selectedDateStr).length : 0} {selectedDateStr && listBookings.filter(b => b.session_date === selectedDateStr).length === 1 ? 'SESJA' : selectedDateStr && listBookings.filter(b => b.session_date === selectedDateStr).length >= 2 && listBookings.filter(b => b.session_date === selectedDateStr).length <= 4 ? 'SESJE' : 'SESJI'}
                       </p>
                     </div>
@@ -624,7 +624,7 @@ export default function DashboardBookings() {
                         key={tab.key}
                         onClick={() => setListTab(tab.key)}
                         style={{
-                          flex: 1, padding: '10px', fontFamily: 'JetBrains Mono', fontSize: '9px',
+                          flex: 1, padding: '10px', fontFamily: 'var(--font-mono)', fontSize: '9px',
                           letterSpacing: '0.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer',
                           background: listTab === tab.key ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent',
                           color: listTab === tab.key ? 'var(--brand)' : t.muted,
@@ -640,10 +640,10 @@ export default function DashboardBookings() {
                 {viewMode === 'day' && searchQuery.trim() && (
                   <div className="flex items-center justify-between mb-3" style={{ border: `0.5px solid ${t.border}`, padding: '10px 16px', background: t.bg }}>
                     <div className="text-center flex-1">
-                      <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.2rem', color: t.title, letterSpacing: '0.08em', lineHeight: 1 }}>
+                      <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', color: t.title, letterSpacing: '0.08em', lineHeight: 1 }}>
                         {format(selectedDate, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase()}
                       </p>
-                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: listBookings.length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: listBookings.length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
                         {listBookings.length} {listBookings.length === 1 ? 'SESJA' : listBookings.length >= 2 && listBookings.length <= 4 ? 'SESJE' : 'SESJI'}
                       </p>
                     </div>
@@ -658,7 +658,7 @@ export default function DashboardBookings() {
                         dayBookings.map((b, i, arr) => <BookingRow key={b.id} b={b} i={i} items={arr} selected={selected} setSelected={setSelected} artists={artists} t={t} healthStatusMap={healthStatusMap} />)
                       ) : (
                         <div className="py-6 text-center">
-                          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK SESJI W TEN DZIEŃ</p>
+                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK SESJI W TEN DZIEŃ</p>
                         </div>
                       )}
                     </div>
@@ -694,16 +694,16 @@ export default function DashboardBookings() {
           {viewMode === 'pending' && (
             <div>
               <div style={{ padding: '10px 16px', background: t.bg, border: `0.5px solid ${t.border}`, marginBottom: '8px' }}>
-                <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.1rem', color: t.title, letterSpacing: '0.08em' }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: t.title, letterSpacing: '0.08em' }}>
                   DO WERYFIKACJI
                 </p>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: pendingViewBookings.length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: pendingViewBookings.length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
                   {pendingViewBookings.length} {pendingViewBookings.length === 1 ? 'REZERWACJA' : pendingViewBookings.length >= 2 && pendingViewBookings.length <= 4 ? 'REZERWACJE' : 'REZERWACJI'}
                 </p>
               </div>
               {pendingViewBookings.length === 0 ? (
                 <div className="py-12 text-center" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK REZERWACJI DO WERYFIKACJI</p>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK REZERWACJI DO WERYFIKACJI</p>
                 </div>
               ) : (
                 <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>

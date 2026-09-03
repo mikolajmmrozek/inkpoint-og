@@ -349,7 +349,7 @@ export default function HealthFormPage() {
     fontSize: '16px',
     width: '100%',
     outline: 'none',
-    fontFamily: 'Inter, sans-serif',
+    fontFamily: 'var(--font-body)',
   };
 
   const canProceed = () => {
@@ -484,22 +484,22 @@ export default function HealthFormPage() {
       <div className="min-h-screen flex flex-col items-center justify-center p-4" style={{ background: bg }}>
         <div className="max-w-lg text-center flex-1 flex items-center justify-center">
           <div>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>
               {t.studio}
             </p>
-            <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: textPrimary, lineHeight: 1, letterSpacing: '0.04em', marginBottom: '20px' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 400, color: textPrimary, lineHeight: 1, letterSpacing: '0.04em', marginBottom: '20px' }}>
               {t.successTitle}
             </h1>
             <p style={{ color: textMuted, fontSize: '16px', lineHeight: 1.8 }}>
               {t.successText}
             </p>
-            <a href="/" style={{ display: 'inline-block', marginTop: '32px', fontFamily: 'JetBrains Mono', fontSize: '13px', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--brand)', textDecoration: 'none', padding: '12px 28px', border: '0.5px solid var(--brand)' }} onMouseEnter={e => { e.target.style.background = 'var(--brand)'; e.target.style.color = bg; }} onMouseLeave={e => { e.target.style.background = 'transparent'; e.target.style.color = 'var(--brand)'; }}>
+            <a href="/" style={{ display: 'inline-block', marginTop: '32px', fontFamily: 'var(--font-mono)', fontSize: '13px', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--brand)', textDecoration: 'none', padding: '12px 28px', border: '0.5px solid var(--brand)' }} onMouseEnter={e => { e.target.style.background = 'var(--brand)'; e.target.style.color = bg; }} onMouseLeave={e => { e.target.style.background = 'transparent'; e.target.style.color = 'var(--brand)'; }}>
               {t.returnToHome || 'POWRÓT NA STRONĘ GŁÓWNĄ'}
             </a>
           </div>
         </div>
         <div style={{ paddingBottom: '40px', textAlign: 'center' }}>
-          <a href="/health-form" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: textMuted, textDecoration: 'none', letterSpacing: '0.08em' }}>
+          <a href="/health-form" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: textMuted, textDecoration: 'none', letterSpacing: '0.08em' }}>
             {t.newSurvey || 'NOWA ANKIETA'}
           </a>
         </div>
@@ -516,21 +516,21 @@ export default function HealthFormPage() {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{ background: bg }}>
         <div style={{ width: '100%', maxWidth: '480px' }}>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>
             {t.studio}
           </p>
-          <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: textPrimary, lineHeight: 1, letterSpacing: '0.04em', marginBottom: '12px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 400, color: textPrimary, lineHeight: 1, letterSpacing: '0.04em', marginBottom: '12px' }}>
             Znaleziono zapisany formularz
           </h1>
           <div style={{ height: '0.5px', background: 'var(--brand)', width: '64px', marginBottom: '32px' }} />
 
           <div className="mb-8 px-4 py-4" style={{ border: '0.5px solid rgb(var(--brand-rgb) /0.3)', background: 'rgb(var(--brand-rgb) /0.05)' }}>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '6px' }}>NIEZAKOŃCZONA ANKIETA</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '6px' }}>NIEZAKOŃCZONA ANKIETA</p>
             <p style={{ color: textPrimary, fontSize: '14px', marginBottom: '4px' }}>
               {foundDraft.client_first_name} {foundDraft.client_last_name}
             </p>
             {draftDate && (
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: textMuted, letterSpacing: '0.05em' }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: textMuted, letterSpacing: '0.05em' }}>
                 Ostatnio zapisano: {draftDate}
               </p>
             )}
@@ -539,13 +539,13 @@ export default function HealthFormPage() {
           <div className="space-y-3">
             <button
               onClick={() => resumeDraft(foundDraft)}
-              style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '14px 32px', background: 'linear-gradient(135deg, var(--brand) 0%, var(--brand) 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', width: '100%' }}
+              style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '14px 32px', background: 'linear-gradient(135deg, var(--brand) 0%, var(--brand) 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', width: '100%' }}
             >
               ↩ KONTYNUUJ POPRZEDNIĄ ANKIETĘ
             </button>
             <button
               onClick={() => discardDraft(foundDraft)}
-              style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '13px 32px', background: 'transparent', color: 'rgba(245,240,235,0.5)', border: '0.5px solid #262626', cursor: 'pointer', width: '100%' }}
+              style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '13px 32px', background: 'transparent', color: 'rgba(245,240,235,0.5)', border: '0.5px solid #262626', cursor: 'pointer', width: '100%' }}
             >
               + WYPEŁNIJ NOWĄ ANKIETĘ
             </button>
@@ -561,23 +561,23 @@ export default function HealthFormPage() {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{ background: bg }}>
         <div style={{ width: '100%', maxWidth: '480px' }}>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>
             {t.studio}
           </p>
-          <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '3rem', fontWeight: 400, color: textPrimary, lineHeight: 1, letterSpacing: '0.04em', marginBottom: '12px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '3rem', fontWeight: 400, color: textPrimary, lineHeight: 1, letterSpacing: '0.04em', marginBottom: '12px' }}>
             {t.title}
           </h1>
           <div className="h-px w-16 mb-12" style={{ background: 'var(--brand)', height: '0.5px' }} />
 
           {/* Language selector */}
           <div className="mb-8 relative">
-            <label style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: textMuted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+            <label style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: textMuted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
               {t.langSelect}
             </label>
             <div style={{ position: 'relative' }}>
               <button
                 onClick={() => setLangMenuOpen(!langMenuOpen)}
-                style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', letterSpacing: '0.08em', padding: '12px 16px', border: `0.5px solid ${langMenuOpen ? 'var(--brand)' : borderColor}`, color: textPrimary, background: cardBg, cursor: 'pointer', width: '100%', textAlign: 'left', textTransform: 'uppercase' }}
+                style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', letterSpacing: '0.08em', padding: '12px 16px', border: `0.5px solid ${langMenuOpen ? 'var(--brand)' : borderColor}`, color: textPrimary, background: cardBg, cursor: 'pointer', width: '100%', textAlign: 'left', textTransform: 'uppercase' }}
               >
                 {LANGUAGES.find(l => l.code === lang)?.flag} {LANGUAGES.find(l => l.code === lang)?.label}
               </button>
@@ -587,7 +587,7 @@ export default function HealthFormPage() {
                     <button
                       key={l.code}
                       onClick={() => { setLang(l.code); setLangMenuOpen(false); }}
-                      style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', letterSpacing: '0.08em', padding: '10px 16px', border: 'none', borderBottom: `0.5px solid ${borderColor}`, color: lang === l.code ? 'var(--brand)' : textPrimary, background: lang === l.code ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', cursor: 'pointer', width: '100%', textAlign: 'left', textTransform: 'uppercase' }}
+                      style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', letterSpacing: '0.08em', padding: '10px 16px', border: 'none', borderBottom: `0.5px solid ${borderColor}`, color: lang === l.code ? 'var(--brand)' : textPrimary, background: lang === l.code ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', cursor: 'pointer', width: '100%', textAlign: 'left', textTransform: 'uppercase' }}
                     >
                       {l.flag} {l.label}
                     </button>
@@ -599,7 +599,7 @@ export default function HealthFormPage() {
 
           {/* First visit? */}
           <div className="mb-6">
-            <label style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: textMuted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+            <label style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: textMuted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
               {t.firstVisitQuestion || 'Czy to Twoja pierwsza wizyta w naszym studio?'} *
             </label>
             <div className="flex gap-3">
@@ -607,7 +607,7 @@ export default function HealthFormPage() {
                 <button
                   key={String(v)}
                   onClick={() => setIsFirstVisit(v)}
-                  style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 20px', border: `0.5px solid ${isFirstVisit === v ? 'var(--brand)' : borderColor}`, color: isFirstVisit === v ? 'var(--brand)' : textMuted, background: isFirstVisit === v ? 'rgb(var(--brand-rgb) /0.08)' : (theme === 'light' ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.06)'), cursor: 'pointer', flex: 1 }}
+                  style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 20px', border: `0.5px solid ${isFirstVisit === v ? 'var(--brand)' : borderColor}`, color: isFirstVisit === v ? 'var(--brand)' : textMuted, background: isFirstVisit === v ? 'rgb(var(--brand-rgb) /0.08)' : (theme === 'light' ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.06)'), cursor: 'pointer', flex: 1 }}
                 >
                   {v ? t.yes : t.no}
                 </button>
@@ -618,7 +618,7 @@ export default function HealthFormPage() {
           {/* Returning client email */}
           {isFirstVisit === false && (
             <div className="mb-6">
-              <label style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: textMuted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+              <label style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: textMuted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
                 {t.returningEmailLabel || 'Adres e-mail z poprzedniej wizyty'} *
               </label>
               <input
@@ -635,7 +635,7 @@ export default function HealthFormPage() {
           <div className="flex justify-end mb-4">
             <button
               onClick={toggleTheme}
-              style={{ background: theme === 'light' ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.06)', border: `0.5px solid ${borderColor}`, cursor: 'pointer', color: textMuted, padding: '8px 14px', fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase' }}
+              style={{ background: theme === 'light' ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.06)', border: `0.5px solid ${borderColor}`, cursor: 'pointer', color: textMuted, padding: '8px 14px', fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase' }}
             >
               {theme === 'dark' ? '☀ Jasny' : '☾ Ciemny'}
             </button>
@@ -655,7 +655,7 @@ export default function HealthFormPage() {
               }
               setStep('personal');
             }}
-            style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', background: 'linear-gradient(135deg, var(--brand) 0%, var(--brand) 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', width: '100%', opacity: isFirstVisit === null || (isFirstVisit === false && !form.client_email) || prewarming ? 0.5 : 1 }}
+            style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', background: 'linear-gradient(135deg, var(--brand) 0%, var(--brand) 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', width: '100%', opacity: isFirstVisit === null || (isFirstVisit === false && !form.client_email) || prewarming ? 0.5 : 1 }}
           >
             {prewarming ? '⟳ ŁADOWANIE TŁUMACZEŃ...' : `${t.next} →`}
           </button>
@@ -684,17 +684,17 @@ export default function HealthFormPage() {
         {/* Header */}
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>
               {currentStepIndex + 1} / {steps.length}
             </p>
-            <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.2rem', fontWeight: 400, color: textPrimary, letterSpacing: '0.04em' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.2rem', fontWeight: 400, color: textPrimary, letterSpacing: '0.04em' }}>
               {stepTitle[step] || t.title}
             </h1>
           </div>
           {/* Theme toggle */}
           <button
             onClick={toggleTheme}
-            style={{ background: theme === 'light' ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.06)', border: `0.5px solid ${borderColor}`, cursor: 'pointer', color: textMuted, padding: '8px 14px', fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap', flexShrink: 0, marginTop: '4px' }}
+            style={{ background: theme === 'light' ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.06)', border: `0.5px solid ${borderColor}`, cursor: 'pointer', color: textMuted, padding: '8px 14px', fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap', flexShrink: 0, marginTop: '4px' }}
           >
             {theme === 'dark' ? '☀ Jasny' : '☾ Ciemny'}
           </button>
@@ -710,12 +710,12 @@ export default function HealthFormPage() {
         <form className="mb-12" onSubmit={e => e.preventDefault()}>
           {draftBanner && (
             <div className="mb-4 px-3 py-2" style={{ background: 'rgb(var(--brand-rgb) /0.07)', border: '0.5px solid rgb(var(--brand-rgb) /0.35)' }}>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em' }}>↩ Kontynuujesz poprzednio zapisaną ankietę — sprawdź dane i uzupełnij brakujące informacje.</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em' }}>↩ Kontynuujesz poprzednio zapisaną ankietę — sprawdź dane i uzupełnij brakujące informacje.</p>
             </div>
           )}
           {prefillBanner && (
             <div className="mb-4 px-3 py-2" style={{ background: 'rgba(22,163,74,0.1)', border: '0.5px solid rgba(22,163,74,0.4)' }}>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.08em' }}>✓ {t.prefillBannerText || 'Wczytano dane z poprzedniej wizyty — sprawdź i uzupełnij.'}</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#16a34a', letterSpacing: '0.08em' }}>✓ {t.prefillBannerText || 'Wczytano dane z poprzedniej wizyty — sprawdź i uzupełnij.'}</p>
             </div>
           )}
 
@@ -733,7 +733,7 @@ export default function HealthFormPage() {
               <button
                 type="button"
                 onClick={() => { setShowErrors(false); setStep(steps[currentStepIndex - 1]); }}
-                style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', border: `0.5px solid ${borderColor}`, color: textPrimary, background: 'transparent', cursor: 'pointer', flex: 1 }}
+                style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', border: `0.5px solid ${borderColor}`, color: textPrimary, background: 'transparent', cursor: 'pointer', flex: 1 }}
               >
                 ← {t.back}
               </button>
@@ -741,12 +741,12 @@ export default function HealthFormPage() {
 
             <div style={{ flex: 1 }}>
               {showErrors && !canProceed() && (
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em', marginBottom: '8px' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em', marginBottom: '8px' }}>
                   ⚠ {t.fillRequired || 'Uzupełnij wszystkie wymagane pola przed przejściem dalej.'}
                 </p>
               )}
               {submitError && (
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em', marginBottom: '8px' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em', marginBottom: '8px' }}>
                   ⚠ {submitError}
                 </p>
               )}
@@ -760,7 +760,7 @@ export default function HealthFormPage() {
                       setStep(steps[currentStepIndex + 1]);
                     } else setShowErrors(true);
                   }}
-                  style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', background: 'linear-gradient(135deg, var(--brand) 0%, var(--brand) 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', width: '100%', opacity: canProceed() ? 1 : 0.7 }}
+                  style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', background: 'linear-gradient(135deg, var(--brand) 0%, var(--brand) 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', width: '100%', opacity: canProceed() ? 1 : 0.7 }}
                 >
                   {t.next} →
                 </button>
@@ -771,7 +771,7 @@ export default function HealthFormPage() {
                     if (canProceed() && !submitting) { useQuickRefresh ? handleQuickRefresh() : handleSubmit(); }
                     else setShowErrors(true);
                   }}
-                  style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', background: 'linear-gradient(135deg, var(--brand) 0%, var(--brand) 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', width: '100%', opacity: canProceed() && !submitting ? 1 : 0.5 }}
+                  style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', background: 'linear-gradient(135deg, var(--brand) 0%, var(--brand) 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', width: '100%', opacity: canProceed() && !submitting ? 1 : 0.5 }}
                 >
                   {submitting ? t.submitting : t.submit}
                 </button>

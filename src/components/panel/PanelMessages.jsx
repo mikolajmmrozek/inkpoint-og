@@ -98,10 +98,10 @@ export default function PanelMessages({ theme, userEmail, userName, roleLabel })
   return (
     <div>
       <div className="mb-8">
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
           KONTAKT ZE STUDIEM
         </p>
-        <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.text, lineHeight: 1, letterSpacing: '0.04em' }}>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 400, color: t.text, lineHeight: 1, letterSpacing: '0.04em' }}>
           Wiadomości
         </h2>
       </div>
@@ -130,7 +130,7 @@ export default function PanelMessages({ theme, userEmail, userName, roleLabel })
                 return (
                   <div key={msg.id} className="flex flex-col items-center">
                     <BookingCard bookingId={msg.booking_id} t={t} theme={theme} readOnly />
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, marginTop: '4px' }}>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, marginTop: '4px' }}>
                       {format(new Date(msg.created_date), 'dd.MM.yyyy HH:mm')}
                     </p>
                   </div>
@@ -141,11 +141,11 @@ export default function PanelMessages({ theme, userEmail, userName, roleLabel })
                 return (
                   <div key={msg.id} className="flex justify-center">
                     <div style={{ background: 'rgb(var(--brand-rgb) /0.06)', border: `0.5px solid rgb(var(--brand-rgb) /0.2)`, padding: '10px 16px', maxWidth: '80%', textAlign: 'center' }}>
-                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '4px' }}>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '4px' }}>
                         STATUS REZERWACJI
                       </p>
                       <p style={{ fontSize: '12px', color: t.text, lineHeight: 1.5 }}>{msg.message}</p>
-                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, marginTop: '6px' }}>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, marginTop: '6px' }}>
                         {format(new Date(msg.created_date), 'dd.MM.yyyy HH:mm')}
                       </p>
                     </div>
@@ -164,7 +164,7 @@ export default function PanelMessages({ theme, userEmail, userName, roleLabel })
                     }}>
                       <MessageContent message={msg} t={t} isAdmin={isMe} />
                     </div>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, marginTop: '4px', textAlign: isMe ? 'right' : 'left' }}>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, marginTop: '4px', textAlign: isMe ? 'right' : 'left' }}>
                       {format(new Date(msg.created_date), 'dd.MM.yyyy HH:mm')}
                     </p>
                   </div>
@@ -185,7 +185,7 @@ export default function PanelMessages({ theme, userEmail, userName, roleLabel })
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
               rows={1}
               placeholder="Napisz wiadomość..."
-              style={{ flex: 1, background: 'transparent', border: `0.5px solid ${t.border}`, padding: '10px 12px', fontSize: '13px', color: t.text, fontFamily: 'Inter, sans-serif', resize: 'none', outline: 'none', minHeight: '40px', maxHeight: '120px' }}
+              style={{ flex: 1, background: 'transparent', border: `0.5px solid ${t.border}`, padding: '10px 12px', fontSize: '13px', color: t.text, fontFamily: 'var(--font-body)', resize: 'none', outline: 'none', minHeight: '40px', maxHeight: '120px' }}
               onFocus={e => e.target.style.borderColor = t.fuchsia}
               onBlur={e => e.target.style.borderColor = t.border}
             />

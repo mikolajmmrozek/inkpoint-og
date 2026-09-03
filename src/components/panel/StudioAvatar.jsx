@@ -13,7 +13,7 @@ export default function StudioAvatar({ studio, theme, size = 36 }) {
     <div
       style={{ width: size, height: size, borderRadius: '50%', background: bg, border: '0.5px solid rgb(var(--brand-rgb) /0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
     >
-      <span style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: Math.round(size * 0.42), color: 'var(--brand)', letterSpacing: '0.05em', lineHeight: 1 }}>RT</span>
+      <span style={{ fontFamily: 'var(--font-display)', fontSize: Math.round(size * 0.42), color: 'var(--brand)', letterSpacing: '0.05em', lineHeight: 1 }}>RT</span>
     </div>
   );
 }

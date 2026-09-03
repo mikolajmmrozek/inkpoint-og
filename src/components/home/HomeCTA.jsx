@@ -14,11 +14,11 @@ export default function HomeCTA() {
           viewport={{ once: true }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
-          <p className="text-micro text-oxblood mb-8" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em' }}>
+          <p className="text-micro text-oxblood mb-8" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em' }}>
             ZACZNIJ SWOJĄ HISTORIĘ
           </p>
           <h2 style={{
-            fontFamily: 'Bebas Neue, Barlow Condensed, system-ui',
+            fontFamily: 'var(--font-display)',
             fontSize: 'clamp(3.5rem, 8vw, 7rem)',
             fontWeight: 400,
             lineHeight: 0.9,

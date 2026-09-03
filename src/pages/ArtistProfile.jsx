@@ -59,7 +59,7 @@ export default function ArtistProfile() {
       <div className="pt-24 min-h-screen">
         {/* Back link */}
         <div className="px-8 md:px-16 pt-12 pb-8">
-          <Link to="/artists" className="text-micro text-parchment/30 hover:text-parchment/70 transition-colors" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.15em' }}>
+          <Link to="/artists" className="text-micro text-parchment/30 hover:text-parchment/70 transition-colors" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.15em' }}>
             ← ARTYŚCI
           </Link>
         </div>
@@ -80,13 +80,13 @@ export default function ArtistProfile() {
 
               <div className="flex gap-2 flex-wrap mb-4">
                 {(artist?.specialty || MOCK.specialty).map(s => (
-                  <span key={s} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', border: '0.5px solid var(--brand)', padding: '3px 8px', textTransform: 'uppercase' }}>
+                  <span key={s} style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', border: '0.5px solid var(--brand)', padding: '3px 8px', textTransform: 'uppercase' }}>
                     {s}
                   </span>
                 ))}
               </div>
 
-              <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: '#F5F0EB', lineHeight: 1, marginBottom: '1rem' }}>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 400, color: '#F5F0EB', lineHeight: 1, marginBottom: '1rem' }}>
                 {artist?.name || MOCK.name}
               </h1>
 
@@ -98,10 +98,10 @@ export default function ArtistProfile() {
 
               {artist?.years_experience && (
                 <div className="mb-6">
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px' }}>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px' }}>
                     DOŚWIADCZENIE
                   </p>
-                  <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2rem', fontWeight: 400, color: '#F5F0EB' }}>
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 400, color: '#F5F0EB' }}>
                     {artist.years_experience} {artist.years_experience === 1 ? 'rok' : [2,3,4].includes(artist.years_experience) ? 'lata' : 'lat'}
                   </p>
                 </div>
@@ -113,7 +113,7 @@ export default function ArtistProfile() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 mb-8 hover:opacity-70 transition-opacity w-fit"
-                  style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.1em', fontWeight: 500, cursor: 'pointer' }}
+                  style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.1em', fontWeight: 500, cursor: 'pointer' }}
                 >
                   <Instagram size={16} />
                   Instagram
@@ -131,7 +131,7 @@ export default function ArtistProfile() {
 
           {/* RIGHT — Masonry portfolio */}
           <div className="flex-1 px-8 md:px-16 pb-32">
-            <p className="text-micro mb-8" style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.15em' }}>
+            <p className="text-micro mb-8" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.15em' }}>
               PORTFOLIO
             </p>
             <div className="masonry-grid">
@@ -156,7 +156,7 @@ export default function ArtistProfile() {
                   </div>
                   {img.caption && (
                     <div className="absolute bottom-0 left-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'linear-gradient(to top, rgba(10,10,10,0.9), transparent)' }}>
-                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#F5F0EB', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#F5F0EB', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                         {img.caption}
                       </p>
                     </div>

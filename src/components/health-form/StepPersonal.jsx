@@ -6,7 +6,7 @@ export default function StepPersonal({ form, setField, t, inputStyle, showErrors
     : false;
 
   const labelStyle = (error) => ({
-    fontFamily: 'JetBrains Mono', fontSize: '11px',
+    fontFamily: 'var(--font-mono)', fontSize: '11px',
     color: error ? 'var(--brand)' : textMuted,
     letterSpacing: '0.15em', textTransform: 'uppercase',
     display: 'block', marginBottom: '6px'
@@ -43,7 +43,7 @@ export default function StepPersonal({ form, setField, t, inputStyle, showErrors
         <DatePickerCustom value={form.date_of_birth} onChange={v => setField('date_of_birth', v)} showErrors={showErrors} t={t} textPrimary={textPrimary} textMuted={textMuted} borderColor={borderColor} />
         {isMinor && (
           <div className="mt-2 px-3 py-2 flex items-center gap-2" style={{ background: 'rgb(var(--brand-rgb) /0.08)', border: '0.5px solid rgb(var(--brand-rgb) /0.3)' }}>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em' }}>⚠ {t.minorWarning}</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em' }}>⚠ {t.minorWarning}</p>
           </div>
         )}
       </div>
@@ -84,7 +84,7 @@ export default function StepPersonal({ form, setField, t, inputStyle, showErrors
           {['TATUAŻ', 'PIERCING'].map(p => (
             <button type="button" key={p} onClick={() => setField('procedure_type', p)}
               style={{
-                fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em',
+                fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.1em',
                 textTransform: 'uppercase', padding: '11px 22px',
                 border: `0.5px solid ${form.procedure_type === p ? 'var(--brand)' : showErrors && !form.procedure_type ? 'var(--brand)' : borderColor}`,
                 color: form.procedure_type === p ? 'var(--brand)' : showErrors && !form.procedure_type ? 'var(--brand)' : textMuted,

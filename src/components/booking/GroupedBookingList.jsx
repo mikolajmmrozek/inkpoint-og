@@ -15,7 +15,7 @@ export default function GroupedBookingList({ bookings, renderRow, t, emptyMessag
   if (!bookings || bookings.length === 0) {
     return (
       <div className="py-6 text-center" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>{emptyMessage}</p>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>{emptyMessage}</p>
       </div>
     );
   }
@@ -32,11 +32,11 @@ export default function GroupedBookingList({ bookings, renderRow, t, emptyMessag
           <div key={date}>
             <div className="flex items-center gap-3 mb-2">
               <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: isPast ? '#9ca3af' : isToday ? '#f59e0b' : '#16a34a', flexShrink: 0 }} />
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: isPast ? t.muted : isToday ? '#f59e0b' : t.muted }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: isPast ? t.muted : isToday ? '#f59e0b' : t.muted }}>
                 {isToday ? `DZIŚ — ${dayLabel}` : dayLabel}
               </p>
               <div style={{ flex: 1, height: '0.5px', background: t.border }} />
-              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: t.muted }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.muted }}>
                 {items.length} {items.length === 1 ? 'sesja' : items.length >= 2 && items.length <= 4 ? 'sesje' : 'sesji'}
               </span>
             </div>

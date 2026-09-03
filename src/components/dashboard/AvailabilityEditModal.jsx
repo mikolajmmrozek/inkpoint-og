@@ -40,7 +40,7 @@ function TimeDropdown({ value, onChange, border, text }) {
   const setM = (newM) => onChange(`${h || '09'}:${newM}`);
   const selectStyle = {
     background: '#1a1a1a', border: `0.5px solid ${border}`, color: text,
-    padding: '6px 8px', fontSize: '14px', outline: 'none', fontFamily: 'Inter, sans-serif',
+    padding: '6px 8px', fontSize: '14px', outline: 'none', fontFamily: 'var(--font-body)',
     cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none', borderRadius: 0, flex: 1,
   };
   return (
@@ -59,7 +59,7 @@ function TimeDropdown({ value, onChange, border, text }) {
 function Row({ label, value, color, t }) {
   return (
     <div>
-      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '2px' }}>{label}</p>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', color, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '2px' }}>{label}</p>
       <p style={{ color: t.text, fontSize: '13px' }}>{value}</p>
     </div>
   );
@@ -109,11 +109,11 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
   const typeColor = record.is_available ? '#16a34a' : 'var(--brand)';
 
   const lbl = txt => (
-    <label style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>{txt}</label>
+    <label style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>{txt}</label>
   );
 
   const SegBtn = ({ active, onClick, children }) => (
-    <button type="button" onClick={onClick} style={{ flex: 1, padding: '6px 8px', fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', background: active ? 'rgb(var(--brand-rgb) /0.1)' : 'transparent', border: `0.5px solid ${active ? 'var(--brand)' : t.border}`, color: active ? 'var(--brand)' : t.muted, cursor: 'pointer' }}>
+    <button type="button" onClick={onClick} style={{ flex: 1, padding: '6px 8px', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', background: active ? 'rgb(var(--brand-rgb) /0.1)' : 'transparent', border: `0.5px solid ${active ? 'var(--brand)' : t.border}`, color: active ? 'var(--brand)' : t.muted, cursor: 'pointer' }}>
       {children}
     </button>
   );
@@ -215,16 +215,16 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
           {/* Header */}
           <div className="flex items-start justify-between mb-5">
             <div>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: typeColor, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: typeColor, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>
                 {step === 'edit' ? 'EDYTUJ WPIS' : 'DYSPOZYCJA / BLOKADA'}
               </p>
-              <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.5rem', color: t.title, letterSpacing: '0.04em', lineHeight: 1 }}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: t.title, letterSpacing: '0.04em', lineHeight: 1 }}>
                 {typeLabel}
               </h3>
               {isRecurring && (
                 <div className="flex items-center gap-1 mt-2">
                   <RefreshCw size={9} color={typeColor} />
-                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: typeColor, letterSpacing: '0.1em', textTransform: 'uppercase', opacity: 0.8 }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: typeColor, letterSpacing: '0.1em', textTransform: 'uppercase', opacity: 0.8 }}>
                     Wydarzenie cykliczne · {REPEAT_LABELS[record.repeat]}
                   </span>
                 </div>
@@ -240,10 +240,10 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                 <div className="flex items-center gap-2 px-3 py-2" style={{ background: `${typeColor}08`, border: `0.5px solid ${typeColor}30` }}>
                   <RefreshCw size={10} color={typeColor} style={{ flexShrink: 0 }} />
                   <div>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: typeColor, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: typeColor, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
                       WYDARZENIE CYKLICZNE
                     </p>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginTop: '1px' }}>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, marginTop: '1px' }}>
                       {repeatDisplay} · {groupRecords.length} {groupRecords.length === 1 ? 'wpis' : groupRecords.length < 5 ? 'wpisy' : 'wpisów'} w cyklu
                     </p>
                   </div>
@@ -261,7 +261,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                 >EDYTUJ</button>
                 <button
                   onClick={() => isRecurring ? setStep('confirm_delete_scope') : setStep('confirm_delete')}
-                  style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: `0.5px solid rgb(var(--brand-rgb) /0.4)`, color: 'var(--brand)', background: 'transparent', cursor: 'pointer' }}
+                  style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: `0.5px solid rgb(var(--brand-rgb) /0.4)`, color: 'var(--brand)', background: 'transparent', cursor: 'pointer' }}
                 >USUŃ</button>
               </div>
             </div>
@@ -270,7 +270,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
           {/* ── CONFIRM EDIT SCOPE ── */}
           {step === 'confirm_edit' && (
             <div className="space-y-4">
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text, letterSpacing: '0.04em', lineHeight: 1.6 }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.text, letterSpacing: '0.04em', lineHeight: 1.6 }}>
                 To wydarzenie jest częścią cyklu ({REPEAT_LABELS[record.repeat]}).<br />Co chcesz edytować?
               </p>
               <div className="space-y-2 pt-2">
@@ -282,19 +282,19 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                     style={{ display: 'block', width: '100%', textAlign: 'left', padding: '12px 14px', border: `0.5px solid ${t.border}`, background: 'transparent', cursor: 'pointer' }}
                     onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--brand)'}
                     onMouseLeave={e => e.currentTarget.style.borderColor = t.border}>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>{title}</p>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>{title}</p>
                     <p style={{ fontSize: '12px', color: t.muted }}>{sub}</p>
                   </button>
                 ))}
               </div>
-              <button onClick={() => setStep('view')} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}>← WRÓĆ</button>
+              <button onClick={() => setStep('view')} style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}>← WRÓĆ</button>
             </div>
           )}
 
           {/* ── CONFIRM DELETE SCOPE (dla cyklicznych) ── */}
           {step === 'confirm_delete_scope' && (
             <div className="space-y-4">
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text, letterSpacing: '0.04em', lineHeight: 1.6 }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.text, letterSpacing: '0.04em', lineHeight: 1.6 }}>
                 To wydarzenie jest częścią cyklu ({REPEAT_LABELS[record.repeat]}).<br />Co chcesz usunąć?
               </p>
               <div className="space-y-2 pt-2">
@@ -306,12 +306,12 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                     style={{ display: 'block', width: '100%', textAlign: 'left', padding: '12px 14px', border: `0.5px solid ${t.border}`, background: 'transparent', cursor: 'pointer' }}
                     onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--brand)'}
                     onMouseLeave={e => e.currentTarget.style.borderColor = t.border}>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>{title}</p>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>{title}</p>
                     <p style={{ fontSize: '12px', color: t.muted }}>{sub}</p>
                   </button>
                 ))}
               </div>
-              <button onClick={() => setStep('view')} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}>← WRÓĆ</button>
+              <button onClick={() => setStep('view')} style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}>← WRÓĆ</button>
             </div>
           )}
 
@@ -321,7 +321,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
               <div className="flex items-start gap-3 px-3 py-3" style={{ background: 'rgb(var(--brand-rgb) /0.06)', border: '0.5px solid rgb(var(--brand-rgb) /0.3)' }}>
                 <AlertTriangle size={16} color="var(--brand)" style={{ flexShrink: 0, marginTop: '2px' }} />
                 <div>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>
                     POTWIERDŹ USUNIĘCIE
                   </p>
                   <p style={{ fontSize: '13px', color: t.text, lineHeight: 1.5 }}>
@@ -334,11 +334,11 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
               </div>
               <div className="flex gap-3 pt-2">
                 <button onClick={handleDelete} disabled={saving}
-                  style={{ flex: 1, fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 14px', background: 'linear-gradient(135deg,var(--brand),var(--brand))', color: '#F5F0EB', border: 'none', cursor: 'pointer' }}>
+                  style={{ flex: 1, fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 14px', background: 'linear-gradient(135deg,var(--brand),var(--brand))', color: '#F5F0EB', border: 'none', cursor: 'pointer' }}>
                   {saving ? 'USUWAM...' : 'TAK, USUŃ'}
                 </button>
                 <button onClick={() => setStep(isRecurring ? 'confirm_delete_scope' : 'view')}
-                  style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 14px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}>
+                  style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 14px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}>
                   ANULUJ
                 </button>
               </div>
@@ -350,19 +350,19 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
             <div className="space-y-4">
               {editScope === 'occurrence' && (
                 <div style={{ padding: '8px 10px', background: 'rgb(var(--brand-rgb) /0.05)', border: '0.5px solid rgb(var(--brand-rgb) /0.2)' }}>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.1em' }}>EDYTUJESZ TYLKO: {dateDisplay}</p>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.1em' }}>EDYTUJESZ TYLKO: {dateDisplay}</p>
                 </div>
               )}
               {editScope === 'cycle' && (
                 <div style={{ padding: '10px 12px', background: 'rgba(22,163,74,0.05)', border: '0.5px solid rgba(22,163,74,0.25)' }}>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>EDYTUJESZ CAŁY CYKL</p>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>EDYTUJESZ CAŁY CYKL</p>
                   {cyclePreview && (
                     <div className="space-y-1">
-                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>
                         Łącznie po zapisie: <span style={{ color: t.text }}>{cyclePreview.total} wpisów</span>
                       </p>
-                      {cyclePreview.toAdd > 0 && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#16a34a' }}>+ {cyclePreview.toAdd} nowych</p>}
-                      {cyclePreview.toDelete > 0 && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)' }}>− {cyclePreview.toDelete} usuniętych</p>}
+                      {cyclePreview.toAdd > 0 && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: '#16a34a' }}>+ {cyclePreview.toAdd} nowych</p>}
+                      {cyclePreview.toDelete > 0 && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)' }}>− {cyclePreview.toDelete} usuniętych</p>}
                     </div>
                   )}
                 </div>
@@ -380,7 +380,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                 <div>
                   {lbl('DATA STARTU')}
                   <input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
-                    style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '8px 0', fontSize: '13px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif', colorScheme: 'dark' }} />
+                    style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '8px 0', fontSize: '13px', width: '100%', outline: 'none', fontFamily: 'var(--font-body)', colorScheme: 'dark' }} />
                 </div>
               )}
 
@@ -415,9 +415,9 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                         <input type="date" value={form.repeat_until}
                           onChange={e => setForm(f => ({ ...f, repeat_until: e.target.value, repeat_indefinite: false }))}
                           disabled={form.repeat_indefinite}
-                          style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '8px 0', fontSize: '13px', flex: 1, outline: 'none', fontFamily: 'Inter, sans-serif', colorScheme: 'dark', opacity: form.repeat_indefinite ? 0.3 : 1 }} />
+                          style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '8px 0', fontSize: '13px', flex: 1, outline: 'none', fontFamily: 'var(--font-body)', colorScheme: 'dark', opacity: form.repeat_indefinite ? 0.3 : 1 }} />
                         <button type="button" onClick={() => setForm(f => ({ ...f, repeat_indefinite: !f.repeat_indefinite, repeat_until: '' }))}
-                          style={{ flexShrink: 0, fontFamily: 'JetBrains Mono', fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 8px', border: `0.5px solid ${form.repeat_indefinite ? 'var(--brand)' : t.border}`, color: form.repeat_indefinite ? 'var(--brand)' : t.muted, background: form.repeat_indefinite ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                          style={{ flexShrink: 0, fontFamily: 'var(--font-mono)', fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 8px', border: `0.5px solid ${form.repeat_indefinite ? 'var(--brand)' : t.border}`, color: form.repeat_indefinite ? 'var(--brand)' : t.muted, background: form.repeat_indefinite ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', cursor: 'pointer', whiteSpace: 'nowrap' }}>
                           Do odwołania
                         </button>
                       </div>
@@ -429,7 +429,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
               <div>
                 {lbl('NOTATKA')}
                 <input type="text" value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} placeholder="np. urlop..."
-                  style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '8px 0', fontSize: '13px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif' }} />
+                  style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '8px 0', fontSize: '13px', width: '100%', outline: 'none', fontFamily: 'var(--font-body)' }} />
               </div>
 
               <div className="flex gap-3 pt-2" style={{ borderTop: `0.5px solid ${t.border}` }}>
@@ -437,7 +437,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                   {saving ? 'ZAPISUJĘ...' : 'ZAPISZ'}
                 </button>
                 <button onClick={() => setStep(isRecurring ? 'confirm_edit' : 'view')}
-                  style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 12px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}>
+                  style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 12px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}>
                   ANULUJ
                 </button>
               </div>

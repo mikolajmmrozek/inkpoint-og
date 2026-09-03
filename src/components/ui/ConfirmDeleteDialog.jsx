@@ -35,10 +35,10 @@ export default function ConfirmDeleteDialog({ open, title, message, onConfirm, o
             style={{ background: bg, border: `0.5px solid ${border}`, padding: '32px' }}
             onClick={e => e.stopPropagation()}
           >
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
               POTWIERDZENIE USUNIĘCIA
             </p>
-            <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.6rem', fontWeight: 400, color: textColor, letterSpacing: '0.04em', marginBottom: '12px' }}>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 400, color: textColor, letterSpacing: '0.04em', marginBottom: '12px' }}>
               {title || 'Usuń element'}
             </h3>
             <p style={{ fontSize: '13px', color: mutedColor, lineHeight: 1.6, marginBottom: '24px' }}>
@@ -47,13 +47,13 @@ export default function ConfirmDeleteDialog({ open, title, message, onConfirm, o
             <div className="flex gap-3">
               <button
                 onClick={onConfirm}
-                style={{ flex: 1, padding: '10px', background: 'linear-gradient(135deg,var(--brand),var(--brand))', color: '#F5F0EB', fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }}
+                style={{ flex: 1, padding: '10px', background: 'linear-gradient(135deg,var(--brand),var(--brand))', color: '#F5F0EB', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }}
               >
                 USUŃ
               </button>
               <button
                 onClick={onCancel}
-                style={{ flex: 1, padding: '10px', background: 'transparent', color: mutedColor, fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', border: `0.5px solid ${border}`, cursor: 'pointer' }}
+                style={{ flex: 1, padding: '10px', background: 'transparent', color: mutedColor, fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', border: `0.5px solid ${border}`, cursor: 'pointer' }}
               >
                 ANULUJ
               </button>
