@@ -26,8 +26,8 @@ const inputStyle = {
 export default function DashboardClients() {
   const { theme } = useTheme();
   const t = theme === 'light'
-    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F', modalBg: '#FFFFFF' }
-    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F', modalBg: '#0A0A0A' };
+    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: 'var(--brand)', modalBg: '#FFFFFF' }
+    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: 'var(--brand)', modalBg: '#0A0A0A' };
 
   const [clients, setClients] = useState([]);
   const [bookings, setBookings] = useState([]);
@@ -243,7 +243,7 @@ export default function DashboardClients() {
     style: { ...inputStyle, color: t.text, borderBottomColor: t.border },
     value: form[field] || '',
     onChange: e => setForm(f => ({ ...f, [field]: e.target.value })),
-    onFocus: e => e.target.style.borderBottomColor = '#FF007F',
+    onFocus: e => e.target.style.borderBottomColor = 'var(--brand)',
     onBlur: e => e.target.style.borderBottomColor = t.border,
   });
 
@@ -308,19 +308,19 @@ export default function DashboardClients() {
             return (
               <div key={c.id}>
                 {/* Mobile row — minimal */}
-                <div className="md:hidden px-4 py-3 flex items-center justify-between cursor-pointer" style={{ borderBottom: `0.5px solid ${t.border}`, background: isExpanded ? 'rgba(255,0,127,0.03)' : 'transparent' }} onClick={() => setExpandedClient(isExpanded ? null : c.id)}>
+                <div className="md:hidden px-4 py-3 flex items-center justify-between cursor-pointer" style={{ borderBottom: `0.5px solid ${t.border}`, background: isExpanded ? 'rgba(var(--brand-rgb),0.03)' : 'transparent' }} onClick={() => setExpandedClient(isExpanded ? null : c.id)}>
                   <div className="flex items-center gap-2">
                     <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{c.name}</p>
-                    {isNewClient(c) && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#16a34a', border: '0.5px solid #16a34a', padding: '1px 4px' }}>NOWY</span>}{c.is_blocked && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '1px 4px', marginLeft: '4px' }}>ZABLOKOWANY</span>}
+                    {isNewClient(c) && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#16a34a', border: '0.5px solid #16a34a', padding: '1px 4px' }}>NOWY</span>}{c.is_blocked && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: 'var(--brand)', border: '0.5px solid var(--brand)', padding: '1px 4px', marginLeft: '4px' }}>ZABLOKOWANY</span>}
                   </div>
                   <div className="flex gap-2">
                      {c.email && getClientStatus(c) === 'inactive' && (
-                       <button onClick={(e) => { e.stopPropagation(); handleInvite(c); }} style={{ color: '#FF007F', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} title="Utwórz konto i zaproś"><UserPlus size={13} /></button>
+                       <button onClick={(e) => { e.stopPropagation(); handleInvite(c); }} style={{ color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} title="Utwórz konto i zaproś"><UserPlus size={13} /></button>
                      )}
                      <ClientMessageButton client={c} t={t} users={users} />
                      <button onClick={(e) => { e.stopPropagation(); openNewSession(c); }} style={{ color: '#16a34a', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} title="Nowa sesja"><CalendarPlus size={13} /></button>
                      <button onClick={(e) => { e.stopPropagation(); setMergeSource(c); setMergeTarget(null); setMergeSearch(''); }} style={{ color: '#a855f7', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} title="Połącz"><Merge size={13} /></button>
-                     <button onClick={(e) => { e.stopPropagation(); handleToggleBlock(c); }} style={{ color: c.is_blocked ? '#FF007F' : t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} title={c.is_blocked ? 'Odblokuj klienta' : 'Zablokuj klienta'}><Ban size={13} /></button>
+                     <button onClick={(e) => { e.stopPropagation(); handleToggleBlock(c); }} style={{ color: c.is_blocked ? 'var(--brand)' : t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} title={c.is_blocked ? 'Odblokuj klienta' : 'Zablokuj klienta'}><Ban size={13} /></button>
                      <button onClick={(e) => { e.stopPropagation(); openEdit(c); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><Edit2 size={13} /></button>
                      <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(c); }} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><Trash2 size={13} /></button>
                    </div>
@@ -329,7 +329,7 @@ export default function DashboardClients() {
                 {/* Desktop row — full grid */}
                 <div 
                   className="hidden md:grid grid-cols-12 px-4 py-3 items-center cursor-pointer"
-                  style={{ borderBottom: `0.5px solid ${t.border}`, background: isExpanded ? 'rgba(255,0,127,0.03)' : 'transparent' }}
+                  style={{ borderBottom: `0.5px solid ${t.border}`, background: isExpanded ? 'rgba(var(--brand-rgb),0.03)' : 'transparent' }}
                   onClick={() => setExpandedClient(isExpanded ? null : c.id)}
                 >
                   <div className="col-span-4 flex items-center gap-2">
@@ -339,7 +339,7 @@ export default function DashboardClients() {
                     <div>
                       <div className="flex items-center gap-2">
                         <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{c.name}</p>
-                        {isNewClient(c) && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#16a34a', border: '0.5px solid #16a34a', padding: '1px 4px' }}>NOWY</span>}{c.is_blocked && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '1px 4px', marginLeft: '4px' }}>ZABLOKOWANY</span>}
+                        {isNewClient(c) && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#16a34a', border: '0.5px solid #16a34a', padding: '1px 4px' }}>NOWY</span>}{c.is_blocked && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: 'var(--brand)', border: '0.5px solid var(--brand)', padding: '1px 4px', marginLeft: '4px' }}>ZABLOKOWANY</span>}
                       </div>
                       {c.notes && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.notes}</p>}
                     </div>
@@ -353,7 +353,7 @@ export default function DashboardClients() {
                           const tip = st === 'active' ? 'Konto aktywne' : st === 'invited' ? 'Zaproszony — czeka na logowanie' : 'Brak konta — kliknij + aby zaprosić';
                           return <div title={tip} style={{ width: '6px', height: '6px', borderRadius: '50%', background: dotColor, flexShrink: 0 }} />;
                         })()}
-                        <a href={`mailto:${c.email}`} onClick={e => e.stopPropagation()} style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.04em', textDecoration: 'none' }} onMouseEnter={e => e.target.style.color = '#FF007F'} onMouseLeave={e => e.target.style.color = t.muted}>{c.email}</a>
+                        <a href={`mailto:${c.email}`} onClick={e => e.stopPropagation()} style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.04em', textDecoration: 'none' }} onMouseEnter={e => e.target.style.color = 'var(--brand)'} onMouseLeave={e => e.target.style.color = t.muted}>{c.email}</a>
                         {inviteStatus[c.id] === 'inviting' && <Loader2 size={11} className="animate-spin" color={t.muted} />}
                         {inviteStatus[c.id] === 'invited' && <Check size={11} color="#16a34a" />}
                       </>
@@ -362,26 +362,26 @@ export default function DashboardClients() {
                     )}
                   </div>
                   <div className="col-span-2">
-                    {c.phone ? <a href={`tel:${c.phone}`} onClick={e => e.stopPropagation()} style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, textDecoration: 'none' }} onMouseEnter={e => e.target.style.color = '#FF007F'} onMouseLeave={e => e.target.style.color = t.muted}>{c.phone}</a> : <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>—</span>}
+                    {c.phone ? <a href={`tel:${c.phone}`} onClick={e => e.stopPropagation()} style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, textDecoration: 'none' }} onMouseEnter={e => e.target.style.color = 'var(--brand)'} onMouseLeave={e => e.target.style.color = t.muted}>{c.phone}</a> : <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>—</span>}
                   </div>
                   <div className="col-span-1">
                     <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: getClientData(c).sessions.filter(s => s.status === 'completed').length >= 2 ? t.fuchsia : t.muted, fontWeight: 600 }}>{getClientData(c).sessions.filter(s => s.status === 'completed').length}</span>
                   </div>
                   <div className="col-span-2 flex justify-end gap-3">
                     {c.email && getClientStatus(c) === 'inactive' && (
-                      <button onClick={(e) => { e.stopPropagation(); handleInvite(c); }} style={{ color: '#FF007F', background: 'none', border: 'none', cursor: 'pointer' }} title="Utwórz konto i zaproś do aplikacji"><UserPlus size={13} /></button>
+                      <button onClick={(e) => { e.stopPropagation(); handleInvite(c); }} style={{ color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer' }} title="Utwórz konto i zaproś do aplikacji"><UserPlus size={13} /></button>
                     )}
                     <ClientMessageButton client={c} t={t} users={users} />
                     <button onClick={(e) => { e.stopPropagation(); openNewSession(c); }} style={{ color: '#16a34a', background: 'none', border: 'none', cursor: 'pointer' }} title="Nowa sesja"><CalendarPlus size={13} /></button>
                     <button onClick={(e) => { e.stopPropagation(); setMergeSource(c); setMergeTarget(null); setMergeSearch(''); }} style={{ color: '#a855f7', background: 'none', border: 'none', cursor: 'pointer' }} title="Połącz z innym klientem"><Merge size={13} /></button>
-                    <button onClick={(e) => { e.stopPropagation(); handleToggleBlock(c); }} style={{ color: c.is_blocked ? '#FF007F' : t.muted, background: 'none', border: 'none', cursor: 'pointer' }} title={c.is_blocked ? 'Odblokuj klienta' : 'Zablokuj klienta'}><Ban size={13} /></button>
+                    <button onClick={(e) => { e.stopPropagation(); handleToggleBlock(c); }} style={{ color: c.is_blocked ? 'var(--brand)' : t.muted, background: 'none', border: 'none', cursor: 'pointer' }} title={c.is_blocked ? 'Odblokuj klienta' : 'Zablokuj klienta'}><Ban size={13} /></button>
                     <button onClick={(e) => { e.stopPropagation(); openEdit(c); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Edit2 size={13} /></button>
                     <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(c); }} style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={13} /></button>
                   </div>
                 </div>
 
                 {isExpanded && (
-                  <div style={{ background: 'rgba(255,0,127,0.02)', borderBottom: `0.5px solid ${t.border}`, padding: '12px 20px' }}>
+                  <div style={{ background: 'rgba(var(--brand-rgb),0.02)', borderBottom: `0.5px solid ${t.border}`, padding: '12px 20px' }}>
                     {sessions.length > 0 && (
                       <div className="mb-4">
                         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>Sesje ({sessions.length})</p>
@@ -460,7 +460,7 @@ export default function DashboardClients() {
       {newSessionClient && repeatPromptVisible && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.75)' }}>
           <div style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '36px', maxWidth: '460px', width: '100%' }}>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>NOWA SESJA</p>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>NOWA SESJA</p>
             <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.8rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em', marginBottom: '20px' }}>
               {newSessionClient.name}
             </h3>
@@ -470,7 +470,7 @@ export default function DashboardClients() {
             <div style={{ border: `0.5px solid ${t.border}`, padding: '14px 16px', marginBottom: '20px' }}>
               <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.text, marginBottom: '4px' }}>{lastSessionForClient?.session_date} · {lastSessionForClient?.artist_name || '—'}</p>
               {lastSessionForClient?.tattoo_placement && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted }}>{lastSessionForClient.tattoo_placement}{lastSessionForClient.tattoo_description ? ` — ${lastSessionForClient.tattoo_description}` : ''}</p>}
-              {lastSessionForClient?.estimated_price && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', marginTop: '4px' }}>{lastSessionForClient.estimated_price} PLN</p>}
+              {lastSessionForClient?.estimated_price && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', marginTop: '4px' }}>{lastSessionForClient.estimated_price} PLN</p>}
             </div>
             <p style={{ fontSize: '13px', color: t.muted, marginBottom: '20px', lineHeight: 1.6 }}>
               Czy chcesz umówić ponownie z danymi z ostatniej sesji (artysta, opis, cena)?
@@ -650,7 +650,7 @@ export default function DashboardClients() {
               </div>
               <div>{label('Liczba sesji')}<input type="number" {...inp('total_sessions')} /></div>
               <div>{label('Notatki')}
-                <textarea rows={3} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} value={form.notes || ''} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+                <textarea rows={3} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} value={form.notes || ''} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
               </div>
             </div>
             <div className="flex gap-4 mt-8 pt-6" style={{ borderTop: `0.5px solid ${t.border}` }}>

@@ -10,7 +10,7 @@ function StarDisplay({ value, size = 12 }) {
   return (
     <span style={{ fontSize: size, letterSpacing: '1px' }}>
       {[1, 2, 3, 4, 5].map(s => (
-        <span key={s} style={{ color: s <= value ? '#FF007F' : 'rgba(245,240,235,0.15)' }}>★</span>
+        <span key={s} style={{ color: s <= value ? 'var(--brand)' : 'rgba(245,240,235,0.15)' }}>★</span>
       ))}
     </span>
   );
@@ -38,8 +38,8 @@ const DEFAULT_CONFIG = {
 export default function DashboardFeedback() {
   const { theme } = useTheme();
   const t = theme === 'light'
-    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.6)', fuchsia: '#FF007F', pageBg: '#F8F8F8' }
-    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.65)', fuchsia: '#FF007F', pageBg: '#0A0A0A' };
+    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.6)', fuchsia: 'var(--brand)', pageBg: '#F8F8F8' }
+    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.65)', fuchsia: 'var(--brand)', pageBg: '#0A0A0A' };
 
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('reviews'); // 'reviews' | 'config'
@@ -172,7 +172,7 @@ export default function DashboardFeedback() {
               fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase',
               padding: '12px 20px', background: 'transparent', border: 'none', cursor: 'pointer',
               color: activeTab === tab.id ? t.fuchsia : t.muted,
-              borderBottom: activeTab === tab.id ? '2px solid #FF007F' : '2px solid transparent',
+              borderBottom: activeTab === tab.id ? '2px solid var(--brand)' : '2px solid transparent',
               marginBottom: '-0.5px',
             }}
           >
@@ -252,7 +252,7 @@ export default function DashboardFeedback() {
                   <button
                     onClick={() => deleteFeedback.mutate(fb.id)}
                     title="Usuń"
-                    style={{ background: 'none', border: `0.5px solid ${t.border}`, cursor: 'pointer', padding: '6px', color: '#FF007F' }}
+                    style={{ background: 'none', border: `0.5px solid ${t.border}`, cursor: 'pointer', padding: '6px', color: 'var(--brand)' }}
                   >
                     <Trash2 size={14} />
                   </button>
@@ -308,8 +308,8 @@ export default function DashboardFeedback() {
                             <option value="text">✏️ Tekst (mały)</option>
                           </select>
                           <label className="flex items-center gap-2 cursor-pointer">
-                            <div onClick={() => setConfigForm(f => ({ ...f, questions: f.questions.map((x, i) => i === idx ? { ...x, required: !x.required } : x) }))} style={{ width: '14px', height: '14px', border: `0.5px solid ${q.required ? t.fuchsia : t.border}`, background: q.required ? 'rgba(255,0,127,0.15)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                              {q.required && <Check size={9} color="#FF007F" />}
+                            <div onClick={() => setConfigForm(f => ({ ...f, questions: f.questions.map((x, i) => i === idx ? { ...x, required: !x.required } : x) }))} style={{ width: '14px', height: '14px', border: `0.5px solid ${q.required ? t.fuchsia : t.border}`, background: q.required ? 'rgba(var(--brand-rgb),0.15)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                              {q.required && <Check size={9} color="var(--brand)" />}
                             </div>
                             <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, textTransform: 'uppercase' }}>Wymagane</span>
                           </label>

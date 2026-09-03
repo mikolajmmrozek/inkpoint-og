@@ -50,8 +50,8 @@ const CONSENT_FIELDS = [
 export default function DashboardHealthForms() {
   const { theme } = useTheme();
   const t = theme === 'light'
-    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F' }
-    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F' };
+    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: 'var(--brand)' }
+    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: 'var(--brand)' };
 
   const [template, setTemplate] = useState(null);
   const [forms, setForms] = useState([]);
@@ -453,7 +453,7 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
       </div>
 
       {/* General form link section */}
-      <div className="mb-6 p-4" style={{ border: `0.5px solid ${t.border}`, background: 'rgba(255,0,127,0.03)' }}>
+      <div className="mb-6 p-4" style={{ border: `0.5px solid ${t.border}`, background: 'rgba(var(--brand-rgb),0.03)' }}>
         <div className="flex items-center justify-between mb-3">
           <p style={{ ...mono, fontSize: '8px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
             LINK OGÓLNY DO ANKIETY
@@ -537,7 +537,7 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
             <p style={{ ...mono, fontSize: '8px', color: '#f97316', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
               NIEDOKOŃCZONE ANKIETY (DRAFT) — {filteredDrafts.length}
             </p>
-            <button onClick={deleteAllDrafts} className="flex items-center gap-1.5" style={{ ...mono, fontSize: '8px', color: '#FF007F', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #FF007F', padding: '4px 10px', cursor: 'pointer' }}>
+            <button onClick={deleteAllDrafts} className="flex items-center gap-1.5" style={{ ...mono, fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: '0.5px solid var(--brand)', padding: '4px 10px', cursor: 'pointer' }}>
               <Trash2 size={10} /> USUŃ WSZYSTKIE ({filteredDrafts.length})
             </button>
           </div>
@@ -561,7 +561,7 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
                 <button
                   onClick={() => deleteForm(form)}
                   title="Usuń draft"
-                  style={{ color: '#FF007F', background: 'none', border: 'none', cursor: 'pointer' }}
+                  style={{ color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer' }}
                 >
                   <Trash2 size={13} />
                 </button>
@@ -580,14 +580,14 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
             </p>
             {/* Legenda kropek */}
             <div className="flex flex-wrap gap-4 mb-2">
-              {[['#FF007F', 'Problemy medyczne'], ['#f97316', 'Tak na pytanie przedzabiegowe'], ['#3b82f6', 'Brak zgody na wizerunek'], ['#16a34a', 'Wszystko OK']].map(([color, label]) => (
+              {[['var(--brand)', 'Problemy medyczne'], ['#f97316', 'Tak na pytanie przedzabiegowe'], ['#3b82f6', 'Brak zgody na wizerunek'], ['#16a34a', 'Wszystko OK']].map(([color, label]) => (
                 <div key={label} className="flex items-center gap-1.5">
                   <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: color, flexShrink: 0 }} />
                   <span style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>{label}</span>
                 </div>
               ))}
               <div className="flex items-center gap-1.5">
-                <span style={{ ...mono, fontSize: '7px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '1px 4px', letterSpacing: '0.06em' }}>NIEPEŁNOLETNI</span>
+                <span style={{ ...mono, fontSize: '7px', color: 'var(--brand)', border: '0.5px solid var(--brand)', padding: '1px 4px', letterSpacing: '0.06em' }}>NIEPEŁNOLETNI</span>
                 <span style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>Niepełnoletni klient</span>
               </div>
             </div>
@@ -631,11 +631,11 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
                 return (
                   <div key={form.client_email || form.id}
                     className="flex items-center gap-3 px-4 py-3 cursor-pointer"
-                    style={{ borderBottom: i < groupedClients.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selected?.client_email === form.client_email ? 'rgba(255,0,127,0.05)' : group.some(f => !f.is_read) ? 'rgba(255,0,127,0.025)' : 'transparent', borderLeft: group.some(f => !f.is_read) ? '2px solid rgba(255,0,127,0.4)' : '2px solid transparent' }}
+                    style={{ borderBottom: i < groupedClients.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selected?.client_email === form.client_email ? 'rgba(var(--brand-rgb),0.05)' : group.some(f => !f.is_read) ? 'rgba(var(--brand-rgb),0.025)' : 'transparent', borderLeft: group.some(f => !f.is_read) ? '2px solid rgba(var(--brand-rgb),0.4)' : '2px solid transparent' }}
                     onClick={() => handleSelectForm(form)}
                   >
-                    <FileText size={13} color={form.is_minor ? '#FF007F' : t.fuchsia} />
-                    {group.some(f => !f.is_read) && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '1px 4px' }}>NOWA</span>}
+                    <FileText size={13} color={form.is_minor ? 'var(--brand)' : t.fuchsia} />
+                    {group.some(f => !f.is_read) && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: 'var(--brand)', border: '0.5px solid var(--brand)', padding: '1px 4px' }}>NOWA</span>}
                     <div className="flex-1 min-w-0">
                       <p style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>{getClientName(form)}</p>
                       <p style={{ ...mono, fontSize: '8px', color: t.muted, marginTop: '2px' }}>{form.client_email}</p>
@@ -649,8 +649,8 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
                       </div>
                     </div>
                     <div className="flex flex-row gap-2 items-center flex-shrink-0">
-                      {form.is_minor && <span style={{ ...mono, fontSize: '7px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '1px 4px' }}>NIELETNI</span>}
-                      {hasMedical && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#FF007F' }} title="Problemy medyczne" />}
+                      {form.is_minor && <span style={{ ...mono, fontSize: '7px', color: 'var(--brand)', border: '0.5px solid var(--brand)', padding: '1px 4px' }}>NIELETNI</span>}
+                      {hasMedical && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: 'var(--brand)' }} title="Problemy medyczne" />}
                       {hasProcedureYes && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#f97316' }} title="Tak na pytanie przedzabiegowe" />}
                       {noImageConsent && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#3b82f6' }} title="Brak zgody na wizerunek" />}
                       {allOk && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#16a34a' }} title="Wszystko OK" />}
@@ -695,7 +695,7 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
           extraActions={[
             { icon: <Download size={14} />, label: 'Pobierz', onClick: () => exportPDF(selected, 'save'), color: exporting ? t.muted : t.muted },
             { icon: <Printer size={14} />, label: 'Drukuj', onClick: () => exportPDF(selected, 'print'), color: exporting ? t.muted : t.muted },
-            { icon: <Trash2 size={14} />, label: 'Usuń', onClick: () => deleteForm(selected), color: '#FF007F' },
+            { icon: <Trash2 size={14} />, label: 'Usuń', onClick: () => deleteForm(selected), color: 'var(--brand)' },
           ]}
           formSelector={selectedClientForms.length > 1 ? {
             forms: selectedClientForms,

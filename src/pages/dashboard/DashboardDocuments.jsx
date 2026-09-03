@@ -24,8 +24,8 @@ const INSTRUCTION_TYPES = [
 export default function DashboardDocuments() {
   const { theme } = useTheme();
   const t = theme === 'light'
-    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F', modalBg: '#FFFFFF', cardBg: 'rgba(255,0,127,0.02)' }
-    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F', modalBg: '#0A0A0A', cardBg: 'rgba(255,0,127,0.02)' };
+    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: 'var(--brand)', modalBg: '#FFFFFF', cardBg: 'rgba(var(--brand-rgb),0.02)' }
+    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: 'var(--brand)', modalBg: '#0A0A0A', cardBg: 'rgba(var(--brand-rgb),0.02)' };
 
   const [instructions, setInstructions] = useState([]);
   const [terms, setTerms] = useState(null);
@@ -555,7 +555,7 @@ export default function DashboardDocuments() {
                 <p style={{ ...mono, fontSize: '9px', color: '#16a34a', letterSpacing: '0.08em' }}>✓ Dokument wysłany pomyślnie</p>
               )}
               {shareResult === 'error' && (
-                <p style={{ ...mono, fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>⚠ Błąd wysyłki. Sprawdź adres e-mail i spróbuj ponownie.</p>
+                <p style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em' }}>⚠ Błąd wysyłki. Sprawdź adres e-mail i spróbuj ponownie.</p>
               )}
               <div className="flex gap-3">
                 <button
@@ -609,7 +609,7 @@ export default function DashboardDocuments() {
             </div>
 
             <div className="p-6 space-y-3" style={{ borderTop: `0.5px solid ${t.border}`, flexShrink: 0 }}>
-              {saveError && <p style={{ ...mono, fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>⚠ {saveError}</p>}
+              {saveError && <p style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em' }}>⚠ {saveError}</p>}
               <div className="flex gap-4">
                 <button onClick={handleSaveInstr} disabled={saving} className="btn-oxblood flex-1" style={{ padding: '12px', opacity: saving ? 0.5 : 1 }}>{saving ? 'ZAPISYWANIE...' : 'ZAPISZ'}</button>
                 <button onClick={() => { setEditingInstr(null); setSaveError(null); }} className="btn-ghost-parchment">ANULUJ</button>
@@ -640,7 +640,7 @@ export default function DashboardDocuments() {
             </div>
 
             <div className="p-6 space-y-3" style={{ borderTop: `0.5px solid ${t.border}`, flexShrink: 0 }}>
-              {saveError && <p style={{ ...mono, fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>⚠ {saveError}</p>}
+              {saveError && <p style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em' }}>⚠ {saveError}</p>}
               <div className="flex gap-4">
                 <button onClick={handleSaveTerms} disabled={saving} className="btn-oxblood flex-1" style={{ padding: '12px', opacity: saving ? 0.5 : 1 }}>{saving ? 'ZAPISYWANIE...' : 'ZAPISZ'}</button>
                 <button onClick={() => { setEditingTerms(false); setSaveError(null); }} className="btn-ghost-parchment">ANULUJ</button>
@@ -673,7 +673,7 @@ export default function DashboardDocuments() {
             </div>
 
             <div className="p-6 space-y-3" style={{ borderTop: `0.5px solid ${t.border}`, flexShrink: 0 }}>
-              {saveError && <p style={{ ...mono, fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>⚠ {saveError}</p>}
+              {saveError && <p style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em' }}>⚠ {saveError}</p>}
               <div className="flex gap-4">
                 <button onClick={handleSaveLegal} disabled={saving} className="btn-oxblood flex-1" style={{ padding: '12px', opacity: saving ? 0.5 : 1 }}>{saving ? 'ZAPISYWANIE...' : 'ZAPISZ'}</button>
                 <button onClick={() => { setEditingLegal(null); setSaveError(null); }} className="btn-ghost-parchment">ANULUJ</button>

@@ -38,8 +38,8 @@ const EMPTY_FORM = {
 export default function DashboardServices() {
   const { theme } = useTheme();
   const t = theme === 'light'
-    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F', modalBg: '#FFFFFF' }
-    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F', modalBg: '#0A0A0A' };
+    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: 'var(--brand)', modalBg: '#FFFFFF' }
+    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: 'var(--brand)', modalBg: '#0A0A0A' };
 
   const [services, setServices] = useState([]);
   const [artists, setArtists] = useState([]);
@@ -134,7 +134,7 @@ export default function DashboardServices() {
     style: { ...inputStyle, color: t.text, borderBottomColor: t.border },
     value: form[field] ?? '',
     onChange: e => set(field, e.target.value),
-    onFocus: e => e.target.style.borderBottomColor = '#FF007F',
+    onFocus: e => e.target.style.borderBottomColor = 'var(--brand)',
     onBlur: e => e.target.style.borderBottomColor = t.border,
   });
 
@@ -188,9 +188,9 @@ export default function DashboardServices() {
                   key={cat || 'all'}
                   onClick={() => setFilterCategory(cat)}
                   style={{
-                    border: `0.5px solid ${active ? '#FF007F' : t.border}`,
-                    color: active ? '#FF007F' : t.muted,
-                    background: active ? 'rgba(255,0,127,0.08)' : 'transparent',
+                    border: `0.5px solid ${active ? 'var(--brand)' : t.border}`,
+                    color: active ? 'var(--brand)' : t.muted,
+                    background: active ? 'rgba(var(--brand-rgb),0.08)' : 'transparent',
                     fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase',
                     padding: '7px 14px', cursor: 'pointer',
                   }}
@@ -215,9 +215,9 @@ export default function DashboardServices() {
                     onClick={() => setFilterArtist(a?.id || '')}
                     className="flex items-center gap-2"
                     style={{
-                      border: `0.5px solid ${active ? '#FF007F' : t.border}`,
-                      color: active ? '#FF007F' : t.muted,
-                      background: active ? 'rgba(255,0,127,0.08)' : 'transparent',
+                      border: `0.5px solid ${active ? 'var(--brand)' : t.border}`,
+                      color: active ? 'var(--brand)' : t.muted,
+                      background: active ? 'rgba(var(--brand-rgb),0.08)' : 'transparent',
                       fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase',
                       padding: '7px 14px', cursor: 'pointer',
                     }}
@@ -241,7 +241,7 @@ export default function DashboardServices() {
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
           style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '10px 36px', fontSize: '13px', color: t.text, fontFamily: 'Inter, sans-serif', outline: 'none' }}
-          onFocus={e => e.target.style.borderColor = '#FF007F'}
+          onFocus={e => e.target.style.borderColor = 'var(--brand)'}
           onBlur={e => e.target.style.borderColor = t.border}
         />
         {searchQuery && (
@@ -276,7 +276,7 @@ export default function DashboardServices() {
                 key={label || '_actions'}
                 onClick={() => key && handleSort(key)}
                 className={`${span} flex items-center gap-1`}
-                style={{ background: 'none', border: 'none', cursor: key ? 'pointer' : 'default', padding: 0, fontFamily: 'JetBrains Mono', fontSize: '8px', color: sortKey === key ? '#FF007F' : t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}
+                style={{ background: 'none', border: 'none', cursor: key ? 'pointer' : 'default', padding: 0, fontFamily: 'JetBrains Mono', fontSize: '8px', color: sortKey === key ? 'var(--brand)' : t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}
               >
                 {label}
                 {key && sortKey === key && (sortDir === 'asc' ? <ChevronUp size={10} /> : <ChevronDown size={10} />)}
@@ -317,15 +317,15 @@ export default function DashboardServices() {
                 {s.image_url ? (
                   <img src={s.image_url} alt={s.name} style={{ width: '36px', height: '36px', objectFit: 'cover', flexShrink: 0 }} />
                 ) : (
-                  <div style={{ width: '36px', height: '36px', background: 'rgba(255,0,127,0.1)', border: `0.5px solid rgba(255,0,127,0.2)`, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ fontFamily: 'Bebas Neue', fontSize: '14px', color: '#FF007F' }}>{s.name?.[0]?.toUpperCase()}</span>
+                  <div style={{ width: '36px', height: '36px', background: 'rgba(var(--brand-rgb),0.1)', border: `0.5px solid rgba(var(--brand-rgb),0.2)`, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontFamily: 'Bebas Neue', fontSize: '14px', color: 'var(--brand)' }}>{s.name?.[0]?.toUpperCase()}</span>
                   </div>
                 )}
                 <div className="min-w-0">
                   <p style={{ color: t.text, fontSize: '14px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</p>
                   <div className="flex items-center gap-2 mt-1">
                     {s.category && (
-                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '1px 6px', border: '0.5px solid rgba(255,0,127,0.4)', color: '#FF007F' }}>
+                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '1px 6px', border: '0.5px solid rgba(var(--brand-rgb),0.4)', color: 'var(--brand)' }}>
                         {s.category}
                       </span>
                     )}
@@ -394,7 +394,7 @@ export default function DashboardServices() {
           <div className="w-full max-w-2xl max-h-screen overflow-y-auto" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '40px' }} onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-8">
               <div>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
                   {editing === 'new' ? 'NOWA USŁUGA' : 'EDYTUJ USŁUGĘ'}
                 </p>
                 <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.8rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
@@ -407,7 +407,7 @@ export default function DashboardServices() {
             <div className="space-y-6">
               {/* Basic info */}
               <div>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>PODSTAWOWE INFO</p>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>PODSTAWOWE INFO</p>
                 <div className="mb-4">{label('Nazwa *')}<input {...inp('name')} /></div>
                 <div className="mb-4">
                   {label('Kategoria')}
@@ -426,13 +426,13 @@ export default function DashboardServices() {
                 <div>{label('Długi opis')}
                   <textarea rows={4} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'vertical' }}
                     value={form.long_description || ''} onChange={e => set('long_description', e.target.value)}
-                    onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+                    onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                 </div>
               </div>
 
               {/* Image */}
               <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>ZDJĘCIE</p>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>ZDJĘCIE</p>
                 {form.image_url && (
                   <div className="mb-3">
                     <img src={form.image_url} alt="preview" style={{ width: '120px', height: '80px', objectFit: 'cover', border: `0.5px solid ${t.border}` }} />
@@ -447,7 +447,7 @@ export default function DashboardServices() {
 
               {/* Duration & Price */}
               <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>CZAS I CENA</p>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>CZAS I CENA</p>
                 {/* Duration sliders */}
                 <div className="mb-6">
                   {label('Czas wykonania')}
@@ -468,7 +468,7 @@ export default function DashboardServices() {
                           <input
                             type="range" min={0} max={12} step={1} value={hours}
                             onChange={e => setDuration(Number(e.target.value), minutes)}
-                            style={{ width: '100%', accentColor: '#FF007F', cursor: 'pointer' }}
+                            style={{ width: '100%', accentColor: 'var(--brand)', cursor: 'pointer' }}
                           />
                           <div className="flex justify-between" style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: t.muted, marginTop: '2px' }}>
                             {Array.from({length: 13}, (_, i) => <span key={i}>{i}</span>)}
@@ -481,7 +481,7 @@ export default function DashboardServices() {
                           <input
                             type="range" min={0} max={45} step={15} value={minutes}
                             onChange={e => setDuration(hours, Number(e.target.value))}
-                            style={{ width: '100%', accentColor: '#FF007F', cursor: 'pointer' }}
+                            style={{ width: '100%', accentColor: 'var(--brand)', cursor: 'pointer' }}
                           />
                           <div className="flex justify-between" style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: t.muted, marginTop: '2px' }}>
                             {[0, 15, 30, 45].map(m => <span key={m}>{m}</span>)}
@@ -532,7 +532,7 @@ export default function DashboardServices() {
 
               {/* Artists */}
               <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px' }}>ARTYŚCI</p>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px' }}>ARTYŚCI</p>
                 <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginBottom: '12px' }}>Brak zaznaczenia = wszyscy artyści</p>
                 <div className="flex flex-wrap gap-2">
                   {artists.map(a => {
@@ -544,9 +544,9 @@ export default function DashboardServices() {
                         onClick={() => toggleArtist(a.id)}
                         className="flex items-center gap-2 px-3 py-2"
                         style={{
-                          border: `0.5px solid ${selected ? '#FF007F' : t.border}`,
-                          color: selected ? '#FF007F' : t.muted,
-                          background: selected ? 'rgba(255,0,127,0.06)' : 'transparent',
+                          border: `0.5px solid ${selected ? 'var(--brand)' : t.border}`,
+                          color: selected ? 'var(--brand)' : t.muted,
+                          background: selected ? 'rgba(var(--brand-rgb),0.06)' : 'transparent',
                           fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer',
                         }}
                       >
@@ -617,7 +617,7 @@ export default function DashboardServices() {
                           value={form.min_advance_booking?.value || 0}
                           onChange={e => set('min_advance_booking', { ...(form.min_advance_booking || {}), value: Number(e.target.value) })}
                           style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }}
-                          onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
+                          onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'}
                           onBlur={e => e.target.style.borderBottomColor = t.border}
                         />
                       </div>
@@ -626,7 +626,7 @@ export default function DashboardServices() {
                       const unit = form.min_advance_booking?.unit || 'minutes';
                       const val = form.min_advance_booking?.value || 0;
                       let display = val === 0 ? 'Bez wymogów' : unit === 'minutes' ? `Za ${val} minut` : unit === 'hours' ? `Za ${val} h` : `Za ${val} dni`;
-                      return <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', marginTop: '8px', letterSpacing: '0.05em' }}>{display}</p>;
+                      return <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', marginTop: '8px', letterSpacing: '0.05em' }}>{display}</p>;
                     })()}
                   </div>
                 </div>

@@ -98,7 +98,7 @@ export default function DashboardUsers() {
     setSaving(false);
   };
 
-  const ROLE_COLORS = { admin: '#FF007F', artist: '#f59e0b', user: '#9ca3af' };
+  const ROLE_COLORS = { admin: 'var(--brand)', artist: '#f59e0b', user: '#9ca3af' };
   const ROLE_LABELS = { admin: 'ADMIN', artist: 'ARTYSTA', user: 'UŻYTKOWNIK' };
 
   return (
@@ -106,8 +106,8 @@ export default function DashboardUsers() {
       {/* Invite form */}
       <div className="p-6 mb-8" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
         <div className="flex items-center gap-2 mb-6">
-          <UserPlus size={14} color="#FF007F" />
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase' }}>ZAPROŚ UŻYTKOWNIKA</p>
+          <UserPlus size={14} color="var(--brand)" />
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>ZAPROŚ UŻYTKOWNIKA</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
@@ -149,7 +149,7 @@ export default function DashboardUsers() {
         </div>
 
         {inviteError && (
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em', marginBottom: '12px' }}>⚠ {inviteError}</p>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em', marginBottom: '12px' }}>⚠ {inviteError}</p>
         )}
         {inviteSuccess && (
           <div className="mb-4 px-3 py-2 flex items-center justify-between" style={{ border: '0.5px solid #16a34a', background: 'rgba(22,163,74,0.06)' }}>
@@ -185,7 +185,7 @@ export default function DashboardUsers() {
         </p>
         {loading ? (
           <div className="p-8 text-center" style={{ border: `0.5px solid ${t.cardBorder}` }}>
-            <div className="w-8 h-px mx-auto animate-pulse" style={{ background: '#FF007F' }} />
+            <div className="w-8 h-px mx-auto animate-pulse" style={{ background: 'var(--brand)' }} />
           </div>
         ) : (
           <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
@@ -225,7 +225,7 @@ export default function DashboardUsers() {
           <div className="w-full max-w-md p-8" style={{ background: theme === 'light' ? '#FFFFFF' : '#0A0A0A', border: `0.5px solid ${t.cardBorder}` }} onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <div>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>EDYCJA UŻYTKOWNIKA</p>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>EDYCJA UŻYTKOWNIKA</p>
                 <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.6rem', color: t.title, letterSpacing: '0.04em' }}>{editingUser.full_name || editingUser.email}</h3>
               </div>
               <button onClick={() => setEditingUser(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}><X size={18} /></button>
