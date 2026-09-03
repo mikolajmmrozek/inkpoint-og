@@ -52,15 +52,17 @@ export default function DashboardHome() {
         forms: completedForms.length,
       });
 
-      // Group pending+confirmed by date, sorted ascending — limit to 10 sessions total
-      const active = bookings.filter(b => b.status === 'pending' || b.status === 'confirmed');
-      const sortedActive = [...active].sort((a, b) =>
-        (a.session_date || '').localeCompare(b.session_date || '') ||
-        (a.session_time || '').localeCompare(b.session_time || '')
-      );
-      const limited = sortedActive.slice(0, 10);
+      // Today: show ALL sessions (except cancelled) for day-of operations
+      // Future: pending + confirmed only, limited to 10
+      const todayBookings = bookings
+        .filter(b => b.session_date === todayStr && b.status !== 'cancelled')
+        .sort((a, b) => (a.session_time || '').localeCompare(b.session_time || ''));
+      const futureActive = bookings
+        .filter(b => (b.session_date || '') > todayStr && (b.status === 'pending' || b.status === 'confirmed'))
+        .sort((a, b) => (a.session_date || '').localeCompare(b.session_date || '') || (a.session_time || '').localeCompare(b.session_time || ''));
+      const futureLimited = futureActive.slice(0, 10);
       const grouped = {};
-      limited.forEach(b => {
+      [...todayBookings, ...futureLimited].forEach(b => {
         const day = b.session_date || 'Brak daty';
         if (!grouped[day]) grouped[day] = [];
         grouped[day].push(b);
@@ -91,14 +93,16 @@ export default function DashboardHome() {
   ];
 
   const buildPendingByDay = (bookingsArr) => {
-    const active = bookingsArr.filter(b => b.status === 'pending' || b.status === 'confirmed');
-    const sortedActive = [...active].sort((a, b) =>
-      (a.session_date || '').localeCompare(b.session_date || '') ||
-      (a.session_time || '').localeCompare(b.session_time || '')
-    );
-    const limited = sortedActive.slice(0, 10);
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todayBookings = bookingsArr
+      .filter(b => b.session_date === todayStr && b.status !== 'cancelled')
+      .sort((a, b) => (a.session_time || '').localeCompare(b.session_time || ''));
+    const futureActive = bookingsArr
+      .filter(b => (b.session_date || '') > todayStr && (b.status === 'pending' || b.status === 'confirmed'))
+      .sort((a, b) => (a.session_date || '').localeCompare(b.session_date || '') || (a.session_time || '').localeCompare(b.session_time || ''));
+    const futureLimited = futureActive.slice(0, 10);
     const grouped = {};
-    limited.forEach(b => {
+    [...todayBookings, ...futureLimited].forEach(b => {
       const day = b.session_date || 'Brak daty';
       if (!grouped[day]) grouped[day] = [];
       grouped[day].push(b);
