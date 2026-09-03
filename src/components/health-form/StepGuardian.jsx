@@ -3,25 +3,25 @@ import SignatureCanvas from './SignatureCanvas';
 export default function StepGuardian({ guardian, setGuardianField, form, t, inputStyle, showErrors, textPrimary, textMuted, borderColor, theme }) {
   const labelStyle = (error) => ({
     fontFamily: 'JetBrains Mono', fontSize: '11px',
-    color: error ? '#FF007F' : textMuted,
+    color: error ? 'var(--brand)' : textMuted,
     letterSpacing: '0.15em', textTransform: 'uppercase',
     display: 'block', marginBottom: '6px'
   });
 
   return (
     <div className="space-y-6">
-      <div className="px-4 py-3 mb-4" style={{ background: 'rgba(255,0,127,0.06)', border: '0.5px solid rgba(255,0,127,0.2)' }}>
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.1em', lineHeight: 1.6 }}>{t.guardianInfo}</p>
+      <div className="px-4 py-3 mb-4" style={{ background: 'rgb(var(--brand-rgb) /0.06)', border: '0.5px solid rgb(var(--brand-rgb) /0.2)' }}>
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.1em', lineHeight: 1.6 }}>{t.guardianInfo}</p>
       </div>
 
       <div>
         <label style={labelStyle(showErrors && !guardian.guardian_name)}>{t.guardianName} * {showErrors && !guardian.guardian_name && '(wymagane)'}</label>
-        <input style={{ ...inputStyle, borderColor: showErrors && !guardian.guardian_name ? '#FF007F' : borderColor }} value={guardian.guardian_name || ''} onChange={e => setGuardianField('guardian_name', e.target.value)} />
+        <input style={{ ...inputStyle, borderColor: showErrors && !guardian.guardian_name ? 'var(--brand)' : borderColor }} value={guardian.guardian_name || ''} onChange={e => setGuardianField('guardian_name', e.target.value)} />
       </div>
 
       <div>
         <label style={labelStyle(showErrors && !guardian.guardian_phone)}>{t.guardianPhone} * {showErrors && !guardian.guardian_phone && '(wymagane)'}</label>
-        <input type="tel" style={{ ...inputStyle, borderColor: showErrors && !guardian.guardian_phone ? '#FF007F' : borderColor }} value={guardian.guardian_phone || ''} onChange={e => setGuardianField('guardian_phone', e.target.value)} />
+        <input type="tel" style={{ ...inputStyle, borderColor: showErrors && !guardian.guardian_phone ? 'var(--brand)' : borderColor }} value={guardian.guardian_phone || ''} onChange={e => setGuardianField('guardian_phone', e.target.value)} />
       </div>
 
       <div>
@@ -35,7 +35,7 @@ export default function StepGuardian({ guardian, setGuardianField, form, t, inpu
                   const curr = guardian.procedure_type || [];
                   setGuardianField('procedure_type', selected ? curr.filter(x => x !== p) : [...curr, p]);
                 }}
-                style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '11px 22px', border: `0.5px solid ${selected ? '#FF007F' : showErrors && !guardian.procedure_type?.length ? '#FF007F' : borderColor}`, color: selected ? '#FF007F' : showErrors && !guardian.procedure_type?.length ? '#FF007F' : textMuted, background: selected ? 'rgba(255,0,127,0.08)' : showErrors && !guardian.procedure_type?.length ? 'rgba(255,0,127,0.08)' : 'rgba(255,255,255,0.06)', cursor: 'pointer' }}>
+                style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '11px 22px', border: `0.5px solid ${selected ? 'var(--brand)' : showErrors && !guardian.procedure_type?.length ? 'var(--brand)' : borderColor}`, color: selected ? 'var(--brand)' : showErrors && !guardian.procedure_type?.length ? 'var(--brand)' : textMuted, background: selected ? 'rgb(var(--brand-rgb) /0.08)' : showErrors && !guardian.procedure_type?.length ? 'rgb(var(--brand-rgb) /0.08)' : 'rgba(255,255,255,0.06)', cursor: 'pointer' }}>
                 {p === 'TATUAŻ' ? t.tattoo : t.piercing}
               </button>
             );
@@ -45,7 +45,7 @@ export default function StepGuardian({ guardian, setGuardianField, form, t, inpu
 
       <div>
         <label style={labelStyle(showErrors && !guardian.body_placement)}>{t.bodyPlacement} * {showErrors && !guardian.body_placement && '(wymagane)'}</label>
-        <input style={{ ...inputStyle, borderColor: showErrors && !guardian.body_placement ? '#FF007F' : borderColor }} value={guardian.body_placement || form.body_placement || ''} onChange={e => setGuardianField('body_placement', e.target.value)} />
+        <input style={{ ...inputStyle, borderColor: showErrors && !guardian.body_placement ? 'var(--brand)' : borderColor }} value={guardian.body_placement || form.body_placement || ''} onChange={e => setGuardianField('body_placement', e.target.value)} />
       </div>
 
       <div>

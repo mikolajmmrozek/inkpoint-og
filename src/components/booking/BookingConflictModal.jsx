@@ -42,10 +42,10 @@ export default function BookingConflictModal({ conflicts, theme = 'dark', onConf
             </div>
           )}
           {doubleBooking && (
-            <div className="p-3" style={{ border: `0.5px solid #FF007F50`, background: 'rgba(255,0,127,0.08)' }}>
+            <div className="p-3" style={{ border: `0.5px solid rgb(var(--brand-rgb) / 0.31)`, background: 'rgb(var(--brand-rgb) /0.08)' }}>
               <div className="flex items-center gap-2 mb-1">
-                <Clock size={12} color="#FF007F" />
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Nakładająca się sesja</span>
+                <Clock size={12} color="var(--brand)" />
+                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Nakładająca się sesja</span>
               </div>
               <p style={{ fontSize: '13px', color: t.text }}>
                 {doubleBooking.clientName} — <strong>{doubleBooking.timeRange}</strong>

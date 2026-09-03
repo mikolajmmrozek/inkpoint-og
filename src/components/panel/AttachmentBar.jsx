@@ -43,13 +43,13 @@ export default function AttachmentBar({ attachments, setAttachments, t }) {
                 <img src={att.url} alt={att.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
                 <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '2px' }}>
-                  <FileText size={14} color="#FF007F" />
+                  <FileText size={14} color="var(--brand)" />
                   <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: t.muted, textTransform: 'uppercase' }}>PDF</span>
                 </div>
               )}
               <button
                 onClick={() => removeAttachment(idx)}
-                style={{ position: 'absolute', top: '-6px', right: '-6px', width: '16px', height: '16px', background: '#FF007F', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}
+                style={{ position: 'absolute', top: '-6px', right: '-6px', width: '16px', height: '16px', background: 'var(--brand)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}
               >
                 <X size={10} color="#FFF" />
               </button>

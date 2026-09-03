@@ -14,8 +14,8 @@ export default function ClientHealthForms() {
   const [selectedFormId, setSelectedFormId] = useState(null);
 
   const t = theme === 'light'
-    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', mutedLow: 'rgba(0,0,0,0.2)', fuchsia: '#FF007F', modalBg: '#FFFFFF' }
-    : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', mutedLow: 'rgba(245,240,235,0.2)', fuchsia: '#FF007F', modalBg: '#0A0A0A' };
+    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', mutedLow: 'rgba(0,0,0,0.2)', fuchsia: 'var(--brand)', modalBg: '#FFFFFF' }
+    : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', mutedLow: 'rgba(245,240,235,0.2)', fuchsia: 'var(--brand)', modalBg: '#0A0A0A' };
 
   useEffect(() => {
     if (!user?.email) return;

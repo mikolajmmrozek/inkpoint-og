@@ -7,7 +7,7 @@ export default function SignatureCanvas({ value, onChange, label, clearLabel, sh
 
   const canvasBg = theme === 'light' ? '#ffffff' : '#111111';
   const strokeColor = theme === 'light' ? '#111111' : '#F5F0EB';
-  const borderColorFinal = showErrors && !value ? '#FF007F' : borderColor || (theme === 'light' ? '#E5E5E5' : '#262626');
+  const borderColorFinal = showErrors && !value ? 'var(--brand)' : borderColor || (theme === 'light' ? '#E5E5E5' : '#262626');
   const placeholderColor = theme === 'light' ? 'rgba(0,0,0,0.15)' : 'rgba(245,240,235,0.15)';
   const bc = borderColor || '#262626';
   const tm = textMuted || 'rgba(245,240,235,0.5)';
@@ -89,7 +89,7 @@ export default function SignatureCanvas({ value, onChange, label, clearLabel, sh
   return (
     <div>
       {label && (
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: showErrors && !value ? '#FF007F' : tm, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: showErrors && !value ? 'var(--brand)' : tm, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>
           {label} * {showErrors && !value && '(wymagane)'}
         </p>
       )}

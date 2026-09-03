@@ -14,8 +14,8 @@ export default function DashboardMessages() {
   const { theme } = useTheme();
   const location = useLocation();
   const t = theme === 'light'
-    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.65)', fuchsia: '#FF007F', hover: 'rgba(0,0,0,0.03)', cardBg: '#FFFFFF', bubbleBg: 'rgba(0,0,0,0.06)', adminBubble: '#FF007F' }
-    : { bg: 'rgba(24,24,24,0.95)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.75)', fuchsia: '#FF007F', hover: 'rgba(255,255,255,0.05)', cardBg: 'transparent', bubbleBg: 'rgba(255,255,255,0.06)', adminBubble: '#FF007F' };
+    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.65)', fuchsia: 'var(--brand)', hover: 'rgba(0,0,0,0.03)', cardBg: '#FFFFFF', bubbleBg: 'rgba(0,0,0,0.06)', adminBubble: 'var(--brand)' }
+    : { bg: 'rgba(24,24,24,0.95)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.75)', fuchsia: 'var(--brand)', hover: 'rgba(255,255,255,0.05)', cardBg: 'transparent', bubbleBg: 'rgba(255,255,255,0.06)', adminBubble: 'var(--brand)' };
 
   const [allMessages, setAllMessages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -247,7 +247,7 @@ export default function DashboardMessages() {
             <div
               key={th.email}
               className="flex items-center gap-3 p-4 cursor-pointer transition-colors hover:opacity-70"
-              style={{ borderBottom: i < filteredThreads.length - 1 ? `0.5px solid ${t.border}` : 'none', borderLeft: selectedEmail === th.email ? `3px solid ${t.fuchsia}` : '3px solid transparent', background: selectedEmail === th.email ? 'rgba(255,0,127,0.1)' : 'transparent', paddingLeft: '13px' }}
+              style={{ borderBottom: i < filteredThreads.length - 1 ? `0.5px solid ${t.border}` : 'none', borderLeft: selectedEmail === th.email ? `3px solid ${t.fuchsia}` : '3px solid transparent', background: selectedEmail === th.email ? 'rgb(var(--brand-rgb) /0.1)' : 'transparent', paddingLeft: '13px' }}
               onClick={() => handleSelectThread(th.email)}
             >
               <div className="flex-shrink-0">
@@ -262,7 +262,7 @@ export default function DashboardMessages() {
                   <p style={{ color: th.unreadCount > 0 ? t.text : t.muted, fontSize: '14px', fontWeight: th.unreadCount > 0 ? 500 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {th.clientName}
                     {th.messages.some(m => m.subject === 'ARTYSTA') && (
-                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#FF007F', letterSpacing: '0.1em', marginLeft: '6px', border: '0.5px solid rgba(255,0,127,0.4)', padding: '1px 4px' }}>ARTYSTA</span>
+                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: 'var(--brand)', letterSpacing: '0.1em', marginLeft: '6px', border: '0.5px solid rgb(var(--brand-rgb) /0.4)', padding: '1px 4px' }}>ARTYSTA</span>
                     )}
                   </p>
                   <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: theme === 'light' ? 'rgba(0,0,0,0.35)' : 'rgba(245,240,235,0.4)', letterSpacing: '0.05em', flexShrink: 0 }}>
@@ -327,7 +327,7 @@ export default function DashboardMessages() {
                   if (msg.message_type === 'status_change') {
                     return (
                       <div key={msg.id} className="flex justify-center">
-                        <div style={{ background: 'rgba(255,0,127,0.06)', border: `0.5px solid rgba(255,0,127,0.2)`, padding: '10px 16px', maxWidth: '80%', textAlign: 'center' }}>
+                        <div style={{ background: 'rgb(var(--brand-rgb) /0.06)', border: `0.5px solid rgb(var(--brand-rgb) /0.2)`, padding: '10px 16px', maxWidth: '80%', textAlign: 'center' }}>
                           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '4px' }}>
                             STATUS REZERWACJI
                           </p>
@@ -382,7 +382,7 @@ export default function DashboardMessages() {
                   <button
                     onClick={sendReply}
                     disabled={sending || !replyText.trim()}
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px', background: 'linear-gradient(135deg, #FF007F, #CC0066)', border: 'none', cursor: sending || !replyText.trim() ? 'not-allowed' : 'pointer', opacity: sending || !replyText.trim() ? 0.4 : 1, transition: 'all 0.3s' }}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px', background: 'linear-gradient(135deg, var(--brand), var(--brand))', border: 'none', cursor: sending || !replyText.trim() ? 'not-allowed' : 'pointer', opacity: sending || !replyText.trim() ? 0.4 : 1, transition: 'all 0.3s' }}
                   >
                     {sending ? <Loader2 size={14} className="animate-spin" color="#F5F0EB" /> : <Send size={14} color="#F5F0EB" />}
                   </button>

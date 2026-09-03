@@ -8,8 +8,8 @@ export default function MessageModal({ booking, client, user, theme = 'dark', on
   const [sending, setSending] = useState(false);
 
   const t = theme === 'light'
-    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F', overlay: 'rgba(0,0,0,0.5)' }
-    : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F', overlay: 'rgba(0,0,0,0.8)' };
+    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: 'var(--brand)', overlay: 'rgba(0,0,0,0.5)' }
+    : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: 'var(--brand)', overlay: 'rgba(0,0,0,0.8)' };
 
   const handleSend = async () => {
     if (!message.trim()) return;

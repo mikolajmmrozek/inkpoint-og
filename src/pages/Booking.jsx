@@ -315,7 +315,7 @@ export default function Booking() {
                     <div className="flex flex-wrap gap-0 mt-2">
                       {(artist.specialty || []).map((s, idx, arr) => (
                         <span key={s} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.1em' }}>
-                          {s}{idx < arr.length - 1 ? <span style={{ color: 'rgba(255,0,127,0.35)', margin: '0 5px' }}>/</span> : ''}
+                          {s}{idx < arr.length - 1 ? <span style={{ color: 'rgb(var(--brand-rgb) /0.35)', margin: '0 5px' }}>/</span> : ''}
                         </span>
                       ))}
                     </div>

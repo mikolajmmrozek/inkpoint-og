@@ -35,7 +35,7 @@ export default function NotificationSidebarItem({ userEmail, theme, onMobileClic
           <span style={{
             position: 'absolute', top: '-3px', right: '-5px',
             minWidth: '14px', height: '14px',
-            background: '#FF007F', color: '#F5F0EB',
+            background: 'var(--brand)', color: '#F5F0EB',
             fontSize: '8px', fontWeight: 600,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             borderRadius: '7px', padding: '0 3px',
@@ -77,7 +77,7 @@ export default function NotificationSidebarItem({ userEmail, theme, onMobileClic
             <span style={{
               position: 'absolute', top: '-3px', right: '-5px',
               minWidth: '14px', height: '14px',
-              background: '#FF007F', color: '#F5F0EB',
+              background: 'var(--brand)', color: '#F5F0EB',
               fontSize: '8px', fontWeight: 600,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               borderRadius: '7px', padding: '0 3px',

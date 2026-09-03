@@ -26,7 +26,7 @@ export default function DatePickerCustom({ value, onChange, showErrors, t, textP
 
   const selectStyle = {
     background: 'rgba(255,255,255,0.09)',
-    border: `0.5px solid ${showErrors && !value ? '#FF007F' : bc}`,
+    border: `0.5px solid ${showErrors && !value ? 'var(--brand)' : bc}`,
     borderRadius: '4px',
     color: tc,
     padding: '10px 10px',
@@ -38,7 +38,7 @@ export default function DatePickerCustom({ value, onChange, showErrors, t, textP
 
   return (
     <div>
-      <label style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: showErrors && !value ? '#FF007F' : tm, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+      <label style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: showErrors && !value ? 'var(--brand)' : tm, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
         {t.dateOfBirth} * {showErrors && !value && '(wymagane)'}
       </label>
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>

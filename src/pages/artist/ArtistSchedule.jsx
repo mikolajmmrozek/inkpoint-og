@@ -17,7 +17,7 @@ import HealthFormBadge from '@/components/booking/HealthFormBadge';
 import ReferenceImagesGallery from '@/components/booking/ReferenceImagesGallery';
 import GroupedBookingList from '@/components/booking/GroupedBookingList';
 
-const STATUS_COLORS = { pending: '#FF007F', confirmed: '#16a34a', completed: '#2563eb', cancelled: '#9ca3af' };
+const STATUS_COLORS = { pending: 'var(--brand)', confirmed: '#16a34a', completed: '#2563eb', cancelled: '#9ca3af' };
 const STATUS_LABELS = { pending: 'Oczekuje', confirmed: 'Potwierdzona', completed: 'Zakończona', cancelled: 'Anulowana' };
 const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
 const MINUTES = ['00', '15', '30', '45'];
@@ -48,13 +48,13 @@ function ArtistBookingRow({ b, i, items, t, healthStatusMap, onSelect }) {
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <div className="flex-shrink-0 text-center" style={{ minWidth: '52px' }}>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '16px', color: STATUS_COLORS[b.status] || '#FF007F', letterSpacing: '0.05em' }}>{b.session_time || '—'}</p>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '16px', color: STATUS_COLORS[b.status] || 'var(--brand)', letterSpacing: '0.05em' }}>{b.session_time || '—'}</p>
           {endDisplay && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted }}>{endDisplay}</p>}
         </div>
         <div className="min-w-0">
           <p style={{ color: t.text, fontSize: '15px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.client_name}</p>
           {b.tattoo_placement && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.tattoo_placement}</p>}
-          {b.service_name && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', opacity: 0.8 }}>{b.service_name}</p>}
+          {b.service_name && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', opacity: 0.8 }}>{b.service_name}</p>}
         </div>
       </div>
       <div className="flex items-center gap-3 flex-shrink-0">
@@ -124,7 +124,7 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, availabil
     value: form[field] || '',
     onChange: e => setForm(f => ({ ...f, [field]: e.target.value })),
     style: { background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif' },
-    onFocus: e => e.target.style.borderBottomColor = '#FF007F',
+    onFocus: e => e.target.style.borderBottomColor = 'var(--brand)',
     onBlur: e => e.target.style.borderBottomColor = t.inputBorder,
   });
 
@@ -232,16 +232,16 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, availabil
         {/* Header */}
         <div className="flex items-start justify-between mb-6">
           <div>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>{isNew ? 'NOWA SESJA' : 'PODGLĄD SESJI'}</p>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>{isNew ? 'NOWA SESJA' : 'PODGLĄD SESJI'}</p>
             <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em', lineHeight: 1 }}>
               {isNew ? 'Dodaj rezerwację' : form.client_name}
             </h3>
           </div>
           <div className="flex items-center gap-2">
             {!isNew && !editing && (
-              <button onClick={() => setEditing(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#FF007F', padding: '4px' }}><Edit3 size={18} /></button>
+              <button onClick={() => setEditing(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--brand)', padding: '4px' }}><Edit3 size={18} /></button>
             )}
-            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#FF007F', padding: '4px' }}><X size={18} /></button>
+            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--brand)', padding: '4px' }}><X size={18} /></button>
           </div>
         </div>
 
@@ -289,7 +289,7 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, availabil
                 ['NOTATKI', form.notes],
               ].filter(([, v]) => v).map(([lbl, val]) => (
                 <div key={lbl}>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '2px' }}>{lbl}</p>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '2px' }}>{lbl}</p>
                   <p style={{ color: t.text, fontSize: '13px' }}>{val}</p>
                 </div>
               ))}
@@ -298,14 +298,14 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, availabil
             {/* Reference images gallery */}
             {form.reference_images && form.reference_images.length > 0 && (
               <div className="pt-2" style={{ borderTop: `0.5px solid ${t.border}` }}>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>ZDJĘCIA REFERENCYJNE ({form.reference_images.length})</p>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>ZDJĘCIA REFERENCYJNE ({form.reference_images.length})</p>
                 <ReferenceImagesGallery images={form.reference_images} theme={theme} t={theme === 'light' ? { border: '#E5E5E5' } : { border: '#262626' }} />
               </div>
             )}
 
             {/* Health form button */}
             {form.health_form_completed && (
-              <button onClick={() => setShowHealthForm(true)} style={{ fontSize: '9px', marginTop: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', padding: '10px 20px', background: 'transparent', color: '#FF007F', border: '0.5px solid #FF007F', cursor: 'pointer', transition: 'all 0.3s ease' }}>
+              <button onClick={() => setShowHealthForm(true)} style={{ fontSize: '9px', marginTop: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', padding: '10px 20px', background: 'transparent', color: 'var(--brand)', border: '0.5px solid var(--brand)', cursor: 'pointer', transition: 'all 0.3s ease' }}>
                 <FileText size={12} /> PODGLĄD ANKIETY ZDROWOTNEJ
               </button>
             )}
@@ -317,7 +317,7 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, availabil
           <div className="space-y-5">
             {/* Client */}
             <div>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>KLIENT</p>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>KLIENT</p>
               <div style={{ position: 'relative', marginBottom: '12px' }}>
                 {label('Szukaj klienta z bazy')}
                 <div style={{ position: 'relative' }}>
@@ -334,7 +334,7 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, availabil
                   <div style={{ position: 'absolute', zIndex: 100, left: 0, right: 0, top: '100%', background: t.bg, border: `0.5px solid ${t.border}`, maxHeight: '180px', overflowY: 'auto' }}>
                     {clientSuggestions.map(c => (
                       <button key={c.id} onMouseDown={() => selectClient(c)} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', background: 'none', border: 'none', borderBottom: `0.5px solid ${t.border}`, cursor: 'pointer', color: t.text, fontFamily: 'Inter, sans-serif', fontSize: '13px' }}
-                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,0,127,0.06)'}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgb(var(--brand-rgb) /0.06)'}
                         onMouseLeave={e => e.currentTarget.style.background = 'none'}>
                         <span>{c.name}</span>
                         <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginLeft: '8px' }}>{c.email}{c.phone ? ` · ${c.phone}` : ''}</span>
@@ -353,7 +353,7 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, availabil
 
             {/* Service */}
             <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '16px' }}>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>USŁUGA</p>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>USŁUGA</p>
               <div style={{ position: 'relative' }}>
                 {label('Wybierz usługę')}
                 <input type="text" value={serviceQuery}
@@ -361,13 +361,13 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, availabil
                   onFocus={() => setShowServiceSugg(true)}
                   onBlur={() => setTimeout(() => setShowServiceSugg(false), 150)}
                   placeholder="Wpisz nazwę..."
-                  style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${form.service_id ? '#FF007F' : t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif' }}
+                  style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${form.service_id ? 'var(--brand)' : t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif' }}
                 />
                 {showServiceSugg && filteredServices.length > 0 && (
                   <div style={{ position: 'absolute', zIndex: 100, left: 0, right: 0, top: '100%', background: t.bg, border: `0.5px solid ${t.border}`, maxHeight: '200px', overflowY: 'auto' }}>
                     {filteredServices.map(s => (
                       <button key={s.id} onMouseDown={() => handleServiceSelect(s)} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', background: 'none', border: 'none', borderBottom: `0.5px solid ${t.border}`, cursor: 'pointer', color: t.text, fontFamily: 'Inter, sans-serif', fontSize: '13px' }}
-                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,0,127,0.06)'}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgb(var(--brand-rgb) /0.06)'}
                         onMouseLeave={e => e.currentTarget.style.background = 'none'}>
                         {s.name}
                         <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, marginLeft: '8px' }}>
@@ -379,16 +379,16 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, availabil
                 )}
               </div>
               {form.service_id && (
-                <div className="mt-2 px-3 py-1 flex items-center gap-2" style={{ background: 'rgba(255,0,127,0.05)', border: '0.5px solid rgba(255,0,127,0.2)' }}>
-                  <Zap size={10} color="#FF007F" />
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>CZAS I CENA UZUPEŁNIONE</p>
+                <div className="mt-2 px-3 py-1 flex items-center gap-2" style={{ background: 'rgb(var(--brand-rgb) /0.05)', border: '0.5px solid rgb(var(--brand-rgb) /0.2)' }}>
+                  <Zap size={10} color="var(--brand)" />
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em' }}>CZAS I CENA UZUPEŁNIONE</p>
                 </div>
               )}
             </div>
 
             {/* Session */}
             <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '16px' }}>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>TERMIN</p>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>TERMIN</p>
               <div className="mb-3">{label('Data *')}<input {...inp('session_date', 'date')} style={{ ...inp('session_date', 'date').style, colorScheme: theme === 'light' ? 'light' : 'dark' }} /></div>
               <div className="grid grid-cols-4 gap-3 mb-3">
                 {[['Godz. start', 'session_time', true], ['Min start', 'session_time', false], ['Godz. koniec', 'session_end_time', true], ['Min koniec', 'session_end_time', false]].map(([lbl, field, isHour], idx) => (
@@ -415,7 +415,7 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, availabil
 
             {/* Tattoo */}
             <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '16px' }}>
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>TATUAŻ / ZABIEG</p>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>TATUAŻ / ZABIEG</p>
               <div className="mb-3">{label('Miejsce na ciele')}<input {...inp('tattoo_placement')} /></div>
               <div className="mb-3">{label('Opis')}<textarea rows={2} style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '10px 0', fontSize: '14px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif', resize: 'none' }} value={form.tattoo_description || ''} onChange={e => setForm(f => ({ ...f, tattoo_description: e.target.value }))} /></div>
               <div className="mb-3">
@@ -475,8 +475,8 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, availabil
           clientName={form.client_name}
           onClose={() => setShowHealthForm(false)}
           t={theme === 'light'
-            ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F' }
-            : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F' }
+            ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: 'var(--brand)' }
+            : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: 'var(--brand)' }
           }
         />
       )}
@@ -549,11 +549,11 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
             <button key={day.toISOString()} onClick={() => onDayClick(day)}
               style={{
                 minHeight: '52px', padding: '6px 4px',
-                border: isSelected ? `0.5px solid #FF007F` : isBlocked ? `0.5px solid rgba(255,0,127,0.35)` : isToday ? `0.5px solid ${t.cardBorder}` : `0.5px solid transparent`,
+                border: isSelected ? `0.5px solid var(--brand)` : isBlocked ? `0.5px solid rgb(var(--brand-rgb) /0.35)` : isToday ? `0.5px solid ${t.cardBorder}` : `0.5px solid transparent`,
                 background: isSelected
-                  ? 'rgba(255,0,127,0.12)'
+                  ? 'rgb(var(--brand-rgb) /0.12)'
                   : isFullDayOff
-                    ? 'repeating-linear-gradient(45deg, rgba(255,0,127,0.10) 0px, rgba(255,0,127,0.10) 3px, rgba(255,0,127,0.03) 3px, rgba(255,0,127,0.03) 8px)'
+                    ? 'repeating-linear-gradient(45deg, rgb(var(--brand-rgb) /0.10) 0px, rgb(var(--brand-rgb) /0.10) 3px, rgb(var(--brand-rgb) /0.03) 3px, rgb(var(--brand-rgb) /0.03) 8px)'
                     : 'transparent',
                 cursor: 'pointer', textAlign: 'center', position: 'relative',
                 opacity: isFullDayOff && !isSelected ? 0.75 : 1,
@@ -561,12 +561,12 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
               {avail && avail.type === 'free' && (
                 <div style={{ position: 'absolute', top: '2px', right: '2px', width: '5px', height: '5px', borderRadius: '1px', background: '#16a34a', opacity: 0.7 }} />
               )}
-              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: isSelected ? '#FF007F' : isBlocked ? '#FF007F' : isToday ? t.title : isSameMonth(day, viewMonth) ? t.text : t.muted, fontWeight: isToday ? 600 : 400 }}>
+              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: isSelected ? 'var(--brand)' : isBlocked ? 'var(--brand)' : isToday ? t.title : isSameMonth(day, viewMonth) ? t.text : t.muted, fontWeight: isToday ? 600 : 400 }}>
                 {format(day, 'd')}
               </span>
               <div className="flex gap-0.5 mt-1 flex-wrap justify-center">
                 {dayBk.slice(0, 3).map((b, i) => (
-                  <div key={i} style={{ width: '5px', height: '5px', borderRadius: '50%', background: STATUS_COLORS[b.status] || '#FF007F' }} />
+                  <div key={i} style={{ width: '5px', height: '5px', borderRadius: '50%', background: STATUS_COLORS[b.status] || 'var(--brand)' }} />
                 ))}
                 {dayBk.length > 3 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: t.muted }}>+{dayBk.length - 3}</span>}
               </div>
@@ -577,7 +577,7 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
 
       {/* Selected day sessions */}
       <div className="mt-6" style={{ borderTop: `0.5px solid ${t.cardBorder}`, paddingTop: '16px' }}>
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>
           SESJE — {format(selectedDate, 'EEEE, d MMMM', { locale: pl }).toUpperCase()}
         </p>
 
@@ -587,7 +587,7 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
           const avail = getAvailBadge(selectedDate);
           if (!avail) return null;
           const isRecurring = avail.record.repeat && avail.record.repeat !== 'none';
-          const color = avail.type === 'free' ? '#16a34a' : '#FF007F';
+          const color = avail.type === 'free' ? '#16a34a' : 'var(--brand)';
           const timeStr = avail.record.start_time && avail.record.end_time ? `${avail.record.start_time}–${avail.record.end_time}` : 'Cały dzień';
           return (
             <button
@@ -617,7 +617,7 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
         })()}
 
         {selectedDayBookings.length === 0 ? (
-          <div className="py-8 text-center" style={{ border: `0.5px solid ${t.cardBorder}`, background: 'rgba(255,0,127,0.02)' }}>
+          <div className="py-8 text-center" style={{ border: `0.5px solid ${t.cardBorder}`, background: 'rgb(var(--brand-rgb) /0.02)' }}>
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em', marginBottom: '12px' }}>BRAK SESJI W TEN DZIEŃ</p>
             <button onClick={onAddBooking} className="btn-oxblood" style={{ fontSize: '10px', padding: '8px 20px' }}>+ DODAJ SESJĘ</button>
           </div>
@@ -629,7 +629,7 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
                 onMouseEnter={e => e.currentTarget.style.background = t.rowHover}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                 <div className="flex items-center gap-2 mb-1">
-                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', color: STATUS_COLORS[b.status] || '#FF007F', letterSpacing: '0.05em', flexShrink: 0 }}>{b.session_time || '—'}{b.session_end_time ? `–${b.session_end_time}` : ''}</span>
+                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', color: STATUS_COLORS[b.status] || 'var(--brand)', letterSpacing: '0.05em', flexShrink: 0 }}>{b.session_time || '—'}{b.session_end_time ? `–${b.session_end_time}` : ''}</span>
                   <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: STATUS_COLORS[b.status] || t.muted, flexShrink: 0 }} />
                 </div>
                 <p style={{ color: t.text, fontSize: '15px', fontWeight: 500 }}>{b.client_name}</p>
@@ -785,9 +785,9 @@ function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, o
               return (
                 <div key={`unavail-${idx}`} style={{
                   position: 'absolute', top: `${top}px`, height: `${height}px`, left: 0, right: 0,
-                  backgroundImage: 'repeating-linear-gradient(135deg, rgba(255,0,127,0.07) 0px, rgba(255,0,127,0.07) 4px, transparent 4px, transparent 10px)',
-                  borderTop: range.start > DAY_START_H * 60 ? '0.5px dashed rgba(255,0,127,0.25)' : 'none',
-                  borderBottom: range.end < DAY_END_H * 60 ? '0.5px dashed rgba(255,0,127,0.25)' : 'none',
+                  backgroundImage: 'repeating-linear-gradient(135deg, rgb(var(--brand-rgb) /0.07) 0px, rgb(var(--brand-rgb) /0.07) 4px, transparent 4px, transparent 10px)',
+                  borderTop: range.start > DAY_START_H * 60 ? '0.5px dashed rgb(var(--brand-rgb) /0.25)' : 'none',
+                  borderBottom: range.end < DAY_END_H * 60 ? '0.5px dashed rgb(var(--brand-rgb) /0.25)' : 'none',
                   pointerEvents: 'none', zIndex: 0,
                 }} />
               );
@@ -795,13 +795,13 @@ function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, o
             {/* Now line */}
             {showNow && (
               <>
-                <div style={{ position: 'absolute', top: `${nowTop}px`, left: 0, right: 0, borderTop: '1px solid #FF007F', opacity: 0.7, pointerEvents: 'none', zIndex: 2 }} />
-                <div style={{ position: 'absolute', top: `${nowTop}px`, left: '-4px', width: '8px', height: '8px', borderRadius: '50%', background: '#FF007F', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 3 }} />
+                <div style={{ position: 'absolute', top: `${nowTop}px`, left: 0, right: 0, borderTop: '1px solid var(--brand)', opacity: 0.7, pointerEvents: 'none', zIndex: 2 }} />
+                <div style={{ position: 'absolute', top: `${nowTop}px`, left: '-4px', width: '8px', height: '8px', borderRadius: '50%', background: 'var(--brand)', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 3 }} />
               </>
             )}
             {/* Availability tile in timeline */}
             {availRecord && availRecord.start_time && availRecord.end_time && (() => {
-              const color = availRecord.is_available ? '#16a34a' : '#FF007F';
+              const color = availRecord.is_available ? '#16a34a' : 'var(--brand)';
               const label = availRecord.is_available ? 'Dyspozycja' : 'Blokada';
               const isRecurring = availRecord.repeat && availRecord.repeat !== 'none';
               const startMin = toMin(availRecord.start_time);
@@ -842,7 +842,7 @@ function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, o
               const dur = b.session_duration || 60;
               const top = Math.max(0, (startMin - DAY_START_H * 60)) * PX_PER_MIN;
               const height = Math.max(30, dur * PX_PER_MIN);
-              const color = STATUS_COLORS[b.status] || '#FF007F';
+              const color = STATUS_COLORS[b.status] || 'var(--brand)';
               const endTime = b.session_end_time || (() => { const e = startMin + dur; return `${String(Math.floor(e/60)).padStart(2,'0')}:${String(e%60).padStart(2,'0')}`; })();
               return (
                 <div key={b.id} data-bk="1" onClick={(e) => { e.stopPropagation(); onBookingClick(b); }}
@@ -977,7 +977,7 @@ export default function ArtistSchedule() {
         <div className="flex gap-2 flex-wrap">
           {[['month', 'MIESIĘCZNY'], ['hourly', 'GODZINOWY'], ['list', 'LISTA']].map(([mode, lbl]) => (
             <button key={mode} onClick={() => setViewMode(mode)}
-              style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '7px 12px', border: `0.5px solid ${viewMode === mode ? '#FF007F' : t.cardBorder}`, color: viewMode === mode ? '#FF007F' : t.muted, background: viewMode === mode ? 'rgba(255,0,127,0.08)' : 'transparent', cursor: 'pointer' }}>
+              style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '7px 12px', border: `0.5px solid ${viewMode === mode ? 'var(--brand)' : t.cardBorder}`, color: viewMode === mode ? 'var(--brand)' : t.muted, background: viewMode === mode ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', cursor: 'pointer' }}>
               {lbl}
             </button>
           ))}
@@ -989,8 +989,8 @@ export default function ArtistSchedule() {
 
       {/* Search bar */}
       <div className="mb-4">
-        <div className="flex items-center gap-2 w-full" style={{ border: `0.5px solid ${searchQuery ? '#FF007F' : t.cardBorder}`, padding: '8px 14px', background: t.cardBg }}>
-          <Search size={12} color={searchQuery ? '#FF007F' : t.muted} />
+        <div className="flex items-center gap-2 w-full" style={{ border: `0.5px solid ${searchQuery ? 'var(--brand)' : t.cardBorder}`, padding: '8px 14px', background: t.cardBg }}>
+          <Search size={12} color={searchQuery ? 'var(--brand)' : t.muted} />
           <input
             type="text"
             value={searchQuery}
@@ -1011,7 +1011,7 @@ export default function ArtistSchedule() {
         <div className="mb-6">
           <div style={{ padding: '10px 16px', background: t.cardBg, border: `0.5px solid ${t.cardBorder}`, marginBottom: '12px' }}>
             <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.1rem', color: t.title, letterSpacing: '0.08em' }}>WYNIKI WYSZUKIWANIA</p>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: searchResults.length > 0 ? '#FF007F' : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: searchResults.length > 0 ? 'var(--brand)' : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
               {searchResults.length} {searchResults.length === 1 ? 'SESJA' : searchResults.length >= 2 && searchResults.length <= 4 ? 'SESJE' : 'SESJI'}
             </p>
           </div>
@@ -1075,7 +1075,7 @@ export default function ArtistSchedule() {
             const recurringOff = availabilityRecords.find(r => r.type === 'recurring' && r.day_of_week === dow && r.is_available === false);
             const record = ex || (recurringOff ? { is_available: false, start_time: recurringOff.start_time, end_time: recurringOff.end_time, note: recurringOff.note || 'Cykliczne wolne' } : null);
             if (!record) return null;
-            const color = record.is_available ? '#16a34a' : '#FF007F';
+            const color = record.is_available ? '#16a34a' : 'var(--brand)';
             const label = record.is_available ? 'Dyspozycja' : 'Wolne';
             const timeStr = record.start_time && record.end_time ? `${record.start_time}–${record.end_time}` : 'Cały dzień';
             return (
@@ -1088,7 +1088,7 @@ export default function ArtistSchedule() {
           })()}
 
           {loading ? (
-            <div className="p-8 text-center" style={{ border: `0.5px solid ${t.cardBorder}` }}><div className="w-8 h-px mx-auto animate-pulse" style={{ background: '#FF007F' }} /></div>
+            <div className="p-8 text-center" style={{ border: `0.5px solid ${t.cardBorder}` }}><div className="w-8 h-px mx-auto animate-pulse" style={{ background: 'var(--brand)' }} /></div>
           ) : dayBookings.length === 0 ? (
             <div className="p-10 text-center" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
               <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em', marginBottom: '12px' }}>BRAK SESJI W TEN DZIEŃ</p>
@@ -1115,7 +1115,7 @@ export default function ArtistSchedule() {
                   <p style={{ color: t.text, fontSize: '15px', fontWeight: 500 }}>{b.client_name}</p>
                   {b.client_phone && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px' }}>{b.client_phone}</p>}
                   {b.tattoo_placement && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, marginTop: '2px' }}>{b.tattoo_placement}{b.tattoo_description ? ` — ${b.tattoo_description}` : ''}</p>}
-                  {b.service_name && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', opacity: 0.8, marginTop: '2px' }}>{b.service_name}</p>}
+                  {b.service_name && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', opacity: 0.8, marginTop: '2px' }}>{b.service_name}</p>}
                   <div className="flex items-center gap-3 mt-2 flex-wrap">
                     {b.estimated_price > 0 && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted }}>{b.estimated_price} zł</span>}
                     {b.status !== 'cancelled' && <HealthFormBadge status={resolveBookingHealthStatus(b, healthStatusMap)} fontSize="8px" style={{ padding: '2px 6px' }} />}

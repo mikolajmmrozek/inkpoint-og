@@ -133,7 +133,7 @@ export default function BookingCard({ bookingId, t, theme, onAction, readOnly = 
 
   return (
     <>
-      <div style={{ border: `0.5px solid ${t.border}`, background: 'rgba(255,0,127,0.03)', padding: '16px' }}>
+      <div style={{ border: `0.5px solid ${t.border}`, background: 'rgb(var(--brand-rgb) /0.03)', padding: '16px' }}>
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">

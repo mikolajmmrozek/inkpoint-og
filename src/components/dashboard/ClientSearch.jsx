@@ -74,7 +74,7 @@ export default function ClientSearch({ value, onSelect, t }) {
           placeholder="Szukaj klienta po imieniu, emailu, telefonie..."
           value={query}
           onChange={e => { setQuery(e.target.value); setOpen(true); }}
-          onFocus={e => { setOpen(true); e.target.style.borderBottomColor = '#FF007F'; }}
+          onFocus={e => { setOpen(true); e.target.style.borderBottomColor = 'var(--brand)'; }}
           onBlur={e => e.target.style.borderBottomColor = t.border}
         />
       </div>
@@ -90,17 +90,17 @@ export default function ClientSearch({ value, onSelect, t }) {
               type="button"
               className="w-full text-left px-4 py-3 transition-colors"
               style={{ background: 'none', border: 'none', cursor: 'pointer', borderBottom: `0.5px solid ${t.border}` }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,0,127,0.05)'}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgb(var(--brand-rgb) /0.05)'}
               onMouseLeave={e => e.currentTarget.style.background = 'none'}
               onClick={() => handleSelect(client)}
             >
               <div className="flex items-center justify-between gap-2">
                 <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{client.name}</p>
-                {client.is_blocked && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#FF007F', border: '0.5px solid #FF007F', padding: '1px 4px', marginLeft: '6px' }}>ZABLOKOWANY</span>}
+                {client.is_blocked && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: 'var(--brand)', border: '0.5px solid var(--brand)', padding: '1px 4px', marginLeft: '6px' }}>ZABLOKOWANY</span>}
                 {(client.total_sessions || 0) > 0 && (
                   <div className="flex items-center gap-1" style={{ flexShrink: 0 }}>
-                    <History size={9} color="#FF007F" />
-                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.08em' }}>{client.total_sessions} sesji</span>
+                    <History size={9} color="var(--brand)" />
+                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.08em' }}>{client.total_sessions} sesji</span>
                   </div>
                 )}
               </div>
@@ -114,13 +114,13 @@ export default function ClientSearch({ value, onSelect, t }) {
             type="button"
             className="w-full text-left px-4 py-3 flex items-center gap-3 transition-colors"
             style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,0,127,0.05)'}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgb(var(--brand-rgb) /0.05)'}
             onMouseLeave={e => e.currentTarget.style.background = 'none'}
             onClick={handleNewClient}
           >
-            <UserPlus size={12} color="#FF007F" />
+            <UserPlus size={12} color="var(--brand)" />
             <div>
-              <p style={{ color: '#FF007F', fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em' }}>NOWY KLIENT</p>
+              <p style={{ color: 'var(--brand)', fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em' }}>NOWY KLIENT</p>
               <p style={{ color: t.muted, fontSize: '12px', marginTop: '1px' }}>Dodaj „{query}" jako nowego klienta</p>
             </div>
           </button>

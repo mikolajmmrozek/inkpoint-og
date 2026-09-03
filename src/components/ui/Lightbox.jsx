@@ -93,7 +93,7 @@ export default function Lightbox({ images, currentIndex, onClose, onNext, onPrev
               key={i}
               onClick={(e) => { e.stopPropagation(); onNext(i); }}
               className="flex-shrink-0 transition-all"
-              style={{ opacity: i === currentIndex ? 1 : 0.35, border: i === currentIndex ? '0.5px solid #FF007F' : '0.5px solid transparent' }}
+              style={{ opacity: i === currentIndex ? 1 : 0.35, border: i === currentIndex ? '0.5px solid var(--brand)' : '0.5px solid transparent' }}
             >
               <img src={im?.url || im} alt="" className="w-12 h-12 object-cover" />
             </button>

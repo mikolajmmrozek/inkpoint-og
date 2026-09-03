@@ -6,8 +6,8 @@ const STATUS_LABELS = { pending: 'Oczekująca', confirmed: 'Potwierdzona', compl
 
 export default function SessionCard({ booking, theme = 'dark', onChangeRequest, onMessage, showActions }) {
   const t = theme === 'light'
-    ? { border: '#E5E5E5', text: '#111111', muted: 'rgba(0,0,0,0.4)', mutedLow: 'rgba(0,0,0,0.3)', fuchsia: '#FF007F' }
-    : { border: '#262626', text: '#F5F0EB', muted: 'rgba(245,240,235,0.5)', mutedLow: 'rgba(245,240,235,0.3)', fuchsia: '#FF007F' };
+    ? { border: '#E5E5E5', text: '#111111', muted: 'rgba(0,0,0,0.4)', mutedLow: 'rgba(0,0,0,0.3)', fuchsia: 'var(--brand)' }
+    : { border: '#262626', text: '#F5F0EB', muted: 'rgba(245,240,235,0.5)', mutedLow: 'rgba(245,240,235,0.3)', fuchsia: 'var(--brand)' };
 
   const STATUS_COLORS = { pending: '#f59e0b', confirmed: '#16a34a', completed: '#3b82f6', cancelled: theme === 'light' ? 'rgba(0,0,0,0.3)' : 'rgba(245,240,235,0.3)' };
 

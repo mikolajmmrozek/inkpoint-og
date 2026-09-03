@@ -25,8 +25,8 @@ const inputStyle = {
 export default function DashboardArtists() {
   const { theme } = useTheme();
   const t = theme === 'light'
-    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F', modalBg: '#FFFFFF' }
-    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F', modalBg: '#0A0A0A' };
+    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: 'var(--brand)', modalBg: '#FFFFFF' }
+    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: 'var(--brand)', modalBg: '#0A0A0A' };
   const [artists, setArtists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null);
@@ -176,7 +176,7 @@ export default function DashboardArtists() {
               {/* Tabs */}
               <div className="flex mb-6" style={{ borderBottom: `0.5px solid ${t.border}` }}>
                 {[['profile', 'Profil'], ...(editing !== 'new' ? [['schedule', 'Grafik']] : [])].map(([key, lbl]) => (
-                  <button key={key} onClick={() => setActiveTab(key)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '8px 16px', background: 'transparent', border: 'none', borderBottom: `1.5px solid ${activeTab === key ? '#FF007F' : 'transparent'}`, color: activeTab === key ? '#FF007F' : t.muted, cursor: 'pointer', marginBottom: '-0.5px' }}>{lbl}</button>
+                  <button key={key} onClick={() => setActiveTab(key)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '8px 16px', background: 'transparent', border: 'none', borderBottom: `1.5px solid ${activeTab === key ? 'var(--brand)' : 'transparent'}`, color: activeTab === key ? 'var(--brand)' : t.muted, cursor: 'pointer', marginBottom: '-0.5px' }}>{lbl}</button>
                 ))}
               </div>
 
@@ -189,38 +189,38 @@ export default function DashboardArtists() {
                 <div className="grid grid-cols-2 gap-6">
                   <div>
                     <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Imię i Nazwisko *</label>
-                    <input style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={form.name || ''} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+                    <input style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={form.name || ''} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                   </div>
                   <div>
                     <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Slug (URL)</label>
-                    <input style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={form.slug || ''} onChange={e => setForm(f => ({ ...f, slug: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+                    <input style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={form.slug || ''} onChange={e => setForm(f => ({ ...f, slug: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                   </div>
                 </div>
 
                 <div>
                   <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Bio</label>
-                  <textarea rows={4} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} value={form.bio || ''} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+                  <textarea rows={4} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} value={form.bio || ''} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                 </div>
 
                 <div className="grid grid-cols-2 gap-6">
                   <div>
                     <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Specjalizacje (przecinki)</label>
-                    <input style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={Array.isArray(form.specialty) ? form.specialty.join(', ') : (form.specialty || '')} onChange={e => setForm(f => ({ ...f, specialty: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+                    <input style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={Array.isArray(form.specialty) ? form.specialty.join(', ') : (form.specialty || '')} onChange={e => setForm(f => ({ ...f, specialty: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                   </div>
                   <div>
                     <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Lata doświadczenia</label>
-                    <input type="number" style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={form.years_experience || ''} onChange={e => setForm(f => ({ ...f, years_experience: Number(e.target.value) }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+                    <input type="number" style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={form.years_experience || ''} onChange={e => setForm(f => ({ ...f, years_experience: Number(e.target.value) }))} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                   </div>
                 </div>
 
                 {/* Revenue split */}
                 <div style={{ border: `0.5px solid ${t.border}`, padding: '16px' }}>
                   <div className="flex items-center justify-between mb-3">
-                    <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Podział przychodu</label>
+                    <label style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Podział przychodu</label>
                     {editing !== 'new' && (
                       <button
                         onClick={() => setShowAddCommission(v => !v)}
-                        style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: showAddCommission ? '#FF007F' : t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${showAddCommission ? '#FF007F' : t.border}`, padding: '4px 10px', cursor: 'pointer' }}
+                        style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: showAddCommission ? 'var(--brand)' : t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${showAddCommission ? 'var(--brand)' : t.border}`, padding: '4px 10px', cursor: 'pointer' }}
                       >
                         + ZMIEŃ STAWKĘ
                       </button>
@@ -244,7 +244,7 @@ export default function DashboardArtists() {
                     <div style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: t.muted }}>+</div>
                     <div className="flex-1">
                       <label className="block mb-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Studio %</label>
-                      <input type="number" readOnly style={{ ...inputStyle, color: '#FF007F', borderBottomColor: t.border, cursor: 'default' }} value={100 - (form.artist_cut_percent ?? 60)} />
+                      <input type="number" readOnly style={{ ...inputStyle, color: 'var(--brand)', borderBottomColor: t.border, cursor: 'default' }} value={100 - (form.artist_cut_percent ?? 60)} />
                     </div>
                     <div style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted }}>= 100%</div>
                   </div>
@@ -272,7 +272,7 @@ export default function DashboardArtists() {
                             style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }}
                             value={newCommission.effective_from}
                             onChange={e => setNewCommission(c => ({ ...c, effective_from: e.target.value }))}
-                            onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
+                            onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'}
                             onBlur={e => e.target.style.borderBottomColor = t.border}
                           />
                         </div>
@@ -285,7 +285,7 @@ export default function DashboardArtists() {
                           style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }}
                           value={newCommission.note}
                           onChange={e => setNewCommission(c => ({ ...c, note: e.target.value }))}
-                          onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
+                          onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'}
                           onBlur={e => e.target.style.borderBottomColor = t.border}
                         />
                       </div>
@@ -329,7 +329,7 @@ export default function DashboardArtists() {
 
                 <div>
                   <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Instagram</label>
-                  <input style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={form.instagram || ''} onChange={e => setForm(f => ({ ...f, instagram: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+                  <input style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} value={form.instagram || ''} onChange={e => setForm(f => ({ ...f, instagram: e.target.value }))} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
                 </div>
 
                 {/* Photo upload */}
@@ -446,8 +446,8 @@ export default function DashboardArtists() {
                           {a.photo_url ? (
                             <img src={a.photo_url} alt="" style={{ width: '40px', height: '40px', objectFit: 'cover', flexShrink: 0 }} />
                           ) : (
-                            <div style={{ width: '40px', height: '40px', flexShrink: 0, background: 'rgba(255,0,127,0.1)', border: '0.5px solid rgba(255,0,127,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <span style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '14px', color: '#FF007F', letterSpacing: '0.05em' }}>
+                            <div style={{ width: '40px', height: '40px', flexShrink: 0, background: 'rgb(var(--brand-rgb) /0.1)', border: '0.5px solid rgb(var(--brand-rgb) /0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '14px', color: 'var(--brand)', letterSpacing: '0.05em' }}>
                                 {a.name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
                               </span>
                             </div>

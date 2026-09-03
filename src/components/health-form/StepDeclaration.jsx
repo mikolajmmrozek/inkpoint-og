@@ -47,7 +47,7 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
                 <TranslatedLabel
                   text={field.label}
                   lang={lang}
-                  style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '6px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+                  style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '6px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
                 />
               )}
               <TranslatedParagraph
@@ -62,7 +62,7 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
 
       {/* Section title at the bottom — mirrors consent blocks heading style */}
       {declaration.label && (
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '16px 0 4px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '16px 0 4px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
           {declaration.label}{declaration.required && ' *'}
         </p>
       )}
@@ -75,14 +75,14 @@ export default function StepDeclaration({ form, setField, t, inputStyle, showErr
           className="flex items-center gap-3"
           style={{ background: 'none', border: 'none', cursor: 'pointer' }}
         >
-          <div style={{ width: '16px', height: '16px', border: `0.5px solid ${checked ? '#16a34a' : isError ? '#FF007F' : borderColor}`, background: checked ? '#16a34a' : isError ? 'rgba(255,0,127,0.1)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div style={{ width: '16px', height: '16px', border: `0.5px solid ${checked ? '#16a34a' : isError ? 'var(--brand)' : borderColor}`, background: checked ? '#16a34a' : isError ? 'rgb(var(--brand-rgb) /0.1)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             {checked && <span style={{ color: '#fff', fontSize: '10px', lineHeight: 1 }}>✓</span>}
           </div>
-          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', color: checked ? '#16a34a' : isError ? '#FF007F' : textMuted }}>
+          <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', color: checked ? '#16a34a' : isError ? 'var(--brand)' : textMuted }}>
             {checked ? `✓ ${t?.accepted || 'ZAAKCEPTOWANO'}` : isError ? `⚠ ${t?.required || 'WYMAGANE'}` : t?.clickToAccept || 'KLIKNIJ ABY ZAAKCEPTOWAĆ'}
           </span>
         </button>
-        {isError && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', marginTop: '6px', letterSpacing: '0.08em' }}>⚠ {t?.required || 'WYMAGANE'}</p>}
+        {isError && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', marginTop: '6px', letterSpacing: '0.08em' }}>⚠ {t?.required || 'WYMAGANE'}</p>}
       </div>
     </div>
   );

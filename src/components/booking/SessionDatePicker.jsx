@@ -152,7 +152,7 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
           <button
             onClick={() => setShowCalendar(true)}
             className="flex items-center gap-2"
-            style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: '0.5px solid #FF007F', color: '#FF007F', background: 'transparent', cursor: 'pointer' }}
+            style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: '0.5px solid var(--brand)', color: 'var(--brand)', background: 'transparent', cursor: 'pointer' }}
           >
             <Calendar size={13} /> KALENDARZ
           </button>
@@ -160,7 +160,7 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
         <div className="flex gap-2 overflow-x-auto thin-scrollbar pb-2">
           {loading ? (
             <div className="flex justify-center py-6 w-full">
-              <div className="w-8 h-px animate-pulse" style={{ background: '#FF007F' }} />
+              <div className="w-8 h-px animate-pulse" style={{ background: 'var(--brand)' }} />
             </div>
           ) : (
             <>
@@ -192,17 +192,17 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
                     style={{
                       minWidth: '72px',
                       padding: '12px 8px',
-                      border: `0.5px solid ${isSelected ? '#FF007F' : hasSlots ? '#262626' : '#1a1a1a'}`,
-                      background: isSelected ? 'rgba(255,0,127,0.08)' : 'transparent',
+                      border: `0.5px solid ${isSelected ? 'var(--brand)' : hasSlots ? '#262626' : '#1a1a1a'}`,
+                      background: isSelected ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent',
                       cursor: hasSlots ? 'pointer' : 'default',
                       opacity: hasSlots ? 1 : 0.25,
                       textAlign: 'center',
                     }}
                   >
-                    <div style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: isSelected ? '#FF007F' : 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                    <div style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: isSelected ? 'var(--brand)' : 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                       {DAY_SHORT[day.getDay()]}
                     </div>
-                    <div style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.5rem', color: isSelected ? '#FF007F' : '#F5F0EB', lineHeight: 1, marginTop: '4px' }}>
+                    <div style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.5rem', color: isSelected ? 'var(--brand)' : '#F5F0EB', lineHeight: 1, marginTop: '4px' }}>
                       {format(day, 'd')}
                     </div>
                     <div style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: '2px' }}>
@@ -257,11 +257,11 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
                     disabled={isBooked}
                     className="py-3 transition-all duration-200"
                     style={{
-                      border: `0.5px solid ${isSelected ? '#FF007F' : isBooked ? '#262626' : '#262626'}`,
-                      background: isSelected ? 'rgba(255,0,127,0.08)' : isBooked ? 'rgba(245,240,235,0.02)' : 'transparent',
+                      border: `0.5px solid ${isSelected ? 'var(--brand)' : isBooked ? '#262626' : '#262626'}`,
+                      background: isSelected ? 'rgb(var(--brand-rgb) /0.08)' : isBooked ? 'rgba(245,240,235,0.02)' : 'transparent',
                       fontFamily: 'JetBrains Mono',
                       fontSize: '11px',
-                      color: isSelected ? '#FF007F' : isBooked ? 'rgba(245,240,235,0.2)' : 'rgba(245,240,235,0.5)',
+                      color: isSelected ? 'var(--brand)' : isBooked ? 'rgba(245,240,235,0.2)' : 'rgba(245,240,235,0.5)',
                       letterSpacing: '0.05em',
                       cursor: isBooked ? 'not-allowed' : 'pointer',
                       textDecoration: isBooked ? 'line-through' : 'none',
@@ -330,8 +330,8 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
                       style={{
                         height: '42px',
                         padding: '6px 4px',
-                        border: `0.5px solid ${isSelected ? '#FF007F' : 'transparent'}`,
-                        background: isSelected ? 'rgba(255,0,127,0.08)' : 'transparent',
+                        border: `0.5px solid ${isSelected ? 'var(--brand)' : 'transparent'}`,
+                        background: isSelected ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent',
                         cursor: hasSlots ? 'pointer' : 'default',
                         opacity: hasSlots ? 1 : isPast ? 0.15 : 0.3,
                         textAlign: 'center',
@@ -339,12 +339,12 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
                       }}
                     >
                       {hasSlots && !isSelected && (
-                        <div style={{ position: 'absolute', bottom: '3px', left: '50%', transform: 'translateX(-50%)', width: '4px', height: '4px', borderRadius: '50%', background: '#FF007F' }} />
+                        <div style={{ position: 'absolute', bottom: '3px', left: '50%', transform: 'translateX(-50%)', width: '4px', height: '4px', borderRadius: '50%', background: 'var(--brand)' }} />
                       )}
                       <span style={{
                         fontFamily: 'JetBrains Mono',
                         fontSize: '11px',
-                        color: isSelected ? '#FF007F' : isTodayDate ? '#F5F0EB' : 'rgba(245,240,235,0.5)',
+                        color: isSelected ? 'var(--brand)' : isTodayDate ? '#F5F0EB' : 'rgba(245,240,235,0.5)',
                         fontWeight: isTodayDate ? 600 : 400,
                       }}>
                         {format(day, 'd')}
@@ -357,7 +357,7 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
               {/* Legend */}
               <div className="flex items-center gap-4 mt-4 pt-4" style={{ borderTop: '0.5px solid #262626' }}>
                 <div className="flex items-center gap-2">
-                  <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#FF007F' }} />
+                  <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--brand)' }} />
                   <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.08em' }}>WOLNE TERMINY</span>
                 </div>
                 <div className="flex items-center gap-2">

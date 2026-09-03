@@ -6,9 +6,9 @@ function ConsentBlock({ title, text, fieldKey, form, setField, required, showErr
   const checked = form[fieldKey];
   const isError = showErrors && required && !checked;
   return (
-    <div className="py-4" style={{ borderBottom: isError ? '0.5px solid #FF007F' : `0.5px solid ${borderColor}` }}>
+    <div className="py-4" style={{ borderBottom: isError ? '0.5px solid var(--brand)' : `0.5px solid ${borderColor}` }}>
       <div style={{ marginBottom: '10px' }}>
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
           {translatedTitle}{required && ' *'} {isError && `(${(t?.required || 'WYMAGANE').toLowerCase()})`}
         </p>
         <p style={{ color: textMuted, fontSize: '15px', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{translatedText}</p>
@@ -19,10 +19,10 @@ function ConsentBlock({ title, text, fieldKey, form, setField, required, showErr
         className="flex items-center gap-3"
         style={{ background: 'none', border: 'none', cursor: 'pointer' }}
       >
-        <div style={{ width: '16px', height: '16px', border: `0.5px solid ${checked ? '#16a34a' : isError ? '#FF007F' : borderColor}`, background: checked ? '#16a34a' : isError ? 'rgba(255,0,127,0.1)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <div style={{ width: '16px', height: '16px', border: `0.5px solid ${checked ? '#16a34a' : isError ? 'var(--brand)' : borderColor}`, background: checked ? '#16a34a' : isError ? 'rgb(var(--brand-rgb) /0.1)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           {checked && <span style={{ color: '#fff', fontSize: '10px', lineHeight: 1 }}>✓</span>}
         </div>
-        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', color: checked ? '#16a34a' : isError ? '#FF007F' : textMuted }}>
+        <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', color: checked ? '#16a34a' : isError ? 'var(--brand)' : textMuted }}>
           {checked ? `✓ ${t?.accepted || 'ZAAKCEPTOWANO'}` : isError ? `⚠ ${t?.required || 'WYMAGANE'}` : t?.clickToAccept || 'KLIKNIJ ABY ZAAKCEPTOWAĆ'}
         </span>
       </button>
@@ -62,7 +62,7 @@ export default function StepConsents({ form, setField, t, showErrors, templateDa
           href={termsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', opacity: 0.8 }}
+          style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', opacity: 0.8 }}
         >
           ↗ {t?.readTerms || 'PRZECZYTAJ REGULAMIN STUDIA'}
         </a>

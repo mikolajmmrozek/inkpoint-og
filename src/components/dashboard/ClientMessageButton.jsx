@@ -40,7 +40,7 @@ export default function ClientMessageButton({ client, t, users }) {
       <button
         onClick={handleMessage}
         disabled={!client.email || sending}
-        style={{ color: sending ? t.muted : '#FF007F', background: 'none', border: 'none', cursor: client.email && !sending ? 'pointer' : 'not-allowed', opacity: client.email ? 1 : 0.5, padding: '4px' }}
+        style={{ color: sending ? t.muted : 'var(--brand)', background: 'none', border: 'none', cursor: client.email && !sending ? 'pointer' : 'not-allowed', opacity: client.email ? 1 : 0.5, padding: '4px' }}
         title={client.email ? 'Wyślij wiadomość' : 'Brak emaila'}
       >
         {sending ? <Loader2 size={13} className="animate-spin" /> : <Mail size={13} />}

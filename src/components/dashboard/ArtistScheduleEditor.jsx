@@ -380,12 +380,12 @@ export default function ArtistScheduleEditor({ artistId, t }) {
     value: val,
     onChange,
     style: { background: 'transparent', border: 'none', borderBottom: `0.5px solid ${border}`, color: text, padding: '7px 0', fontSize: '13px', width: '100%', outline: 'none', fontFamily: 'Inter, sans-serif', colorScheme: 'dark' },
-    onFocus: e => e.target.style.borderBottomColor = '#FF007F',
+    onFocus: e => e.target.style.borderBottomColor = 'var(--brand)',
     onBlur: e => e.target.style.borderBottomColor = border,
   });
 
   const SegBtn = ({ active, onClick, children }) => (
-    <button onClick={onClick} style={{ flex: 1, padding: '6px 10px', fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', background: active ? 'rgba(255,0,127,0.1)' : 'transparent', border: `0.5px solid ${active ? '#FF007F' : border}`, color: active ? '#FF007F' : muted, cursor: 'pointer' }}>
+    <button onClick={onClick} style={{ flex: 1, padding: '6px 10px', fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', background: active ? 'rgb(var(--brand-rgb) /0.1)' : 'transparent', border: `0.5px solid ${active ? 'var(--brand)' : border}`, color: active ? 'var(--brand)' : muted, cursor: 'pointer' }}>
       {children}
     </button>
   );
@@ -401,7 +401,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
       {/* ── Grafik tygodniowy ── */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
             GRAFIK TYGODNIOWY ({activeCount} dni)
           </p>
           <button onClick={applyDefault} disabled={saving} style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 8px', border: `0.5px solid ${border}`, color: muted, background: 'transparent', cursor: 'pointer' }}>
@@ -414,7 +414,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
             const rec = getDayEntry(value);
             return (
               <div key={value} className="flex items-center gap-3" style={{ padding: '5px 0', borderBottom: `0.5px solid ${border}18` }}>
-                <button onClick={() => toggleDay(value)} style={{ width: '28px', height: '28px', flexShrink: 0, border: `0.5px solid ${active ? '#FF007F' : border}`, background: active ? 'rgba(255,0,127,0.1)' : 'transparent', cursor: 'pointer', fontFamily: 'JetBrains Mono', fontSize: '9px', color: active ? '#FF007F' : muted }}>
+                <button onClick={() => toggleDay(value)} style={{ width: '28px', height: '28px', flexShrink: 0, border: `0.5px solid ${active ? 'var(--brand)' : border}`, background: active ? 'rgb(var(--brand-rgb) /0.1)' : 'transparent', cursor: 'pointer', fontFamily: 'JetBrains Mono', fontSize: '9px', color: active ? 'var(--brand)' : muted }}>
                   {label}
                 </button>
                 {active && rec ? (
@@ -439,7 +439,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
       {/* ── Blokady / Dodaj wolne ── */}
       <div style={{ borderTop: `0.5px solid ${border}`, paddingTop: '16px' }}>
         <div className="flex items-center justify-between mb-4">
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
             DODAJ WOLNE
           </p>
           {!showForm && (
@@ -451,9 +451,9 @@ export default function ArtistScheduleEditor({ artistId, t }) {
 
         {/* Form */}
         {showForm && (
-          <div className="mb-4 p-4 space-y-4" style={{ border: `0.5px solid rgba(255,0,127,0.25)`, background: 'rgba(255,0,127,0.02)' }}>
+          <div className="mb-4 p-4 space-y-4" style={{ border: `0.5px solid rgb(var(--brand-rgb) /0.25)`, background: 'rgb(var(--brand-rgb) /0.02)' }}>
             <div className="flex items-center justify-between">
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
                 {editingGroup ? `EDYTUJ WPIS (×${editingGroup.count})` : 'NOWY WPIS'}
               </p>
               <button onClick={cancelForm} style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><X size={13} /></button>
@@ -533,7 +533,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
                   />
                   <button
                     onClick={() => setEntry(e => ({ ...e, repeat_indefinite: !e.repeat_indefinite, repeat_until: '' }))}
-                    style={{ flexShrink: 0, fontFamily: 'JetBrains Mono', fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${entry.repeat_indefinite ? '#FF007F' : border}`, color: entry.repeat_indefinite ? '#FF007F' : muted, background: entry.repeat_indefinite ? 'rgba(255,0,127,0.08)' : 'transparent', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                    style={{ flexShrink: 0, fontFamily: 'JetBrains Mono', fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${entry.repeat_indefinite ? 'var(--brand)' : border}`, color: entry.repeat_indefinite ? 'var(--brand)' : muted, background: entry.repeat_indefinite ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', cursor: 'pointer', whiteSpace: 'nowrap' }}
                   >
                     Do odwołania
                   </button>
@@ -548,8 +548,8 @@ export default function ArtistScheduleEditor({ artistId, t }) {
             </div>
 
             {editingGroup && (
-              <div style={{ padding: '8px 10px', background: 'rgba(255,0,127,0.04)', border: '0.5px solid rgba(255,0,127,0.2)' }}>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#FF007F', letterSpacing: '0.1em' }}>
+              <div style={{ padding: '8px 10px', background: 'rgb(var(--brand-rgb) /0.04)', border: '0.5px solid rgb(var(--brand-rgb) /0.2)' }}>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: 'var(--brand)', letterSpacing: '0.1em' }}>
                   Zmiana zakresu dat: wpisy poza nowym zakresem zostaną usunięte, nowe daty zostaną dodane.
                 </p>
               </div>
@@ -575,7 +575,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
             <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>BLOKADY ({blocks.length})</p>
             <div className="space-y-1">
               {blocks.map(group => (
-                <ExceptionRow key={group.representative.id} group={group} color="#FF007F" border={border} muted={muted} text={text} onView={g => openViewModal(g, false)} onEdit={g => openViewModal(g, true)} onDelete={() => deleteGroup(group)} />
+                <ExceptionRow key={group.representative.id} group={group} color="var(--brand)" border={border} muted={muted} text={text} onView={g => openViewModal(g, false)} onEdit={g => openViewModal(g, true)} onDelete={() => deleteGroup(group)} />
               ))}
             </div>
           </div>

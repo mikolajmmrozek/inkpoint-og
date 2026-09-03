@@ -7,14 +7,14 @@ export default function StepPersonal({ form, setField, t, inputStyle, showErrors
 
   const labelStyle = (error) => ({
     fontFamily: 'JetBrains Mono', fontSize: '11px',
-    color: error ? '#FF007F' : textMuted,
+    color: error ? 'var(--brand)' : textMuted,
     letterSpacing: '0.15em', textTransform: 'uppercase',
     display: 'block', marginBottom: '6px'
   });
 
   const inp = (field, required) => ({
     ...inputStyle,
-    borderColor: showErrors && required && !form[field] ? '#FF007F' : borderColor
+    borderColor: showErrors && required && !form[field] ? 'var(--brand)' : borderColor
   });
 
   return (
@@ -42,8 +42,8 @@ export default function StepPersonal({ form, setField, t, inputStyle, showErrors
       <div>
         <DatePickerCustom value={form.date_of_birth} onChange={v => setField('date_of_birth', v)} showErrors={showErrors} t={t} textPrimary={textPrimary} textMuted={textMuted} borderColor={borderColor} />
         {isMinor && (
-          <div className="mt-2 px-3 py-2 flex items-center gap-2" style={{ background: 'rgba(255,0,127,0.08)', border: '0.5px solid rgba(255,0,127,0.3)' }}>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>⚠ {t.minorWarning}</p>
+          <div className="mt-2 px-3 py-2 flex items-center gap-2" style={{ background: 'rgb(var(--brand-rgb) /0.08)', border: '0.5px solid rgb(var(--brand-rgb) /0.3)' }}>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em' }}>⚠ {t.minorWarning}</p>
           </div>
         )}
       </div>
@@ -74,7 +74,7 @@ export default function StepPersonal({ form, setField, t, inputStyle, showErrors
       {/* PESEL */}
       <div>
         <label style={labelStyle(isMinor && showErrors && !form.pesel)}>{t.pesel}{isMinor ? ' *' : ''} {isMinor && showErrors && !form.pesel && `(${t.required?.toLowerCase() || 'wymagane'})`}</label>
-        <input style={{ ...inputStyle, borderBottomColor: isMinor && showErrors && !form.pesel ? '#FF007F' : borderColor }} value={form.pesel || ''} onChange={e => setField('pesel', e.target.value)} />
+        <input style={{ ...inputStyle, borderBottomColor: isMinor && showErrors && !form.pesel ? 'var(--brand)' : borderColor }} value={form.pesel || ''} onChange={e => setField('pesel', e.target.value)} />
       </div>
 
       {/* Rodzaj zabiegu */}
@@ -86,9 +86,9 @@ export default function StepPersonal({ form, setField, t, inputStyle, showErrors
               style={{
                 fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em',
                 textTransform: 'uppercase', padding: '11px 22px',
-                border: `0.5px solid ${form.procedure_type === p ? '#FF007F' : showErrors && !form.procedure_type ? '#FF007F' : borderColor}`,
-                color: form.procedure_type === p ? '#FF007F' : showErrors && !form.procedure_type ? '#FF007F' : textMuted,
-                background: form.procedure_type === p ? 'rgba(255,0,127,0.08)' : showErrors && !form.procedure_type ? 'rgba(255,0,127,0.08)' : 'rgba(255,255,255,0.06)',
+                border: `0.5px solid ${form.procedure_type === p ? 'var(--brand)' : showErrors && !form.procedure_type ? 'var(--brand)' : borderColor}`,
+                color: form.procedure_type === p ? 'var(--brand)' : showErrors && !form.procedure_type ? 'var(--brand)' : textMuted,
+                background: form.procedure_type === p ? 'rgb(var(--brand-rgb) /0.08)' : showErrors && !form.procedure_type ? 'rgb(var(--brand-rgb) /0.08)' : 'rgba(255,255,255,0.06)',
                 cursor: 'pointer'
               }}>
               {p === 'TATUAŻ' ? t.tattoo : t.piercing}

@@ -8,7 +8,7 @@ export default function MessageContent({ message, t, isAdmin }) {
   const [previewAttachment, setPreviewAttachment] = useState(null);
   const text = message.message || '';
   const attachments = message.attachments || [];
-  const linkColor = isAdmin ? 'rgba(245,240,235,0.95)' : '#FF007F';
+  const linkColor = isAdmin ? 'rgba(245,240,235,0.95)' : 'var(--brand)';
 
   const renderText = (txt) => {
     if (!txt) return null;
@@ -52,7 +52,7 @@ export default function MessageContent({ message, t, isAdmin }) {
                 onClick={() => setPreviewAttachment(att)}
                 style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', border: `0.5px solid ${isAdmin ? 'rgba(245,240,235,0.2)' : t.border}`, background: 'transparent', cursor: 'pointer' }}
               >
-                <FileText size={16} color={isAdmin ? '#F5F0EB' : '#FF007F'} />
+                <FileText size={16} color={isAdmin ? '#F5F0EB' : 'var(--brand)'} />
                 <span style={{ fontSize: '11px', color: isAdmin ? '#F5F0EB' : t.text, maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {att.name || (att.type === 'pdf' ? 'Plik PDF' : 'Plik')}
                 </span>

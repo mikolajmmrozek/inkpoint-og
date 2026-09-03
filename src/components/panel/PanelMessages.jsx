@@ -8,8 +8,8 @@ import AttachmentBar from '@/components/panel/AttachmentBar';
 
 export default function PanelMessages({ theme, userEmail, userName, roleLabel }) {
   const t = theme === 'light'
-    ? { bg: '#FFFFFF', border: '#E5E5E5', text: '#111111', muted: 'rgba(0,0,0,0.5)', fuchsia: '#FF007F', bubbleBg: 'rgba(0,0,0,0.04)', adminBubble: '#FF007F' }
-    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', text: '#F5F0EB', muted: 'rgba(245,240,235,0.5)', fuchsia: '#FF007F', bubbleBg: 'rgba(255,255,255,0.04)', adminBubble: '#FF007F' };
+    ? { bg: '#FFFFFF', border: '#E5E5E5', text: '#111111', muted: 'rgba(0,0,0,0.5)', fuchsia: 'var(--brand)', bubbleBg: 'rgba(0,0,0,0.04)', adminBubble: 'var(--brand)' }
+    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', text: '#F5F0EB', muted: 'rgba(245,240,235,0.5)', fuchsia: 'var(--brand)', bubbleBg: 'rgba(255,255,255,0.04)', adminBubble: 'var(--brand)' };
 
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -140,7 +140,7 @@ export default function PanelMessages({ theme, userEmail, userName, roleLabel })
               if (isStatusChange) {
                 return (
                   <div key={msg.id} className="flex justify-center">
-                    <div style={{ background: 'rgba(255,0,127,0.06)', border: `0.5px solid rgba(255,0,127,0.2)`, padding: '10px 16px', maxWidth: '80%', textAlign: 'center' }}>
+                    <div style={{ background: 'rgb(var(--brand-rgb) /0.06)', border: `0.5px solid rgb(var(--brand-rgb) /0.2)`, padding: '10px 16px', maxWidth: '80%', textAlign: 'center' }}>
                       <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '4px' }}>
                         STATUS REZERWACJI
                       </p>
@@ -192,7 +192,7 @@ export default function PanelMessages({ theme, userEmail, userName, roleLabel })
             <button
               onClick={send}
               disabled={sending || !replyText.trim()}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px', background: 'linear-gradient(135deg, #FF007F, #CC0066)', border: 'none', cursor: sending || !replyText.trim() ? 'not-allowed' : 'pointer', opacity: sending || !replyText.trim() ? 0.4 : 1 }}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px', background: 'linear-gradient(135deg, var(--brand), var(--brand))', border: 'none', cursor: sending || !replyText.trim() ? 'not-allowed' : 'pointer', opacity: sending || !replyText.trim() ? 0.4 : 1 }}
             >
               {sending ? <Loader2 size={14} className="animate-spin" color="#F5F0EB" /> : <Send size={14} color="#F5F0EB" />}
             </button>

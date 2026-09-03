@@ -72,13 +72,13 @@ export default function ReferenceImagesGallery({ images = [], theme = 'dark', t 
               <>
                 <button
                   onClick={e => { e.stopPropagation(); setLightboxIndex(i => (i - 1 + images.length) % images.length); }}
-                  style={{ position: 'fixed', left: '12px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', border: 'none', cursor: 'pointer', color: '#FF007F', padding: '12px', zIndex: 71 }}
+                  style={{ position: 'fixed', left: '12px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', border: 'none', cursor: 'pointer', color: 'var(--brand)', padding: '12px', zIndex: 71 }}
                 >
                   <ChevronLeft size={28} />
                 </button>
                 <button
                   onClick={e => { e.stopPropagation(); setLightboxIndex(i => (i + 1) % images.length); }}
-                  style={{ position: 'fixed', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', border: 'none', cursor: 'pointer', color: '#FF007F', padding: '12px', zIndex: 71 }}
+                  style={{ position: 'fixed', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', border: 'none', cursor: 'pointer', color: 'var(--brand)', padding: '12px', zIndex: 71 }}
                 >
                   <ChevronRight size={28} />
                 </button>
@@ -103,7 +103,7 @@ export default function ReferenceImagesGallery({ images = [], theme = 'dark', t 
                 a.click();
                 document.body.removeChild(a);
               }}
-              style={{ position: 'fixed', bottom: '12px', right: '12px', background: 'rgba(255,0,127,0.9)', color: '#FFF', padding: '8px 12px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontFamily: 'JetBrains Mono', fontSize: '10px', textTransform: 'uppercase', zIndex: 71 }}
+              style={{ position: 'fixed', bottom: '12px', right: '12px', background: 'rgb(var(--brand-rgb) /0.9)', color: '#FFF', padding: '8px 12px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontFamily: 'JetBrains Mono', fontSize: '10px', textTransform: 'uppercase', zIndex: 71 }}
             >
               <Download size={11} />
             </button>

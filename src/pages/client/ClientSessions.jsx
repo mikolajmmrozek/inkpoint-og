@@ -17,8 +17,8 @@ export default function ClientSessions() {
   const [messageBooking, setMessageBooking] = useState(null);
 
   const t = theme === 'light'
-    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F' }
-    : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F' };
+    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: 'var(--brand)' }
+    : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: 'var(--brand)' };
 
   const load = async () => {
     const res = await base44.entities.Booking.filter({ client_email: user.email }, '-session_date', 200);
@@ -77,7 +77,7 @@ export default function ClientSessions() {
               fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase',
               padding: '8px 16px', border: `0.5px solid ${tab === tbtn.key ? t.fuchsia : t.border}`,
               color: tab === tbtn.key ? t.fuchsia : t.muted,
-              background: tab === tbtn.key ? 'rgba(255,0,127,0.06)' : 'transparent',
+              background: tab === tbtn.key ? 'rgb(var(--brand-rgb) /0.06)' : 'transparent',
               cursor: 'pointer',
             }}
           >

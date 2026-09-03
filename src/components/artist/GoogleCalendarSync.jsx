@@ -79,7 +79,7 @@ export default function GoogleCalendarSync({ theme }) {
   if (loading) {
     return (
       <div className="p-4 mb-6" style={{ border: `0.5px solid ${t.border}`, background: t.cardBg }}>
-        <div className="w-6 h-px animate-pulse" style={{ background: '#FF007F' }} />
+        <div className="w-6 h-px animate-pulse" style={{ background: 'var(--brand)' }} />
       </div>
     );
   }
@@ -87,9 +87,9 @@ export default function GoogleCalendarSync({ theme }) {
   return (
     <div className="p-4 mb-6 flex items-center justify-between gap-4 flex-wrap" style={{ border: `0.5px solid ${t.border}`, background: t.cardBg }}>
       <div className="flex items-center gap-3">
-        <Calendar size={16} color={connected ? '#16a34a' : '#FF007F'} />
+        <Calendar size={16} color={connected ? '#16a34a' : 'var(--brand)'} />
         <div>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '2px' }}>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '2px' }}>
             GOOGLE CALENDAR
           </p>
           <p style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>
@@ -103,14 +103,14 @@ export default function GoogleCalendarSync({ theme }) {
                 {` / ${syncResult.total}`}
               </p>
               {syncResult.errors?.length > 0 && (
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#FF007F', letterSpacing: '0.04em', marginTop: '2px', wordBreak: 'break-word' }}>
+                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: 'var(--brand)', letterSpacing: '0.04em', marginTop: '2px', wordBreak: 'break-word' }}>
                   ⚠ {syncResult.errors[0]}
                 </p>
               )}
             </>
           )}
           {error && (
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.08em', marginTop: '4px' }}>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.08em', marginTop: '4px' }}>
               ⚠ {error}
             </p>
           )}
@@ -123,7 +123,7 @@ export default function GoogleCalendarSync({ theme }) {
             <button
               onClick={handleSync}
               disabled={syncing}
-              style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 16px', background: syncing ? 'rgba(255,0,127,0.3)' : 'linear-gradient(135deg, #FF007F 0%, #CC0066 100%)', color: '#F5F0EB', border: 'none', cursor: syncing ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+              style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 16px', background: syncing ? 'rgb(var(--brand-rgb) /0.3)' : 'linear-gradient(135deg, var(--brand) 0%, var(--brand) 100%)', color: '#F5F0EB', border: 'none', cursor: syncing ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
             >
               <RefreshCw size={12} className={syncing ? 'animate-spin' : ''} />
               {syncing ? 'SYNCHRONIZUJĘ...' : 'SYNCHRONIZUJ'}
@@ -139,7 +139,7 @@ export default function GoogleCalendarSync({ theme }) {
         ) : (
           <button
             onClick={handleConnect}
-            style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 16px', background: 'linear-gradient(135deg, #FF007F 0%, #CC0066 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+            style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 16px', background: 'linear-gradient(135deg, var(--brand) 0%, var(--brand) 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
           >
             <Link2 size={12} />
             POŁĄCZ KALENDARZ

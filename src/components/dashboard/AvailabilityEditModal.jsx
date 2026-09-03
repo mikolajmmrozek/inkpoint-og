@@ -106,14 +106,14 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
   }
   const timeDisplay = record.start_time && record.end_time ? `${record.start_time}–${record.end_time}` : 'Cały dzień';
   const typeLabel = record.is_available ? 'Dyspozycja (dostępny)' : 'Blokada (niedostępny)';
-  const typeColor = record.is_available ? '#16a34a' : '#FF007F';
+  const typeColor = record.is_available ? '#16a34a' : 'var(--brand)';
 
   const lbl = txt => (
     <label style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>{txt}</label>
   );
 
   const SegBtn = ({ active, onClick, children }) => (
-    <button type="button" onClick={onClick} style={{ flex: 1, padding: '6px 8px', fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', background: active ? 'rgba(255,0,127,0.1)' : 'transparent', border: `0.5px solid ${active ? '#FF007F' : t.border}`, color: active ? '#FF007F' : t.muted, cursor: 'pointer' }}>
+    <button type="button" onClick={onClick} style={{ flex: 1, padding: '6px 8px', fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', background: active ? 'rgb(var(--brand-rgb) /0.1)' : 'transparent', border: `0.5px solid ${active ? 'var(--brand)' : t.border}`, color: active ? 'var(--brand)' : t.muted, cursor: 'pointer' }}>
       {children}
     </button>
   );
@@ -261,7 +261,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                 >EDYTUJ</button>
                 <button
                   onClick={() => isRecurring ? setStep('confirm_delete_scope') : setStep('confirm_delete')}
-                  style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: `0.5px solid rgba(255,0,127,0.4)`, color: '#FF007F', background: 'transparent', cursor: 'pointer' }}
+                  style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: `0.5px solid rgb(var(--brand-rgb) /0.4)`, color: 'var(--brand)', background: 'transparent', cursor: 'pointer' }}
                 >USUŃ</button>
               </div>
             </div>
@@ -280,9 +280,9 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                 ].map(([scope, title, sub]) => (
                   <button key={scope} onClick={() => { setEditScope(scope); setStep('edit'); }}
                     style={{ display: 'block', width: '100%', textAlign: 'left', padding: '12px 14px', border: `0.5px solid ${t.border}`, background: 'transparent', cursor: 'pointer' }}
-                    onMouseEnter={e => e.currentTarget.style.borderColor = '#FF007F'}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--brand)'}
                     onMouseLeave={e => e.currentTarget.style.borderColor = t.border}>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>{title}</p>
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>{title}</p>
                     <p style={{ fontSize: '12px', color: t.muted }}>{sub}</p>
                   </button>
                 ))}
@@ -304,9 +304,9 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                 ].map(([scope, title, sub]) => (
                   <button key={scope} onClick={() => { setDeleteScope(scope); setStep('confirm_delete'); }}
                     style={{ display: 'block', width: '100%', textAlign: 'left', padding: '12px 14px', border: `0.5px solid ${t.border}`, background: 'transparent', cursor: 'pointer' }}
-                    onMouseEnter={e => e.currentTarget.style.borderColor = '#FF007F'}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--brand)'}
                     onMouseLeave={e => e.currentTarget.style.borderColor = t.border}>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>{title}</p>
+                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>{title}</p>
                     <p style={{ fontSize: '12px', color: t.muted }}>{sub}</p>
                   </button>
                 ))}
@@ -318,10 +318,10 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
           {/* ── CONFIRM DELETE (monit potwierdzenia) ── */}
           {step === 'confirm_delete' && (
             <div className="space-y-4">
-              <div className="flex items-start gap-3 px-3 py-3" style={{ background: 'rgba(255,0,127,0.06)', border: '0.5px solid rgba(255,0,127,0.3)' }}>
-                <AlertTriangle size={16} color="#FF007F" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <div className="flex items-start gap-3 px-3 py-3" style={{ background: 'rgb(var(--brand-rgb) /0.06)', border: '0.5px solid rgb(var(--brand-rgb) /0.3)' }}>
+                <AlertTriangle size={16} color="var(--brand)" style={{ flexShrink: 0, marginTop: '2px' }} />
                 <div>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>
                     POTWIERDŹ USUNIĘCIE
                   </p>
                   <p style={{ fontSize: '13px', color: t.text, lineHeight: 1.5 }}>
@@ -334,7 +334,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
               </div>
               <div className="flex gap-3 pt-2">
                 <button onClick={handleDelete} disabled={saving}
-                  style={{ flex: 1, fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 14px', background: 'linear-gradient(135deg,#FF007F,#CC0066)', color: '#F5F0EB', border: 'none', cursor: 'pointer' }}>
+                  style={{ flex: 1, fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 14px', background: 'linear-gradient(135deg,var(--brand),var(--brand))', color: '#F5F0EB', border: 'none', cursor: 'pointer' }}>
                   {saving ? 'USUWAM...' : 'TAK, USUŃ'}
                 </button>
                 <button onClick={() => setStep(isRecurring ? 'confirm_delete_scope' : 'view')}
@@ -349,8 +349,8 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
           {step === 'edit' && (
             <div className="space-y-4">
               {editScope === 'occurrence' && (
-                <div style={{ padding: '8px 10px', background: 'rgba(255,0,127,0.05)', border: '0.5px solid rgba(255,0,127,0.2)' }}>
-                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F', letterSpacing: '0.1em' }}>EDYTUJESZ TYLKO: {dateDisplay}</p>
+                <div style={{ padding: '8px 10px', background: 'rgb(var(--brand-rgb) /0.05)', border: '0.5px solid rgb(var(--brand-rgb) /0.2)' }}>
+                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.1em' }}>EDYTUJESZ TYLKO: {dateDisplay}</p>
                 </div>
               )}
               {editScope === 'cycle' && (
@@ -362,7 +362,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                         Łącznie po zapisie: <span style={{ color: t.text }}>{cyclePreview.total} wpisów</span>
                       </p>
                       {cyclePreview.toAdd > 0 && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#16a34a' }}>+ {cyclePreview.toAdd} nowych</p>}
-                      {cyclePreview.toDelete > 0 && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: '#FF007F' }}>− {cyclePreview.toDelete} usuniętych</p>}
+                      {cyclePreview.toDelete > 0 && <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)' }}>− {cyclePreview.toDelete} usuniętych</p>}
                     </div>
                   )}
                 </div>
@@ -417,7 +417,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                           disabled={form.repeat_indefinite}
                           style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '8px 0', fontSize: '13px', flex: 1, outline: 'none', fontFamily: 'Inter, sans-serif', colorScheme: 'dark', opacity: form.repeat_indefinite ? 0.3 : 1 }} />
                         <button type="button" onClick={() => setForm(f => ({ ...f, repeat_indefinite: !f.repeat_indefinite, repeat_until: '' }))}
-                          style={{ flexShrink: 0, fontFamily: 'JetBrains Mono', fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 8px', border: `0.5px solid ${form.repeat_indefinite ? '#FF007F' : t.border}`, color: form.repeat_indefinite ? '#FF007F' : t.muted, background: form.repeat_indefinite ? 'rgba(255,0,127,0.08)' : 'transparent', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                          style={{ flexShrink: 0, fontFamily: 'JetBrains Mono', fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 8px', border: `0.5px solid ${form.repeat_indefinite ? 'var(--brand)' : t.border}`, color: form.repeat_indefinite ? 'var(--brand)' : t.muted, background: form.repeat_indefinite ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', cursor: 'pointer', whiteSpace: 'nowrap' }}>
                           Do odwołania
                         </button>
                       </div>

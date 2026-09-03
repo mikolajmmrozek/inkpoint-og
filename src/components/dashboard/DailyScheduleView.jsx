@@ -42,8 +42,8 @@ const NowLine = memo(function NowLine() {
 
   return (
     <>
-      <div style={{ position: 'absolute', top: `${nowTop}px`, left: 0, right: 0, borderTop: '1px solid #FF007F', pointerEvents: 'none', zIndex: 2, opacity: 0.7 }} />
-      <div style={{ position: 'absolute', top: `${nowTop}px`, left: 0, width: '8px', height: '8px', borderRadius: '50%', background: '#FF007F', transform: 'translate(-50%, -50%)', pointerEvents: 'none', zIndex: 3 }} />
+      <div style={{ position: 'absolute', top: `${nowTop}px`, left: 0, right: 0, borderTop: '1px solid var(--brand)', pointerEvents: 'none', zIndex: 2, opacity: 0.7 }} />
+      <div style={{ position: 'absolute', top: `${nowTop}px`, left: 0, width: '8px', height: '8px', borderRadius: '50%', background: 'var(--brand)', transform: 'translate(-50%, -50%)', pointerEvents: 'none', zIndex: 3 }} />
     </>
   );
 });
@@ -67,7 +67,7 @@ const BookingTile = memo(function BookingTile({ booking, onClick, t }) {
   const duration = booking.session_duration || 60;
   const top = Math.max(0, (startMin - DAY_START)) * PX_PER_MIN;
   const height = Math.max(30, duration * PX_PER_MIN);
-  const color = STATUS_COLORS[booking.status] || '#FF007F';
+  const color = STATUS_COLORS[booking.status] || 'var(--brand)';
 
   const endTime = booking.session_end_time || (() => {
     const endMin = startMin + duration;
@@ -239,17 +239,17 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
           return (
           <div key={`header-${a.id}`} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '8px 4px', gap: '4px', borderLeft: `0.5px solid ${t.border}` }}>
             {a.photo_url ? (
-              <img src={a.photo_url} alt={a.name} loading="lazy" width={28} height={28} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${off.off ? '#FF007F' : t.border}`, flexShrink: 0, opacity: off.off ? 0.55 : 1 }} />
+              <img src={a.photo_url} alt={a.name} loading="lazy" width={28} height={28} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${off.off ? 'var(--brand)' : t.border}`, flexShrink: 0, opacity: off.off ? 0.55 : 1 }} />
             ) : (
-              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: off.off ? 'rgba(255,0,127,0.15)' : 'rgba(255,0,127,0.15)', border: `1px solid ${off.off ? '#FF007F' : t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ fontSize: '11px', color: off.off ? '#FF007F' : '#FF007F', fontFamily: 'Bebas Neue, system-ui' }}>{a.name.charAt(0)}</span>
+              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: off.off ? 'rgb(var(--brand-rgb) /0.15)' : 'rgb(var(--brand-rgb) /0.15)', border: `1px solid ${off.off ? 'var(--brand)' : t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ fontSize: '11px', color: off.off ? 'var(--brand)' : 'var(--brand)', fontFamily: 'Bebas Neue, system-ui' }}>{a.name.charAt(0)}</span>
               </div>
             )}
-            <p className="hidden sm:block" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: off.off ? '#FF007F' : t.muted, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <p className="hidden sm:block" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: off.off ? 'var(--brand)' : t.muted, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {a.name}
             </p>
             {off.off && (
-              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#FF007F', letterSpacing: '0.08em', textTransform: 'uppercase', border: '0.5px solid #FF007F', padding: '1px 4px' }} title={off.note || ''}>
+              <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: 'var(--brand)', letterSpacing: '0.08em', textTransform: 'uppercase', border: '0.5px solid var(--brand)', padding: '1px 4px' }} title={off.note || ''}>
                 {off.note ? off.note.toUpperCase().slice(0, 10) : 'URLOP'}
               </span>
             )}

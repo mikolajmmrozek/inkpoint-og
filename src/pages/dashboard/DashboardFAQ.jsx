@@ -80,7 +80,7 @@ export default function DashboardFAQ() {
             <button onClick={closeForm} className="absolute top-4 right-4" style={{ background: 'none', border: 'none', cursor: 'pointer', color: mutedColor }}>
               <X size={18} />
             </button>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '20px' }}>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '20px' }}>
               {editing?.id ? 'EDYTUJ PYTANIE' : 'NOWE PYTANIE'}
             </p>
 
@@ -120,7 +120,7 @@ export default function DashboardFAQ() {
                 onClick={handleSave}
                 disabled={createMut.isPending || updateMut.isPending}
                 className="flex items-center gap-2 px-5 py-2"
-                style={{ background: '#FF007F', color: '#F5F0EB', fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', opacity: (createMut.isPending || updateMut.isPending) ? 0.6 : 1 }}
+                style={{ background: 'var(--brand)', color: '#F5F0EB', fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', opacity: (createMut.isPending || updateMut.isPending) ? 0.6 : 1 }}
               >
                 <Save size={13} /> Zapisz
               </button>
@@ -144,7 +144,7 @@ export default function DashboardFAQ() {
       {/* List */}
       {isLoading ? (
         <div className="flex justify-center py-20">
-          <div className="w-6 h-px animate-pulse" style={{ background: '#FF007F' }} />
+          <div className="w-6 h-px animate-pulse" style={{ background: 'var(--brand)' }} />
         </div>
       ) : faqs.length === 0 ? (
         <div className="text-center py-20" style={{ border: `0.5px solid ${border}` }}>
@@ -170,7 +170,7 @@ export default function DashboardFAQ() {
                 <button
                   onClick={() => setDeleteConfirm(item)}
                   className="p-1"
-                  style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#FF007F' }}
+                  style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--brand)' }}
                 >
                   <Trash2 size={14} />
                 </button>

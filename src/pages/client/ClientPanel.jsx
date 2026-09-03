@@ -60,7 +60,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, clientName, 
                 className="flex items-center gap-3 px-4 py-3 transition-all duration-200"
                 style={{
                   background: active ? 'rgba(var(--brand-rgb),0.08)' : 'transparent',
-                  borderLeft: active ? '2px solid #FF007F' : '2px solid transparent',
+                  borderLeft: active ? '2px solid var(--brand)' : '2px solid transparent',
                   color: active ? textColor : mutedColor,
                 }}
                 onClick={() => setSidebarOpen(false)}

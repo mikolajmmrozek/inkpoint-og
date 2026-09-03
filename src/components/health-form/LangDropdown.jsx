@@ -27,8 +27,8 @@ export default function LangDropdown({ lang, setLang, template, theme }) {
           onClick={() => setOpen(o => !o)}
           style={{
             fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.08em',
-            padding: '6px 14px', border: `0.5px solid ${open ? '#FF007F' : borderColor}`,
-            color: open ? '#FF007F' : textColor, background: 'transparent',
+            padding: '6px 14px', border: `0.5px solid ${open ? 'var(--brand)' : borderColor}`,
+            color: open ? 'var(--brand)' : textColor, background: 'transparent',
             cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
           }}
         >
@@ -49,8 +49,8 @@ export default function LangDropdown({ lang, setLang, template, theme }) {
                   style={{
                     fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.08em',
                     padding: '8px 14px', border: 'none', borderBottom: `0.5px solid ${innerBorder}`,
-                    color: lang === l.code ? '#FF007F' : textColor,
-                    background: lang === l.code ? 'rgba(255,0,127,0.06)' : 'transparent',
+                    color: lang === l.code ? 'var(--brand)' : textColor,
+                    background: lang === l.code ? 'rgb(var(--brand-rgb) /0.06)' : 'transparent',
                     cursor: 'pointer', width: '100%', textAlign: 'left',
                     display: 'flex', alignItems: 'center', gap: '8px'
                   }}

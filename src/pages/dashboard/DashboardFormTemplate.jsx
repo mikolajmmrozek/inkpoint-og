@@ -75,7 +75,7 @@ function SectionCard({ title, color, open, onToggle, children, fg, borderCol, ca
 
 export default function DashboardFormTemplate() {
   const { theme } = useTheme();
-  const fuchsia = '#FF007F';
+  const fuchsia = 'var(--brand)';
   const isDark = theme !== 'light';
   const fg = isDark ? '#F5F0EB' : '#1a1a1a';
   const fgMuted = isDark ? 'rgba(245,240,235,0.4)' : 'rgba(30,30,30,0.5)';
@@ -179,7 +179,7 @@ export default function DashboardFormTemplate() {
 
             <div className="space-y-3">
               {medicalFields.map((field, i) => (
-                <div key={i} style={{ border: `0.5px solid ${dividerCol}`, padding: '10px', background: 'rgba(255,0,127,0.02)' }}>
+                <div key={i} style={{ border: `0.5px solid ${dividerCol}`, padding: '10px', background: 'rgb(var(--brand-rgb) /0.02)' }}>
                   <div className="flex items-start gap-3">
                     <div className="flex-1 space-y-2">
                       <input type="text" value={field.label} onChange={e => setMedicalFields(u => u.map((f, j) => j === i ? { ...f, label: e.target.value } : f))} placeholder="Etykieta pytania" style={inputStyle} />
@@ -234,7 +234,7 @@ export default function DashboardFormTemplate() {
 
             <div className="space-y-3">
               {procedureQuestions.map((field, i) => (
-                <div key={i} style={{ border: `0.5px solid ${dividerCol}`, padding: '10px', background: 'rgba(255,0,127,0.02)' }}>
+                <div key={i} style={{ border: `0.5px solid ${dividerCol}`, padding: '10px', background: 'rgb(var(--brand-rgb) /0.02)' }}>
                   <div className="flex items-start gap-3">
                     <div className="flex-1 space-y-2">
                       <input type="text" value={field.label} onChange={e => setProcedureQuestions(u => u.map((f, j) => j === i ? { ...f, label: e.target.value } : f))} placeholder="Treść pytania" style={inputStyle} />
@@ -302,7 +302,7 @@ export default function DashboardFormTemplate() {
 
             <div className="space-y-3">
               {declarationFields.map((field, i) => (
-                <div key={i} style={{ border: `0.5px solid ${dividerCol}`, padding: '10px', background: 'rgba(255,0,127,0.02)' }}>
+                <div key={i} style={{ border: `0.5px solid ${dividerCol}`, padding: '10px', background: 'rgb(var(--brand-rgb) /0.02)' }}>
                   <div className="flex items-start gap-3">
                     <div className="flex-1 space-y-2">
                       <input type="text" value={field.label || ''} onChange={e => setDeclarationFields(u => u.map((f, j) => j === i ? { ...f, label: e.target.value } : f))} placeholder="Etykieta pola" style={inputStyle} />
@@ -346,7 +346,7 @@ export default function DashboardFormTemplate() {
 
             <div className="space-y-3">
               {consentFields.map((field, i) => (
-                <div key={i} style={{ border: `0.5px solid ${dividerCol}`, padding: '10px', background: 'rgba(255,0,127,0.02)' }}>
+                <div key={i} style={{ border: `0.5px solid ${dividerCol}`, padding: '10px', background: 'rgb(var(--brand-rgb) /0.02)' }}>
                   <div className="flex items-start gap-3">
                     <div className="flex-1 space-y-2">
                       <input type="text" value={field.label} onChange={e => setConsentFields(u => u.map((f, j) => j === i ? { ...f, label: e.target.value } : f))} placeholder="Etykieta zgody" style={inputStyle} />

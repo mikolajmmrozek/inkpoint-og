@@ -8,7 +8,7 @@ import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 
 const CATEGORY_ICONS = { booking: Calendar, message: MessageSquare, system: Info, health_form: FileText };
-const CATEGORY_COLORS = { booking: '#FF007F', message: '#3b82f6', system: '#9ca3af', health_form: '#f59e0b' };
+const CATEGORY_COLORS = { booking: 'var(--brand)', message: '#3b82f6', system: '#9ca3af', health_form: '#f59e0b' };
 
 /**
  * Pełnostronicowy widok powiadomień — używany na mobile/tablet zamiast popupu.
@@ -26,8 +26,8 @@ export default function NotificationsPage() {
   const pageSize = 15;
 
   const t = theme === 'light'
-    ? { bg: '#FFFFFF', border: '#E5E5E5', text: '#111111', muted: 'rgba(0,0,0,0.5)', fuchsia: '#FF007F', unreadBg: 'rgba(255,0,127,0.03)' }
-    : { bg: '#0A0A0A', border: '#262626', text: '#F5F0EB', muted: 'rgba(245,240,235,0.5)', fuchsia: '#FF007F', unreadBg: 'rgba(255,0,127,0.04)' };
+    ? { bg: '#FFFFFF', border: '#E5E5E5', text: '#111111', muted: 'rgba(0,0,0,0.5)', fuchsia: 'var(--brand)', unreadBg: 'rgb(var(--brand-rgb) /0.03)' }
+    : { bg: '#0A0A0A', border: '#262626', text: '#F5F0EB', muted: 'rgba(245,240,235,0.5)', fuchsia: 'var(--brand)', unreadBg: 'rgb(var(--brand-rgb) /0.04)' };
 
   const userEmail = getNotificationEmail(user?.role, user?.email);
 

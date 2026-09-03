@@ -76,7 +76,7 @@ export default function ArtistProfile() {
       {/* Tabs */}
       <div className="flex mb-6" style={{ borderBottom: `0.5px solid ${t.cardBorder}` }}>
         {[['profile', 'Profil'], ['schedule', 'Mój Grafik']].map(([key, lbl]) => (
-          <button key={key} onClick={() => setActiveTab(key)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '8px 16px', background: 'transparent', border: 'none', borderBottom: `1.5px solid ${activeTab === key ? '#FF007F' : 'transparent'}`, color: activeTab === key ? '#FF007F' : t.muted, cursor: 'pointer', marginBottom: '-0.5px' }}>{lbl}</button>
+          <button key={key} onClick={() => setActiveTab(key)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '8px 16px', background: 'transparent', border: 'none', borderBottom: `1.5px solid ${activeTab === key ? 'var(--brand)' : 'transparent'}`, color: activeTab === key ? 'var(--brand)' : t.muted, cursor: 'pointer', marginBottom: '-0.5px' }}>{lbl}</button>
         ))}
       </div>
 
@@ -90,13 +90,13 @@ export default function ArtistProfile() {
       <div className="space-y-6" style={{ display: activeTab === 'profile' ? 'block' : 'none' }}>
         {/* Photo */}
         <div className="p-6" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>ZDJĘCIE PROFILOWE</p>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>ZDJĘCIE PROFILOWE</p>
           <div className="flex items-center gap-6">
             {artist?.photo_url ? (
               <img src={artist.photo_url} alt={artist.name} style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: `0.5px solid ${t.cardBorder}` }} />
             ) : (
-              <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(255,0,127,0.1)', border: '0.5px solid rgba(255,0,127,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '24px', color: '#FF007F' }}>
+              <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgb(var(--brand-rgb) /0.1)', border: '0.5px solid rgb(var(--brand-rgb) /0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '24px', color: 'var(--brand)' }}>
                   {(artist?.name || '').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
                 </span>
               </div>
@@ -112,7 +112,7 @@ export default function ArtistProfile() {
 
         {/* Bio & Instagram */}
         <div className="p-6" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>INFORMACJE</p>
+          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>INFORMACJE</p>
           <div className="space-y-4">
             <div>
               <label style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>NAZWA ARTYSTY</label>
@@ -135,7 +135,7 @@ export default function ArtistProfile() {
         {/* Portfolio */}
         <div className="p-6" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
           <div className="flex items-center justify-between mb-4">
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
               PORTFOLIO ({(artist?.portfolio_images || []).length} zdjęć)
             </p>
             <label style={{ cursor: 'pointer' }}>
@@ -154,7 +154,7 @@ export default function ArtistProfile() {
                   <img src={img.url} alt={img.caption} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" />
                   <button
                     onClick={() => removePortfolioImage(i)}
-                    style={{ position: 'absolute', top: '4px', right: '4px', background: 'rgba(0,0,0,0.7)', border: 'none', color: '#FF007F', cursor: 'pointer', width: '22px', height: '22px', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ position: 'absolute', top: '4px', right: '4px', background: 'rgba(0,0,0,0.7)', border: 'none', color: 'var(--brand)', cursor: 'pointer', width: '22px', height: '22px', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >×</button>
                 </div>
               ))}

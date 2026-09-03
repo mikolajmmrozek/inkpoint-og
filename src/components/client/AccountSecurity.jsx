@@ -151,7 +151,7 @@ export default function AccountSecurity({ user, t }) {
           </div>
 
           {error && (
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em' }}>✗ {error}</p>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em' }}>✗ {error}</p>
           )}
 
           <div className="flex items-center gap-4">
