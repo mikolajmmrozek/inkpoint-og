@@ -176,6 +176,7 @@
 
   .media-border {
     border: var(--media-border-width) solid var(--media-border-color);
+    border-radius: var(--radius);
   }
   .text-display {
     font-family: var(--font-display);

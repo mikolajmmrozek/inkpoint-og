@@ -242,7 +242,7 @@ export default function DashboardDocuments() {
 
   // ── Document card ──────────────────────────────────────────────────────
   const DocCard = ({ label, title, content, onView, onEdit, onDelete, onPrint, onShare }) => (
-    <div style={{ border: `0.5px solid ${t.border}`, padding: '16px 20px', background: t.cardBg }}>
+    <div style={{ border: `0.5px solid ${t.border}`, padding: '16px 20px', background: t.cardBg, borderRadius: 'var(--radius)' }}>
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
           <FileText size={14} style={{ color: content ? t.fuchsia : t.muted, flexShrink: 0 }} />
@@ -285,7 +285,7 @@ export default function DashboardDocuments() {
 
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.8)' }} onClick={() => { setViewDoc(null); setTranslatedContent(null); setViewLang('pl'); }}>
-        <div className="w-full max-w-2xl flex flex-col" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, maxHeight: '90vh' }} onClick={e => e.stopPropagation()}>
+        <div className="w-full max-w-2xl flex flex-col" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, maxHeight: '90vh', borderRadius: 'var(--radius)' }} onClick={e => e.stopPropagation()}>
           {/* Header */}
           <div className="flex items-center justify-between p-6" style={{ borderBottom: `0.5px solid ${t.border}`, flexShrink: 0 }}>
             <div>
@@ -405,7 +405,7 @@ export default function DashboardDocuments() {
       ) : (
         <div className="space-y-8">
           {/* Zalecenia / Instrukcje */}
-          <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '24px' }}>
+          <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '24px', borderRadius: 'var(--radius)' }}>
             <div className="flex items-center justify-between mb-6">
               <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em' }}>Zalecenia i Instrukcje</h3>
               <button
@@ -437,7 +437,7 @@ export default function DashboardDocuments() {
           </div>
 
           {/* Regulamin */}
-          <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '24px' }}>
+          <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '24px', borderRadius: 'var(--radius)' }}>
             <div className="flex items-center justify-between mb-6">
               <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em' }}>Regulamin Studia</h3>
               <button
@@ -461,7 +461,7 @@ export default function DashboardDocuments() {
           </div>
 
           {/* Dokumenty prawne */}
-          <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '24px' }}>
+          <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '24px', borderRadius: 'var(--radius)' }}>
             <div className="flex items-center justify-between mb-6">
               <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em' }}>Dokumenty prawne</h3>
               <button
@@ -531,7 +531,7 @@ export default function DashboardDocuments() {
       {/* Share modal */}
       {shareDoc && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.8)' }} onClick={() => setShareDoc(null)}>
-          <div className="w-full max-w-md flex flex-col" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg }} onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-md flex flex-col" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, borderRadius: 'var(--radius)' }} onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center p-6" style={{ borderBottom: `0.5px solid ${t.border}` }}>
               <div>
                 <p style={{ ...mono, fontSize: '9px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>WYŚLIJ DOKUMENT</p>
@@ -576,7 +576,7 @@ export default function DashboardDocuments() {
       {/* Modal edycji instrukcji */}
       {editingInstr && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.8)' }} onClick={() => { setEditingInstr(null); setSaveError(null); }}>
-          <div className="w-full max-w-2xl flex flex-col" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, maxHeight: '90vh' }} onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-2xl flex flex-col" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, maxHeight: '90vh', borderRadius: 'var(--radius)' }} onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center p-6" style={{ borderBottom: `0.5px solid ${t.border}`, flexShrink: 0 }}>
               <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em' }}>
                 {editingInstr === 'new' ? 'Nowa instrukcja' : 'Edytuj instrukcję'}
@@ -622,7 +622,7 @@ export default function DashboardDocuments() {
       {/* Modal edycji regulaminu */}
       {editingTerms && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.8)' }} onClick={() => { setEditingTerms(false); setSaveError(null); }}>
-          <div className="w-full max-w-2xl flex flex-col" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, maxHeight: '90vh' }} onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-2xl flex flex-col" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, maxHeight: '90vh', borderRadius: 'var(--radius)' }} onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center p-6" style={{ borderBottom: `0.5px solid ${t.border}`, flexShrink: 0 }}>
               <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em' }}>Edytuj Regulamin</h3>
               <button onClick={() => { setEditingTerms(false); setSaveError(null); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><X size={18} /></button>
@@ -653,7 +653,7 @@ export default function DashboardDocuments() {
       {/* Modal edycji dokumentów prawnych */}
       {editingLegal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.8)' }} onClick={() => { setEditingLegal(null); setSaveError(null); }}>
-          <div className="w-full max-w-2xl flex flex-col" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, maxHeight: '90vh' }} onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-2xl flex flex-col" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, maxHeight: '90vh', borderRadius: 'var(--radius)' }} onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center p-6" style={{ borderBottom: `0.5px solid ${t.border}`, flexShrink: 0 }}>
               <h3 style={{ ...display, fontSize: '1.8rem', color: t.title, letterSpacing: '0.04em' }}>
                 {editingLegal === 'cookies' ? 'Edytuj Politykę Cookies' : 'Edytuj Politykę Prywatności'}

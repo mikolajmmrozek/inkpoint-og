@@ -165,7 +165,7 @@ export default function DashboardArtists() {
       <AnimatePresence>
         {editing && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }}>
-            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="w-full max-w-2xl max-h-screen overflow-y-auto" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '40px' }}>
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="w-full max-w-2xl max-h-screen overflow-y-auto" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '40px', borderRadius: 'var(--radius)' }}>
               <div className="flex justify-between items-center mb-6">
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
                   {editing === 'new' ? 'Nowy Artysta' : 'Edytuj Artystę'}
@@ -335,7 +335,7 @@ export default function DashboardArtists() {
                 {/* Photo upload */}
                 <div>
                   <label className="block mb-3" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Zdjęcie profilowe</label>
-                  {form.photo_url && <img src={form.photo_url} alt="" className="w-24 h-24 object-cover mb-3" style={{ filter: 'brightness(0.7)' }} />}
+                  {form.photo_url && <img src={form.photo_url} alt="" className="w-24 h-24 object-cover mb-3" style={{ filter: 'brightness(0.7)', borderRadius: 'var(--radius)' }} />}
                   <label style={{ display: 'inline-block', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '10px', padding: '8px 16px', background: 'transparent', border: `0.5px solid ${t.border}`, color: t.text, transition: 'all 0.2s ease' }} className="hover:opacity-70">
                     {uploading ? 'PRZESYŁANIE...' : 'WYBIERZ ZDJĘCIE'}
                     <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
@@ -350,7 +350,7 @@ export default function DashboardArtists() {
                   <div className="flex flex-wrap gap-2 mb-3">
                     {(form.portfolio_images || []).map((img, i) => (
                       <div key={i} className="relative">
-                        <img src={img.url} alt="" className="w-16 h-16 object-cover" style={{ filter: 'brightness(0.7)' }} />
+                        <img src={img.url} alt="" className="w-16 h-16 object-cover" style={{ filter: 'brightness(0.7)', borderRadius: 'var(--radius)' }} />
                         <button onClick={() => removePortfolioImage(i)} className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: '#8B1A1A' }}>
                           <X size={8} color="#F5F0EB" />
                         </button>
@@ -429,7 +429,7 @@ export default function DashboardArtists() {
         <DragDropContext onDragEnd={handleDragEnd}>
           <Droppable droppableId="artists">
             {(provided) => (
-              <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }} ref={provided.innerRef} {...provided.droppableProps}>
+              <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }} ref={provided.innerRef} {...provided.droppableProps}>
                 {artists.length === 0 ? (
                   <div className="py-20 text-center">
                     <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK ARTYSTÓW</p>
@@ -444,9 +444,9 @@ export default function DashboardArtists() {
                         <div className="flex items-center gap-4">
                           <GripVertical size={14} style={{ color: t.muted, flexShrink: 0 }} />
                           {a.photo_url ? (
-                            <img src={a.photo_url} alt="" style={{ width: '40px', height: '40px', objectFit: 'cover', flexShrink: 0 }} />
+                            <img src={a.photo_url} alt="" style={{ width: '40px', height: '40px', objectFit: 'cover', flexShrink: 0, borderRadius: 'var(--radius)' }} />
                           ) : (
-                            <div style={{ width: '40px', height: '40px', flexShrink: 0, background: 'rgb(var(--brand-rgb) /0.1)', border: '0.5px solid rgb(var(--brand-rgb) /0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div style={{ width: '40px', height: '40px', flexShrink: 0, background: 'rgb(var(--brand-rgb) /0.1)', border: '0.5px solid rgb(var(--brand-rgb) /0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--radius)' }}>
                               <span style={{ fontFamily: 'var(--font-display)', fontSize: '14px', color: 'var(--brand)', letterSpacing: '0.05em' }}>
                                 {a.name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
                               </span>

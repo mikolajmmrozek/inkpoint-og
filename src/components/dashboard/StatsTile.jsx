@@ -11,6 +11,7 @@ export default function StatsTile({ label, value, active = false, onClick, t }) 
         padding: '16px 20px',
         cursor: clickable ? 'pointer' : 'default',
         minWidth: '120px',
+        borderRadius: 'var(--radius)',
       }}
     >
       <p style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 400, color: 'var(--brand)', lineHeight: 1 }}>{value}</p>

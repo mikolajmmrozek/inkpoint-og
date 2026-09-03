@@ -59,7 +59,7 @@ export default function DashboardFAQ() {
 
   const closeForm = () => { setShowForm(false); setEditing(null); };
 
-  const inputStyle = { background: inputBg, border: `0.5px solid ${border}`, color: textColor, fontFamily: 'var(--font-body)', fontSize: '14px', padding: '10px 14px', width: '100%', outline: 'none', borderRadius: '2px' };
+  const inputStyle = { background: inputBg, border: `0.5px solid ${border}`, color: textColor, fontFamily: 'var(--font-body)', fontSize: '14px', padding: '10px 14px', width: '100%', outline: 'none', borderRadius: 'var(--radius)' };
 
   return (
     <div>
@@ -76,7 +76,7 @@ export default function DashboardFAQ() {
       {/* Form modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }}>
-          <div className="w-full max-w-lg p-8 relative" style={{ background: bg, border: `0.5px solid ${border}` }}>
+          <div className="w-full max-w-lg p-8 relative" style={{ background: bg, border: `0.5px solid ${border}`, borderRadius: 'var(--radius)' }}>
             <button onClick={closeForm} className="absolute top-4 right-4" style={{ background: 'none', border: 'none', cursor: 'pointer', color: mutedColor }}>
               <X size={18} />
             </button>
@@ -153,7 +153,7 @@ export default function DashboardFAQ() {
       ) : (
         <div className="space-y-2">
           {faqs.map((item, i) => (
-            <div key={item.id} className="flex items-start gap-4 p-5" style={{ border: `0.5px solid ${border}`, background: bg }}>
+            <div key={item.id} className="flex items-start gap-4 p-5" style={{ border: `0.5px solid ${border}`, background: bg, borderRadius: 'var(--radius)' }}>
               <GripVertical size={14} style={{ color: mutedColor, marginTop: '3px', flexShrink: 0 }} />
               <div className="flex-1 min-w-0">
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: textColor, letterSpacing: '0.04em', fontWeight: 400 }}>{item.question}</p>

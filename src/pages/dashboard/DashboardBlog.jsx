@@ -124,7 +124,7 @@ export default function DashboardBlog() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               className="w-full max-w-3xl max-h-screen overflow-y-auto"
-              style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '40px' }}
+              style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '40px', borderRadius: 'var(--radius)' }}
             >
               <div className="flex justify-between items-center mb-8">
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
@@ -171,7 +171,7 @@ export default function DashboardBlog() {
                 <div>
                   <label className="block mb-3" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Zdjęcie tytułowe</label>
                   {form.cover_image_url && (
-                    <img src={form.cover_image_url} alt="Cover" className="w-32 h-20 object-cover mb-3" />
+                    <img src={form.cover_image_url} alt="Cover" className="w-32 h-20 object-cover mb-3" style={{ borderRadius: 'var(--radius)' }} />
                   )}
                   <label className="btn-ghost-parchment inline-block cursor-pointer text-center" style={{ fontSize: '10px', padding: '10px 20px' }}>
                     {uploading ? 'PRZESYŁANIE...' : 'WYBIERZ PLIK'}
@@ -188,7 +188,7 @@ export default function DashboardBlog() {
                     <div className="flex flex-wrap gap-2 mb-3">
                       {(form.images || []).map((img, i) => (
                         <div key={i} className="relative">
-                          <img src={img.url} alt="" className="w-16 h-16 object-cover" />
+                          <img src={img.url} alt="" className="w-16 h-16 object-cover" style={{ borderRadius: 'var(--radius)' }} />
                           <button onClick={() => removePostImage(i)} className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: 'var(--brand)', border: 'none', cursor: 'pointer' }}>
                             <span style={{ color: '#fff', fontSize: '10px', lineHeight: 1 }}>×</span>
                           </button>
@@ -251,7 +251,7 @@ export default function DashboardBlog() {
           <div className="w-8 h-px animate-pulse" style={{ background: '#8B1A1A' }} />
         </div>
       ) : (
-        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
           {posts.length === 0 ? (
             <div className="py-20 text-center">
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
@@ -263,7 +263,7 @@ export default function DashboardBlog() {
              {/* Mobile: title first */}
              <div className="flex items-center gap-3 mb-3 md:mb-0 md:gap-6 min-w-0 flex-1">
                {post.cover_image_url && (
-                 <img src={post.cover_image_url} alt="" className="w-10 h-10 md:w-12 md:h-12 object-cover flex-shrink-0" />
+                 <img src={post.cover_image_url} alt="" className="w-10 h-10 md:w-12 md:h-12 object-cover flex-shrink-0" style={{ borderRadius: 'var(--radius)' }} />
                )}
                <div className="min-w-0 flex-1">
                  <p style={{ color: t.text, fontSize: '13px', md: '14px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</p>

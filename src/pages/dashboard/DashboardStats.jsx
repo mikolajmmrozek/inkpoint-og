@@ -138,7 +138,7 @@ export default function DashboardStats() {
   const display = { fontFamily: 'var(--font-display)', fontWeight: 400 };
 
   const KPICard = ({ label, value, sub }) => (
-    <div className="p-5" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+    <div className="p-5" style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
       <p style={{ ...display, fontSize: '2.2rem', color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>{value}</p>
       <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '6px' }}>{label}</p>
       {sub && <p style={{ ...mono, fontSize: '9px', color: t.fuchsia, marginTop: '4px' }}>{sub}</p>}
@@ -193,7 +193,7 @@ export default function DashboardStats() {
           </div>
 
           {/* Monthly chart */}
-          <div className="mb-8 p-6" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+          <div className="mb-8 p-6" style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
             <p style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '20px' }}>
               PRZYCHÓD MIESIĘCZNY {selectedYear} {selectedArtistId !== 'all' ? `— ${artistMap[selectedArtistId]?.name}` : '— WSZYSCY ARTYŚCI'}
             </p>
@@ -235,7 +235,7 @@ export default function DashboardStats() {
               )}
             </div>
 
-            <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+            <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
               {/* Table header */}
               <div className="grid grid-cols-12 px-4 py-2" style={{ borderBottom: `0.5px solid ${t.border}` }}>
                 <p className="col-span-3" style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{breakdownView === 'monthly' ? 'Miesiąc' : 'Dzień'}</p>
@@ -296,7 +296,7 @@ export default function DashboardStats() {
             <p style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>
               ZESTAWIENIE PER ARTYSTA — {selectedYear}
             </p>
-            <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+            <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
               {/* Table header */}
               <div className="hidden md:grid grid-cols-12 px-4 py-2" style={{ borderBottom: `0.5px solid ${t.border}` }}>
                 {['Artysta', 'Udział %', 'Sesje', 'Klienci', 'Łączny przychód', 'Zarobek artysty', 'Zarobek studia'].map((h, i) => (
@@ -327,7 +327,7 @@ export default function DashboardStats() {
                     <div key={s.artist.id} className="hidden md:grid grid-cols-12 px-4 py-4 items-center" style={{ borderBottom: i < artistStats.length - 1 ? `0.5px solid ${t.border}` : 'none' }}>
                       {/* Name */}
                       <div className="col-span-3 flex items-center gap-3">
-                        {s.artist.photo_url && <img src={s.artist.photo_url} alt="" className="w-8 h-8 object-cover flex-shrink-0" style={{ filter: 'brightness(0.8)' }} />}
+                        {s.artist.photo_url && <img src={s.artist.photo_url} alt="" className="w-8 h-8 object-cover flex-shrink-0" style={{ filter: 'brightness(0.8)', borderRadius: 'var(--radius)' }} />}
                         <div>
                           <p style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>{s.artist.name}</p>
                           <p style={{ ...mono, fontSize: '8px', color: t.muted, marginTop: '2px' }}>{(s.artist.specialty || []).slice(0, 2).join(', ')}</p>

@@ -222,7 +222,7 @@ export default function DashboardServices() {
                       padding: '7px 14px', cursor: 'pointer',
                     }}
                   >
-                    {a?.photo_url && <img src={a.photo_url} alt={a.name} style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover' }} />}
+                    {a?.photo_url && <img src={a.photo_url} alt={a.name} style={{ width: '18px', height: '18px', borderRadius: 'var(--radius)', objectFit: 'cover' }} />}
                     {a ? a.name.toUpperCase() : 'WSZYSCY'}
                   </button>
                 );
@@ -262,7 +262,7 @@ export default function DashboardServices() {
           <button onClick={openNew} className="mt-4 btn-oxblood" style={{ padding: '10px 24px' }}>DODAJ PIERWSZĄ USŁUGĘ</button>
         </div>
       ) : (
-        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
           {/* Header */}
           <div className="hidden md:grid grid-cols-12 px-4 py-2" style={{ borderBottom: `0.5px solid ${t.border}` }}>
             {[
@@ -315,9 +315,9 @@ export default function DashboardServices() {
               {/* Image + Name */}
               <div className="col-span-4 flex items-center gap-3">
                 {s.image_url ? (
-                  <img src={s.image_url} alt={s.name} style={{ width: '36px', height: '36px', objectFit: 'cover', flexShrink: 0 }} />
+                  <img src={s.image_url} alt={s.name} style={{ width: '36px', height: '36px', objectFit: 'cover', flexShrink: 0, borderRadius: 'var(--radius)' }} />
                 ) : (
-                  <div style={{ width: '36px', height: '36px', background: 'rgb(var(--brand-rgb) /0.1)', border: `0.5px solid rgb(var(--brand-rgb) /0.2)`, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ width: '36px', height: '36px', background: 'rgb(var(--brand-rgb) /0.1)', border: `0.5px solid rgb(var(--brand-rgb) /0.2)`, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--radius)' }}>
                     <span style={{ fontFamily: 'var(--font-display)', fontSize: '14px', color: 'var(--brand)' }}>{s.name?.[0]?.toUpperCase()}</span>
                   </div>
                 )}
@@ -391,7 +391,7 @@ export default function DashboardServices() {
       {/* Edit Modal */}
       {editing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={closeModal}>
-          <div className="w-full max-w-2xl max-h-screen overflow-y-auto" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '40px' }} onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-2xl max-h-screen overflow-y-auto" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '40px', borderRadius: 'var(--radius)' }} onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-8">
               <div>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
@@ -435,7 +435,7 @@ export default function DashboardServices() {
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>ZDJĘCIE</p>
                 {form.image_url && (
                   <div className="mb-3">
-                    <img src={form.image_url} alt="preview" style={{ width: '120px', height: '80px', objectFit: 'cover', border: `0.5px solid ${t.border}` }} />
+                    <img src={form.image_url} alt="preview" style={{ width: '120px', height: '80px', objectFit: 'cover', border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)' }} />
                   </div>
                 )}
                 <label className="flex items-center gap-2 cursor-pointer" style={{ border: `0.5px solid ${t.border}`, padding: '8px 14px', display: 'inline-flex', color: t.muted, fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
@@ -550,7 +550,7 @@ export default function DashboardServices() {
                           fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer',
                         }}
                       >
-                        {a.photo_url && <img src={a.photo_url} alt={a.name} style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover' }} />}
+                        {a.photo_url && <img src={a.photo_url} alt={a.name} style={{ width: '20px', height: '20px', borderRadius: 'var(--radius)', objectFit: 'cover' }} />}
                         {a.name}
                       </button>
                     );

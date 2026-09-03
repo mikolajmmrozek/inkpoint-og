@@ -183,7 +183,7 @@ export default function DashboardFeedback() {
 
       {/* Reviews tab */}
       {activeTab === 'reviews' && (
-        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
           {/* Sort controls */}
           <div className="flex items-center gap-1 px-4 py-2 flex-wrap" style={{ borderBottom: `0.5px solid ${t.border}` }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginRight: '6px' }}>SORTUJ:</span>
@@ -229,7 +229,7 @@ export default function DashboardFeedback() {
                     {fb.rating_value > 0 && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted }}>Cena/Jakość: {fb.rating_value}★</span>}
                   </div>
                   {fb.tattoo_photo_url && (
-                    <img src={fb.tattoo_photo_url} alt="" className="mt-3 w-20 h-20 object-cover" style={{ filter: 'brightness(0.8)' }} />
+                    <img src={fb.tattoo_photo_url} alt="" className="mt-3 w-20 h-20 object-cover" style={{ filter: 'brightness(0.8)', borderRadius: 'var(--radius)' }} />
                   )}
                 </div>
                 <div className="flex flex-col gap-2 flex-shrink-0">
@@ -265,7 +265,7 @@ export default function DashboardFeedback() {
 
       {/* Config tab */}
       {activeTab === 'config' && configForm && (
-        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '32px' }}>
+        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '32px', borderRadius: 'var(--radius)' }}>
           <div className="space-y-6">
             <div>
               <label style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Tekst wprowadzający</label>
