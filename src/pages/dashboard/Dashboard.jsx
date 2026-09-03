@@ -89,7 +89,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
                 to={nav.path}
                 className="flex items-center gap-3 px-4 py-3 whitespace-nowrap overflow-hidden transition-colors duration-200"
                 style={{
-                  background: active ? 'rgba(var(--brand-rgb), 0.08)' : 'transparent',
+                  background: active ? 'rgb(var(--brand-rgb) / 0.08)' : 'transparent',
                   borderLeft: active ? '2px solid var(--brand)' : '2px solid transparent',
                   color: active ? textColor : mutedColor,
                 }}

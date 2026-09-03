@@ -453,7 +453,7 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
       </div>
 
       {/* General form link section */}
-      <div className="mb-6 p-4" style={{ border: `0.5px solid ${t.border}`, background: 'rgba(var(--brand-rgb),0.03)' }}>
+      <div className="mb-6 p-4" style={{ border: `0.5px solid ${t.border}`, background: 'rgb(var(--brand-rgb) /0.03)' }}>
         <div className="flex items-center justify-between mb-3">
           <p style={{ ...mono, fontSize: '8px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
             LINK OGÓLNY DO ANKIETY
@@ -631,7 +631,7 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
                 return (
                   <div key={form.client_email || form.id}
                     className="flex items-center gap-3 px-4 py-3 cursor-pointer"
-                    style={{ borderBottom: i < groupedClients.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selected?.client_email === form.client_email ? 'rgba(var(--brand-rgb),0.05)' : group.some(f => !f.is_read) ? 'rgba(var(--brand-rgb),0.025)' : 'transparent', borderLeft: group.some(f => !f.is_read) ? '2px solid rgba(var(--brand-rgb),0.4)' : '2px solid transparent' }}
+                    style={{ borderBottom: i < groupedClients.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selected?.client_email === form.client_email ? 'rgb(var(--brand-rgb) /0.05)' : group.some(f => !f.is_read) ? 'rgb(var(--brand-rgb) /0.025)' : 'transparent', borderLeft: group.some(f => !f.is_read) ? '2px solid rgb(var(--brand-rgb) /0.4)' : '2px solid transparent' }}
                     onClick={() => handleSelectForm(form)}
                   >
                     <FileText size={13} color={form.is_minor ? 'var(--brand)' : t.fuchsia} />

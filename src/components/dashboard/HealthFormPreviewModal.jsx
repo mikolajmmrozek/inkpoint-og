@@ -138,11 +138,11 @@ export default function HealthFormPreviewModal({ bookingId, healthFormId, client
             <div>
               {/* Form selector — when client has multiple forms */}
               {formSelector && formSelector.forms && formSelector.forms.length > 1 && (
-                <div className="flex items-center gap-2 flex-wrap mb-5 pb-4" style={{ borderBottom: `0.5px solid ${t.border}`, background: 'rgba(var(--brand-rgb),0.03)', padding: '8px 12px' }}>
+                <div className="flex items-center gap-2 flex-wrap mb-5 pb-4" style={{ borderBottom: `0.5px solid ${t.border}`, background: 'rgb(var(--brand-rgb) /0.03)', padding: '8px 12px' }}>
                   <p style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginRight: '4px' }}>ANKIETY:</p>
                   {formSelector.forms.map(f => (
                     <button key={f.id} onClick={() => formSelector.onSelect(f)}
-                      style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.06em', padding: '3px 8px', border: `0.5px solid ${formSelector.selectedId === f.id ? t.fuchsia : t.border}`, color: formSelector.selectedId === f.id ? t.fuchsia : t.muted, background: formSelector.selectedId === f.id ? 'rgba(var(--brand-rgb),0.08)' : 'transparent', cursor: 'pointer' }}
+                      style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.06em', padding: '3px 8px', border: `0.5px solid ${formSelector.selectedId === f.id ? t.fuchsia : t.border}`, color: formSelector.selectedId === f.id ? t.fuchsia : t.muted, background: formSelector.selectedId === f.id ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', cursor: 'pointer' }}
                     >
                       {f.form_filled_date ? format(new Date(f.form_filled_date), 'dd.MM.yyyy') : f.id?.slice(-4)}{f.is_update_only ? ' ↻' : ''}
                     </button>
@@ -228,7 +228,7 @@ export default function HealthFormPreviewModal({ bookingId, healthFormId, client
               {/* Guardian */}
               {guardian && (
                 <div className="mt-6">
-                  <div className="p-4" style={{ border: '0.5px solid rgba(var(--brand-rgb),0.3)', background: 'rgba(var(--brand-rgb),0.04)' }}>
+                  <div className="p-4" style={{ border: '0.5px solid rgb(var(--brand-rgb) /0.3)', background: 'rgb(var(--brand-rgb) /0.04)' }}>
                     <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>— ZGODA OPIEKUNA</p>
                     <Row label="Opiekun" value={guardian.guardian_name} t={t} />
                     <Row label="Telefon opiekuna" value={guardian.guardian_phone} t={t} />

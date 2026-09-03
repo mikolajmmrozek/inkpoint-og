@@ -8,7 +8,7 @@ import HealthFormBadge from '@/components/booking/HealthFormBadge';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const STATUS_COLORS = {
-  pending: 'var(--brand)',
+  pending: '#FF007F',
   confirmed: '#16a34a',
   completed: '#2563eb',
   cancelled: '#9ca3af',
@@ -84,14 +84,14 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
               className="relative flex flex-col items-center py-2 transition-all duration-200"
               style={{
                 background: isSelected
-                  ? 'rgba(var(--brand-rgb),0.12)'
+                  ? 'rgb(var(--brand-rgb) /0.12)'
                   : isFullDayOff
-                    ? 'repeating-linear-gradient(45deg, rgba(var(--brand-rgb),0.10) 0px, rgba(var(--brand-rgb),0.10) 3px, rgba(var(--brand-rgb),0.03) 3px, rgba(var(--brand-rgb),0.03) 8px)'
+                    ? 'repeating-linear-gradient(45deg, rgb(var(--brand-rgb) /0.10) 0px, rgb(var(--brand-rgb) /0.10) 3px, rgb(var(--brand-rgb) /0.03) 3px, rgb(var(--brand-rgb) /0.03) 8px)'
                     : 'transparent',
                 border: isSelected
                   ? '0.5px solid var(--brand)'
                   : isOffDay
-                    ? '0.5px solid rgba(var(--brand-rgb),0.35)'
+                    ? '0.5px solid rgb(var(--brand-rgb) /0.35)'
                     : (searchQuery && dayBookings.length > 0) ? `0.5px solid var(--brand)` : isToday ? `0.5px solid ${t.border}` : '0.5px solid transparent',
                 cursor: 'pointer',
                 minHeight: '52px',
@@ -137,7 +137,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
           {selectedDayOff.length > 0 && (
             <div className="mb-3 space-y-1">
               {selectedDayOff.map((o, i) => (
-                <div key={i} className="flex items-center gap-2 px-3 py-2" style={{ border: `0.5px solid rgba(var(--brand-rgb),0.25)`, background: 'rgba(var(--brand-rgb),0.05)' }}>
+                <div key={i} className="flex items-center gap-2 px-3 py-2" style={{ border: `0.5px solid rgb(var(--brand-rgb) /0.25)`, background: 'rgb(var(--brand-rgb) /0.05)' }}>
                   <div style={{ width: '6px', height: '6px', borderRadius: '1px', background: 'var(--brand)', flexShrink: 0 }} />
                   <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.06em', flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     WOLNE · {o.artist.name}{o.timeRange ? ` · ${o.timeRange}` : ' · cały dzień'}{o.note ? ` · ${o.note}` : ''}
@@ -147,7 +147,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
             </div>
           )}
           {selectedDayBookings.length === 0 && !searchQuery.trim() ? (
-            <div className="py-8 text-center" style={{ border: `0.5px solid ${t.border}`, background: 'rgba(var(--brand-rgb),0.02)' }}>
+            <div className="py-8 text-center" style={{ border: `0.5px solid ${t.border}`, background: 'rgb(var(--brand-rgb) /0.02)' }}>
               <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em', marginBottom: '12px' }}>BRAK SESJI W TEN DZIEŃ</p>
               <button onClick={onAddBooking} className="btn-oxblood" style={{ fontSize: '10px', padding: '8px 20px' }}>
                 + DODAJ SESJĘ
@@ -158,7 +158,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
               {selectedDayBookings.map((b, i) => {
                 const artist = artists.find(a => a.id === b.artist_id);
                 return (
-                  <div key={b.id} onClick={() => onBookingClick?.(b)} style={{ borderBottom: i < selectedDayBookings.length - 1 ? `0.5px solid ${t.border}` : 'none', padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(var(--brand-rgb),0.04)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <div key={b.id} onClick={() => onBookingClick?.(b)} style={{ borderBottom: i < selectedDayBookings.length - 1 ? `0.5px solid ${t.border}` : 'none', padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onMouseEnter={e => e.currentTarget.style.background = 'rgb(var(--brand-rgb) /0.04)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                     {/* Time */}
                     <div className="flex-shrink-0 text-center" style={{ minWidth: isMobile ? '42px' : '52px' }}>
                       <p style={{ fontFamily: 'JetBrains Mono', fontSize: isMobile ? '13px' : '16px', color: STATUS_COLORS[b.status] || t.fuchsia, letterSpacing: '0.05em' }}>{b.session_time}</p>
@@ -172,7 +172,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
                       {artist?.photo_url ? (
                         <img src={artist.photo_url} alt={artist.name} loading="lazy" width={40} height={40} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${t.border}`, flexShrink: 0 }} />
                       ) : (artist || b.artist_name) ? (
-                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(var(--brand-rgb),0.1)', border: '0.5px solid rgba(var(--brand-rgb),0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgb(var(--brand-rgb) /0.1)', border: '0.5px solid rgb(var(--brand-rgb) /0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                           <span style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '15px', color: 'var(--brand)', letterSpacing: '0.05em' }}>
                             {(artist?.name || b.artist_name || '').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
                           </span>

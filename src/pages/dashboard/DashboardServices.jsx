@@ -190,7 +190,7 @@ export default function DashboardServices() {
                   style={{
                     border: `0.5px solid ${active ? 'var(--brand)' : t.border}`,
                     color: active ? 'var(--brand)' : t.muted,
-                    background: active ? 'rgba(var(--brand-rgb),0.08)' : 'transparent',
+                    background: active ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent',
                     fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase',
                     padding: '7px 14px', cursor: 'pointer',
                   }}
@@ -217,7 +217,7 @@ export default function DashboardServices() {
                     style={{
                       border: `0.5px solid ${active ? 'var(--brand)' : t.border}`,
                       color: active ? 'var(--brand)' : t.muted,
-                      background: active ? 'rgba(var(--brand-rgb),0.08)' : 'transparent',
+                      background: active ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent',
                       fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase',
                       padding: '7px 14px', cursor: 'pointer',
                     }}
@@ -317,7 +317,7 @@ export default function DashboardServices() {
                 {s.image_url ? (
                   <img src={s.image_url} alt={s.name} style={{ width: '36px', height: '36px', objectFit: 'cover', flexShrink: 0 }} />
                 ) : (
-                  <div style={{ width: '36px', height: '36px', background: 'rgba(var(--brand-rgb),0.1)', border: `0.5px solid rgba(var(--brand-rgb),0.2)`, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ width: '36px', height: '36px', background: 'rgb(var(--brand-rgb) /0.1)', border: `0.5px solid rgb(var(--brand-rgb) /0.2)`, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <span style={{ fontFamily: 'Bebas Neue', fontSize: '14px', color: 'var(--brand)' }}>{s.name?.[0]?.toUpperCase()}</span>
                   </div>
                 )}
@@ -325,7 +325,7 @@ export default function DashboardServices() {
                   <p style={{ color: t.text, fontSize: '14px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</p>
                   <div className="flex items-center gap-2 mt-1">
                     {s.category && (
-                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '1px 6px', border: '0.5px solid rgba(var(--brand-rgb),0.4)', color: 'var(--brand)' }}>
+                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '1px 6px', border: '0.5px solid rgb(var(--brand-rgb) /0.4)', color: 'var(--brand)' }}>
                         {s.category}
                       </span>
                     )}
@@ -546,7 +546,7 @@ export default function DashboardServices() {
                         style={{
                           border: `0.5px solid ${selected ? 'var(--brand)' : t.border}`,
                           color: selected ? 'var(--brand)' : t.muted,
-                          background: selected ? 'rgba(var(--brand-rgb),0.06)' : 'transparent',
+                          background: selected ? 'rgb(var(--brand-rgb) /0.06)' : 'transparent',
                           fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer',
                         }}
                       >

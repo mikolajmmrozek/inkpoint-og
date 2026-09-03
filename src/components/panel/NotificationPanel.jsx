@@ -18,8 +18,8 @@ export default function NotificationPanel({ open, onClose, userEmail, theme, not
   const notifEmail = getNotificationEmail(user?.role, userEmail);
 
   const t = theme === 'light'
-    ? { bg: '#FFFFFF', border: '#E5E5E5', text: '#111111', muted: 'rgba(0,0,0,0.5)', fuchsia: 'var(--brand)', unreadBg: 'rgba(var(--brand-rgb),0.03)' }
-    : { bg: '#0A0A0A', border: '#262626', text: '#F5F0EB', muted: 'rgba(245,240,235,0.5)', fuchsia: 'var(--brand)', unreadBg: 'rgba(var(--brand-rgb),0.04)' };
+    ? { bg: '#FFFFFF', border: '#E5E5E5', text: '#111111', muted: 'rgba(0,0,0,0.5)', fuchsia: 'var(--brand)', unreadBg: 'rgb(var(--brand-rgb) /0.03)' }
+    : { bg: '#0A0A0A', border: '#262626', text: '#F5F0EB', muted: 'rgba(245,240,235,0.5)', fuchsia: 'var(--brand)', unreadBg: 'rgb(var(--brand-rgb) /0.04)' };
 
   const load = async () => {
     if (!userEmail) return;

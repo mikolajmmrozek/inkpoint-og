@@ -75,7 +75,7 @@ export default function DashboardHome() {
   }, []);
 
   const STATUS_COLORS = {
-    pending: 'var(--brand)',
+    pending: '#FF007F',
     confirmed: '#16a34a',
     completed: '#2563eb',
     cancelled: '#9ca3af',
@@ -156,7 +156,7 @@ export default function DashboardHome() {
               WSZYSTKIE →
             </Link>
           </div>
-          <div style={{ border: '0.5px solid rgba(var(--brand-rgb),0.4)', background: t.cardBg }}>
+          <div style={{ border: '0.5px solid rgb(var(--brand-rgb) /0.4)', background: t.cardBg }}>
             {draftForms.map((f, i) => {
               const clientName = f.client_name || `${f.client_first_name || ''} ${f.client_last_name || ''}`.trim() || 'Brak nazwy';
               return (
@@ -268,7 +268,7 @@ export default function DashboardHome() {
                   </div>
 
                   {/* Sessions */}
-                  <div style={{ border: `0.5px solid ${isPast ? 'rgba(var(--brand-rgb),0.4)' : t.cardBorder}`, background: t.cardBg }}>
+                  <div style={{ border: `0.5px solid ${isPast ? 'rgb(var(--brand-rgb) /0.4)' : t.cardBorder}`, background: t.cardBg }}>
                     {items.map((b, i) => {
                       const artist = artists.find(a => a.id === b.artist_id);
                       return (
@@ -288,7 +288,7 @@ export default function DashboardHome() {
                               {artist?.photo_url ? (
                                 <img src={artist.photo_url} alt={artist.name} loading="lazy" width={40} height={40} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${t.border}`, flexShrink: 0 }} />
                               ) : (artist || b.artist_name) ? (
-                                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(var(--brand-rgb),0.1)', border: '0.5px solid rgba(var(--brand-rgb),0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgb(var(--brand-rgb) /0.1)', border: '0.5px solid rgb(var(--brand-rgb) /0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                   <span style={{ fontFamily: 'var(--font-display)', fontSize: '15px', color: 'var(--brand)', letterSpacing: '0.05em' }}>
                                     {(artist?.name || b.artist_name || '').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
                                   </span>

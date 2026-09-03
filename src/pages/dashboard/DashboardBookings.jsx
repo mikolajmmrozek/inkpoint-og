@@ -17,7 +17,7 @@ import HealthFormBadge from '@/components/booking/HealthFormBadge';
 import GroupedBookingList from '@/components/booking/GroupedBookingList';
 
 const STATUS_COLORS = {
-  pending: 'var(--brand)',
+  pending: '#FF007F',
   confirmed: '#16a34a',
   completed: '#2563eb',
   cancelled: '#9ca3af',
@@ -29,7 +29,7 @@ function BookingRow({ b, i, items, selected, setSelected, artists, t, healthStat
   return (
     <div
       className="flex items-center justify-between p-4 cursor-pointer transition-colors"
-      style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selected?.id === b.id ? 'rgba(var(--brand-rgb),0.05)' : 'transparent' }}
+      style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.border}` : 'none', background: selected?.id === b.id ? 'rgb(var(--brand-rgb) /0.05)' : 'transparent' }}
       onClick={() => setSelected(b)}
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -51,7 +51,7 @@ function BookingRow({ b, i, items, selected, setSelected, artists, t, healthStat
             return artist?.photo_url ? (
               <img src={artist.photo_url} alt={artist.name} loading="lazy" width={40} height={40} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${t.border}`, flexShrink: 0 }} />
             ) : (artist || b.artist_name) ? (
-              <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(var(--brand-rgb),0.1)', border: '0.5px solid rgba(var(--brand-rgb),0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgb(var(--brand-rgb) /0.1)', border: '0.5px solid rgb(var(--brand-rgb) /0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <span style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '15px', color: 'var(--brand)', letterSpacing: '0.05em' }}>
                   {(artist?.name || b.artist_name || '').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
                 </span>
@@ -149,9 +149,9 @@ function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPa
                 </span>
               </div>
               {date !== 'Brak daty' && (() => { const off = getOffForDate(date); return off.length > 0 ? (
-                <div className="mb-2" style={{ border: '0.5px solid rgba(var(--brand-rgb),0.25)', background: 'rgba(var(--brand-rgb),0.05)' }}>
+                <div className="mb-2" style={{ border: '0.5px solid rgb(var(--brand-rgb) /0.25)', background: 'rgb(var(--brand-rgb) /0.05)' }}>
                   {off.map((o, i) => (
-                    <div key={i} className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: i < off.length - 1 ? '0.5px solid rgba(var(--brand-rgb),0.2)' : 'none' }}>
+                    <div key={i} className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: i < off.length - 1 ? '0.5px solid rgb(var(--brand-rgb) /0.2)' : 'none' }}>
                       <div style={{ width: '6px', height: '6px', borderRadius: '1px', background: 'var(--brand)', flexShrink: 0 }} />
                       <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.06em', flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>WOLNE · {o.artist.name}{o.timeRange ? ` · ${o.timeRange}` : ' · cały dzień'}{o.note ? ` · ${o.note}` : ''}</span>
                     </div>
@@ -477,9 +477,9 @@ export default function DashboardBookings() {
                 key={mode}
                 onClick={() => { setViewMode(mode); if (mode !== 'day' && mode !== 'calendar' && mode !== 'pending') setSelectedDate(new Date()); }}
                 className="p-2.5 transition-all"
-                style={{ background: viewMode === mode ? 'rgba(var(--brand-rgb),0.1)' : 'transparent', color: viewMode === mode ? 'var(--brand)' : t.muted, border: 'none', cursor: 'pointer' }}
+                style={{ background: viewMode === mode ? 'rgb(var(--brand-rgb) /0.1)' : 'transparent', color: viewMode === mode ? 'var(--brand)' : t.muted, border: 'none', cursor: 'pointer' }}
                 title={mode === 'pending' ? 'Nowe rezerwacje (do weryfikacji)' : ''}
-                style={{ position: 'relative', background: viewMode === mode ? 'rgba(var(--brand-rgb),0.1)' : 'transparent', color: viewMode === mode ? 'var(--brand)' : t.muted, border: 'none', cursor: 'pointer' }}
+                style={{ position: 'relative', background: viewMode === mode ? 'rgb(var(--brand-rgb) /0.1)' : 'transparent', color: viewMode === mode ? 'var(--brand)' : t.muted, border: 'none', cursor: 'pointer' }}
               >
                 <Icon size={14} />
                 {mode === 'pending' && pendingCount > 0 && (
@@ -501,13 +501,13 @@ export default function DashboardBookings() {
             Wszyscy
           </button>
           {artists.map(a => (
-            <button key={a.id} onClick={() => toggleArtist(a.id)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilters.includes(a.id) ? t.fuchsia : t.border}`, color: artistFilters.includes(a.id) ? t.fuchsia : t.muted, background: artistFilters.includes(a.id) ? 'rgba(var(--brand-rgb),0.06)' : 'transparent', cursor: 'pointer', flexShrink: 0 }}>
+            <button key={a.id} onClick={() => toggleArtist(a.id)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilters.includes(a.id) ? t.fuchsia : t.border}`, color: artistFilters.includes(a.id) ? t.fuchsia : t.muted, background: artistFilters.includes(a.id) ? 'rgb(var(--brand-rgb) /0.06)' : 'transparent', cursor: 'pointer', flexShrink: 0 }}>
               {a.name}
             </button>
           ))}
           <div style={{ width: '0.5px', height: '16px', background: t.border, margin: '0 4px' }} />
           {(viewMode === 'pending' ? ['pending', 'cancelled'] : STATUS_OPTIONS).map(s => (
-            <button key={s} onClick={() => toggleStatus(s)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${statusFilters.includes(s) ? t.fuchsia : t.border}`, color: statusFilters.includes(s) ? t.fuchsia : t.muted, background: statusFilters.includes(s) ? 'rgba(var(--brand-rgb),0.06)' : 'transparent', cursor: 'pointer', flexShrink: 0 }}>
+            <button key={s} onClick={() => toggleStatus(s)} style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${statusFilters.includes(s) ? t.fuchsia : t.border}`, color: statusFilters.includes(s) ? t.fuchsia : t.muted, background: statusFilters.includes(s) ? 'rgb(var(--brand-rgb) /0.06)' : 'transparent', cursor: 'pointer', flexShrink: 0 }}>
               {s === 'all' ? 'Wszystkie' : s}
             </button>
           ))}
@@ -626,7 +626,7 @@ export default function DashboardBookings() {
                         style={{
                           flex: 1, padding: '10px', fontFamily: 'JetBrains Mono', fontSize: '9px',
                           letterSpacing: '0.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer',
-                          background: listTab === tab.key ? 'rgba(var(--brand-rgb),0.08)' : 'transparent',
+                          background: listTab === tab.key ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent',
                           color: listTab === tab.key ? 'var(--brand)' : t.muted,
                           borderBottom: listTab === tab.key ? '1px solid var(--brand)' : '1px solid transparent',
                         }}

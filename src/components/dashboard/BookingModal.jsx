@@ -490,7 +490,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
             <div className="mt-4">{label('Email')}<input {...inp('client_email', 'email')} /></div>
             <div className="mt-4">{label('Telefon')}<input {...inp('client_phone')} /></div>
             {selectedClient && (
-              <div className="mt-3 p-3" style={{ background: 'rgba(var(--brand-rgb),0.04)', border: '0.5px solid rgba(var(--brand-rgb),0.2)' }}>
+              <div className="mt-3 p-3" style={{ background: 'rgb(var(--brand-rgb) /0.04)', border: '0.5px solid rgb(var(--brand-rgb) /0.2)' }}>
                 <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
                   ISTNIEJĄCY KLIENT · {selectedClient.total_sessions || 0} SESJI
                 </p>
@@ -543,7 +543,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                     style={{
                       border: `0.5px solid ${selectedCategory === val ? 'var(--brand)' : t.border}`,
                       color: selectedCategory === val ? 'var(--brand)' : t.muted,
-                      background: selectedCategory === val ? 'rgba(var(--brand-rgb),0.08)' : 'transparent',
+                      background: selectedCategory === val ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent',
                       fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em',
                       padding: '6px 12px', cursor: 'pointer',
                     }}
@@ -608,7 +608,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                             handleService(s.id, s.name);
                           }}
                           style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 14px', background: 'none', border: 'none', borderBottom: `0.5px solid ${t.border}`, cursor: 'pointer', color: t.text, fontFamily: 'Inter, sans-serif', fontSize: '13px' }}
-                          onMouseEnter={e => e.currentTarget.style.background = 'rgba(var(--brand-rgb),0.06)'}
+                          onMouseEnter={e => e.currentTarget.style.background = 'rgb(var(--brand-rgb) /0.06)'}
                           onMouseLeave={e => e.currentTarget.style.background = 'none'}
                         >
                           <span>{s.name}</span>
@@ -621,7 +621,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
               })()}
             </div>
             {form.service_id && (
-              <div className="mt-3 px-3 py-2 flex items-center gap-2" style={{ background: 'rgba(var(--brand-rgb),0.05)', border: '0.5px solid rgba(var(--brand-rgb),0.2)' }}>
+              <div className="mt-3 px-3 py-2 flex items-center gap-2" style={{ background: 'rgb(var(--brand-rgb) /0.05)', border: '0.5px solid rgb(var(--brand-rgb) /0.2)' }}>
                 <Zap size={10} color="var(--brand)" />
                 <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em' }}>
                   USŁUGA WYBRANA · CENA I CZAS UZUPEŁNIONE AUTOMATYCZNIE

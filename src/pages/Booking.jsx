@@ -306,7 +306,7 @@ export default function Booking() {
                     className="w-full text-left p-6 transition-all duration-300"
                     style={{
                       border: data.artist_id === artist.id ? '0.5px solid var(--brand)' : '0.5px solid #262626',
-                      background: data.artist_id === artist.id ? 'rgba(var(--brand-rgb),0.08)' : 'transparent',
+                      background: data.artist_id === artist.id ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent',
                     }}
                   >
                     <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.4rem', fontWeight: 600, color: '#F5F0EB' }}>
@@ -342,7 +342,7 @@ export default function Booking() {
                       className="w-full text-left p-6 transition-all duration-300"
                       style={{
                         border: data.service_id === service.id ? '0.5px solid var(--brand)' : '0.5px solid #262626',
-                        background: data.service_id === service.id ? 'rgba(var(--brand-rgb),0.08)' : 'transparent',
+                        background: data.service_id === service.id ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent',
                       }}
                     >
                       <h3 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.2rem', fontWeight: 600, color: '#F5F0EB' }}>

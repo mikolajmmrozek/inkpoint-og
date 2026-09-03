@@ -204,7 +204,7 @@ export default function DashboardStats() {
                 <Tooltip
                   contentStyle={{ background: theme === 'light' ? '#fff' : '#111', border: `0.5px solid ${t.border}`, fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.text }}
                   formatter={(v) => [`${v} PLN`, 'Przychód']}
-                  cursor={{ fill: 'rgba(var(--brand-rgb),0.05)' }}
+                  cursor={{ fill: 'rgb(var(--brand-rgb) /0.05)' }}
                 />
                 <Bar dataKey="revenue" radius={0}>
                   {monthlyData.map((_, i) => (
@@ -273,14 +273,14 @@ export default function DashboardStats() {
                     </div>
                     {/* Sub-rows: individual bookings */}
                     {row.bookings.map(b => (
-                      <div key={b.id} className="grid grid-cols-12 px-4 py-1.5 items-center" style={{ background: 'rgba(var(--brand-rgb),0.02)', borderTop: `0.5px solid ${t.border}` }}>
+                      <div key={b.id} className="grid grid-cols-12 px-4 py-1.5 items-center" style={{ background: 'rgb(var(--brand-rgb) /0.02)', borderTop: `0.5px solid ${t.border}` }}>
                         <p className="col-span-3" style={{ ...mono, fontSize: '9px', color: t.muted, paddingLeft: '16px' }}>↳ {b.client_name}</p>
                         <p className="col-span-1" />
                         <p className="col-span-3" style={{ ...mono, fontSize: '9px', color: t.muted }}>{Number(b.estimated_price || 0).toLocaleString('pl-PL')} PLN · {b.artist_name}</p>
                         <p className="col-span-3" style={{ ...mono, fontSize: '9px', color: 'rgba(22,163,74,0.7)' }}>
                           {Math.round(Number(b.estimated_price || 0) * ((artistMap[b.artist_id]?.artist_cut_percent ?? 60) / 100)).toLocaleString('pl-PL')} PLN
                         </p>
-                        <p className="col-span-2" style={{ ...mono, fontSize: '9px', color: 'rgba(var(--brand-rgb),0.6)' }}>
+                        <p className="col-span-2" style={{ ...mono, fontSize: '9px', color: 'rgb(var(--brand-rgb) /0.6)' }}>
                           {(Number(b.estimated_price || 0) - Math.round(Number(b.estimated_price || 0) * ((artistMap[b.artist_id]?.artist_cut_percent ?? 60) / 100))).toLocaleString('pl-PL')} PLN
                         </p>
                       </div>
@@ -364,7 +364,7 @@ export default function DashboardStats() {
 
               {/* Totals row */}
               {selectedArtistId === 'all' && artistStats.length > 0 && (
-                <div className="grid grid-cols-12 px-4 py-4 items-center" style={{ borderTop: `0.5px solid ${t.border}`, background: 'rgba(var(--brand-rgb),0.04)' }}>
+                <div className="grid grid-cols-12 px-4 py-4 items-center" style={{ borderTop: `0.5px solid ${t.border}`, background: 'rgb(var(--brand-rgb) /0.04)' }}>
                   <p className="col-span-3" style={{ ...mono, fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase' }}>SUMA</p>
                   <div className="col-span-1" />
                   <p className="col-span-1" style={{ ...mono, fontSize: '11px', color: t.text, fontWeight: 600 }}>{totals.sessions}</p>

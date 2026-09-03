@@ -74,7 +74,7 @@ export default function HeroSlider() {
 
       {/* Gradient overlay */}
       <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(10,10,10,0.75) 0%, rgba(10,10,10,0.25) 60%, rgba(10,10,10,0.5) 100%)' }} />
-      <div className="absolute bottom-0 left-0 right-0 h-64" style={{ background: 'linear-gradient(to top, rgba(var(--brand-rgb),0.12) 0%, transparent 100%)' }} />
+      <div className="absolute bottom-0 left-0 right-0 h-64" style={{ background: 'linear-gradient(to top, rgb(var(--brand-rgb) /0.12) 0%, transparent 100%)' }} />
 
       {/* Content */}
       <div className="relative h-full flex flex-col justify-center px-8 md:px-16 lg:px-24 pb-24 md:pb-16">

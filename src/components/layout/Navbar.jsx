@@ -76,8 +76,8 @@ export default function Navbar() {
               style={{
                 height: '38px',
                 borderRadius: '0.25rem',
-                border: '0.5px solid rgba(var(--brand-rgb),0.4)',
-                background: 'rgba(var(--brand-rgb),0.04)',
+                border: '0.5px solid rgb(var(--brand-rgb) /0.4)',
+                background: 'rgb(var(--brand-rgb) /0.04)',
                 padding: '0 10px',
                 cursor: 'pointer'
               }}
@@ -86,13 +86,13 @@ export default function Navbar() {
                 const label = e.currentTarget.querySelector('.login-label');
                 const icon = e.currentTarget.querySelector('.login-icon');
                 if (label) {label.style.maxWidth = '120px';label.style.opacity = '1';label.style.marginLeft = '8px';}
-                if (icon) {e.currentTarget.style.borderColor = 'var(--brand)';e.currentTarget.style.background = 'rgba(var(--brand-rgb),0.08)';}
+                if (icon) {e.currentTarget.style.borderColor = 'var(--brand)';e.currentTarget.style.background = 'rgb(var(--brand-rgb) /0.08)';}
               }}
               onMouseLeave={(e) => {
                 const label = e.currentTarget.querySelector('.login-label');
                 if (label) {label.style.maxWidth = '0';label.style.opacity = '0';label.style.marginLeft = '0';}
-                e.currentTarget.style.borderColor = 'rgba(var(--brand-rgb),0.4)';
-                e.currentTarget.style.background = 'rgba(var(--brand-rgb),0.04)';
+                e.currentTarget.style.borderColor = 'rgb(var(--brand-rgb) /0.4)';
+                e.currentTarget.style.background = 'rgb(var(--brand-rgb) /0.04)';
               }}>
               
               <User size={17} className="login-icon" color="var(--brand)" style={{ flexShrink: 0 }} />
@@ -147,7 +147,7 @@ export default function Navbar() {
                 padding: '0 12px',
                 borderRadius: '0',
                 border: '0.5px solid var(--brand)',
-                background: 'rgba(var(--brand-rgb),0.06)',
+                background: 'rgb(var(--brand-rgb) /0.06)',
                 cursor: 'pointer',
                 fontFamily: 'JetBrains Mono, monospace',
                 fontSize: '10px',

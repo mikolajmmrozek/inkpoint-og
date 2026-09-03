@@ -308,7 +308,7 @@ export default function DashboardClients() {
             return (
               <div key={c.id}>
                 {/* Mobile row — minimal */}
-                <div className="md:hidden px-4 py-3 flex items-center justify-between cursor-pointer" style={{ borderBottom: `0.5px solid ${t.border}`, background: isExpanded ? 'rgba(var(--brand-rgb),0.03)' : 'transparent' }} onClick={() => setExpandedClient(isExpanded ? null : c.id)}>
+                <div className="md:hidden px-4 py-3 flex items-center justify-between cursor-pointer" style={{ borderBottom: `0.5px solid ${t.border}`, background: isExpanded ? 'rgb(var(--brand-rgb) /0.03)' : 'transparent' }} onClick={() => setExpandedClient(isExpanded ? null : c.id)}>
                   <div className="flex items-center gap-2">
                     <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{c.name}</p>
                     {isNewClient(c) && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: '#16a34a', border: '0.5px solid #16a34a', padding: '1px 4px' }}>NOWY</span>}{c.is_blocked && <span style={{ fontFamily: 'JetBrains Mono', fontSize: '7px', color: 'var(--brand)', border: '0.5px solid var(--brand)', padding: '1px 4px', marginLeft: '4px' }}>ZABLOKOWANY</span>}
@@ -329,7 +329,7 @@ export default function DashboardClients() {
                 {/* Desktop row — full grid */}
                 <div 
                   className="hidden md:grid grid-cols-12 px-4 py-3 items-center cursor-pointer"
-                  style={{ borderBottom: `0.5px solid ${t.border}`, background: isExpanded ? 'rgba(var(--brand-rgb),0.03)' : 'transparent' }}
+                  style={{ borderBottom: `0.5px solid ${t.border}`, background: isExpanded ? 'rgb(var(--brand-rgb) /0.03)' : 'transparent' }}
                   onClick={() => setExpandedClient(isExpanded ? null : c.id)}
                 >
                   <div className="col-span-4 flex items-center gap-2">
@@ -381,7 +381,7 @@ export default function DashboardClients() {
                 </div>
 
                 {isExpanded && (
-                  <div style={{ background: 'rgba(var(--brand-rgb),0.02)', borderBottom: `0.5px solid ${t.border}`, padding: '12px 20px' }}>
+                  <div style={{ background: 'rgb(var(--brand-rgb) /0.02)', borderBottom: `0.5px solid ${t.border}`, padding: '12px 20px' }}>
                     {sessions.length > 0 && (
                       <div className="mb-4">
                         <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>Sesje ({sessions.length})</p>

@@ -308,7 +308,7 @@ export default function DashboardFeedback() {
                             <option value="text">✏️ Tekst (mały)</option>
                           </select>
                           <label className="flex items-center gap-2 cursor-pointer">
-                            <div onClick={() => setConfigForm(f => ({ ...f, questions: f.questions.map((x, i) => i === idx ? { ...x, required: !x.required } : x) }))} style={{ width: '14px', height: '14px', border: `0.5px solid ${q.required ? t.fuchsia : t.border}`, background: q.required ? 'rgba(var(--brand-rgb),0.15)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                            <div onClick={() => setConfigForm(f => ({ ...f, questions: f.questions.map((x, i) => i === idx ? { ...x, required: !x.required } : x) }))} style={{ width: '14px', height: '14px', border: `0.5px solid ${q.required ? t.fuchsia : t.border}`, background: q.required ? 'rgb(var(--brand-rgb) /0.15)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                               {q.required && <Check size={9} color="var(--brand)" />}
                             </div>
                             <span style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, textTransform: 'uppercase' }}>Wymagane</span>

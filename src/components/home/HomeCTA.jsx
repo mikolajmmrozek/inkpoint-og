@@ -5,7 +5,7 @@ export default function HomeCTA() {
   return (
     <section className="py-16 px-8 md:px-16 relative overflow-hidden">
       {/* Fuchsia gradient background */}
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(var(--brand-rgb),0.08) 0%, rgba(10,10,10,0) 50%, rgba(var(--brand-rgb),0.05) 100%)' }} />
+      <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgb(var(--brand-rgb) /0.08) 0%, rgba(10,10,10,0) 50%, rgb(var(--brand-rgb) /0.05) 100%)' }} />
       <div className="absolute bottom-0 left-0 right-0 h-1" style={{ background: 'linear-gradient(to right, transparent, var(--brand), transparent)' }} />
       <div className="relative max-w-4xl mx-auto text-center">
         <motion.div

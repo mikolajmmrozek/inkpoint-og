@@ -6,7 +6,7 @@ import { base44 } from '@/api/base44Client';
 import HealthFormPreviewModal from './HealthFormPreviewModal';
 
 const STATUS_COLORS = {
-  pending: 'var(--brand)',
+  pending: '#FF007F',
   confirmed: '#16a34a',
   completed: '#2563eb',
   cancelled: '#9ca3af',
@@ -172,7 +172,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
           </button>
         </div>
       ) : (
-        <div className="mb-4 p-3" style={{ border: '0.5px solid rgba(var(--brand-rgb),0.3)', background: 'rgba(var(--brand-rgb),0.04)' }}>
+        <div className="mb-4 p-3" style={{ border: '0.5px solid rgb(var(--brand-rgb) /0.3)', background: 'rgb(var(--brand-rgb) /0.04)' }}>
           <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
             ANKIETA ZDROWOTNA — BRAK
           </p>
@@ -284,7 +284,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
             {clientHistory.slice(0, 5).map((s, i) => (
               <div key={s.id} className="px-3 py-2" style={{ borderBottom: i < Math.min(clientHistory.length, 5) - 1 ? `0.5px solid ${t.border}` : 'none' }}>
                 <div className="flex items-center justify-between gap-2">
-                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: { pending: 'var(--brand)', confirmed: '#16a34a', completed: '#2563eb', cancelled: '#9ca3af' }[s.status] || t.muted, flexShrink: 0 }} />
+                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: { pending: '#FF007F', confirmed: '#16a34a', completed: '#2563eb', cancelled: '#9ca3af' }[s.status] || t.muted, flexShrink: 0 }} />
                   <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, flex: 1 }}>{s.session_date || '—'}</p>
                   <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{s.status}</p>
                 </div>
@@ -444,7 +444,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
               a.click();
             document.body.removeChild(a);
           }}
-          style={{ position: 'fixed', bottom: '12px', right: '12px', background: 'rgba(var(--brand-rgb),0.9)', color: '#FFF', padding: '8px 12px', border: 'none', cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px', fontFamily: 'JetBrains Mono', fontSize: '10px', textTransform: 'uppercase', opacity: 0.7, transition: 'opacity 0.2s', zIndex: 71 }}
+          style={{ position: 'fixed', bottom: '12px', right: '12px', background: 'rgb(var(--brand-rgb) /0.9)', color: '#FFF', padding: '8px 12px', border: 'none', cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px', fontFamily: 'JetBrains Mono', fontSize: '10px', textTransform: 'uppercase', opacity: 0.7, transition: 'opacity 0.2s', zIndex: 71 }}
           onMouseEnter={e => e.target.style.opacity = '1'}
           onMouseLeave={e => e.target.style.opacity = '0.7'}
         >

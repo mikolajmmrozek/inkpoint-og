@@ -36,7 +36,7 @@ export default function StudioHero() {
         />
       ) : (
         /* Fallback: animated gradient */
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 20% 50%, rgba(var(--brand-rgb),0.08) 0%, #0A0A0A 60%)' }} />
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 20% 50%, rgb(var(--brand-rgb) /0.08) 0%, #0A0A0A 60%)' }} />
       )}
 
       {/* Overlays */}

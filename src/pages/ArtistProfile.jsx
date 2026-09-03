@@ -151,7 +151,7 @@ export default function ArtistProfile() {
                     className="w-full object-cover transition-all duration-700 group-hover:scale-105"
                     style={{ filter: 'brightness(0.75) contrast(1.1)', display: 'block' }}
                   />
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center" style={{ background: 'rgba(var(--brand-rgb),0.12)' }}>
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center" style={{ background: 'rgb(var(--brand-rgb) /0.12)' }}>
                     <ZoomIn size={20} color="#F5F0EB" />
                   </div>
                   {img.caption && (

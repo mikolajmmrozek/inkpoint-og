@@ -24,8 +24,8 @@ const INSTRUCTION_TYPES = [
 export default function DashboardDocuments() {
   const { theme } = useTheme();
   const t = theme === 'light'
-    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: 'var(--brand)', modalBg: '#FFFFFF', cardBg: 'rgba(var(--brand-rgb),0.02)' }
-    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: 'var(--brand)', modalBg: '#0A0A0A', cardBg: 'rgba(var(--brand-rgb),0.02)' };
+    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: 'var(--brand)', modalBg: '#FFFFFF', cardBg: 'rgb(var(--brand-rgb) /0.02)' }
+    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: 'var(--brand)', modalBg: '#0A0A0A', cardBg: 'rgb(var(--brand-rgb) /0.02)' };
 
   const [instructions, setInstructions] = useState([]);
   const [terms, setTerms] = useState(null);

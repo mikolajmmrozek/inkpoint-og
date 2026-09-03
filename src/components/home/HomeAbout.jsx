@@ -88,7 +88,7 @@ export default function HomeAbout() {
             />
           </div>
           {/* Fuchsia gradient overlay on image */}
-          <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(var(--brand-rgb),0.15) 0%, transparent 40%)' }} />
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to top, rgb(var(--brand-rgb) /0.15) 0%, transparent 40%)' }} />
           {/* Decorative offset box */}
           <div className="absolute -bottom-6 -left-6 w-24 h-24" style={{ border: '0.5px solid var(--brand)', zIndex: -1 }} />
           {/* Stats badge */}
