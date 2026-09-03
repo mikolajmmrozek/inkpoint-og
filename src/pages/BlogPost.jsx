@@ -129,7 +129,7 @@ export default function BlogPost() {
     <PageLayout>
       {/* Hero — cover image full width */}
       {post.cover_image_url && (
-        <div className="relative h-[65vh] overflow-hidden">
+        <div className="relative h-[65vh] overflow-hidden" style={{ borderRadius: 'var(--radius)' }}>
           <img
             src={post.cover_image_url}
             alt={post.title}
@@ -209,7 +209,7 @@ export default function BlogPost() {
                 {sidebarImages.length > 0 && (
                   <div className="space-y-3">
                     {sidebarImages.map((img, i) => (
-                      <div key={i} className="cursor-pointer overflow-hidden group" onClick={() => setLightboxIndex(i)}>
+                      <div key={i} className="cursor-pointer overflow-hidden group" style={{ borderRadius: 'var(--radius)' }} onClick={() => setLightboxIndex(i)}>
                         <img
                           src={img?.url || img}
                           alt={img?.caption || ''}

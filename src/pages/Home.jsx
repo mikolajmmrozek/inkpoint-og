@@ -92,7 +92,7 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ delay: i * 0.1, duration: 0.6 }}
               className="flex-shrink-0 overflow-hidden"
-              style={{ width: i % 3 === 0 ? '280px' : i % 3 === 1 ? '200px' : '240px', height: '360px' }}
+              style={{ width: i % 3 === 0 ? '280px' : i % 3 === 1 ? '200px' : '240px', height: '360px', borderRadius: 'var(--radius)' }}
             >
               <img
                 src={img}

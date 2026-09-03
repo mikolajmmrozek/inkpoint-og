@@ -142,7 +142,7 @@ export default function ArtistProfile() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.08, duration: 0.6 }}
-                  className="relative overflow-hidden group cursor-pointer"
+                  className="relative overflow-hidden group cursor-pointer" style={{ borderRadius: 'var(--radius)' }}
                   onClick={() => setLightboxIndex(i)}
                 >
                   <img

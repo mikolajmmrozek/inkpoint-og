@@ -93,7 +93,7 @@ export default function Blog() {
                 className="mb-16"
               >
                 <Link to={`/blog/${featured.slug || featured.id}`} className="group grid grid-cols-1 md:grid-cols-2 gap-0">
-                  <div className="relative overflow-hidden aspect-[4/3] md:aspect-auto md:h-full min-w-0">
+                  <div className="relative overflow-hidden aspect-[4/3] md:aspect-auto md:h-full min-w-0" style={{ borderRadius: 'var(--radius)' }}>
                     {resolveCover(featured) ? (
                       <img
                         src={resolveCover(featured)}
@@ -149,7 +149,7 @@ export default function Blog() {
                   transition={{ delay: i * 0.1, duration: 0.6 }}
                 >
                   <Link to={`/blog/${post.slug || post.id}`} className="group block">
-                    <div className="relative overflow-hidden aspect-[4/3] mb-6">
+                    <div className="relative overflow-hidden aspect-[4/3] mb-6" style={{ borderRadius: 'var(--radius)' }}>
                       {resolveCover(post) ? (
                         <img
                           src={resolveCover(post)}

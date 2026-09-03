@@ -100,7 +100,7 @@ export default function Artists() {
                 transition={{ delay: i * 0.15, duration: 0.7 }}
               >
                 <Link to={`/artists/${artist.slug || artist.id}`} className="group block">
-                  <div className="relative overflow-hidden aspect-[3/4]">
+                  <div className="relative overflow-hidden aspect-[3/4]" style={{ borderRadius: 'var(--radius)' }}>
                     <img
                       src={artist.photo_url || 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&q=80'}
                       alt={artist.name}
