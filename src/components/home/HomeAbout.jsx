@@ -79,7 +79,7 @@ export default function HomeAbout() {
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
           className="relative"
         >
-          <div className="relative aspect-[3/4] overflow-hidden">
+          <div className="relative aspect-[3/4] overflow-hidden" style={{ borderRadius: 'var(--radius)' }}>
             <img
               src={data.about_image_url}
               alt="Tattoo process"
