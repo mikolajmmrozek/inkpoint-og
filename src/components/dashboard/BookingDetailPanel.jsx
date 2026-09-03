@@ -6,7 +6,7 @@ import { base44 } from '@/api/base44Client';
 import HealthFormPreviewModal from './HealthFormPreviewModal';
 
 const STATUS_COLORS = {
-  pending: '#FF007F',
+  pending: 'var(--brand)',
   confirmed: '#16a34a',
   completed: '#2563eb',
   cancelled: '#9ca3af',
@@ -284,7 +284,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
             {clientHistory.slice(0, 5).map((s, i) => (
               <div key={s.id} className="px-3 py-2" style={{ borderBottom: i < Math.min(clientHistory.length, 5) - 1 ? `0.5px solid ${t.border}` : 'none' }}>
                 <div className="flex items-center justify-between gap-2">
-                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: { pending: '#FF007F', confirmed: '#16a34a', completed: '#2563eb', cancelled: '#9ca3af' }[s.status] || t.muted, flexShrink: 0 }} />
+                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: { pending: 'var(--brand)', confirmed: '#16a34a', completed: '#2563eb', cancelled: '#9ca3af' }[s.status] || t.muted, flexShrink: 0 }} />
                   <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, flex: 1 }}>{s.session_date || '—'}</p>
                   <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{s.status}</p>
                 </div>

@@ -17,7 +17,7 @@ import HealthFormBadge from '@/components/booking/HealthFormBadge';
 import GroupedBookingList from '@/components/booking/GroupedBookingList';
 
 const STATUS_COLORS = {
-  pending: '#FF007F',
+  pending: 'var(--brand)',
   confirmed: '#16a34a',
   completed: '#2563eb',
   cancelled: '#9ca3af',
