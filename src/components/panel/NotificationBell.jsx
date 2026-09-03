@@ -43,11 +43,11 @@ export default function NotificationBell({ userEmail, theme, onClick, size = 18,
           <span style={{
             position: 'absolute', top: '-2px', right: '-4px',
             minWidth: '14px', height: '14px',
-            background: '#FF007F', color: '#F5F0EB',
+            background: 'var(--brand)', color: '#F5F0EB',
             fontSize: '8px', fontWeight: 600,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             borderRadius: '7px', padding: '0 3px',
-            fontFamily: 'JetBrains Mono',
+            fontFamily: 'var(--font-mono)',
           }}>
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
@@ -55,7 +55,7 @@ export default function NotificationBell({ userEmail, theme, onClick, size = 18,
       </div>
       {showLabel && (
         <span style={{
-          fontFamily: 'JetBrains Mono', fontSize: '7px',
+          fontFamily: 'var(--font-mono)', fontSize: '7px',
           letterSpacing: '0.1em', textTransform: 'uppercase',
           color: inactiveColor,
         }}>

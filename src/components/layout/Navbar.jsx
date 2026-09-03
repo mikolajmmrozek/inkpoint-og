@@ -44,10 +44,10 @@ export default function Navbar() {
         <div className="px-8 md:px-16 flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex flex-col leading-none">
-            <span className="font-display text-2xl font-700 text-parchment tracking-tight" style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, color: '#F5F0EB', letterSpacing: '0.08em', fontSize: '2.1rem' }}>
+            <span className="font-display text-2xl font-700 text-parchment tracking-tight" style={{ fontFamily: 'var(--font-display)', fontWeight: 400, color: '#F5F0EB', letterSpacing: '0.08em', fontSize: '2.1rem' }}>
               ROMANS
             </span>
-            <span className="text-micro text-oxblood" style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.2em', color: '#FF007F' }}>
+            <span className="text-micro text-oxblood" style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.2em', color: 'var(--brand)' }}>
               TATTOO
             </span>
           </Link>
@@ -61,7 +61,7 @@ export default function Navbar() {
               className={`text-micro transition-all duration-300 hover:text-oxblood ${
               location.pathname === link.href ? 'text-oxblood' : 'text-parchment/60'}`
               }
-              style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', letterSpacing: '0.12em', textTransform: 'uppercase', color: location.pathname === link.href ? '#FF007F' : 'rgba(245,240,235,0.85)' }}>
+              style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', letterSpacing: '0.12em', textTransform: 'uppercase', color: location.pathname === link.href ? 'var(--brand)' : 'rgba(245,240,235,0.85)' }}>
               
                 {link.label}
               </Link>
@@ -86,7 +86,7 @@ export default function Navbar() {
                 const label = e.currentTarget.querySelector('.login-label');
                 const icon = e.currentTarget.querySelector('.login-icon');
                 if (label) {label.style.maxWidth = '120px';label.style.opacity = '1';label.style.marginLeft = '8px';}
-                if (icon) {e.currentTarget.style.borderColor = '#FF007F';e.currentTarget.style.background = 'rgba(255,0,127,0.08)';}
+                if (icon) {e.currentTarget.style.borderColor = 'var(--brand)';e.currentTarget.style.background = 'rgba(255,0,127,0.08)';}
               }}
               onMouseLeave={(e) => {
                 const label = e.currentTarget.querySelector('.login-label');
@@ -154,7 +154,7 @@ export default function Navbar() {
                 fontWeight: 500,
                 letterSpacing: '0.08em',
                 textTransform: 'uppercase',
-                color: '#FF007F'
+                color: 'var(--brand)'
               }}>
               <User size={15} color="#FF007F" />
               {isAuthenticated ? 'MOJE KONTO' : 'ZALOGUJ SIĘ'}
@@ -168,7 +168,7 @@ export default function Navbar() {
               <Link
               to={link.href}
               className="block font-display text-6xl font-300 text-parchment hover:text-oxblood transition-colors duration-300"
-              style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: 'clamp(3rem, 10vw, 6rem)', color: '#F5F0EB', fontWeight: 400, letterSpacing: '0.05em' }}>
+              style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(3rem, 10vw, 6rem)', color: '#F5F0EB', fontWeight: 400, letterSpacing: '0.05em' }}>
               
                 {link.label}
               </Link>

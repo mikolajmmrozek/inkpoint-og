@@ -90,6 +90,31 @@
     },
     "app_description": {
       "type": "string"
+    },
+    "theme_mode": {
+      "type": "string",
+      "enum": [
+        "dark",
+        "light"
+      ],
+      "default": "dark",
+      "description": "Motyw strony publicznej: dark = ciemny, light = jasny"
+    },
+    "primary_color": {
+      "type": "string",
+      "default": "#FF007F",
+      "description": "Kolor wiod\u0105cy (hex)"
+    },
+    "font_package": {
+      "type": "string",
+      "enum": [
+        "original",
+        "classic",
+        "elegant",
+        "modern"
+      ],
+      "default": "original",
+      "description": "Pakiet czcionek: original, classic, elegant, modern"
     }
   },
   "required": [

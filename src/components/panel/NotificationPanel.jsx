@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 
 const CATEGORY_ICONS = { booking: Calendar, message: MessageSquare, system: Info, health_form: FileText };
-const CATEGORY_COLORS = { booking: '#FF007F', message: '#3b82f6', system: '#9ca3af', health_form: '#f59e0b' };
+const CATEGORY_COLORS = { booking: 'var(--brand)', message: '#3b82f6', system: '#9ca3af', health_form: '#f59e0b' };
 
 export default function NotificationPanel({ open, onClose, userEmail, theme, notificationsPath = '/dashboard/notifications' }) {
   const navigate = useNavigate();
@@ -18,8 +18,8 @@ export default function NotificationPanel({ open, onClose, userEmail, theme, not
   const notifEmail = getNotificationEmail(user?.role, userEmail);
 
   const t = theme === 'light'
-    ? { bg: '#FFFFFF', border: '#E5E5E5', text: '#111111', muted: 'rgba(0,0,0,0.5)', fuchsia: '#FF007F', unreadBg: 'rgba(255,0,127,0.03)' }
-    : { bg: '#0A0A0A', border: '#262626', text: '#F5F0EB', muted: 'rgba(245,240,235,0.5)', fuchsia: '#FF007F', unreadBg: 'rgba(255,0,127,0.04)' };
+    ? { bg: '#FFFFFF', border: '#E5E5E5', text: '#111111', muted: 'rgba(0,0,0,0.5)', fuchsia: 'var(--brand)', unreadBg: 'rgba(255,0,127,0.03)' }
+    : { bg: '#0A0A0A', border: '#262626', text: '#F5F0EB', muted: 'rgba(245,240,235,0.5)', fuchsia: 'var(--brand)', unreadBg: 'rgba(255,0,127,0.04)' };
 
   const load = async () => {
     if (!userEmail) return;
@@ -87,7 +87,7 @@ export default function NotificationPanel({ open, onClose, userEmail, theme, not
         {/* Header */}
         <div className="flex items-center justify-between p-6" style={{ borderBottom: `0.5px solid ${t.border}` }}>
           <div>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>
               POWIADOMIENIA
             </p>
             <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '1.8rem', fontWeight: 400, color: t.text, letterSpacing: '0.04em', lineHeight: 1 }}>
@@ -97,7 +97,7 @@ export default function NotificationPanel({ open, onClose, userEmail, theme, not
           <div className="flex items-center gap-2">
             <button
               onClick={() => { onClose(); navigate(notificationsPath); }}
-              style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', border: `0.5px solid ${t.fuchsia}`, padding: '6px 12px', cursor: 'pointer' }}
+              style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', border: `0.5px solid ${t.fuchsia}`, padding: '6px 12px', cursor: 'pointer' }}
             >
               Pokaż wszystkie
             </button>
@@ -110,7 +110,7 @@ export default function NotificationPanel({ open, onClose, userEmail, theme, not
         {/* Mark all read */}
         {notifications.some(n => !n.is_read) && (
           <div className="px-6 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-            <button onClick={markAllRead} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer' }}>
+            <button onClick={markAllRead} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer' }}>
               <CheckCheck size={12} /> Oznacz wszystkie jako przeczytane
             </button>
           </div>
@@ -149,7 +149,7 @@ export default function NotificationPanel({ open, onClose, userEmail, theme, not
                        <p style={{ fontSize: '12px', color: t.muted, lineHeight: 1.5, marginBottom: '4px' }}>
                          {notif.message}
                        </p>
-                       <p style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', color: t.muted, letterSpacing: '0.05em' }}>
+                       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.05em' }}>
                          {format(new Date(notif.created_date), 'dd.MM.yyyy HH:mm')}
                        </p>
                      </div>
@@ -168,7 +168,7 @@ export default function NotificationPanel({ open, onClose, userEmail, theme, not
                        onClose();
                        navigate(notificationsPath);
                      }}
-                    style={{ width: '100%', padding: '10px', fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', border: `0.5px solid ${t.fuchsia}`, cursor: 'pointer' }}
+                    style={{ width: '100%', padding: '10px', fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', border: `0.5px solid ${t.fuchsia}`, cursor: 'pointer' }}
                   >
                     Pokaż wszystkie
                   </button>

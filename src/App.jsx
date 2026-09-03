@@ -4,6 +4,7 @@ import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
+import { ThemeProvider } from '@/lib/ThemeProvider';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
 // Pages
@@ -76,7 +77,7 @@ const AuthenticatedApp = () => {
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center" style={{ background: '#0A0A0A' }}>
-        <div className="w-8 h-px animate-pulse" style={{ background: '#8B1A1A' }} />
+        <div className="w-8 h-px animate-pulse" style={{ background: 'var(--brand)' }} />
       </div>
     );
   }
@@ -154,6 +155,7 @@ const AuthenticatedApp = () => {
 function App() {
   return (
     <AuthProvider>
+      <ThemeProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <ScrollToTop />
@@ -161,6 +163,7 @@ function App() {
         </Router>
         <Toaster />
       </QueryClientProvider>
+      </ThemeProvider>
     </AuthProvider>
   );
 }

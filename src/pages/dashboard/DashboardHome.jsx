@@ -75,15 +75,15 @@ export default function DashboardHome() {
   }, []);
 
   const STATUS_COLORS = {
-    pending: '#FF007F',
+    pending: 'var(--brand)',
     confirmed: '#16a34a',
     completed: '#2563eb',
     cancelled: '#9ca3af',
   };
 
   const t = theme === 'light'
-    ? { label: '#FF007F', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.62)', fuchsia: '#FF007F', border: '#E5E5E5', cardBg: '#FFFFFF', cardBorder: '#E5E5E5', value: '#111111', rowHover: 'rgba(0,0,0,0.03)', rowBorder: '#E5E5E5', pageBg: '#D5D5D5' }
-    : { label: '#FF007F', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.72)', fuchsia: '#FF007F', border: '#262626', cardBg: 'rgba(255,255,255,0.06)', cardBorder: '#262626', value: '#F5F0EB', rowHover: 'rgba(255,255,255,0.05)', rowBorder: '#262626', pageBg: '#0A0A0A' };
+    ? { label: 'var(--brand)', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.62)', fuchsia: 'var(--brand)', border: '#E5E5E5', cardBg: '#FFFFFF', cardBorder: '#E5E5E5', value: '#111111', rowHover: 'rgba(0,0,0,0.03)', rowBorder: '#E5E5E5', pageBg: '#D5D5D5' }
+    : { label: 'var(--brand)', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.72)', fuchsia: 'var(--brand)', border: '#262626', cardBg: 'rgba(255,255,255,0.06)', cardBorder: '#262626', value: '#F5F0EB', rowHover: 'rgba(255,255,255,0.05)', rowBorder: '#262626', pageBg: '#0A0A0A' };
 
   const KPI = [
     { label: 'Wszystkie rezerwacje', value: stats.bookings, icon: Calendar, link: '/dashboard/bookings' },
@@ -130,10 +130,10 @@ export default function DashboardHome() {
                   <Icon size={16} color="#FF007F" />
                   <TrendingUp size={12} color={t.muted} />
                 </div>
-                <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.value, lineHeight: 1, letterSpacing: '0.04em' }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 400, color: t.value, lineHeight: 1, letterSpacing: '0.04em' }}>
                   {loading ? '—' : formatCompact(kpi.value)}
                 </p>
-                <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px' }}>
                   {kpi.label}
                 </p>
               </Link>
@@ -148,15 +148,15 @@ export default function DashboardHome() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <ClipboardList size={14} color="#FF007F" />
-              <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#FF007F', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                 NIEDOKOŃCZONE ANKIETY ({draftForms.length})
               </p>
             </div>
-            <Link to="/dashboard/health-forms" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            <Link to="/dashboard/health-forms" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
               WSZYSTKIE →
             </Link>
           </div>
-          <div style={{ border: '0.5px solid rgba(255,0,127,0.4)', background: t.cardBg }}>
+          <div style={{ border: '0.5px solid rgba(var(--brand-rgb),0.4)', background: t.cardBg }}>
             {draftForms.map((f, i) => {
               const clientName = f.client_name || `${f.client_first_name || ''} ${f.client_last_name || ''}`.trim() || 'Brak nazwy';
               return (
@@ -170,12 +170,12 @@ export default function DashboardHome() {
                 >
                   <div>
                     <p style={{ color: t.value, fontSize: '14px', fontWeight: 500 }}>{clientName}</p>
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', marginTop: '2px' }}>
                       {f.client_email || ''}{f.procedure_type ? ` · ${f.procedure_type}` : ''}
                       {f.created_date ? ` · ${new Date(f.created_date).toLocaleDateString('pl-PL')}` : ''}
                     </p>
                   </div>
-                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: '0.5px solid #FF007F', color: '#FF007F', flexShrink: 0 }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: '0.5px solid #FF007F', color: 'var(--brand)', flexShrink: 0 }}>
                     DRAFT
                   </span>
                 </button>
@@ -190,22 +190,22 @@ export default function DashboardHome() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <AlertCircle size={14} color="#FF007F" />
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
               NADCHODZĄCE SESJE
             </p>
           </div>
-          <Link to="/dashboard/bookings" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+          <Link to="/dashboard/bookings" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             WSZYSTKIE →
           </Link>
         </div>
 
         {loading ? (
           <div className="p-8 text-center" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
-            <div className="w-8 h-px mx-auto animate-pulse" style={{ background: '#FF007F' }} />
+            <div className="w-8 h-px mx-auto animate-pulse" style={{ background: 'var(--brand)' }} />
           </div>
         ) : pendingByDay.length === 0 ? (
           <div className="p-8 text-center" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
               ✓ BRAK SESJI DO POTWIERDZENIA
             </p>
           </div>
@@ -224,16 +224,16 @@ export default function DashboardHome() {
                     {/* Day header */}
                     <div className="flex items-center gap-3 mb-2">
                       <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#16a34a', flexShrink: 0 }} />
-                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#16a34a' }}>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#16a34a' }}>
                         DZISIAJ — {todayLabel}
                       </p>
                       <div style={{ flex: 1, height: '0.5px', background: t.cardBorder }} />
-                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: t.muted }}>0 sesji</span>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.muted }}>0 sesji</span>
                     </div>
                     {/* No sessions message */}
                     <div className="py-3 px-4 flex items-center justify-center gap-2" style={{ border: `0.5px solid #16a34a`, background: t.cardBg }}>
                       <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#16a34a', flexShrink: 0 }} />
-                      <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
                         BRAK SESJI DZIŚ
                       </p>
                     </div>
@@ -258,38 +258,38 @@ export default function DashboardHome() {
                   {/* Day header */}
                   <div className="flex items-center gap-3 mb-2">
                     <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: isPast ? '#9ca3af' : isToday ? '#16a34a' : '#16a34a', flexShrink: 0 }} />
-                    <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: isPast ? t.muted : isToday ? '#16a34a' : t.muted }}>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: isPast ? t.muted : isToday ? '#16a34a' : t.muted }}>
                       {isToday ? `DZISIAJ — ${dayLabel}` : isPast ? `PRZETERMINOWANE — ${dayLabel}` : dayLabel}
                     </p>
                     <div style={{ flex: 1, height: '0.5px', background: t.cardBorder }} />
-                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: t.muted }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.muted }}>
                       {items.length} {pluralSesji(items.length)}
                     </span>
                   </div>
 
                   {/* Sessions */}
-                  <div style={{ border: `0.5px solid ${isPast ? 'rgba(255,0,127,0.4)' : t.cardBorder}`, background: t.cardBg }}>
+                  <div style={{ border: `0.5px solid ${isPast ? 'rgba(var(--brand-rgb),0.4)' : t.cardBorder}`, background: t.cardBg }}>
                     {items.map((b, i) => {
                       const artist = artists.find(a => a.id === b.artist_id);
                       return (
                         <div key={b.id} onClick={() => setSelectedBooking(b)} className="flex items-center justify-between p-4 cursor-pointer transition-colors" style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none', background: 'transparent' }} onMouseEnter={e => e.currentTarget.style.background = t.rowHover} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                           <div className="flex items-center gap-3 min-w-0 flex-1">
                             <div className="flex-shrink-0 text-center" style={{ minWidth: isMobile ? '42px' : '52px' }}>
-                              <p style={{ fontFamily: 'JetBrains Mono', fontSize: isMobile ? '13px' : '16px', color: STATUS_COLORS[b.status] || t.fuchsia, letterSpacing: '0.05em' }}>{b.session_time}</p>
+                              <p style={{ fontFamily: 'var(--font-mono)', fontSize: isMobile ? '13px' : '16px', color: STATUS_COLORS[b.status] || t.fuchsia, letterSpacing: '0.05em' }}>{b.session_time}</p>
                               {b.session_end_time ? (
-                                <p style={{ fontFamily: 'JetBrains Mono', fontSize: isMobile ? '9px' : '11px', color: t.muted }}>→ {b.session_end_time}</p>
+                                <p style={{ fontFamily: 'var(--font-mono)', fontSize: isMobile ? '9px' : '11px', color: t.muted }}>→ {b.session_end_time}</p>
                               ) : b.session_time && b.session_duration ? (() => {
                                 const [h, m] = b.session_time.split(':').map(Number);
                                 const endTotal = h * 60 + m + b.session_duration;
-                                return <p style={{ fontFamily: 'JetBrains Mono', fontSize: isMobile ? '9px' : '11px', color: t.muted }}>→ {String(Math.floor(endTotal / 60)).padStart(2, '0')}:{String(endTotal % 60).padStart(2, '0')}</p>;
+                                return <p style={{ fontFamily: 'var(--font-mono)', fontSize: isMobile ? '9px' : '11px', color: t.muted }}>→ {String(Math.floor(endTotal / 60)).padStart(2, '0')}:{String(endTotal % 60).padStart(2, '0')}</p>;
                               })() : null}
                             </div>
                             <div className="flex items-center gap-3 min-w-0 flex-1">
                               {artist?.photo_url ? (
                                 <img src={artist.photo_url} alt={artist.name} loading="lazy" width={40} height={40} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: `1px solid ${t.border}`, flexShrink: 0 }} />
                               ) : (artist || b.artist_name) ? (
-                                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(255,0,127,0.1)', border: '0.5px solid rgba(255,0,127,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                  <span style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '15px', color: '#FF007F', letterSpacing: '0.05em' }}>
+                                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(var(--brand-rgb),0.1)', border: '0.5px solid rgba(var(--brand-rgb),0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '15px', color: 'var(--brand)', letterSpacing: '0.05em' }}>
                                     {(artist?.name || b.artist_name || '').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
                                   </span>
                                 </div>
@@ -309,17 +309,17 @@ export default function DashboardHome() {
                                   <p style={{ color: t.text, fontSize: '15px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.client_name}</p>
                                 )}
                                 {!isMobile && (
-                                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                     {b.artist_name}{b.tattoo_placement ? ` · ${b.tattoo_placement}` : ''}
                                   </p>
                                 )}
                                 {isMobile && b.tattoo_placement && (
-                                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                     {b.tattoo_placement}
                                   </p>
                                 )}
                                 {b.service_name && (
-                                  <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.08em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', opacity: 0.8 }}>
+                                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', opacity: 0.8 }}>
                                     {b.service_name}
                                   </p>
                                 )}
@@ -330,9 +330,9 @@ export default function DashboardHome() {
                             <div className="flex items-center gap-2 flex-shrink-0">
                               <div className="flex flex-col items-end gap-1">
                                 {b.service_id && (b.estimated_price === 0 || b.estimated_price === null || b.estimated_price === undefined || b.estimated_price === '') ? (
-                                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted, letterSpacing: '0.04em' }}>BEZPŁATNA</span>
+                                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: t.muted, letterSpacing: '0.04em' }}>BEZPŁATNA</span>
                                 ) : b.estimated_price > 0 ? (
-                                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: t.muted }}>{b.estimated_price} PLN</span>
+                                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: t.muted }}>{b.estimated_price} PLN</span>
                                 ) : null}
                                 <HealthFormBadge status={resolveBookingHealthStatus(b, healthStatusMap)} fontSize="8px" style={{ padding: '1px 4px' }} />
                               </div>
@@ -342,9 +342,9 @@ export default function DashboardHome() {
                             <div className="flex items-center gap-3 flex-shrink-0">
                               <HealthFormBadge status={resolveBookingHealthStatus(b, healthStatusMap)} fontSize="10px" style={{ padding: '3px 7px' }} />
                               {b.service_id && (b.estimated_price === 0 || b.estimated_price === null || b.estimated_price === undefined || b.estimated_price === '') ? (
-                                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', color: t.muted, letterSpacing: '0.06em' }}>BEZPŁATNA</span>
+                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '14px', color: t.muted, letterSpacing: '0.06em' }}>BEZPŁATNA</span>
                               ) : b.estimated_price > 0 ? (
-                                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', color: t.muted }}>{b.estimated_price} PLN</span>
+                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '14px', color: t.muted }}>{b.estimated_price} PLN</span>
                               ) : null}
                               <div style={{ width: '11px', height: '11px', borderRadius: '50%', background: STATUS_COLORS[b.status] || t.muted }} />
                             </div>
@@ -405,8 +405,8 @@ export default function DashboardHome() {
             onClick: () => window.open(`/health-form?edit_form_id=${previewForm.healthFormId}`, '_blank'),
           } : null}
           t={theme === 'light'
-            ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F' }
-            : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F' }
+            ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: 'var(--brand)' }
+            : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: 'var(--brand)' }
           }
         />
       )}

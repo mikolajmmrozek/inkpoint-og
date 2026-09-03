@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
 import { X } from 'lucide-react';
+import ThemeSettings from '@/components/dashboard/ThemeSettings';
 
 const inputStyle = {
   background: 'transparent',
@@ -12,7 +13,7 @@ const inputStyle = {
   fontSize: '15px',
   width: '100%',
   outline: 'none',
-  fontFamily: 'Inter, sans-serif',
+  fontFamily: 'var(--font-body)',
 };
 
 const DEFAULTS = {
@@ -60,8 +61,8 @@ const DEFAULTS = {
 export default function DashboardSettings() {
   const { theme } = useTheme();
   const t = theme === 'light'
-    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: '#FF007F' }
-    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: '#FF007F' };
+    ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: 'var(--brand)' }
+    : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: 'var(--brand)' };
 
   const [activeTab, setActiveTab] = useState('hero');
   const [form, setForm] = useState(DEFAULTS.hero);
@@ -118,7 +119,7 @@ export default function DashboardSettings() {
     style: { ...inputStyle, color: t.text, borderBottomColor: t.border },
     value: form[field] || '',
     onChange: e => setForm(f => ({ ...f, [field]: e.target.value })),
-    onFocus: e => e.target.style.borderBottomColor = '#FF007F',
+    onFocus: e => e.target.style.borderBottomColor = 'var(--brand)',
     onBlur: e => e.target.style.borderBottomColor = t.border,
   });
 
@@ -126,12 +127,12 @@ export default function DashboardSettings() {
     <div>
       {/* Tabs */}
       <div className="flex gap-2 mb-6 flex-wrap">
-        {['hero', 'about', 'contact', 'branding'].map(tab => (
+        {['hero', 'about', 'contact', 'branding', 'theme'].map(tab => (
           <button
             key={tab}
-            onClick={() => loadTab(tab)}
+            onClick={() => tab === 'theme' ? setActiveTab('theme') : loadTab(tab)}
             style={{
-              fontFamily: 'JetBrains Mono',
+              fontFamily: 'var(--font-mono)',
               fontSize: '10px',
               letterSpacing: '0.1em',
               textTransform: 'uppercase',
@@ -142,21 +143,24 @@ export default function DashboardSettings() {
               cursor: 'pointer',
             }}
           >
-            {tab === 'hero' ? 'Strona Główna — Hero' : tab === 'about' ? 'Strona Główna — O Studiu' : tab === 'contact' ? 'Strona Kontaktu' : 'Branding'}
+            {tab === 'hero' ? 'Strona Główna — Hero' : tab === 'about' ? 'Strona Główna — O Studiu' : tab === 'contact' ? 'Strona Kontaktu' : tab === 'branding' ? 'Branding' : 'Motyw i Czcionki'}
           </button>
         ))}
       </div>
 
+      {activeTab === 'theme' ? (
+        <ThemeSettings t={t} />
+      ) : (
       <div className="max-w-2xl space-y-10" style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '40px' }}>
         {activeTab === 'hero' && (
         <div>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '24px' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '24px' }}>
             SEKCJA HERO — WIDEO
           </p>
 
           {/* Video upload */}
           <div className="mb-8">
-            <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+            <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
               Wideo tła (zapętlone)
             </label>
             {form.hero_video_url && (
@@ -170,84 +174,84 @@ export default function DashboardSettings() {
               {form.hero_video_url && (
                 <button
                   onClick={() => setForm(f => ({ ...f, hero_video_url: '' }))}
-                  style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', background: 'none', border: 'none', cursor: 'pointer', textTransform: 'uppercase' }}
+                  style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', background: 'none', border: 'none', cursor: 'pointer', textTransform: 'uppercase' }}
                 >
                   USUŃ WIDEO
                 </button>
               )}
             </div>
-            <p className="mt-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>
+            <p className="mt-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>
               Bez wideo wyświetli się gradientowe tło. Zalecane: mp4, krótka pętla 5–15s.
             </p>
           </div>
 
           {/* Tagline */}
           <div className="mb-8">
-            <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+            <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
               Nagłówek (każda linia = nowy wiersz)
             </label>
             <textarea
               rows={3}
               {...inp('hero_tagline')}
-              style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none', fontSize: '18px', fontFamily: 'Bebas Neue, system-ui', letterSpacing: '0.05em' }}
-              onFocus={e => e.target.style.borderBottomColor = '#FF007F'}
+              style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none', fontSize: '18px', fontFamily: 'var(--font-display)', letterSpacing: '0.05em' }}
+              onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'}
               onBlur={e => e.target.style.borderBottomColor = t.border}
             />
-            <p className="mt-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>
+            <p className="mt-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>
               Np. "ROMANS\nTATTOO" — ostatnie 3 znaki drugiej linii będą w kolorze fuchsia.
             </p>
           </div>
 
           {/* Subtext */}
           <div className="mb-8">
-            <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+            <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
               Podnagłówek (każda linia = nowy wiersz)
             </label>
-            <textarea rows={3} {...inp('hero_subtext')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none', lineHeight: 1.8 }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            <textarea rows={3} {...inp('hero_subtext')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none', lineHeight: 1.8 }} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
           </div>
         </div>
         )}
 
         {activeTab === 'about' && (
         <div>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '24px' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '24px' }}>
             SEKCJA O STUDIU
           </p>
 
           {/* Heading */}
           <div className="mb-8">
-            <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+            <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
               Nagłówek główny
             </label>
-            <input {...inp('about_heading')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            <input {...inp('about_heading')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
           </div>
 
           {/* Highlight word */}
           <div className="mb-8">
-            <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+            <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
               Słowo do wyróżnienia (w kolorze fuchsia)
             </label>
-            <input {...inp('about_highlight_word')} style={{ ...inputStyle, color: t.fuchsia, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            <input {...inp('about_highlight_word')} style={{ ...inputStyle, color: t.fuchsia, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
           </div>
 
           {/* Paragraphs */}
           <div className="mb-8">
-            <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+            <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
               Pierwszy akapit
             </label>
-            <textarea rows={4} {...inp('about_paragraph_1')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            <textarea rows={4} {...inp('about_paragraph_1')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
           </div>
 
           <div className="mb-8">
-            <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+            <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
               Drugi akapit
             </label>
-            <textarea rows={3} {...inp('about_paragraph_2')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            <textarea rows={3} {...inp('about_paragraph_2')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
           </div>
 
           {/* Image upload */}
           <div className="mb-8">
-            <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+            <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
               Zdjęcie sekcji
             </label>
             {form.about_image_url && (
@@ -271,16 +275,16 @@ export default function DashboardSettings() {
           {/* Stats */}
           <div className="grid grid-cols-2 gap-6 mb-8">
             <div>
-              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                 Liczba w badżu (np. 4+)
               </label>
-              <input {...inp('about_stats_number')} style={{ ...inputStyle, color: t.fuchsia, borderBottomColor: t.border, fontSize: '18px' }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+              <input {...inp('about_stats_number')} style={{ ...inputStyle, color: t.fuchsia, borderBottomColor: t.border, fontSize: '18px' }} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
             </div>
             <div>
-              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                 Opis badżu (np. W WOLSZTYNIE)
               </label>
-              <input {...inp('about_stats_text')} style={{ ...inputStyle, color: t.muted, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+              <input {...inp('about_stats_text')} style={{ ...inputStyle, color: t.muted, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
             </div>
           </div>
         </div>
@@ -288,17 +292,17 @@ export default function DashboardSettings() {
 
         {activeTab === 'contact' && (
         <div>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '24px' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '24px' }}>
             DANE KONTAKTOWE
           </p>
 
           {/* Email */}
           <div className="mb-8">
-            <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+            <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
               Email kontaktowy
             </label>
-            <input {...inp('contact_email')} type="email" style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
-            <p className="mt-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>
+            <input {...inp('contact_email')} type="email" style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            <p className="mt-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>
               Będzie używany w formularzach kontaktowych i wiadomościach e-mail
             </p>
           </div>
@@ -306,105 +310,105 @@ export default function DashboardSettings() {
           {/* Address */}
           <div className="mb-8 grid grid-cols-2 gap-8">
             <div>
-              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                 Ulica
               </label>
-              <input {...inp('contact_address_street')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+              <input {...inp('contact_address_street')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
             </div>
             <div>
-              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                 Miasto i kod
               </label>
-              <input {...inp('contact_address_city')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+              <input {...inp('contact_address_city')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
             </div>
           </div>
 
           {/* Contact info */}
           <div className="mb-8 grid grid-cols-2 gap-8">
             <div>
-              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                 Telefon
               </label>
-              <input {...inp('contact_phone')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+              <input {...inp('contact_phone')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
             </div>
             <div>
-              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                 Godziny (każda linia = nowy wiersz)
               </label>
-              <textarea rows={2} {...inp('contact_hours')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+              <textarea rows={2} {...inp('contact_hours')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
             </div>
           </div>
 
           {/* Social */}
           <div className="mb-8 grid grid-cols-2 gap-8">
             <div>
-              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                 Instagram nazwa
               </label>
-              <input {...inp('contact_instagram')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+              <input {...inp('contact_instagram')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
             </div>
             <div>
-              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                 Instagram URL
               </label>
-              <input {...inp('contact_instagram_url')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+              <input {...inp('contact_instagram_url')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
             </div>
           </div>
 
           <div className="mb-8 grid grid-cols-2 gap-8">
             <div>
-              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                 Facebook nazwa
               </label>
-              <input {...inp('contact_facebook')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+              <input {...inp('contact_facebook')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
             </div>
             <div>
-              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                 Facebook URL
               </label>
-              <input {...inp('contact_facebook_url')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+              <input {...inp('contact_facebook_url')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
             </div>
           </div>
 
           {/* YouTube */}
           <div className="mb-8 grid grid-cols-2 gap-8">
             <div>
-              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                 YouTube nazwa
               </label>
-              <input {...inp('contact_youtube')} placeholder="np. Romans Tattoo" style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+              <input {...inp('contact_youtube')} placeholder="np. Romans Tattoo" style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
             </div>
             <div>
-              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                 YouTube URL
               </label>
-              <input {...inp('contact_youtube_url')} placeholder="https://www.youtube.com/@..." style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+              <input {...inp('contact_youtube_url')} placeholder="https://www.youtube.com/@..." style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
             </div>
           </div>
 
           {/* TikTok */}
           <div className="mb-8 grid grid-cols-2 gap-8">
             <div>
-              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                 TikTok nazwa
               </label>
-              <input {...inp('contact_tiktok')} placeholder="np. @tattoo.romans" style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+              <input {...inp('contact_tiktok')} placeholder="np. @tattoo.romans" style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
             </div>
             <div>
-              <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                 TikTok URL
               </label>
-              <input {...inp('contact_tiktok_url')} placeholder="https://www.tiktok.com/@..." style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+              <input {...inp('contact_tiktok_url')} placeholder="https://www.tiktok.com/@..." style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
             </div>
           </div>
 
           {/* Google Maps */}
           <div className="mb-8">
-            <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+            <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
               Link do wizytówki Google Maps
             </label>
-            <input {...inp('contact_google_maps_url')} placeholder="https://www.google.com/maps/place/..." style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
-            <p className="mt-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>
+            <input {...inp('contact_google_maps_url')} placeholder="https://www.google.com/maps/place/..." style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            <p className="mt-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>
               Skopiuj adres URL z wizytówki Google Twojej firmy z google.com/maps
             </p>
           </div>
@@ -413,13 +417,13 @@ export default function DashboardSettings() {
 
         {activeTab === 'branding' && (
         <div>
-          <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '24px' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '24px' }}>
             BRANDING I WYGLĄD
           </p>
 
           {/* Logo */}
           <div className="mb-8">
-            <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+            <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
               Logo strony
             </label>
             {form.site_logo_url && (
@@ -440,7 +444,7 @@ export default function DashboardSettings() {
               {form.site_logo_url && (
                 <button
                   onClick={() => setForm(f => ({ ...f, site_logo_url: '' }))}
-                  style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', background: 'none', border: 'none', cursor: 'pointer', textTransform: 'uppercase' }}
+                  style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', background: 'none', border: 'none', cursor: 'pointer', textTransform: 'uppercase' }}
                 >
                   USUŃ LOGO
                 </button>
@@ -450,7 +454,7 @@ export default function DashboardSettings() {
 
           {/* App Icon */}
           <div className="mb-8">
-            <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+            <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
               Ikona aplikacji
             </label>
             {form.app_icon_url && (
@@ -471,7 +475,7 @@ export default function DashboardSettings() {
               {form.app_icon_url && (
                 <button
                   onClick={() => setForm(f => ({ ...f, app_icon_url: '' }))}
-                  style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', background: 'none', border: 'none', cursor: 'pointer', textTransform: 'uppercase' }}
+                  style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', background: 'none', border: 'none', cursor: 'pointer', textTransform: 'uppercase' }}
                 >
                   USUŃ IKONĘ
                 </button>
@@ -481,11 +485,11 @@ export default function DashboardSettings() {
 
           {/* App Description */}
           <div className="mb-8">
-            <label className="block mb-2" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+            <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
               Opis aplikacji
             </label>
-            <textarea rows={2} {...inp('app_description')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} onFocus={e => e.target.style.borderBottomColor = '#FF007F'} onBlur={e => e.target.style.borderBottomColor = t.border} />
-            <p className="mt-1" style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>
+            <textarea rows={2} {...inp('app_description')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} />
+            <p className="mt-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>
               Wyświetlany w meta tagach i opisie aplikacji
             </p>
           </div>
@@ -498,6 +502,7 @@ export default function DashboardSettings() {
           </button>
         </div>
       </div>
+      )}
     </div>
   );
 }

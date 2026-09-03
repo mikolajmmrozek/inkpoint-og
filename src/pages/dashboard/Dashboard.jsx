@@ -66,8 +66,8 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
         {/* Logo / collapse toggle — matches top bar height (px-6 py-4) */}
         <div className="flex items-center px-2 py-4 lg:py-6 justify-between min-h-[72px] lg:min-h-[96px]" style={{ borderBottom: `0.5px solid ${border}` }}>
           <div className={`flex-1 min-w-0 overflow-hidden pl-4 transition-opacity duration-300 ${collapsed ? 'lg:opacity-0' : ''}`}>
-            <p style={{ fontFamily: 'Bebas Neue, system-ui', fontWeight: 400, fontSize: '2.1rem', color: textColor, letterSpacing: '0.08em', lineHeight: 1, margin: 0 }}>ROMANS</p>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: '#FF007F', letterSpacing: '0.2em', lineHeight: 1, marginTop: '3px', textTransform: 'uppercase' }}>TATTOO</p>
+            <p style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: '2.1rem', color: textColor, letterSpacing: '0.08em', lineHeight: 1, margin: 0 }}>ROMANS</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--brand)', letterSpacing: '0.2em', lineHeight: 1, marginTop: '3px', textTransform: 'uppercase' }}>TATTOO</p>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden flex items-center justify-center" style={{ color: mutedColor, background: 'none', border: 'none', cursor: 'pointer', padding: '8px', minWidth: '44px', minHeight: '44px' }}>
             <X size={20} />
@@ -89,7 +89,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
                 to={nav.path}
                 className="flex items-center gap-3 px-4 py-3 whitespace-nowrap overflow-hidden transition-colors duration-200"
                 style={{
-                  background: active ? 'rgba(255,0,127,0.08)' : 'transparent',
+                  background: active ? 'rgba(var(--brand-rgb), 0.08)' : 'transparent',
                   borderLeft: active ? '2px solid #FF007F' : '2px solid transparent',
                   color: active ? textColor : mutedColor,
                 }}
@@ -97,10 +97,10 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
                 title={collapsed ? nav.label : ''}
               >
                 <div className="shrink-0" style={{ position: 'relative' }}>
-                  <Icon size={20} color={active ? '#FF007F' : (theme === 'light' ? 'rgba(0,0,0,0.55)' : 'rgba(245,240,235,0.65)')} />
+                  <Icon size={20} color={active ? 'var(--brand)' : (theme === 'light' ? 'rgba(0,0,0,0.55)' : 'rgba(245,240,235,0.65)')} />
                   {badge && <SidebarBadge type={badge.type} value={badge.value} />}
                 </div>
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                   {nav.label}
                 </span>
               </Link>
@@ -131,7 +131,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
             <div className="shrink-0 flex items-center justify-center" style={{ width: 20 }}>
               {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
             </div>
-            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
               {theme === 'light' ? 'Ciemny motyw' : 'Jasny motyw'}
             </span>
           </button>
@@ -145,11 +145,11 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
             <div className="shrink-0 flex items-center justify-center" style={{ width: 20 }}>
               <LogOut size={16} />
             </div>
-            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
               Wyloguj się
             </span>
           </button>
-          <Link to="/" className="flex items-center gap-3 px-4 py-1.5 w-full whitespace-nowrap overflow-hidden" style={{ color: mutedColor, fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }} title={collapsed ? 'Wróć na stronę' : ''}>
+          <Link to="/" className="flex items-center gap-3 px-4 py-1.5 w-full whitespace-nowrap overflow-hidden" style={{ color: mutedColor, fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }} title={collapsed ? 'Wróć na stronę' : ''}>
             <div className="shrink-0 flex items-center justify-center" style={{ width: 20 }}>
               <HomeIcon size={16} />
             </div>
@@ -204,7 +204,7 @@ export default function Dashboard() {
 
   if (isLoadingAuth) return (
     <div className="h-screen flex items-center justify-center" style={{ background: '#FFFFFF' }}>
-      <div className="w-8 h-px animate-pulse" style={{ background: '#FF007F' }} />
+      <div className="w-8 h-px animate-pulse" style={{ background: 'var(--brand)' }} />
     </div>
   );
 
@@ -213,9 +213,9 @@ export default function Dashboard() {
   if (user.role !== 'admin') return (
     <div className="h-screen flex items-center justify-center flex-col gap-6" style={{ background: '#0A0A0A' }}>
       <div style={{ border: '0.5px solid #262626', padding: '48px', textAlign: 'center', maxWidth: '400px' }}>
-        <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>DOSTĘP ZABRONIONY</p>
-        <h2 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: '#F5F0EB', letterSpacing: '0.04em', marginBottom: '12px' }}>Brak uprawnień</h2>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', color: 'rgba(245,240,235,0.5)', lineHeight: 1.7, marginBottom: '32px' }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>DOSTĘP ZABRONIONY</p>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 400, color: '#F5F0EB', letterSpacing: '0.04em', marginBottom: '12px' }}>Brak uprawnień</h2>
+        <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'rgba(245,240,235,0.5)', lineHeight: 1.7, marginBottom: '32px' }}>
           Twoje konto ({user.email}) nie ma dostępu do panelu administracyjnego. Skontaktuj się z właścicielem studia.
         </p>
         <button onClick={() => base44.auth.logout('/')} className="btn-ghost-parchment" style={{ fontSize: '10px' }}>
@@ -248,8 +248,8 @@ export default function Dashboard() {
              {/* Dynamic page title */}
              <div className="flex items-center gap-3 min-w-0">
                <div className="min-w-0">
-                 <p style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: '#FF007F', letterSpacing: '0.2em', textTransform: 'uppercase', lineHeight: 1 }}>PANEL</p>
-                 <h1 style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2rem', fontWeight: 400, color: textColor, letterSpacing: '0.04em', lineHeight: 1, marginTop: '3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentLabel}</h1>
+                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', lineHeight: 1 }}>PANEL</p>
+                 <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 400, color: textColor, letterSpacing: '0.04em', lineHeight: 1, marginTop: '3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentLabel}</h1>
                </div>
              </div>
              <div className="flex-1" />

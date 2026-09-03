@@ -15,7 +15,7 @@ export default function BottomNav({ theme, calendarPath, messagesPath, notificat
 
   const bg = theme === 'light' ? '#FFFFFF' : '#0A0A0A';
   const border = theme === 'light' ? '#E5E5E5' : '#262626';
-  const activeColor = '#FF007F';
+  const activeColor = 'var(--brand)';
   const inactiveColor = theme === 'light' ? 'rgba(0,0,0,0.55)' : 'rgba(245,240,235,0.65)';
 
   const isCalendarActive = location.pathname.startsWith(calendarPath);
@@ -114,7 +114,7 @@ export default function BottomNav({ theme, calendarPath, messagesPath, notificat
                 <span style={{
                   position: 'absolute', top: '-2px', right: '-4px',
                   minWidth: '14px', height: '14px',
-                  background: '#FF007F', color: '#F5F0EB',
+                  background: 'var(--brand)', color: '#F5F0EB',
                   fontSize: '8px', fontWeight: 600,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   borderRadius: '7px', padding: '0 3px',

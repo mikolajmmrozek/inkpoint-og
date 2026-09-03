@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Montserrat:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@600;700;800&family=Source+Sans+3:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -27,6 +27,11 @@
     --ring: 325 100% 50%;
     --radius: 0.25rem;
 
+    /* Dynamic brand color (overridden by ThemeProvider) */
+    --brand: #FF007F;
+    --brand-rgb: 255 0 127;
+    --btn-text: #F5F0EB;
+
     /* Custom tokens */
     --obsidian: #0A0A0A;
     --parchment: #F5F0EB;
@@ -35,6 +40,22 @@
     --font-display: 'Bebas Neue', 'Barlow Condensed', system-ui;
     --font-body: 'Inter', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  /* Light mode overrides for public site */
+  :root[data-theme="light"] {
+    --background: 0 0% 97%;
+    --foreground: 0 0% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+    --secondary: 0 0% 90%;
+    --secondary-foreground: 0 0% 10%;
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 40%;
+    --border: 0 0% 85%;
+    --input: 0 0% 90%;
   }
 }
 
@@ -49,6 +70,11 @@
     overflow-x: hidden;
   }
 
+  :root[data-theme="light"] html {
+    background-color: #F5F5F5;
+    color: #111111;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
@@ -57,9 +83,21 @@
     letter-spacing: -0.01em;
     overflow-x: hidden;
     background-image:
-      radial-gradient(ellipse 55% 45% at -5% 0%, rgba(255, 0, 127, 0.55) 0%, rgba(255, 0, 127, 0.15) 40%, transparent 70%),
-      radial-gradient(ellipse 45% 40% at 105% 100%, rgba(255, 0, 127, 0.5) 0%, rgba(255, 0, 127, 0.12) 40%, transparent 65%);
+      radial-gradient(ellipse 55% 45% at -5% 0%, rgba(var(--brand-rgb), 0.55) 0%, rgba(var(--brand-rgb), 0.15) 40%, transparent 70%),
+      radial-gradient(ellipse 45% 40% at 105% 100%, rgba(var(--brand-rgb), 0.5) 0%, rgba(var(--brand-rgb), 0.12) 40%, transparent 65%);
     background-attachment: fixed;
+  }
+
+  :root[data-theme="light"] body {
+    background-color: #F5F5F5;
+    color: #111111;
+    background-image:
+      radial-gradient(ellipse 55% 45% at -5% 0%, rgba(var(--brand-rgb), 0.1) 0%, rgba(var(--brand-rgb), 0.03) 40%, transparent 70%),
+      radial-gradient(ellipse 45% 40% at 105% 100%, rgba(var(--brand-rgb), 0.08) 0%, rgba(var(--brand-rgb), 0.02) 40%, transparent 65%);
+  }
+
+  :root[data-theme="light"] body::before {
+    opacity: 0.015;
   }
 
   /* Grain texture overlay */
@@ -96,7 +134,7 @@
     background: #0A0A0A;
   }
   ::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, #FF007F, #CC0066);
+    background: var(--brand);
   }
 }
 
@@ -166,8 +204,8 @@ input[type="number"] {
 
 /* Custom animations */
 @keyframes pulse-oxblood {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 0, 127, 0.4); }
-  50% { box-shadow: 0 0 0 8px rgba(255, 0, 127, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(var(--brand-rgb), 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(var(--brand-rgb), 0); }
 }
 
 @keyframes shimmer {
@@ -230,10 +268,10 @@ input[type="number"] {
   }
 }
 
-/* Fuchsia CTA button */
+/* Brand CTA button — uses dynamic --brand color */
 .btn-oxblood {
-  background: linear-gradient(135deg, #FF007F 0%, #CC0066 100%);
-  color: #F5F0EB;
+  background: var(--brand);
+  color: var(--btn-text);
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 500;
@@ -245,9 +283,9 @@ input[type="number"] {
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .btn-oxblood:hover {
-  background: linear-gradient(135deg, #FF3399 0%, #FF007F 100%);
+  filter: brightness(1.15);
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(255, 0, 127, 0.35);
+  box-shadow: 0 8px 24px rgba(var(--brand-rgb), 0.35);
 }
 
 /* Ghost button */
@@ -277,9 +315,9 @@ input[type="number"] {
   background: transparent;
 }
 .thin-scrollbar::-webkit-scrollbar-thumb {
-  background: #FF007F;
+  background: var(--brand);
   border-radius: 2px;
 }
 .thin-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #CC0066;
+  filter: brightness(1.2);
 }
