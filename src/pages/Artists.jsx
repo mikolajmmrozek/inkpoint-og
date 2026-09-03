@@ -104,10 +104,9 @@ export default function Artists() {
                     <img
                       src={artist.photo_url || 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&q=80'}
                       alt={artist.name}
-                      className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
-                      style={{ filter: 'brightness(0.6) contrast(1.1)' }}
+                      className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 media-darken-soft"
                     />
-                    <div className="absolute inset-0 transition-all duration-500 group-hover:bg-oxblood/10" style={{ background: 'linear-gradient(to top, rgba(10,10,10,0.9) 0%, rgba(10,10,10,0.1) 60%)' }} />
+                    <div className="absolute inset-0 transition-all duration-500 group-hover:bg-oxblood/10" style={{ background: 'linear-gradient(to top, hsl(var(--background) / 0.9) 0%, hsl(var(--background) / 0.1) 60%)' }} />
                     
                     <div className="absolute bottom-0 left-0 right-0 p-8">
                       <div className="flex gap-2 mb-3 flex-wrap">
@@ -117,14 +116,14 @@ export default function Artists() {
                           </span>
                         ))}
                       </div>
-                      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 400, color: '#F5F0EB', lineHeight: 1, letterSpacing: '0.05em' }}>
+                      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 400, color: 'hsl(var(--foreground))', lineHeight: 1, letterSpacing: '0.05em' }}>
                         {artist.name}
                       </h3>
-                      <p className="mt-2 text-sm text-parchment/50 line-clamp-2" style={{ color: 'rgba(245,240,235,0.5)', fontSize: '13px' }}>
+                      <p className="mt-2 text-sm text-parchment/50 line-clamp-2" style={{ color: 'rgb(var(--foreground-rgb) / 0.5)', fontSize: '13px' }}>
                         {artist.bio}
                       </p>
                       <div className="mt-4 flex items-center justify-between">
-                        <p className="text-micro group-hover:text-oxblood transition-colors" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.15em' }}>
+                        <p className="text-micro group-hover:text-oxblood transition-colors" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgb(var(--foreground-rgb) / 0.4)', letterSpacing: '0.15em' }}>
                           PORTFOLIO →
                         </p>
                         {artist.instagram && (

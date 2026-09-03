@@ -31,8 +31,7 @@ export default function StudioHero() {
           loop
           muted
           playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{ filter: 'brightness(0.45) contrast(1.1) saturate(0.85)' }}
+          className="absolute inset-0 w-full h-full object-cover media-darken-video"
         />
       ) : (
         /* Fallback: animated gradient */
@@ -40,7 +39,7 @@ export default function StudioHero() {
       )}
 
       {/* Overlays */}
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(10,10,10,0.75) 0%, rgba(10,10,10,0.35) 60%, rgba(10,10,10,0.55) 100%)' }} />
+      <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, hsl(var(--background) / 0.75) 0%, hsl(var(--background) / 0.35) 60%, hsl(var(--background) / 0.55) 100%)' }} />
       <div className="absolute bottom-0 left-0 right-0 h-48" style={{ background: 'linear-gradient(to top, hsl(var(--background)), transparent)' }} />
       <div className="absolute top-0 left-0 right-0 h-32" style={{ background: 'linear-gradient(to bottom, hsl(var(--background)), transparent)' }} />
 
@@ -67,7 +66,7 @@ export default function StudioHero() {
           </motion.p>
 
           {/* Main headline */}
-          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 400, lineHeight: 0.88, letterSpacing: '0.02em', color: '#F5F0EB' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 400, lineHeight: 0.88, letterSpacing: '0.02em', color: 'hsl(var(--foreground))' }}>
             {lines.map((line, i) => (
               <motion.span
                 key={i}
@@ -79,7 +78,7 @@ export default function StudioHero() {
               >
                 {i === 1 ? (
                   <>
-                    <span style={{ color: '#F5F0EB' }}>{line.slice(0, -3)}</span>
+                    <span style={{ color: 'hsl(var(--foreground))' }}>{line.slice(0, -3)}</span>
                     <span style={{ color: 'var(--brand)' }}>{line.slice(-3)}</span>
                   </>
                 ) : line}
@@ -103,7 +102,7 @@ export default function StudioHero() {
             className="space-y-1 mb-12"
           >
             {sublines.map((line, i) => (
-              <p key={i} style={{ color: 'rgba(245,240,235,0.85)', fontSize: '16px', lineHeight: 1.7, fontFamily: 'var(--font-body)' }}>
+              <p key={i} style={{ color: 'rgb(var(--foreground-rgb) / 0.85)', fontSize: '16px', lineHeight: 1.7, fontFamily: 'var(--font-body)' }}>
                 {line}
               </p>
             ))}

@@ -187,6 +187,26 @@
     transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
+  /* Media brightness — dark mode darkens for white text; light mode brightens (raises black point) for dark text */
+  .media-darken {
+    filter: brightness(0.50) contrast(1.1);
+  }
+  .media-darken-video {
+    filter: brightness(0.45) contrast(1.1) saturate(0.85);
+  }
+  .media-darken-soft {
+    filter: brightness(0.6) contrast(1.1);
+  }
+  :root[data-theme="light"] .media-darken {
+    filter: brightness(1.15) contrast(0.92) saturate(0.9);
+  }
+  :root[data-theme="light"] .media-darken-video {
+    filter: brightness(1.2) contrast(0.9) saturate(0.85);
+  }
+  :root[data-theme="light"] .media-darken-soft {
+    filter: brightness(1.1) contrast(0.95);
+  }
+
   /* Shutter animation */
   .shutter-overlay {
     position: fixed;
