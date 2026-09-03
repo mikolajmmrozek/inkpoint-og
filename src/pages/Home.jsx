@@ -98,7 +98,7 @@ export default function Home() {
                 src={img}
                 alt={`Portfolio ${i + 1}`}
                 onClick={() => setLightboxIndex(i)}
-                className="w-full h-full object-cover liquid-hover cursor-pointer"
+                className="w-full h-full object-cover liquid-hover cursor-pointer media-border"
                 loading="lazy"
                 decoding="async"
               />

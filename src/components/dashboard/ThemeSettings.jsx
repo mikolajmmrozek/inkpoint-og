@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useThemeSettings } from '@/lib/ThemeProvider';
 import { FONT_PACKAGES, PRESET_COLORS, DEFAULT_THEME } from '@/lib/themeConfig';
 import { Sun, Moon, Check, Type, Palette } from 'lucide-react';
+import StyleOptionsSection from '@/components/dashboard/StyleOptionsSection';
 
 export default function ThemeSettings({ t }) {
   const { refreshTheme } = useThemeSettings();
@@ -184,6 +185,8 @@ export default function ThemeSettings({ t }) {
             })}
           </div>
         </div>
+
+        <StyleOptionsSection form={form} set={set} t={t} />
       </div>
 
       <div className="pt-4" style={{ borderTop: `0.5px solid ${t.border}` }}>

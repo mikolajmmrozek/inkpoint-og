@@ -133,7 +133,7 @@ export default function BlogPost() {
           <img
             src={post.cover_image_url}
             alt={post.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover media-border"
             style={{ filter: 'brightness(0.35) contrast(1.1)' }}
           />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, hsl(var(--background)) 0%, transparent 60%)' }} />
@@ -213,7 +213,7 @@ export default function BlogPost() {
                         <img
                           src={img?.url || img}
                           alt={img?.caption || ''}
-                          className="w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          className="w-full object-cover transition-transform duration-700 group-hover:scale-105 media-border"
                           style={{ filter: 'brightness(0.85) contrast(1.05)' }}
                         />
                         {img?.caption && (

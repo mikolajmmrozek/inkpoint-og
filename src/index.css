@@ -25,7 +25,10 @@
     --border: 0 0% 15%;
     --input: 0 0% 10%;
     --ring: 325 100% 50%;
-    --radius: 0.25rem;
+    --radius: 0px;
+    --border-width: 0.5px;
+    --media-border-width: 0;
+    --media-border-color: transparent;
 
     /* Dynamic brand color (overridden by ThemeProvider) */
     --brand: #FF007F;
@@ -127,7 +130,7 @@
   /* Needle-thin rule */
   hr {
     border-color: hsl(var(--border));
-    border-width: 0.5px;
+    border-width: var(--border-width);
   }
 
   /* Scrollbar styling */
@@ -162,12 +165,17 @@
     background-color: hsl(var(--border));
   }
   .border-needle {
-    border-width: 0.5px;
+    border-width: var(--border-width);
     border-color: hsl(var(--border));
   }
+
   .border-oxblood-thin {
-    border-width: 0.5px;
+    border-width: var(--border-width);
     border-color: var(--brand);
+  }
+
+  .media-border {
+    border: var(--media-border-width) solid var(--media-border-color);
   }
   .text-display {
     font-family: var(--font-display);
@@ -270,7 +278,7 @@ input[type="number"] {
 .glass {
   backdrop-filter: blur(20px) saturate(180%);
   background-color: hsl(var(--background) / 0.85);
-  border-bottom: 0.5px solid hsl(var(--border) / 0.8);
+  border-bottom: var(--border-width) solid hsl(var(--border) / 0.8);
 }
 
 /* Masonry grid */
@@ -300,6 +308,7 @@ input[type="number"] {
   letter-spacing: 0.1em;
   padding: 14px 32px;
   border: none;
+  border-radius: var(--radius);
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -319,7 +328,8 @@ input[type="number"] {
   text-transform: uppercase;
   letter-spacing: 0.1em;
   padding: 13px 31px;
-  border: 0.5px solid hsl(var(--foreground));
+  border: var(--border-width) solid hsl(var(--foreground));
+  border-radius: var(--radius);
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }

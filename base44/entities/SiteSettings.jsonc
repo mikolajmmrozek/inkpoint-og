@@ -116,6 +116,36 @@
       ],
       "default": "original",
       "description": "Pakiet czcionek: original, classic, elegant, modern, fraunces"
+    },
+    "corner_radius": {
+      "type": "string",
+      "enum": [
+        "sharp",
+        "soft",
+        "rounded"
+      ],
+      "default": "sharp",
+      "description": "Promie\u0144 naro\u017cnik\u00f3w: sharp=ostre, soft=delikatnie zaokr\u0105glone, rounded=zaokr\u0105glone"
+    },
+    "border_thickness": {
+      "type": "string",
+      "enum": [
+        "needle",
+        "thin",
+        "bold"
+      ],
+      "default": "needle",
+      "description": "Grubo\u015b\u0107 ramek: needle=iglaste 0.5px, thin=cienkie 1px, bold=wyra\u017ane 2px"
+    },
+    "image_border_style": {
+      "type": "string",
+      "enum": [
+        "none",
+        "subtle",
+        "solid"
+      ],
+      "default": "none",
+      "description": "Ramka wok\u00f3\u0142 zdj\u0119\u0107: none=brak, subtle=subtelna, solid=solidna"
     }
   },
   "required": [

@@ -103,8 +103,29 @@ export function isLightColor(hex) {
   return luminance > 0.6;
 }
 
+export const CORNER_RADIUS_OPTIONS = {
+  sharp: { label: 'Ostre', radius: '0px' },
+  soft: { label: 'Delikatnie', radius: '6px' },
+  rounded: { label: 'Zaokrąglone', radius: '16px' },
+};
+
+export const BORDER_THICKNESS_OPTIONS = {
+  needle: { label: 'Iglaste', width: '0.5px' },
+  thin: { label: 'Cienkie', width: '1px' },
+  bold: { label: 'Wyraźne', width: '2px' },
+};
+
+export const IMAGE_BORDER_OPTIONS = {
+  none: { label: 'Brak', width: '0', color: 'transparent' },
+  subtle: { label: 'Subtelna', width: '1px', color: 'hsl(var(--foreground) / 0.15)' },
+  solid: { label: 'Solidna', width: '2px', color: 'hsl(var(--foreground) / 0.4)' },
+};
+
 export const DEFAULT_THEME = {
   theme_mode: 'dark',
   primary_color: '#FF007F',
   font_package: 'original',
+  corner_radius: 'sharp',
+  border_thickness: 'needle',
+  image_border_style: 'none',
 };

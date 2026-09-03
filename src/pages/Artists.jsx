@@ -104,7 +104,7 @@ export default function Artists() {
                     <img
                       src={artist.photo_url || 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&q=80'}
                       alt={artist.name}
-                      className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 media-darken-soft"
+                      className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 media-darken-soft media-border"
                     />
                     <div className="absolute inset-0 transition-all duration-500 group-hover:bg-oxblood/10" style={{ background: 'linear-gradient(to top, hsl(var(--background) / 0.95) 0%, hsl(var(--background) / 0.5) 40%, hsl(var(--background) / 0.1) 85%)' }} />
                     
