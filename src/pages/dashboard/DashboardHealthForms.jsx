@@ -7,6 +7,7 @@ import { AnimatePresence } from 'framer-motion';
 import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
 import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
 import StatsTile from '@/components/dashboard/StatsTile';
+import { formatCompact } from '@/lib/formatNumber';
 
 const safeFormat = (dateStr, fmt) => {
   try {
@@ -77,10 +78,10 @@ export default function DashboardHealthForms() {
 
   useEffect(() => {
     Promise.all([
-      base44.entities.HealthForm.list('-form_filled_date', 200),
+      base44.entities.HealthForm.list('-form_filled_date', 5000),
       base44.entities.GuardianConsentForm.list('-form_filled_date', 100),
-      base44.entities.Booking.list('-session_date', 200),
-      base44.entities.Client.list('-created_date', 500),
+      base44.entities.Booking.list('-session_date', 5000),
+      base44.entities.Client.list('-created_date', 5000),
       base44.entities.HealthFormTemplate.filter({ key: 'default' }),
     ]).then(([f, g, b, c, tplArr]) => {
       if (tplArr?.length > 0) setTemplate(tplArr[0]);
@@ -436,8 +437,8 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
     <div>
       {/* Stats tiles + new button */}
       <div className="flex gap-4 mb-6 flex-wrap items-center">
-        <StatsTile label="Wszystkie ankiety" value={completedForms.length} active={formFilter === 'all'} onClick={() => setFormFilter('all')} t={t} />
-        <StatsTile label="Nowe (nieprzeczytane)" value={completedForms.filter(f => !f.is_read).length} active={formFilter === 'unread'} onClick={() => setFormFilter(formFilter === 'unread' ? 'all' : 'unread')} t={t} />
+        <StatsTile label="Wszystkie ankiety" value={formatCompact(completedForms.length)} active={formFilter === 'all'} onClick={() => setFormFilter('all')} t={t} />
+        <StatsTile label="Nowe (nieprzeczytane)" value={formatCompact(completedForms.filter(f => !f.is_read).length)} active={formFilter === 'unread'} onClick={() => setFormFilter(formFilter === 'unread' ? 'all' : 'unread')} t={t} />
         <div className="ml-auto">
           <a
             href={generalFormLink}

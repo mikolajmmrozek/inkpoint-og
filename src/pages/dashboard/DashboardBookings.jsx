@@ -213,10 +213,10 @@ export default function DashboardBookings() {
     setLoadError(null);
     try {
       const [data, artistData, avail, healthForms] = await Promise.all([
-        base44.entities.Booking.list('-session_date', 200),
+        base44.entities.Booking.list('-session_date', 5000),
         base44.entities.Artist.list(),
         base44.entities.ArtistAvailability.list(),
-        base44.entities.HealthForm.list('-created_date', 300),
+        base44.entities.HealthForm.list('-created_date', 5000),
       ]);
       setBookings(data);
       setArtists(artistData);

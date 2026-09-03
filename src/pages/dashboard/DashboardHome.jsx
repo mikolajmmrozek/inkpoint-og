@@ -12,6 +12,7 @@ import HealthFormBadge from '@/components/booking/HealthFormBadge';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { buildHealthFormStatusMap, resolveBookingHealthStatus } from '@/lib/healthFormStatus';
 import { pluralSesji } from '@/utils';
+import { formatCompact } from '@/lib/formatNumber';
 
 export default function DashboardHome() {
   const { theme } = useTheme();
@@ -29,7 +30,7 @@ export default function DashboardHome() {
 
   useEffect(() => {
     Promise.all([
-      base44.entities.Booking.list('-created_date', 200),
+      base44.entities.Booking.list('-created_date', 5000),
       base44.entities.ContactMessage.filter({ is_read: false }),
       base44.entities.HealthForm.list('-created_date', 10),
       base44.entities.HealthForm.filter({ is_draft: true }, '-created_date', 50),
@@ -40,12 +41,15 @@ export default function DashboardHome() {
       setArtists(artistData);
       setHealthStatusMap(buildHealthFormStatusMap(healthForms));
       setDraftForms(drafts);
+      const todayStr = new Date().toISOString().split('T')[0];
+      const futureBookings = bookings.filter(b => (b.session_date || '') >= todayStr);
       const pending = bookings.filter(b => b.status === 'pending');
+      const completedForms = healthForms.filter(f => !f.is_draft);
       setStats({
-        bookings: bookings.length,
+        bookings: futureBookings.length,
         pending: pending.length,
         messages: messages.length,
-        forms: forms.length,
+        forms: completedForms.length,
       });
 
       // Group pending+confirmed by date, sorted ascending — limit to 10 sessions total
@@ -123,7 +127,7 @@ export default function DashboardHome() {
                   <TrendingUp size={12} color={t.muted} />
                 </div>
                 <p style={{ fontFamily: 'Bebas Neue, system-ui', fontSize: '2.5rem', fontWeight: 400, color: t.value, lineHeight: 1, letterSpacing: '0.04em' }}>
-                  {loading ? '—' : kpi.value}
+                  {loading ? '—' : formatCompact(kpi.value)}
                 </p>
                 <p style={{ fontFamily: 'JetBrains Mono', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px' }}>
                   {kpi.label}

@@ -9,6 +9,7 @@ import { AnimatePresence } from 'framer-motion';
 import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
 import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
 import StatsTile from '@/components/dashboard/StatsTile';
+import { formatCompact } from '@/lib/formatNumber';
 import ClientMessageButton from '@/components/dashboard/ClientMessageButton';
 
 const inputStyle = {
@@ -53,7 +54,7 @@ export default function DashboardClients() {
 
   const load = async () => {
     const [clientData, bookingData, formData, userData] = await Promise.all([
-      base44.entities.Client.list('-created_date', 200),
+      base44.entities.Client.list('-created_date', 5000),
       base44.entities.Booking.list('-session_date', 500),
       base44.entities.HealthForm.list('-form_filled_date', 500),
       base44.entities.User.list('-created_date', 200).catch(() => []),
@@ -255,9 +256,9 @@ export default function DashboardClients() {
       {/* Stats row + new client button */}
       <div className="flex gap-4 mb-4 flex-wrap items-center">
         {[
-          { label: 'Wszyscy klienci', value: clients.length, filter: 'all' },
-          { label: 'Nowi (7 dni)', value: clients.filter(c => isNewClient(c)).length, filter: 'new' },
-          { label: 'Powracający (2+ sesji)', value: clients.filter(c => (c.total_sessions || 0) >= 2).length, filter: 'returning' },
+          { label: 'Wszyscy klienci', value: formatCompact(clients.length), filter: 'all' },
+          { label: 'Nowi (7 dni)', value: formatCompact(clients.filter(c => isNewClient(c)).length), filter: 'new' },
+          { label: 'Powracający (2+ sesji)', value: formatCompact(clients.filter(c => (c.total_sessions || 0) >= 2).length), filter: 'returning' },
         ].map(s => (
           <StatsTile key={s.label} label={s.label} value={s.value} active={clientFilter === s.filter} onClick={() => setClientFilter(clientFilter === s.filter ? 'all' : s.filter)} t={t} />
         ))}
