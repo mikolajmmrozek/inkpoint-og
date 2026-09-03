@@ -137,6 +137,7 @@ export default function BlogPost() {
             style={{ filter: 'brightness(0.35) contrast(1.1)' }}
           />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, hsl(var(--background)) 0%, transparent 60%)' }} />
+          <div className="absolute top-0 left-0 right-0 h-24" style={{ background: 'linear-gradient(to bottom, rgba(10,10,10,0.55), transparent)' }} />
           {/* Title overlay on hero */}
           <div className="absolute bottom-0 left-0 right-0 px-8 md:px-16 pb-12">
             <div className="flex gap-2 mb-4 flex-wrap">
@@ -146,7 +147,7 @@ export default function BlogPost() {
                 </span>
               ))}
             </div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.5rem, 6vw, 5rem)', fontWeight: 400, color: 'hsl(var(--foreground))', lineHeight: 0.95, letterSpacing: '0.03em' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.5rem, 6vw, 5rem)', fontWeight: 400, color: '#F5F0EB', lineHeight: 0.95, letterSpacing: '0.03em' }}>
               {post.title}
             </h1>
           </div>
