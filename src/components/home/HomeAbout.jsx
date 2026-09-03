@@ -46,7 +46,7 @@ export default function HomeAbout() {
             fontSize: 'clamp(3rem, 6vw, 5.5rem)',
             fontWeight: 400,
             lineHeight: 0.95,
-            color: '#F5F0EB',
+            color: 'hsl(var(--foreground))',
             letterSpacing: '0.04em',
           }}>
             {headingLines.map((line, i) => (
@@ -58,10 +58,10 @@ export default function HomeAbout() {
             <div>na zawsze</div>
           </h2>
           <div className="mt-8 h-px w-12" style={{ background: 'linear-gradient(to right, var(--brand), transparent)', height: '1px' }} />
-          <p className="mt-8 text-parchment/60 leading-relaxed" style={{ color: 'rgba(245,240,235,0.85)', fontSize: '16px', lineHeight: 1.8 }}>
+          <p className="mt-8 text-parchment/60 leading-relaxed" style={{ color: 'rgb(var(--foreground-rgb) / 0.85)', fontSize: '16px', lineHeight: 1.8 }}>
             {data.about_paragraph_1}
           </p>
-          <p className="mt-4 text-parchment/60 leading-relaxed" style={{ color: 'rgba(245,240,235,0.85)', fontSize: '16px', lineHeight: 1.8 }}>
+          <p className="mt-4 text-parchment/60 leading-relaxed" style={{ color: 'rgb(var(--foreground-rgb) / 0.85)', fontSize: '16px', lineHeight: 1.8 }}>
             {data.about_paragraph_2}
           </p>
           <div className="mt-10">
@@ -92,9 +92,9 @@ export default function HomeAbout() {
           {/* Decorative offset box */}
           <div className="absolute -bottom-6 -left-6 w-24 h-24" style={{ border: '0.5px solid var(--brand)', zIndex: -1 }} />
           {/* Stats badge */}
-          <div className="absolute top-8 -right-4 bg-obsidian p-6" style={{ background: '#0A0A0A', border: '0.5px solid #262626' }}>
+          <div className="absolute top-8 -right-4 bg-obsidian p-6" style={{ background: 'hsl(var(--background))', border: '0.5px solid hsl(var(--border))' }}>
             <p className="font-display text-4xl font-700" style={{ fontFamily: 'var(--font-display)', fontWeight: 400, color: 'var(--brand)', fontSize: '2.5rem', letterSpacing: '0.05em' }}>{data.about_stats_number}</p>
-            <p className="text-micro mt-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.7)', letterSpacing: '0.15em' }}>{data.about_stats_text}</p>
+            <p className="text-micro mt-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgb(var(--foreground-rgb) / 0.7)', letterSpacing: '0.15em' }}>{data.about_stats_text}</p>
           </div>
         </motion.div>
       </div>

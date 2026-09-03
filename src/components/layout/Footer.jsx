@@ -23,15 +23,15 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer className="border-t mt-0" style={{ borderColor: '#262626', borderTopWidth: '0.5px', background: '#0A0A0A' }}>
+    <footer className="border-t mt-0" style={{ borderColor: 'hsl(var(--border))', borderTopWidth: '0.5px', background: 'hsl(var(--background))' }}>
       <div className="px-8 md:px-16 py-16">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           {/* Brand */}
           <div>
-            <div className="font-display text-4xl font-700 mb-2" style={{ fontFamily: 'var(--font-display)', fontWeight: 400, color: '#F5F0EB', fontSize: '2.8rem', letterSpacing: '0.06em' }}>
+            <div className="font-display text-4xl font-700 mb-2" style={{ fontFamily: 'var(--font-display)', fontWeight: 400, color: 'hsl(var(--foreground))', fontSize: '2.8rem', letterSpacing: '0.06em' }}>
               ROMANS TATTOO
             </div>
-            <p className="text-parchment/40 text-sm mt-4 leading-relaxed" style={{ color: 'rgba(245,240,235,0.4)', fontSize: '14px' }}>
+            <p className="text-parchment/40 text-sm mt-4 leading-relaxed" style={{ color: 'rgb(var(--foreground-rgb) / 0.4)', fontSize: '14px' }}>
               Studio tatuażu i piercingu.<br />
               Wolsztyn, Polska.
             </p>
@@ -66,7 +66,7 @@ export default function Footer() {
             </p>
             <div className="space-y-3">
               {[['/', 'Home'], ['/artists', 'Artyści'], ['/faq', 'FAQ'], ['/blog', 'Blog'], ['/contact', 'Kontakt']].map(([href, label]) => (
-                <Link key={href} to={href} className="block text-parchment/50 hover:text-parchment transition-colors text-sm" style={{ color: 'rgba(245,240,235,0.5)', fontSize: '14px' }}>
+                <Link key={href} to={href} className="block text-parchment/50 hover:text-parchment transition-colors text-sm" style={{ color: 'rgb(var(--foreground-rgb) / 0.5)', fontSize: '14px' }}>
                   {label}
                 </Link>
               ))}
@@ -78,7 +78,7 @@ export default function Footer() {
             <p className="text-micro text-oxblood mb-6" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.15em' }}>
               KONTAKT
             </p>
-            <div className="space-y-2 text-sm text-parchment/50" style={{ color: 'rgba(245,240,235,0.5)', fontSize: '14px' }}>
+            <div className="space-y-2 text-sm text-parchment/50" style={{ color: 'rgb(var(--foreground-rgb) / 0.5)', fontSize: '14px' }}>
               <p>ul. Wschowska 30</p>
               <p>64-200 Wolsztyn</p>
               <a href="tel:881717880" className="hover:text-parchment/80 transition-colors" style={{ marginTop: '16px', display: 'block', color: 'var(--brand)' }}>881717880</a>
@@ -87,8 +87,8 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-16 pt-8 flex flex-col md:flex-row justify-between items-center gap-4" style={{ borderTop: '0.5px solid #262626' }}>
-          <p className="text-micro" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.1em' }}>
+        <div className="mt-16 pt-8 flex flex-col md:flex-row justify-between items-center gap-4" style={{ borderTop: '0.5px solid hsl(var(--border))' }}>
+          <p className="text-micro" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgb(var(--foreground-rgb) / 0.3)', letterSpacing: '0.1em' }}>
             © 2026 ROMANS TATTOO. WSZELKIE PRAWA ZASTRZEŻONE.
           </p>
         </div>

@@ -44,7 +44,7 @@ export default function Navbar() {
         <div className="px-8 md:px-16 flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex flex-col leading-none">
-            <span className="font-display text-2xl font-700 text-parchment tracking-tight" style={{ fontFamily: 'var(--font-display)', fontWeight: 400, color: '#F5F0EB', letterSpacing: '0.08em', fontSize: '2.1rem' }}>
+            <span className="font-display text-2xl font-700 text-parchment tracking-tight" style={{ fontFamily: 'var(--font-display)', fontWeight: 400, color: 'hsl(var(--foreground))', letterSpacing: '0.08em', fontSize: '2.1rem' }}>
               ROMANS
             </span>
             <span className="text-micro text-oxblood" style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.2em', color: 'var(--brand)' }}>
@@ -61,7 +61,7 @@ export default function Navbar() {
               className={`text-micro transition-all duration-300 hover:text-oxblood ${
               location.pathname === link.href ? 'text-oxblood' : 'text-parchment/60'}`
               }
-              style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', letterSpacing: '0.12em', textTransform: 'uppercase', color: location.pathname === link.href ? 'var(--brand)' : 'rgba(245,240,235,0.85)' }}>
+              style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', letterSpacing: '0.12em', textTransform: 'uppercase', color: location.pathname === link.href ? 'var(--brand)' : 'rgb(var(--foreground-rgb) / 0.85)' }}>
               
                 {link.label}
               </Link>
@@ -104,7 +104,7 @@ export default function Navbar() {
                   fontWeight: 500,
                   letterSpacing: '0.1em',
                   textTransform: 'uppercase',
-                  color: '#F5F0EB',
+                  color: 'hsl(var(--foreground))',
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   maxWidth: '0',
@@ -126,9 +126,9 @@ export default function Navbar() {
             className="md:hidden flex flex-col gap-1.5 p-2"
             aria-label="Menu">
             
-            <span className={`block w-6 h-px bg-parchment transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-2' : ''}`} style={{ background: '#F5F0EB' }} />
-            <span className={`block w-6 h-px bg-parchment transition-all duration-300 ${menuOpen ? 'opacity-0' : ''}`} style={{ background: '#F5F0EB' }} />
-            <span className={`block w-6 h-px bg-parchment transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`} style={{ background: '#F5F0EB' }} />
+            <span className={`block w-6 h-px bg-parchment transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-2' : ''}`} style={{ background: 'hsl(var(--foreground))' }} />
+            <span className={`block w-6 h-px bg-parchment transition-all duration-300 ${menuOpen ? 'opacity-0' : ''}`} style={{ background: 'hsl(var(--foreground))' }} />
+            <span className={`block w-6 h-px bg-parchment transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`} style={{ background: 'hsl(var(--foreground))' }} />
           </button>
         </div>
       </nav>
@@ -136,7 +136,7 @@ export default function Navbar() {
       {/* Mobile Menu */}
       <div className={`fixed inset-0 z-40 bg-obsidian flex flex-col justify-center px-12 transition-all duration-700 ${
       menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`
-      } style={{ background: '#0A0A0A' }}>
+      } style={{ background: 'hsl(var(--background))' }}>
         <div className="space-y-8">
           <div className="flex gap-3 mb-8" style={{ marginTop: '60px' }}>
             <button
@@ -168,11 +168,11 @@ export default function Navbar() {
               <Link
               to={link.href}
               className="block font-display text-6xl font-300 text-parchment hover:text-oxblood transition-colors duration-300"
-              style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(3rem, 10vw, 6rem)', color: '#F5F0EB', fontWeight: 400, letterSpacing: '0.05em' }}>
+              style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(3rem, 10vw, 6rem)', color: 'hsl(var(--foreground))', fontWeight: 400, letterSpacing: '0.05em' }}>
               
                 {link.label}
               </Link>
-              <div className="h-px w-full mt-4" style={{ background: '#262626', height: '0.5px' }} />
+              <div className="h-px w-full mt-4" style={{ background: 'hsl(var(--border))', height: '0.5px' }} />
             </div>
           )}
         </div>

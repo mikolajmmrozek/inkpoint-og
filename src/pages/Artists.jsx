@@ -75,7 +75,7 @@ export default function Artists() {
           <p className="text-micro text-oxblood mb-6" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em' }}>
             NASZ ZESPÓŁ
           </p>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(4rem, 9vw, 8rem)', fontWeight: 400, lineHeight: 0.9, color: '#F5F0EB', letterSpacing: '0.04em' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(4rem, 9vw, 8rem)', fontWeight: 400, lineHeight: 0.9, color: 'hsl(var(--foreground))', letterSpacing: '0.04em' }}>
             Artyści
           </h1>
           <div className="mt-6 h-px w-16" style={{ background: 'linear-gradient(to right, var(--brand), transparent)', height: '1px' }} />
@@ -86,7 +86,7 @@ export default function Artists() {
         {loading ? (
           <div className="grid md:grid-cols-3 gap-8">
             {[1, 2, 3].map(i => (
-              <div key={i} className="aspect-[3/4] bg-steel animate-pulse" style={{ background: '#262626' }} />
+              <div key={i} className="aspect-[3/4] bg-steel animate-pulse" style={{ background: 'hsl(var(--border))' }} />
             ))}
           </div>
         ) : (

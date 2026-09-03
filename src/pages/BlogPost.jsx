@@ -113,7 +113,7 @@ export default function BlogPost() {
   if (!post) return (
     <PageLayout>
       <div className="pt-40 px-8 md:px-16 text-center">
-        <p style={{ color: 'rgba(245,240,235,0.4)', fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.2em' }}>
+        <p style={{ color: 'rgb(var(--foreground-rgb) / 0.4)', fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.2em' }}>
           POST NIE ZNALEZIONY
         </p>
         <Link to="/blog" className="btn-ghost-parchment inline-block mt-8">Wróć do Bloga</Link>
@@ -136,7 +136,7 @@ export default function BlogPost() {
             className="w-full h-full object-cover"
             style={{ filter: 'brightness(0.35) contrast(1.1)' }}
           />
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, #0A0A0A 0%, transparent 60%)' }} />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, hsl(var(--background)) 0%, transparent 60%)' }} />
           {/* Title overlay on hero */}
           <div className="absolute bottom-0 left-0 right-0 px-8 md:px-16 pb-12">
             <div className="flex gap-2 mb-4 flex-wrap">
@@ -146,7 +146,7 @@ export default function BlogPost() {
                 </span>
               ))}
             </div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.5rem, 6vw, 5rem)', fontWeight: 400, color: '#F5F0EB', lineHeight: 0.95, letterSpacing: '0.03em' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.5rem, 6vw, 5rem)', fontWeight: 400, color: 'hsl(var(--foreground))', lineHeight: 0.95, letterSpacing: '0.03em' }}>
               {post.title}
             </h1>
           </div>
@@ -154,7 +154,7 @@ export default function BlogPost() {
       )}
 
       <div className="px-8 md:px-16 lg:px-24 py-12 max-w-5xl mx-auto">
-        <Link to="/blog" className="text-micro mb-10 block" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.15em' }}>
+        <Link to="/blog" className="text-micro mb-10 block" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgb(var(--foreground-rgb) / 0.3)', letterSpacing: '0.15em' }}>
           ← BLOG
         </Link>
 
@@ -168,7 +168,7 @@ export default function BlogPost() {
                 </span>
               ))}
             </div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 400, color: '#F5F0EB', lineHeight: 0.95, letterSpacing: '0.03em' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 400, color: 'hsl(var(--foreground))', lineHeight: 0.95, letterSpacing: '0.03em' }}>
               {post.title}
             </h1>
           </motion.div>
@@ -176,14 +176,14 @@ export default function BlogPost() {
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }}>
           {/* Author / date bar */}
-          <div className="flex items-center gap-4 mb-10 pb-8" style={{ borderBottom: '0.5px solid #262626' }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgba(245,240,235,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+          <div className="flex items-center gap-4 mb-10 pb-8" style={{ borderBottom: '0.5px solid hsl(var(--border))' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgb(var(--foreground-rgb) / 0.4)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
               {post.author_name}
             </p>
             {post.published_at && (
               <>
-                <span style={{ color: '#262626' }}>|</span>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                <span style={{ color: 'hsl(var(--border))' }}>|</span>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgb(var(--foreground-rgb) / 0.3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                   {format(new Date(post.published_at), 'dd MMMM yyyy', { locale: pl })}
                 </p>
               </>
@@ -195,7 +195,7 @@ export default function BlogPost() {
             <div className="lg:grid lg:grid-cols-5 lg:gap-12">
               {/* Text — 3 cols */}
               <div className="lg:col-span-3">
-                <div style={{ color: 'rgba(245,240,235,0.75)', fontSize: '16px', lineHeight: 2, whiteSpace: 'pre-wrap' }}>
+                <div style={{ color: 'rgb(var(--foreground-rgb) / 0.75)', fontSize: '16px', lineHeight: 2, whiteSpace: 'pre-wrap' }}>
                   {post.content || post.excerpt}
                 </div>
               </div>
@@ -203,7 +203,7 @@ export default function BlogPost() {
               {/* Media sidebar — 2 cols */}
               <div className="lg:col-span-2 mt-10 lg:mt-0 space-y-4">
                 {post.video_url && (
-                  <video src={post.video_url} controls className="w-full" style={{ background: '#0A0A0A' }} />
+                  <video src={post.video_url} controls className="w-full" style={{ background: 'hsl(var(--background))' }} />
                 )}
                 {sidebarImages.length > 0 && (
                   <div className="space-y-3">
@@ -216,7 +216,7 @@ export default function BlogPost() {
                           style={{ filter: 'brightness(0.85) contrast(1.05)' }}
                         />
                         {img?.caption && (
-                          <p className="mt-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.08em' }}>
+                          <p className="mt-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgb(var(--foreground-rgb) / 0.3)', letterSpacing: '0.08em' }}>
                             {img.caption}
                           </p>
                         )}
@@ -227,7 +227,7 @@ export default function BlogPost() {
               </div>
             </div>
           ) : (
-            <div style={{ color: 'rgba(245,240,235,0.75)', fontSize: '16px', lineHeight: 2, whiteSpace: 'pre-wrap', maxWidth: '680px' }}>
+            <div style={{ color: 'rgb(var(--foreground-rgb) / 0.75)', fontSize: '16px', lineHeight: 2, whiteSpace: 'pre-wrap', maxWidth: '680px' }}>
               {post.content || post.excerpt}
             </div>
           )}

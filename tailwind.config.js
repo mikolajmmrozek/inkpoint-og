@@ -50,10 +50,10 @@ module.exports = {
                     '4': 'hsl(var(--chart-4))',
                     '5': 'hsl(var(--chart-5))'
                 },
-                obsidian: '#0A0A0A',
-                parchment: '#F5F0EB',
+                obsidian: 'hsl(var(--background))',
+                parchment: 'hsl(var(--foreground))',
                 oxblood: 'var(--brand)',
-                steel: '#262626',
+                steel: 'hsl(var(--border))',
             },
             fontFamily: {
                 display: ['Bebas Neue', 'Barlow Condensed', 'system-ui'],

@@ -73,11 +73,11 @@ export default function Home() {
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
                 NASZE PRACE
               </p>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 5vw, 4rem)', fontWeight: 400, color: '#F5F0EB', lineHeight: 0.95, letterSpacing: '0.04em' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 5vw, 4rem)', fontWeight: 400, color: 'hsl(var(--foreground))', lineHeight: 0.95, letterSpacing: '0.04em' }}>
                 Galeria
               </h2>
             </div>
-            <Link to="/artists" className="text-micro" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgba(245,240,235,0.7)', letterSpacing: '0.15em', textDecoration: 'none' }}>
+            <Link to="/artists" className="text-micro" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgb(var(--foreground-rgb) / 0.7)', letterSpacing: '0.15em', textDecoration: 'none' }}>
               WSZYSTKIE PRACE →
             </Link>
           </div>

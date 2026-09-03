@@ -36,13 +36,13 @@ export default function StudioHero() {
         />
       ) : (
         /* Fallback: animated gradient */
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 20% 50%, rgb(var(--brand-rgb) /0.08) 0%, #0A0A0A 60%)' }} />
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 20% 50%, rgb(var(--brand-rgb) /0.08) 0%, hsl(var(--background)) 60%)' }} />
       )}
 
       {/* Overlays */}
       <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(10,10,10,0.75) 0%, rgba(10,10,10,0.35) 60%, rgba(10,10,10,0.55) 100%)' }} />
-      <div className="absolute bottom-0 left-0 right-0 h-48" style={{ background: 'linear-gradient(to top, #0A0A0A, transparent)' }} />
-      <div className="absolute top-0 left-0 right-0 h-32" style={{ background: 'linear-gradient(to bottom, #0A0A0A, transparent)' }} />
+      <div className="absolute bottom-0 left-0 right-0 h-48" style={{ background: 'linear-gradient(to top, hsl(var(--background)), transparent)' }} />
+      <div className="absolute top-0 left-0 right-0 h-32" style={{ background: 'linear-gradient(to bottom, hsl(var(--background)), transparent)' }} />
 
       {/* Decorative fuchsia lines */}
       <div className="absolute left-0 top-1/2 w-px h-40 -translate-y-1/2" style={{ background: 'linear-gradient(to bottom, transparent, var(--brand), transparent)' }} />
@@ -132,10 +132,10 @@ export default function StudioHero() {
           transition={{ delay: 1.5, duration: 1 }}
           className="absolute bottom-10 right-8 md:right-16 flex flex-col items-center gap-3"
         >
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.6)', letterSpacing: '0.2em', writingMode: 'vertical-rl' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgb(var(--foreground-rgb) / 0.6)', letterSpacing: '0.2em', writingMode: 'vertical-rl' }}>
             SCROLL
           </p>
-          <div className="w-px h-12 relative overflow-hidden" style={{ background: 'rgba(245,240,235,0.1)' }}>
+          <div className="w-px h-12 relative overflow-hidden" style={{ background: 'rgb(var(--foreground-rgb) / 0.1)' }}>
             <motion.div
               className="w-full absolute top-0"
               style={{ background: 'var(--brand)', height: '50%' }}

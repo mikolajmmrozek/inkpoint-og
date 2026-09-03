@@ -41,28 +41,28 @@ export default function TermsAndConditions() {
   }, [lang]);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0A0A0A', color: '#F5F0EB', padding: '60px 24px' }}>
+    <div style={{ minHeight: '100vh', background: 'hsl(var(--background))', color: 'hsl(var(--foreground))', padding: '60px 24px' }}>
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
         {loading ? (
-          <div style={{ textAlign: 'center', color: 'rgba(245,240,235,0.4)', fontFamily: 'var(--font-mono)', fontSize: '12px', letterSpacing: '0.1em' }}>
+          <div style={{ textAlign: 'center', color: 'rgb(var(--foreground-rgb) / 0.4)', fontFamily: 'var(--font-mono)', fontSize: '12px', letterSpacing: '0.1em' }}>
             ŁADOWANIE...
           </div>
         ) : !terms ? (
-          <div style={{ textAlign: 'center', color: 'rgba(245,240,235,0.4)', fontFamily: 'var(--font-mono)', fontSize: '12px', letterSpacing: '0.1em' }}>
+          <div style={{ textAlign: 'center', color: 'rgb(var(--foreground-rgb) / 0.4)', fontFamily: 'var(--font-mono)', fontSize: '12px', letterSpacing: '0.1em' }}>
             Brak regulaminu.
           </div>
         ) : (
           <>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '48px', marginBottom: '32px', color: '#F5F0EB' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '48px', marginBottom: '32px', color: 'hsl(var(--foreground))' }}>
               {terms.title}
             </h1>
             <div
-              style={{ lineHeight: 1.8, fontSize: '15px', color: 'rgba(245,240,235,0.85)' }}
+              style={{ lineHeight: 1.8, fontSize: '15px', color: 'rgb(var(--foreground-rgb) / 0.85)' }}
               dangerouslySetInnerHTML={{ __html: terms.content }}
             />
           </>
         )}
-        <div style={{ marginTop: '48px', paddingTop: '24px', borderTop: '0.5px solid #262626' }}>
+        <div style={{ marginTop: '48px', paddingTop: '24px', borderTop: '0.5px solid hsl(var(--border))' }}>
           <a href="/" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none' }}>
             ← Powrót
           </a>

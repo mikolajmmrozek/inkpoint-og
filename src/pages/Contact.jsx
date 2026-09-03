@@ -53,8 +53,8 @@ export default function Contact() {
   const inputStyle = {
     background: 'transparent',
     border: 'none',
-    borderBottom: '0.5px solid #595959',
-    color: '#F5F0EB',
+    borderBottom: '0.5px solid hsl(var(--input-border))',
+    color: 'hsl(var(--foreground))',
     padding: '12px 0',
     fontSize: '15px',
     width: '100%',
@@ -70,7 +70,7 @@ export default function Contact() {
           <p className="text-micro text-oxblood mb-6" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em' }}>
             NAPISZ DO NAS
           </p>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(4rem, 9vw, 8rem)', fontWeight: 400, lineHeight: 0.9, color: '#F5F0EB', letterSpacing: '0.04em' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(4rem, 9vw, 8rem)', fontWeight: 400, lineHeight: 0.9, color: 'hsl(var(--foreground))', letterSpacing: '0.04em' }}>
             Kontakt
           </h1>
         </motion.div>
@@ -87,10 +87,10 @@ export default function Contact() {
             {sent ? (
               <div className="py-16">
                 <div className="w-8 h-px mb-8" style={{ background: 'var(--brand)' }} />
-                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 400, color: '#F5F0EB', letterSpacing: '0.04em' }}>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 400, color: 'hsl(var(--foreground))', letterSpacing: '0.04em' }}>
                   Wiadomość wysłana
                 </h3>
-                <p className="mt-4 text-sm" style={{ color: 'rgba(245,240,235,0.5)', fontSize: '14px' }}>
+                <p className="mt-4 text-sm" style={{ color: 'rgb(var(--foreground-rgb) / 0.5)', fontSize: '14px' }}>
                   Odpiszemy w ciągu 24 godzin.
                 </p>
               </div>
@@ -98,7 +98,7 @@ export default function Contact() {
               <form onSubmit={handleSubmit} className="space-y-8">
                 <div className="grid grid-cols-2 gap-8">
                   <div>
-                    <label className="text-micro block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.75)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                    <label className="text-micro block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgb(var(--foreground-rgb) / 0.75)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                       Imię i Nazwisko *
                     </label>
                     <input
@@ -107,11 +107,11 @@ export default function Contact() {
                       value={form.name}
                       onChange={e => setForm({ ...form, name: e.target.value })}
                       onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'}
-                      onBlur={e => e.target.style.borderBottomColor = '#595959'}
+                      onBlur={e => e.target.style.borderBottomColor = 'hsl(var(--input-border))'}
                     />
                   </div>
                   <div>
-                    <label className="text-micro block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.75)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                    <label className="text-micro block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgb(var(--foreground-rgb) / 0.75)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                       Email *
                     </label>
                     <input
@@ -121,13 +121,13 @@ export default function Contact() {
                       value={form.email}
                       onChange={e => setForm({ ...form, email: e.target.value })}
                       onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'}
-                      onBlur={e => e.target.style.borderBottomColor = '#595959'}
+                      onBlur={e => e.target.style.borderBottomColor = 'hsl(var(--input-border))'}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-micro block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.75)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                  <label className="text-micro block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgb(var(--foreground-rgb) / 0.75)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                     Telefon
                   </label>
                   <input
@@ -135,12 +135,12 @@ export default function Contact() {
                     value={form.phone}
                     onChange={e => setForm({ ...form, phone: e.target.value })}
                     onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'}
-                    onBlur={e => e.target.style.borderBottomColor = '#595959'}
+                    onBlur={e => e.target.style.borderBottomColor = 'hsl(var(--input-border))'}
                   />
                 </div>
 
                 <div>
-                  <label className="text-micro block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.75)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                  <label className="text-micro block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgb(var(--foreground-rgb) / 0.75)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                     Temat
                   </label>
                   <input
@@ -148,22 +148,22 @@ export default function Contact() {
                     value={form.subject}
                     onChange={e => setForm({ ...form, subject: e.target.value })}
                     onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'}
-                    onBlur={e => e.target.style.borderBottomColor = '#595959'}
+                    onBlur={e => e.target.style.borderBottomColor = 'hsl(var(--input-border))'}
                   />
                 </div>
 
                 <div>
-                  <label className="text-micro block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.75)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                  <label className="text-micro block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgb(var(--foreground-rgb) / 0.75)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                     Wiadomość *
                   </label>
                   <textarea
                     required
                     rows={5}
-                    style={{ background: 'rgba(255,255,255,0.04)', border: '0.5px solid #595959', borderRadius: '2px', padding: '12px', color: '#F5F0EB', fontSize: '15px', width: '100%', outline: 'none', fontFamily: 'var(--font-body)', resize: 'none', transition: 'border-color 0.3s' }}
+                    style={{ background: 'rgb(var(--foreground-rgb) / 0.04)', border: '0.5px solid hsl(var(--input-border))', borderRadius: '2px', padding: '12px', color: 'hsl(var(--foreground))', fontSize: '15px', width: '100%', outline: 'none', fontFamily: 'var(--font-body)', resize: 'none', transition: 'border-color 0.3s' }}
                     value={form.message}
                     onChange={e => setForm({ ...form, message: e.target.value })}
                     onFocus={e => e.target.style.borderColor = 'var(--brand)'}
-                    onBlur={e => e.target.style.borderColor = '#595959'}
+                    onBlur={e => e.target.style.borderColor = 'hsl(var(--input-border))'}
                   />
                 </div>
 
@@ -182,7 +182,7 @@ export default function Contact() {
             className="space-y-12"
           >
             {/* Map placeholder */}
-            <div className="aspect-video overflow-hidden relative" style={{ border: '0.5px solid #262626' }}>
+            <div className="aspect-video overflow-hidden relative" style={{ border: '0.5px solid hsl(var(--border))' }}>
               <iframe
                 src={`https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2449!2d16.117!3d51.869!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0!2s${encodeURIComponent(contactData.contact_address_street + ', ' + contactData.contact_address_city)}!5e0!3m2!1spl!2spl!4v1700000000000`}
                 width="100%"
@@ -214,15 +214,15 @@ export default function Contact() {
                     </p>
                   </div>
                   {label === 'TELEFON' ? (
-                    <a href={`tel:${value}`} style={{ color: 'rgba(245,240,235,0.6)', fontSize: '13px', lineHeight: 1.7, textDecoration: 'underline', cursor: 'pointer', display: 'inline-block' }}>
+                    <a href={`tel:${value}`} style={{ color: 'rgb(var(--foreground-rgb) / 0.6)', fontSize: '13px', lineHeight: 1.7, textDecoration: 'underline', cursor: 'pointer', display: 'inline-block' }}>
                       {value}
                     </a>
                   ) : link ? (
-                    <a href={link} target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(245,240,235,0.6)', fontSize: '13px', lineHeight: 1.7, textDecoration: 'underline', cursor: 'pointer', display: 'inline-block' }}>
+                    <a href={link} target="_blank" rel="noopener noreferrer" style={{ color: 'rgb(var(--foreground-rgb) / 0.6)', fontSize: '13px', lineHeight: 1.7, textDecoration: 'underline', cursor: 'pointer', display: 'inline-block' }}>
                       {value}
                     </a>
                   ) : (
-                    <p style={{ color: 'rgba(245,240,235,0.6)', fontSize: '13px', whiteSpace: 'pre-line', lineHeight: 1.7 }}>
+                    <p style={{ color: 'rgb(var(--foreground-rgb) / 0.6)', fontSize: '13px', whiteSpace: 'pre-line', lineHeight: 1.7 }}>
                       {value}
                     </p>
                   )}

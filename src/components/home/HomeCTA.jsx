@@ -5,7 +5,7 @@ export default function HomeCTA() {
   return (
     <section className="py-16 px-8 md:px-16 relative overflow-hidden">
       {/* Fuchsia gradient background */}
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgb(var(--brand-rgb) /0.08) 0%, rgba(10,10,10,0) 50%, rgb(var(--brand-rgb) /0.05) 100%)' }} />
+      <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgb(var(--brand-rgb) /0.08) 0%, hsl(var(--background) / 0) 50%, rgb(var(--brand-rgb) /0.05) 100%)' }} />
       <div className="absolute bottom-0 left-0 right-0 h-1" style={{ background: 'linear-gradient(to right, transparent, var(--brand), transparent)' }} />
       <div className="relative max-w-4xl mx-auto text-center">
         <motion.div
@@ -22,13 +22,13 @@ export default function HomeCTA() {
             fontSize: 'clamp(3.5rem, 8vw, 7rem)',
             fontWeight: 400,
             lineHeight: 0.9,
-            color: '#F5F0EB',
+            color: 'hsl(var(--foreground))',
             letterSpacing: '0.04em',
           }}>
             Gotowy na<br />
             <span style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>PERMANENTNĄ ZMIANĘ?</span>
           </h2>
-          <p className="mt-8 text-parchment/60 max-w-xl mx-auto text-base leading-relaxed" style={{ color: 'rgba(245,240,235,0.85)', fontSize: '16px' }}>
+          <p className="mt-8 text-parchment/60 max-w-xl mx-auto text-base leading-relaxed" style={{ color: 'rgb(var(--foreground-rgb) / 0.85)', fontSize: '16px' }}>
             Umów się na bezpłatną konsultację. Porozmawiamy o Twoim pomyśle, dobierzemy artystę i ustalimy termin.
           </p>
           <div className="mt-12 flex gap-4 justify-center flex-wrap">

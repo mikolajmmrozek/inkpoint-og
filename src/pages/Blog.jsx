@@ -69,7 +69,7 @@ export default function Blog() {
           <p className="text-micro text-oxblood mb-6" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.2em' }}>
             WIEDZA & INSPIRACJE
           </p>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(4rem, 9vw, 8rem)', fontWeight: 400, lineHeight: 0.9, color: '#F5F0EB', letterSpacing: '0.04em' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(4rem, 9vw, 8rem)', fontWeight: 400, lineHeight: 0.9, color: 'hsl(var(--foreground))', letterSpacing: '0.04em' }}>
             Blog
           </h1>
         </motion.div>
@@ -79,7 +79,7 @@ export default function Blog() {
         {loading ? (
           <div className="grid md:grid-cols-2 gap-8">
             {[1, 2, 3].map(i => (
-              <div key={i} className="aspect-video animate-pulse" style={{ background: '#262626' }} />
+              <div key={i} className="aspect-video animate-pulse" style={{ background: 'hsl(var(--border))' }} />
             ))}
           </div>
         ) : (
@@ -103,7 +103,7 @@ export default function Blog() {
                         style={{ filter: 'brightness(0.65) contrast(1.1)' }}
                       />
                     ) : (
-                      <div className="w-full h-full" style={{ background: 'linear-gradient(135deg, #1a1a1a, #262626)' }} />
+                      <div className="w-full h-full" style={{ background: 'linear-gradient(135deg, hsl(var(--card)), hsl(var(--border)))' }} />
                     )}
                   </div>
                   <div className="p-6 md:p-12 flex flex-col justify-center min-w-0">
@@ -114,22 +114,22 @@ export default function Blog() {
                         </span>
                       ))}
                     </div>
-                    <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.7rem, 6vw, 2.2rem)', fontWeight: 600, color: '#F5F0EB', lineHeight: 1.1, overflowWrap: 'break-word' }}>
+                    <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.7rem, 6vw, 2.2rem)', fontWeight: 600, color: 'hsl(var(--foreground))', lineHeight: 1.1, overflowWrap: 'break-word' }}>
                       {featured.title}
                     </h2>
-                    <p className="mt-4 text-sm leading-relaxed" style={{ color: 'rgba(245,240,235,0.5)', fontSize: '14px', lineHeight: 1.8, overflowWrap: 'break-word' }}>
+                    <p className="mt-4 text-sm leading-relaxed" style={{ color: 'rgb(var(--foreground-rgb) / 0.5)', fontSize: '14px', lineHeight: 1.8, overflowWrap: 'break-word' }}>
                       {featured.excerpt}
                     </p>
                     <div className="mt-8 flex items-center justify-between">
                       <div>
-                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgb(var(--foreground-rgb) / 0.3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                           {featured.author_name}
                         </p>
-                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.2)', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '2px' }}>
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgb(var(--foreground-rgb) / 0.2)', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '2px' }}>
                           {featured.published_at ? format(new Date(featured.published_at), 'dd MMM yyyy', { locale: pl }) : ''}
                         </p>
                       </div>
-                      <p className="group-hover:text-oxblood transition-colors" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgba(245,240,235,0.3)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                      <p className="group-hover:text-oxblood transition-colors" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgb(var(--foreground-rgb) / 0.3)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                         CZYTAJ →
                       </p>
                     </div>
@@ -159,7 +159,7 @@ export default function Blog() {
                           style={{ filter: 'brightness(0.65) contrast(1.1)' }}
                         />
                       ) : (
-                        <div className="w-full h-full" style={{ background: 'linear-gradient(135deg, #1a1a1a, #262626)' }} />
+                        <div className="w-full h-full" style={{ background: 'linear-gradient(135deg, hsl(var(--card)), hsl(var(--border)))' }} />
                       )}
                     </div>
                     <div className="flex flex-wrap gap-2 mb-3">
@@ -169,13 +169,13 @@ export default function Blog() {
                         </span>
                       ))}
                     </div>
-                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 600, color: '#F5F0EB', lineHeight: 1.1 }}>
+                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 600, color: 'hsl(var(--foreground))', lineHeight: 1.1 }}>
                       {post.title}
                     </h3>
-                    <p className="mt-3 text-sm line-clamp-2" style={{ color: 'rgba(245,240,235,0.4)', fontSize: '13px' }}>
+                    <p className="mt-3 text-sm line-clamp-2" style={{ color: 'rgb(var(--foreground-rgb) / 0.4)', fontSize: '13px' }}>
                       {post.excerpt}
                     </p>
-                    <p className="mt-4 group-hover:text-oxblood transition-colors" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgba(245,240,235,0.25)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                    <p className="mt-4 group-hover:text-oxblood transition-colors" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgb(var(--foreground-rgb) / 0.25)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                       CZYTAJ →
                     </p>
                   </Link>
