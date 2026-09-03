@@ -2,11 +2,11 @@
 export const FONT_PACKAGES = {
   original: {
     label: 'Oryginalny',
-    description: 'Bebas Neue · Inter · JetBrains Mono',
+    description: 'Bebas Neue · Inter · Inter',
     display: "'Bebas Neue', 'Barlow Condensed', system-ui",
     body: "'Inter', sans-serif",
-    mono: "'JetBrains Mono', monospace",
-    import: 'Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500',
+    mono: "'Inter', sans-serif",
+    import: 'Bebas+Neue&family=Inter:wght@300;400;500;600;700',
   },
   classic: {
     label: 'Czytelny',
@@ -33,7 +33,7 @@ export const FONT_PACKAGES = {
     import: 'Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700',
   },
   fraunces: {
-    label: 'Fraunces + Inter',
+    label: 'Klasyczny',
     description: 'Fraunces (serif) · Inter · Inter — czyste, eleganckie',
     display: "'Fraunces', Georgia, serif",
     body: "'Inter', sans-serif",
