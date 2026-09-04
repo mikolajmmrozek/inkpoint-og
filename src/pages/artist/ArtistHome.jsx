@@ -383,13 +383,19 @@ export default function ArtistHome() {
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
   const upcoming = bookings.filter(b => b.session_date >= todayStr && (b.status === 'pending' || b.status === 'confirmed'));
   const overdue = bookings.filter(b => b.session_date < todayStr && (b.status === 'pending' || b.status === 'confirmed'));
-  const thisMonth = bookings.filter(b => b.session_date?.startsWith(new Date().toISOString().slice(0, 7)) && b.status === 'completed');
-  const revenue = thisMonth.reduce((sum, b) => sum + ((b.estimated_price || 0) * (artist.artist_cut_percent || 60) / 100), 0);
+  const monthPrefix = new Date().toISOString().slice(0, 7);
+  const thisMonth = bookings.filter(b => b.session_date?.startsWith(monthPrefix) && b.status === 'completed');
+  const cut = artist.artist_cut_percent || 60;
+  const revenue = thisMonth.reduce((sum, b) => sum + ((b.estimated_price || 0) * cut / 100), 0);
+  // Prognoza: wszystkie zapisane sesje w tym miesiącu (bez anulowanych) minus to, co już zarobione
+  const bookedThisMonth = bookings.filter(b => b.session_date?.startsWith(monthPrefix) && b.status !== 'cancelled');
+  const projected = bookedThisMonth.reduce((sum, b) => sum + (b.estimated_price || 0), 0) * cut / 100;
+  const forecast = Math.round(projected - revenue);
 
   const KPI = [
     { label: 'Nadchodzące sesje', value: upcoming.length, icon: Calendar, link: '/artist/schedule' },
     { label: 'Sesje w tym miesiącu', value: thisMonth.length, icon: TrendingUp, link: '/artist/stats' },
-    { label: 'Mój zarobek (mies.)', value: `${Math.round(revenue)} zł`, icon: Clock, link: '/artist/stats' },
+    { label: 'Mój zarobek (mies.)', value: `${Math.round(revenue)} zł`, sub: `Prognoza: +${forecast} zł`, icon: Clock, link: '/artist/stats' },
   ];
 
   // All active sessions sorted ascending, max 10 upcoming
@@ -434,11 +440,14 @@ export default function ArtistHome() {
           const Icon = kpi.icon;
           return (
             <motion.div key={kpi.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
-              <Link to={kpi.link} className="block p-6 h-full" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+              <Link to={kpi.link} className="block p-6 h-full" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
                 <Icon size={16} color="var(--brand)" className="mb-4" />
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 400, color: t.value, lineHeight: 1, letterSpacing: '0.04em' }}>
                   {loading ? '—' : kpi.value}
                 </p>
+                {kpi.sub && !loading && (
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.06em', marginTop: '6px' }}>{kpi.sub}</p>
+                )}
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px' }}>{kpi.label}</p>
               </Link>
             </motion.div>
