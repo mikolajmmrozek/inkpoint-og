@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import PageLayout from '../components/layout/PageLayout';
+import { getThumbnailUrl } from '@/lib/thumbnail';
 
 const PLACEHOLDER_ARTISTS = [
   {
@@ -102,7 +103,7 @@ export default function Artists() {
                 <Link to={`/artists/${artist.slug || artist.id}`} className="group block">
                   <div className="relative overflow-hidden aspect-[3/4]" style={{ borderRadius: 'var(--radius)' }}>
                     <img
-                      src={artist.photo_url || 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&q=80'}
+                      src={getThumbnailUrl(artist.photo_url || 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91', 400, 65)}
                       alt={artist.name}
                       className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 media-darken-soft media-border"
                     />

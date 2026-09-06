@@ -4,6 +4,7 @@ import { format, addDays, subDays, isToday } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import { getAvailabilityForDay } from '@/components/dashboard/ArtistScheduleEditor';
 import { isArtistOffOnDate } from '@/lib/bookingConflicts';
+import { getThumbnailUrl } from '@/lib/thumbnail';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -239,7 +240,7 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
           return (
           <div key={`header-${a.id}`} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '8px 4px', gap: '4px', borderLeft: `0.5px solid ${t.border}` }}>
             {a.photo_url ? (
-              <img src={a.photo_url} alt={a.name} loading="lazy" width={28} height={28} style={{ width: '28px', height: '28px', borderRadius: 'var(--radius)', objectFit: 'cover', border: `1px solid ${off.off ? 'var(--brand)' : t.border}`, flexShrink: 0, opacity: off.off ? 0.55 : 1 }} />
+              <img src={getThumbnailUrl(a.photo_url, 56, 60)} alt={a.name} loading="lazy" width={28} height={28} style={{ width: '28px', height: '28px', borderRadius: 'var(--radius)', objectFit: 'cover', border: `1px solid ${off.off ? 'var(--brand)' : t.border}`, flexShrink: 0, opacity: off.off ? 0.55 : 1 }} />
             ) : (
               <div style={{ width: '28px', height: '28px', borderRadius: 'var(--radius)', background: off.off ? 'rgb(var(--brand-rgb) /0.15)' : 'rgb(var(--brand-rgb) /0.15)', border: `1px solid ${off.off ? 'var(--brand)' : t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <span style={{ fontSize: '11px', color: off.off ? 'var(--brand)' : 'var(--brand)', fontFamily: 'var(--font-display)' }}>{a.name.charAt(0)}</span>
