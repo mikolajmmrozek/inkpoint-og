@@ -454,7 +454,7 @@ export default function DashboardBookings() {
       <button
         onClick={handleNewBooking}
         title="Nowa sesja"
-        className="fixed flex items-center justify-center transition-all"
+        className="fixed lg:hidden flex items-center justify-center transition-all"
         style={{
           right: '20px',
           bottom: '100px',
@@ -524,6 +524,9 @@ export default function DashboardBookings() {
             statusOptions={viewMode === 'pending' ? ['pending', 'cancelled'] : STATUS_OPTIONS}
             t={t}
           />
+          <button onClick={handleNewBooking} className="hidden lg:flex items-center gap-2 btn-oxblood ml-auto" style={{ padding: '8px 14px' }}>
+            <Plus size={13} /> NOWA SESJA
+          </button>
         </div>
 
         {/* Row 3: search */}
