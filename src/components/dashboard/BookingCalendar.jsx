@@ -14,7 +14,7 @@ const STATUS_COLORS = {
   cancelled: '#9ca3af',
 };
 
-export default function BookingCalendar({ bookings, onDayClick, selectedDate, t, artists = [], onAddBooking, searchQuery = '', onBookingClick, availabilityRecords = [], artistFilter = 'all', healthStatusMap = {} }) {
+export default function BookingCalendar({ bookings, onDayClick, selectedDate, t, artists = [], onAddBooking, searchQuery = '', onBookingClick, availabilityRecords = [], artistFilter = 'all', healthStatusMap = {}, showSessionsList = true }) {
   const [viewMonth, setViewMonth] = useState(new Date());
   const isMobile = useIsMobile();
   const today = new Date();
@@ -129,7 +129,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
       </div>
 
       {/* Selected day sessions / empty state */}
-      {(selectedDayBookings.length > 0 || selectedDate) && (
+      {showSessionsList && (selectedDayBookings.length > 0 || selectedDate) && (
         <div className="mt-6" style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '16px' }}>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: t.fuchsia, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
             Sesje — {format(effectiveSelectedDate, 'EEEE, d MMMM', { locale: pl }).toUpperCase()}

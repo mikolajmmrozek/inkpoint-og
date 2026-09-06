@@ -5,13 +5,13 @@ export default function StudioAvatar({ studio, theme, size = 36 }) {
       <img
         src={studio.photo_url}
         alt="Romans Tattoo"
-        style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', border: '0.5px solid rgb(var(--brand-rgb) /0.4)', flexShrink: 0 }}
+        style={{ width: size, height: size, borderRadius: 'var(--radius)', objectFit: 'cover', border: '0.5px solid rgb(var(--brand-rgb) /0.4)', flexShrink: 0 }}
       />
     );
   }
   return (
     <div
-      style={{ width: size, height: size, borderRadius: '50%', background: bg, border: '0.5px solid rgb(var(--brand-rgb) /0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+      style={{ width: size, height: size, borderRadius: 'var(--radius)', background: bg, border: '0.5px solid rgb(var(--brand-rgb) /0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
     >
       <span style={{ fontFamily: 'var(--font-display)', fontSize: Math.round(size * 0.42), color: 'var(--brand)', letterSpacing: '0.05em', lineHeight: 1 }}>RT</span>
     </div>

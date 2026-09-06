@@ -15,6 +15,7 @@ import { recomputeClientTotalSessions } from '@/lib/clientStats';
 import { buildHealthFormStatusMap, resolveBookingHealthStatus } from '@/lib/healthFormStatus';
 import HealthFormBadge from '@/components/booking/HealthFormBadge';
 import GroupedBookingList from '@/components/booking/GroupedBookingList';
+import BookingFilters from '@/components/dashboard/BookingFilters';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -490,32 +491,20 @@ export default function DashboardBookings() {
               </button>
             ))}
           </div>
+          <BookingFilters
+            artists={artists}
+            artistFilters={artistFilters}
+            toggleArtist={toggleArtist}
+            setArtistFilters={setArtistFilters}
+            statusFilters={statusFilters}
+            toggleStatus={toggleStatus}
+            setStatusFilters={setStatusFilters}
+            statusOptions={viewMode === 'pending' ? ['pending', 'cancelled'] : STATUS_OPTIONS}
+            t={t}
+          />
           <button onClick={handleNewBooking} className="flex items-center gap-2 btn-oxblood ml-auto" style={{ padding: '8px 14px' }}>
             <Plus size={13} /> NOWA SESJA
           </button>
-        </div>
-
-        {/* Row 2: filters */}
-        <div className="flex items-center gap-1 flex-wrap mb-3">
-          <button onClick={() => setArtistFilters([])} style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilters.length === 0 ? t.fuchsia : t.border}`, color: artistFilters.length === 0 ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
-            Wszyscy
-          </button>
-          {artists.map(a => (
-            <button key={a.id} onClick={() => toggleArtist(a.id)} style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${artistFilters.includes(a.id) ? t.fuchsia : t.border}`, color: artistFilters.includes(a.id) ? t.fuchsia : t.muted, background: artistFilters.includes(a.id) ? 'rgb(var(--brand-rgb) /0.06)' : 'transparent', cursor: 'pointer', flexShrink: 0 }}>
-              {a.name}
-            </button>
-          ))}
-          <div style={{ width: '0.5px', height: '16px', background: t.border, margin: '0 4px' }} />
-          {(viewMode === 'pending' ? ['pending', 'cancelled'] : STATUS_OPTIONS).map(s => (
-            <button key={s} onClick={() => toggleStatus(s)} style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${statusFilters.includes(s) ? t.fuchsia : t.border}`, color: statusFilters.includes(s) ? t.fuchsia : t.muted, background: statusFilters.includes(s) ? 'rgb(var(--brand-rgb) /0.06)' : 'transparent', cursor: 'pointer', flexShrink: 0 }}>
-              {s === 'all' ? 'Wszystkie' : s}
-            </button>
-          ))}
-          {statusFilters.length > 0 && (
-            <button onClick={() => setStatusFilters([])} style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}>
-              ✕ Wszystkie
-            </button>
-          )}
         </div>
 
         {/* Row 3: search */}
@@ -543,7 +532,23 @@ export default function DashboardBookings() {
       ) : (
         <div>
           <div className="space-y-6">
-            {/* Search results above calendar */}
+            {/* Calendar — always on top, visible in every view */}
+            <BookingCalendar
+              bookings={calendarBookings}
+              onDayClick={handleDayClick}
+              selectedDate={selectedDate}
+              t={t}
+              artists={artists}
+              onAddBooking={handleNewBooking}
+              searchQuery={searchQuery}
+              onBookingClick={handleBookingClick}
+              availabilityRecords={availabilityRecords}
+              artistFilter={artistFilters}
+              healthStatusMap={healthStatusMap}
+              showSessionsList={viewMode === 'calendar' && !searchQuery.trim()}
+            />
+
+            {/* Search results (calendar view + search) */}
             {viewMode === 'calendar' && searchQuery.trim() && (
               <div className="mb-6">
                 <div style={{ padding: '10px 16px', background: t.bg, border: `0.5px solid ${t.border}`, marginBottom: '12px' }}>
@@ -561,23 +566,6 @@ export default function DashboardBookings() {
                   renderRow={(b, i, items) => <BookingRow key={b.id} b={b} i={i} items={items} selected={selected} setSelected={setSelected} artists={artists} t={t} healthStatusMap={healthStatusMap} />}
                 />
               </div>
-            )}
-
-            {/* Calendar view */}
-            {viewMode === 'calendar' && (
-              <BookingCalendar
-                bookings={calendarBookings}
-                onDayClick={handleDayClick}
-                selectedDate={selectedDate}
-                t={t}
-                artists={artists}
-                onAddBooking={handleNewBooking}
-                searchQuery={searchQuery}
-                onBookingClick={handleBookingClick}
-                availabilityRecords={availabilityRecords}
-                artistFilter={artistFilters}
-                healthStatusMap={healthStatusMap}
-              />
             )}
 
             {/* Day view */}
@@ -598,25 +586,6 @@ export default function DashboardBookings() {
             {/* List section */}
              {showListSection && (
               <div>
-                {viewMode === 'calendar' && selectedDate && selectedDate instanceof Date && !isNaN(selectedDate) && (
-                  <div className="flex items-center justify-between mb-3" style={{ border: `0.5px solid ${t.border}`, padding: '10px 16px', background: t.bg }}>
-                    <button onClick={() => { if (!searchQuery.trim()) setSelectedDate(d => subDays(d, 1)); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px', opacity: searchQuery.trim() ? 0.3 : 1 }}>
-                      <ChevronLeft size={16} />
-                    </button>
-                    <div className="text-center flex-1 min-w-0 px-2">
-                      <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', color: t.title, letterSpacing: '0.08em', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {format(selectedDate, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase()}
-                      </p>
-                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: selectedDateStr && listBookings.filter(b => b.session_date === selectedDateStr).length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
-                        {selectedDateStr ? listBookings.filter(b => b.session_date === selectedDateStr).length : 0} {selectedDateStr && listBookings.filter(b => b.session_date === selectedDateStr).length === 1 ? 'SESJA' : selectedDateStr && listBookings.filter(b => b.session_date === selectedDateStr).length >= 2 && listBookings.filter(b => b.session_date === selectedDateStr).length <= 4 ? 'SESJE' : 'SESJI'}
-                      </p>
-                    </div>
-                    <button onClick={() => { if (!searchQuery.trim()) setSelectedDate(d => addDays(d, 1)); }} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px', opacity: searchQuery.trim() ? 0.3 : 1 }}>
-                      <ChevronRight size={16} />
-                    </button>
-                  </div>
-                )}
-
                 {viewMode === 'list' && !searchQuery.trim() && (
                   <div className="flex mb-4" style={{ border: `0.5px solid ${t.border}` }}>
                     {[{ key: 'upcoming', label: 'NADCHODZĄCE' }, { key: 'past', label: 'PRZESZŁE' }].map(tab => (
