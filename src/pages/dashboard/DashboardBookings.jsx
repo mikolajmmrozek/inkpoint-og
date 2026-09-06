@@ -211,22 +211,30 @@ export default function DashboardBookings() {
   const [loadError, setLoadError] = useState(null);
   const loadedOnce = useRef(false);
 
+  const loadHealthForms = async () => {
+    try {
+      const healthForms = await base44.entities.HealthForm.list('-created_date', 5000);
+      setHealthStatusMap(buildHealthFormStatusMap(healthForms));
+    } catch (e) { /* silent — badges fall back to health_form_completed flag */ }
+  };
+
+  // Fast path: bookings + artists + availability block render; health forms load lazily.
   const load = async () => {
     setLoadError(null);
     try {
-      const [data, artistData, avail, healthForms] = await Promise.all([
+      const [data, artistData, avail] = await Promise.all([
         base44.entities.Booking.list('-session_date', 5000),
         base44.entities.Artist.list(),
         base44.entities.ArtistAvailability.list(),
-        base44.entities.HealthForm.list('-created_date', 5000),
       ]);
       setBookings(data);
       setArtists(artistData);
       setAvailabilityRecords(avail);
-      setHealthStatusMap(buildHealthFormStatusMap(healthForms));
+      setLoading(false);
+      // Health forms are the slowest and only feed the badge — load after render.
+      loadHealthForms();
     } catch (err) {
       setLoadError(err);
-    } finally {
       setLoading(false);
     }
   };
@@ -317,10 +325,14 @@ export default function DashboardBookings() {
     setShowModal(true);
   };
 
-  const handleModalSaved = () => {
+  const handleModalSaved = async () => {
     setShowModal(false);
     setEditingBooking(null);
-    load();
+    // Only bookings change on save — refetch just them (fast), keep artists/availability/healthForms.
+    try {
+      const data = await base44.entities.Booking.list('-session_date', 5000);
+      setBookings(data);
+    } catch (e) { /* keep stale list on error */ }
   };
 
   const handleSearch = (q) => {
@@ -549,8 +561,35 @@ export default function DashboardBookings() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
+        <div className="space-y-3" aria-busy="true">
+          {/* Calendar skeleton */}
+          <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '20px' }}>
+            <div className="flex items-center justify-between mb-6">
+              <div style={{ width: '18px', height: '18px', background: t.border }} />
+              <div style={{ height: '24px', width: '180px', background: t.border, opacity: 0.6 }} />
+              <div style={{ width: '18px', height: '18px', background: t.border }} />
+            </div>
+            <div className="grid grid-cols-7 gap-1 mb-2">
+              {Array.from({ length: 7 }).map((_, i) => <div key={i} style={{ height: '16px', background: t.border, opacity: 0.4 }} />)}
+            </div>
+            <div className="grid grid-cols-7 gap-1">
+              {Array.from({ length: 35 }).map((_, i) => <div key={i} className="animate-pulse" style={{ minHeight: '52px', background: t.border, opacity: 0.25 }} />)}
+            </div>
+          </div>
+          {/* Day sessions skeleton */}
+          <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 p-4" style={{ borderBottom: i < 3 ? `0.5px solid ${t.border}` : 'none' }}>
+                <div style={{ width: '48px', height: '32px', background: t.border, opacity: 0.3 }} />
+                <div style={{ width: '40px', height: '40px', borderRadius: 'var(--radius)', background: t.border, opacity: 0.3 }} />
+                <div className="flex-1 space-y-2">
+                  <div style={{ height: '14px', width: '45%', background: t.border, opacity: 0.4 }} />
+                  <div style={{ height: '10px', width: '30%', background: t.border, opacity: 0.25 }} />
+                </div>
+                <div style={{ width: '40px', height: '14px', background: t.border, opacity: 0.3 }} />
+              </div>
+            ))}
+          </div>
         </div>
       ) : (
         <div>

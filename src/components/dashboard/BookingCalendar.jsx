@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameDay, isSameMonth, addMonths, subMonths } from 'date-fns';
 import { pl } from 'date-fns/locale';
@@ -30,12 +30,22 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
     return ta.localeCompare(tb);
   });
 
+  // Precompute off-artists per visible day once per data change, instead of per-day-per-render.
+  const offByDate = useMemo(() => {
+    const map = {};
+    for (const day of [...days, effectiveSelectedDate]) {
+      const ds = format(day, 'yyyy-MM-dd');
+      if (!map[ds]) map[ds] = getArtistsOffForDate(availabilityRecords, artists, artistFilter, ds);
+    }
+    return map;
+  }, [days, effectiveSelectedDate, availabilityRecords, artists, artistFilter]);
+
   const getBookingsForDay = (day) =>
     sortByTime(bookings.filter(b => b.session_date && isSameDay(new Date(b.session_date), day)));
 
   const selectedDayBookings = getBookingsForDay(effectiveSelectedDate);
   const selectedDateStr = format(effectiveSelectedDate, 'yyyy-MM-dd');
-  const selectedDayOff = getArtistsOffForDate(availabilityRecords, artists, artistFilter, selectedDateStr);
+  const selectedDayOff = offByDate[selectedDateStr] || [];
 
   const WEEKDAYS = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Ndz'];
 
@@ -72,7 +82,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
           const dayBookings = getBookingsForDay(day);
           const isSelected = isSameDay(day, effectiveSelectedDate);
           const isToday = isSameDay(day, today);
-          const dayOff = getArtistsOffForDate(availabilityRecords, artists, artistFilter, format(day, 'yyyy-MM-dd'));
+          const dayOff = offByDate[format(day, 'yyyy-MM-dd')] || [];
           const isOffDay = dayOff.length > 0;
           // Full-day off = no time range on any entry; partial = at least one entry has a time range
           const isFullDayOff = isOffDay && dayOff.every(o => !o.timeRange);
