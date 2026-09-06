@@ -554,21 +554,23 @@ export default function DashboardBookings() {
       ) : (
         <div>
           <div className="space-y-6">
-            {/* Calendar — always on top, visible in every view */}
-            <BookingCalendar
-              bookings={calendarBookings}
-              onDayClick={handleDayClick}
-              selectedDate={selectedDate}
-              t={t}
-              artists={artists}
-              onAddBooking={handleNewBooking}
-              searchQuery={searchQuery}
-              onBookingClick={handleBookingClick}
-              availabilityRecords={availabilityRecords}
-              artistFilter={artistFilters}
-              healthStatusMap={healthStatusMap}
-              showSessionsList={viewMode === 'calendar' && !searchQuery.trim()}
-            />
+            {/* Calendar — only in monthly view */}
+            {viewMode === 'calendar' && (
+              <BookingCalendar
+                bookings={calendarBookings}
+                onDayClick={handleDayClick}
+                selectedDate={selectedDate}
+                t={t}
+                artists={artists}
+                onAddBooking={handleNewBooking}
+                searchQuery={searchQuery}
+                onBookingClick={handleBookingClick}
+                availabilityRecords={availabilityRecords}
+                artistFilter={artistFilters}
+                healthStatusMap={healthStatusMap}
+                showSessionsList={!searchQuery.trim()}
+              />
+            )}
 
             {/* Search results (calendar view + search) */}
             {viewMode === 'calendar' && searchQuery.trim() && (
