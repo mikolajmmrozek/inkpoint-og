@@ -189,6 +189,20 @@ export default function Dashboard() {
       .catch(() => {});
   }, []);
 
+  // Keep the document background in sync with the dashboard theme so the area
+  // behind the panel never leaks the dark public-site/html background.
+  useEffect(() => {
+    const rootBg = theme === 'light' ? '#F8F8F8' : '#0A0A0A';
+    document.documentElement.style.backgroundColor = rootBg;
+    document.body.style.backgroundColor = rootBg;
+    document.body.style.backgroundImage = 'none';
+    return () => {
+      document.documentElement.style.backgroundColor = '';
+      document.body.style.backgroundColor = '';
+      document.body.style.backgroundImage = '';
+    };
+  }, [theme]);
+
   useEffect(() => {
     if (!isLoadingAuth) {
       if (!user) {
