@@ -450,6 +450,28 @@ export default function DashboardBookings() {
           <button onClick={load} className="btn-oxblood" style={{ fontSize: '11px' }}>SPRÓBUJ PONOWNIE</button>
         </div>
       )}
+      {/* Floating New Session button — pinned bottom-right, above bottom nav */}
+      <button
+        onClick={handleNewBooking}
+        title="Nowa sesja"
+        className="fixed flex items-center justify-center transition-all"
+        style={{
+          right: '20px',
+          bottom: '80px',
+          zIndex: 40,
+          width: '56px',
+          height: '56px',
+          borderRadius: 'var(--radius)',
+          background: 'var(--brand)',
+          color: 'var(--btn-text, #F5F0EB)',
+          border: 'none',
+          cursor: 'pointer',
+          boxShadow: '0 8px 24px rgba(var(--brand-rgb) / 0.35)',
+        }}
+      >
+        <Plus size={22} />
+      </button>
+
       {/* Toolbar */}
       <div className="mb-4">
         {/* Row 1: view toggle + actions */}
@@ -502,9 +524,6 @@ export default function DashboardBookings() {
             statusOptions={viewMode === 'pending' ? ['pending', 'cancelled'] : STATUS_OPTIONS}
             t={t}
           />
-          <button onClick={handleNewBooking} className="flex items-center gap-2 btn-oxblood ml-auto" style={{ padding: '8px 14px' }}>
-            <Plus size={13} /> NOWA SESJA
-          </button>
         </div>
 
         {/* Row 3: search */}
