@@ -457,8 +457,8 @@ export default function DashboardBookings() {
         className="fixed flex items-center justify-center transition-all"
         style={{
           right: '20px',
-          bottom: '80px',
-          zIndex: 40,
+          bottom: '100px',
+          zIndex: 45,
           width: '56px',
           height: '56px',
           borderRadius: 'var(--radius)',
