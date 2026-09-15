@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, Legend } from 'recharts';
-import { TrendingUp, Users, Calendar, DollarSign } from 'lucide-react';
+import { TrendingUp, Users, Calendar, DollarSign, BarChart2, Wallet } from 'lucide-react';
+import TodaySettlementView from '@/components/dashboard/TodaySettlementView';
 
 const MONTHS_PL = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
 const MONTHS_FULL = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
@@ -32,6 +33,7 @@ export default function DashboardStats() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [breakdownView, setBreakdownView] = useState('monthly'); // 'monthly' | 'daily'
+  const [pageView, setPageView] = useState('stats'); // 'stats' | 'today'
 
   useEffect(() => {
     base44.entities.Artist.list().then(a => {
@@ -191,8 +193,37 @@ export default function DashboardStats() {
     </div>
   );
 
+  const ViewToggle = () => (
+    <div className="flex gap-1 mb-4" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+      {[{ key: 'stats', label: 'Statystyki', icon: BarChart2 }, { key: 'today', label: 'Rozliczenie dnia', icon: Wallet }].map(v => {
+        const Icon = v.icon;
+        const active = pageView === v.key;
+        return (
+          <button
+            key={v.key}
+            onClick={() => setPageView(v.key)}
+            className="flex items-center gap-2 px-4 py-2.5 transition-all"
+            style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', background: active ? 'rgb(var(--brand-rgb) /0.1)' : 'transparent', color: active ? 'var(--brand)' : t.muted }}
+          >
+            <Icon size={12} /> {v.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+
+  if (pageView === 'today') {
+    return (
+      <div>
+        <ViewToggle />
+        <TodaySettlementView t={t} theme={theme} />
+      </div>
+    );
+  }
+
   return (
     <div>
+      <ViewToggle />
       {/* Filters */}
       <div className="mb-4 flex items-center gap-3 flex-wrap">
           {/* Year */}
