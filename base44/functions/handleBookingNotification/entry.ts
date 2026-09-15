@@ -17,11 +17,27 @@ Deno.serve(async (req) => {
     const notifications = [];
 
     if (eventType === 'create') {
-      // New booking — notify all admins
-      if (booking.source === 'online_form') {
+      // Determine who created the booking so we never notify the creator.
+      const creatorIsClient = booking.source === 'online_form';
+      let creatorIsArtist = false;
+
+      if (booking.artist_id && booking.created_by_id) {
+        try {
+          const artistUser = await base44.asServiceRole.entities.User.filter({ 'data.artist_id': booking.artist_id }, null, 1);
+          if (artistUser.length > 0 && artistUser[0].id === booking.created_by_id) {
+            creatorIsArtist = true;
+          }
+        } catch (e) {}
+      }
+
+      const adminSelfCreated = booking.source === 'dashboard' && booking.created_by_id && !creatorIsArtist;
+
+      // Notify admins — unless an admin created it themselves.
+      if (!adminSelfCreated) {
+        const title = creatorIsClient ? 'Nowa rezerwacja online' : (creatorIsArtist ? 'Nowa rezerwacja od artysty' : 'Nowa rezerwacja');
         notifications.push({
           target_email: 'tattoo.wolsztyn@gmail.com',
-          title: 'Nowa rezerwacja online',
+          title,
           message: `${booking.client_name || 'Klient'} — ${booking.session_date || '—'}${booking.session_time ? ' o ' + booking.session_time : ''}`,
           category: 'booking',
           link_path: '/dashboard/bookings?view=pending',
@@ -29,26 +45,36 @@ Deno.serve(async (req) => {
           booking_id: booking.id,
         });
       }
-      // Notify the assigned artist on new booking — client (online) or admin created it,
-      // but NOT when the artist created it themselves.
-      if (booking.artist_id) {
+
+      // Notify the assigned artist — unless the artist created it themselves.
+      if (booking.artist_id && !creatorIsArtist) {
         try {
           const artistUser = await base44.asServiceRole.entities.User.filter({ 'data.artist_id': booking.artist_id }, null, 1);
           if (artistUser.length > 0 && artistUser[0].email) {
-            const artistSelfCreated = booking.source === 'dashboard' && booking.created_by_id && artistUser[0].id === booking.created_by_id;
-            if (!artistSelfCreated) {
-              notifications.push({
-                target_email: artistUser[0].email,
-                title: 'Nowa rezerwacja',
-                message: `Rezerwacja klienta ${booking.client_name || '—'} na ${booking.session_date || '—'}${booking.session_time ? ' o ' + booking.session_time : ''}`,
-                category: 'booking',
-                link_path: '/artist/schedule',
-                is_read: false,
-                booking_id: booking.id,
-              });
-            }
+            notifications.push({
+              target_email: artistUser[0].email,
+              title: 'Nowa rezerwacja',
+              message: `Rezerwacja klienta ${booking.client_name || '—'} na ${booking.session_date || '—'}${booking.session_time ? ' o ' + booking.session_time : ''}`,
+              category: 'booking',
+              link_path: '/artist/schedule',
+              is_read: false,
+              booking_id: booking.id,
+            });
           }
         } catch (e) {}
+      }
+
+      // Notify the client — unless the client created it themselves (online form).
+      if (!creatorIsClient && booking.client_email) {
+        notifications.push({
+          target_email: booking.client_email,
+          title: 'Nowa rezerwacja',
+          message: `Twoja rezerwacja na ${booking.session_date || '—'}${booking.session_time ? ' o ' + booking.session_time : ''} została utworzona.`,
+          category: 'booking',
+          link_path: '/panel/sessions',
+          is_read: false,
+          booking_id: booking.id,
+        });
       }
     } else if (eventType === 'update') {
       // Booking confirmed or completed — auto-mark admin notification as read
