@@ -147,6 +147,7 @@ export default function DashboardHome() {
       {!loading && (
         <TodayOverview
           bookings={allBookings}
+          artists={artists}
           t={t}
           theme={theme}
           onBookingUpdate={(updated) => setAllBookings(prev => prev.map(b => b.id === updated.id ? updated : b))}

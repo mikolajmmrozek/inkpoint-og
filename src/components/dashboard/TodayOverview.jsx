@@ -7,7 +7,7 @@ import { formatCompact } from '@/lib/formatNumber';
 
 const STATUS_COLORS = { pending: '#FF007F', confirmed: '#16a34a', completed: '#2563eb', cancelled: '#9ca3af' };
 
-export default function TodayOverview({ bookings, t, theme, onBookingUpdate }) {
+export default function TodayOverview({ bookings, t, theme, onBookingUpdate, artists }) {
   const { user } = useAuth();
   const [settlingBooking, setSettlingBooking] = useState(null);
 
@@ -18,6 +18,16 @@ export default function TodayOverview({ bookings, t, theme, onBookingUpdate }) {
   const toSettle = today.filter(b => !b.is_settled);
   const settledCount = today.filter(b => b.is_settled).length;
   const pct = potential > 0 ? Math.round((settled / potential) * 100) : (today.length > 0 && settledCount === today.length ? 100 : 0);
+
+  // Artist / studio split (based on each artist's cut percent)
+  const getCut = (b) => artists?.find(a => a.id === b.artist_id)?.artist_cut_percent ?? 60;
+  const artistShare = (b, amount) => Math.round(amount * getCut(b) / 100 * 100) / 100;
+  const potentialArtist = today.reduce((s, b) => s + artistShare(b, Number(b.final_amount || b.estimated_price || 0)), 0);
+  const potentialStudio = Math.round((potential - potentialArtist) * 100) / 100;
+  const settledArtist = today.filter(b => b.is_settled).reduce((s, b) => s + artistShare(b, Number(b.final_amount || 0)), 0);
+  const settledStudio = Math.round((settled - settledArtist) * 100) / 100;
+  const toSettleArtist = Math.round((potentialArtist - settledArtist) * 100) / 100;
+  const toSettleStudio = Math.round((potentialStudio - settledStudio) * 100) / 100;
 
   const mono = { fontFamily: 'var(--font-mono)' };
   const display = { fontFamily: 'var(--font-display)', fontWeight: 400 };
@@ -50,6 +60,7 @@ export default function TodayOverview({ bookings, t, theme, onBookingUpdate }) {
               <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Potencjalnie</p>
             </div>
             <p style={{ ...display, fontSize: '1.9rem', color: t.value, lineHeight: 1, letterSpacing: '0.02em' }}>{formatCompact(potential)} <span style={{ ...mono, fontSize: '11px', color: t.muted }}>PLN</span></p>
+            <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px' }}>Art: {formatCompact(potentialArtist)} · Studio: {formatCompact(potentialStudio)}</p>
           </div>
           <div>
             <div className="flex items-center gap-1.5 mb-1">
@@ -57,6 +68,7 @@ export default function TodayOverview({ bookings, t, theme, onBookingUpdate }) {
               <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Rozliczone</p>
             </div>
             <p style={{ ...display, fontSize: '1.9rem', color: '#16a34a', lineHeight: 1, letterSpacing: '0.02em' }}>{formatCompact(settled)} <span style={{ ...mono, fontSize: '11px', color: t.muted }}>PLN</span></p>
+            <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px' }}>Art: {formatCompact(settledArtist)} · Studio: {formatCompact(settledStudio)}</p>
           </div>
           <div>
             <div className="flex items-center gap-1.5 mb-1">
@@ -64,6 +76,7 @@ export default function TodayOverview({ bookings, t, theme, onBookingUpdate }) {
               <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Do rozliczenia</p>
             </div>
             <p style={{ ...display, fontSize: '1.9rem', color: toSettle.length > 0 ? '#f59e0b' : t.muted, lineHeight: 1, letterSpacing: '0.02em' }}>{toSettle.length} <span style={{ ...mono, fontSize: '11px', color: t.muted }}>sesji</span></p>
+            <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px' }}>Art: {formatCompact(toSettleArtist)} · Studio: {formatCompact(toSettleStudio)}</p>
           </div>
         </div>
 
