@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, CalendarPlus, Clock, FileText, UserPlus } from 'lucide-react';
 
-// Arc angles (degrees, measured from horizontal) fan the 4 options up-left of the FAB.
-const ARC = [168, 138, 108, 78];
-const R = 158;
+// Near-vertical stack with a slight leftward fan — keeps labels from overlapping.
+const STEP_Y = 72;
+const FAN_X = 12;
 
 export default function CreateMenuFAB({ onNewBooking, onNewAvailability, onNewHealthForm, onNewClient, theme }) {
   const [open, setOpen] = useState(false);
@@ -17,10 +17,10 @@ export default function CreateMenuFAB({ onNewBooking, onNewAvailability, onNewHe
     { icon: UserPlus, label: 'Klient', action: onNewClient },
   ];
 
-  const positions = ARC.map((angle) => {
-    const rad = (angle * Math.PI) / 180;
-    return { x: Math.round(R * Math.cos(rad)), y: -Math.round(R * Math.sin(rad)) };
-  });
+  const positions = options.map((_, i) => ({
+    x: -((i + 1) * FAN_X) - 4,
+    y: -((i + 1) * STEP_Y),
+  }));
 
   const handleSelect = (action) => { setOpen(false); action(); };
 
