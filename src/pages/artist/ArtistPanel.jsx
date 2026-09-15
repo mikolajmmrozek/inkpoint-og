@@ -9,6 +9,7 @@ import NotificationPanel from '@/components/panel/NotificationPanel';
 import NotificationSidebarItem from '@/components/panel/NotificationSidebarItem';
 import SidebarBadge from '@/components/panel/SidebarBadge';
 import { useBadgeCounts } from '@/hooks/useBadgeCounts';
+import { CreateMenuProvider } from '@/components/create/CreateMenuContext';
 
 export const ArtistThemeContext = createContext({ theme: 'dark', toggleTheme: () => {} });
 export const useArtistTheme = () => useContext(ArtistThemeContext);
@@ -227,6 +228,7 @@ export default function ArtistPanel() {
 
   return (
     <ArtistThemeContext.Provider value={{ theme, toggleTheme, artist }}>
+      <CreateMenuProvider role="artist" theme={theme} selfArtistId={artist?.id}>
       <div className="min-h-screen flex overflow-x-hidden" style={{ background: bg, color: textColor }}>
         <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} theme={theme} toggleTheme={toggleTheme} artist={artist} userEmail={user.email} onNotifClick={() => setNotifOpen(true)} collapsed={sidebarCollapsed} onToggleCollapse={toggleSidebarCollapse} />
 
@@ -269,6 +271,7 @@ export default function ArtistPanel() {
         <BottomNav theme={theme} role="artist" calendarPath="/artist/schedule" messagesPath="/artist/messages" notificationsPath="/artist/notifications" userEmail={user.email} />
         <NotificationPanel open={notifOpen} onClose={() => setNotifOpen(false)} userEmail={user.email} theme={theme} notificationsPath="/artist/notifications" />
       </div>
+      </CreateMenuProvider>
     </ArtistThemeContext.Provider>
   );
 }

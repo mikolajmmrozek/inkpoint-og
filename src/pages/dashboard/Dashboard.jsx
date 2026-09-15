@@ -10,6 +10,7 @@ import NotificationSidebarItem from '@/components/panel/NotificationSidebarItem'
 import SidebarBadge from '@/components/panel/SidebarBadge';
 import StudioAvatar from '@/components/panel/StudioAvatar';
 import { useBadgeCounts } from '@/hooks/useBadgeCounts';
+import { CreateMenuProvider } from '@/components/create/CreateMenuContext';
 
 export const ThemeContext = createContext({ theme: 'light', toggleTheme: () => {} });
 export const useTheme = () => useContext(ThemeContext);
@@ -250,6 +251,7 @@ export default function Dashboard() {
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      <CreateMenuProvider role="admin" theme={theme}>
       <div className="min-h-screen flex overflow-x-hidden" style={{ background: bg, color: textColor }}>
         <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} theme={theme} toggleTheme={toggleTheme} userEmail={user.email} onNotifClick={() => setNotifOpen(true)} collapsed={sidebarCollapsed} onToggleCollapse={toggleSidebarCollapse} />
 
@@ -284,6 +286,7 @@ export default function Dashboard() {
         <BottomNav theme={theme} role="admin" calendarPath="/dashboard/bookings" messagesPath="/dashboard/messages" notificationsPath="/dashboard/notifications" userEmail={user.email} />
         <NotificationPanel open={notifOpen} onClose={() => setNotifOpen(false)} userEmail={user.email} theme={theme} />
       </div>
+      </CreateMenuProvider>
     </ThemeContext.Provider>
   );
 }

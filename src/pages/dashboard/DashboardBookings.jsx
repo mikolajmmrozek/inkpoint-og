@@ -2,13 +2,12 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { AnimatePresence } from 'framer-motion';
-import { Plus, Calendar, List, Clock, ChevronLeft, ChevronRight, Search, X, Inbox } from 'lucide-react';
+import { Calendar, List, Clock, ChevronLeft, ChevronRight, Search, X, Inbox } from 'lucide-react';
 import { format, isSameDay, addDays, subDays } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import { useTheme } from './Dashboard';
 import BookingCalendar from '@/components/dashboard/BookingCalendar';
 import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
-import BookingModal from '@/components/dashboard/BookingModal';
 import DailyScheduleView from '@/components/dashboard/DailyScheduleView.jsx';
 import { getArtistsOffForDate } from '@/lib/bookingConflicts';
 import { recomputeClientTotalSessions } from '@/lib/clientStats';
@@ -17,6 +16,7 @@ import HealthFormBadge from '@/components/booking/HealthFormBadge';
 import GroupedBookingList from '@/components/booking/GroupedBookingList';
 import BookingFilters from '@/components/dashboard/BookingFilters';
 import { getThumbnailUrl } from '@/lib/thumbnail';
+import { useCreateMenu } from '@/components/create/CreateMenuContext';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -86,7 +86,7 @@ function BookingRow({ b, i, items, selected, setSelected, artists, t, healthStat
   );
 }
 
-function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPageBookings, listPageCount, listPage, setListPage, listTab, setListTab, selected, setSelected, artists, t, setEditingBooking, setShowModal, availabilityRecords, artistFilter, healthStatusMap }) {
+function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPageBookings, listPageCount, listPage, setListPage, listTab, setListTab, selected, setSelected, artists, t, onNewBooking, availabilityRecords, artistFilter, healthStatusMap }) {
   const getOffForDate = (dateStr) => getArtistsOffForDate(availabilityRecords, artists, artistFilter, dateStr);
   const todayStr = format(new Date(), 'yyyy-MM-dd');
 
@@ -97,7 +97,7 @@ function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPa
           {viewMode === 'calendar' ? 'BRAK SESJI W TEN DZIEŃ' : 'BRAK REZERWACJI'}
         </p>
         {viewMode === 'calendar' && selectedDate && (
-          <button onClick={() => { setEditingBooking(null); setShowModal(true); }} className="btn-oxblood mt-4" style={{ fontSize: '10px', padding: '8px 20px' }}>
+          <button onClick={onNewBooking} className="btn-oxblood mt-4" style={{ fontSize: '10px', padding: '8px 20px' }}>
             + DODAJ SESJĘ
           </button>
         )}
@@ -202,14 +202,25 @@ export default function DashboardBookings() {
   const artistMatch = (b) => artistFilters.length === 0 || artistFilters.includes(b.artist_id);
   const [viewMode, setViewMode] = useState(searchParams.get('view') || 'calendar');
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [showModal, setShowModal] = useState(false);
-  const [editingBooking, setEditingBooking] = useState(null);
   const [listPage, setListPage] = useState(0);
   const [listTab, setListTab] = useState('upcoming');
   const [searchQuery, setSearchQuery] = useState('');
 
   const [loadError, setLoadError] = useState(null);
   const loadedOnce = useRef(false);
+
+  const { newBooking, registerBookingsRefresh, registerAvailabilityRefresh } = useCreateMenu();
+
+  const refreshBookings = useCallback(async () => {
+    try { const data = await base44.entities.Booking.list('-session_date', 5000); setBookings(data); } catch (e) {}
+  }, []);
+  const refreshAvailability = useCallback(async () => {
+    try { const avail = await base44.entities.ArtistAvailability.list(); setAvailabilityRecords(avail); } catch (e) {}
+  }, []);
+  useEffect(() => {
+    registerBookingsRefresh(refreshBookings);
+    registerAvailabilityRefresh(refreshAvailability);
+  }, [registerBookingsRefresh, registerAvailabilityRefresh, refreshBookings, refreshAvailability]);
 
   const loadHealthForms = async () => {
     try {
@@ -284,15 +295,14 @@ export default function DashboardBookings() {
 
   const handleBookingClick = useCallback((b) => setSelected(b), []);
   const handleNewBookingRequest = useCallback(({ artist, time, date }) => {
-    setEditingBooking({
+    newBooking({
       _prefill: true,
       artist_id: artist.id,
       artist_name: artist.name,
       session_date: date,
       session_time: time,
     });
-    setShowModal(true);
-  }, []);
+  }, [newBooking]);
 
   const handleDayClick = (day) => {
     const dayDateStr = format(day, 'yyyy-MM-dd');
@@ -315,25 +325,8 @@ export default function DashboardBookings() {
     setSelected(null);
   };
 
-  const handleNewBooking = () => {
-    setEditingBooking(null);
-    setShowModal(true);
-  };
-
-  const handleEdit = (booking) => {
-    setEditingBooking(booking);
-    setShowModal(true);
-  };
-
-  const handleModalSaved = async () => {
-    setShowModal(false);
-    setEditingBooking(null);
-    // Only bookings change on save — refetch just them (fast), keep artists/availability/healthForms.
-    try {
-      const data = await base44.entities.Booking.list('-session_date', 5000);
-      setBookings(data);
-    } catch (e) { /* keep stale list on error */ }
-  };
+  const handleNewBooking = useCallback(() => newBooking(null), [newBooking]);
+  const handleEdit = useCallback((booking) => newBooking(booking), [newBooking]);
 
   const handleSearch = (q) => {
     setSearchQuery(q);
@@ -463,28 +456,6 @@ export default function DashboardBookings() {
           <button onClick={load} className="btn-oxblood" style={{ fontSize: '11px' }}>SPRÓBUJ PONOWNIE</button>
         </div>
       )}
-      {/* Floating New Session button — pinned bottom-right, above bottom nav */}
-      <button
-        onClick={handleNewBooking}
-        title="Nowa sesja"
-        className="fixed lg:hidden flex items-center justify-center transition-all"
-        style={{
-          right: '20px',
-          bottom: '100px',
-          zIndex: 45,
-          width: '56px',
-          height: '56px',
-          borderRadius: 'var(--radius)',
-          background: 'var(--brand)',
-          color: 'var(--btn-text, #F5F0EB)',
-          border: 'none',
-          cursor: 'pointer',
-          boxShadow: '0 8px 24px rgba(var(--brand-rgb) / 0.35)',
-        }}
-      >
-        <Plus size={22} />
-      </button>
-
       {/* Toolbar */}
       <div className="mb-4">
         {/* Row 1: view toggle + actions */}
@@ -537,9 +508,6 @@ export default function DashboardBookings() {
             statusOptions={viewMode === 'pending' ? ['pending', 'cancelled'] : STATUS_OPTIONS}
             t={t}
           />
-          <button onClick={handleNewBooking} className="hidden lg:flex items-center gap-2 btn-oxblood ml-auto" style={{ padding: '8px 14px' }}>
-            <Plus size={13} /> NOWA SESJA
-          </button>
         </div>
 
         {/* Row 3: search */}
@@ -712,8 +680,7 @@ export default function DashboardBookings() {
                     setSelected={setSelected}
                     artists={artists}
                     t={t}
-                    setEditingBooking={setEditingBooking}
-                    setShowModal={setShowModal}
+                    onNewBooking={handleNewBooking}
                     availabilityRecords={availabilityRecords}
                     artistFilter={artistFilters}
                     healthStatusMap={healthStatusMap}
@@ -760,18 +727,6 @@ export default function DashboardBookings() {
             )}
           </AnimatePresence>
 
-          {/* Modal */}
-          <AnimatePresence>
-            {showModal && (
-              <BookingModal
-                booking={editingBooking}
-                defaultDate={selectedDate ? format(selectedDate, 'yyyy-MM-dd') : ''}
-                onClose={() => { setShowModal(false); setEditingBooking(null); }}
-                onSaved={handleModalSaved}
-                t={t}
-              />
-            )}
-          </AnimatePresence>
         </div>
       )}
     </div>

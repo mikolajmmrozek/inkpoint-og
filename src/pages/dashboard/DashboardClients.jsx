@@ -11,6 +11,7 @@ import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModa
 import StatsTile from '@/components/dashboard/StatsTile';
 import { formatCompact } from '@/lib/formatNumber';
 import ClientMessageButton from '@/components/dashboard/ClientMessageButton';
+import { useCreateMenu } from '@/components/create/CreateMenuContext';
 
 const inputStyle = {
   background: 'transparent',
@@ -51,6 +52,12 @@ export default function DashboardClients() {
   const [deleteConfirm, setDeleteConfirm] = useState(null); // client to delete
   const [users, setUsers] = useState([]);
   const [inviteStatus, setInviteStatus] = useState({}); // { [clientId]: 'inviting' | 'invited' | 'error' }
+
+  const { registerClientsRefresh } = useCreateMenu();
+  const refreshClients = async () => {
+    try { const data = await base44.entities.Client.list('-created_date', 5000); setClients(data); } catch (e) {}
+  };
+  useEffect(() => { registerClientsRefresh(refreshClients); }, [registerClientsRefresh]);
 
   const load = async () => {
     const [clientData, bookingData, formData, userData] = await Promise.all([

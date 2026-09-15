@@ -8,6 +8,7 @@ import NotificationBell from '@/components/panel/NotificationBell';
 import NotificationPanel from '@/components/panel/NotificationPanel';
 import SidebarBadge from '@/components/panel/SidebarBadge';
 import { useBadgeCounts } from '@/hooks/useBadgeCounts';
+import { CreateMenuProvider } from '@/components/create/CreateMenuContext';
 
 export const ClientThemeContext = createContext({ theme: 'dark', toggleTheme: () => {} });
 export const useClientTheme = () => useContext(ClientThemeContext);
@@ -159,6 +160,7 @@ export default function ClientPanel() {
 
   return (
     <ClientThemeContext.Provider value={{ theme, toggleTheme, client }}>
+      <CreateMenuProvider role="user" theme={theme}>
       <div className="min-h-screen flex" style={{ background: bg, color: textColor }}>
         <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} theme={theme} toggleTheme={toggleTheme} clientName={clientName} userEmail={user.email} />
         <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
@@ -184,6 +186,7 @@ export default function ClientPanel() {
         <BottomNav theme={theme} role="user" calendarPath="/panel/sessions" messagesPath="/panel/messages" notificationsPath="/panel/notifications" userEmail={user.email} />
         <NotificationPanel open={notifOpen} onClose={() => setNotifOpen(false)} userEmail={user.email} theme={theme} />
       </div>
+      </CreateMenuProvider>
     </ClientThemeContext.Provider>
   );
 }
