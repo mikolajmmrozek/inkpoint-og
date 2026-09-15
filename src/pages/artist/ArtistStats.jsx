@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const MONTHS_PL = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
+const MONTHS_FULL = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
 
 export default function ArtistStats() {
   const { artist, theme } = useOutletContext();
@@ -11,6 +12,7 @@ export default function ArtistStats() {
   const [loading, setLoading] = useState(true);
   const [year, setYear] = useState(new Date().getFullYear());
   const [viewMode, setViewMode] = useState('monthly'); // 'monthly' | 'daily'
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
 
   const t = theme === 'light'
     ? { title: '#111111', muted: 'rgba(0,0,0,0.4)', cardBg: '#FFFFFF', cardBorder: '#E5E5E5', text: '#111111', rowBorder: '#E5E5E5' }
@@ -58,6 +60,19 @@ export default function ArtistStats() {
   const totalRevenue = monthlyData.reduce((s, m) => s + m.revenue, 0);
   const totalEarning = monthlyData.reduce((s, m) => s + m.myEarning, 0);
 
+  // Selected month summary
+  const monthBookings = useMemo(() => {
+    const prefix = `${year}-${String(selectedMonth + 1).padStart(2, '0')}`;
+    return bookings.filter(b => b.session_date?.startsWith(prefix) && b.status !== 'cancelled');
+  }, [bookings, year, selectedMonth]);
+  const monthCompleted = monthBookings.filter(b => b.status === 'completed');
+  const monthRemaining = monthBookings.filter(b => b.status !== 'completed');
+  const monthSessions = monthBookings.length;
+  const monthDone = monthCompleted.length;
+  const monthLeft = monthRemaining.length;
+  const monthEarned = monthCompleted.reduce((s, b) => s + Math.round((b.estimated_price || 0) * cut / 100), 0);
+  const monthToEarn = monthRemaining.reduce((s, b) => s + Math.round((b.estimated_price || 0) * cut / 100), 0);
+
   return (
     <div>
       {/* Year selector */}
@@ -100,6 +115,42 @@ export default function ArtistStats() {
             <Bar dataKey="myEarning" fill="var(--brand)" radius={[2, 2, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
+      </div>
+
+      {/* Month summary tiles */}
+      <div className="mb-8">
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Podsumowanie miesiąca:</p>
+          <select
+            value={selectedMonth}
+            onChange={e => setSelectedMonth(Number(e.target.value))}
+            style={{ background: t.cardBg, border: `0.5px solid ${t.cardBorder}`, color: t.text, fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.06em', padding: '6px 12px', cursor: 'pointer', outline: 'none', colorScheme: theme === 'light' ? 'light' : 'dark' }}
+          >
+            {MONTHS_FULL.map((m, i) => <option key={i} value={i}>{m}</option>)}
+          </select>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <div className="p-4" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: t.text, lineHeight: 1, letterSpacing: '0.04em' }}>{monthSessions}</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px' }}>Sesje w miesiącu</p>
+          </div>
+          <div className="p-4" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: '#16a34a', lineHeight: 1, letterSpacing: '0.04em' }}>{monthDone}</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px' }}>Zrobione</p>
+          </div>
+          <div className="p-4" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: '#f59e0b', lineHeight: 1, letterSpacing: '0.04em' }}>{monthLeft}</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px' }}>Do zrobienia</p>
+          </div>
+          <div className="p-4" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: '#16a34a', lineHeight: 1, letterSpacing: '0.04em' }}>{monthEarned} <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted }}>zł</span></p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px' }}>Zarobione</p>
+          </div>
+          <div className="p-4" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: 'var(--brand)', lineHeight: 1, letterSpacing: '0.04em' }}>{monthToEarn} <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted }}>zł</span></p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px' }}>Do zarobienia</p>
+          </div>
+        </div>
       </div>
 
       {/* View toggle */}
