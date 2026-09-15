@@ -477,6 +477,13 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
           >
             {copiedGeneral ? '✓ SKOPIOWANO' : 'KOPIUJ'}
           </button>
+          <button
+            onClick={() => openHealthFormQRPage(generalFormLink)}
+            title="Pokaż kod QR do ankiety"
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', border: `0.5px solid var(--brand)`, color: 'var(--brand)', cursor: 'pointer', background: 'transparent' }}
+          >
+            <QrCode size={13} />
+          </button>
           <a href={generalFormLink} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', border: `0.5px solid ${t.border}`, color: t.muted, cursor: 'pointer' }}>
             <ExternalLink size={13} />
           </a>
