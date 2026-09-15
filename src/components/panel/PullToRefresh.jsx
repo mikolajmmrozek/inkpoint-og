@@ -25,9 +25,15 @@ export default function PullToRefresh({ onRefresh, className, style, children, t
     const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     if (!isTouch) return;
 
+    // The panel layouts scroll on the window/document, not always on `el`
+    // itself — so detect the real scroll position whichever element scrolls.
+    const getScrollTop = () => {
+      if (el.scrollHeight > el.clientHeight) return el.scrollTop;
+      return window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    };
     const onStart = (e) => {
       if (refreshingRef.current) return;
-      if (el.scrollTop <= 0) {
+      if (getScrollTop() <= 0) {
         startY.current = e.touches[0].clientY;
         pulling.current = true;
         pullRef.current = 0;
@@ -38,7 +44,7 @@ export default function PullToRefresh({ onRefresh, className, style, children, t
     const onMove = (e) => {
       if (!pulling.current || refreshingRef.current) return;
       const dy = e.touches[0].clientY - startY.current;
-      if (dy > 0 && el.scrollTop <= 0) {
+      if (dy > 0 && getScrollTop() <= 0) {
         const resisted = Math.min(dy * 0.5, threshold * 1.6);
         pullRef.current = resisted;
         setPull(resisted);
