@@ -578,7 +578,7 @@ export default function DashboardBookings() {
       ) : (
         <div>
           <div className="space-y-6">
-            {/* Calendar — monthly view */}
+            {/* Calendar — monthly view (search bar injected above session list) */}
             {viewMode === 'calendar' && (
               <BookingCalendar
                 bookings={calendarBookings}
@@ -593,26 +593,30 @@ export default function DashboardBookings() {
                 artistFilter={artistFilters}
                 healthStatusMap={healthStatusMap}
                 showSessionsList={!searchQuery.trim()}
+                searchBar={searchBar}
               />
             )}
 
-            {/* Day plan view */}
+            {/* Day plan view — search bar above the schedule */}
             {viewMode === 'day' && (
-              <DailyScheduleView
-                bookings={searchQuery.trim() ? dayViewBookings : calendarBookings}
-                artists={artists}
-                selectedDate={selectedDate || new Date()}
-                onDateChange={(day) => setSelectedDate(day)}
-                onBookingClick={handleBookingClick}
-                onNewBookingRequest={handleNewBookingRequest}
-                t={t}
-                artistFilter={artistFilters}
-                availabilityRecords={availabilityRecords}
-              />
+              <>
+                {searchBar}
+                <DailyScheduleView
+                  bookings={searchQuery.trim() ? dayViewBookings : calendarBookings}
+                  artists={artists}
+                  selectedDate={selectedDate || new Date()}
+                  onDateChange={(day) => setSelectedDate(day)}
+                  onBookingClick={handleBookingClick}
+                  onNewBookingRequest={handleNewBookingRequest}
+                  t={t}
+                  artistFilter={artistFilters}
+                  availabilityRecords={availabilityRecords}
+                />
+              </>
             )}
 
-            {/* Search bar — below calendar / day plan, above the list */}
-            {viewMode !== 'pending' && searchBar}
+            {/* Search bar — above the list (list view only) */}
+            {viewMode === 'list' && searchBar}
 
             {/* Search results — nearest first, split into upcoming / past */}
             {searchQuery.trim() && viewMode !== 'pending' && (
