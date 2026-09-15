@@ -209,7 +209,10 @@ export default function DashboardBookings() {
   const [loadError, setLoadError] = useState(null);
   const loadedOnce = useRef(false);
 
-  const { newBooking, registerBookingsRefresh, registerAvailabilityRefresh } = useCreateMenu();
+  const createMenu = useCreateMenu() || {};
+  const newBooking = createMenu.newBooking || (() => {});
+  const registerBookingsRefresh = createMenu.registerBookingsRefresh || (() => {});
+  const registerAvailabilityRefresh = createMenu.registerAvailabilityRefresh || (() => {});
 
   const refreshBookings = useCallback(async () => {
     try { const data = await base44.entities.Booking.list('-session_date', 5000); setBookings(data); } catch (e) {}
