@@ -9,6 +9,7 @@ import { useTheme } from './Dashboard';
 import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
 import BookingModal from '@/components/dashboard/BookingModal';
 import HealthFormBadge from '@/components/booking/HealthFormBadge';
+import TodayOverview from '@/components/dashboard/TodayOverview';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { buildHealthFormStatusMap, resolveBookingHealthStatus } from '@/lib/healthFormStatus';
 import { pluralSesji } from '@/utils';
@@ -141,6 +142,16 @@ export default function DashboardHome() {
           );
         })}
       </div>
+
+      {/* Today's cash + settlement overview */}
+      {!loading && (
+        <TodayOverview
+          bookings={allBookings}
+          t={t}
+          theme={theme}
+          onBookingUpdate={(updated) => setAllBookings(prev => prev.map(b => b.id === updated.id ? updated : b))}
+        />
+      )}
 
       {/* Draft forms section */}
       {!loading && draftForms.length > 0 && (
