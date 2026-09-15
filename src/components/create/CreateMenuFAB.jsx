@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, CalendarPlus, Clock, FileText, UserPlus } from 'lucide-react';
 
 // Arc angles (degrees, measured from horizontal) fan the 4 options up-left of the FAB.
-const ARC = [98, 120, 142, 164];
-const R = 118;
+const ARC = [168, 138, 108, 78];
+const R = 158;
 
 export default function CreateMenuFAB({ onNewBooking, onNewAvailability, onNewHealthForm, onNewClient, theme }) {
   const [open, setOpen] = useState(false);
@@ -12,8 +12,8 @@ export default function CreateMenuFAB({ onNewBooking, onNewAvailability, onNewHe
 
   const options = [
     { icon: CalendarPlus, label: 'Rezerwacja', action: onNewBooking },
-    { icon: Clock, label: 'Dyspozycja', action: onNewAvailability },
     { icon: FileText, label: 'Ankieta', action: onNewHealthForm },
+    { icon: Clock, label: 'Dyspozycja', action: onNewAvailability },
     { icon: UserPlus, label: 'Klient', action: onNewClient },
   ];
 
