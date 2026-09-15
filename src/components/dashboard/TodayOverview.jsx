@@ -126,7 +126,9 @@ export default function TodayOverview({ bookings, t, theme, onBookingUpdate, art
           user={user}
           onClose={() => setSettlingBooking(null)}
           onSettled={handleSettled}
-          t={t}
+          t={theme === 'light'
+            ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.62)' }
+            : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.72)' }}
         />
       )}
     </div>
