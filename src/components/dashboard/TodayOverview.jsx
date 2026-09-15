@@ -15,7 +15,7 @@ const sumMethod = (b, method) => {
   return method === 'cash' ? Number(b.final_amount || b.estimated_price || 0) : 0;
 };
 
-export default function TodayOverview({ bookings, t, theme, onBookingUpdate, artists }) {
+export default function TodayOverview({ bookings, t, theme, onBookingUpdate, artists, variant }) {
   const { user } = useAuth();
   const [settlingBooking, setSettlingBooking] = useState(null);
 
@@ -47,11 +47,14 @@ export default function TodayOverview({ bookings, t, theme, onBookingUpdate, art
   const mono = { fontFamily: 'var(--font-mono)' };
   const display = { fontFamily: 'var(--font-display)', fontWeight: 400 };
   const todayLabel = new Date().toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' });
+  const fmt = (n) => Number(n || 0).toLocaleString('pl-PL');
 
   const handleSettled = (updated) => {
     setSettlingBooking(null);
     if (onBookingUpdate) onBookingUpdate(updated);
   };
+
+  const headerTitle = variant === 'artist' ? 'Rozliczenie dnia' : 'Kasa dnia';
 
   return (
     <div className="mb-10">
@@ -59,70 +62,104 @@ export default function TodayOverview({ bookings, t, theme, onBookingUpdate, art
       <div className="flex items-center justify-between mb-1.5">
         <div className="flex items-center gap-2">
           <Wallet size={13} color="var(--brand)" />
-          <p style={{ ...mono, fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.18em', textTransform: 'uppercase' }}>Kasa dnia</p>
+          <p style={{ ...mono, fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.18em', textTransform: 'uppercase' }}>{headerTitle}</p>
         </div>
-        <Link to="/dashboard/stats" className="flex items-center gap-1" style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-          STATYSTYKI <ArrowRight size={11} />
-        </Link>
+        {variant !== 'artist' && (
+          <Link to="/dashboard/stats" className="flex items-center gap-1" style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            STATYSTYKI <ArrowRight size={11} />
+          </Link>
+        )}
       </div>
       <p style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>{todayLabel}</p>
       <div className="p-6 mb-4" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
 
-        <div className="grid grid-cols-3 gap-4 mb-5">
-          <div>
-            <div className="flex items-center gap-1.5 mb-1" style={{ minHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden' }}>
-              <TrendingUp size={10} color={t.muted} />
-              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Potencjalnie</p>
+        {variant === 'artist' ? (
+          /* Artist view: Mój zarobek · Studio · Do rozliczenia (exact amounts) */
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <div className="flex items-center gap-1.5 mb-1" style={{ minHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden' }}>
+                <Wallet size={10} color="var(--brand)" />
+                <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Mój zarobek</p>
+              </div>
+              <p style={{ ...display, fontSize: '1.9rem', color: 'var(--brand)', lineHeight: 1, letterSpacing: '0.02em' }}>{fmt(settledArtist)} <span style={{ ...mono, fontSize: '11px', color: t.muted }}>PLN</span></p>
+              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px' }}>do odebrania: {fmt(toSettleArtist)} PLN</p>
             </div>
-            <p style={{ ...display, fontSize: '1.9rem', color: t.value, lineHeight: 1, letterSpacing: '0.02em' }}>{formatCompact(potential)} <span style={{ ...mono, fontSize: '11px', color: t.muted }}>PLN</span></p>
-            <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Art: {formatCompact(potentialArtist)} · Studio: {formatCompact(potentialStudio)}</p>
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5 mb-1" style={{ minHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden' }}>
-              <Check size={10} color="#16a34a" />
-              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Rozliczone</p>
+            <div>
+              <div className="flex items-center gap-1.5 mb-1" style={{ minHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden' }}>
+                <TrendingUp size={10} color={t.muted} />
+                <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Studio</p>
+              </div>
+              <p style={{ ...display, fontSize: '1.9rem', color: t.value, lineHeight: 1, letterSpacing: '0.02em' }}>{fmt(settledStudio)} <span style={{ ...mono, fontSize: '11px', color: t.muted }}>PLN</span></p>
+              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px' }}>do odebrania: {fmt(toSettleStudio)} PLN</p>
             </div>
-            <p style={{ ...display, fontSize: '1.9rem', color: '#16a34a', lineHeight: 1, letterSpacing: '0.02em' }}>{formatCompact(settled)} <span style={{ ...mono, fontSize: '11px', color: t.muted }}>PLN</span></p>
-            <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Art: {formatCompact(settledArtist)} · Studio: {formatCompact(settledStudio)}</p>
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5 mb-1" style={{ minHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden' }}>
-              <Clock size={10} color={toSettle.length > 0 ? '#f59e0b' : t.muted} />
-              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Do rozliczenia</p>
+            <div>
+              <div className="flex items-center gap-1.5 mb-1" style={{ minHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden' }}>
+                <Clock size={10} color={toSettle.length > 0 ? '#f59e0b' : t.muted} />
+                <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Do rozliczenia</p>
+              </div>
+              <p style={{ ...display, fontSize: '1.9rem', color: toSettle.length > 0 ? '#f59e0b' : t.muted, lineHeight: 1, letterSpacing: '0.02em' }}>{toSettle.length} <span style={{ ...mono, fontSize: '11px', color: t.muted }}>sesji</span></p>
+              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Art: {fmt(toSettleArtist)} · Studio: {fmt(toSettleStudio)}</p>
             </div>
-            <p style={{ ...display, fontSize: '1.9rem', color: toSettle.length > 0 ? '#f59e0b' : t.muted, lineHeight: 1, letterSpacing: '0.02em' }}>{toSettle.length} <span style={{ ...mono, fontSize: '11px', color: t.muted }}>sesji</span></p>
-            <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Art: {formatCompact(toSettleArtist)} · Studio: {formatCompact(toSettleStudio)}</p>
           </div>
-        </div>
-
-        {/* Payment methods in kasa — simplified */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-5">
-          {[
-            { label: 'Gotówka', value: cashInKasa, color: PAYMENT_COLORS.cash },
-            { label: 'Karta', value: cardTotal, color: PAYMENT_COLORS.card },
-            { label: 'Voucher', value: voucherTotal, color: PAYMENT_COLORS.voucher },
-            { label: 'Przedpłaty', value: depositsTotal, color: t.muted },
-          ].map((m, i) => (
-            <div key={i} className="flex items-center gap-2 px-3 py-2" style={{ border: `0.5px solid ${t.cardBorder}`, background: 'rgb(var(--brand-rgb) /0.03)', borderRadius: 'var(--radius)' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: m.color, flexShrink: 0 }} />
-              <div className="min-w-0">
-                <p style={{ ...mono, fontSize: '7px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{m.label}</p>
-                <p style={{ ...mono, fontSize: '12px', color: t.value, fontWeight: 600 }}>{formatCompact(m.value)} PLN</p>
+        ) : (
+          <>
+            <div className="grid grid-cols-3 gap-4 mb-5">
+              <div>
+                <div className="flex items-center gap-1.5 mb-1" style={{ minHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden' }}>
+                  <TrendingUp size={10} color={t.muted} />
+                  <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Potencjalnie</p>
+                </div>
+                <p style={{ ...display, fontSize: '1.9rem', color: t.value, lineHeight: 1, letterSpacing: '0.02em' }}>{formatCompact(potential)} <span style={{ ...mono, fontSize: '11px', color: t.muted }}>PLN</span></p>
+                <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Art: {formatCompact(potentialArtist)} · Studio: {formatCompact(potentialStudio)}</p>
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5 mb-1" style={{ minHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden' }}>
+                  <Check size={10} color="#16a34a" />
+                  <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Rozliczone</p>
+                </div>
+                <p style={{ ...display, fontSize: '1.9rem', color: '#16a34a', lineHeight: 1, letterSpacing: '0.02em' }}>{formatCompact(settled)} <span style={{ ...mono, fontSize: '11px', color: t.muted }}>PLN</span></p>
+                <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Art: {formatCompact(settledArtist)} · Studio: {formatCompact(settledStudio)}</p>
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5 mb-1" style={{ minHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden' }}>
+                  <Clock size={10} color={toSettle.length > 0 ? '#f59e0b' : t.muted} />
+                  <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Do rozliczenia</p>
+                </div>
+                <p style={{ ...display, fontSize: '1.9rem', color: toSettle.length > 0 ? '#f59e0b' : t.muted, lineHeight: 1, letterSpacing: '0.02em' }}>{toSettle.length} <span style={{ ...mono, fontSize: '11px', color: t.muted }}>sesji</span></p>
+                <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Art: {formatCompact(toSettleArtist)} · Studio: {formatCompact(toSettleStudio)}</p>
               </div>
             </div>
-          ))}
-        </div>
 
-        {/* Progress bar */}
-        <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <span style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Postęp rozliczenia</span>
-            <span style={{ ...mono, fontSize: '9px', color: t.muted }}>{settledCount}/{today.length} · {pct}%</span>
-          </div>
-          <div style={{ height: '4px', background: t.border, borderRadius: 'var(--radius)', overflow: 'hidden' }}>
-            <div style={{ width: `${pct}%`, height: '100%', background: 'var(--brand)', transition: 'width 0.5s ease' }} />
-          </div>
-        </div>
+            {/* Payment methods in kasa — simplified */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-5">
+              {[
+                { label: 'Gotówka', value: cashInKasa, color: PAYMENT_COLORS.cash },
+                { label: 'Karta', value: cardTotal, color: PAYMENT_COLORS.card },
+                { label: 'Voucher', value: voucherTotal, color: PAYMENT_COLORS.voucher },
+                { label: 'Przedpłaty', value: depositsTotal, color: t.muted },
+              ].map((m, i) => (
+                <div key={i} className="flex items-center gap-2 px-3 py-2" style={{ border: `0.5px solid ${t.cardBorder}`, background: 'rgb(var(--brand-rgb) /0.03)', borderRadius: 'var(--radius)' }}>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: m.color, flexShrink: 0 }} />
+                  <div className="min-w-0">
+                    <p style={{ ...mono, fontSize: '7px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{m.label}</p>
+                    <p style={{ ...mono, fontSize: '12px', color: t.value, fontWeight: 600 }}>{formatCompact(m.value)} PLN</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Progress bar */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <span style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Postęp rozliczenia</span>
+                <span style={{ ...mono, fontSize: '9px', color: t.muted }}>{settledCount}/{today.length} · {pct}%</span>
+              </div>
+              <div style={{ height: '4px', background: t.border, borderRadius: 'var(--radius)', overflow: 'hidden' }}>
+                <div style={{ width: `${pct}%`, height: '100%', background: 'var(--brand)', transition: 'width 0.5s ease' }} />
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* To-settle list */}

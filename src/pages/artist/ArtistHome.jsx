@@ -560,16 +560,7 @@ export default function ArtistHome() {
         </h1>
       </div>
 
-      {/* Rozliczenie dnia — always visible */}
-      <TodayOverview
-        bookings={bookings}
-        t={t}
-        theme={theme}
-        artists={[artist]}
-        onBookingUpdate={handleSettled}
-      />
-
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
         {KPI.map((kpi, i) => {
           const Icon = kpi.icon;
           return (
@@ -588,6 +579,16 @@ export default function ArtistHome() {
           );
         })}
       </div>
+
+      {/* Rozliczenie dnia — under monthly earnings */}
+      <TodayOverview
+        bookings={bookings}
+        t={t}
+        theme={theme}
+        artists={[artist]}
+        onBookingUpdate={handleSettled}
+        variant="artist"
+      />
 
       <div>
         <div className="flex items-center justify-between mb-4">
