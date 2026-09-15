@@ -475,13 +475,6 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
           >
             {copiedGeneral ? '✓ SKOPIOWANO' : 'KOPIUJ'}
           </button>
-          <button
-            onClick={() => openHealthFormQRPage(generalFormLink)}
-            title="Pokaż kod QR do ankiety"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', border: `0.5px solid var(--brand)`, color: 'var(--brand)', cursor: 'pointer', background: 'transparent' }}
-          >
-            <QrCode size={13} />
-          </button>
           <a href={generalFormLink} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', border: `0.5px solid ${t.border}`, color: t.muted, cursor: 'pointer' }}>
             <ExternalLink size={13} />
           </a>
@@ -526,12 +519,6 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
                   style={{ color: t.muted, display: 'flex', alignItems: 'center' }}>
                   <ExternalLink size={12} />
                 </a>
-                <button onClick={() => openHealthFormQRPage(getFormLink(b))}
-                  title="Pokaż kod QR do ankiety"
-                  style={{ color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                >
-                  <QrCode size={12} />
-                </button>
                 <button onClick={() => copyLink(b)}
                   style={{ ...mono, fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${copiedId === b.id ? '#16a34a' : t.border}`, color: copiedId === b.id ? '#16a34a' : t.muted, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <Copy size={10} /> {copiedId === b.id ? 'SKOPIOWANO' : 'KOPIUJ LINK'}

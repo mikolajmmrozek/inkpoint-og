@@ -6,6 +6,7 @@ import CreateMenuFAB from './CreateMenuFAB';
 import BookingModal from '@/components/dashboard/BookingModal';
 import QuickAvailabilityModal from './QuickAvailabilityModal';
 import QuickClientModal from './QuickClientModal';
+import { openHealthFormQRPage } from '@/lib/qrPage';
 
 const CreateMenuContext = createContext(null);
 export const useCreateMenu = () => useContext(CreateMenuContext);
@@ -35,7 +36,9 @@ export function CreateMenuProvider({ children, role, theme, selfArtistId }) {
     setAction('availability');
   }, [role, selfArtistId]);
   const newClient = useCallback(() => setAction('client'), []);
-  const newHealthForm = useCallback(() => navigate('/health-form'), [navigate]);
+  const newHealthForm = useCallback(() => {
+    openHealthFormQRPage(`${window.location.origin}/health-form`);
+  }, []);
 
   const closeAll = () => { setAction(null); setBookingPrefill(null); setAvailPrefill(null); };
 
