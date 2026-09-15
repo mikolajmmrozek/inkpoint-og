@@ -21,9 +21,14 @@ const inputStyle = {
 };
 
 export default function SettlementModal({ booking, user, onClose, onSettled, t }) {
-  const [finalAmount, setFinalAmount] = useState(booking?.estimated_price || '');
+  const isEditing = booking?.is_settled === true;
+  const [finalAmount, setFinalAmount] = useState(booking?.final_amount || booking?.estimated_price || '');
   const [depositAmount, setDepositAmount] = useState(booking?.deposit_amount || 0);
-  const [payments, setPayments] = useState([{ method: 'cash', amount: '' }]);
+  const [payments, setPayments] = useState(
+    booking?.payment_breakdown?.length
+      ? booking.payment_breakdown.map(p => ({ method: p.method, amount: String(p.amount) }))
+      : [{ method: 'cash', amount: '' }]
+  );
   const [saving, setSaving] = useState(false);
 
   const finalNum = Number(finalAmount) || 0;
@@ -82,7 +87,7 @@ export default function SettlementModal({ booking, user, onClose, onSettled, t }
         <div className="flex justify-between items-center mb-6">
           <div>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>
-              ROZLICZENIE SESJI
+              {isEditing ? 'EDYCJA ROZLICZENIA' : 'ROZLICZENIE SESJI'}
             </p>
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
               {booking?.client_name}
@@ -186,7 +191,7 @@ export default function SettlementModal({ booking, user, onClose, onSettled, t }
 
         <div className="flex gap-4 mt-8 pt-6" style={{ borderTop: `0.5px solid ${t.border}` }}>
           <button onClick={handleSettle} disabled={!isValid || saving} className="btn-oxblood flex-1 flex items-center justify-center gap-2" style={{ opacity: (!isValid || saving) ? 0.5 : 1 }}>
-            {saving ? 'ROZLICZANIE...' : <><Check size={13} /> ROZLICZ I ZAKOŃCZ</>}
+            {saving ? 'ZAPISYWANIE...' : <><Check size={13} /> {isEditing ? 'ZAPISZ ROZLICZENIE' : 'ROZLICZ I ZAKOŃCZ'}</>}
           </button>
           <button onClick={onClose} className="btn-ghost-parchment">ANULUJ</button>
         </div>

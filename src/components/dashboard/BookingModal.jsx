@@ -401,7 +401,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
   });
 
   const label = (text) => (
-    <label className="block mb-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>{text}</label>
+    <label className="block mb-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{text}</label>
   );
 
   return (
@@ -638,7 +638,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
             <div className="mb-4">
               <div>{label('Data *')}<input {...inp('session_date', 'date')} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }} /></div>
             </div>
-            <div className="grid grid-cols-4 gap-6 mb-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4 items-end">
               <div>
                 {label('Godz. start')}
                 <select

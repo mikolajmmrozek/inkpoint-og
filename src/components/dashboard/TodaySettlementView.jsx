@@ -336,9 +336,13 @@ export default function TodaySettlementView({ t, theme }) {
                                   <p style={{ ...mono, fontSize: '8px', color: '#16a34a' }}>→ {bCut.toLocaleString('pl-PL')} PLN</p>
                                 </div>
                                 {settled ? (
-                                  <span style={{ ...mono, fontSize: '8px', color: '#16a34a', letterSpacing: '0.1em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
-                                    <Check size={12} /> ROZLICZONO
-                                  </span>
+                                  <button
+                                    onClick={() => setSettlingBooking(b)}
+                                    className="flex items-center gap-1"
+                                    style={{ ...mono, fontSize: '8px', color: '#16a34a', letterSpacing: '0.1em', textTransform: 'uppercase', border: '0.5px solid rgba(22,163,74,0.4)', padding: '5px 10px', cursor: 'pointer', flexShrink: 0, background: 'transparent' }}
+                                  >
+                                    <Check size={11} /> EDYTUJ
+                                  </button>
                                 ) : b.status === 'cancelled' ? (
                                   <span style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', flexShrink: 0 }}>ANULOWANA</span>
                                 ) : (
