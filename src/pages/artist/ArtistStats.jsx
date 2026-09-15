@@ -92,7 +92,9 @@ export default function ArtistStats() {
             <XAxis dataKey="label" tick={{ fontFamily: 'var(--font-mono)', fontSize: 9, fill: t.muted }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fontFamily: 'var(--font-mono)', fontSize: 9, fill: t.muted }} axisLine={false} tickLine={false} />
             <Tooltip
-              contentStyle={{ background: '#0A0A0A', border: '0.5px solid #262626', fontFamily: 'var(--font-mono)', fontSize: '10px' }}
+              contentStyle={{ background: t.cardBg, border: `0.5px solid ${t.cardBorder}`, fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.text, borderRadius: 'var(--radius)' }}
+              itemStyle={{ color: t.text }}
+              labelStyle={{ color: t.muted, fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}
               formatter={(value) => [`${value} zł`, 'Zarobek']}
             />
             <Bar dataKey="myEarning" fill="var(--brand)" radius={[2, 2, 0, 0]} />
