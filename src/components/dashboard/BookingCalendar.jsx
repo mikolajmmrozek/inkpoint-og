@@ -15,7 +15,7 @@ const STATUS_COLORS = {
   cancelled: '#9ca3af',
 };
 
-export default function BookingCalendar({ bookings, onDayClick, selectedDate, t, artists = [], onAddBooking, searchQuery = '', onBookingClick, availabilityRecords = [], artistFilter = 'all', healthStatusMap = {}, showSessionsList = true, searchBar = null }) {
+export default function BookingCalendar({ bookings, onDayClick, selectedDate, t, artists = [], onAddBooking, searchQuery = '', onBookingClick, availabilityRecords = [], artistFilter = 'all', healthStatusMap = {}, showSessionsList = true }) {
   const [viewMonth, setViewMonth] = useState(new Date());
   const isMobile = useIsMobile();
   const today = new Date();
@@ -138,11 +138,6 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
           );
         })}
       </div>
-
-      {/* Search bar — above the session list */}
-      {searchBar && (
-        <div className="mt-6">{searchBar}</div>
-      )}
 
       {/* Selected day sessions / empty state */}
       {showSessionsList && (selectedDayBookings.length > 0 || selectedDate) && (
