@@ -16,6 +16,7 @@ import BlogPost from './pages/BlogPost';
 import Contact from './pages/Contact';
 import Booking from './pages/Booking';
 import HealthFormPage from './pages/HealthFormPage';
+import HealthFormQR from './pages/HealthFormQR';
 import TermsAndConditions from './pages/TermsAndConditions';
 import FAQ from './pages/FAQ';
 
@@ -102,6 +103,7 @@ const AuthenticatedApp = () => {
       <Route path="/contact" element={<Contact />} />
       <Route path="/booking" element={<Booking />} />
       <Route path="/health-form" element={<HealthFormPage />} />
+      <Route path="/health-form-qr" element={<HealthFormQR />} />
       <Route path="/terms" element={<TermsAndConditions />} />
       <Route path="/faq" element={<FAQ />} />
       <Route path="/feedback" element={<FeedbackSurvey />} />

@@ -499,7 +499,7 @@ export default function HealthFormPage() {
           </div>
         </div>
         <div style={{ paddingBottom: '40px', textAlign: 'center' }}>
-          <a href="/health-form" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: textMuted, textDecoration: 'none', letterSpacing: '0.08em' }}>
+          <a href={form.booking_id ? `/health-form-qr?booking_id=${encodeURIComponent(form.booking_id)}` : '/health-form-qr'} style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: textMuted, textDecoration: 'none', letterSpacing: '0.08em' }}>
             {t.newSurvey || 'NOWA ANKIETA'}
           </a>
         </div>
