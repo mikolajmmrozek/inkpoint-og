@@ -56,42 +56,42 @@ export default function TodayOverview({ bookings, t, theme, onBookingUpdate, art
   return (
     <div className="mb-10">
       {/* Cash card */}
-      <div className="p-6 mb-4" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
-        <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
-          <div className="flex items-center gap-2">
-            <Wallet size={15} color="var(--brand)" />
-            <p style={{ ...mono, fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.18em', textTransform: 'uppercase' }}>Kasa dnia</p>
-            <span style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{todayLabel}</span>
-          </div>
-          <Link to="/dashboard/stats" className="flex items-center gap-1" style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-            STATYSTYKI <ArrowRight size={11} />
-          </Link>
+      <div className="flex items-center justify-between mb-1.5">
+        <div className="flex items-center gap-2">
+          <Wallet size={13} color="var(--brand)" />
+          <p style={{ ...mono, fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.18em', textTransform: 'uppercase' }}>Kasa dnia</p>
         </div>
+        <Link to="/dashboard/stats" className="flex items-center gap-1" style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+          STATYSTYKI <ArrowRight size={11} />
+        </Link>
+      </div>
+      <p style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>{todayLabel}</p>
+      <div className="p-6 mb-4" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
 
         <div className="grid grid-cols-3 gap-4 mb-5">
           <div>
-            <div className="flex items-center gap-1.5 mb-1">
+            <div className="flex items-center gap-1.5 mb-1" style={{ minHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden' }}>
               <TrendingUp size={10} color={t.muted} />
               <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Potencjalnie</p>
             </div>
             <p style={{ ...display, fontSize: '1.9rem', color: t.value, lineHeight: 1, letterSpacing: '0.02em' }}>{formatCompact(potential)} <span style={{ ...mono, fontSize: '11px', color: t.muted }}>PLN</span></p>
-            <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px' }}>Art: {formatCompact(potentialArtist)} · Studio: {formatCompact(potentialStudio)}</p>
+            <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Art: {formatCompact(potentialArtist)} · Studio: {formatCompact(potentialStudio)}</p>
           </div>
           <div>
-            <div className="flex items-center gap-1.5 mb-1">
+            <div className="flex items-center gap-1.5 mb-1" style={{ minHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden' }}>
               <Check size={10} color="#16a34a" />
               <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Rozliczone</p>
             </div>
             <p style={{ ...display, fontSize: '1.9rem', color: '#16a34a', lineHeight: 1, letterSpacing: '0.02em' }}>{formatCompact(settled)} <span style={{ ...mono, fontSize: '11px', color: t.muted }}>PLN</span></p>
-            <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px' }}>Art: {formatCompact(settledArtist)} · Studio: {formatCompact(settledStudio)}</p>
+            <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Art: {formatCompact(settledArtist)} · Studio: {formatCompact(settledStudio)}</p>
           </div>
           <div>
-            <div className="flex items-center gap-1.5 mb-1">
+            <div className="flex items-center gap-1.5 mb-1" style={{ minHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden' }}>
               <Clock size={10} color={toSettle.length > 0 ? '#f59e0b' : t.muted} />
               <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Do rozliczenia</p>
             </div>
             <p style={{ ...display, fontSize: '1.9rem', color: toSettle.length > 0 ? '#f59e0b' : t.muted, lineHeight: 1, letterSpacing: '0.02em' }}>{toSettle.length} <span style={{ ...mono, fontSize: '11px', color: t.muted }}>sesji</span></p>
-            <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px' }}>Art: {formatCompact(toSettleArtist)} · Studio: {formatCompact(toSettleStudio)}</p>
+            <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Art: {formatCompact(toSettleArtist)} · Studio: {formatCompact(toSettleStudio)}</p>
           </div>
         </div>
 
@@ -134,7 +134,7 @@ export default function TodayOverview({ bookings, t, theme, onBookingUpdate, art
           </div>
           <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
             {[...toSettle].sort((a, b) => (a.session_time || '').localeCompare(b.session_time || '')).map((b, i) => (
-              <div key={b.id} className="flex items-center gap-3 px-4 py-3" style={{ borderBottom: i < toSettle.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }}>
+              <div key={b.id} className="flex items-center gap-3 px-4 py-3 flex-wrap" style={{ borderBottom: i < toSettle.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }}>
                 <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: STATUS_COLORS[b.status] || t.muted, flexShrink: 0 }} />
                 <div style={{ minWidth: '46px', flexShrink: 0 }}>
                   <p style={{ ...mono, fontSize: '12px', color: t.value }}>{b.session_time}</p>
