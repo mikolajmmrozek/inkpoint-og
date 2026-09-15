@@ -2,7 +2,9 @@ import { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, Legend } from 'recharts';
-import { TrendingUp, Users, Calendar, DollarSign, BarChart2, Wallet } from 'lucide-react';
+import { TrendingUp, Users, Calendar, DollarSign, BarChart2, Wallet, ChevronLeft, ChevronRight } from 'lucide-react';
+import { format, addDays, addWeeks, startOfWeek } from 'date-fns';
+import { pl } from 'date-fns/locale';
 import TodaySettlementView from '@/components/dashboard/TodaySettlementView';
 
 const MONTHS_PL = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
@@ -34,6 +36,7 @@ export default function DashboardStats() {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [breakdownView, setBreakdownView] = useState('monthly'); // 'monthly' | 'daily'
   const [pageView, setPageView] = useState('stats'); // 'stats' | 'today'
+  const [paymentWeekStart, setPaymentWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
 
   useEffect(() => {
     base44.entities.Artist.list().then(a => {
@@ -120,24 +123,20 @@ export default function DashboardStats() {
     }));
   }, [filtered, selectedMonth, selectedYear]);
 
-  // Daily payment breakdown for selected month (stacked chart)
+  // Daily payment breakdown — 7-day window (Mon–Sun), movable by ±7 days
   const dailyPaymentData = useMemo(() => {
-    const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
-    return Array.from({ length: daysInMonth }, (_, di) => {
-      const day = di + 1;
-      const db = filtered.filter(b => {
-        if (!b.session_date) return false;
-        const d = new Date(b.session_date);
-        return d.getMonth() === selectedMonth && d.getDate() === day && d.getFullYear() === selectedYear;
-      });
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = addDays(paymentWeekStart, i);
+      const ds = format(d, 'yyyy-MM-dd');
+      const db = filtered.filter(b => b.session_date === ds);
       return {
-        day: String(day),
+        day: format(d, 'd.MM', { locale: pl }),
         cash: db.reduce((s, b) => s + sumMethod(b, 'cash'), 0),
         card: db.reduce((s, b) => s + sumMethod(b, 'card'), 0),
         voucher: db.reduce((s, b) => s + sumMethod(b, 'voucher'), 0),
       };
-    }).filter(d => d.cash + d.card + d.voucher > 0);
-  }, [filtered, selectedYear, selectedMonth]);
+    });
+  }, [filtered, paymentWeekStart]);
 
   // Monthly breakdown table (per artist per month)
   const monthlyBreakdown = useMemo(() => {
@@ -194,18 +193,24 @@ export default function DashboardStats() {
   );
 
   const ViewToggle = () => (
-    <div className="flex gap-1 mb-4" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-      {[{ key: 'stats', label: 'Statystyki', icon: BarChart2 }, { key: 'today', label: 'Rozliczenie dnia', icon: Wallet }].map(v => {
+    <div className="grid grid-cols-2 gap-3 mb-6">
+      {[{ key: 'stats', label: 'Statystyki', icon: BarChart2, desc: 'Przychód i zestawienia' }, { key: 'today', label: 'Rozliczenie dnia', icon: Wallet, desc: 'Tydzień · podział na artystów' }].map(v => {
         const Icon = v.icon;
         const active = pageView === v.key;
         return (
           <button
             key={v.key}
             onClick={() => setPageView(v.key)}
-            className="flex items-center gap-2 px-4 py-2.5 transition-all"
-            style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', background: active ? 'rgb(var(--brand-rgb) /0.1)' : 'transparent', color: active ? 'var(--brand)' : t.muted }}
+            className="flex items-center gap-3 p-4 transition-all text-left"
+            style={{ border: `0.5px solid ${active ? 'var(--brand)' : t.border}`, background: active ? 'rgb(var(--brand-rgb) /0.08)' : t.bg, cursor: 'pointer', borderRadius: 'var(--radius)' }}
           >
-            <Icon size={12} /> {v.label}
+            <div style={{ width: '40px', height: '40px', borderRadius: 'var(--radius)', background: active ? 'var(--brand)' : 'rgb(var(--brand-rgb) /0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Icon size={20} color={active ? '#fff' : 'var(--brand)'} />
+            </div>
+            <div className="min-w-0">
+              <p style={{ ...mono, fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: active ? 'var(--brand)' : t.text, fontWeight: 600 }}>{v.label}</p>
+              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.08em', marginTop: '3px' }}>{v.desc}</p>
+            </div>
           </button>
         );
       })}
@@ -317,11 +322,20 @@ export default function DashboardStats() {
             {dailyPaymentData.length > 0 && (
               <div className="p-6" style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
                 <p style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '20px' }}>
-                  PŁATNOŚCI DZIENNIE — {MONTHS_FULL[selectedMonth]} {selectedYear}
+                  PŁATNOŚCI DZIENNIE — {format(paymentWeekStart, 'd MMM', { locale: pl })} — {format(addDays(paymentWeekStart, 6), 'd MMM yyyy', { locale: pl })}
                 </p>
+                <div className="flex items-center justify-end gap-2 mb-4">
+                  <button onClick={() => setPaymentWeekStart(addWeeks(paymentWeekStart, -1))} style={{ padding: '6px', border: `0.5px solid ${t.border}`, background: t.bg, color: t.muted, cursor: 'pointer' }}>
+                    <ChevronLeft size={13} />
+                  </button>
+                  <button onClick={() => setPaymentWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))} style={{ ...mono, fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${t.border}`, color: t.muted, background: t.bg, cursor: 'pointer' }}>DZIŚ</button>
+                  <button onClick={() => setPaymentWeekStart(addWeeks(paymentWeekStart, 1))} style={{ padding: '6px', border: `0.5px solid ${t.border}`, background: t.bg, color: t.muted, cursor: 'pointer' }}>
+                    <ChevronRight size={13} />
+                  </button>
+                </div>
                 <ResponsiveContainer width="100%" height={180}>
                   <BarChart data={dailyPaymentData} barCategoryGap="20%">
-                    <XAxis dataKey="day" tick={{ fontFamily: 'var(--font-mono)', fontSize: 8, fill: t.muted }} axisLine={false} tickLine={false} />
+                    <XAxis dataKey="day" tick={{ fontFamily: 'var(--font-mono)', fontSize: 9, fill: t.muted }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fontFamily: 'var(--font-mono)', fontSize: 8, fill: t.muted }} axisLine={false} tickLine={false} width={50} tickFormatter={v => `${v}`} />
                     <Tooltip
                       contentStyle={{ background: theme === 'light' ? '#fff' : '#111', border: `0.5px solid ${t.border}`, fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.text }}
