@@ -330,14 +330,7 @@ export default function DashboardBookings() {
 
   const handleSearch = (q) => {
     setSearchQuery(q);
-    if (q.trim()) {
-      setListPage(0);
-      if (viewMode !== 'calendar') {
-        setSelectedDate(null);
-        setViewMode('list');
-        setListTab('upcoming');
-      }
-    }
+    if (q.trim()) setListPage(0);
   };
 
   const listBookings = (() => {
@@ -446,6 +439,46 @@ export default function DashboardBookings() {
 
   const showListSection = (viewMode === 'calendar' && searchQuery.trim()) || viewMode === 'list' || viewMode === 'day';
 
+  const todayStr = format(new Date(), 'yyyy-MM-dd');
+  const searchMatches = (() => {
+    if (!searchQuery.trim()) return { future: [], past: [] };
+    const q = searchQuery.toLowerCase();
+    const match = (b) =>
+      (b.client_name || '').toLowerCase().includes(q) ||
+      (b.session_id || '').toLowerCase().includes(q) ||
+      (b.client_email || '').toLowerCase().includes(q) ||
+      (b.tattoo_placement || '').toLowerCase().includes(q) ||
+      (b.notes || '').toLowerCase().includes(q);
+    let base = bookings.filter(b => statusMatch(b) && artistMatch(b) && match(b));
+    if (viewMode === 'pending') {
+      base = base.filter(b => b.status === 'pending' || b.status === 'cancelled');
+      if (statusFilters.length > 0) base = base.filter(b => statusFilters.includes(b.status));
+    }
+    const future = base.filter(b => (b.session_date || '') >= todayStr)
+      .sort((a, b) => (a.session_date || '').localeCompare(b.session_date || '') || (a.session_time || '').localeCompare(b.session_time || ''));
+    const past = base.filter(b => (b.session_date || '') < todayStr)
+      .sort((a, b) => (b.session_date || '').localeCompare(a.session_date || '') || (b.session_time || '').localeCompare(a.session_time || ''));
+    return { future, past };
+  })();
+
+  const searchBar = (
+    <div className="flex items-center gap-2 w-full" style={{ border: `0.5px solid ${searchQuery ? 'var(--brand)' : t.border}`, padding: '8px 14px', background: t.bg, marginBottom: '12px' }}>
+      <Search size={12} color={searchQuery ? 'var(--brand)' : t.muted} />
+      <input
+        type="text"
+        value={searchQuery}
+        onChange={e => handleSearch(e.target.value)}
+        placeholder="Szukaj klienta, sesji, emailu, miejsca..."
+        style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.text, letterSpacing: '0.05em' }}
+      />
+      {searchQuery && (
+        <button onClick={() => setSearchQuery('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: 0 }}>
+          <X size={12} />
+        </button>
+      )}
+    </div>
+  );
+
   return (
     <div>
       {loadError && bookings.length === 0 && (
@@ -509,23 +542,6 @@ export default function DashboardBookings() {
             t={t}
           />
         </div>
-
-        {/* Row 3: search */}
-        <div className="flex items-center gap-2 w-full" style={{ border: `0.5px solid ${searchQuery ? 'var(--brand)' : t.border}`, padding: '8px 14px', background: t.bg }}>
-          <Search size={12} color={searchQuery ? 'var(--brand)' : t.muted} />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={e => handleSearch(e.target.value)}
-            placeholder="Szukaj klienta, sesji, emailu, miejsca..."
-            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.text, letterSpacing: '0.05em' }}
-          />
-          {searchQuery && (
-            <button onClick={() => setSearchQuery('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: 0 }}>
-              <X size={12} />
-            </button>
-          )}
-        </div>
       </div>
 
       {loading ? (
@@ -562,7 +578,7 @@ export default function DashboardBookings() {
       ) : (
         <div>
           <div className="space-y-6">
-            {/* Calendar — only in monthly view */}
+            {/* Calendar — monthly view */}
             {viewMode === 'calendar' && (
               <BookingCalendar
                 bookings={calendarBookings}
@@ -580,27 +596,7 @@ export default function DashboardBookings() {
               />
             )}
 
-            {/* Search results (calendar view + search) */}
-            {viewMode === 'calendar' && searchQuery.trim() && (
-              <div className="mb-6">
-                <div style={{ padding: '10px 16px', background: t.bg, border: `0.5px solid ${t.border}`, marginBottom: '12px' }}>
-                  <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: t.title, letterSpacing: '0.08em' }}>
-                    WYNIKI WYSZUKIWANIA
-                  </p>
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: listBookings.length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
-                    {listBookings.length} {listBookings.length === 1 ? 'SESJA' : listBookings.length >= 2 && listBookings.length <= 4 ? 'SESJE' : 'SESJI'}
-                  </p>
-                </div>
-                <GroupedBookingList
-                  bookings={listBookings}
-                  t={t}
-                  emptyMessage="BRAK PASUJĄCYCH SESJI"
-                  renderRow={(b, i, items) => <BookingRow key={b.id} b={b} i={i} items={items} selected={selected} setSelected={setSelected} artists={artists} t={t} healthStatusMap={healthStatusMap} />}
-                />
-              </div>
-            )}
-
-            {/* Day view */}
+            {/* Day plan view */}
             {viewMode === 'day' && (
               <DailyScheduleView
                 bookings={searchQuery.trim() ? dayViewBookings : calendarBookings}
@@ -615,10 +611,45 @@ export default function DashboardBookings() {
               />
             )}
 
-            {/* List section */}
-             {showListSection && (
+            {/* Search bar — below calendar / day plan, above the list */}
+            {viewMode !== 'pending' && searchBar}
+
+            {/* Search results — nearest first, split into upcoming / past */}
+            {searchQuery.trim() && viewMode !== 'pending' && (
               <div>
-                {viewMode === 'list' && !searchQuery.trim() && (
+                <div style={{ padding: '10px 16px', background: t.bg, border: `0.5px solid ${t.border}`, marginBottom: '12px' }}>
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: t.title, letterSpacing: '0.08em' }}>WYNIKI WYSZUKIWANIA</p>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: (searchMatches.future.length + searchMatches.past.length) > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
+                    {searchMatches.future.length + searchMatches.past.length} {(() => { const n = searchMatches.future.length + searchMatches.past.length; return n === 1 ? 'SESJA' : n >= 2 && n <= 4 ? 'SESJE' : 'SESJI'; })()}
+                  </p>
+                </div>
+                {searchMatches.future.length === 0 && searchMatches.past.length === 0 ? (
+                  <div className="py-12 text-center" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK PASUJĄCYCH SESJI</p>
+                  </div>
+                ) : (
+                  <>
+                    {searchMatches.future.length > 0 && (
+                      <div className="mb-6">
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: t.fuchsia, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>Nadchodzące — {searchMatches.future.length}</p>
+                        <GroupedBookingList bookings={searchMatches.future} t={t} emptyMessage="" renderRow={(b, i, items) => <BookingRow key={b.id} b={b} i={i} items={items} selected={selected} setSelected={setSelected} artists={artists} t={t} healthStatusMap={healthStatusMap} />} />
+                      </div>
+                    )}
+                    {searchMatches.past.length > 0 && (
+                      <div>
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>Przeszłe — {searchMatches.past.length}</p>
+                        <GroupedBookingList bookings={searchMatches.past} t={t} emptyMessage="" renderRow={(b, i, items) => <BookingRow key={b.id} b={b} i={i} items={items} selected={selected} setSelected={setSelected} artists={artists} t={t} healthStatusMap={healthStatusMap} />} />
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* List section — only when not searching */}
+            {!searchQuery.trim() && showListSection && (
+              <div>
+                {viewMode === 'list' && (
                   <div className="flex mb-4" style={{ border: `0.5px solid ${t.border}` }}>
                     {[{ key: 'upcoming', label: 'NADCHODZĄCE' }, { key: 'past', label: 'PRZESZŁE' }].map(tab => (
                       <button
@@ -637,55 +668,26 @@ export default function DashboardBookings() {
                     ))}
                   </div>
                 )}
-
-                {viewMode === 'day' && searchQuery.trim() && (
-                  <div className="flex items-center justify-between mb-3" style={{ border: `0.5px solid ${t.border}`, padding: '10px 16px', background: t.bg }}>
-                    <div className="text-center flex-1">
-                      <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', color: t.title, letterSpacing: '0.08em', lineHeight: 1 }}>
-                        {format(selectedDate, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase()}
-                      </p>
-                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: listBookings.length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
-                        {listBookings.length} {listBookings.length === 1 ? 'SESJA' : listBookings.length >= 2 && listBookings.length <= 4 ? 'SESJE' : 'SESJI'}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {viewMode === 'calendar' && searchQuery.trim() && selectedDateStr ? (() => {
-                  const dayBookings = listBookings.filter(b => b.session_date === selectedDateStr);
-                  return (
-                    <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-                      {dayBookings.length > 0 ? (
-                        dayBookings.map((b, i, arr) => <BookingRow key={b.id} b={b} i={i} items={arr} selected={selected} setSelected={setSelected} artists={artists} t={t} healthStatusMap={healthStatusMap} />)
-                      ) : (
-                        <div className="py-6 text-center">
-                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK SESJI W TEN DZIEŃ</p>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })() : !(viewMode === 'calendar') && (
-                  <ListContent
-                    viewMode={viewMode}
-                    searchQuery={searchQuery}
-                    selectedDate={selectedDate}
-                    listBookings={listBookings}
-                    listPageBookings={listPageBookings}
-                    listPageCount={listPageCount}
-                    listPage={listPage}
-                    setListPage={setListPage}
-                    listTab={listTab}
-                    setListTab={setListTab}
-                    selected={selected}
-                    setSelected={setSelected}
-                    artists={artists}
-                    t={t}
-                    onNewBooking={handleNewBooking}
-                    availabilityRecords={availabilityRecords}
-                    artistFilter={artistFilters}
-                    healthStatusMap={healthStatusMap}
-                  />
-                )}
+                <ListContent
+                  viewMode={viewMode}
+                  searchQuery={searchQuery}
+                  selectedDate={selectedDate}
+                  listBookings={listBookings}
+                  listPageBookings={listPageBookings}
+                  listPageCount={listPageCount}
+                  listPage={listPage}
+                  setListPage={setListPage}
+                  listTab={listTab}
+                  setListTab={setListTab}
+                  selected={selected}
+                  setSelected={setSelected}
+                  artists={artists}
+                  t={t}
+                  onNewBooking={handleNewBooking}
+                  availabilityRecords={availabilityRecords}
+                  artistFilter={artistFilters}
+                  healthStatusMap={healthStatusMap}
+                />
               </div>
             )}
           </div>
@@ -693,10 +695,9 @@ export default function DashboardBookings() {
           {/* Pending view (Nowe rezerwacje — do weryfikacji) */}
           {viewMode === 'pending' && (
             <div>
+              {searchBar}
               <div style={{ padding: '10px 16px', background: t.bg, border: `0.5px solid ${t.border}`, marginBottom: '8px' }}>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: t.title, letterSpacing: '0.08em' }}>
-                  DO WERYFIKACJI
-                </p>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: t.title, letterSpacing: '0.08em' }}>DO WERYFIKACJI</p>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: pendingViewBookings.length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
                   {pendingViewBookings.length} {pendingViewBookings.length === 1 ? 'REZERWACJA' : pendingViewBookings.length >= 2 && pendingViewBookings.length <= 4 ? 'REZERWACJE' : 'REZERWACJI'}
                 </p>
