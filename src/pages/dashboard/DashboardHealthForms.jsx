@@ -1,6 +1,7 @@
 import { useState, useContext, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { FileText, X, ExternalLink, Copy, Shield, AlertTriangle, Search, Download, Mail, Trash2, Settings, Loader2, Edit3, Printer, CheckCheck, Plus } from 'lucide-react';
+import { FileText, X, ExternalLink, Copy, Shield, AlertTriangle, Search, Download, Mail, Trash2, Settings, Loader2, Edit3, Printer, CheckCheck, Plus, QrCode } from 'lucide-react';
+import { openHealthFormQRPage } from '@/lib/qrPage';
 import { format } from 'date-fns';
 import { useTheme } from './Dashboard';
 import { AnimatePresence } from 'framer-motion';
@@ -520,6 +521,12 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
                   style={{ color: t.muted, display: 'flex', alignItems: 'center' }}>
                   <ExternalLink size={12} />
                 </a>
+                <button onClick={() => openHealthFormQRPage(getFormLink(b))}
+                  title="Pokaż kod QR do ankiety"
+                  style={{ color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                >
+                  <QrCode size={12} />
+                </button>
                 <button onClick={() => copyLink(b)}
                   style={{ ...mono, fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${copiedId === b.id ? '#16a34a' : t.border}`, color: copiedId === b.id ? '#16a34a' : t.muted, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <Copy size={10} /> {copiedId === b.id ? 'SKOPIOWANO' : 'KOPIUJ LINK'}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trash2, Edit, Copy, Check, ExternalLink, Mail, FileText, Loader2, Save, Download, ChevronLeft, ChevronRight, Wallet, Phone, User, Calendar, Clock, MapPin, FileSignature, MessageSquare, CreditCard } from 'lucide-react';
+import { X, Trash2, Edit, Copy, Check, ExternalLink, Mail, FileText, Loader2, Save, Download, ChevronLeft, ChevronRight, Wallet, Phone, User, Calendar, Clock, MapPin, FileSignature, MessageSquare, CreditCard, QrCode } from 'lucide-react';
+import { openHealthFormQRPage } from '@/lib/qrPage';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
@@ -269,6 +270,12 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
               ANKIETA ZDROWOTNA — BRAK
             </p>
             <div className="flex gap-2">
+              <button onClick={() => openHealthFormQRPage(formUrl)}
+                title="Pokaż kod QR do ankiety"
+                className="flex items-center gap-1.5 flex-1 justify-center py-2"
+                style={{ border: '0.5px solid var(--brand)', color: 'var(--brand)', ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer' }}>
+                <QrCode size={12} /> QR
+              </button>
               <button onClick={copyFormLink}
                 className="flex items-center gap-1.5 flex-1 justify-center py-2"
                 style={{ border: '0.5px solid var(--brand)', color: 'var(--brand)', ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer' }}>
