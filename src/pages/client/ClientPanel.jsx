@@ -7,6 +7,7 @@ import BottomNav from '@/components/panel/BottomNav';
 import NotificationBell from '@/components/panel/NotificationBell';
 import NotificationPanel from '@/components/panel/NotificationPanel';
 import SidebarBadge from '@/components/panel/SidebarBadge';
+import PullToRefresh from '@/components/panel/PullToRefresh';
 import { useBadgeCounts } from '@/hooks/useBadgeCounts';
 import { CreateMenuProvider } from '@/components/create/CreateMenuContext';
 
@@ -179,9 +180,9 @@ export default function ClientPanel() {
               </p>
             </div>
           </div>
-          <div className="flex-1 p-6 lg:p-10 overflow-y-auto pb-20 lg:pb-10">
+          <PullToRefresh className="flex-1 p-6 lg:p-10 overflow-y-auto pb-20 lg:pb-10">
             <Outlet context={{ client, user, theme }} />
-          </div>
+          </PullToRefresh>
         </div>
         <BottomNav theme={theme} role="user" calendarPath="/panel/sessions" messagesPath="/panel/messages" notificationsPath="/panel/notifications" userEmail={user.email} />
         <NotificationPanel open={notifOpen} onClose={() => setNotifOpen(false)} userEmail={user.email} theme={theme} />

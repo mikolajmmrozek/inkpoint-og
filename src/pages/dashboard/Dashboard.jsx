@@ -9,6 +9,7 @@ import NotificationPanel from '@/components/panel/NotificationPanel';
 import NotificationSidebarItem from '@/components/panel/NotificationSidebarItem';
 import SidebarBadge from '@/components/panel/SidebarBadge';
 import StudioAvatar from '@/components/panel/StudioAvatar';
+import PullToRefresh from '@/components/panel/PullToRefresh';
 import { useBadgeCounts } from '@/hooks/useBadgeCounts';
 import { CreateMenuProvider } from '@/components/create/CreateMenuContext';
 
@@ -279,9 +280,9 @@ export default function Dashboard() {
              </div>
           </div>
 
-          <div className="flex-1 p-4 lg:p-10 overflow-y-auto overflow-x-hidden min-w-0 pb-20 lg:pb-10">
+          <PullToRefresh className="flex-1 p-4 lg:p-10 overflow-y-auto overflow-x-hidden min-w-0 pb-20 lg:pb-10">
             <Outlet context={{ theme }} />
-          </div>
+          </PullToRefresh>
         </div>
         <BottomNav theme={theme} role="admin" calendarPath="/dashboard/bookings" messagesPath="/dashboard/messages" notificationsPath="/dashboard/notifications" userEmail={user.email} />
         <NotificationPanel open={notifOpen} onClose={() => setNotifOpen(false)} userEmail={user.email} theme={theme} />
