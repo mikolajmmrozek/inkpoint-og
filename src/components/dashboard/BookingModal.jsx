@@ -67,6 +67,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
         session_end_time: b.session_end_time || calcEndTime(b.session_time, b.session_duration),
         admin_notes: b.admin_notes || '',
         client_notes: '',
+        deposit_amount: b.deposit_amount || 0,
         reference_images: b.reference_images || [],
       };
     }
@@ -91,7 +92,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
       admin_notes: '',
       client_notes: '',
       status: 'pending',
-      deposit_paid: false,
+      deposit_amount: p?.deposit_amount || 0,
       estimated_price: p?.estimated_price || '',
       health_form_completed: false,
       service_id: p?.service_id || '',
@@ -293,7 +294,8 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
     setSaving(true);
     const fullName = `${form.client_first_name || ''} ${form.client_last_name || ''}`.trim();
     const { client_notes, ...rest } = form;
-    const data = { ...rest, client_name: fullName, estimated_price: form.estimated_price ? Math.round(Number(form.estimated_price) * 100) / 100 : undefined };
+    const depNum = Math.round((Number(form.deposit_amount) || 0) * 100) / 100;
+    const data = { ...rest, deposit_amount: depNum, deposit_paid: depNum > 0, client_name: fullName, estimated_price: form.estimated_price ? Math.round(Number(form.estimated_price) * 100) / 100 : undefined };
     delete data.client_first_name;
     delete data.client_last_name;
     let savedBookingId = booking?.id;
@@ -772,21 +774,33 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
             </div>
           </div>
 
-          {/* Flags */}
-          <div className="flex gap-6" style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
-            {[['deposit_paid', 'Wpłacony depozyt'], ['health_form_completed', 'Ankieta zdrowotna']].map(([field, lbl]) => (
+          {/* Zaliczka + Flags */}
+          <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
+            <div className="mb-6" style={{ maxWidth: '200px' }}>
+              {label('Zaliczka (PLN)')}
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={form.deposit_amount || 0}
+                onChange={e => set('deposit_amount', e.target.value)}
+                onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'}
+                onBlur={e => e.target.style.borderBottomColor = t.border}
+                style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
+              />
+            </div>
+            <div className="flex gap-6">
               <button
-                key={field}
-                onClick={() => set(field, !form[field])}
+                onClick={() => set('health_form_completed', !form.health_form_completed)}
                 className="flex items-center gap-2"
-                style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form[field] ? '#16a34a' : t.muted }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.health_form_completed ? '#16a34a' : t.muted }}
               >
-                <div style={{ width: '12px', height: '12px', border: `0.5px solid ${form[field] ? '#16a34a' : t.border}`, background: form[field] ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {form[field] && <span style={{ color: '#fff', fontSize: '8px' }}>✓</span>}
+                <div style={{ width: '12px', height: '12px', border: `0.5px solid ${form.health_form_completed ? '#16a34a' : t.border}`, background: form.health_form_completed ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {form.health_form_completed && <span style={{ color: '#fff', fontSize: '8px' }}>✓</span>}
                 </div>
-                {lbl}
+                Ankieta zdrowotna
               </button>
-            ))}
+            </div>
           </div>
         </div>
 

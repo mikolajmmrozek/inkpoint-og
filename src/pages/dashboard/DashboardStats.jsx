@@ -1,11 +1,23 @@
 import { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, Legend } from 'recharts';
 import { TrendingUp, Users, Calendar, DollarSign } from 'lucide-react';
 
 const MONTHS_PL = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
 const MONTHS_FULL = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
+
+const PAYMENT_COLORS = { cash: '#16a34a', card: '#2563eb', voucher: '#f59e0b' };
+const PAYMENT_LABELS = { cash: 'Gotówka', card: 'Karta', voucher: 'Voucher' };
+
+// Sum amount for a given method from a booking's payment_breakdown.
+// Falls back to estimated_price as 'cash' for legacy completed bookings without breakdown.
+const sumMethod = (b, method) => {
+  if (b.payment_breakdown && b.payment_breakdown.length > 0) {
+    return b.payment_breakdown.filter(p => p.method === method).reduce((s, p) => s + Number(p.amount || 0), 0);
+  }
+  return method === 'cash' ? Number(b.estimated_price || 0) : 0;
+};
 
 export default function DashboardStats() {
   const { theme } = useTheme();
@@ -82,14 +94,48 @@ export default function DashboardStats() {
     }), { revenue: 0, artistEarnings: 0, studioEarnings: 0, sessions: 0 });
   }, [artistStats, selectedArtistId]);
 
-  // Monthly chart data
+  // Monthly chart data — stacked by payment method
   const monthlyData = useMemo(() => {
     return MONTHS_PL.map((name, mi) => {
       const mb = filtered.filter(b => b.session_date && new Date(b.session_date).getMonth() === mi);
-      const revenue = mb.reduce((s, b) => s + Number(b.estimated_price || 0), 0);
-      return { name, revenue, sessions: mb.length };
+      const cash = mb.reduce((s, b) => s + sumMethod(b, 'cash'), 0);
+      const card = mb.reduce((s, b) => s + sumMethod(b, 'card'), 0);
+      const voucher = mb.reduce((s, b) => s + sumMethod(b, 'voucher'), 0);
+      return { name, revenue: cash + card + voucher, cash, card, voucher, sessions: mb.length };
     });
   }, [filtered]);
+
+  // Payment method stats — daily (today) and monthly (selected month) totals
+  const paymentStats = useMemo(() => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todayBookings = filtered.filter(b => b.session_date === todayStr);
+    const monthBookings = filtered.filter(b => b.session_date && new Date(b.session_date).getMonth() === selectedMonth && new Date(b.session_date).getFullYear() === selectedYear);
+    const methods = ['cash', 'card', 'voucher'];
+    return methods.map(m => ({
+      method: m,
+      today: todayBookings.reduce((s, b) => s + sumMethod(b, m), 0),
+      month: monthBookings.reduce((s, b) => s + sumMethod(b, m), 0),
+    }));
+  }, [filtered, selectedMonth, selectedYear]);
+
+  // Daily payment breakdown for selected month (stacked chart)
+  const dailyPaymentData = useMemo(() => {
+    const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
+    return Array.from({ length: daysInMonth }, (_, di) => {
+      const day = di + 1;
+      const db = filtered.filter(b => {
+        if (!b.session_date) return false;
+        const d = new Date(b.session_date);
+        return d.getMonth() === selectedMonth && d.getDate() === day && d.getFullYear() === selectedYear;
+      });
+      return {
+        day: String(day),
+        cash: db.reduce((s, b) => s + sumMethod(b, 'cash'), 0),
+        card: db.reduce((s, b) => s + sumMethod(b, 'card'), 0),
+        voucher: db.reduce((s, b) => s + sumMethod(b, 'voucher'), 0),
+      };
+    }).filter(d => d.cash + d.card + d.voucher > 0);
+  }, [filtered, selectedYear, selectedMonth]);
 
   // Monthly breakdown table (per artist per month)
   const monthlyBreakdown = useMemo(() => {
@@ -192,27 +238,72 @@ export default function DashboardStats() {
             <KPICard label="Sesji" value={totals.sessions} />
           </div>
 
-          {/* Monthly chart */}
+          {/* Monthly chart — stacked by payment method */}
           <div className="mb-8 p-6" style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
             <p style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '20px' }}>
               PRZYCHÓD MIESIĘCZNY {selectedYear} {selectedArtistId !== 'all' ? `— ${artistMap[selectedArtistId]?.name}` : '— WSZYSCY ARTYŚCI'}
             </p>
-            <ResponsiveContainer width="100%" height={200}>
+            <ResponsiveContainer width="100%" height={220}>
               <BarChart data={monthlyData} barCategoryGap="30%">
                 <XAxis dataKey="name" tick={{ fontFamily: 'var(--font-mono)', fontSize: 9, fill: t.muted }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontFamily: 'var(--font-mono)', fontSize: 9, fill: t.muted }} axisLine={false} tickLine={false} width={60} tickFormatter={v => `${v} PLN`} />
                 <Tooltip
                   contentStyle={{ background: theme === 'light' ? '#fff' : '#111', border: `0.5px solid ${t.border}`, fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.text }}
-                  formatter={(v) => [`${v} PLN`, 'Przychód']}
+                  formatter={(v, name) => [`${Number(v).toLocaleString('pl-PL')} PLN`, PAYMENT_LABELS[name] || name]}
                   cursor={{ fill: 'rgb(var(--brand-rgb) /0.05)' }}
                 />
-                <Bar dataKey="revenue" radius={0}>
-                  {monthlyData.map((_, i) => (
-                    <Cell key={i} fill={_.revenue > 0 ? 'var(--brand)' : (theme === 'light' ? '#E5E5E5' : '#262626')} />
-                  ))}
-                </Bar>
+                <Legend wrapperStyle={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase' }} formatter={(v) => PAYMENT_LABELS[v] || v} />
+                <Bar dataKey="cash" stackId="a" fill={PAYMENT_COLORS.cash} />
+                <Bar dataKey="card" stackId="a" fill={PAYMENT_COLORS.card} />
+                <Bar dataKey="voucher" stackId="a" fill={PAYMENT_COLORS.voucher} />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+
+          {/* Formy płatności */}
+          <div className="mb-8">
+            <p style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>
+              FORMY PŁATNOŚCI — {MONTHS_FULL[selectedMonth]} {selectedYear}
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+              {paymentStats.map(ps => (
+                <div key={ps.method} className="p-5" style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: PAYMENT_COLORS[ps.method] }} />
+                    <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>{PAYMENT_LABELS[ps.method]}</p>
+                  </div>
+                  <p style={{ ...display, fontSize: '1.6rem', color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>{ps.month.toLocaleString('pl-PL')} PLN</p>
+                  <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px' }}>
+                    Miesiąc
+                  </p>
+                  <div className="pt-3 mt-3" style={{ borderTop: `0.5px solid ${t.border}` }}>
+                    <p style={{ ...mono, fontSize: '13px', color: PAYMENT_COLORS[ps.method], fontWeight: 600 }}>{ps.today.toLocaleString('pl-PL')} PLN</p>
+                    <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '2px' }}>Dziś</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {dailyPaymentData.length > 0 && (
+              <div className="p-6" style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
+                <p style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '20px' }}>
+                  PŁATNOŚCI DZIENNIE — {MONTHS_FULL[selectedMonth]} {selectedYear}
+                </p>
+                <ResponsiveContainer width="100%" height={180}>
+                  <BarChart data={dailyPaymentData} barCategoryGap="20%">
+                    <XAxis dataKey="day" tick={{ fontFamily: 'var(--font-mono)', fontSize: 8, fill: t.muted }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontFamily: 'var(--font-mono)', fontSize: 8, fill: t.muted }} axisLine={false} tickLine={false} width={50} tickFormatter={v => `${v}`} />
+                    <Tooltip
+                      contentStyle={{ background: theme === 'light' ? '#fff' : '#111', border: `0.5px solid ${t.border}`, fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.text }}
+                      formatter={(v, name) => [`${Number(v).toLocaleString('pl-PL')} PLN`, PAYMENT_LABELS[name] || name]}
+                      cursor={{ fill: 'rgb(var(--brand-rgb) /0.05)' }}
+                    />
+                    <Bar dataKey="cash" stackId="d" fill={PAYMENT_COLORS.cash} />
+                    <Bar dataKey="card" stackId="d" fill={PAYMENT_COLORS.card} />
+                    <Bar dataKey="voucher" stackId="d" fill={PAYMENT_COLORS.voucher} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </div>
 
           {/* Monthly / Daily breakdown */}

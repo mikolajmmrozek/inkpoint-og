@@ -61,7 +61,54 @@
     },
     "deposit_paid": {
       "type": "boolean",
-      "default": false
+      "default": false,
+      "description": "Przechowywane dla kompatybilno\u015bci \u2014 true gdy deposit_amount > 0"
+    },
+    "deposit_amount": {
+      "type": "number",
+      "default": 0,
+      "description": "Kwota zaliczki (cz\u0119\u015b\u0107 finalnej kwoty)"
+    },
+    "final_amount": {
+      "type": "number",
+      "description": "Fina\u0142na kwota rozliczenia sesji"
+    },
+    "payment_breakdown": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string",
+            "enum": [
+              "cash",
+              "card",
+              "voucher"
+            ]
+          },
+          "amount": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "Podzia\u0142 p\u0142atno\u015bci wg metody (got\u00f3wka/karta/voucher)"
+    },
+    "is_settled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Czy sesja zosta\u0142a rozliczona"
+    },
+    "settled_by_id": {
+      "type": "string",
+      "description": "ID u\u017cytkownika, kt\u00f3ry rozliczy\u0142 sesj\u0119"
+    },
+    "settled_by_name": {
+      "type": "string",
+      "description": "Imi\u0119/nazwa osoby rozliczaj\u0105cej (cache)"
+    },
+    "settled_date": {
+      "type": "string",
+      "description": "Data rozliczenia (ISO)"
     },
     "status": {
       "type": "string",

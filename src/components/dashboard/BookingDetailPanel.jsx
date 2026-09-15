@@ -1,9 +1,14 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trash2, Edit, Copy, Check, ExternalLink, Mail, FileText, Loader2, History, Save, Download, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, Trash2, Edit, Copy, Check, ExternalLink, Mail, FileText, Loader2, History, Save, Download, Eye, ChevronLeft, ChevronRight, Wallet } from 'lucide-react';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
 import HealthFormPreviewModal from './HealthFormPreviewModal';
+import SettlementModal from './SettlementModal';
+
+const PAYMENT_METHOD_LABELS = { cash: 'Gotówka', card: 'Karta', voucher: 'Voucher' };
+const PAYMENT_METHOD_COLORS = { cash: '#16a34a', card: '#2563eb', voucher: '#f59e0b' };
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -47,6 +52,17 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showImageLightbox, setShowImageLightbox] = useState(false);
   const [lightboxImageIndex, setLightboxImageIndex] = useState(0);
+  const [showSettlement, setShowSettlement] = useState(false);
+  const [currentBooking, setCurrentBooking] = useState(booking);
+  const { user } = useAuth();
+
+  useEffect(() => { setCurrentBooking(booking); }, [booking]);
+
+  const handleSettled = (updated) => {
+    setCurrentBooking(updated);
+    setShowSettlement(false);
+    if (onStatusChange) onStatusChange(updated.id, 'completed');
+  };
 
   useEffect(() => {
     if (!booking.client_email) return;
@@ -216,7 +232,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
        ['Miejsce', booking.tattoo_placement || '—'],
        ['Opis projektu', booking.tattoo_description || '—'],
        ['Cena', booking.estimated_price ? `${booking.estimated_price} PLN` : '—'],
-       ['Depozyt', booking.deposit_paid ? '✓ Wpłacony' : '✗ Brak'],
+       ['Zaliczka', booking.deposit_amount ? `${booking.deposit_amount} PLN` : '—'],
        ['Notatki klienta', booking.notes || '—'],
        ['Notatki admina', booking.admin_notes || '—'],
        ].map(([label, value]) => (
@@ -305,8 +321,57 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
         </div>
       )}
 
+      {/* Settlement summary — shown when settled */}
+      {currentBooking.is_settled && currentBooking.payment_breakdown && (
+        <div className="mb-5 p-3" style={{ border: '0.5px solid rgba(22,163,74,0.3)', background: 'rgba(22,163,74,0.04)' }}>
+          <div className="flex items-center gap-2 mb-3">
+            <Check size={11} color="#16a34a" />
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+              ROZLICZONO
+            </p>
+          </div>
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>FINAŁNA KWOTA</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.title, fontWeight: 600 }}>{Number(currentBooking.final_amount || 0).toLocaleString('pl-PL')} PLN</span>
+            </div>
+            {Number(currentBooking.deposit_amount || 0) > 0 && (
+              <div className="flex items-center justify-between">
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>ZALICZKA</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.muted }}>{Number(currentBooking.deposit_amount).toLocaleString('pl-PL')} PLN</span>
+              </div>
+            )}
+            <div className="pt-2" style={{ borderTop: '0.5px solid rgba(22,163,74,0.2)' }}>
+              {currentBooking.payment_breakdown.map((p, i) => (
+                <div key={i} className="flex items-center justify-between py-1">
+                  <div className="flex items-center gap-2">
+                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: PAYMENT_METHOD_COLORS[p.method] || t.muted }} />
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{PAYMENT_METHOD_LABELS[p.method] || p.method}</span>
+                  </div>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.title }}>{Number(p.amount || 0).toLocaleString('pl-PL')} PLN</span>
+                </div>
+              ))}
+            </div>
+            {currentBooking.settled_by_name && (
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '6px', paddingTop: '6px', borderTop: '0.5px solid rgba(22,163,74,0.15)' }}>
+                ROZLICZYŁ: {currentBooking.settled_by_name}{currentBooking.settled_date ? ` · ${new Date(currentBooking.settled_date).toLocaleDateString('pl-PL')}` : ''}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Actions */}
       <div className="flex gap-2">
+        {!currentBooking.is_settled && (
+          <button
+            onClick={() => setShowSettlement(true)}
+            className="btn-oxblood flex items-center gap-1.5 flex-1 justify-center py-2.5"
+            style={{ fontSize: '9px' }}
+          >
+            <Wallet size={11} /> ROZLICZ
+          </button>
+        )}
         <button
           onClick={safeOnEdit}
           className="flex items-center gap-1.5 flex-1 justify-center py-2.5 transition-all hover:opacity-70"
@@ -338,6 +403,16 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
         healthFormId={previewFormId}
         clientName={booking.client_name}
         onClose={() => { setShowFormPreview(false); setPreviewFormId(null); }}
+        t={t}
+      />
+    )}
+
+    {showSettlement && (
+      <SettlementModal
+        booking={currentBooking}
+        user={user}
+        onClose={() => setShowSettlement(false)}
+        onSettled={handleSettled}
         t={t}
       />
     )}
