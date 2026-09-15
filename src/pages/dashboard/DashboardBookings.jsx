@@ -352,12 +352,11 @@ export default function DashboardBookings() {
         (b.tattoo_placement || '').toLowerCase().includes(q) ||
         (b.notes || '').toLowerCase().includes(q)
       );
-      base = [...base].sort((a, b) => (a.session_date || '').localeCompare(b.session_date || ''));
-      
-      if (viewMode === 'day' && base.length > 0) {
-        base = base.filter(b => b.session_date === base[0].session_date);
-        base = [...base].sort((a, b) => (a.session_time || '').localeCompare(b.session_time || ''));
-      }
+      base = [...base].sort((a, b) => {
+        const d = (a.session_date || '').localeCompare(b.session_date || '');
+        if (d !== 0) return d;
+        return (a.session_time || '').localeCompare(b.session_time || '');
+      });
       return base;
     }
     
@@ -381,8 +380,10 @@ export default function DashboardBookings() {
 
   useEffect(() => {
     if (viewMode === 'day' && searchQuery.trim() && listBookings.length > 0) {
-      const firstMatchDate = new Date(listBookings[0].session_date);
-      setSelectedDate(firstMatchDate);
+      const todayStr = format(new Date(), 'yyyy-MM-dd');
+      const upcoming = listBookings.filter(b => (b.session_date || '') >= todayStr);
+      const nearest = upcoming[0] || listBookings[listBookings.length - 1];
+      if (nearest?.session_date) setSelectedDate(new Date(nearest.session_date));
     }
   }, [viewMode, searchQuery]);
 
@@ -445,6 +446,46 @@ export default function DashboardBookings() {
   })();
 
   const showListSection = (viewMode === 'calendar' && searchQuery.trim()) || viewMode === 'list' || viewMode === 'day';
+
+  // Split search results into upcoming / past for calendar & day views — nearest sessions first.
+  const searchSplit = (() => {
+    if (!searchQuery.trim() || (viewMode !== 'calendar' && viewMode !== 'day')) return null;
+    const q = searchQuery.toLowerCase();
+    const base = bookings.filter(b => statusMatch(b) && artistMatch(b) && (
+      (b.client_name || '').toLowerCase().includes(q) ||
+      (b.session_id || '').toLowerCase().includes(q) ||
+      (b.client_email || '').toLowerCase().includes(q) ||
+      (b.tattoo_placement || '').toLowerCase().includes(q) ||
+      (b.notes || '').toLowerCase().includes(q)
+    ));
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
+    const cmpDate = (a, b) => (a.session_date || '').localeCompare(b.session_date || '');
+    const cmpTime = (a, b) => (a.session_time || '99:99').localeCompare(b.session_time || '99:99');
+    const upcoming = base.filter(b => (b.session_date || '') >= todayStr).sort((a, b) => {
+      const d = cmpDate(a, b); if (d !== 0) return d; return cmpTime(a, b);
+    });
+    const past = base.filter(b => (b.session_date || '') < todayStr).sort((a, b) => {
+      const d = cmpDate(b, a); if (d !== 0) return d; return cmpTime(b, a);
+    });
+    return { upcoming, past, total: base.length };
+  })();
+
+  const renderSearchSection = (label, items, emptyMsg) => (
+    <div className="mb-4">
+      <div style={{ padding: '8px 14px', background: t.bg, border: `0.5px solid ${t.border}`, marginBottom: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.12em', color: items.length > 0 ? t.fuchsia : t.muted }}>{label}</span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em' }}>
+          {items.length} {items.length === 1 ? 'SESJA' : items.length >= 2 && items.length <= 4 ? 'SESJE' : 'SESJI'}
+        </span>
+      </div>
+      <GroupedBookingList
+        bookings={items}
+        t={t}
+        emptyMessage={emptyMsg}
+        renderRow={(b, i, arr) => <BookingRow key={b.id} b={b} i={i} items={arr} selected={selected} setSelected={setSelected} artists={artists} t={t} healthStatusMap={healthStatusMap} />}
+      />
+    </div>
+  );
 
   return (
     <div>
@@ -580,23 +621,19 @@ export default function DashboardBookings() {
               />
             )}
 
-            {/* Search results (calendar view + search) */}
-            {viewMode === 'calendar' && searchQuery.trim() && (
+            {/* Search results (calendar view + search) — split into upcoming / past, nearest first */}
+            {viewMode === 'calendar' && searchQuery.trim() && searchSplit && (
               <div className="mb-6">
                 <div style={{ padding: '10px 16px', background: t.bg, border: `0.5px solid ${t.border}`, marginBottom: '12px' }}>
                   <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: t.title, letterSpacing: '0.08em' }}>
                     WYNIKI WYSZUKIWANIA
                   </p>
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: listBookings.length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
-                    {listBookings.length} {listBookings.length === 1 ? 'SESJA' : listBookings.length >= 2 && listBookings.length <= 4 ? 'SESJE' : 'SESJI'}
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: searchSplit.total > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
+                    {searchSplit.total} {searchSplit.total === 1 ? 'SESJA' : searchSplit.total >= 2 && searchSplit.total <= 4 ? 'SESJE' : 'SESJI'}
                   </p>
                 </div>
-                <GroupedBookingList
-                  bookings={listBookings}
-                  t={t}
-                  emptyMessage="BRAK PASUJĄCYCH SESJI"
-                  renderRow={(b, i, items) => <BookingRow key={b.id} b={b} i={i} items={items} selected={selected} setSelected={setSelected} artists={artists} t={t} healthStatusMap={healthStatusMap} />}
-                />
+                {renderSearchSection('NADCHODZĄCE', searchSplit.upcoming, 'BRAK NADCHODZĄCYCH SESJI')}
+                {renderSearchSection('PRZESZŁE', searchSplit.past, 'BRAK PRZESZŁYCH SESJI')}
               </div>
             )}
 
@@ -638,33 +675,22 @@ export default function DashboardBookings() {
                   </div>
                 )}
 
-                {viewMode === 'day' && searchQuery.trim() && (
-                  <div className="flex items-center justify-between mb-3" style={{ border: `0.5px solid ${t.border}`, padding: '10px 16px', background: t.bg }}>
-                    <div className="text-center flex-1">
-                      <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', color: t.title, letterSpacing: '0.08em', lineHeight: 1 }}>
-                        {format(selectedDate, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase()}
+                {viewMode === 'day' && searchQuery.trim() && searchSplit && (
+                  <div className="mb-6">
+                    <div style={{ padding: '10px 16px', background: t.bg, border: `0.5px solid ${t.border}`, marginBottom: '12px' }}>
+                      <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: t.title, letterSpacing: '0.08em' }}>
+                        WYNIKI WYSZUKIWANIA
                       </p>
-                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: listBookings.length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
-                        {listBookings.length} {listBookings.length === 1 ? 'SESJA' : listBookings.length >= 2 && listBookings.length <= 4 ? 'SESJE' : 'SESJI'}
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: searchSplit.total > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
+                        {searchSplit.total} {searchSplit.total === 1 ? 'SESJA' : searchSplit.total >= 2 && searchSplit.total <= 4 ? 'SESJE' : 'SESJI'}
                       </p>
                     </div>
+                    {renderSearchSection('NADCHODZĄCE', searchSplit.upcoming, 'BRAK NADCHODZĄCYCH SESJI')}
+                    {renderSearchSection('PRZESZŁE', searchSplit.past, 'BRAK PRZESZŁYCH SESJI')}
                   </div>
                 )}
 
-                {viewMode === 'calendar' && searchQuery.trim() && selectedDateStr ? (() => {
-                  const dayBookings = listBookings.filter(b => b.session_date === selectedDateStr);
-                  return (
-                    <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-                      {dayBookings.length > 0 ? (
-                        dayBookings.map((b, i, arr) => <BookingRow key={b.id} b={b} i={i} items={arr} selected={selected} setSelected={setSelected} artists={artists} t={t} healthStatusMap={healthStatusMap} />)
-                      ) : (
-                        <div className="py-6 text-center">
-                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK SESJI W TEN DZIEŃ</p>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })() : !(viewMode === 'calendar') && (
+                {!(viewMode === 'calendar') && !(viewMode === 'day' && searchQuery.trim()) && (
                   <ListContent
                     viewMode={viewMode}
                     searchQuery={searchQuery}
