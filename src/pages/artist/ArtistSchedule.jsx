@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { ChevronLeft, ChevronRight, Plus, X, Search, Zap, RefreshCw, FileText, Edit3 } from 'lucide-react';
+import { useAuth } from '@/lib/AuthContext';
+import { ChevronLeft, ChevronRight, Plus, X, Search, Zap, RefreshCw, FileText, Edit3, Wallet, Phone, Mail, QrCode, Check } from 'lucide-react';
 import { format, addDays, subDays, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, isSameMonth, isToday, parseISO } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
 import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
+import SettlementModal from '@/components/dashboard/SettlementModal';
+import { openHealthFormQRPage } from '@/lib/qrPage';
 import AvailabilityEditModal from '@/components/dashboard/AvailabilityEditModal';
 import ReferenceImagesUpload from '@/components/dashboard/ReferenceImagesUpload';
 import { getAvailabilityForDay } from '@/components/dashboard/ArtistScheduleEditor';
@@ -19,6 +22,8 @@ import GroupedBookingList from '@/components/booking/GroupedBookingList';
 
 const STATUS_COLORS = { pending: 'var(--brand)', confirmed: '#16a34a', completed: '#2563eb', cancelled: '#9ca3af' };
 const STATUS_LABELS = { pending: 'Oczekuje', confirmed: 'Potwierdzona', completed: 'Zakończona', cancelled: 'Anulowana' };
+const PAYMENT_METHOD_LABELS = { cash: 'Gotówka', card: 'Karta', voucher: 'Voucher' };
+const PAYMENT_METHOD_COLORS = { cash: '#16a34a', card: '#2563eb', voucher: '#f59e0b' };
 const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
 const MINUTES = ['00', '15', '30', '45'];
 
@@ -67,7 +72,7 @@ function ArtistBookingRow({ b, i, items, t, healthStatusMap, onSelect }) {
 }
 
 // ── Booking Detail / Edit Modal ──────────────────────────────────────────────
-function BookingModal({ booking, isNew, artist, artistServices, theme, availabilityRecords, allBookings, onClose, onSaved, healthStatusMap }) {
+function BookingModal({ booking, isNew, artist, artistServices, theme, user, availabilityRecords, allBookings, onClose, onSaved, healthStatusMap }) {
   const t = theme === 'light'
     ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', inputBorder: '#CCCCCC' }
     : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', inputBorder: '#262626' };
@@ -91,9 +96,23 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, availabil
   });
   const [saving, setSaving] = useState(false);
   const [showHealthForm, setShowHealthForm] = useState(false);
+  const [settlingBooking, setSettlingBooking] = useState(null);
   const [editing, setEditing] = useState(isNew);
   const [clientQuery, setClientQuery] = useState(isNew ? '' : (booking?.client_name || ''));
   const [clientSuggestions, setClientSuggestions] = useState([]);
+
+  const formUrl = booking ? `${window.location.origin}/health-form?booking_id=${booking.id}` : '';
+  const phone = (form.client_phone || '').trim();
+  const email = (form.client_email || '').trim();
+
+  const handleSettled = (updated) => {
+    setSettlingBooking(null);
+    setForm(f => ({ ...f, ...updated }));
+    onSaved();
+    if (updated?.id) {
+      base44.functions.invoke('manageGoogleCalendar', { action: 'sync_one', booking_id: updated.id }).catch(() => {});
+    }
+  };
 
   // Auto-populate client name from Client entity if missing on the booking
   useEffect(() => {
@@ -275,6 +294,93 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, availabil
               </div>
             )}
 
+            {/* Quick contact */}
+            {(phone || email) && (
+              <div className="flex gap-2">
+                {phone && (
+                  <a href={`tel:${phone.replace(/\s/g, '')}`} className="flex items-center justify-center gap-1.5 flex-1 py-2" style={{ border: `0.5px solid ${t.border}`, color: t.text, textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                    <Phone size={11} color="#16a34a" /> ZADZWOŃ
+                  </a>
+                )}
+                {email && (
+                  <a href={`mailto:${email}`} className="flex items-center justify-center gap-1.5 flex-1 py-2" style={{ border: `0.5px solid ${t.border}`, color: t.text, textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                    <Mail size={11} color="var(--brand)" /> EMAIL
+                  </a>
+                )}
+              </div>
+            )}
+
+            {/* Settlement action */}
+            <div>
+              <button
+                onClick={() => setSettlingBooking(booking)}
+                className="btn-oxblood flex items-center gap-1.5 justify-center w-full"
+                style={{ fontSize: '9px', padding: '10px' }}
+              >
+                <Wallet size={12} /> {form.is_settled ? 'EDYTUJ ROZLICZENIE' : 'ROZLICZ'}
+              </button>
+            </div>
+
+            {/* Settlement summary */}
+            {form.is_settled && form.payment_breakdown && (
+              <div className="p-3" style={{ border: '0.5px solid rgba(22,163,74,0.3)', background: 'rgba(22,163,74,0.04)' }}>
+                <div className="flex items-center gap-2 mb-3">
+                  <Check size={11} color="#16a34a" />
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase' }}>ROZLICZONO</p>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>FINAŁNA KWOTA</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.title, fontWeight: 600 }}>{Number(form.final_amount || 0).toLocaleString('pl-PL')} PLN</span>
+                  </div>
+                  {Number(form.deposit_amount || 0) > 0 && (
+                    <div className="flex items-center justify-between">
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>ZALICZKA</span>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.muted }}>{Number(form.deposit_amount).toLocaleString('pl-PL')} PLN</span>
+                    </div>
+                  )}
+                  <div className="pt-2" style={{ borderTop: '0.5px solid rgba(22,163,74,0.2)' }}>
+                    {form.payment_breakdown.map((p, i) => (
+                      <div key={i} className="flex items-center justify-between py-1">
+                        <div className="flex items-center gap-2">
+                          <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: PAYMENT_METHOD_COLORS[p.method] || t.muted }} />
+                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{PAYMENT_METHOD_LABELS[p.method] || p.method}</span>
+                        </div>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.title }}>{Number(p.amount || 0).toLocaleString('pl-PL')} PLN</span>
+                      </div>
+                    ))}
+                  </div>
+                  {form.settled_by_name && (
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '6px', paddingTop: '6px', borderTop: '0.5px solid rgba(22,163,74,0.15)' }}>
+                      ROZLICZYŁ: {form.settled_by_name}{form.settled_date ? ` · ${new Date(form.settled_date).toLocaleDateString('pl-PL')}` : ''}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Health form section */}
+            {form.health_form_completed ? (
+              <div className="p-3" style={{ border: '0.5px solid rgba(22,163,74,0.3)', background: 'rgba(22,163,74,0.04)' }}>
+                <div className="flex items-center gap-2 mb-2">
+                  <FileText size={11} color="#16a34a" />
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase' }}>ANKIETA ZDROWOTNA — WYPEŁNIONA</p>
+                </div>
+                <button onClick={() => setShowHealthForm(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#16a34a', background: 'transparent', padding: '7px 10px', border: '0.5px solid rgba(22,163,74,0.4)', marginTop: '6px', cursor: 'pointer', width: '100%' }}>
+                  <FileText size={10} /> PODGLĄD ANKIETY
+                </button>
+              </div>
+            ) : (
+              <div className="p-3" style={{ border: '0.5px solid rgb(var(--brand-rgb) /0.3)', background: 'rgb(var(--brand-rgb) /0.04)' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>ANKIETA ZDROWOTNA — BRAK</p>
+                <button onClick={() => openHealthFormQRPage(formUrl)} title="Pokaż kod QR do ankiety"
+                  className="flex items-center gap-1.5 justify-center w-full py-2"
+                  style={{ border: '0.5px solid var(--brand)', color: 'var(--brand)', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer' }}>
+                  <QrCode size={12} /> QR
+                </button>
+              </div>
+            )}
+
             {/* Details view */}
             <div className="space-y-3 pt-2" style={{ borderTop: `0.5px solid ${t.border}` }}>
               {[
@@ -303,12 +409,6 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, availabil
               </div>
             )}
 
-            {/* Health form button */}
-            {form.health_form_completed && (
-              <button onClick={() => setShowHealthForm(true)} style={{ fontSize: '9px', marginTop: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-mono)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', padding: '10px 20px', background: 'transparent', color: 'var(--brand)', border: '0.5px solid var(--brand)', cursor: 'pointer', transition: 'all 0.3s ease' }}>
-                <FileText size={12} /> PODGLĄD ANKIETY ZDROWOTNEJ
-              </button>
-            )}
           </div>
         )}
 
@@ -478,6 +578,18 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, availabil
             ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: 'var(--brand)' }
             : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: 'var(--brand)' }
           }
+        />
+      )}
+
+      {settlingBooking && (
+        <SettlementModal
+          booking={settlingBooking}
+          user={user}
+          onClose={() => setSettlingBooking(null)}
+          onSettled={handleSettled}
+          t={theme === 'light'
+            ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.62)' }
+            : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.72)' }}
         />
       )}
 
@@ -873,6 +985,7 @@ function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, o
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function ArtistSchedule() {
   const { artist, theme } = useOutletContext();
+  const { user } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -1136,6 +1249,7 @@ export default function ArtistSchedule() {
             artist={artist}
             artistServices={artistServices}
             theme={theme}
+            user={user}
             availabilityRecords={availabilityRecords}
             allBookings={bookings}
             onClose={() => setSelectedBooking(null)}
@@ -1150,6 +1264,7 @@ export default function ArtistSchedule() {
             artist={artist}
             artistServices={artistServices}
             theme={theme}
+            user={user}
             availabilityRecords={availabilityRecords}
             allBookings={bookings}
             onClose={() => setShowNewModal(false)}

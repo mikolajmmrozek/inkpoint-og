@@ -1,14 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, TrendingUp, X, ChevronLeft, ChevronRight, Search, Zap } from 'lucide-react';
+import { Calendar, Clock, TrendingUp, X, ChevronLeft, ChevronRight, Search, Zap, Wallet, Phone, Mail, QrCode, FileText, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, isToday, isPast, parseISO, addDays, subDays } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
+import SettlementModal from '@/components/dashboard/SettlementModal';
+import { openHealthFormQRPage } from '@/lib/qrPage';
 import ClientSearch from '@/components/dashboard/ClientSearch';
 import { pluralSesji } from '@/utils';
+
+const PAYMENT_METHOD_LABELS = { cash: 'Gotówka', card: 'Karta', voucher: 'Voucher' };
+const PAYMENT_METHOD_COLORS = { cash: '#16a34a', card: '#2563eb', voucher: '#f59e0b' };
 
 const STATUS_COLORS = {
   pending: 'var(--brand)',
@@ -28,7 +34,7 @@ const getDefaultSessionTime = () => {
 };
 
 // ── Booking Detail / View Modal ──────────────────────────────────────────────
-function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, onSaved }) {
+function BookingModal({ booking, isNew, artist, artistServices, theme, user, onClose, onSaved }) {
   const t = theme === 'light'
     ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', inputBorder: '#CCCCCC' }
     : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', inputBorder: '#262626' };
@@ -54,6 +60,7 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
 
   const [form, setForm] = useState(() => buildForm(booking));
   const [showHealthForm, setShowHealthForm] = useState(false);
+  const [settlingBooking, setSettlingBooking] = useState(null);
   const [editing, setEditing] = useState(isNew);
   const [saving, setSaving] = useState(false);
   const [showServiceSuggestions, setShowServiceSuggestions] = useState(false);
@@ -63,6 +70,19 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
   useEffect(() => {
     setForm(buildForm(booking));
   }, [booking?.id]);
+
+  const formUrl = booking ? `${window.location.origin}/health-form?booking_id=${booking.id}` : '';
+  const phone = (form.client_phone || '').trim();
+  const email = (form.client_email || '').trim();
+
+  const handleSettled = (updated) => {
+    setSettlingBooking(null);
+    setForm(f => ({ ...f, ...updated }));
+    onSaved();
+    if (updated?.id) {
+      base44.functions.invoke('manageGoogleCalendar', { action: 'sync_one', booking_id: updated.id }).catch(() => {});
+    }
+  };
 
   // Auto-populate client name from Client entity if missing on the booking
   useEffect(() => {
@@ -176,6 +196,93 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
               </div>
             )}
 
+            {/* Quick contact */}
+            {(phone || email) && (
+              <div className="flex gap-2">
+                {phone && (
+                  <a href={`tel:${phone.replace(/\s/g, '')}`} className="flex items-center justify-center gap-1.5 flex-1 py-2" style={{ border: `0.5px solid ${t.border}`, color: t.text, textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                    <Phone size={11} color="#16a34a" /> ZADZWOŃ
+                  </a>
+                )}
+                {email && (
+                  <a href={`mailto:${email}`} className="flex items-center justify-center gap-1.5 flex-1 py-2" style={{ border: `0.5px solid ${t.border}`, color: t.text, textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                    <Mail size={11} color="var(--brand)" /> EMAIL
+                  </a>
+                )}
+              </div>
+            )}
+
+            {/* Settlement action */}
+            <div>
+              <button
+                onClick={() => setSettlingBooking(booking)}
+                className="btn-oxblood flex items-center gap-1.5 justify-center w-full"
+                style={{ fontSize: '9px', padding: '10px' }}
+              >
+                <Wallet size={12} /> {form.is_settled ? 'EDYTUJ ROZLICZENIE' : 'ROZLICZ'}
+              </button>
+            </div>
+
+            {/* Settlement summary */}
+            {form.is_settled && form.payment_breakdown && (
+              <div className="p-3" style={{ border: '0.5px solid rgba(22,163,74,0.3)', background: 'rgba(22,163,74,0.04)' }}>
+                <div className="flex items-center gap-2 mb-3">
+                  <Check size={11} color="#16a34a" />
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase' }}>ROZLICZONO</p>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>FINAŁNA KWOTA</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.title, fontWeight: 600 }}>{Number(form.final_amount || 0).toLocaleString('pl-PL')} PLN</span>
+                  </div>
+                  {Number(form.deposit_amount || 0) > 0 && (
+                    <div className="flex items-center justify-between">
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>ZALICZKA</span>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.muted }}>{Number(form.deposit_amount).toLocaleString('pl-PL')} PLN</span>
+                    </div>
+                  )}
+                  <div className="pt-2" style={{ borderTop: '0.5px solid rgba(22,163,74,0.2)' }}>
+                    {form.payment_breakdown.map((p, i) => (
+                      <div key={i} className="flex items-center justify-between py-1">
+                        <div className="flex items-center gap-2">
+                          <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: PAYMENT_METHOD_COLORS[p.method] || t.muted }} />
+                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{PAYMENT_METHOD_LABELS[p.method] || p.method}</span>
+                        </div>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.title }}>{Number(p.amount || 0).toLocaleString('pl-PL')} PLN</span>
+                      </div>
+                    ))}
+                  </div>
+                  {form.settled_by_name && (
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '6px', paddingTop: '6px', borderTop: '0.5px solid rgba(22,163,74,0.15)' }}>
+                      ROZLICZYŁ: {form.settled_by_name}{form.settled_date ? ` · ${new Date(form.settled_date).toLocaleDateString('pl-PL')}` : ''}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Health form section */}
+            {form.health_form_completed ? (
+              <div className="p-3" style={{ border: '0.5px solid rgba(22,163,74,0.3)', background: 'rgba(22,163,74,0.04)' }}>
+                <div className="flex items-center gap-2 mb-2">
+                  <FileText size={11} color="#16a34a" />
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase' }}>ANKIETA ZDROWOTNA — WYPEŁNIONA</p>
+                </div>
+                <button onClick={() => setShowHealthForm(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#16a34a', background: 'transparent', padding: '7px 10px', border: '0.5px solid rgba(22,163,74,0.4)', marginTop: '6px', cursor: 'pointer', width: '100%' }}>
+                  <FileText size={10} /> PODGLĄD ANKIETY
+                </button>
+              </div>
+            ) : (
+              <div className="p-3" style={{ border: '0.5px solid rgb(var(--brand-rgb) /0.3)', background: 'rgb(var(--brand-rgb) /0.04)' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>ANKIETA ZDROWOTNA — BRAK</p>
+                <button onClick={() => openHealthFormQRPage(formUrl)} title="Pokaż kod QR do ankiety"
+                  className="flex items-center gap-1.5 justify-center w-full py-2"
+                  style={{ border: '0.5px solid var(--brand)', color: 'var(--brand)', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer' }}>
+                  <QrCode size={12} /> QR
+                </button>
+              </div>
+            )}
+
             {/* Details view */}
             <div className="space-y-3 pt-2" style={{ borderTop: `0.5px solid ${t.border}` }}>
               {[
@@ -196,12 +303,6 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
               ))}
             </div>
 
-            {/* Health form button */}
-            {form.health_form_completed && (
-              <button onClick={() => setShowHealthForm(true)} className="btn-ghost-parchment" style={{ fontSize: '9px', marginTop: '8px', width: '100%' }}>
-                PODGLĄD ANKIETY ZDROWOTNEJ
-              </button>
-            )}
           </div>
         )}
 
@@ -352,15 +453,29 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, onClose, 
           }
         />
       )}
+
+      {settlingBooking && (
+        <SettlementModal
+          booking={settlingBooking}
+          user={user}
+          onClose={() => setSettlingBooking(null)}
+          onSettled={handleSettled}
+          t={theme === 'light'
+            ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.62)' }
+            : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.72)' }}
+        />
+      )}
     </div>
   );
 }
 
 export default function ArtistHome() {
   const { artist, theme } = useOutletContext();
+  const { user } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [settlingBooking, setSettlingBooking] = useState(null);
   const [artistServices, setArtistServices] = useState([]);
 
   const t = theme === 'light'
@@ -418,6 +533,18 @@ export default function ArtistHome() {
   const todayBookings = sortedUpcoming.filter(b => b.session_date === todayStr);
   const todayLabel = format(new Date(), 'EEEE, d MMMM', { locale: pl }).toUpperCase();
 
+  // Sessions to settle: today + overdue, not cancelled, not settled
+  const toSettle = bookings.filter(b => b.session_date <= todayStr && b.status !== 'cancelled' && !b.is_settled);
+  const toSettleSorted = [...toSettle].sort((a, b) => (a.session_date || '').localeCompare(b.session_date || '') || (a.session_time || '').localeCompare(b.session_time || ''));
+
+  const handleSettled = (updated) => {
+    setSettlingBooking(null);
+    base44.entities.Booking.filter({ artist_id: artist.id }, '-session_date', 100).then(setBookings);
+    if (updated?.id) {
+      base44.functions.invoke('manageGoogleCalendar', { action: 'sync_one', booking_id: updated.id }).catch(() => {});
+    }
+  };
+
   const formatDayHeader = (dateStr) => {
     if (!dateStr || dateStr === 'brak') return 'BRAK DATY';
     try {
@@ -434,6 +561,35 @@ export default function ArtistHome() {
           Cześć, {artist.name?.split(' ')[0]}
         </h1>
       </div>
+
+      {/* Do rozliczenia — top section */}
+      {toSettleSorted.length > 0 && (
+        <div className="mb-10">
+          <div className="flex items-center gap-3 mb-3">
+            <Clock size={13} color="#f59e0b" />
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: '#f59e0b', letterSpacing: '0.15em', textTransform: 'uppercase' }}>DO ROZLICZENIA ({toSettleSorted.length})</p>
+            <div style={{ flex: 1, height: '0.5px', background: 'rgba(245,158,11,0.3)' }} />
+          </div>
+          <div style={{ border: '0.5px solid rgba(245,158,11,0.4)', background: t.cardBg }}>
+            {toSettleSorted.map((b, i) => (
+              <div key={b.id} className="flex items-center gap-3 p-4 flex-wrap" style={{ borderBottom: i < toSettleSorted.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }}>
+                <div style={{ minWidth: '46px', flexShrink: 0 }}>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.value }}>{b.session_time}</p>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted }}>{b.session_date}</p>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p style={{ color: t.text, fontSize: '15px', fontWeight: 500 }}>{b.client_name}</p>
+                  {b.tattoo_placement && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, marginTop: '2px' }}>{b.tattoo_placement}</p>}
+                </div>
+                {b.estimated_price > 0 && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.muted, flexShrink: 0 }}>{b.estimated_price} zł</span>}
+                <button onClick={() => setSettlingBooking(b)} className="btn-oxblood flex items-center gap-1.5" style={{ fontSize: '8px', padding: '6px 12px', flexShrink: 0 }}>
+                  <Wallet size={10} /> ROZLICZ
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
         {KPI.map((kpi, i) => {
@@ -515,8 +671,8 @@ export default function ArtistHome() {
               ) : (
                 <div style={{ border: `0.5px solid rgba(22,163,74,0.4)`, background: t.cardBg }}>
                   {todayBookings.map((b, i) => (
-                    <div key={b.id} onClick={() => setSelectedBooking(b)} className="flex items-center justify-between p-4 cursor-pointer" style={{ borderBottom: i < todayBookings.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }} onMouseEnter={e => e.currentTarget.style.background = t.rowHover} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                      <div className="flex-1">
+                    <div key={b.id} onClick={() => setSelectedBooking(b)} className="flex items-center justify-between p-4 cursor-pointer flex-wrap" style={{ borderBottom: i < todayBookings.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }} onMouseEnter={e => e.currentTarget.style.background = t.rowHover} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                      <div className="flex-1 min-w-0">
                         <p style={{ color: t.value, fontSize: '15px', fontWeight: 500 }}>{b.client_name}</p>
                         <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px' }}>
                           {b.session_time ? `${b.session_time} · ` : ''}{b.tattoo_placement || ''}
@@ -529,6 +685,11 @@ export default function ArtistHome() {
                           {b.status?.toUpperCase()}
                         </span>
                       </div>
+                      {!b.is_settled && b.status !== 'cancelled' && (
+                        <button onClick={(e) => { e.stopPropagation(); setSettlingBooking(b); }} className="btn-oxblood flex items-center gap-1.5" style={{ fontSize: '8px', padding: '6px 12px', flexShrink: 0 }}>
+                          <Wallet size={10} /> ROZLICZ
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -577,6 +738,7 @@ export default function ArtistHome() {
             artist={artist}
             artistServices={artistServices}
             theme={theme}
+            user={user}
             onClose={() => setSelectedBooking(null)}
             onSaved={() => {
               base44.entities.Booking.filter({ artist_id: artist.id }, '-session_date', 100).then(setBookings);
@@ -585,6 +747,18 @@ export default function ArtistHome() {
           />
         )}
       </AnimatePresence>
+
+      {settlingBooking && (
+        <SettlementModal
+          booking={settlingBooking}
+          user={user}
+          onClose={() => setSettlingBooking(null)}
+          onSettled={handleSettled}
+          t={theme === 'light'
+            ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.62)' }
+            : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.72)' }}
+        />
+      )}
     </div>
   );
 }
