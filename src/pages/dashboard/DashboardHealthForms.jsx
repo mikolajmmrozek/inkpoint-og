@@ -441,15 +441,13 @@ ${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeo
         <StatsTile label="Wszystkie ankiety" value={formatCompact(completedForms.length)} active={formFilter === 'all'} onClick={() => setFormFilter('all')} t={t} />
         <StatsTile label="Nowe (nieprzeczytane)" value={formatCompact(completedForms.filter(f => !f.is_read).length)} active={formFilter === 'unread'} onClick={() => setFormFilter(formFilter === 'unread' ? 'all' : 'unread')} t={t} />
         <div className="ml-auto">
-          <a
-            href={generalFormLink}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={() => openHealthFormQRPage(generalFormLink)}
             className="flex items-center gap-2 btn-oxblood"
-            style={{ padding: '8px 16px', textDecoration: 'none' }}
+            style={{ padding: '8px 16px' }}
           >
-            <Plus size={13} /> NOWA ANKIETA
-          </a>
+            <QrCode size={13} /> WYPEŁNIJ ANKIETĘ
+          </button>
         </div>
       </div>
 
