@@ -138,13 +138,12 @@ export default function SettlementModal({ booking, user, onClose, onSettled, t }
           <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>METODY PŁATNOŚCI</p>
             {payments.map((p, i) => {
-              const method = PAYMENT_METHODS.find(m => m.value === p.method);
               return (
                 <div key={i} className="flex items-center gap-2 mb-3">
                   <select
                     value={p.method}
                     onChange={e => setPayment(i, 'method', e.target.value)}
-                    style={{ ...inputStyle, color: t.text, borderBottomColor: method?.color || t.border, flex: '0 0 130px', colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
+                    style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, flex: '0 0 130px', colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
                   >
                     {PAYMENT_METHODS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
                   </select>

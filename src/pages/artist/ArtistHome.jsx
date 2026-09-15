@@ -9,6 +9,7 @@ import { format, isToday, isPast, parseISO, addDays, subDays } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
 import SettlementModal from '@/components/dashboard/SettlementModal';
+import TodayOverview from '@/components/dashboard/TodayOverview';
 import { openHealthFormQRPage } from '@/lib/qrPage';
 import ClientSearch from '@/components/dashboard/ClientSearch';
 import { pluralSesji } from '@/utils';
@@ -479,8 +480,8 @@ export default function ArtistHome() {
   const [artistServices, setArtistServices] = useState([]);
 
   const t = theme === 'light'
-    ? { title: '#111111', muted: 'rgba(0,0,0,0.4)', cardBg: '#FFFFFF', cardBorder: '#E5E5E5', value: '#111111', rowHover: 'rgba(0,0,0,0.03)', rowBorder: '#E5E5E5' }
-    : { title: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', cardBg: 'rgba(255,255,255,0.04)', cardBorder: '#262626', value: '#F5F0EB', rowHover: 'rgba(255,255,255,0.04)', rowBorder: '#262626' };
+    ? { title: '#111111', muted: 'rgba(0,0,0,0.4)', cardBg: '#FFFFFF', cardBorder: '#E5E5E5', value: '#111111', rowHover: 'rgba(0,0,0,0.03)', rowBorder: '#E5E5E5', border: '#E5E5E5' }
+    : { title: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', cardBg: 'rgba(255,255,255,0.04)', cardBorder: '#262626', value: '#F5F0EB', rowHover: 'rgba(255,255,255,0.04)', rowBorder: '#262626', border: '#262626' };
 
   useEffect(() => {
     if (!artist?.id) return;
@@ -530,12 +531,9 @@ export default function ArtistHome() {
   const overdueGroups = groupByDate(overdue.sort((a, b) => (a.session_date || '').localeCompare(b.session_date || '')));
   const upcomingGroups = groupByDate(sortedUpcoming);
 
-  const todayBookings = sortedUpcoming.filter(b => b.session_date === todayStr);
+  const todayBookings = bookings.filter(b => b.session_date === todayStr && b.status !== 'cancelled')
+    .sort((a, b) => (a.session_time || '').localeCompare(b.session_time || ''));
   const todayLabel = format(new Date(), 'EEEE, d MMMM', { locale: pl }).toUpperCase();
-
-  // Sessions to settle: today + overdue, not cancelled, not settled
-  const toSettle = bookings.filter(b => b.session_date <= todayStr && b.status !== 'cancelled' && !b.is_settled);
-  const toSettleSorted = [...toSettle].sort((a, b) => (a.session_date || '').localeCompare(b.session_date || '') || (a.session_time || '').localeCompare(b.session_time || ''));
 
   const handleSettled = (updated) => {
     setSettlingBooking(null);
@@ -562,34 +560,14 @@ export default function ArtistHome() {
         </h1>
       </div>
 
-      {/* Do rozliczenia — top section */}
-      {toSettleSorted.length > 0 && (
-        <div className="mb-10">
-          <div className="flex items-center gap-3 mb-3">
-            <Clock size={13} color="#f59e0b" />
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: '#f59e0b', letterSpacing: '0.15em', textTransform: 'uppercase' }}>DO ROZLICZENIA ({toSettleSorted.length})</p>
-            <div style={{ flex: 1, height: '0.5px', background: 'rgba(245,158,11,0.3)' }} />
-          </div>
-          <div style={{ border: '0.5px solid rgba(245,158,11,0.4)', background: t.cardBg }}>
-            {toSettleSorted.map((b, i) => (
-              <div key={b.id} className="flex items-center gap-3 p-4 flex-wrap" style={{ borderBottom: i < toSettleSorted.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }}>
-                <div style={{ minWidth: '46px', flexShrink: 0 }}>
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.value }}>{b.session_time}</p>
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted }}>{b.session_date}</p>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p style={{ color: t.text, fontSize: '15px', fontWeight: 500 }}>{b.client_name}</p>
-                  {b.tattoo_placement && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, marginTop: '2px' }}>{b.tattoo_placement}</p>}
-                </div>
-                {b.estimated_price > 0 && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.muted, flexShrink: 0 }}>{b.estimated_price} zł</span>}
-                <button onClick={() => setSettlingBooking(b)} className="btn-oxblood flex items-center gap-1.5" style={{ fontSize: '8px', padding: '6px 12px', flexShrink: 0 }}>
-                  <Wallet size={10} /> ROZLICZ
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Rozliczenie dnia — always visible */}
+      <TodayOverview
+        bookings={bookings}
+        t={t}
+        theme={theme}
+        artists={[artist]}
+        onBookingUpdate={handleSettled}
+      />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
         {KPI.map((kpi, i) => {
