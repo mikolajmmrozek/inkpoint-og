@@ -6,6 +6,14 @@ import SettlementModal from './SettlementModal';
 import { formatCompact } from '@/lib/formatNumber';
 
 const STATUS_COLORS = { pending: '#FF007F', confirmed: '#16a34a', completed: '#2563eb', cancelled: '#9ca3af' };
+const PAYMENT_COLORS = { cash: '#16a34a', card: '#2563eb', voucher: '#f59e0b' };
+
+const sumMethod = (b, method) => {
+  if (b.payment_breakdown && b.payment_breakdown.length > 0) {
+    return b.payment_breakdown.filter(p => p.method === method).reduce((s, p) => s + Number(p.amount || 0), 0);
+  }
+  return method === 'cash' ? Number(b.final_amount || b.estimated_price || 0) : 0;
+};
 
 export default function TodayOverview({ bookings, t, theme, onBookingUpdate, artists }) {
   const { user } = useAuth();
@@ -28,6 +36,13 @@ export default function TodayOverview({ bookings, t, theme, onBookingUpdate, art
   const settledStudio = Math.round((settled - settledArtist) * 100) / 100;
   const toSettleArtist = Math.round((potentialArtist - settledArtist) * 100) / 100;
   const toSettleStudio = Math.round((potentialStudio - settledStudio) * 100) / 100;
+
+  // Payment methods in kasa (from settled sessions) + deposits collected
+  const settledBookings = today.filter(b => b.is_settled);
+  const cashInKasa = settledBookings.reduce((s, b) => s + sumMethod(b, 'cash'), 0);
+  const cardTotal = settledBookings.reduce((s, b) => s + sumMethod(b, 'card'), 0);
+  const voucherTotal = settledBookings.reduce((s, b) => s + sumMethod(b, 'voucher'), 0);
+  const depositsTotal = today.reduce((s, b) => s + Number(b.deposit_amount || 0), 0);
 
   const mono = { fontFamily: 'var(--font-mono)' };
   const display = { fontFamily: 'var(--font-display)', fontWeight: 400 };
@@ -78,6 +93,24 @@ export default function TodayOverview({ bookings, t, theme, onBookingUpdate, art
             <p style={{ ...display, fontSize: '1.9rem', color: toSettle.length > 0 ? '#f59e0b' : t.muted, lineHeight: 1, letterSpacing: '0.02em' }}>{toSettle.length} <span style={{ ...mono, fontSize: '11px', color: t.muted }}>sesji</span></p>
             <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px' }}>Art: {formatCompact(toSettleArtist)} · Studio: {formatCompact(toSettleStudio)}</p>
           </div>
+        </div>
+
+        {/* Payment methods in kasa — simplified */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-5">
+          {[
+            { label: 'Gotówka', value: cashInKasa, color: PAYMENT_COLORS.cash },
+            { label: 'Karta', value: cardTotal, color: PAYMENT_COLORS.card },
+            { label: 'Voucher', value: voucherTotal, color: PAYMENT_COLORS.voucher },
+            { label: 'Przedpłaty', value: depositsTotal, color: t.muted },
+          ].map((m, i) => (
+            <div key={i} className="flex items-center gap-2 px-3 py-2" style={{ border: `0.5px solid ${t.cardBorder}`, background: 'rgb(var(--brand-rgb) /0.03)', borderRadius: 'var(--radius)' }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: m.color, flexShrink: 0 }} />
+              <div className="min-w-0">
+                <p style={{ ...mono, fontSize: '7px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{m.label}</p>
+                <p style={{ ...mono, fontSize: '12px', color: t.value, fontWeight: 600 }}>{formatCompact(m.value)} PLN</p>
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Progress bar */}

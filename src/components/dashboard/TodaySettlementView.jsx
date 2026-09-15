@@ -118,6 +118,17 @@ export default function TodaySettlementView({ t, theme }) {
 
   const dayTotalsSelected = useMemo(() => dayTotals.find(d => d.str === selectedStr) || { revenue: 0, sessions: 0, settled: 0, pending: 0 }, [dayTotals, selectedStr]);
 
+  // Selected day payment-method breakdown (from settled sessions only = real money in kasa)
+  const dayMethods = useMemo(() => {
+    const settled = activeBookings.filter(b => b.is_settled);
+    const cash = settled.reduce((s, b) => s + sumMethod(b, 'cash'), 0);
+    const card = settled.reduce((s, b) => s + sumMethod(b, 'card'), 0);
+    const voucher = settled.reduce((s, b) => s + sumMethod(b, 'voucher'), 0);
+    const voucherCount = settled.filter(b => b.payment_breakdown && b.payment_breakdown.some(p => p.method === 'voucher' && Number(p.amount || 0) > 0)).length;
+    const deposits = settled.reduce((s, b) => s + Number(b.deposit_amount || 0), 0);
+    return { cash, card, voucher, voucherCount, deposits };
+  }, [activeBookings]);
+
   const handleSettled = (updated) => {
     setBookings(prev => prev.map(b => b.id === updated.id ? { ...b, ...updated } : b));
     setSettlingBooking(null);
@@ -232,6 +243,38 @@ export default function TodaySettlementView({ t, theme }) {
                 {k.sub && <p style={{ ...mono, fontSize: '9px', color: k.color || t.fuchsia, marginTop: '3px' }}>{k.sub}</p>}
               </div>
             ))}
+          </div>
+
+          {/* Payment methods in kasa */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            <div className="p-3 flex items-center gap-3" style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
+              <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: PAYMENT_COLORS.cash, flexShrink: 0 }} />
+              <div>
+                <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Gotówka w kasie</p>
+                <p style={{ ...mono, fontSize: '15px', color: PAYMENT_COLORS.cash, fontWeight: 600 }}>{dayMethods.cash.toLocaleString('pl-PL')} PLN</p>
+              </div>
+            </div>
+            <div className="p-3 flex items-center gap-3" style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
+              <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: PAYMENT_COLORS.card, flexShrink: 0 }} />
+              <div>
+                <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Kartą</p>
+                <p style={{ ...mono, fontSize: '15px', color: PAYMENT_COLORS.card, fontWeight: 600 }}>{dayMethods.card.toLocaleString('pl-PL')} PLN</p>
+              </div>
+            </div>
+            <div className="p-3 flex items-center gap-3" style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
+              <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: PAYMENT_COLORS.voucher, flexShrink: 0 }} />
+              <div>
+                <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Voucherami {dayMethods.voucherCount > 0 ? `(${dayMethods.voucherCount})` : ''}</p>
+                <p style={{ ...mono, fontSize: '15px', color: PAYMENT_COLORS.voucher, fontWeight: 600 }}>{dayMethods.voucher.toLocaleString('pl-PL')} PLN</p>
+              </div>
+            </div>
+            <div className="p-3 flex items-center gap-3" style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
+              <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: t.muted, flexShrink: 0 }} />
+              <div>
+                <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Wpłacone zaliczki</p>
+                <p style={{ ...mono, fontSize: '15px', color: t.text, fontWeight: 600 }}>{dayMethods.deposits.toLocaleString('pl-PL')} PLN</p>
+              </div>
+            </div>
           </div>
 
           {/* Per-artist settlement cards */}
