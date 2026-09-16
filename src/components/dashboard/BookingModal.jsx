@@ -155,7 +155,22 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
     set('service_id', '');
     set('service_name', '');
     setServiceQuery('');
-    setArtists(allArtists);
+    // Narrow artists to those who perform at least one service in this category
+    if (!cat) {
+      setArtists(allArtists);
+    } else {
+      const artistIdsInCat = new Set(
+        allServices
+          .filter(s => s.category === cat && s.artist_ids && s.artist_ids.length > 0)
+          .flatMap(s => s.artist_ids)
+      );
+      setArtists(artistIdsInCat.size > 0 ? allArtists.filter(a => artistIdsInCat.has(a.id)) : allArtists);
+      // If the currently selected artist isn't in the narrowed list, clear it
+      if (form.artist_id && artistIdsInCat.size > 0 && !artistIdsInCat.has(form.artist_id)) {
+        set('artist_id', '');
+        set('artist_name', '');
+      }
+    }
   };
 
   const filteredServices = allServices.filter(s => {
@@ -196,6 +211,8 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
         return { ...f, service_id: serviceId, service_name: svc.name, session_duration: dur, ...(endTime ? { session_end_time: endTime } : {}) };
       });
     }
+    // Keep category in sync with the selected service (bidirectional filtering)
+    if (svc.category) setSelectedCategory(svc.category);
     // Filter artists
     if (svc.artist_ids && svc.artist_ids.length > 0) {
       setArtists(allArtists.filter(a => svc.artist_ids.includes(a.id)));

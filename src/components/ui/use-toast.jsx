@@ -110,7 +110,7 @@ function dispatch(action) {
   });
 }
 
-function toast({ duration = 3000, ...props }) {
+function toast({ duration = 5000, ...props }) {
   const id = genId();
 
   const update = (props) =>
