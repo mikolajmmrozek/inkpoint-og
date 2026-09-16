@@ -35,7 +35,7 @@ export default function SettlementModal({ booking, user, onClose, onSettled, t }
   const depositNum = Number(depositAmount) || 0;
   const remainder = Math.max(0, finalNum - depositNum);
   const paymentsSum = payments.reduce((s, p) => s + (Number(p.amount) || 0), 0);
-  const isValid = finalNum > 0 && paymentsSum === remainder && payments.every(p => p.method && (Number(p.amount) || 0) > 0);
+  const isValid = finalNum >= 0 && paymentsSum === remainder && (remainder === 0 || payments.every(p => p.method && (Number(p.amount) || 0) > 0));
   const diff = paymentsSum - remainder;
 
   const addPayment = () => {
@@ -51,7 +51,9 @@ export default function SettlementModal({ booking, user, onClose, onSettled, t }
     if (!isValid || saving) return;
     setSaving(true);
     try {
-      const breakdown = payments.map(p => ({ method: p.method, amount: Math.round(Number(p.amount) * 100) / 100 }));
+      const breakdown = payments
+        .map(p => ({ method: p.method, amount: Math.round(Number(p.amount) * 100) / 100 }))
+        .filter(p => p.amount > 0);
       const updates = {
         final_amount: Math.round(finalNum * 100) / 100,
         deposit_amount: Math.round(depositNum * 100) / 100,
