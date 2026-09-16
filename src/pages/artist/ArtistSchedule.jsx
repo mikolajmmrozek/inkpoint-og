@@ -19,6 +19,7 @@ import { buildHealthFormStatusMap, resolveBookingHealthStatus } from '@/lib/heal
 import HealthFormBadge from '@/components/booking/HealthFormBadge';
 import ReferenceImagesGallery from '@/components/booking/ReferenceImagesGallery';
 import GroupedBookingList from '@/components/booking/GroupedBookingList';
+import ArtistSessionRow from '@/components/artist/ArtistSessionRow';
 
 const STATUS_COLORS = { pending: 'var(--brand)', confirmed: '#16a34a', completed: '#2563eb', cancelled: '#9ca3af' };
 const STATUS_LABELS = { pending: 'Oczekuje', confirmed: 'Potwierdzona', completed: 'Zakończona', cancelled: 'Anulowana' };
@@ -729,30 +730,14 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
         })()}
 
         {selectedDayBookings.length === 0 ? (
-          <div className="py-8 text-center" style={{ border: `0.5px solid ${t.cardBorder}`, background: 'rgb(var(--brand-rgb) /0.02)' }}>
+          <div className="py-8 text-center" style={{ border: `0.5px solid ${t.cardBorder}`, background: 'rgb(var(--brand-rgb) /0.02)', borderRadius: 'var(--radius)' }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em', marginBottom: '12px' }}>BRAK SESJI W TEN DZIEŃ</p>
             <button onClick={onAddBooking} className="btn-oxblood" style={{ fontSize: '10px', padding: '8px 20px' }}>+ DODAJ SESJĘ</button>
           </div>
         ) : (
-          <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+          <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)', overflow: 'hidden' }}>
             {selectedDayBookings.map((b, i) => (
-              <div key={b.id} onClick={() => onBookingClick(b)}
-                style={{ borderBottom: i < selectedDayBookings.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none', padding: '12px', cursor: 'pointer', opacity: b.status === 'cancelled' ? 0.5 : 1 }}
-                onMouseEnter={e => e.currentTarget.style.background = t.rowHover}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                <div className="flex items-center gap-2 mb-1">
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: STATUS_COLORS[b.status] || 'var(--brand)', letterSpacing: '0.05em', flexShrink: 0 }}>{b.session_time || '—'}{b.session_end_time ? `–${b.session_end_time}` : ''}</span>
-                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: STATUS_COLORS[b.status] || t.muted, flexShrink: 0 }} />
-                </div>
-                <p style={{ color: t.text, fontSize: '15px', fontWeight: 500 }}>{b.client_name}</p>
-                {(b.tattoo_placement || b.service_name) && (
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px' }}>
-                    {b.tattoo_placement}{b.service_name ? ` · ${b.service_name}` : ''}
-                  </p>
-                )}
-                {b.estimated_price > 0 && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: t.muted, marginTop: '2px' }}>{b.estimated_price} zł</p>}
-                <div className="mt-1"><HealthFormBadge status={resolveBookingHealthStatus(b, healthStatusMap)} fontSize="8px" style={{ padding: '2px 5px' }} /></div>
-              </div>
+              <ArtistSessionRow key={b.id} booking={b} healthStatusMap={healthStatusMap} t={t} isLast={i === selectedDayBookings.length - 1} onClick={() => onBookingClick(b)} />
             ))}
           </div>
         )}
@@ -1139,7 +1124,7 @@ export default function ArtistSchedule() {
 
       {/* Monthly view */}
       {viewMode === 'month' && (
-        <div className="p-4" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+        <div className="p-4" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
           <MonthView
             bookings={bookings} selectedDate={selectedDate} onDayClick={handleDayClick}
             viewMonth={viewMonth} setViewMonth={setViewMonth} t={t} theme={theme}
@@ -1203,37 +1188,14 @@ export default function ArtistSchedule() {
           {loading ? (
             <div className="p-8 text-center" style={{ border: `0.5px solid ${t.cardBorder}` }}><div className="w-8 h-px mx-auto animate-pulse" style={{ background: 'var(--brand)' }} /></div>
           ) : dayBookings.length === 0 ? (
-            <div className="p-10 text-center" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+            <div className="p-10 text-center" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em', marginBottom: '12px' }}>BRAK SESJI W TEN DZIEŃ</p>
               <button onClick={() => setShowNewModal(true)} className="btn-oxblood" style={{ fontSize: '10px' }}>+ DODAJ SESJĘ</button>
             </div>
           ) : (
-            <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+            <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)', overflow: 'hidden' }}>
               {dayBookings.map((b, i) => (
-                <div key={b.id} onClick={() => setSelectedBooking(b)}
-                  className="p-4 cursor-pointer"
-                  style={{ borderBottom: i < dayBookings.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none', opacity: b.status === 'cancelled' ? 0.5 : 1 }}
-                  onMouseEnter={e => e.currentTarget.style.background = t.rowHover}
-                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                  <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
-                    {b.session_time && (
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: STATUS_COLORS[b.status], letterSpacing: '0.05em', flexShrink: 0 }}>
-                        {b.session_time}{b.session_end_time ? `–${b.session_end_time}` : ''}
-                      </span>
-                    )}
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '3px 8px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status], flexShrink: 0 }}>
-                      {STATUS_LABELS[b.status]}
-                    </span>
-                  </div>
-                  <p style={{ color: t.text, fontSize: '15px', fontWeight: 500 }}>{b.client_name}</p>
-                  {b.client_phone && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px' }}>{b.client_phone}</p>}
-                  {b.tattoo_placement && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, marginTop: '2px' }}>{b.tattoo_placement}{b.tattoo_description ? ` — ${b.tattoo_description}` : ''}</p>}
-                  {b.service_name && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', opacity: 0.8, marginTop: '2px' }}>{b.service_name}</p>}
-                  <div className="flex items-center gap-3 mt-2 flex-wrap">
-                    {b.estimated_price > 0 && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted }}>{b.estimated_price} zł</span>}
-                    {b.status !== 'cancelled' && <HealthFormBadge status={resolveBookingHealthStatus(b, healthStatusMap)} fontSize="8px" style={{ padding: '2px 6px' }} />}
-                  </div>
-                </div>
+                <ArtistSessionRow key={b.id} booking={b} healthStatusMap={healthStatusMap} t={t} isLast={i === dayBookings.length - 1} onClick={() => setSelectedBooking(b)} />
               ))}
             </div>
           )}
