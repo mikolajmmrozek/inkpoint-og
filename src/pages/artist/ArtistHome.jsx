@@ -12,6 +12,8 @@ import SettlementModal from '@/components/dashboard/SettlementModal';
 import TodayOverview from '@/components/dashboard/TodayOverview';
 import { openHealthFormQRPage } from '@/lib/qrPage';
 import ClientSearch from '@/components/dashboard/ClientSearch';
+import ArtistSessionRow from '@/components/artist/ArtistSessionRow';
+import { buildHealthFormStatusMap } from '@/lib/healthFormStatus';
 import { pluralSesji } from '@/utils';
 
 const PAYMENT_METHOD_LABELS = { cash: 'Gotówka', card: 'Karta', voucher: 'Voucher' };
@@ -478,6 +480,7 @@ export default function ArtistHome() {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [settlingBooking, setSettlingBooking] = useState(null);
   const [artistServices, setArtistServices] = useState([]);
+  const [healthStatusMap, setHealthStatusMap] = useState({});
 
   const t = theme === 'light'
     ? { title: '#111111', muted: 'rgba(0,0,0,0.4)', cardBg: '#FFFFFF', cardBorder: '#E5E5E5', value: '#111111', rowHover: 'rgba(0,0,0,0.03)', rowBorder: '#E5E5E5', border: '#E5E5E5' }
@@ -493,6 +496,9 @@ export default function ArtistHome() {
         setArtistServices(svcs.filter(s => !s.artist_ids?.length || s.artist_ids.includes(artist.id)));
       });
     }, 800);
+    base44.entities.HealthForm.list('-created_date', 300)
+      .then(forms => setHealthStatusMap(buildHealthFormStatusMap(forms)))
+      .catch(() => {});
   }, [artist?.id]);
 
   const now = new Date();
@@ -612,23 +618,9 @@ export default function ArtistHome() {
                 {overdueGroups.map(([date, items]) => (
                   <div key={date} className="mb-3">
                     <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px', opacity: 0.7 }}>{formatDayHeader(date)}</p>
-                    <div style={{ border: '0.5px solid rgb(var(--brand-rgb) /0.4)', background: t.cardBg }}>
+                    <div style={{ border: '0.5px solid rgb(var(--brand-rgb) /0.4)', background: t.cardBg, borderRadius: 'var(--radius)', overflow: 'hidden' }}>
                       {items.map((b, i) => (
-                        <div key={b.id} onClick={() => setSelectedBooking(b)} className="flex items-center justify-between p-4 cursor-pointer" style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }} onMouseEnter={e => e.currentTarget.style.background = t.rowHover} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                          <div className="flex-1">
-                            <p style={{ color: t.value, fontSize: '15px', fontWeight: 500 }}>{b.client_name}</p>
-                            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px' }}>
-                              {b.session_time ? `${b.session_time} · ` : ''}{b.tattoo_placement || ''}
-                            </p>
-                            {b.service_name && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', opacity: 0.8, marginTop: '2px' }}>{b.service_name}</p>}
-                          </div>
-                          <div className="flex items-end gap-3 flex-shrink-0 ml-4">
-                            {b.estimated_price > 0 && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.muted }}>{b.estimated_price} zł</span>}
-                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status] }}>
-                              {b.status?.toUpperCase()}
-                            </span>
-                          </div>
-                        </div>
+                        <ArtistSessionRow key={b.id} booking={b} healthStatusMap={healthStatusMap} t={t} isLast={i === items.length - 1} onClick={() => setSelectedBooking(b)} />
                       ))}
                     </div>
                   </div>
@@ -648,28 +640,9 @@ export default function ArtistHome() {
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK UMÓWIONYCH SESJI DZIŚ</p>
                 </div>
               ) : (
-                <div style={{ border: `0.5px solid rgba(22,163,74,0.4)`, background: t.cardBg }}>
+                <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)', overflow: 'hidden' }}>
                   {todayBookings.map((b, i) => (
-                    <div key={b.id} onClick={() => setSelectedBooking(b)} className="flex items-center justify-between p-4 cursor-pointer flex-wrap" style={{ borderBottom: i < todayBookings.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }} onMouseEnter={e => e.currentTarget.style.background = t.rowHover} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                      <div className="flex-1 min-w-0">
-                        <p style={{ color: t.value, fontSize: '15px', fontWeight: 500 }}>{b.client_name}</p>
-                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px' }}>
-                          {b.session_time ? `${b.session_time} · ` : ''}{b.tattoo_placement || ''}
-                        </p>
-                        {b.service_name && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', opacity: 0.8, marginTop: '2px' }}>{b.service_name}</p>}
-                      </div>
-                      <div className="flex items-end gap-3 flex-shrink-0 ml-4">
-                        {b.estimated_price > 0 && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.muted }}>{b.estimated_price} zł</span>}
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status] }}>
-                          {b.status?.toUpperCase()}
-                        </span>
-                      </div>
-                      {!b.is_settled && b.status !== 'cancelled' && (
-                        <button onClick={(e) => { e.stopPropagation(); setSettlingBooking(b); }} className="btn-oxblood flex items-center gap-1.5" style={{ fontSize: '8px', padding: '6px 12px', flexShrink: 0 }}>
-                          <Wallet size={10} /> ROZLICZ
-                        </button>
-                      )}
-                    </div>
+                    <ArtistSessionRow key={b.id} booking={b} healthStatusMap={healthStatusMap} t={t} isLast={i === todayBookings.length - 1} onClick={() => setSelectedBooking(b)} />
                   ))}
                 </div>
               )}
@@ -684,23 +657,9 @@ export default function ArtistHome() {
                   <div style={{ flex: 1, height: '0.5px', background: t.cardBorder }} />
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.muted }}>{items.length} {pluralSesji(items.length)}</span>
                 </div>
-                <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+                <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)', overflow: 'hidden' }}>
                   {items.map((b, i) => (
-                    <div key={b.id} onClick={() => setSelectedBooking(b)} className="flex items-center justify-between p-4 cursor-pointer" style={{ borderBottom: i < items.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }} onMouseEnter={e => e.currentTarget.style.background = t.rowHover} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                      <div className="flex-1">
-                        <p style={{ color: t.value, fontSize: '15px', fontWeight: 500 }}>{b.client_name}</p>
-                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px' }}>
-                          {b.session_time ? `${b.session_time} · ` : ''}{b.tattoo_placement || ''}
-                        </p>
-                        {b.service_name && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', opacity: 0.8, marginTop: '2px' }}>{b.service_name}</p>}
-                      </div>
-                      <div className="flex items-end gap-3 flex-shrink-0 ml-4">
-                        {b.estimated_price > 0 && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.muted }}>{b.estimated_price} zł</span>}
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[b.status]}`, color: STATUS_COLORS[b.status] }}>
-                          {b.status?.toUpperCase()}
-                        </span>
-                      </div>
-                    </div>
+                    <ArtistSessionRow key={b.id} booking={b} healthStatusMap={healthStatusMap} t={t} isLast={i === items.length - 1} onClick={() => setSelectedBooking(b)} />
                   ))}
                 </div>
               </div>
