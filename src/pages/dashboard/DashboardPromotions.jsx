@@ -488,7 +488,7 @@ export default function DashboardPromotions() {
               <button onClick={() => setEmailFor(null)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><X size={18} /></button>
             </div>
             <p style={{ fontSize: '13px', color: t.muted, marginBottom: '16px' }}>{emailFor.code} · {valueStr(emailFor)}</p>
-            <div>{label('E-mail odbiorcy *')}<input type="email" value={emailTo} onChange={e => setEmailTo(e.target.value)} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border }} /></div>
+            <div>{label('E-mail odbiorcy *')}<ClientEmailPicker value={emailTo} onChange={setEmailTo} t={t} /></div>
             <div className="flex gap-4 mt-8 pt-6" style={{ borderTop: `0.5px solid ${t.border}` }}>
               <button onClick={handleSendEmail} disabled={sending} className="btn-oxblood flex-1 flex items-center justify-center gap-2">{sending ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />} WYŚLIJ</button>
               <button onClick={() => setEmailFor(null)} className="btn-ghost-parchment">ANULUJ</button>
