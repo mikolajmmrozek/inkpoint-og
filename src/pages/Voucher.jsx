@@ -40,10 +40,7 @@ export default function Voucher() {
     if (!iso) return '—';
     const d = new Date(iso);
     if (isNaN(d.getTime())) return '—';
-    const hasTime = d.getHours() !== 0 || d.getMinutes() !== 0;
-    return hasTime
-      ? d.toLocaleString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-      : d.toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return d.toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
 
   if (loading) {
@@ -163,7 +160,7 @@ export default function Voucher() {
 
           {/* Studio info */}
           <div style={{ marginTop: 'auto' }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: brand, letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: '5mm', textAlign: 'center' }}>Kontakt ze studiem</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: brand, letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: '5mm', textAlign: 'center' }}>Dane kontaktowe</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '3mm', alignItems: 'center', textAlign: 'center' }}>
               {addressLine && <p style={{ fontFamily: 'var(--font-body)', fontSize: '4mm', color: '#333', margin: 0, lineHeight: 1.5 }}>{addressLine}</p>}
               {settings?.contact_phone && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '4mm', color: '#333', letterSpacing: '0.08em', margin: 0 }}>Tel: {settings.contact_phone}</p>}
@@ -174,7 +171,7 @@ export default function Voucher() {
           {/* Footer */}
           <div style={{ marginTop: '10mm', paddingTop: '5mm', borderTop: `0.3mm solid #DDD`, textAlign: 'center' }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.6mm', color: '#999', letterSpacing: '0.15em', textTransform: 'uppercase', margin: 0 }}>
-              Voucher jest imienny na okaziciela · Nr {promo.code}
+              Voucher na okaziciela · Ważny w dniu sesji · Nr {promo.code}
             </p>
           </div>
         </div>
