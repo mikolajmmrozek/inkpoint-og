@@ -24,7 +24,7 @@ export default async function(req: Request): Promise<Response> {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'Romans Tattoo <noreply@mail.tattoostudio.pl>',
+        from: 'Romans Tattoo <tattoo.wolsztyn@gmail.com>',
         to,
         subject,
         html: body,
