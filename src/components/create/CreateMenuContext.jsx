@@ -86,6 +86,7 @@ export function CreateMenuProvider({ children, role, theme, selfArtistId }) {
             onClose={closeAll}
             onSaved={handleBookingSaved}
             t={t}
+            lockArtistId={role === 'artist' ? selfArtistId : undefined}
           />
         )}
       </AnimatePresence>

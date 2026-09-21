@@ -33,7 +33,7 @@ const getDefaultSessionTime = () => {
   return `${String(h).padStart(2, '0')}:${String(roundedM).padStart(2, '0')}`;
 };
 
-export default function BookingModal({ booking, defaultDate, onClose, onSaved, t }) {
+export default function BookingModal({ booking, defaultDate, onClose, onSaved, t, lockArtistId }) {
   const isNew = !booking || booking._prefill;
   const [artists, setArtists] = useState([]);
   const [allArtists, setAllArtists] = useState([]);
@@ -113,7 +113,14 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
       base44.entities.Service.filter({ is_active: true }),
     ]).then(([arts, svcs]) => {
       setAllArtists(arts);
-      setArtists(arts);
+      // When artist is locked (artist role), restrict the dropdown to the session owner only
+      if (lockArtistId) {
+        const me = arts.find(a => a.id === lockArtistId);
+        setArtists(me ? [me] : arts);
+        if (me) setForm(f => ({ ...f, artist_id: me.id, artist_name: me.name }));
+      } else {
+        setArtists(arts);
+      }
       const sorted = svcs.sort((a, b) => (a.order || 999) - (b.order || 999));
       setAllServices(sorted);
       setServices(sorted);
@@ -155,6 +162,8 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
     set('service_id', '');
     set('service_name', '');
     setServiceQuery('');
+    // When artist is locked, keep the locked artist regardless of category
+    if (lockArtistId) return;
     // Narrow artists to those who perform at least one service in this category
     if (!cat) {
       setArtists(allArtists);
@@ -185,7 +194,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
       set('service_id', '');
       set('service_name', '');
       setServiceQuery('');
-      setArtists(allArtists);
+      if (!lockArtistId) setArtists(allArtists);
       return;
     }
     const svc = services.find(s => s.id === serviceId);
@@ -213,7 +222,8 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
     }
     // Keep category in sync with the selected service (bidirectional filtering)
     if (svc.category) setSelectedCategory(svc.category);
-    // Filter artists
+    // Filter artists (skip when artist is locked to the session owner)
+    if (lockArtistId) return;
     if (svc.artist_ids && svc.artist_ids.length > 0) {
       setArtists(allArtists.filter(a => svc.artist_ids.includes(a.id)));
     } else {
@@ -576,9 +586,10 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
               <select
                 value={form.artist_id || ''}
                 onChange={e => handleArtist(e.target.value)}
-                style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
+                disabled={!!lockArtistId}
+                style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark', cursor: lockArtistId ? 'not-allowed' : 'pointer' }}
               >
-                <option value="">Wybierz artystę</option>
+                {!lockArtistId && <option value="">Wybierz artystę</option>}
                 {artists.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
               </select>
             </div>
