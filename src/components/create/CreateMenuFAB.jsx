@@ -1,18 +1,19 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, CalendarPlus, Clock, FileText, UserPlus } from 'lucide-react';
+import { Plus, CalendarPlus, Clock, FileText, UserPlus, Ticket } from 'lucide-react';
 
 // Near-vertical stack with a slight leftward fan — keeps labels from overlapping.
 const STEP_Y = 72;
 const FAN_X = 12;
 
-export default function CreateMenuFAB({ onNewBooking, onNewAvailability, onNewHealthForm, onNewClient, theme }) {
+export default function CreateMenuFAB({ onNewBooking, onNewAvailability, onNewHealthForm, onNewClient, onNewPromotion, theme }) {
   const [open, setOpen] = useState(false);
   const isLight = theme === 'light';
 
   const options = [
     { icon: CalendarPlus, label: 'Rezerwacja', action: onNewBooking },
     { icon: FileText, label: 'Ankieta', action: onNewHealthForm },
+    { icon: Ticket, label: 'Promocje', action: onNewPromotion },
     { icon: Clock, label: 'Dyspozycja', action: onNewAvailability },
     { icon: UserPlus, label: 'Klient', action: onNewClient },
   ];

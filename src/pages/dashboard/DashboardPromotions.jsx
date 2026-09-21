@@ -260,8 +260,8 @@ export default function DashboardPromotions() {
   ];
 
   const statusFilters = view === 'voucher'
-    ? ['', 'active', 'inactive', 'used', 'grace', 'expired', 'revoked']
-    : ['', 'active', 'inactive', 'used', 'expired', 'revoked'];
+    ? ['', 'active', 'inactive', 'used', 'grace', 'expired']
+    : ['', 'active', 'inactive', 'used', 'expired'];
 
   const StatusBadge = ({ st }) => {
     const stInfo = STATUS[st];

@@ -6,6 +6,7 @@ import CreateMenuFAB from './CreateMenuFAB';
 import BookingModal from '@/components/dashboard/BookingModal';
 import QuickAvailabilityModal from './QuickAvailabilityModal';
 import QuickClientModal from './QuickClientModal';
+import QuickPromotionModal from './QuickPromotionModal';
 import { openHealthFormQRPage } from '@/lib/qrPage';
 
 const CreateMenuContext = createContext(null);
@@ -18,7 +19,7 @@ export const buildThemeT = (theme) => theme === 'light'
 
 export function CreateMenuProvider({ children, role, theme, selfArtistId }) {
   const navigate = useNavigate();
-  const [action, setAction] = useState(null); // 'booking' | 'availability' | 'client'
+  const [action, setAction] = useState(null); // 'booking' | 'availability' | 'client' | 'promotion'
   const [bookingPrefill, setBookingPrefill] = useState(null);
   const [availPrefill, setAvailPrefill] = useState(null);
   const refreshRef = useRef({ bookings: null, availability: null, clients: null });
@@ -36,6 +37,7 @@ export function CreateMenuProvider({ children, role, theme, selfArtistId }) {
     setAction('availability');
   }, [role, selfArtistId]);
   const newClient = useCallback(() => setAction('client'), []);
+  const newPromotion = useCallback(() => setAction('promotion'), []);
   const newHealthForm = useCallback(() => {
     openHealthFormQRPage(`${window.location.origin}/health-form`);
   }, []);
@@ -65,8 +67,13 @@ export function CreateMenuProvider({ children, role, theme, selfArtistId }) {
     await runRefresh('clients');
   };
 
+  const handlePromotionSaved = async () => {
+    closeAll();
+    toast({ title: 'Promocja utworzona' });
+  };
+
   return (
-    <CreateMenuContext.Provider value={{ newBooking, newAvailability, newClient, newHealthForm, registerBookingsRefresh, registerAvailabilityRefresh, registerClientsRefresh, role }}>
+    <CreateMenuContext.Provider value={{ newBooking, newAvailability, newClient, newPromotion, newHealthForm, registerBookingsRefresh, registerAvailabilityRefresh, registerClientsRefresh, role }}>
       {children}
       {role !== 'user' && !action && (
         <CreateMenuFAB
@@ -75,6 +82,7 @@ export function CreateMenuProvider({ children, role, theme, selfArtistId }) {
           onNewAvailability={() => newAvailability(null)}
           onNewHealthForm={newHealthForm}
           onNewClient={newClient}
+          onNewPromotion={newPromotion}
         />
       )}
       <AnimatePresence>
@@ -109,6 +117,17 @@ export function CreateMenuProvider({ children, role, theme, selfArtistId }) {
             onClose={closeAll}
             onSaved={handleClientSaved}
             t={t}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {action === 'promotion' && (
+          <QuickPromotionModal
+            key="promotion"
+            onClose={closeAll}
+            onSaved={handlePromotionSaved}
+            t={t}
+            theme={theme}
           />
         )}
       </AnimatePresence>
