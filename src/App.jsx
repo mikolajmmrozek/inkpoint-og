@@ -52,6 +52,7 @@ import ClientHealthForms from './pages/client/ClientHealthForms';
 import ClientProfile from './pages/client/ClientProfile';
 import ClientMessages from './pages/client/ClientMessages';
 import FeedbackSurvey from './pages/FeedbackSurvey';
+import Voucher from './pages/Voucher';
 import ScrollToTop from './components/ScrollToTop';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -107,6 +108,7 @@ const AuthenticatedApp = () => {
       <Route path="/terms" element={<TermsAndConditions />} />
       <Route path="/faq" element={<FAQ />} />
       <Route path="/feedback" element={<FeedbackSurvey />} />
+      <Route path="/voucher/:code" element={<Voucher />} />
 
       {/* Dashboard (admin only) */}
       <Route path="/dashboard" element={<Dashboard />}>

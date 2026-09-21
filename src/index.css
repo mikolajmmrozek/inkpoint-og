@@ -351,5 +351,20 @@ input[type="number"] {
   border-radius: 2px;
 }
 .thin-scrollbar::-webkit-scrollbar-thumb:hover {
-  filter: brightness(1.2);
+    filter: brightness(1.2);
+}
+
+/* Print styles — clean voucher / document printing via browser */
+@media print {
+    body::before {
+        display: none !important;
+    }
+    body {
+        background: #FFFFFF !important;
+        background-image: none !important;
+    }
+    * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
 }
