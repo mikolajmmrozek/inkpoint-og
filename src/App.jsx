@@ -37,6 +37,7 @@ import DashboardDocuments from './pages/dashboard/DashboardDocuments';
 import DashboardFAQ from './pages/dashboard/DashboardFAQ';
 import DashboardFeedback from './pages/dashboard/DashboardFeedback';
 import DashboardServices from './pages/dashboard/DashboardServices';
+import DashboardPromotions from './pages/dashboard/DashboardPromotions';
 import DashboardUsers from './pages/dashboard/DashboardUsers';
 import NotificationsPage from './pages/shared/NotificationsPage';
 import ArtistPanel from './pages/artist/ArtistPanel';
@@ -127,6 +128,7 @@ const AuthenticatedApp = () => {
         <Route path="faq" element={<DashboardFAQ />} />
         <Route path="feedback" element={<DashboardFeedback />} />
         <Route path="services" element={<DashboardServices />} />
+        <Route path="promotions" element={<DashboardPromotions />} />
         <Route path="users" element={<DashboardUsers />} />
         <Route path="notifications" element={<NotificationsPage />} />
       </Route>

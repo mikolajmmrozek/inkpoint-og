@@ -2,7 +2,7 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Calendar, Users, BookOpen, MessageSquare, FileText, LogOut, BarChart2, Menu, X, Sun, Moon, Settings, UserCircle, PieChart, Star, FolderOpen, Scissors, ShieldCheck, Bell, PanelLeftClose, PanelLeftOpen, Home as HomeIcon } from 'lucide-react';
+import { Calendar, Users, BookOpen, MessageSquare, FileText, LogOut, BarChart2, Menu, X, Sun, Moon, Settings, UserCircle, PieChart, Star, FolderOpen, Scissors, ShieldCheck, Bell, PanelLeftClose, PanelLeftOpen, Home as HomeIcon, Gift } from 'lucide-react';
 import BottomNav from '@/components/panel/BottomNav';
 import NotificationBell from '@/components/panel/NotificationBell';
 import NotificationPanel from '@/components/panel/NotificationPanel';
@@ -27,6 +27,7 @@ const NAV = [
   { path: '/dashboard/documents', label: 'Dokumenty', icon: FolderOpen },
   { path: '/dashboard/faq', label: 'FAQ', icon: MessageSquare },
   { path: '/dashboard/services', label: 'Usługi', icon: Scissors },
+  { path: '/dashboard/promotions', label: 'Promocje', icon: Gift },
   { path: '/dashboard/feedback', label: 'Opinie', icon: Star },
   { path: '/dashboard/stats', label: 'Statystyki', icon: PieChart },
   { path: '/dashboard/users', label: 'Użytkownicy', icon: ShieldCheck },
