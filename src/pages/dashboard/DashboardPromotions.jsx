@@ -443,7 +443,7 @@ export default function DashboardPromotions() {
                   <div style={{ width: '12px', height: '12px', border: `0.5px solid ${form.send_email ? '#16a34a' : t.border}`, background: form.send_email ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{form.send_email && <span style={{ color: '#fff', fontSize: '8px' }}>✓</span>}</div>
                   Wyślij e-mailem po utworzeniu
                 </button>
-                {form.send_email && <div>{label('E-mail odbiorcy *')}<input {...inp('email_to', 'email')} /></div>}
+                {form.send_email && <div>{label('E-mail odbiorcy *')}<ClientEmailPicker value={form.email_to} onChange={v => set('email_to', v)} t={t} /></div>}
               </div>
             </div>
 
