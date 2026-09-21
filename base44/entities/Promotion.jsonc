@@ -44,6 +44,11 @@
       "default": "single",
       "description": "single = jednorazowy, multi = wielorazowy"
     },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "True = aktywna (w\u0142\u0105czona), False = wy\u0142\u0105czona (tylko kody zni\u017ckowe)"
+    },
     "assigned_client_email": {
       "type": "string",
       "description": "E-mail klienta, do kt\u00f3rego przypisana jest zni\u017cka (opcjonalne)"
@@ -64,7 +69,7 @@
     },
     "expires_at": {
       "type": "string",
-      "description": "Data wa\u017cno\u015bci (ISO datetime z godzin\u0105)"
+      "description": "Data wa\u017cno\u015bci (ISO datetime)"
     },
     "grace_value": {
       "type": "number",
