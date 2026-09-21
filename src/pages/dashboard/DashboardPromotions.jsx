@@ -5,6 +5,7 @@ import { Plus, X, Mail, Clock, Ban, Trash2, QrCode, Gift, Send, Loader2, Copy, C
 import { toast } from '@/components/ui/use-toast';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 import StatsTile from '@/components/dashboard/StatsTile';
+import ClientEmailPicker from '@/components/dashboard/ClientEmailPicker';
 
 const inputStyle = {
   background: 'transparent',
@@ -424,7 +425,7 @@ export default function DashboardPromotions() {
                       {form.is_active ? 'Włączony' : 'Wyłączony'}
                     </button>
                   </div>
-                  <div className="mb-4">{label('Przypisz do klienta (opcjonalne)')}<input {...inp('assigned_client_email', 'email')} /></div>
+                  <div className="mb-4">{label('Przypisz do klienta (opcjonalne)')}<ClientEmailPicker value={form.assigned_client_email} onChange={v => set('assigned_client_email', v)} t={t} /></div>
                   <div className="mb-4">
                     <button type="button" onClick={() => set('assignment_permanent', !form.assignment_permanent)} className="flex items-center gap-2" style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.assignment_permanent ? '#16a34a' : t.muted }}>
                       <div style={{ width: '12px', height: '12px', border: `0.5px solid ${form.assignment_permanent ? '#16a34a' : t.border}`, background: form.assignment_permanent ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{form.assignment_permanent && <span style={{ color: '#fff', fontSize: '8px' }}>✓</span>}</div>
