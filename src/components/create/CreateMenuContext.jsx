@@ -78,6 +78,7 @@ export function CreateMenuProvider({ children, role, theme, selfArtistId }) {
       {role !== 'user' && !action && (
         <CreateMenuFAB
           theme={theme}
+          role={role}
           onNewBooking={() => newBooking(null)}
           onNewAvailability={() => newAvailability(null)}
           onNewHealthForm={newHealthForm}
