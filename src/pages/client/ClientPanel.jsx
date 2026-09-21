@@ -2,7 +2,7 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Calendar, FileText, User, LogOut, Home, Menu, X, Sun, Moon, MessageSquare } from 'lucide-react';
+import { Calendar, FileText, User, LogOut, Home, Menu, X, Sun, Moon, MessageSquare, Gift } from 'lucide-react';
 import BottomNav from '@/components/panel/BottomNav';
 import NotificationBell from '@/components/panel/NotificationBell';
 import NotificationPanel from '@/components/panel/NotificationPanel';
@@ -18,6 +18,7 @@ const NAV = [
   { path: '/panel', label: 'Pulpit', icon: Home, exact: true },
   { path: '/panel/sessions', label: 'Sesje', icon: Calendar },
   { path: '/panel/health-forms', label: 'Ankiety', icon: FileText },
+  { path: '/panel/vouchers', label: 'Vouchery', icon: Gift },
   { path: '/panel/profile', label: 'Profil', icon: User },
   { path: '/panel/messages', label: 'Wiadomości', icon: MessageSquare },
 ];

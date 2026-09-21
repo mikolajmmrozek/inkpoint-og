@@ -50,6 +50,7 @@ import ClientPanel from './pages/client/ClientPanel';
 import ClientHome from './pages/client/ClientHome';
 import ClientSessions from './pages/client/ClientSessions';
 import ClientHealthForms from './pages/client/ClientHealthForms';
+import ClientVouchers from './pages/client/ClientVouchers';
 import ClientProfile from './pages/client/ClientProfile';
 import ClientMessages from './pages/client/ClientMessages';
 import FeedbackSurvey from './pages/FeedbackSurvey';
@@ -148,6 +149,7 @@ const AuthenticatedApp = () => {
         <Route index element={<ClientHome />} />
         <Route path="sessions" element={<ClientSessions />} />
         <Route path="health-forms" element={<ClientHealthForms />} />
+        <Route path="vouchers" element={<ClientVouchers />} />
         <Route path="profile" element={<ClientProfile />} />
         <Route path="messages" element={<ClientMessages />} />
         <Route path="notifications" element={<NotificationsPage />} />

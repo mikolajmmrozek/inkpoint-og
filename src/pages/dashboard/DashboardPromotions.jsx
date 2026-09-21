@@ -316,7 +316,7 @@ export default function DashboardPromotions() {
         <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
           <div className="hidden md:grid grid-cols-12 px-4 py-2" style={{ borderBottom: `0.5px solid ${t.border}` }}>
             {['Kod', 'Wartość', 'Saldo', 'Ważny do', 'Status', ''].map((lbl, i) => (
-              <span key={i} className={i === 5 ? 'col-span-1' : i === 0 ? 'col-span-3' : 'col-span-2'} style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>{lbl}</span>
+              <span key={i} className={i === 0 ? 'col-span-3' : i === 2 ? 'col-span-1' : i === 5 ? 'col-span-2' : 'col-span-2'} style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>{lbl}</span>
             ))}
           </div>
           {filtered.map((p, i) => {
@@ -334,7 +334,7 @@ export default function DashboardPromotions() {
                 <div className="col-span-1 md:col-span-2">
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--brand)' }}>{valueStr(p)}</p>
                 </div>
-                <div className="col-span-1 md:col-span-2">
+                <div className="col-span-1 md:col-span-1">
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: t.muted }}>{p.balance !== undefined && p.balance !== p.value ? `${p.balance} PLN` : '—'}</p>
                 </div>
                 <div className="col-span-1 md:col-span-2">
@@ -343,14 +343,14 @@ export default function DashboardPromotions() {
                 <div className="col-span-1 md:col-span-2">
                   <StatusBadge st={st} />
                 </div>
-                <div className="col-span-2 md:col-span-1 flex items-center gap-2 md:justify-end">
-                  {p.qr_code_url && <button onClick={() => setQrFor(p)} title="Pokaż QR" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><QrCode size={14} /></button>}
-                  <a href={`${window.location.origin}/voucher/${p.code}`} target="_blank" rel="noopener noreferrer" title="Otwórz stronę vouchera (podgląd klienta)" style={{ color: t.muted, display: 'inline-flex', alignItems: 'center' }}><ExternalLink size={14} /></a>
-                  <button onClick={() => openEdit(p)} title="Edytuj" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Pencil size={14} /></button>
-                  <button onClick={() => { setEmailFor(p); setEmailTo(p.assigned_client_email || ''); }} title="Wyślij e-mail" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Mail size={14} /></button>
-                  <button onClick={() => { setGraceFor(p); setGraceForm({ grace_value: String(Math.round((p.balance || p.value) / 2)), grace_expires_at: defaultExpiry('voucher') }); }} title="Przedłuż (ostatnia szansa)" style={{ color: '#f59e0b', background: 'none', border: 'none', cursor: 'pointer' }}><Clock size={14} /></button>
-                  <button onClick={() => toggleActive(p)} title={p.is_active !== false ? 'Wyłącz' : 'Włącz'} style={{ color: p.is_active !== false ? '#16a34a' : t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Power size={14} /></button>
-                  <button onClick={() => setDeleteConfirm(p)} title="Usuń" style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={14} /></button>
+                <div className="col-span-2 md:col-span-2 flex flex-wrap items-center gap-1.5 md:justify-end">
+                  {p.qr_code_url && <button onClick={() => setQrFor(p)} title="Pokaż QR" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><QrCode size={13} /></button>}
+                  <a href={`${window.location.origin}/voucher/${p.code}`} target="_blank" rel="noopener noreferrer" title="Otwórz stronę vouchera (podgląd klienta)" style={{ color: t.muted, display: 'inline-flex', alignItems: 'center', padding: '4px' }}><ExternalLink size={13} /></a>
+                  <button onClick={() => openEdit(p)} title="Edytuj" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><Pencil size={13} /></button>
+                  <button onClick={() => { setEmailFor(p); setEmailTo(p.assigned_client_email || ''); }} title="Wyślij e-mail" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><Mail size={13} /></button>
+                  <button onClick={() => { setGraceFor(p); setGraceForm({ grace_value: String(Math.round((p.balance || p.value) / 2)), grace_expires_at: defaultExpiry('voucher') }); }} title="Przedłuż (ostatnia szansa)" style={{ color: '#f59e0b', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><Clock size={13} /></button>
+                  <button onClick={() => toggleActive(p)} title={p.is_active !== false ? 'Wyłącz' : 'Włącz'} style={{ color: p.is_active !== false ? '#16a34a' : t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><Power size={13} /></button>
+                  <button onClick={() => setDeleteConfirm(p)} title="Usuń" style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><Trash2 size={13} /></button>
                 </div>
               </div>
             );
