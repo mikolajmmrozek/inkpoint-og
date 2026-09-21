@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import jsQR from 'jsqr';
 import { base44 } from '@/api/base44Client';
 import { ScanLine, X, Check, Loader2, AlertCircle } from 'lucide-react';
 
@@ -32,14 +33,17 @@ export default function VoucherPicker({ t, onApplied, applied }) {
   const [checking, setChecking] = useState(false);
   const [cameraUnsupported, setCameraUnsupported] = useState(false);
   const videoRef = useRef(null);
+  const canvasRef = useRef(null);
   const streamRef = useRef(null);
   const detectRef = useRef(null);
+  const [scanHint, setScanHint] = useState('');
 
   const stopCamera = () => {
     if (detectRef.current) { cancelAnimationFrame(detectRef.current); detectRef.current = null; }
     if (streamRef.current) { streamRef.current.getTracks().forEach(tk => tk.stop()); streamRef.current = null; }
     if (videoRef.current) videoRef.current.srcObject = null;
     setScanning(false);
+    setScanHint('');
   };
 
   useEffect(() => () => stopCamera(), []);
@@ -72,7 +76,8 @@ export default function VoucherPicker({ t, onApplied, applied }) {
 
   const startScan = async () => {
     setError('');
-    if (!('BarcodeDetector' in window) || !navigator.mediaDevices?.getUserMedia) {
+    setCameraUnsupported(false);
+    if (!navigator.mediaDevices?.getUserMedia) {
       setCameraUnsupported(true);
       return;
     }
@@ -80,19 +85,36 @@ export default function VoucherPicker({ t, onApplied, applied }) {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
       streamRef.current = stream;
       setScanning(true);
-      // wait for video element to mount
       requestAnimationFrame(async () => {
         const video = videoRef.current;
         if (!video) return;
         video.srcObject = stream;
         await video.play().catch(() => {});
-        const detector = new window.BarcodeDetector({ formats: ['qr_code'] });
+        const hasNative = 'BarcodeDetector' in window;
+        let detector = null;
+        if (hasNative) {
+          try { detector = new window.BarcodeDetector({ formats: ['qr_code'] }); } catch (_) { detector = null; }
+        }
+        const canvas = canvasRef.current;
+        const ctx = canvas?.getContext('2d', { willReadFrequently: true }) || null;
         const tick = async () => {
           if (!streamRef.current) return;
           try {
-            const codes = await detector.detect(video);
-            if (codes && codes.length > 0) {
-              const raw = codes[0].rawValue;
+            let raw = null;
+            if (detector) {
+              const codes = await detector.detect(video);
+              if (codes && codes.length > 0) raw = codes[0].rawValue;
+            } else if (ctx && canvas) {
+              const w = video.videoWidth, h = video.videoHeight;
+              if (w && h) {
+                canvas.width = w; canvas.height = h;
+                ctx.drawImage(video, 0, 0, w, h);
+                const img = ctx.getImageData(0, 0, w, h);
+                const res = jsQR(img.data, w, h, { inversionAttempts: 'dontInvert' });
+                if (res && res.data) raw = res.data;
+              }
+            }
+            if (raw) {
               stopCamera();
               await lookupAndApply(raw);
               return;
@@ -100,6 +122,7 @@ export default function VoucherPicker({ t, onApplied, applied }) {
           } catch (_) { /* ignore frame errors */ }
           detectRef.current = requestAnimationFrame(tick);
         };
+        if (!detector && !ctx) setScanHint('Inicjalizacja dekodera...');
         tick();
       });
     } catch (e) {
@@ -157,7 +180,8 @@ export default function VoucherPicker({ t, onApplied, applied }) {
               <video ref={videoRef} playsInline muted style={{ width: '300px', maxWidth: '80vw', height: '300px', maxHeight: '60vh', objectFit: 'cover', display: 'block' }} />
               <div style={{ position: 'absolute', inset: '20%', border: '2px solid var(--brand)', borderRadius: '4px', boxShadow: '0 0 0 9999px rgba(0,0,0,0.4)' }} />
             </div>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '16px' }}>Nakieruj kamerę na kod QR</p>
+            <canvas ref={canvasRef} style={{ display: 'none' }} />
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '16px' }}>{scanHint || 'Nakieruj kamerę na kod QR'}</p>
             <button onClick={stopCamera} className="btn-ghost-parchment mt-3" style={{ fontSize: '9px', padding: '8px 20px' }}>ANULUJ</button>
           </div>
         </div>
