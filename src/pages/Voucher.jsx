@@ -256,8 +256,8 @@ export default function Voucher() {
             </div>
 
             {/* Clause — pinned to bottom */}
-            <p style={{ marginTop: 'auto', fontFamily: 'var(--font-body)', fontSize: '3mm', color: muted, lineHeight: 1.6, margin: 0, paddingTop: '4mm', borderTop: '0.2mm solid rgba(0,0,0,0.08)' }}>
-              Voucher do zrealizowania na usługi w studio, nie podlega wymianie na gotówkę. Zachowaj go i pamiętaj o okazaniu na sesji.
+            <p style={{ position: 'absolute', left: '14mm', right: '12mm', bottom: '6mm', fontFamily: 'var(--font-body)', fontSize: '3mm', color: muted, lineHeight: 1.6, margin: 0, paddingTop: '4mm', borderTop: '0.2mm solid rgba(0,0,0,0.08)' }}>
+              Voucher do zrealizowania na usługi w studio, nie podlega wymianę na gotówkę. Zachowaj go i pamiętaj o okazaniu na sesji.
             </p>
           </div>
         </div>
