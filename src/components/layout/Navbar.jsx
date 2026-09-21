@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { User } from 'lucide-react';
+import { User, X } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 
@@ -166,75 +166,104 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile Menu */}
-      <div className={`fixed inset-0 z-40 bg-obsidian flex flex-col justify-center px-12 transition-all duration-700 ${
-      menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`
-      } style={{ background: 'hsl(var(--background))' }}>
-        <div className="space-y-8">
-          <div className="flex gap-3 mb-8" style={{ marginTop: '60px' }}>
-            <button
-              onClick={handleAccountClick}
-              className="flex items-center gap-3 flex-1 min-w-0"
-              style={{
-                height: '48px',
-                padding: '4px 14px 4px 4px',
-                borderRadius: '9999px',
-                border: '0.5px solid rgb(var(--brand-rgb) /0.35)',
-                background: 'rgb(var(--brand-rgb) /0.05)',
-                cursor: 'pointer'
-              }}>
-              <span
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '9999px',
-                  overflow: 'hidden',
-                  flexShrink: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: avatarSrc ? 'transparent' : 'rgb(var(--brand-rgb) /0.15)'
-                }}>
-                {avatarSrc
-                  ? <img src={avatarSrc} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : isAuthenticated
-                    ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: '14px', fontWeight: 600, color: 'var(--brand)', letterSpacing: '0.02em' }}>{initials}</span>
-                    : <User size={17} color="var(--brand)" />
-                }
-              </span>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '11px',
-                  fontWeight: 500,
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  color: 'hsl(var(--foreground))',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis'
-                }}>
-                {isAuthenticated ? (displayName || 'MOJE KONTO') : 'ZALOGUJ SIĘ'}
-              </span>
-            </button>
-            <Link to="/booking" className="btn-oxblood flex items-center justify-center flex-1 whitespace-nowrap" style={{ height: '48px', padding: '0 18px', borderRadius: '9999px', fontSize: '11px', letterSpacing: '0.08em', textAlign: 'center' }}>
-              Umów Sesję
-            </Link>
+      {/* Mobile side drawer backdrop */}
+      <div
+        className={`fixed inset-0 z-40 transition-opacity duration-500 md:hidden ${menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        style={{ background: 'rgba(0,0,0,0.6)' }}
+        onClick={() => setMenuOpen(false)}
+      />
+      {/* Mobile side drawer */}
+      <aside
+        className={`fixed top-0 right-0 bottom-0 z-50 flex flex-col transition-transform duration-500 ease-out md:hidden ${menuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        style={{ width: 'min(82vw, 360px)', background: 'hsl(var(--background))', borderLeft: '0.5px solid hsl(var(--border))' }}
+      >
+        {/* Drawer header */}
+        <div className="flex items-center justify-between px-6" style={{ height: '72px', borderBottom: '0.5px solid hsl(var(--border))' }}>
+          <div className="flex flex-col leading-none">
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 400, color: 'hsl(var(--foreground))', letterSpacing: '0.08em', fontSize: '1.4rem' }}>ROMANS</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.2em', color: 'var(--brand)' }}>TATTOO</span>
           </div>
-          {navLinks.map((link, i) =>
-          <div key={link.href}>
+          <button onClick={() => setMenuOpen(false)} aria-label="Zamknij menu" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--muted-foreground))', padding: '6px' }}>
+            <X size={22} />
+          </button>
+        </div>
+
+        {/* Account + booking */}
+        <div className="px-5 py-5 flex flex-col gap-3" style={{ borderBottom: '0.5px solid hsl(var(--border))' }}>
+          <button
+            onClick={handleAccountClick}
+            className="flex items-center gap-3 w-full"
+            style={{
+              height: '48px',
+              padding: '4px 14px 4px 4px',
+              borderRadius: '9999px',
+              border: '0.5px solid rgb(var(--brand-rgb) /0.35)',
+              background: 'rgb(var(--brand-rgb) /0.05)',
+              cursor: 'pointer'
+            }}>
+            <span
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '9999px',
+                overflow: 'hidden',
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: avatarSrc ? 'transparent' : 'rgb(var(--brand-rgb) /0.15)'
+              }}>
+              {avatarSrc
+                ? <img src={avatarSrc} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : isAuthenticated
+                  ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: '14px', fontWeight: 600, color: 'var(--brand)', letterSpacing: '0.02em' }}>{initials}</span>
+                  : <User size={17} color="var(--brand)" />
+              }
+            </span>
+            <span
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '11px',
+                fontWeight: 500,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color: 'hsl(var(--foreground))',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                flex: 1,
+                textAlign: 'left'
+              }}>
+              {isAuthenticated ? (displayName || 'MOJE KONTO') : 'ZALOGUJ SIĘ'}
+            </span>
+          </button>
+          <Link to="/booking" className="btn-oxblood flex items-center justify-center w-full" style={{ height: '48px', borderRadius: '9999px', fontSize: '11px', letterSpacing: '0.08em' }}>
+            Umów Sesję
+          </Link>
+        </div>
+
+        {/* Nav links */}
+        <nav className="px-6 py-2 flex flex-col">
+          {navLinks.map((link) =>
+            <div key={link.href}>
               <Link
-              to={link.href}
-              className="block font-display text-6xl font-300 text-parchment hover:text-oxblood transition-colors duration-300"
-              style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(3rem, 10vw, 6rem)', color: 'hsl(var(--foreground))', fontWeight: 400, letterSpacing: '0.05em' }}>
-              
+                to={link.href}
+                className="block transition-colors duration-300"
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: '1.7rem',
+                  fontWeight: 400,
+                  letterSpacing: '0.04em',
+                  color: location.pathname === link.href ? 'var(--brand)' : 'hsl(var(--foreground))',
+                  padding: '14px 0'
+                }}>
                 {link.label}
               </Link>
-              <div className="h-px w-full mt-4" style={{ background: 'hsl(var(--border))', height: '0.5px' }} />
+              <div style={{ height: '0.5px', background: 'hsl(var(--border))' }} />
             </div>
           )}
-        </div>
-      </div>
+        </nav>
+      </aside>
     </>);
 
 }
