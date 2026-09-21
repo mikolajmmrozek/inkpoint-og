@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
-import { Plus, X, Mail, Clock, Ban, Trash2, QrCode, Gift, Send, Loader2, Copy, Check, Power, ExternalLink } from 'lucide-react';
+import { Plus, X, Mail, Clock, Ban, Trash2, QrCode, Gift, Send, Loader2, Copy, Check, Power, ExternalLink, Pencil } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 import StatsTile from '@/components/dashboard/StatsTile';
@@ -52,6 +52,7 @@ export default function DashboardPromotions() {
   const [filterStatus, setFilterStatus] = useState('');
   const [search, setSearch] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
+  const [editFor, setEditFor] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [graceFor, setGraceFor] = useState(null);
@@ -97,30 +98,65 @@ export default function DashboardPromotions() {
   const valueStr = (p) => p.value_type === 'percent' ? `${p.value}%` : `${p.value} PLN`;
   const dateStr = (p) => p.expires_at ? new Date(p.expires_at).toLocaleDateString('pl-PL') : '—';
 
-  const handleCreate = async () => {
+  const openEdit = (p) => {
+    setEditFor(p);
+    setForm({
+      type: p.type,
+      value_type: p.value_type || 'amount',
+      value: String(p.value ?? ''),
+      usage_mode: p.usage_mode || 'single',
+      expires_at: p.expires_at ? p.expires_at.slice(0, 10) : '',
+      is_active: p.is_active !== false,
+      assigned_client_email: p.assigned_client_email || '',
+      assignment_permanent: !!p.assignment_permanent,
+      assigned_until: p.assigned_until ? p.assigned_until.slice(0, 10) : '',
+      send_email: false,
+      email_to: '',
+    });
+    setCreateOpen(true);
+  };
+
+  const closeForm = () => { setCreateOpen(false); setEditFor(null); setForm(EMPTY_FORM); };
+
+  const handleSave = async () => {
     if (!form.value || Number(form.value) <= 0) { toast({ title: 'Podaj wartość', variant: 'destructive' }); return; }
     if (!form.expires_at) { toast({ title: 'Podaj datę ważności', variant: 'destructive' }); return; }
     if (form.send_email && !form.email_to) { toast({ title: 'Podaj e-mail odbiorcy', variant: 'destructive' }); return; }
     setSaving(true);
     try {
-      const res = await base44.functions.invoke('managePromotion', {
-        action: 'create',
-        type: form.type,
-        value_type: form.value_type,
-        value: Number(form.value),
-        usage_mode: form.usage_mode,
-        expires_at: toISO(form.expires_at),
-        assigned_client_email: form.assigned_client_email,
-        assignment_permanent: form.assignment_permanent,
-        assigned_until: form.assigned_until ? toISO(form.assigned_until.slice(0, 10)) : undefined,
-        is_active: form.type === 'discount' ? form.is_active : undefined,
-        send_email: form.send_email,
-        email_to: form.send_email ? form.email_to : undefined,
-      });
-      if (res?.data?.email?.error) toast({ title: 'Voucher utworzony, ale e-mail nie wysłany', description: res.data.email.error, variant: 'destructive' });
-      else toast({ title: form.type === 'voucher' ? 'Voucher utworzony' : 'Kod zniżkowy utworzony' });
-      setCreateOpen(false);
-      setForm(EMPTY_FORM);
+      if (editFor) {
+        await base44.functions.invoke('managePromotion', {
+          action: 'update',
+          promotion_id: editFor.id,
+          value_type: form.type === 'discount' ? form.value_type : 'amount',
+          value: Number(form.value),
+          usage_mode: form.usage_mode,
+          expires_at: toISO(form.expires_at),
+          assigned_client_email: form.assigned_client_email,
+          assignment_permanent: form.assignment_permanent,
+          assigned_until: form.assigned_until ? toISO(form.assigned_until.slice(0, 10)) : '',
+          is_active: form.type === 'discount' ? form.is_active : undefined,
+        });
+        toast({ title: 'Zapisano zmiany' });
+      } else {
+        const res = await base44.functions.invoke('managePromotion', {
+          action: 'create',
+          type: form.type,
+          value_type: form.value_type,
+          value: Number(form.value),
+          usage_mode: form.usage_mode,
+          expires_at: toISO(form.expires_at),
+          assigned_client_email: form.assigned_client_email,
+          assignment_permanent: form.assignment_permanent,
+          assigned_until: form.assigned_until ? toISO(form.assigned_until.slice(0, 10)) : undefined,
+          is_active: form.type === 'discount' ? form.is_active : undefined,
+          send_email: form.send_email,
+          email_to: form.send_email ? form.email_to : undefined,
+        });
+        if (res?.data?.email?.error) toast({ title: 'Voucher utworzony, ale e-mail nie wysłany', description: res.data.email.error, variant: 'destructive' });
+        else toast({ title: form.type === 'voucher' ? 'Voucher utworzony' : 'Kod zniżkowy utworzony' });
+      }
+      closeForm();
       load();
     } catch (e) {
       toast({ title: 'Błąd', description: e.message, variant: 'destructive' });
@@ -238,7 +274,7 @@ export default function DashboardPromotions() {
       <div className="flex gap-4 mb-6 flex-wrap items-center">
         {stats.map(s => <StatsTile key={s.label} label={s.label} value={s.value} t={t} />)}
         <div className="ml-auto">
-          <button onClick={() => { setForm({ ...EMPTY_FORM, type: view, expires_at: defaultExpiry(view) }); setCreateOpen(true); }} className="flex items-center gap-2 btn-oxblood" style={{ padding: '8px 16px' }}>
+          <button onClick={() => { setEditFor(null); setForm({ ...EMPTY_FORM, type: view, expires_at: defaultExpiry(view) }); setCreateOpen(true); }} className="flex items-center gap-2 btn-oxblood" style={{ padding: '8px 16px' }}>
             <Plus size={14} /> {view === 'voucher' ? 'NOWY VOUCHER' : 'NOWY KOD ZNIŻKOWY'}
           </button>
         </div>
@@ -310,6 +346,7 @@ export default function DashboardPromotions() {
                 <div className="col-span-2 md:col-span-1 flex items-center gap-2 md:justify-end">
                   {p.qr_code_url && <button onClick={() => setQrFor(p)} title="Pokaż QR" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><QrCode size={14} /></button>}
                   <a href={`${window.location.origin}/voucher/${p.code}`} target="_blank" rel="noopener noreferrer" title="Otwórz stronę vouchera (podgląd klienta)" style={{ color: t.muted, display: 'inline-flex', alignItems: 'center' }}><ExternalLink size={14} /></a>
+                  <button onClick={() => openEdit(p)} title="Edytuj" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Pencil size={14} /></button>
                   <button onClick={() => { setEmailFor(p); setEmailTo(p.assigned_client_email || ''); }} title="Wyślij e-mail" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Mail size={14} /></button>
                   <button onClick={() => { setGraceFor(p); setGraceForm({ grace_value: String(Math.round((p.balance || p.value) / 2)), grace_expires_at: defaultExpiry('voucher') }); }} title="Przedłuż (ostatnia szansa)" style={{ color: '#f59e0b', background: 'none', border: 'none', cursor: 'pointer' }}><Clock size={14} /></button>
                   <button onClick={() => toggleActive(p)} title={p.is_active !== false ? 'Wyłącz' : 'Włącz'} style={{ color: p.is_active !== false ? '#16a34a' : t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Power size={14} /></button>
@@ -345,6 +382,7 @@ export default function DashboardPromotions() {
                 <div className="flex flex-wrap gap-2 pt-3" style={{ borderTop: `0.5px solid ${t.border}` }}>
                   <button onClick={() => toggleActive(p)} title={isActive ? 'Wyłącz' : 'Włącz'} style={{ color: isActive ? '#16a34a' : t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Power size={14} /></button>
                   <a href={`${window.location.origin}/voucher/${p.code}`} target="_blank" rel="noopener noreferrer" title="Otwórz stronę (podgląd klienta)" style={{ color: t.muted, display: 'inline-flex', alignItems: 'center' }}><ExternalLink size={14} /></a>
+                  <button onClick={() => openEdit(p)} title="Edytuj" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Pencil size={14} /></button>
                   <button onClick={() => { setEmailFor(p); setEmailTo(p.assigned_client_email || ''); }} title="Wyślij e-mail" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Mail size={14} /></button>
                   <button onClick={() => setDeleteConfirm(p)} title="Usuń" style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer', marginLeft: 'auto' }}><Trash2 size={14} /></button>
                 </div>
@@ -364,14 +402,14 @@ export default function DashboardPromotions() {
       />
 
       {createOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={() => setCreateOpen(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={closeForm}>
           <div className="w-full max-w-lg max-h-screen overflow-y-auto" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '36px', borderRadius: 'var(--radius)' }} onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-8">
               <div>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>NOWA PROMOCJA</p>
-                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>{form.type === 'voucher' ? 'Voucher' : 'Kod zniżkowy'}</h3>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '6px' }}>{editFor ? 'EDYCJA' : 'NOWA PROMOCJA'}</p>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>{form.type === 'voucher' ? 'Voucher' : 'Kod zniżkowy'}{editFor ? ` · ${editFor.code}` : ''}</h3>
               </div>
-              <button onClick={() => setCreateOpen(false)} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
+              <button onClick={closeForm} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
             </div>
 
             <div className="space-y-6">
@@ -379,7 +417,7 @@ export default function DashboardPromotions() {
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>TYP</p>
                 <div className="flex gap-2">
                   {[['voucher', 'VOUCHER NA OKAZICIELA'], ['discount', 'KOD ZNIŻKOWY']].map(([v, lbl]) => (
-                    <button key={v} type="button" onClick={() => setForm(f => ({ ...f, type: v, value_type: v === 'voucher' ? 'amount' : f.value_type }))} style={{ flex: 1, border: `0.5px solid ${form.type === v ? 'var(--brand)' : t.border}`, color: form.type === v ? 'var(--brand)' : t.muted, background: form.type === v ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px', cursor: 'pointer' }}>{lbl}</button>
+                    <button key={v} type="button" disabled={!!editFor} onClick={() => setForm(f => ({ ...f, type: v, value_type: v === 'voucher' ? 'amount' : f.value_type }))} style={{ flex: 1, border: `0.5px solid ${form.type === v ? 'var(--brand)' : t.border}`, color: form.type === v ? 'var(--brand)' : t.muted, background: form.type === v ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px', cursor: editFor ? 'not-allowed' : 'pointer', opacity: editFor ? 0.5 : 1 }}>{lbl}</button>
                   ))}
                 </div>
               </div>
@@ -439,20 +477,22 @@ export default function DashboardPromotions() {
                 </div>
               )}
 
-              <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
-                <button type="button" onClick={() => set('send_email', !form.send_email)} className="flex items-center gap-2 mb-3" style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.send_email ? '#16a34a' : t.muted }}>
-                  <div style={{ width: '12px', height: '12px', border: `0.5px solid ${form.send_email ? '#16a34a' : t.border}`, background: form.send_email ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{form.send_email && <span style={{ color: '#fff', fontSize: '8px' }}>✓</span>}</div>
-                  Wyślij e-mailem po utworzeniu
-                </button>
-                {form.send_email && <div>{label('E-mail odbiorcy *')}<ClientEmailPicker value={form.email_to} onChange={v => set('email_to', v)} t={t} /></div>}
-              </div>
+              {!editFor && (
+                <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
+                  <button type="button" onClick={() => set('send_email', !form.send_email)} className="flex items-center gap-2 mb-3" style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.send_email ? '#16a34a' : t.muted }}>
+                    <div style={{ width: '12px', height: '12px', border: `0.5px solid ${form.send_email ? '#16a34a' : t.border}`, background: form.send_email ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{form.send_email && <span style={{ color: '#fff', fontSize: '8px' }}>✓</span>}</div>
+                    Wyślij e-mailem po utworzeniu
+                  </button>
+                  {form.send_email && <div>{label('E-mail odbiorcy *')}<ClientEmailPicker value={form.email_to} onChange={v => set('email_to', v)} t={t} /></div>}
+                </div>
+              )}
             </div>
 
             <div className="flex gap-4 mt-8 pt-6" style={{ borderTop: `0.5px solid ${t.border}` }}>
-              <button onClick={handleCreate} disabled={saving} className="btn-oxblood flex-1 flex items-center justify-center gap-2">
-                {saving ? <Loader2 size={13} className="animate-spin" /> : <Gift size={13} />} {saving ? 'TWORZENIE...' : 'UTWÓRZ'}
+              <button onClick={handleSave} disabled={saving} className="btn-oxblood flex-1 flex items-center justify-center gap-2">
+                {saving ? <Loader2 size={13} className="animate-spin" /> : editFor ? <Pencil size={13} /> : <Gift size={13} />} {saving ? 'ZAPISYWANIE...' : editFor ? 'ZAPISZ' : 'UTWÓRZ'}
               </button>
-              <button onClick={() => setCreateOpen(false)} className="btn-ghost-parchment">ANULUJ</button>
+              <button onClick={closeForm} className="btn-ghost-parchment">ANULUJ</button>
             </div>
           </div>
         </div>

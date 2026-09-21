@@ -119,6 +119,29 @@ export default async function (req: Request): Promise<Response> {
       return Response.json({ promotion: created, email: emailResult });
     }
 
+    if (action === 'update') {
+      const p: any = await base44.entities.Promotion.get(body.promotion_id);
+      const updates: any = {};
+      if (body.value !== undefined) {
+        const v = Number(body.value) || 0;
+        updates.value = v;
+        // If voucher unused (balance untouched), keep balance/original_value in sync
+        if (p.type === 'voucher' && (p.balance === undefined || p.balance === p.original_value || p.balance === p.value)) {
+          updates.balance = v;
+          updates.original_value = v;
+        }
+      }
+      if (body.value_type !== undefined) updates.value_type = body.value_type === 'percent' ? 'percent' : 'amount';
+      if (body.usage_mode !== undefined) updates.usage_mode = body.usage_mode === 'multi' ? 'multi' : 'single';
+      if (body.expires_at !== undefined) updates.expires_at = body.expires_at;
+      if (body.assigned_client_email !== undefined) updates.assigned_client_email = body.assigned_client_email || '';
+      if (body.assignment_permanent !== undefined) updates.assignment_permanent = !!body.assignment_permanent;
+      if (body.assigned_until !== undefined) updates.assigned_until = body.assigned_until || '';
+      if (body.is_active !== undefined) updates.is_active = !!body.is_active;
+      const updated = await base44.entities.Promotion.update(body.promotion_id, updates);
+      return Response.json({ promotion: updated });
+    }
+
     if (action === 'extend_grace') {
       const grace_value = Number(body.grace_value) || 0;
       const grace_expires_at = body.grace_expires_at;
