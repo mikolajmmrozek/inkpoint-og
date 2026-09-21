@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
-import { Plus, X, Mail, Clock, Ban, Trash2, QrCode, Gift, Send, Loader2, Copy, Check, Power } from 'lucide-react';
+import { Plus, X, Mail, Clock, Ban, Trash2, QrCode, Gift, Send, Loader2, Copy, Check, Power, ExternalLink } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 import StatsTile from '@/components/dashboard/StatsTile';
@@ -309,6 +309,7 @@ export default function DashboardPromotions() {
                 </div>
                 <div className="col-span-2 md:col-span-1 flex items-center gap-2 md:justify-end">
                   {p.qr_code_url && <button onClick={() => setQrFor(p)} title="Pokaż QR" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><QrCode size={14} /></button>}
+                  <a href={`${window.location.origin}/voucher/${p.code}`} target="_blank" rel="noopener noreferrer" title="Otwórz stronę vouchera (podgląd klienta)" style={{ color: t.muted, display: 'inline-flex', alignItems: 'center' }}><ExternalLink size={14} /></a>
                   <button onClick={() => { setEmailFor(p); setEmailTo(p.assigned_client_email || ''); }} title="Wyślij e-mail" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Mail size={14} /></button>
                   <button onClick={() => { setGraceFor(p); setGraceForm({ grace_value: String(Math.round((p.balance || p.value) / 2)), grace_expires_at: defaultExpiry('voucher') }); }} title="Przedłuż (ostatnia szansa)" style={{ color: '#f59e0b', background: 'none', border: 'none', cursor: 'pointer' }}><Clock size={14} /></button>
                   {st !== 'revoked' && <button onClick={() => handleRevoke(p)} title="Odwołaj" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Ban size={14} /></button>}
@@ -343,6 +344,7 @@ export default function DashboardPromotions() {
                 </div>
                 <div className="flex flex-wrap gap-2 pt-3" style={{ borderTop: `0.5px solid ${t.border}` }}>
                   <button onClick={() => toggleActive(p)} title={isActive ? 'Wyłącz' : 'Włącz'} style={{ color: isActive ? '#16a34a' : t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Power size={14} /></button>
+                  <a href={`${window.location.origin}/voucher/${p.code}`} target="_blank" rel="noopener noreferrer" title="Otwórz stronę (podgląd klienta)" style={{ color: t.muted, display: 'inline-flex', alignItems: 'center' }}><ExternalLink size={14} /></a>
                   <button onClick={() => { setEmailFor(p); setEmailTo(p.assigned_client_email || ''); }} title="Wyślij e-mail" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Mail size={14} /></button>
                   {st !== 'revoked' && <button onClick={() => handleRevoke(p)} title="Odwołaj" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Ban size={14} /></button>}
                   <button onClick={() => setDeleteConfirm(p)} title="Usuń" style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer', marginLeft: 'auto' }}><Trash2 size={14} /></button>
