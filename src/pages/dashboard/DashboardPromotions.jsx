@@ -74,7 +74,7 @@ export default function DashboardPromotions() {
 
   const computeStatus = (p) => {
     if (p.revoked) return 'revoked';
-    if (p.type === 'discount' && p.is_active === false) return 'inactive';
+    if (p.is_active === false) return 'inactive';
     const now = Date.now();
     const exp = p.expires_at ? new Date(p.expires_at).getTime() : 0;
     const graceExp = p.grace_expires_at ? new Date(p.grace_expires_at).getTime() : 0;
@@ -221,7 +221,7 @@ export default function DashboardPromotions() {
   ];
 
   const statusFilters = view === 'voucher'
-    ? ['', 'active', 'used', 'grace', 'expired', 'revoked']
+    ? ['', 'active', 'inactive', 'used', 'grace', 'expired', 'revoked']
     : ['', 'active', 'inactive', 'used', 'expired', 'revoked'];
 
   const StatusBadge = ({ st }) => {
@@ -312,7 +312,7 @@ export default function DashboardPromotions() {
                   <a href={`${window.location.origin}/voucher/${p.code}`} target="_blank" rel="noopener noreferrer" title="Otwórz stronę vouchera (podgląd klienta)" style={{ color: t.muted, display: 'inline-flex', alignItems: 'center' }}><ExternalLink size={14} /></a>
                   <button onClick={() => { setEmailFor(p); setEmailTo(p.assigned_client_email || ''); }} title="Wyślij e-mail" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Mail size={14} /></button>
                   <button onClick={() => { setGraceFor(p); setGraceForm({ grace_value: String(Math.round((p.balance || p.value) / 2)), grace_expires_at: defaultExpiry('voucher') }); }} title="Przedłuż (ostatnia szansa)" style={{ color: '#f59e0b', background: 'none', border: 'none', cursor: 'pointer' }}><Clock size={14} /></button>
-                  {st !== 'revoked' && <button onClick={() => handleRevoke(p)} title="Odwołaj" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Ban size={14} /></button>}
+                  <button onClick={() => toggleActive(p)} title={p.is_active !== false ? 'Wyłącz' : 'Włącz'} style={{ color: p.is_active !== false ? '#16a34a' : t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Power size={14} /></button>
                   <button onClick={() => setDeleteConfirm(p)} title="Usuń" style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={14} /></button>
                 </div>
               </div>
@@ -346,7 +346,6 @@ export default function DashboardPromotions() {
                   <button onClick={() => toggleActive(p)} title={isActive ? 'Wyłącz' : 'Włącz'} style={{ color: isActive ? '#16a34a' : t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Power size={14} /></button>
                   <a href={`${window.location.origin}/voucher/${p.code}`} target="_blank" rel="noopener noreferrer" title="Otwórz stronę (podgląd klienta)" style={{ color: t.muted, display: 'inline-flex', alignItems: 'center' }}><ExternalLink size={14} /></a>
                   <button onClick={() => { setEmailFor(p); setEmailTo(p.assigned_client_email || ''); }} title="Wyślij e-mail" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Mail size={14} /></button>
-                  {st !== 'revoked' && <button onClick={() => handleRevoke(p)} title="Odwołaj" style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><Ban size={14} /></button>}
                   <button onClick={() => setDeleteConfirm(p)} title="Usuń" style={{ color: t.fuchsia, background: 'none', border: 'none', cursor: 'pointer', marginLeft: 'auto' }}><Trash2 size={14} /></button>
                 </div>
               </div>

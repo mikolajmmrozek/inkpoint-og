@@ -63,13 +63,28 @@ export default function Voucher() {
     );
   }
 
-  const amount = promo.value || 0;
+  const amount = isGrace ? (promo.balance || promo.grace_value || promo.value || 0) : (promo.value || 0);
   const studioName = settings?.app_description || 'ROMANS TATTOO';
   const addressLine = [settings?.contact_address_street, settings?.contact_address_city].filter(Boolean).join(', ');
+  const isDisabled = promo.is_active === false;
+  const isRevoked = promo.revoked === true;
+  const expired = promo.expires_at ? new Date(promo.expires_at).getTime() < Date.now() : false;
+  const isGrace = promo.is_grace === true && promo.grace_expires_at ? new Date(promo.grace_expires_at).getTime() >= Date.now() : false;
+  const inactive = isDisabled || isRevoked || expired;
+  const statusLabel = isRevoked ? 'Voucher odwołany' : isDisabled ? 'Voucher wyłączony' : expired ? (isGrace ? 'Voucher w trybie ostatniej szansy' : 'Voucher wygasł') : '';
+  const statusDesc = isRevoked
+    ? 'Ten voucher został odwołany przez studio i nie może zostać zrealizowany. Skontaktuj się ze studiem, aby uzyskać więcej informacji.'
+    : isDisabled
+      ? 'Ten voucher został tymczasowo wyłączony przez studio. Nie można go zrealizować do czasu ponownego włączenia.'
+      : expired
+        ? isGrace
+          ? 'Voucher wygasł, ale został przedłużony w trybie ostatniej szansy z obniżoną wartością. Zrealizuj go przed nową datą ważności.'
+          : 'Upłynęła data ważności tego vouchera. Skontaktuj się ze studiem w sprawie ewentualnego przedłużenia.'
+        : '';
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-8 sm:py-12" style={{ background: 'hsl(var(--background))' }}>
-      <div className="w-full" style={{ maxWidth: '480px', border: 'var(--border-width) solid hsl(var(--border))', background: 'hsl(var(--card))', padding: '40px 36px' }}>
+      <div className="w-full" style={{ maxWidth: '480px', border: 'var(--border-width) solid hsl(var(--border))', background: 'hsl(var(--card))', padding: '40px 36px', opacity: inactive ? 0.7 : 1 }}>
         {/* Header: logo + studio name */}
         <div className="flex flex-col items-center text-center mb-7">
           {settings?.site_logo_url && (
@@ -89,6 +104,13 @@ export default function Voucher() {
 
         {/* Divider */}
         <div style={{ height: 'var(--border-width)', background: 'hsl(var(--border))', marginBottom: '28px' }} />
+
+        {inactive && (
+          <div style={{ marginBottom: '28px', padding: '18px 20px', border: 'var(--border-width) solid var(--brand)', background: 'rgb(var(--brand-rgb) / 0.06)', textAlign: 'center' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>{statusLabel}</p>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'hsl(var(--muted-foreground))', lineHeight: 1.6 }}>{statusDesc}</p>
+          </div>
+        )}
 
         {/* Amount */}
         <div className="text-center mb-8">
