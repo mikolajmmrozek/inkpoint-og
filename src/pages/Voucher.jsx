@@ -88,7 +88,7 @@ export default function Voucher() {
         : '';
 
   return (
-    <div style={{ background: '#ECECEC', minHeight: '100vh', display: 'flex', justifyContent: 'center', padding: '20px 0' }}>
+    <div className="voucher-wrap" style={{ background: '#ECECEC', minHeight: '100vh', display: 'flex', justifyContent: 'center', padding: '20px 0' }}>
       <div
         className="voucher-sheet"
         style={{
@@ -182,7 +182,8 @@ export default function Voucher() {
 
       <style>{`
         @media print {
-          body { background: #FFFFFF !important; }
+          html, body { background: #FFFFFF !important; background-image: none !important; height: auto !important; }
+          .voucher-wrap { background: #FFFFFF !important; min-height: 0 !important; padding: 0 !important; display: block !important; }
           .voucher-sheet { box-shadow: none !important; margin: 0 !important; width: 210mm !important; min-height: 297mm !important; }
           @page { size: A4 portrait; margin: 0; }
         }
