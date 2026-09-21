@@ -564,7 +564,9 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
             <div className="mb-4">
               {label('Kategoria')}
               <div className="flex gap-2 flex-wrap mt-1">
-                {[['', 'WSZYSTKIE'], ['tattoo', 'TATTOO'], ['piercing', 'PIERCING'], ['studio', 'STUDIO']].map(([val, lbl]) => (
+                {[['', 'WSZYSTKIE'], ['tattoo', 'TATTOO'], ['piercing', 'PIERCING'], ['studio', 'STUDIO']]
+                  .filter(([val]) => !lockArtistId || val === '' || allServices.some(s => s.category === val && (!s.artist_ids || s.artist_ids.length === 0 || s.artist_ids.includes(lockArtistId))))
+                  .map(([val, lbl]) => (
                   <button
                     key={val}
                     type="button"
