@@ -15,7 +15,7 @@ export default function CreateMenuFAB({ onNewBooking, onNewAvailability, onNewHe
     { icon: FileText, label: 'Ankieta', action: onNewHealthForm },
     ...(role === 'admin' ? [{ icon: Ticket, label: 'Promocje', action: onNewPromotion }] : []),
     { icon: Clock, label: 'Dyspozycja', action: onNewAvailability },
-    { icon: UserPlus, label: 'Klient', action: onNewClient },
+    ...(role === 'admin' ? [{ icon: UserPlus, label: 'Klient', action: onNewClient }] : []),
   ];
 
   const positions = options.map((_, i) => ({
