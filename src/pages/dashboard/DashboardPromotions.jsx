@@ -133,8 +133,8 @@ export default function DashboardPromotions() {
           usage_mode: form.usage_mode,
           expires_at: toISO(form.expires_at),
           assigned_client_email: form.assigned_client_email,
-          assignment_permanent: form.assignment_permanent,
-          assigned_until: form.assigned_until ? toISO(form.assigned_until.slice(0, 10)) : '',
+          assignment_permanent: form.type === 'voucher' ? true : form.assignment_permanent,
+          assigned_until: form.type === 'voucher' ? '' : (form.assigned_until ? toISO(form.assigned_until.slice(0, 10)) : ''),
           is_active: form.type === 'discount' ? form.is_active : undefined,
         });
         toast({ title: 'Zapisano zmiany' });
@@ -459,15 +459,7 @@ export default function DashboardPromotions() {
                 <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>PRZYPISANIE</p>
                   <div className="mb-4">{label('Przypisz do klienta (opcjonalne)')}<ClientEmailPicker value={form.assigned_client_email} onChange={v => set('assigned_client_email', v)} t={t} /></div>
-                  <div className="mb-4">
-                    <button type="button" onClick={() => set('assignment_permanent', !form.assignment_permanent)} className="flex items-center gap-2" style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.assignment_permanent ? '#16a34a' : t.muted }}>
-                      <div style={{ width: '12px', height: '12px', border: `0.5px solid ${form.assignment_permanent ? '#16a34a' : t.border}`, background: form.assignment_permanent ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{form.assignment_permanent && <span style={{ color: '#fff', fontSize: '8px' }}>✓</span>}</div>
-                      Przypisanie stałe
-                    </button>
-                  </div>
-                  {!form.assignment_permanent && (
-                    <div>{label('Przypisany do (data)')}<input type="date" value={form.assigned_until ? form.assigned_until.slice(0, 10) : ''} onChange={e => set('assigned_until', e.target.value)} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: theme === 'light' ? 'light' : 'dark' }} /></div>
-                  )}
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.05em' }}>Voucher przypisuje się na stałe — bez daty wygaśnięcia przypisania.</p>
                 </div>
               )}
 

@@ -122,12 +122,13 @@ export default function Voucher() {
           flexShrink: 0,
           position: 'relative',
           display: 'flex',
-          alignItems: 'center',
+          alignItems: 'flex-start',
           justifyContent: 'center',
+          paddingTop: '8mm',
         }}>
           <span style={{
             fontFamily: 'var(--font-display)',
-            fontSize: '7mm',
+            fontSize: '7.5mm',
             fontWeight: 700,
             color: '#FFFFFF',
             letterSpacing: '0.2em',
@@ -174,22 +175,22 @@ export default function Voucher() {
             )}
 
             {/* Header */}
-            <div style={{ marginBottom: '6mm' }}>
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: '20mm', fontWeight: 700, color: brand, letterSpacing: '0.02em', lineHeight: 0.85, margin: 0 }}>VOUCHER</p>
-              <div style={{ width: '40mm', height: '0.8mm', background: brand, margin: '2mm 0 3mm' }} />
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: '8mm', fontWeight: 600, color: brand, letterSpacing: '0.18em', textTransform: 'uppercase', margin: 0 }}>PODARUNKOWY</p>
+            <div style={{ marginBottom: '16mm' }}>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '26mm', fontWeight: 700, color: brand, letterSpacing: '0.02em', lineHeight: 0.82, margin: 0 }}>VOUCHER</p>
+              <div style={{ width: '78mm', height: '0.9mm', background: brand, margin: '1.5mm 0 1mm' }} />
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '5.5mm', fontWeight: 600, color: brand, letterSpacing: '0.22em', textTransform: 'uppercase', margin: 0 }}>PODARUNKOWY</p>
             </div>
 
             {/* Recipient */}
-            <div style={{ marginBottom: '5mm' }}>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3.2mm', color: ink, letterSpacing: '0.25em', textTransform: 'uppercase', margin: '0 0 2mm' }}>{recipientName ? 'DLA' : 'NA OKAZICIELA'}</p>
+            <div style={{ marginBottom: '14mm' }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3.2mm', color: ink, letterSpacing: '0.25em', textTransform: 'uppercase', margin: '0 0 2.5mm' }}>{recipientName ? 'DLA' : 'NA OKAZICIELA'}</p>
               {recipientName && (
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: '11mm', fontWeight: 700, color: brand, letterSpacing: '0.03em', lineHeight: 0.95, margin: 0 }}>{recipientName}</p>
               )}
             </div>
 
             {/* Amount */}
-            <div style={{ marginBottom: '8mm' }}>
+            <div style={{ marginBottom: '12mm' }}>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3.2mm', color: ink, letterSpacing: '0.25em', textTransform: 'uppercase', margin: '0 0 2mm' }}>O WARTOŚCI</p>
               <p style={{ fontFamily: 'var(--font-display)', fontSize: amount >= 1000 ? '30mm' : '34mm', fontWeight: 700, color: brand, lineHeight: 0.82, letterSpacing: '0.01em', margin: 0 }}>
                 {amount}<span style={{ fontSize: '12mm', marginLeft: '3mm', letterSpacing: '0.1em' }}>PLN</span>
@@ -243,21 +244,21 @@ export default function Voucher() {
               </div>
             </div>
 
-            {/* Footer */}
-            <div style={{ marginTop: 'auto', display: 'flex', gap: '8mm', alignItems: 'flex-end' }}>
-              <p style={{ flex: 1, fontFamily: 'var(--font-body)', fontSize: '3mm', color: muted, lineHeight: 1.6, margin: 0 }}>
-                Voucher do zrealizowania na usługi w studio, nie podlega wymianie na gotówkę. Zachowaj go i pamiętaj o okazaniu na sesji.
-              </p>
-              <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.8mm', color: brand, letterSpacing: '0.2em', textTransform: 'uppercase', margin: '0 0 2mm' }}>DANE KONTAKTOWE</p>
-                <div style={{ fontFamily: 'var(--font-body)', fontSize: '3.2mm', color: ink, lineHeight: 1.7 }}>
-                  {street && <p style={{ margin: 0 }}>{street}</p>}
-                  {city && <p style={{ margin: 0 }}>{city}</p>}
-                  {phone && <p style={{ margin: 0, fontFamily: 'var(--font-mono)', letterSpacing: '0.05em' }}>Tel. {phone}</p>}
-                  {emailAddr && <p style={{ margin: 0, fontFamily: 'var(--font-mono)', letterSpacing: '0.05em' }}>{emailAddr}</p>}
-                </div>
+            {/* Contact block */}
+            <div style={{ marginBottom: '6mm', textAlign: 'right' }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.8mm', color: brand, letterSpacing: '0.2em', textTransform: 'uppercase', margin: '0 0 2.5mm' }}>DANE KONTAKTOWE</p>
+              <div style={{ fontFamily: 'var(--font-body)', fontSize: '3.4mm', color: ink, lineHeight: 1.8, textDecoration: 'none' }}>
+                {street && <p style={{ margin: 0, textDecoration: 'none' }}>{street}</p>}
+                {city && <p style={{ margin: 0, textDecoration: 'none' }}>{city}</p>}
+                {phone && <p style={{ margin: 0, textDecoration: 'none' }}>Tel. {phone}</p>}
+                {emailAddr && <p style={{ margin: 0, textDecoration: 'none' }}>{emailAddr}</p>}
               </div>
             </div>
+
+            {/* Clause — pinned to bottom */}
+            <p style={{ marginTop: 'auto', fontFamily: 'var(--font-body)', fontSize: '3mm', color: muted, lineHeight: 1.6, margin: 0, paddingTop: '4mm', borderTop: '0.2mm solid rgba(0,0,0,0.08)' }}>
+              Voucher do zrealizowania na usługi w studio, nie podlega wymianie na gotówkę. Zachowaj go i pamiętaj o okazaniu na sesji.
+            </p>
           </div>
         </div>
       </div>
