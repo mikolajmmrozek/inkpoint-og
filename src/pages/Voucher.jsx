@@ -9,6 +9,7 @@ export default function Voucher() {
   const { code } = useParams();
   const [promo, setPromo] = useState(null);
   const [settings, setSettings] = useState(null);
+  const [recipientName, setRecipientName] = useState('');
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -24,6 +25,13 @@ export default function Voucher() {
         const found = promos.find(p => p.type === 'voucher');
         if (!found) { setNotFound(true); setLoading(false); return; }
         setPromo(found);
+        // If voucher is assigned to a client, look up their name for "Dla [name]"
+        if (found.assigned_client_email) {
+          try {
+            const clients = await base44.entities.Client.filter({ email: found.assigned_client_email });
+            if (!cancelled && clients[0]) setRecipientName(clients[0].name || `${clients[0].first_name || ''} ${clients[0].last_name || ''}`.trim());
+          } catch { /* ignore */ }
+        }
         // Merge contact data (key 'contact') with theme data (key 'theme')
         const contact = allSettings.find(s => s.key === 'contact') || {};
         const theme = allSettings.find(s => s.key === 'theme') || {};
@@ -111,71 +119,74 @@ export default function Voucher() {
         <div style={{ position: 'absolute', top: '20mm', right: '8mm', width: '2mm', height: '60mm', background: brand, opacity: 0.5 }} />
 
         {/* Content padding */}
-        <div style={{ position: 'relative', zIndex: 2, padding: '18mm 22mm 14mm 26mm', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ position: 'relative', zIndex: 2, padding: '18mm 24mm 16mm 28mm', flex: 1, display: 'flex', flexDirection: 'column' }}>
           {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6mm', marginBottom: '8mm' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8mm', marginBottom: '6mm' }}>
             {settings?.site_logo_url && (
-              <img src={settings.site_logo_url} alt="Logo" style={{ height: '22mm', width: 'auto', objectFit: 'contain' }} />
+              <img src={settings.site_logo_url} alt="Logo" style={{ height: '26mm', width: 'auto', objectFit: 'contain' }} />
             )}
             <div>
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: '14mm', fontWeight: 400, letterSpacing: '0.06em', color: '#111111', lineHeight: 0.9, margin: 0 }}>{studioName}</p>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: brand, letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '2mm' }}>Voucher prezentowy</p>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '18mm', fontWeight: 400, letterSpacing: '0.04em', color: '#111111', lineHeight: 0.85, margin: 0 }}>{studioName}</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3.5mm', color: brand, letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '3mm' }}>Voucher prezentowy</p>
             </div>
           </div>
 
           {/* Inactive banner */}
           {inactive && (
-            <div style={{ marginBottom: '10mm', padding: '6mm 7mm', border: `0.5mm solid ${brand}`, background: `${brand}11`, textAlign: 'center' }}>
+            <div style={{ marginBottom: '8mm', padding: '5mm 7mm', border: `0.5mm solid ${brand}`, background: `${brand}11`, textAlign: 'center' }}>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3.5mm', color: brand, letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 2mm' }}>{statusLabel}</p>
               <p style={{ fontFamily: 'var(--font-body)', fontSize: '3.5mm', color: '#555', lineHeight: 1.6, margin: 0 }}>{statusDesc}</p>
             </div>
           )}
 
           {/* Amount — hero */}
-          <div style={{ textAlign: 'center', marginBottom: '8mm' }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: '#888', letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: '4mm' }}>Wartość vouchera</p>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '34mm', fontWeight: 400, color: brand, lineHeight: 0.85, letterSpacing: '0.01em', margin: 0 }}>
+          <div style={{ textAlign: 'center', marginBottom: '6mm' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3.5mm', color: '#888', letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: '4mm' }}>Wartość vouchera</p>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '42mm', fontWeight: 400, color: brand, lineHeight: 0.85, letterSpacing: '0.01em', margin: 0 }}>
               {amount}
-              <span style={{ fontSize: '12mm', marginLeft: '3mm', letterSpacing: '0.1em' }}>PLN</span>
+              <span style={{ fontSize: '14mm', marginLeft: '4mm', letterSpacing: '0.1em' }}>PLN</span>
             </p>
-            <div style={{ width: '30mm', height: '0.6mm', background: brand, margin: '6mm auto 0' }} />
+            <div style={{ width: '34mm', height: '0.6mm', background: brand, margin: '5mm auto 0' }} />
           </div>
 
-          {/* QR + code */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '8mm' }}>
+          {/* Recipient */}
+          <div style={{ textAlign: 'center', marginBottom: '10mm' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: '#888', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '2.5mm' }}>{recipientName ? 'Dla' : 'Na okaziciela'}</p>
+            {recipientName && (
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '9mm', fontWeight: 400, color: '#111111', letterSpacing: '0.03em', margin: 0, lineHeight: 1 }}>{recipientName}</p>
+            )}
+          </div>
+
+          {/* QR (left) + code & expiry (right) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10mm', marginBottom: '10mm', paddingBottom: '8mm', borderBottom: `0.3mm solid ${brand}33` }}>
             {promo.qr_code_url && (
-              <div style={{ padding: '4mm', background: '#FFFFFF', border: `0.3mm solid ${brand}33` }}>
-                <img src={promo.qr_code_url} alt="Kod QR vouchera" style={{ width: '42mm', height: '42mm', objectFit: 'contain', display: 'block' }} />
+              <div style={{ padding: '4mm', background: '#FFFFFF', border: `0.3mm solid ${brand}33`, flexShrink: 0 }}>
+                <img src={promo.qr_code_url} alt="Kod QR vouchera" style={{ width: '38mm', height: '38mm', objectFit: 'contain', display: 'block' }} />
               </div>
             )}
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: '#888', letterSpacing: '0.3em', textTransform: 'uppercase', margin: '6mm 0 2mm' }}>Kod vouchera</p>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '7mm', color: '#111111', letterSpacing: '0.4em', margin: 0 }}>{promo.code}</p>
-          </div>
-
-          {/* Valid until */}
-          <div style={{ textAlign: 'center', marginBottom: '8mm', paddingBottom: '6mm', borderBottom: `0.3mm solid ${brand}33` }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: '#888', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '3mm' }}>Ważny do</p>
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: '6mm', color: '#111111', letterSpacing: '0.04em', margin: 0 }}>{formatDate(promo.expires_at)}</p>
-            {isGrace && (
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: brand, letterSpacing: '0.1em', marginTop: '3mm' }}>Ostatnia szansa do: {formatDate(promo.grace_expires_at)}</p>
-            )}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6mm' }}>
+              <div>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: '#888', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: '2mm' }}>Kod vouchera</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8mm', color: '#111111', letterSpacing: '0.35em', margin: 0 }}>{promo.code}</p>
+              </div>
+              <div>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: '#888', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '2mm' }}>Ważny do</p>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '6mm', color: '#111111', letterSpacing: '0.04em', margin: 0 }}>{formatDate(promo.expires_at)}</p>
+                {isGrace && (
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.8mm', color: brand, letterSpacing: '0.1em', marginTop: '2mm' }}>Ostatnia szansa do: {formatDate(promo.grace_expires_at)}</p>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Studio info */}
-          <div style={{ marginTop: '4mm' }}>
+          <div style={{ marginTop: 'auto' }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: brand, letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: '4mm', textAlign: 'center' }}>Dane kontaktowe</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '3mm', alignItems: 'center', textAlign: 'center' }}>
               {addressLine && <p style={{ fontFamily: 'var(--font-body)', fontSize: '4mm', color: '#333', margin: 0, lineHeight: 1.5 }}>{addressLine}</p>}
               {settings?.contact_phone && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '4mm', color: '#333', letterSpacing: '0.08em', margin: 0 }}>Tel: {settings.contact_phone}</p>}
               {settings?.contact_email && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '4mm', color: '#333', letterSpacing: '0.08em', margin: 0 }}>{settings.contact_email}</p>}
             </div>
-          </div>
-
-          {/* Footer */}
-          <div style={{ marginTop: '6mm', paddingTop: '4mm', borderTop: `0.3mm solid #DDD`, textAlign: 'center' }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.6mm', color: '#999', letterSpacing: '0.15em', textTransform: 'uppercase', margin: 0 }}>
-              Voucher na okaziciela · Ważny w dniu sesji · Nr {promo.code}
-            </p>
           </div>
         </div>
       </div>
