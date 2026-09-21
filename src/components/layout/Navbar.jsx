@@ -9,7 +9,12 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [artist, setArtist] = useState(null);
   const location = useLocation();
+
+  const displayName = user?.display_name || user?.full_name || artist?.name || '';
+  const initials = (displayName.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('') || (user?.email?.[0] || 'U')).toUpperCase();
+  const avatarSrc = artist?.photo_url || '';
 
   const isBlogPost = location.pathname.startsWith('/blog/') && location.pathname !== '/blog';
   const forceLightText = isBlogPost && !scrolled;
@@ -28,6 +33,14 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (user?.artist_id) {
+      base44.entities.Artist.get(user.artist_id).then(setArtist).catch(() => setArtist(null));
+    } else {
+      setArtist(null);
+    }
+  }, [user?.artist_id]);
 
   useEffect(() => setMenuOpen(false), [location]);
 
@@ -75,30 +88,46 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-4">
             <button
               onClick={handleAccountClick}
-              className="flex items-center justify-center gap-0 overflow-hidden transition-all duration-500 ease-out group"
+              className="flex items-center overflow-hidden transition-all duration-500 ease-out group"
               style={{
-                height: '38px',
-                borderRadius: '0.25rem',
+                height: '40px',
+                borderRadius: '9999px',
                 border: '0.5px solid rgb(var(--brand-rgb) /0.4)',
                 background: 'rgb(var(--brand-rgb) /0.04)',
-                padding: '0 10px',
+                padding: '3px',
                 cursor: 'pointer'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.width = 'auto';
                 const label = e.currentTarget.querySelector('.login-label');
-                const icon = e.currentTarget.querySelector('.login-icon');
-                if (label) {label.style.maxWidth = '120px';label.style.opacity = '1';label.style.marginLeft = '8px';}
-                if (icon) {e.currentTarget.style.borderColor = 'var(--brand)';e.currentTarget.style.background = 'rgb(var(--brand-rgb) /0.08)';}
+                if (label) { label.style.maxWidth = '170px'; label.style.opacity = '1'; label.style.marginLeft = '10px'; label.style.paddingRight = '12px'; }
+                e.currentTarget.style.borderColor = 'var(--brand)';
+                e.currentTarget.style.background = 'rgb(var(--brand-rgb) /0.1)';
               }}
               onMouseLeave={(e) => {
                 const label = e.currentTarget.querySelector('.login-label');
-                if (label) {label.style.maxWidth = '0';label.style.opacity = '0';label.style.marginLeft = '0';}
+                if (label) { label.style.maxWidth = '0'; label.style.opacity = '0'; label.style.marginLeft = '0'; label.style.paddingRight = '0'; }
                 e.currentTarget.style.borderColor = 'rgb(var(--brand-rgb) /0.4)';
                 e.currentTarget.style.background = 'rgb(var(--brand-rgb) /0.04)';
               }}>
-              
-              <User size={17} className="login-icon" color="var(--brand)" style={{ flexShrink: 0 }} />
+              <span
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '9999px',
+                  overflow: 'hidden',
+                  flexShrink: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: avatarSrc ? 'transparent' : 'rgb(var(--brand-rgb) /0.15)'
+                }}>
+                {avatarSrc
+                  ? <img src={avatarSrc} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : isAuthenticated
+                    ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', fontWeight: 600, color: 'var(--brand)', letterSpacing: '0.02em' }}>{initials}</span>
+                    : <User size={15} color="var(--brand)" />
+                }
+              </span>
               <span
                 className="login-label"
                 style={{
@@ -112,10 +141,11 @@ export default function Navbar() {
                   overflow: 'hidden',
                   maxWidth: '0',
                   opacity: '0',
+                  marginLeft: '0',
+                  paddingRight: '0',
                   transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
                 }}>
-                
-                {isAuthenticated ? 'MOJE KONTO' : 'ZALOGUJ SIĘ'}
+                {isAuthenticated ? (displayName || 'MOJE KONTO') : 'ZALOGUJ SIĘ'}
               </span>
             </button>
             <Link to="/booking" className="btn-oxblood animate-pulse-oxblood" style={{ padding: '11px 26px', fontSize: '13px' }}>
@@ -144,25 +174,50 @@ export default function Navbar() {
           <div className="flex gap-3 mb-8" style={{ marginTop: '60px' }}>
             <button
               onClick={handleAccountClick}
-              className="flex items-center justify-center gap-2 flex-1 whitespace-nowrap"
+              className="flex items-center gap-3 flex-1 min-w-0"
               style={{
-                height: '42px',
-                padding: '0 12px',
-                borderRadius: '0',
-                border: '0.5px solid var(--brand)',
-                background: 'rgb(var(--brand-rgb) /0.06)',
-                cursor: 'pointer',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '10px',
-                fontWeight: 500,
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                color: 'var(--brand)'
+                height: '48px',
+                padding: '4px 14px 4px 4px',
+                borderRadius: '9999px',
+                border: '0.5px solid rgb(var(--brand-rgb) /0.35)',
+                background: 'rgb(var(--brand-rgb) /0.05)',
+                cursor: 'pointer'
               }}>
-              <User size={15} color="var(--brand)" />
-              {isAuthenticated ? 'MOJE KONTO' : 'ZALOGUJ SIĘ'}
+              <span
+                style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '9999px',
+                  overflow: 'hidden',
+                  flexShrink: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: avatarSrc ? 'transparent' : 'rgb(var(--brand-rgb) /0.15)'
+                }}>
+                {avatarSrc
+                  ? <img src={avatarSrc} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : isAuthenticated
+                    ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: '14px', fontWeight: 600, color: 'var(--brand)', letterSpacing: '0.02em' }}>{initials}</span>
+                    : <User size={17} color="var(--brand)" />
+                }
+              </span>
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '11px',
+                  fontWeight: 500,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  color: 'hsl(var(--foreground))',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}>
+                {isAuthenticated ? (displayName || 'MOJE KONTO') : 'ZALOGUJ SIĘ'}
+              </span>
             </button>
-            <Link to="/booking" className="btn-oxblood flex items-center justify-center flex-1 whitespace-nowrap" style={{ height: '42px', padding: '0 12px', borderRadius: '0', fontSize: '10px', letterSpacing: '0.08em', textAlign: 'center' }}>
+            <Link to="/booking" className="btn-oxblood flex items-center justify-center flex-1 whitespace-nowrap" style={{ height: '48px', padding: '0 18px', borderRadius: '9999px', fontSize: '11px', letterSpacing: '0.08em', textAlign: 'center' }}>
               Umów Sesję
             </Link>
           </div>
