@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 
 const A4_WIDTH = '210mm';
 const A4_HEIGHT = '297mm';
+const SIDEBAR_WIDTH = '16mm';
 
 export default function Voucher() {
   const { code } = useParams();
@@ -25,14 +26,12 @@ export default function Voucher() {
         const found = promos.find(p => p.type === 'voucher');
         if (!found) { setNotFound(true); setLoading(false); return; }
         setPromo(found);
-        // If voucher is assigned to a client, look up their name for "Dla [name]"
         if (found.assigned_client_email) {
           try {
             const clients = await base44.entities.Client.filter({ email: found.assigned_client_email });
             if (!cancelled && clients[0]) setRecipientName(clients[0].name || `${clients[0].first_name || ''} ${clients[0].last_name || ''}`.trim());
           } catch { /* ignore */ }
         }
-        // Merge contact data (key 'contact') with theme data (key 'theme')
         const contact = allSettings.find(s => s.key === 'contact') || {};
         const theme = allSettings.find(s => s.key === 'theme') || {};
         setSettings({ ...theme, ...contact, primary_color: theme.primary_color || contact.primary_color });
@@ -74,9 +73,14 @@ export default function Voucher() {
     );
   }
 
-  const studioName = settings?.app_description || 'ROMANS TATTOO';
-  const addressLine = [settings?.contact_address_street, settings?.contact_address_city].filter(Boolean).join(', ');
+  const studioName = (settings?.app_description || 'ROMANS TATTOO').toUpperCase();
+  const street = settings?.contact_address_street;
+  const city = settings?.contact_address_city;
+  const phone = settings?.contact_phone;
+  const emailAddr = settings?.contact_email;
   const brand = settings?.primary_color || '#FF007F';
+  const ink = '#1A1A1A';
+  const muted = '#8A8A8A';
 
   const isDisabled = promo.is_active === false;
   const isRevoked = promo.revoked === true;
@@ -101,91 +105,158 @@ export default function Voucher() {
         className="voucher-sheet"
         style={{
           width: A4_WIDTH,
-          minHeight: A4_HEIGHT,
+          height: A4_HEIGHT,
           background: '#FFFFFF',
           position: 'relative',
           overflow: 'hidden',
           boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
-          color: '#111111',
+          color: ink,
           fontFamily: 'var(--font-body)',
           display: 'flex',
-          flexDirection: 'column',
         }}
       >
-        {/* Decorative accent corners / gradient — printable */}
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '14mm', background: `linear-gradient(90deg, ${brand} 0%, ${brand}CC 60%, transparent 100%)` }} />
-        <div style={{ position: 'absolute', top: 0, left: 0, width: '14mm', bottom: 0, background: `linear-gradient(180deg, ${brand} 0%, ${brand}CC 50%, transparent 100%)` }} />
-        <div style={{ position: 'absolute', bottom: 0, right: 0, width: '40mm', height: '40mm', background: `radial-gradient(circle at bottom right, ${brand}22 0%, transparent 70%)` }} />
-        <div style={{ position: 'absolute', top: '20mm', right: '8mm', width: '2mm', height: '60mm', background: brand, opacity: 0.5 }} />
+        {/* Left magenta sidebar */}
+        <div style={{
+          width: SIDEBAR_WIDTH,
+          background: brand,
+          flexShrink: 0,
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <span style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: '7mm',
+            fontWeight: 700,
+            color: '#FFFFFF',
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            writingMode: 'vertical-rl',
+            transform: 'rotate(180deg)',
+            whiteSpace: 'nowrap',
+          }}>
+            {studioName}
+          </span>
+          {/* sidebar decorative tick */}
+          <div style={{ position: 'absolute', bottom: '10mm', left: '50%', transform: 'translateX(-50%)', width: '1.2mm', height: '12mm', background: '#FFFFFF', opacity: 0.5 }} />
+        </div>
 
-        {/* Content padding */}
-        <div style={{ position: 'relative', zIndex: 2, padding: '18mm 24mm 16mm 28mm', flex: 1, display: 'flex', flexDirection: 'column' }}>
-          {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8mm', marginBottom: '6mm' }}>
-            {settings?.site_logo_url && (
-              <img src={settings.site_logo_url} alt="Logo" style={{ height: '26mm', width: 'auto', objectFit: 'contain' }} />
-            )}
-            <div>
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: '18mm', fontWeight: 400, letterSpacing: '0.04em', color: '#111111', lineHeight: 0.85, margin: 0 }}>{studioName}</p>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3.5mm', color: brand, letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '3mm' }}>Voucher prezentowy</p>
-            </div>
-          </div>
+        {/* Main content */}
+        <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+          {/* Arc line art background */}
+          <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} viewBox="0 0 194 297" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <linearGradient id="arcFade" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor={brand} stopOpacity="0.10" />
+                <stop offset="100%" stopColor={brand} stopOpacity="0.02" />
+              </linearGradient>
+            </defs>
+            <circle cx="170" cy="40" r="70" fill="none" stroke={brand} strokeOpacity="0.07" strokeWidth="0.4" />
+            <circle cx="170" cy="40" r="100" fill="none" stroke={brand} strokeOpacity="0.05" strokeWidth="0.4" />
+            <circle cx="170" cy="40" r="130" fill="none" stroke={brand} strokeOpacity="0.03" strokeWidth="0.4" />
+            <circle cx="20" cy="260" r="60" fill="none" stroke={brand} strokeOpacity="0.06" strokeWidth="0.4" />
+            <circle cx="20" cy="260" r="90" fill="none" stroke={brand} strokeOpacity="0.04" strokeWidth="0.4" />
+            <circle cx="20" cy="260" r="120" fill="none" stroke={brand} strokeOpacity="0.02" strokeWidth="0.4" />
+            <path d="M 0 150 Q 97 110 194 150" fill="none" stroke="url(#arcFade)" strokeWidth="0.5" />
+            <path d="M 0 170 Q 97 130 194 170" fill="none" stroke="url(#arcFade)" strokeWidth="0.4" />
+          </svg>
 
-          {/* Inactive banner */}
-          {inactive && (
-            <div style={{ marginBottom: '8mm', padding: '5mm 7mm', border: `0.5mm solid ${brand}`, background: `${brand}11`, textAlign: 'center' }}>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3.5mm', color: brand, letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 2mm' }}>{statusLabel}</p>
-              <p style={{ fontFamily: 'var(--font-body)', fontSize: '3.5mm', color: '#555', lineHeight: 1.6, margin: 0 }}>{statusDesc}</p>
-            </div>
-          )}
+          {/* Inner frame */}
+          <div style={{ position: 'absolute', inset: '10mm 12mm 10mm 14mm', display: 'flex', flexDirection: 'column' }}>
 
-          {/* Amount — hero */}
-          <div style={{ textAlign: 'center', marginBottom: '6mm' }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3.5mm', color: '#888', letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: '4mm' }}>Wartość vouchera</p>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '42mm', fontWeight: 400, color: brand, lineHeight: 0.85, letterSpacing: '0.01em', margin: 0 }}>
-              {amount}
-              <span style={{ fontSize: '14mm', marginLeft: '4mm', letterSpacing: '0.1em' }}>PLN</span>
-            </p>
-            <div style={{ width: '34mm', height: '0.6mm', background: brand, margin: '5mm auto 0' }} />
-          </div>
-
-          {/* Recipient */}
-          <div style={{ textAlign: 'center', marginBottom: '10mm' }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: '#888', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '2.5mm' }}>{recipientName ? 'Dla' : 'Na okaziciela'}</p>
-            {recipientName && (
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: '9mm', fontWeight: 400, color: '#111111', letterSpacing: '0.03em', margin: 0, lineHeight: 1 }}>{recipientName}</p>
-            )}
-          </div>
-
-          {/* QR (left) + code & expiry (right) */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10mm', marginBottom: '10mm', paddingBottom: '8mm', borderBottom: `0.3mm solid ${brand}33` }}>
-            {promo.qr_code_url && (
-              <div style={{ padding: '4mm', background: '#FFFFFF', border: `0.3mm solid ${brand}33`, flexShrink: 0 }}>
-                <img src={promo.qr_code_url} alt="Kod QR vouchera" style={{ width: '38mm', height: '38mm', objectFit: 'contain', display: 'block' }} />
+            {/* Inactive banner */}
+            {inactive && (
+              <div style={{ marginBottom: '6mm', padding: '4mm 6mm', border: `0.4mm solid ${brand}`, background: `${brand}0D`, borderRadius: '1.5mm' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: brand, letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 1.5mm' }}>{statusLabel}</p>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '3mm', color: muted, lineHeight: 1.5, margin: 0 }}>{statusDesc}</p>
               </div>
             )}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6mm' }}>
-              <div>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: '#888', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: '2mm' }}>Kod vouchera</p>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8mm', color: '#111111', letterSpacing: '0.35em', margin: 0 }}>{promo.code}</p>
-              </div>
-              <div>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: '#888', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '2mm' }}>Ważny do</p>
-                <p style={{ fontFamily: 'var(--font-body)', fontSize: '6mm', color: '#111111', letterSpacing: '0.04em', margin: 0 }}>{formatDate(promo.expires_at)}</p>
+
+            {/* Header */}
+            <div style={{ marginBottom: '6mm' }}>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '20mm', fontWeight: 700, color: brand, letterSpacing: '0.02em', lineHeight: 0.85, margin: 0 }}>VOUCHER</p>
+              <div style={{ width: '40mm', height: '0.8mm', background: brand, margin: '2mm 0 3mm' }} />
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '8mm', fontWeight: 600, color: brand, letterSpacing: '0.18em', textTransform: 'uppercase', margin: 0 }}>PODARUNKOWY</p>
+            </div>
+
+            {/* Recipient */}
+            <div style={{ marginBottom: '5mm' }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3.2mm', color: ink, letterSpacing: '0.25em', textTransform: 'uppercase', margin: '0 0 2mm' }}>{recipientName ? 'DLA' : 'NA OKAZICIELA'}</p>
+              {recipientName && (
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '11mm', fontWeight: 700, color: brand, letterSpacing: '0.03em', lineHeight: 0.95, margin: 0 }}>{recipientName}</p>
+              )}
+            </div>
+
+            {/* Amount */}
+            <div style={{ marginBottom: '8mm' }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3.2mm', color: ink, letterSpacing: '0.25em', textTransform: 'uppercase', margin: '0 0 2mm' }}>O WARTOŚCI</p>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: amount >= 1000 ? '30mm' : '34mm', fontWeight: 700, color: brand, lineHeight: 0.82, letterSpacing: '0.01em', margin: 0 }}>
+                {amount}<span style={{ fontSize: '12mm', marginLeft: '3mm', letterSpacing: '0.1em' }}>PLN</span>
+              </p>
+            </div>
+
+            {/* Milky info windows */}
+            <div style={{ display: 'flex', gap: '4mm', marginBottom: '6mm' }}>
+              {/* Code + date window */}
+              <div style={{
+                flex: 1,
+                background: 'rgba(0,0,0,0.04)',
+                backdropFilter: 'blur(2px)',
+                border: '0.3mm solid rgba(0,0,0,0.06)',
+                borderRadius: '2mm',
+                padding: '5mm 6mm',
+              }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.8mm', color: brand, letterSpacing: '0.2em', textTransform: 'uppercase', margin: '0 0 1mm' }}>KOD VOUCHERA</p>
+                <div style={{ width: '14mm', height: '0.4mm', background: brand, marginBottom: '3mm' }} />
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '7mm', color: ink, letterSpacing: '0.3em', fontWeight: 600, margin: '0 0 4mm' }}>{promo.code}</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.8mm', color: brand, letterSpacing: '0.2em', textTransform: 'uppercase', margin: '0 0 1mm' }}>WAŻNY DO</p>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '5mm', color: ink, fontWeight: 600, margin: 0 }}>{formatDate(promo.expires_at)}</p>
                 {isGrace && (
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.8mm', color: brand, letterSpacing: '0.1em', marginTop: '2mm' }}>Ostatnia szansa do: {formatDate(promo.grace_expires_at)}</p>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.6mm', color: brand, letterSpacing: '0.08em', marginTop: '1.5mm' }}>Ostatnia szansa: {formatDate(promo.grace_expires_at)}</p>
                 )}
               </div>
-            </div>
-          </div>
 
-          {/* Studio info */}
-          <div style={{ marginTop: 'auto' }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: brand, letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: '4mm', textAlign: 'center' }}>Dane kontaktowe</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '3mm', alignItems: 'center', textAlign: 'center' }}>
-              {addressLine && <p style={{ fontFamily: 'var(--font-body)', fontSize: '4mm', color: '#333', margin: 0, lineHeight: 1.5 }}>{addressLine}</p>}
-              {settings?.contact_phone && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '4mm', color: '#333', letterSpacing: '0.08em', margin: 0 }}>Tel: {settings.contact_phone}</p>}
-              {settings?.contact_email && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '4mm', color: '#333', letterSpacing: '0.08em', margin: 0 }}>{settings.contact_email}</p>}
+              {/* QR window */}
+              <div style={{
+                width: '44mm',
+                background: 'rgba(0,0,0,0.04)',
+                backdropFilter: 'blur(2px)',
+                border: '0.3mm solid rgba(0,0,0,0.06)',
+                borderRadius: '2mm',
+                padding: '5mm',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                {promo.qr_code_url ? (
+                  <div style={{ padding: '2mm', background: '#FFFFFF', border: '0.3mm solid rgba(0,0,0,0.1)' }}>
+                    <img src={promo.qr_code_url} alt="QR" style={{ width: '32mm', height: '32mm', objectFit: 'contain', display: 'block' }} />
+                  </div>
+                ) : (
+                  <div style={{ width: '32mm', height: '32mm', border: `0.4mm solid ${brand}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '6mm', color: brand, letterSpacing: '0.1em' }}>QR</span>
+                  </div>
+                )}
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.4mm', color: muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginTop: '2mm' }}>ZESKAJ ABY ZREALIZOWAĆ</p>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div style={{ marginTop: 'auto', display: 'flex', gap: '8mm', alignItems: 'flex-end' }}>
+              <p style={{ flex: 1, fontFamily: 'var(--font-body)', fontSize: '3mm', color: muted, lineHeight: 1.6, margin: 0 }}>
+                Voucher do zrealizowania na usługi w studio, nie podlega wymianie na gotówkę. Zachowaj go i pamiętaj o okazaniu na sesji.
+              </p>
+              <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.8mm', color: brand, letterSpacing: '0.2em', textTransform: 'uppercase', margin: '0 0 2mm' }}>DANE KONTAKTOWE</p>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: '3.2mm', color: ink, lineHeight: 1.7 }}>
+                  {street && <p style={{ margin: 0 }}>{street}</p>}
+                  {city && <p style={{ margin: 0 }}>{city}</p>}
+                  {phone && <p style={{ margin: 0, fontFamily: 'var(--font-mono)', letterSpacing: '0.05em' }}>Tel. {phone}</p>}
+                  {emailAddr && <p style={{ margin: 0, fontFamily: 'var(--font-mono)', letterSpacing: '0.05em' }}>{emailAddr}</p>}
+                </div>
+              </div>
             </div>
           </div>
         </div>
