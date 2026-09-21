@@ -111,9 +111,9 @@ export default function Voucher() {
         <div style={{ position: 'absolute', top: '20mm', right: '8mm', width: '2mm', height: '60mm', background: brand, opacity: 0.5 }} />
 
         {/* Content padding */}
-        <div style={{ position: 'relative', zIndex: 2, padding: '26mm 22mm 18mm 26mm', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ position: 'relative', zIndex: 2, padding: '18mm 22mm 14mm 26mm', flex: 1, display: 'flex', flexDirection: 'column' }}>
           {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6mm', marginBottom: '14mm' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6mm', marginBottom: '8mm' }}>
             {settings?.site_logo_url && (
               <img src={settings.site_logo_url} alt="Logo" style={{ height: '22mm', width: 'auto', objectFit: 'contain' }} />
             )}
@@ -132,7 +132,7 @@ export default function Voucher() {
           )}
 
           {/* Amount — hero */}
-          <div style={{ textAlign: 'center', marginBottom: '12mm' }}>
+          <div style={{ textAlign: 'center', marginBottom: '8mm' }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: '#888', letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: '4mm' }}>Wartość vouchera</p>
             <p style={{ fontFamily: 'var(--font-display)', fontSize: '34mm', fontWeight: 400, color: brand, lineHeight: 0.85, letterSpacing: '0.01em', margin: 0 }}>
               {amount}
@@ -142,7 +142,7 @@ export default function Voucher() {
           </div>
 
           {/* QR + code */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '14mm' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '8mm' }}>
             {promo.qr_code_url && (
               <div style={{ padding: '4mm', background: '#FFFFFF', border: `0.3mm solid ${brand}33` }}>
                 <img src={promo.qr_code_url} alt="Kod QR vouchera" style={{ width: '42mm', height: '42mm', objectFit: 'contain', display: 'block' }} />
@@ -153,7 +153,7 @@ export default function Voucher() {
           </div>
 
           {/* Valid until */}
-          <div style={{ textAlign: 'center', marginBottom: '14mm', paddingBottom: '8mm', borderBottom: `0.3mm solid ${brand}33` }}>
+          <div style={{ textAlign: 'center', marginBottom: '8mm', paddingBottom: '6mm', borderBottom: `0.3mm solid ${brand}33` }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: '#888', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '3mm' }}>Ważny do</p>
             <p style={{ fontFamily: 'var(--font-body)', fontSize: '6mm', color: '#111111', letterSpacing: '0.04em', margin: 0 }}>{formatDate(promo.expires_at)}</p>
             {isGrace && (
@@ -162,8 +162,8 @@ export default function Voucher() {
           </div>
 
           {/* Studio info */}
-          <div style={{ marginTop: 'auto' }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: brand, letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: '5mm', textAlign: 'center' }}>Dane kontaktowe</p>
+          <div style={{ marginTop: '4mm' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: brand, letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: '4mm', textAlign: 'center' }}>Dane kontaktowe</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '3mm', alignItems: 'center', textAlign: 'center' }}>
               {addressLine && <p style={{ fontFamily: 'var(--font-body)', fontSize: '4mm', color: '#333', margin: 0, lineHeight: 1.5 }}>{addressLine}</p>}
               {settings?.contact_phone && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '4mm', color: '#333', letterSpacing: '0.08em', margin: 0 }}>Tel: {settings.contact_phone}</p>}
@@ -172,7 +172,7 @@ export default function Voucher() {
           </div>
 
           {/* Footer */}
-          <div style={{ marginTop: '10mm', paddingTop: '5mm', borderTop: `0.3mm solid #DDD`, textAlign: 'center' }}>
+          <div style={{ marginTop: '6mm', paddingTop: '4mm', borderTop: `0.3mm solid #DDD`, textAlign: 'center' }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.6mm', color: '#999', letterSpacing: '0.15em', textTransform: 'uppercase', margin: 0 }}>
               Voucher na okaziciela · Ważny w dniu sesji · Nr {promo.code}
             </p>
@@ -184,7 +184,7 @@ export default function Voucher() {
         @media print {
           html, body { background: #FFFFFF !important; background-image: none !important; height: auto !important; }
           .voucher-wrap { background: #FFFFFF !important; min-height: 0 !important; padding: 0 !important; display: block !important; }
-          .voucher-sheet { box-shadow: none !important; margin: 0 !important; width: 210mm !important; min-height: 297mm !important; }
+          .voucher-sheet { box-shadow: none !important; margin: 0 !important; width: 210mm !important; height: 297mm !important; max-height: 297mm !important; overflow: hidden !important; }
           @page { size: A4 portrait; margin: 0; }
         }
       `}</style>
