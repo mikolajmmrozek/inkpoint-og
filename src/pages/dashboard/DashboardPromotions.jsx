@@ -28,6 +28,7 @@ const toISO = (dateStr) => (dateStr ? new Date(`${dateStr}T00:00:00`).toISOStrin
 
 const EMPTY_FORM = {
   type: 'voucher',
+  code: '',
   value_type: 'amount',
   value: '',
   usage_mode: 'single',
@@ -102,6 +103,7 @@ export default function DashboardPromotions() {
     setEditFor(p);
     setForm({
       type: p.type,
+      code: p.code || '',
       value_type: p.value_type || 'amount',
       value: String(p.value ?? ''),
       usage_mode: p.usage_mode || 'single',
@@ -142,6 +144,7 @@ export default function DashboardPromotions() {
         const res = await base44.functions.invoke('managePromotion', {
           action: 'create',
           type: form.type,
+          code: form.code.trim() || undefined,
           value_type: form.value_type,
           value: Number(form.value),
           usage_mode: form.usage_mode,
@@ -421,6 +424,26 @@ export default function DashboardPromotions() {
                   ))}
                 </div>
               </div>
+
+              {!editFor && (
+                <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>KOD</p>
+                  <div>
+                    {label('Kod (puste = auto-generacja)')}
+                    <input
+                      type="text"
+                      value={form.code}
+                      onChange={e => set('code', e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
+                      placeholder="np. SUMMER25"
+                      maxLength="20"
+                      style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, fontFamily: 'var(--font-mono)', letterSpacing: '0.15em' }}
+                      onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'}
+                      onBlur={e => e.target.style.borderBottomColor = t.border}
+                    />
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.05em', marginTop: '8px' }}>Pozostaw puste, aby kod wygenerował się automatycznie.</p>
+                  </div>
+                </div>
+              )}
 
               <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>WARTOŚĆ</p>

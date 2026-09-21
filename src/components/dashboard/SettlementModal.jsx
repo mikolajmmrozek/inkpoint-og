@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { X, Wallet, Plus, Trash2, Check } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import VoucherPicker from '@/components/dashboard/VoucherPicker';
 
 const PAYMENT_METHODS = [
   { value: 'cash', label: 'Gotówka', color: '#16a34a' },
@@ -30,6 +31,7 @@ export default function SettlementModal({ booking, user, onClose, onSettled, t }
       : [{ method: 'cash', amount: '' }]
   );
   const [saving, setSaving] = useState(false);
+  const [voucherFor, setVoucherFor] = useState({}); // { [rowIndex]: voucherObj }
 
   const finalNum = Number(finalAmount) || 0;
   const depositNum = Number(depositAmount) || 0;
@@ -44,7 +46,10 @@ export default function SettlementModal({ booking, user, onClose, onSettled, t }
     const next = PAYMENT_METHODS.find(m => !used.includes(m.value))?.value || 'cash';
     setPayments([...payments, { method: next, amount: '' }]);
   };
-  const removePayment = (i) => setPayments(payments.filter((_, idx) => idx !== i));
+  const removePayment = (i) => {
+    setPayments(payments.filter((_, idx) => idx !== i));
+    setVoucherFor(v => { const n = { ...v }; delete n[i]; return n; });
+  };
   const setPayment = (i, field, val) => setPayments(payments.map((p, idx) => idx === i ? { ...p, [field]: val } : p));
 
   const handleSettle = async () => {
@@ -52,7 +57,7 @@ export default function SettlementModal({ booking, user, onClose, onSettled, t }
     setSaving(true);
     try {
       const breakdown = payments
-        .map(p => ({ method: p.method, amount: Math.round(Number(p.amount) * 100) / 100 }))
+        .map((p, i) => ({ method: p.method, amount: Math.round(Number(p.amount) * 100) / 100, voucher_id: p.method === 'voucher' ? (voucherFor[i]?.id || '') : '' }))
         .filter(p => p.amount > 0);
       const updates = {
         final_amount: Math.round(finalNum * 100) / 100,
@@ -141,30 +146,68 @@ export default function SettlementModal({ booking, user, onClose, onSettled, t }
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>METODY PŁATNOŚCI</p>
             {payments.map((p, i) => {
               return (
-                <div key={i} className="flex items-center gap-2 mb-3">
-                  <select
-                    value={p.method}
-                    onChange={e => setPayment(i, 'method', e.target.value)}
-                    style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, flex: '0 0 130px', colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
-                  >
-                    {PAYMENT_METHODS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
-                  </select>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    placeholder="0.00"
-                    value={p.amount}
-                    onChange={e => setPayment(i, 'amount', e.target.value)}
-                    onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'}
-                    onBlur={e => e.target.style.borderBottomColor = t.border}
-                    style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, flex: 1, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
-                  />
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted }}>PLN</span>
-                  {payments.length > 1 && (
-                    <button onClick={() => removePayment(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: 0 }}>
-                      <Trash2 size={13} />
-                    </button>
+                <div key={i} className="mb-3">
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={p.method}
+                      onChange={e => {
+                        setPayment(i, 'method', e.target.value);
+                        if (e.target.value !== 'voucher') setVoucherFor(v => { const n = { ...v }; delete n[i]; return n; });
+                      }}
+                      style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, flex: '0 0 130px', colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
+                    >
+                      {PAYMENT_METHODS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+                    </select>
+                    {p.method === 'voucher' ? (
+                      <div className="flex-1">
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder="0.00"
+                          value={p.amount}
+                          onChange={e => setPayment(i, 'amount', e.target.value)}
+                          onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'}
+                          onBlur={e => e.target.style.borderBottomColor = t.border}
+                          style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, width: '100%', colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
+                        />
+                      </div>
+                    ) : (
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={p.amount}
+                        onChange={e => setPayment(i, 'amount', e.target.value)}
+                        onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'}
+                        onBlur={e => e.target.style.borderBottomColor = t.border}
+                        style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, flex: 1, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
+                      />
+                    )}
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted }}>PLN</span>
+                    {payments.length > 1 && (
+                      <button onClick={() => removePayment(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: 0 }}>
+                        <Trash2 size={13} />
+                      </button>
+                    )}
+                  </div>
+                  {p.method === 'voucher' && (
+                    <div className="mt-2">
+                      <VoucherPicker
+                        t={t}
+                        applied={voucherFor[i] || null}
+                        onApplied={(v) => {
+                          setVoucherFor(prev => { const n = { ...prev }; if (v) n[i] = v; else delete n[i]; return n; });
+                          if (v) {
+                            const amt = Math.min(Number(v._appliedAmount) || 0, remainder);
+                            setPayment(i, 'amount', String(amt));
+                          } else {
+                            setPayment(i, 'amount', '');
+                          }
+                        }}
+                      />
+                    </div>
                   )}
                 </div>
               );
