@@ -48,6 +48,7 @@ export default function DashboardPromotions() {
     : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: 'var(--brand)', modalBg: '#0A0A0A' };
 
   const [promotions, setPromotions] = useState([]);
+  const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState('voucher');
   const [filterStatus, setFilterStatus] = useState('');
@@ -66,8 +67,12 @@ export default function DashboardPromotions() {
   const [copied, setCopied] = useState(null);
 
   const load = async () => {
-    const list = await base44.entities.Promotion.list('-created_date', 500);
+    const [list, clientList] = await Promise.all([
+      base44.entities.Promotion.list('-created_date', 500),
+      base44.entities.Client.list('-created_date', 500),
+    ]);
     setPromotions(list);
+    setClients(clientList);
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
@@ -233,7 +238,16 @@ export default function DashboardPromotions() {
     if (filterStatus && computeStatus(p) !== filterStatus) return false;
     if (search) {
       const q = search.toLowerCase();
-      if (!p.code?.toLowerCase().includes(q) && !(p.assigned_client_email || '').toLowerCase().includes(q)) return false;
+      const email = (p.assigned_client_email || '').toLowerCase();
+      const matchesCode = p.code?.toLowerCase().includes(q);
+      const matchesEmail = email.includes(q);
+      const matchesClient = email && clients.some(c => {
+        const cEmail = (c.email || '').toLowerCase();
+        if (cEmail !== email) return false;
+        const name = `${c.first_name || ''} ${c.last_name || ''} ${c.name || ''}`.toLowerCase();
+        return name.includes(q);
+      });
+      if (!matchesCode && !matchesEmail && !matchesClient) return false;
     }
     return true;
   });
