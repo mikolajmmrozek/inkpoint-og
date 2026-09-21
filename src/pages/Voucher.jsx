@@ -111,14 +111,14 @@ export default function Voucher() {
         <div style={{ position: 'absolute', top: '20mm', right: '8mm', width: '2mm', height: '60mm', background: brand, opacity: 0.5 }} />
 
         {/* Content padding */}
-        <div style={{ position: 'relative', zIndex: 2, padding: '26mm 22mm 18mm 26mm', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ position: 'relative', zIndex: 2, padding: '18mm 20mm 14mm 20mm', flex: 1, display: 'flex', flexDirection: 'column' }}>
           {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6mm', marginBottom: '14mm' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5mm', marginBottom: '8mm' }}>
             {settings?.site_logo_url && (
-              <img src={settings.site_logo_url} alt="Logo" style={{ height: '22mm', width: 'auto', objectFit: 'contain' }} />
+              <img src={settings.site_logo_url} alt="Logo" style={{ height: '18mm', width: 'auto', objectFit: 'contain' }} />
             )}
             <div>
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: '14mm', fontWeight: 400, letterSpacing: '0.06em', color: '#111111', lineHeight: 0.9, margin: 0 }}>{studioName}</p>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '11mm', fontWeight: 400, letterSpacing: '0.06em', color: '#111111', lineHeight: 0.9, margin: 0 }}>{studioName}</p>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: brand, letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '2mm' }}>Voucher prezentowy</p>
             </div>
           </div>
@@ -132,28 +132,28 @@ export default function Voucher() {
           )}
 
           {/* Amount — hero */}
-          <div style={{ textAlign: 'center', marginBottom: '12mm' }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: '#888', letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: '4mm' }}>Wartość vouchera</p>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '34mm', fontWeight: 400, color: brand, lineHeight: 0.85, letterSpacing: '0.01em', margin: 0 }}>
+          <div style={{ textAlign: 'center', marginBottom: '8mm' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: '#888', letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: '3mm' }}>Wartość vouchera</p>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '26mm', fontWeight: 400, color: brand, lineHeight: 0.85, letterSpacing: '0.01em', margin: 0 }}>
               {amount}
-              <span style={{ fontSize: '12mm', marginLeft: '3mm', letterSpacing: '0.1em' }}>PLN</span>
+              <span style={{ fontSize: '9mm', marginLeft: '3mm', letterSpacing: '0.1em' }}>PLN</span>
             </p>
-            <div style={{ width: '30mm', height: '0.6mm', background: brand, margin: '6mm auto 0' }} />
+            <div style={{ width: '30mm', height: '0.6mm', background: brand, margin: '4mm auto 0' }} />
           </div>
 
           {/* QR + code */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '14mm' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '8mm' }}>
             {promo.qr_code_url && (
-              <div style={{ padding: '4mm', background: '#FFFFFF', border: `0.3mm solid ${brand}33` }}>
-                <img src={promo.qr_code_url} alt="Kod QR vouchera" style={{ width: '42mm', height: '42mm', objectFit: 'contain', display: 'block' }} />
+              <div style={{ padding: '3mm', background: '#FFFFFF', border: `0.3mm solid ${brand}33` }}>
+                <img src={promo.qr_code_url} alt="Kod QR vouchera" style={{ width: '34mm', height: '34mm', objectFit: 'contain', display: 'block' }} />
               </div>
             )}
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: '#888', letterSpacing: '0.3em', textTransform: 'uppercase', margin: '6mm 0 2mm' }}>Kod vouchera</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: '#888', letterSpacing: '0.3em', textTransform: 'uppercase', margin: '4mm 0 2mm' }}>Kod vouchera</p>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '7mm', color: '#111111', letterSpacing: '0.4em', margin: 0 }}>{promo.code}</p>
           </div>
 
           {/* Valid until */}
-          <div style={{ textAlign: 'center', marginBottom: '14mm', paddingBottom: '8mm', borderBottom: `0.3mm solid ${brand}33` }}>
+          <div style={{ textAlign: 'center', marginBottom: '8mm', paddingBottom: '5mm', borderBottom: `0.3mm solid ${brand}33` }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: '#888', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '3mm' }}>Ważny do</p>
             <p style={{ fontFamily: 'var(--font-body)', fontSize: '6mm', color: '#111111', letterSpacing: '0.04em', margin: 0 }}>{formatDate(promo.expires_at)}</p>
             {isGrace && (
@@ -163,8 +163,8 @@ export default function Voucher() {
 
           {/* Studio info */}
           <div style={{ marginTop: 'auto' }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: brand, letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: '5mm', textAlign: 'center' }}>Dane kontaktowe</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '3mm', alignItems: 'center', textAlign: 'center' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '3mm', color: brand, letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: '3mm', textAlign: 'center' }}>Dane kontaktowe</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2mm', alignItems: 'center', textAlign: 'center' }}>
               {addressLine && <p style={{ fontFamily: 'var(--font-body)', fontSize: '4mm', color: '#333', margin: 0, lineHeight: 1.5 }}>{addressLine}</p>}
               {settings?.contact_phone && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '4mm', color: '#333', letterSpacing: '0.08em', margin: 0 }}>Tel: {settings.contact_phone}</p>}
               {settings?.contact_email && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '4mm', color: '#333', letterSpacing: '0.08em', margin: 0 }}>{settings.contact_email}</p>}
@@ -172,7 +172,7 @@ export default function Voucher() {
           </div>
 
           {/* Footer */}
-          <div style={{ marginTop: '10mm', paddingTop: '5mm', borderTop: `0.3mm solid #DDD`, textAlign: 'center' }}>
+          <div style={{ marginTop: '6mm', paddingTop: '3mm', borderTop: `0.3mm solid #DDD`, textAlign: 'center' }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.6mm', color: '#999', letterSpacing: '0.15em', textTransform: 'uppercase', margin: 0 }}>
               Voucher na okaziciela · Ważny w dniu sesji · Nr {promo.code}
             </p>
