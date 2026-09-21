@@ -69,7 +69,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-10">
+          <div className="hidden lg:flex items-center gap-10">
             {navLinks.map((link) =>
             <Link
               key={link.href}
@@ -85,7 +85,7 @@ export default function Navbar() {
           </div>
 
           {/* Book CTA */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-4">
             <button
               onClick={handleAccountClick}
               className="flex items-center overflow-hidden transition-all duration-500 ease-out group"
@@ -156,7 +156,7 @@ export default function Navbar() {
           {/* Mobile hamburger */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden flex flex-col gap-1.5 p-2"
+            className="lg:hidden flex flex-col gap-1.5 p-2"
             aria-label="Menu">
             
             <span className={`block w-6 h-px bg-parchment transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-2' : ''}`} style={{ background: forceLightText ? '#F5F0EB' : 'hsl(var(--foreground))' }} />
@@ -168,13 +168,13 @@ export default function Navbar() {
 
       {/* Mobile side drawer backdrop */}
       <div
-        className={`fixed inset-0 z-40 transition-opacity duration-500 md:hidden ${menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 z-40 transition-opacity duration-500 lg:hidden ${menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         style={{ background: 'rgba(0,0,0,0.6)' }}
         onClick={() => setMenuOpen(false)}
       />
       {/* Mobile side drawer */}
       <aside
-        className={`fixed top-0 right-0 bottom-0 z-50 flex flex-col transition-transform duration-500 ease-out md:hidden ${menuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`fixed top-0 right-0 bottom-0 z-50 flex flex-col transition-transform duration-500 ease-out lg:hidden ${menuOpen ? 'translate-x-0' : 'translate-x-full'}`}
         style={{ width: 'min(82vw, 360px)', background: 'hsl(var(--background))', borderLeft: '0.5px solid hsl(var(--border))' }}
       >
         {/* Drawer header */}
