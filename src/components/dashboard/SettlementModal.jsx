@@ -71,6 +71,21 @@ export default function SettlementModal({ booking, user, onClose, onSettled, t }
         status: 'completed',
       };
       await base44.entities.Booking.update(booking.id, updates);
+      // Redeem vouchers (only on first settlement, not on edit of already-settled)
+      if (!isEditing) {
+        const voucherPayments = breakdown.filter(p => p.method === 'voucher' && p.voucher_id && p.amount > 0);
+        for (const vp of voucherPayments) {
+          try {
+            await base44.functions.invoke('managePromotion', {
+              action: 'redeem',
+              promotion_id: vp.voucher_id,
+              amount: vp.amount,
+              booking_id: booking.id,
+              client_email: booking.client_email || '',
+            });
+          } catch (e) { /* voucher redeem failed — booking still settled */ console.warn('Voucher redeem failed', e); }
+        }
+      }
       onSettled({ ...booking, ...updates });
     } finally {
       setSaving(false);

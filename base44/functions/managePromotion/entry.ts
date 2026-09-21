@@ -157,6 +157,54 @@ export default async function (req: Request): Promise<Response> {
       return Response.json({ promotion: updated });
     }
 
+    if (action === 'redeem') {
+      const promotion_id = body.promotion_id;
+      const amount = Math.round((Number(body.amount) || 0) * 100) / 100;
+      const booking_id = body.booking_id || '';
+      const client_email = (body.client_email || '').toLowerCase();
+      if (!promotion_id) return Response.json({ error: 'Brak promotion_id' }, { status: 400 });
+      if (!amount || amount <= 0) return Response.json({ error: 'Podaj kwotę' }, { status: 400 });
+
+      const p: any = await base44.entities.Promotion.get(promotion_id);
+      if (!p) return Response.json({ error: 'Voucher nie istnieje' }, { status: 404 });
+      if (p.type !== 'voucher') return Response.json({ error: 'Tylko voucher można rozliczyć' }, { status: 400 });
+      if (p.revoked) return Response.json({ error: 'Voucher odwołany' }, { status: 400 });
+      if (p.is_active === false) return Response.json({ error: 'Voucher wyłączony' }, { status: 400 });
+      const now = Date.now();
+      const exp = p.expires_at ? new Date(p.expires_at).getTime() : 0;
+      const graceExp = p.grace_expires_at ? new Date(p.grace_expires_at).getTime() : 0;
+      const isGrace = p.is_grace && graceExp > now;
+      if (!isGrace && exp && exp < now) return Response.json({ error: 'Voucher wygasł' }, { status: 400 });
+
+      const currentBalance = isGrace ? (p.balance || p.grace_value || p.value || 0) : (p.balance ?? p.value ?? 0);
+      if (amount > currentBalance + 0.01) return Response.json({ error: 'Kwota przekracza saldo vouchera' }, { status: 400 });
+
+      const newBalance = Math.max(0, Math.round((currentBalance - amount) * 100) / 100);
+      const fullyUsed = newBalance <= 0;
+
+      const updates: any = { balance: newBalance, used_booking_id: booking_id };
+      // assign to client account if exists
+      if (client_email && !p.assigned_client_email) {
+        try {
+          const clients = await base44.entities.Client.filter({ email: client_email });
+          const c = clients[0];
+          if (c && c.user_id) {
+            updates.assigned_client_email = client_email;
+            updates.assignment_permanent = true;
+          }
+        } catch (_) { /* ignore */ }
+      }
+      if (fullyUsed) {
+        updates.status = 'used';
+        updates.used_at = new Date().toISOString();
+        if (p.usage_mode !== 'multi') updates.is_active = false;
+      } else {
+        updates.used_at = new Date().toISOString();
+      }
+      const updated = await base44.entities.Promotion.update(promotion_id, updates);
+      return Response.json({ promotion: updated, redeemed: amount, balance: newBalance, fullyUsed });
+    }
+
     if (action === 'send_email') {
       const p: any = await base44.entities.Promotion.get(body.promotion_id);
       const to = body.to || p.assigned_client_email;
