@@ -76,14 +76,14 @@ export default function DashboardPromotions() {
 
   const computeStatus = (p) => {
     if (p.revoked) return 'revoked';
-    if (p.is_active === false) return 'inactive';
     const now = Date.now();
     const exp = p.expires_at ? new Date(p.expires_at).getTime() : 0;
     const graceExp = p.grace_expires_at ? new Date(p.grace_expires_at).getTime() : 0;
     if (p.is_grace && graceExp > now) return 'grace';
-    if (exp && exp < now) return 'expired';
-    if (p.type === 'voucher' && (p.balance || 0) <= 0) return 'used';
+    if (p.type === 'voucher' && (p.balance || 0) <= 0 && p.used_at) return 'used';
     if (p.type === 'discount' && p.used_at) return 'used';
+    if (p.is_active === false) return 'inactive';
+    if (exp && exp < now) return 'expired';
     return 'active';
   };
 
