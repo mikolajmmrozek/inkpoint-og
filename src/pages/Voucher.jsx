@@ -177,7 +177,7 @@ export default function Voucher() {
             {/* Header */}
             <div style={{ marginBottom: '16mm' }}>
               <p style={{ fontFamily: 'var(--font-display)', fontSize: '26mm', fontWeight: 700, color: brand, letterSpacing: '0.02em', lineHeight: 0.82, margin: 0 }}>VOUCHER</p>
-              <div style={{ width: '78mm', height: '0.9mm', background: brand, margin: '1.5mm 0 1mm' }} />
+              <div style={{ width: '100%', height: '0.9mm', background: brand, margin: '1.5mm 0 1mm' }} />
               <p style={{ fontFamily: 'var(--font-display)', fontSize: '5.5mm', fontWeight: 600, color: brand, letterSpacing: '0.22em', textTransform: 'uppercase', margin: 0 }}>PODARUNKOWY</p>
             </div>
 
@@ -208,10 +208,9 @@ export default function Voucher() {
                 borderRadius: '2mm',
                 padding: '5mm 6mm',
               }}>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.8mm', color: brand, letterSpacing: '0.2em', textTransform: 'uppercase', margin: '0 0 1mm' }}>KOD VOUCHERA</p>
-                <div style={{ width: '14mm', height: '0.4mm', background: brand, marginBottom: '3mm' }} />
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.8mm', color: brand, letterSpacing: '0.2em', textTransform: 'uppercase', margin: '0 0 3mm', display: 'inline-block', borderBottom: `0.4mm solid ${brand}`, paddingBottom: '1mm' }}>KOD VOUCHERA</p>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '7mm', color: ink, letterSpacing: '0.3em', fontWeight: 600, margin: '0 0 4mm' }}>{promo.code}</p>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.8mm', color: brand, letterSpacing: '0.2em', textTransform: 'uppercase', margin: '0 0 1mm' }}>WAŻNY DO</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.8mm', color: brand, letterSpacing: '0.2em', textTransform: 'uppercase', margin: '0 0 3mm', display: 'inline-block', borderBottom: `0.4mm solid ${brand}`, paddingBottom: '1mm' }}>WAŻNY DO</p>
                 <p style={{ fontFamily: 'var(--font-body)', fontSize: '5mm', color: ink, fontWeight: 600, margin: 0 }}>{formatDate(promo.expires_at)}</p>
                 {isGrace && (
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.6mm', color: brand, letterSpacing: '0.08em', marginTop: '1.5mm' }}>Ostatnia szansa: {formatDate(promo.grace_expires_at)}</p>
@@ -240,13 +239,13 @@ export default function Voucher() {
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: '6mm', color: brand, letterSpacing: '0.1em' }}>QR</span>
                   </div>
                 )}
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.4mm', color: muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginTop: '2mm' }}>ZESKAJ ABY ZREALIZOWAĆ</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.4mm', color: muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginTop: '2mm', textAlign: 'center' }}>ZESKAJ ABY ZREALIZOWAĆ</p>
               </div>
             </div>
 
             {/* Contact block */}
             <div style={{ marginBottom: '6mm', textAlign: 'right' }}>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.8mm', color: brand, letterSpacing: '0.2em', textTransform: 'uppercase', margin: '0 0 2.5mm' }}>DANE KONTAKTOWE</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.8mm', color: brand, letterSpacing: '0.2em', textTransform: 'uppercase', margin: '0 0 2.5mm', display: 'inline-block', borderBottom: `0.4mm solid ${brand}`, paddingBottom: '1mm' }}>DANE KONTAKTOWE</p>
               <div style={{ fontFamily: 'var(--font-body)', fontSize: '3.4mm', color: ink, lineHeight: 1.8, textDecoration: 'none' }}>
                 {street && <p style={{ margin: 0, textDecoration: 'none' }}>{street}</p>}
                 {city && <p style={{ margin: 0, textDecoration: 'none' }}>{city}</p>}
