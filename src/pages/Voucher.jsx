@@ -16,17 +16,20 @@ export default function Voucher() {
     let cancelled = false;
     (async () => {
       try {
-        const [promos, settingsRecs] = await Promise.all([
+        const [promos, allSettings] = await Promise.all([
           base44.entities.Promotion.filter({ code }),
-          base44.entities.SiteSettings.filter({ key: 'theme' }),
+          base44.entities.SiteSettings.list(),
         ]);
         if (cancelled) return;
         const found = promos.find(p => p.type === 'voucher');
         if (!found) { setNotFound(true); setLoading(false); return; }
         setPromo(found);
-        setSettings(settingsRecs[0] || null);
+        // Merge contact data (key 'contact') with theme data (key 'theme')
+        const contact = allSettings.find(s => s.key === 'contact') || {};
+        const theme = allSettings.find(s => s.key === 'theme') || {};
+        setSettings({ ...theme, ...contact, primary_color: theme.primary_color || contact.primary_color });
         const amt = found.value || 0;
-        const studio = settingsRecs[0]?.app_description || 'Studio';
+        const studio = contact.app_description || theme.app_description || 'Studio';
         document.title = `Voucher ${amt} PLN — ${studio}`;
         setLoading(false);
       } catch {
