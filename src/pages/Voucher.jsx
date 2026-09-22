@@ -23,6 +23,9 @@ export default function Voucher() {
           base44.entities.SiteSettings.list(),
         ]);
         if (cancelled) return;
+        const contact = allSettings.find(s => s.key === 'contact') || {};
+        const theme = allSettings.find(s => s.key === 'theme') || {};
+        setSettings({ ...theme, ...contact, primary_color: theme.primary_color || contact.primary_color });
         const found = promos.find(p => p.type === 'voucher');
         if (!found) { setNotFound(true); setLoading(false); return; }
         setPromo(found);
@@ -32,9 +35,6 @@ export default function Voucher() {
             if (!cancelled && clients[0]) setRecipientName(clients[0].name || `${clients[0].first_name || ''} ${clients[0].last_name || ''}`.trim());
           } catch { /* ignore */ }
         }
-        const contact = allSettings.find(s => s.key === 'contact') || {};
-        const theme = allSettings.find(s => s.key === 'theme') || {};
-        setSettings({ ...theme, ...contact, primary_color: theme.primary_color || contact.primary_color });
         const amt = found.value || 0;
         const studio = contact.app_description || theme.app_description || 'Studio';
         document.title = `Voucher ${amt} PLN — ${studio}`;
@@ -45,6 +45,19 @@ export default function Voucher() {
     })();
     return () => { cancelled = true; };
   }, [code]);
+
+  // Scale A4 sheet to fit viewport on small screens (iPhone/mobile)
+  const [scale, setScale] = useState(1);
+  useEffect(() => {
+    const calc = () => {
+      const a4Px = 210 * (96 / 25.4); // 210mm in px
+      const available = window.innerWidth - 16;
+      setScale(available < a4Px ? available / a4Px : 1);
+    };
+    calc();
+    window.addEventListener('resize', calc);
+    return () => window.removeEventListener('resize', calc);
+  }, []);
 
   const formatDate = (iso) => {
     if (!iso) return '—';
@@ -61,16 +74,31 @@ export default function Voucher() {
     );
   }
 
-  if (notFound) {
-    return (
-      <div className="min-h-screen flex items-center justify-center px-6" style={{ background: '#ECECEC' }}>
-        <div className="text-center">
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: '14px' }}>VOUCHER</p>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 400, color: '#111', letterSpacing: '0.04em' }}>Voucher nie znaleziony</h1>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: '#666', marginTop: '14px', letterSpacing: '0.05em' }}>Sprawdź kod lub skontaktuj się ze studiem.</p>
+  // Detect used voucher: balance depleted and marked used
+  const isUsed = promo && promo.type === 'voucher' && (promo.balance || 0) <= 0 && !!promo.used_at;
+
+  const MessageScreen = ({ title, desc }) => (
+    <div className="min-h-screen flex items-center justify-center px-6" style={{ background: '#ECECEC' }}>
+      <div className="text-center" style={{ maxWidth: '420px' }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: settings?.primary_color || 'var(--brand)', letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: '14px' }}>VOUCHER</p>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 400, color: '#111', letterSpacing: '0.04em' }}>{title}</h1>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: '#666', marginTop: '14px', letterSpacing: '0.05em', lineHeight: 1.6 }}>{desc}</p>
+        <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '0.5px solid rgba(0,0,0,0.1)' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#999', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>Skontaktuj się ze studiem</p>
+          {settings?.contact_phone && <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: '#333', margin: '2px 0' }}>Tel. {settings.contact_phone}</p>}
+          {settings?.contact_email && <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: '#333', margin: '2px 0' }}>{settings.contact_email}</p>}
+          {settings?.contact_address_street && <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#777', margin: '4px 0 0' }}>{settings.contact_address_street}{settings.contact_address_city ? `, ${settings.contact_address_city}` : ''}</p>}
         </div>
       </div>
-    );
+    </div>
+  );
+
+  if (notFound) {
+    return <MessageScreen title="Voucher nie istnieje" desc="Ten kod nie został znaleziony. Sprawdź kod lub skontaktuj się ze studiem." />;
+  }
+
+  if (isUsed) {
+    return <MessageScreen title="Voucher został już wykorzystany" desc="Ten voucher został zrealizowany i nie jest już dostępny online. W razie pytań skontaktuj się ze studium." />;
   }
 
   const studioName = (settings?.app_description || 'ROMANS TATTOO').toUpperCase();
@@ -100,14 +128,19 @@ export default function Voucher() {
         : '';
 
   return (
-    <div className="voucher-wrap" style={{ background: '#ECECEC', minHeight: '100vh', display: 'flex', justifyContent: 'center', padding: '20px 0' }}>
+    <div className="voucher-wrap" style={{ background: '#ECECEC', minHeight: '100vh', display: 'flex', justifyContent: 'center', padding: '20px 0', overflowX: 'hidden' }}>
+      <div className="voucher-scale" style={{ width: `calc(210mm * ${scale})`, height: `calc(297mm * ${scale})`, position: 'relative', flexShrink: 0 }}>
       <div
         className="voucher-sheet"
         style={{
           width: A4_WIDTH,
           height: A4_HEIGHT,
           background: '#FFFFFF',
-          position: 'relative',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          transform: `scale(${scale})`,
+          transformOrigin: 'top left',
           overflow: 'hidden',
           boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
           color: ink,
@@ -261,12 +294,14 @@ export default function Voucher() {
           </div>
         </div>
       </div>
+      </div>
 
       <style>{`
         @media print {
           html, body { background: #FFFFFF !important; background-image: none !important; height: auto !important; }
           .voucher-wrap { background: #FFFFFF !important; min-height: 0 !important; padding: 0 !important; display: block !important; }
-          .voucher-sheet { box-shadow: none !important; margin: 0 !important; width: 210mm !important; height: 297mm !important; max-height: 297mm !important; overflow: hidden !important; }
+          .voucher-scale { width: 210mm !important; height: 297mm !important; }
+          .voucher-sheet { box-shadow: none !important; margin: 0 !important; position: static !important; transform: none !important; width: 210mm !important; height: 297mm !important; max-height: 297mm !important; overflow: hidden !important; }
           @page { size: A4 portrait; margin: 0; }
         }
       `}</style>
