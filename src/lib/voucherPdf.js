@@ -155,7 +155,8 @@ async function buildDoc(promo, settings) {
   doc.setFontSize(18);
   setText(doc, '#FFFFFF');
   const nameW = doc.getTextWidth(studioName);
-  doc.text(studioName, 8, 148 + nameW / 2, { angle: 90 });
+  // angle 90 = CCW; text extends upward from the start point. Center vertically in the 297mm strip.
+  doc.text(studioName, 10, 148.5 + nameW / 2, { angle: 90, baseline: 'alphabetic' });
   // decorative tick
   setFill(doc, mix(brand, '#FFFFFF', 0.5));
   doc.rect(7.4, 287, 1.2, 12, 'F');
@@ -178,7 +179,7 @@ async function buildDoc(promo, settings) {
           : 'Upłynęła data ważności tego vouchera.'
         : '';
 
-  let y = 18;
+  let y = 10;
 
   // --- Inactive banner ---
   if (statusLabel) {
@@ -195,62 +196,63 @@ async function buildDoc(promo, settings) {
     setText(doc, MUTED);
     const descLines = doc.splitTextToSize(statusDesc, FW - 10);
     doc.text(descLines, LX + 5, y + 10, { baseline: 'top', lineHeightFactor: 1.5 });
-    y += bH + 8;
+    y += bH + 6;
   }
 
   // --- Header: VOUCHER / rule / PODARUKOWY ---
   doc.setFont(displayFamily, 'normal');
-  doc.setFontSize(70);
+  doc.setFontSize(26 * PT);
   setText(doc, brand);
   doc.text('VOUCHER', LX, y, { baseline: 'top' });
-  y += 70 / PT * 0.82 + 1.5;
+  y += 26 * 0.82 + 1.5;          // VOUCHER line height + rule margin-top
   setFill(doc, brand);
   doc.rect(LX, y, FW, 0.9, 'F');
-  y += 0.9 + 1.5;
+  y += 0.9 + 1;                  // rule + margin-bottom
   doc.setFont(displayFamily, 'normal');
-  doc.setFontSize(15.6);
+  doc.setFontSize(5.5 * PT);
   setText(doc, brand);
-  doc.text('PODARUNKOWY', LX, y, { baseline: 'top', charSpace: tracking(5.5, 0.22) });
-  y += 6 + 14;
+  doc.text('PODARUKOWY', LX, y, { baseline: 'top', charSpace: tracking(5.5, 0.22) });
+  y += 5.5 + 16;                 // PODARUKOWY + header marginBottom
 
   // --- Recipient ---
   const recipientName = settings?._recipientName || '';
   doc.setFont(bodyFamily, 'normal');
-  doc.setFontSize(9);
+  doc.setFontSize(3.2 * PT);
   setText(doc, INK);
   doc.text(recipientName ? 'DLA' : 'NA OKAZICIELA', LX, y, { baseline: 'top', charSpace: tracking(3.2, 0.25) });
-  y += 6;
+  y += 3.2 + 2.5;                // label + margin
   if (recipientName) {
     doc.setFont(displayFamily, 'normal');
-    doc.setFontSize(31);
+    doc.setFontSize(11 * PT);
     setText(doc, brand);
     doc.text(recipientName, LX, y, { baseline: 'top', charSpace: tracking(11, 0.03) });
-    y += 12;
+    y += 11 * 0.95;              // name line height
   }
-  y += 12;
+  y += 14;                       // recipient marginBottom
 
   // --- Amount ---
   doc.setFont(bodyFamily, 'normal');
-  doc.setFontSize(9);
+  doc.setFontSize(3.2 * PT);
   setText(doc, INK);
   doc.text('O WARTOŚCI', LX, y, { baseline: 'top', charSpace: tracking(3.2, 0.25) });
-  y += 7;
+  y += 3.2 + 2;                  // label + margin
   const amountMm = amount >= 1000 ? 30 : 34;
-  const amountPt = amountMm * PT;
   doc.setFont(displayFamily, 'normal');
-  doc.setFontSize(amountPt);
+  doc.setFontSize(amountMm * PT);
   setText(doc, brand);
   const numStr = String(amount);
   doc.text(numStr, LX, y, { baseline: 'top' });
   const numW = doc.getTextWidth(numStr);
+  // Align PLN baseline with the number baseline (same line box, as on screen).
+  const baselineY = y + 0.73 * amountMm;
   const plnMm = 12;
   doc.setFontSize(plnMm * PT);
   setText(doc, brand);
-  doc.text('PLN', LX + numW + 3, y + (amountMm - plnMm), { baseline: 'top', charSpace: tracking(12, 0.1) });
-  y += amountMm + 12;
+  doc.text('PLN', LX + numW + 3, baselineY, { baseline: 'alphabetic', charSpace: tracking(12, 0.1) });
+  y += amountMm * 0.82 + 12;     // amount line height + marginBottom
 
   // --- Windows row: code+date (left), QR (right) ---
-  const winH = 42;
+  const winH = 46;
   const qrW = 44;
   const gap = 4;
   const codeW = FW - qrW - gap;
@@ -263,28 +265,28 @@ async function buildDoc(promo, settings) {
   const qrX = LX + codeW + gap;
   doc.roundedRect(qrX, y, qrW, winH, 2, 2, 'FD');
 
-  // code + date content
+  // code + date content (matches on-screen mm: labels 2.8, code 7, date 5)
   const padX = 5;
   let cy = y + 5;
   doc.setFont(bodyFamily, 'normal');
-  doc.setFontSize(7.8);
+  doc.setFontSize(2.8 * PT);
   setText(doc, brand);
   doc.text('KOD VOUCHERA', LX + padX, cy, { baseline: 'top', charSpace: tracking(2.8, 0.2) });
-  cy += 6;
-  doc.setFontSize(19.8);
+  cy += 2.8 + 3;
+  doc.setFontSize(7 * PT);
   setText(doc, INK);
   doc.text(promo.code || '', LX + padX, cy, { baseline: 'top', charSpace: tracking(7, 0.3) });
-  cy += 11;
-  doc.setFontSize(7.8);
+  cy += 7 + 4;
+  doc.setFontSize(2.8 * PT);
   setText(doc, brand);
   doc.text('WAŻNY DO', LX + padX, cy, { baseline: 'top', charSpace: tracking(2.8, 0.2) });
-  cy += 6;
-  doc.setFontSize(13);
+  cy += 2.8 + 3;
+  doc.setFontSize(5 * PT);
   setText(doc, INK);
   doc.text(formatDate(promo.expires_at), LX + padX, cy, { baseline: 'top' });
   if (isGrace) {
-    cy += 7;
-    doc.setFontSize(7.2);
+    cy += 5 + 1.5;
+    doc.setFontSize(2.6 * PT);
     setText(doc, brand);
     doc.text(`Ostatnia szansa: ${formatDate(promo.grace_expires_at)}`, LX + padX, cy, { baseline: 'top' });
   }
@@ -308,19 +310,19 @@ async function buildDoc(promo, settings) {
     drawQrPlaceholder(doc, qrImgX, qrImgY, qrImgSize, brand);
   }
   doc.setFont(bodyFamily, 'normal');
-  doc.setFontSize(6.4);
+  doc.setFontSize(2.4 * PT);
   setText(doc, MUTED);
-  doc.text('ZESKAJ ABY ZREALIZOWAĆ', qrX + qrW / 2, qrImgY + qrImgSize + 4, { baseline: 'top', align: 'center', charSpace: tracking(2.4, 0.15) });
+  doc.text('ZESKAJ ABY ZREALIZOWAĆ', qrX + qrW / 2, qrImgY + qrImgSize + 2, { baseline: 'top', align: 'center', charSpace: tracking(2.4, 0.15) });
 
   y += winH + 6;
 
   // --- Contact block (right aligned) ---
   doc.setFont(bodyFamily, 'normal');
-  doc.setFontSize(7.8);
+  doc.setFontSize(2.8 * PT);
   setText(doc, brand);
   doc.text('DANE KONTAKTOWE', RX, y, { baseline: 'top', align: 'right', charSpace: tracking(2.8, 0.2) });
-  y += 6;
-  doc.setFontSize(9.6);
+  y += 2.8 + 2.5;
+  doc.setFontSize(3.4 * PT);
   setText(doc, INK);
   const lines = [];
   if (settings?.contact_address_street) lines.push(settings.contact_address_street);
@@ -329,7 +331,7 @@ async function buildDoc(promo, settings) {
   if (settings?.contact_email) lines.push(settings.contact_email);
   lines.forEach((ln) => {
     doc.text(ln, RX, y, { baseline: 'top', align: 'right' });
-    y += lineGapMm(9.6, 1.7);
+    y += 3.4 * 1.8;
   });
 
   // --- Clause pinned to bottom ---
@@ -337,12 +339,14 @@ async function buildDoc(promo, settings) {
   doc.setFont(bodyFamily, 'normal');
   doc.setFontSize(8.5);
   const clauseLines = doc.splitTextToSize(clause, FW);
-  const clauseLh = lineGapMm(8.5, 1.6);
-  const clauseTop = 287 - clauseLines.length * clauseLh;
+  const clauseLh = 3 * 1.6;
+  const clauseBottom = 281;          // 297 - 10 (frame bottom) - 6 (bottom inset)
+  const clauseTop = clauseBottom - clauseLines.length * clauseLh;
   setStroke(doc, mix('#000000', '#FFFFFF', 0.92));
   doc.setLineWidth(0.2);
-  doc.line(LX, clauseTop - 2, RX, clauseTop - 2);
+  doc.line(LX, clauseTop - 4, RX, clauseTop - 4);
   setText(doc, MUTED);
+  doc.setFontSize(3 * PT);
   doc.text(clauseLines, LX, clauseTop, { baseline: 'top', lineHeightFactor: 1.6 });
 
   return doc;
