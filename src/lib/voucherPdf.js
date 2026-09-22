@@ -152,11 +152,11 @@ async function buildDoc(promo, settings) {
   doc.rect(0, 0, SIDEBAR_W, PAGE_H, 'F');
   const studioName = (settings?.app_description || 'ROMANS TATTOO').toUpperCase();
   doc.setFont(displayFamily, 'normal');
-  doc.setFontSize(18);
+  doc.setFontSize(7.5 * PT);
   setText(doc, '#FFFFFF');
   const nameW = doc.getTextWidth(studioName);
   // angle 90 = CCW; text extends upward from the start point. Pin the block to the top margin (matches on-screen).
-  doc.text(studioName, 10, 10 + nameW, { angle: 90, baseline: 'alphabetic' });
+  doc.text(studioName, 10.5, 10 + nameW, { angle: 90, baseline: 'alphabetic' });
   // decorative tick — 12mm bar, 10mm from the sidebar bottom (matches on-screen bottom:10mm)
   setFill(doc, mix(brand, '#FFFFFF', 0.5));
   doc.rect(7.4, 275, 1.2, 12, 'F');
@@ -204,10 +204,10 @@ async function buildDoc(promo, settings) {
   doc.setFontSize(26 * PT);
   setText(doc, brand);
   doc.text('VOUCHER', LX, y, { baseline: 'top' });
-  y += 26 * 0.82 + 1.5;          // VOUCHER line height + rule margin-top
+  y += 26 * 0.82 + 3;           // VOUCHER line height + rule margin-top (larger interline to match preview)
   setFill(doc, brand);
   doc.rect(LX, y, FW, 0.9, 'F');
-  y += 0.9 + 1;                  // rule + margin-bottom
+  y += 0.9 + 1.5;               // rule + margin-bottom
   doc.setFont(displayFamily, 'normal');
   doc.setFontSize(5.5 * PT);
   setText(doc, brand);
@@ -312,7 +312,12 @@ async function buildDoc(promo, settings) {
   doc.setFont(bodyFamily, 'normal');
   doc.setFontSize(2.4 * PT);
   setText(doc, MUTED);
-  doc.text('ZESKAJ ABY ZREALIZOWAĆ', qrX + qrW / 2, qrImgY + qrImgSize + 2, { baseline: 'top', align: 'center', charSpace: tracking(2.4, 0.15) });
+  const scanLabelLines = ['ZESKAJ ABY', 'ZREALIZOWAĆ'];
+  let scanY = qrImgY + qrImgSize + 2;
+  scanLabelLines.forEach((ln) => {
+    doc.text(ln, qrX + qrW / 2, scanY, { baseline: 'top', align: 'center', charSpace: tracking(2.4, 0.15) });
+    scanY += 2.4 * 1.25;
+  });
 
   y += winH + 6;
 
@@ -320,7 +325,10 @@ async function buildDoc(promo, settings) {
   doc.setFont(bodyFamily, 'normal');
   doc.setFontSize(2.8 * PT);
   setText(doc, brand);
-  doc.text('DANE KONTAKTOWE', RX, y, { baseline: 'top', align: 'right', charSpace: tracking(2.8, 0.2) });
+  const headerCs = tracking(2.8, 0.2);
+  const headerText = 'DANE KONTAKTOWE';
+  const headerW = doc.getTextWidth(headerText) + headerCs * (headerText.length - 1);
+  doc.text(headerText, RX - headerW, y, { baseline: 'top', charSpace: headerCs });
   y += 2.8 + 2.5;
   doc.setFontSize(3.4 * PT);
   setText(doc, INK);
@@ -330,7 +338,8 @@ async function buildDoc(promo, settings) {
   if (settings?.contact_phone) lines.push(`Tel. ${settings.contact_phone}`);
   if (settings?.contact_email) lines.push(settings.contact_email);
   lines.forEach((ln) => {
-    doc.text(ln, RX, y, { baseline: 'top', align: 'right' });
+    const lw = doc.getTextWidth(ln);
+    doc.text(ln, RX - lw, y, { baseline: 'top' });
     y += 3.4 * 1.8;
   });
 
