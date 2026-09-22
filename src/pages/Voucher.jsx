@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { Download, Printer, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
@@ -16,14 +16,15 @@ export default function Voucher() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [pdfBusy, setPdfBusy] = useState(false);
+  const sheetRef = useRef(null);
 
   const handleDownload = async () => {
     setPdfBusy(true);
-    try { await downloadVoucherPDF(promo, settings, recipientName); } finally { setPdfBusy(false); }
+    try { await downloadVoucherPDF(sheetRef.current, promo); } finally { setPdfBusy(false); }
   };
   const handlePrint = async () => {
     setPdfBusy(true);
-    try { await printVoucherPDF(promo, settings, recipientName); } finally { setPdfBusy(false); }
+    try { await printVoucherPDF(sheetRef.current, promo); } finally { setPdfBusy(false); }
   };
 
   useEffect(() => {
@@ -151,6 +152,7 @@ export default function Voucher() {
       </div>
       <div className="voucher-scale" style={{ width: `calc(210mm * ${scale})`, height: `calc(297mm * ${scale})`, position: 'relative', flexShrink: 0 }}>
       <div
+        ref={sheetRef}
         className="voucher-sheet"
         style={{
           width: A4_WIDTH,
