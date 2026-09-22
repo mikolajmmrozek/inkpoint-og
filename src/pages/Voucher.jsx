@@ -110,6 +110,8 @@ export default function Voucher() {
   const ink = '#1A1A1A';
   const muted = '#8A8A8A';
 
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
   const isDisabled = promo.is_active === false;
   const isRevoked = promo.revoked === true;
   const expired = promo.expires_at ? new Date(promo.expires_at).getTime() < Date.now() : false;
@@ -128,7 +130,7 @@ export default function Voucher() {
         : '';
 
   return (
-    <div className="voucher-wrap" style={{ background: '#ECECEC', minHeight: '100vh', display: 'flex', justifyContent: 'center', padding: '20px 0', overflowX: 'hidden' }}>
+    <div className={`voucher-wrap${isIOS ? ' is-ios' : ''}`} style={{ background: '#ECECEC', minHeight: '100vh', display: 'flex', justifyContent: 'center', padding: '20px 0', overflowX: 'hidden' }}>
       <div className="voucher-scale" style={{ width: `calc(210mm * ${scale})`, height: `calc(297mm * ${scale})`, position: 'relative', flexShrink: 0 }}>
       <div
         className="voucher-sheet"
@@ -302,6 +304,8 @@ export default function Voucher() {
           .voucher-wrap { background: #FFFFFF !important; min-height: 0 !important; padding: 0 !important; display: block !important; }
           .voucher-scale { width: 210mm !important; height: 297mm !important; }
           .voucher-sheet { box-shadow: none !important; margin: 0 !important; position: static !important; transform: none !important; width: 210mm !important; height: 297mm !important; max-height: 297mm !important; overflow: hidden !important; }
+          .voucher-wrap.is-ios .voucher-scale { width: calc(210mm * 0.78) !important; height: calc(297mm * 0.78) !important; }
+          .voucher-wrap.is-ios .voucher-sheet { transform: scale(0.78) !important; transform-origin: top left !important; position: absolute !important; }
           @page { size: A4 portrait; margin: 0; }
         }
       `}</style>
