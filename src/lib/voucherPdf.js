@@ -157,9 +157,9 @@ async function buildDoc(promo, settings) {
   const nameW = doc.getTextWidth(studioName);
   // angle 90 = CCW; text extends upward from the start point. Center vertically in the 297mm strip.
   doc.text(studioName, 10, 148.5 + nameW / 2, { angle: 90, baseline: 'alphabetic' });
-  // decorative tick
+  // decorative tick — 12mm bar, 10mm from the sidebar bottom (matches on-screen bottom:10mm)
   setFill(doc, mix(brand, '#FFFFFF', 0.5));
-  doc.rect(7.4, 287, 1.2, 12, 'F');
+  doc.rect(7.4, 275, 1.2, 12, 'F');
 
   // --- Status (mirrors Voucher.jsx) ---
   const isDisabled = promo.is_active === false;
