@@ -120,12 +120,12 @@ async function buildDoc(promo, settings) {
   let bodyFamily = 'helvetica';
   if (dispB64) {
     doc.addFileToVFS(dispSrc.file, dispB64);
-    doc.addFont(dispSrc.file, dispSrc.family, 'normal', 'normal', 'Identity-H');
+    doc.addFont(dispSrc.file, dispSrc.family, 'normal', 'Identity-H');
     displayFamily = dispSrc.family;
   }
   if (interB64) {
     doc.addFileToVFS(INTER.file, interB64);
-    doc.addFont(INTER.file, INTER.family, 'normal', 'normal', 'Identity-H');
+    doc.addFont(INTER.file, INTER.family, 'normal', 'Identity-H');
     bodyFamily = INTER.family;
   }
   // Fallbacks so Polish still renders if one font failed to load

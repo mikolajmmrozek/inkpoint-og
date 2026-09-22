@@ -20,11 +20,11 @@ export default function Voucher() {
 
   const handleDownload = async () => {
     setPdfBusy(true);
-    try { await downloadVoucherPDF(sheetRef.current, promo); } finally { setPdfBusy(false); }
+    try { await downloadVoucherPDF(promo, { ...settings, _recipientName: recipientName }); } finally { setPdfBusy(false); }
   };
   const handlePrint = async () => {
     setPdfBusy(true);
-    try { await printVoucherPDF(sheetRef.current, promo); } finally { setPdfBusy(false); }
+    try { await printVoucherPDF(promo, { ...settings, _recipientName: recipientName }); } finally { setPdfBusy(false); }
   };
 
   useEffect(() => {
