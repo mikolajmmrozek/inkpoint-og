@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { Download, Printer, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { downloadVoucherPDF, printVoucherPDF } from '@/lib/voucherPdf';
 
 const A4_WIDTH = '210mm';
 const A4_HEIGHT = '297mm';
@@ -13,6 +15,16 @@ export default function Voucher() {
   const [recipientName, setRecipientName] = useState('');
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [pdfBusy, setPdfBusy] = useState(false);
+
+  const handleDownload = async () => {
+    setPdfBusy(true);
+    try { await downloadVoucherPDF(promo, settings, recipientName); } finally { setPdfBusy(false); }
+  };
+  const handlePrint = async () => {
+    setPdfBusy(true);
+    try { await printVoucherPDF(promo, settings, recipientName); } finally { setPdfBusy(false); }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -110,8 +122,6 @@ export default function Voucher() {
   const ink = '#1A1A1A';
   const muted = '#8A8A8A';
 
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
   const isDisabled = promo.is_active === false;
   const isRevoked = promo.revoked === true;
   const expired = promo.expires_at ? new Date(promo.expires_at).getTime() < Date.now() : false;
@@ -130,7 +140,15 @@ export default function Voucher() {
         : '';
 
   return (
-    <div className={`voucher-wrap${isIOS ? ' is-ios' : ''}`} style={{ background: '#ECECEC', minHeight: '100vh', display: 'flex', justifyContent: 'center', padding: '20px 0', overflowX: 'hidden' }}>
+    <div className="voucher-wrap" style={{ background: '#ECECEC', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px 0', overflowX: 'hidden' }}>
+      <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginBottom: '20px', flexWrap: 'wrap' }}>
+        <button onClick={handleDownload} disabled={pdfBusy} className="btn-oxblood flex items-center gap-2" style={{ opacity: pdfBusy ? 0.6 : 1 }}>
+          {pdfBusy ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />} POBIERZ PDF
+        </button>
+        <button onClick={handlePrint} disabled={pdfBusy} className="btn-ghost-parchment flex items-center gap-2">
+          <Printer size={14} /> DRUKUJ
+        </button>
+      </div>
       <div className="voucher-scale" style={{ width: `calc(210mm * ${scale})`, height: `calc(297mm * ${scale})`, position: 'relative', flexShrink: 0 }}>
       <div
         className="voucher-sheet"
@@ -298,17 +316,6 @@ export default function Voucher() {
       </div>
       </div>
 
-      <style>{`
-        @media print {
-          html, body { background: #FFFFFF !important; background-image: none !important; height: auto !important; }
-          .voucher-wrap { background: #FFFFFF !important; min-height: 0 !important; padding: 0 !important; display: block !important; }
-          .voucher-scale { width: 210mm !important; height: 297mm !important; }
-          .voucher-sheet { box-shadow: none !important; margin: 0 !important; position: static !important; transform: none !important; width: 210mm !important; height: 297mm !important; max-height: 297mm !important; overflow: hidden !important; }
-          .voucher-wrap.is-ios .voucher-scale { width: calc(210mm * 0.78) !important; height: calc(297mm * 0.78) !important; }
-          .voucher-wrap.is-ios .voucher-sheet { transform: scale(0.78) !important; transform-origin: top left !important; position: absolute !important; }
-          @page { size: A4 portrait; margin: 0; }
-        }
-      `}</style>
     </div>
   );
 }
