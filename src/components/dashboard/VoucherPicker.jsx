@@ -53,22 +53,13 @@ export default function VoucherPicker({ t, onApplied, applied }) {
     if (!c) { setError('Podaj kod'); return; }
     setError(''); setChecking(true);
     try {
-      const list = await base44.entities.Promotion.filter({ code: c });
-      const p = list.find(x => x.type === 'voucher');
-      if (!p) { setError(`Nie znaleziono vouchera: ${c}`); setChecking(false); return; }
-      if (p.revoked) { setError('Voucher odwołany'); setChecking(false); return; }
-      if (p.is_active === false) { setError('Voucher wyłączony'); setChecking(false); return; }
-      const now = Date.now();
-      const exp = p.expires_at ? new Date(p.expires_at).getTime() : 0;
-      const graceExp = p.grace_expires_at ? new Date(p.grace_expires_at).getTime() : 0;
-      const isGrace = p.is_grace && graceExp > now;
-      if (!isGrace && exp && exp < now) { setError('Voucher wygasł'); setChecking(false); return; }
-      if ((p.balance || 0) <= 0 && !isGrace) { setError('Voucher wykorzystany'); setChecking(false); return; }
-      const amount = isGrace ? (p.balance || p.grace_value || p.value || 0) : (p.balance || p.value || 0);
-      onApplied({ ...p, _appliedAmount: amount, _isGrace: isGrace });
+      const res = await base44.functions.invoke('managePromotion', { action: 'lookup', code: c });
+      const data = res.data || {};
+      onApplied({ ...data.voucher, _appliedAmount: data.appliedAmount, _isGrace: data.isGrace });
       setCode('');
     } catch (e) {
-      setError(e.message || 'Błąd');
+      const msg = e?.response?.data?.error || e?.message || 'Błąd';
+      setError(msg === 'Voucher nie istnieje' ? `Nie znaleziono vouchera: ${c}` : msg);
     } finally {
       setChecking(false);
     }

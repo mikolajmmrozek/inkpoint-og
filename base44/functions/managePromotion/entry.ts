@@ -57,13 +57,45 @@ export default async function (req: Request): Promise<Response> {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
-
+    const isAdmin = user.role === 'admin';
+    const isStaff = isAdmin || user.role === 'artist';
+    // lookup + redeem are available to studio staff (admin + artist); all other actions stay admin-only.
     const body = await req.json();
     const action = body.action;
     const appUrl = secrets.get('APP_URL') || '';
 
+    if (action === 'lookup') {
+      if (!isStaff) return Response.json({ error: 'Forbidden' }, { status: 403 });
+      const code = String(body.code || '').trim().toUpperCase();
+      if (!code) return Response.json({ error: 'Podaj kod' }, { status: 400 });
+      // Service role bypasses RLS so studio staff can find bearer vouchers, not just assigned ones.
+      const list = await base44.asServiceRole.entities.Promotion.filter({ code });
+      const p: any = list.find((x: any) => x.type === 'voucher');
+      if (!p) return Response.json({ error: 'Voucher nie istnieje' }, { status: 404 });
+      if (p.revoked) return Response.json({ error: 'Voucher odwołany' }, { status: 400 });
+      if (p.is_active === false) return Response.json({ error: 'Voucher wyłączony' }, { status: 400 });
+      const now = Date.now();
+      const exp = p.expires_at ? new Date(p.expires_at).getTime() : 0;
+      const graceExp = p.grace_expires_at ? new Date(p.grace_expires_at).getTime() : 0;
+      const isGrace = p.is_grace && graceExp > now;
+      if (!isGrace && exp && exp < now) return Response.json({ error: 'Voucher wygasł' }, { status: 400 });
+      const amount = isGrace ? (p.balance || p.grace_value || p.value || 0) : (p.balance ?? p.value ?? 0);
+      if (amount <= 0 && !isGrace) return Response.json({ error: 'Voucher wykorzystany' }, { status: 400 });
+      return Response.json({
+        voucher: {
+          id: p.id, code: p.code, type: p.type,
+          value: p.value, balance: p.balance, original_value: p.original_value,
+          expires_at: p.expires_at, is_grace: !!isGrace,
+          grace_value: p.grace_value, grace_expires_at: p.grace_expires_at,
+          usage_mode: p.usage_mode,
+        },
+        appliedAmount: amount,
+        isGrace,
+      });
+    }
+
     if (action === 'create') {
+      if (!isAdmin) return Response.json({ error: 'Forbidden' }, { status: 403 });
       const type = body.type === 'discount' ? 'discount' : 'voucher';
       const value_type = body.value_type === 'percent' ? 'percent' : 'amount';
       const value = Number(body.value) || 0;
@@ -120,6 +152,7 @@ export default async function (req: Request): Promise<Response> {
     }
 
     if (action === 'update') {
+      if (!isAdmin) return Response.json({ error: 'Forbidden' }, { status: 403 });
       const p: any = await base44.entities.Promotion.get(body.promotion_id);
       const updates: any = {};
       if (body.value !== undefined) {
@@ -143,6 +176,7 @@ export default async function (req: Request): Promise<Response> {
     }
 
     if (action === 'extend_grace') {
+      if (!isAdmin) return Response.json({ error: 'Forbidden' }, { status: 403 });
       const grace_value = Number(body.grace_value) || 0;
       const grace_expires_at = body.grace_expires_at;
       if (!grace_value || !grace_expires_at) return Response.json({ error: 'Podaj wartość i datę grace' }, { status: 400 });
@@ -153,11 +187,13 @@ export default async function (req: Request): Promise<Response> {
     }
 
     if (action === 'revoke') {
+      if (!isAdmin) return Response.json({ error: 'Forbidden' }, { status: 403 });
       const updated = await base44.entities.Promotion.update(body.promotion_id, { revoked: true, status: 'revoked' });
       return Response.json({ promotion: updated });
     }
 
     if (action === 'redeem') {
+      if (!isStaff) return Response.json({ error: 'Forbidden' }, { status: 403 });
       const promotion_id = body.promotion_id;
       const amount = Math.round((Number(body.amount) || 0) * 100) / 100;
       const booking_id = body.booking_id || '';
@@ -165,7 +201,8 @@ export default async function (req: Request): Promise<Response> {
       if (!promotion_id) return Response.json({ error: 'Brak promotion_id' }, { status: 400 });
       if (!amount || amount <= 0) return Response.json({ error: 'Podaj kwotę' }, { status: 400 });
 
-      const p: any = await base44.entities.Promotion.get(promotion_id);
+      // Service role: artists must read/update vouchers they don't own (RLS would hide bearer vouchers).
+      const p: any = await base44.asServiceRole.entities.Promotion.get(promotion_id);
       if (!p) return Response.json({ error: 'Voucher nie istnieje' }, { status: 404 });
       if (p.type !== 'voucher') return Response.json({ error: 'Tylko voucher można rozliczyć' }, { status: 400 });
       if (p.revoked) return Response.json({ error: 'Voucher odwołany' }, { status: 400 });
@@ -186,7 +223,7 @@ export default async function (req: Request): Promise<Response> {
       // assign to client account if exists
       if (client_email && !p.assigned_client_email) {
         try {
-          const clients = await base44.entities.Client.filter({ email: client_email });
+          const clients = await base44.asServiceRole.entities.Client.filter({ email: client_email });
           const c = clients[0];
           if (c && c.user_id) {
             updates.assigned_client_email = client_email;
@@ -201,11 +238,12 @@ export default async function (req: Request): Promise<Response> {
       } else {
         updates.used_at = new Date().toISOString();
       }
-      const updated = await base44.entities.Promotion.update(promotion_id, updates);
+      const updated = await base44.asServiceRole.entities.Promotion.update(promotion_id, updates);
       return Response.json({ promotion: updated, redeemed: amount, balance: newBalance, fullyUsed });
     }
 
     if (action === 'send_email') {
+      if (!isAdmin) return Response.json({ error: 'Forbidden' }, { status: 403 });
       const p: any = await base44.entities.Promotion.get(body.promotion_id);
       const to = body.to || p.assigned_client_email;
       if (!to) return Response.json({ error: 'Brak odbiorcy' }, { status: 400 });
