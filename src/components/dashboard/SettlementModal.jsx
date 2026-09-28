@@ -71,16 +71,11 @@ export default function SettlementModal({ booking, user, onClose, onSettled, t }
         status: 'completed',
       };
       await base44.entities.Booking.update(booking.id, updates);
-      // Redeem vouchers. On edit, skip vouchers already redeemed in the previous settlement
-      // so a newly-added voucher still gets redeemed without double-deducting an existing one.
-      const previouslyRedeemed = new Set(
-        (booking?.payment_breakdown || [])
-          .filter((p) => p.method === 'voucher' && p.voucher_id)
-          .map((p) => p.voucher_id)
-      );
-      const voucherPayments = breakdown.filter(
-        (p) => p.method === 'voucher' && p.voucher_id && p.amount > 0 && !previouslyRedeemed.has(p.voucher_id)
-      );
+      // Redeem vouchers on both first settlement and edit. The backend rejects an amount
+      // exceeding the current balance, so an already-fully-redeemed voucher is skipped
+      // (error caught below) — no double deduction — while a voucher stored but never
+      // actually redeemed (e.g. from the old edit-skip bug) finally gets deducted.
+      const voucherPayments = breakdown.filter((p) => p.method === 'voucher' && p.voucher_id && p.amount > 0);
       for (const vp of voucherPayments) {
         try {
           await base44.functions.invoke('managePromotion', {
