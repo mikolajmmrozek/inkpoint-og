@@ -121,9 +121,18 @@ export default function HealthFormPage() {
   const borderColor = theme === 'light' ? '#E5E5E5' : '#262626';
   const inputBorderBottom = theme === 'light' ? '#CCCCCC' : '#262626';
   const inputColor = theme === 'light' ? '#111111' : '#F5F0EB';
-  const isMinor = form.date_of_birth
-    ? new Date().getFullYear() - new Date(form.date_of_birth).getFullYear() < 18
-    : false;
+  // Full age check: compare month & day too, not just the year.
+  // Year-only comparison misclassifies someone born late in the year they turn 18 as an adult
+  // (e.g. born 2008-10-01 on 2026-09-30 is 17, but 2026-2008=18 would say "adult").
+  const isMinor = (() => {
+    if (!form.date_of_birth) return false;
+    const dob = new Date(form.date_of_birth);
+    if (isNaN(dob.getTime())) return false;
+    const now = new Date();
+    let age = now.getFullYear() - dob.getFullYear();
+    if (now.getMonth() < dob.getMonth() || (now.getMonth() === dob.getMonth() && now.getDate() < dob.getDate())) age--;
+    return age < 18;
+  })();
   const steps = isMinor ? [...STEPS, 'guardian'] : [...STEPS];
 
   const setField = (key, value) => setForm(f => ({ ...f, [key]: value }));
@@ -409,9 +418,10 @@ export default function HealthFormPage() {
       const warnings = [];
 
       if (isMinor) {
+        const guardianBody = guardian.body_placement || form.body_placement || '';
+        let guardianForm;
         try {
-          const guardianBody = guardian.body_placement || form.body_placement || '';
-          await base44.entities.GuardianConsentForm.create({
+          guardianForm = await base44.entities.GuardianConsentForm.create({
             ...guardian,
             body_placement: guardianBody,
             health_form_id: savedForm.id,
@@ -419,7 +429,16 @@ export default function HealthFormPage() {
             minor_client_name: fullName,
             minor_date_of_birth: form.date_of_birth,
           });
-        } catch (e) { warnings.push('zapis formularza opiekuna'); }
+        } catch (e) {
+          setSubmitError('Nie udało się zapisać zgody opiekuna prawnego. Spróbuj ponownie.');
+          return; // keep the form open so the guardian step is not silently lost
+        }
+        // Link the guardian form back onto the health form so it's discoverable later.
+        if (guardianForm?.id) {
+          try {
+            await base44.entities.HealthForm.update(savedForm.id, { guardian_consent_form_id: guardianForm.id });
+          } catch (_) { /* non-fatal: link missing, but consent was saved */ }
+        }
       }
 
       if (booking) {
@@ -448,7 +467,7 @@ export default function HealthFormPage() {
     setSubmitError(null);
     try {
       const fullName = `${form.client_first_name} ${form.client_last_name}`.trim();
-      const formData = { ...form, client_name: fullName, is_update_only: true, is_minor: false, is_draft: false };
+      const formData = { ...form, client_name: fullName, is_update_only: true, is_minor: isMinor, is_draft: false };
 
       if (draftId) {
         await base44.entities.HealthForm.update(draftId, formData);
