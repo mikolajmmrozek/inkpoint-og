@@ -62,7 +62,9 @@ export default async function (req: Request): Promise<Response> {
     // lookup + redeem are available to studio staff (admin + artist); all other actions stay admin-only.
     const body = await req.json();
     const action = body.action;
-    const appUrl = secrets.get('APP_URL') || '';
+    // Published public domain — used for voucher QR codes and links so scans land on the
+    // live site, not the internal build domain (APP_URL may point to the builder domain).
+    const appUrl = 'https://romanstattoo.base44.app';
 
     if (action === 'lookup') {
       if (!isStaff) return Response.json({ error: 'Forbidden' }, { status: 403 });
