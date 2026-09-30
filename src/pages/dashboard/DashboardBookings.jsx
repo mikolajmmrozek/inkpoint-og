@@ -213,6 +213,7 @@ export default function DashboardBookings() {
   const newBooking = createMenu.newBooking || (() => {});
   const registerBookingsRefresh = createMenu.registerBookingsRefresh || (() => {});
   const registerAvailabilityRefresh = createMenu.registerAvailabilityRefresh || (() => {});
+  const registerSelectedDate = createMenu.registerSelectedDate || (() => {});
 
   const refreshBookings = useCallback(async () => {
     try { const data = await base44.entities.Booking.list('-session_date', 5000); setBookings(data); } catch (e) {}
@@ -224,6 +225,11 @@ export default function DashboardBookings() {
     registerBookingsRefresh(refreshBookings);
     registerAvailabilityRefresh(refreshAvailability);
   }, [registerBookingsRefresh, registerAvailabilityRefresh, refreshBookings, refreshAvailability]);
+
+  // Keep the create-menu's booking/dyspozycja prefill in sync with the selected day.
+  useEffect(() => {
+    registerSelectedDate(selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '');
+  }, [registerSelectedDate, selectedDate]);
 
   const loadHealthForms = async () => {
     try {

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { format, parseISO, addWeeks, addMonths, eachDayOfInterval } from 'date-fns';
 import { pl } from 'date-fns/locale';
 
-function generateDates(dateFrom, dateTo, repeat, repeatUntil, repeatIndefinite) {
+export function generateDates(dateFrom, dateTo, repeat, repeatUntil, repeatIndefinite) {
   const start = parseISO(dateFrom);
   const endLimit = repeatIndefinite
     ? addMonths(new Date(), 24)

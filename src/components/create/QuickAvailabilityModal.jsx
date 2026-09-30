@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { generateDates } from '@/components/dashboard/AvailabilityEditModal';
 
 const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
 const MINUTE_OPTIONS = ['00', '15', '30', '45'];
@@ -17,7 +18,10 @@ export default function QuickAvailabilityModal({ prefill, role, onClose, onSaved
   const [artists, setArtists] = useState([]);
   const [artistId, setArtistId] = useState(prefill?.artist_id || '');
   const [mode, setMode] = useState('off'); // 'off' = wolne, 'avail' = dostępność
+  const [dateMode, setDateMode] = useState('single'); // 'single' | 'range'
   const [date, setDate] = useState(prefill?.date || '');
+  const [dateFrom, setDateFrom] = useState(prefill?.date || '');
+  const [dateTo, setDateTo] = useState('');
   const [startTime, setStartTime] = useState(prefill?.start_time || '');
   const [endTime, setEndTime] = useState(prefill?.end_time || '');
   const [note, setNote] = useState('');
@@ -53,20 +57,41 @@ export default function QuickAvailabilityModal({ prefill, role, onClose, onSaved
 
   const handleSave = async () => {
     if (!artistId) { alert('Wybierz artystę.'); return; }
-    if (!date) { alert('Wybierz datę.'); return; }
+    if (dateMode === 'range') {
+      if (!dateFrom || !dateTo) { alert('Wybierz datę od i do.'); return; }
+      if (dateTo < dateFrom) { alert('Data „do" musi być po dacie „od".'); return; }
+    } else {
+      if (!date) { alert('Wybierz datę.'); return; }
+    }
     setSaving(true);
     try {
-      await base44.entities.ArtistAvailability.create({
-        artist_id: artistId,
-        type: 'exception',
-        date,
-        start_time: allDay ? undefined : (startTime || undefined),
-        end_time: allDay ? undefined : (endTime || undefined),
-        is_available: mode === 'avail',
-        note: note || undefined,
-        repeat,
-        repeat_until: repeat !== 'none' ? (repeatUntil || 'indefinite') : undefined,
-      });
+      const timeProps = allDay
+        ? { start_time: undefined, end_time: undefined }
+        : { start_time: startTime || undefined, end_time: endTime || undefined };
+      if (dateMode === 'range') {
+        const dates = generateDates(dateFrom, dateTo, 'none', '', false);
+        const records = dates.map((d) => ({
+          artist_id: artistId,
+          type: 'exception',
+          date: d,
+          is_available: mode === 'avail',
+          note: note || undefined,
+          repeat: 'none',
+          ...timeProps,
+        }));
+        await base44.entities.ArtistAvailability.bulkCreate(records);
+      } else {
+        await base44.entities.ArtistAvailability.create({
+          artist_id: artistId,
+          type: 'exception',
+          date,
+          is_available: mode === 'avail',
+          note: note || undefined,
+          repeat,
+          repeat_until: repeat !== 'none' ? (repeatUntil || 'indefinite') : undefined,
+          ...timeProps,
+        });
+      }
       onSaved();
     } catch (e) {
       alert('Nie udało się zapisać: ' + (e.message || 'błąd'));
@@ -131,8 +156,41 @@ export default function QuickAvailabilityModal({ prefill, role, onClose, onSaved
           </div>
 
           <div>
-            {label('Data *')}
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} style={inputStyle} />
+            {label('Okres')}
+            <div className="flex gap-2 mb-3">
+              {[['single', 'JEDEN DZIEŃ'], ['range', 'ZAKRES OD–DO']].map(([val, lbl]) => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => setDateMode(val)}
+                  style={{
+                    flex: 1,
+                    border: `0.5px solid ${dateMode === val ? 'var(--brand)' : t.border}`,
+                    color: dateMode === val ? 'var(--brand)' : t.muted,
+                    background: dateMode === val ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '9px',
+                    letterSpacing: '0.1em',
+                    padding: '9px 0',
+                    cursor: 'pointer',
+                  }}
+                >{lbl}</button>
+              ))}
+            </div>
+            {dateMode === 'single' ? (
+              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} style={inputStyle} />
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  {label('Od *')}
+                  <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} style={inputStyle} />
+                </div>
+                <div>
+                  {label('Do *')}
+                  <input type="date" value={dateTo} min={dateFrom || undefined} onChange={(e) => setDateTo(e.target.value)} style={inputStyle} />
+                </div>
+              </div>
+            )}
           </div>
 
           <div>
@@ -177,18 +235,20 @@ export default function QuickAvailabilityModal({ prefill, role, onClose, onSaved
             )}
           </div>
 
-          <div>
-            {label('Powtarzanie')}
-            <select value={repeat} onChange={(e) => setRepeat(e.target.value)} style={{ ...inputStyle, colorScheme: isLight ? 'light' : 'dark' }}>
-              {REPEATS.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
-            </select>
-            {repeat !== 'none' && (
-              <div className="mt-3">
-                {label('Powtarzaj do (opcjonalnie)')}
-                <input type="date" value={repeatUntil} onChange={(e) => setRepeatUntil(e.target.value)} style={inputStyle} />
-              </div>
-            )}
-          </div>
+          {dateMode === 'single' && (
+            <div>
+              {label('Powtarzanie')}
+              <select value={repeat} onChange={(e) => setRepeat(e.target.value)} style={{ ...inputStyle, colorScheme: isLight ? 'light' : 'dark' }}>
+                {REPEATS.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
+              </select>
+              {repeat !== 'none' && (
+                <div className="mt-3">
+                  {label('Powtarzaj do (opcjonalnie)')}
+                  <input type="date" value={repeatUntil} onChange={(e) => setRepeatUntil(e.target.value)} style={inputStyle} />
+                </div>
+              )}
+            </div>
+          )}
 
           <div>
             {label('Notatka (opcjonalnie)')}

@@ -23,16 +23,26 @@ export function CreateMenuProvider({ children, role, theme, selfArtistId }) {
   const [bookingPrefill, setBookingPrefill] = useState(null);
   const [availPrefill, setAvailPrefill] = useState(null);
   const refreshRef = useRef({ bookings: null, availability: null, clients: null });
+  const selectedDateRef = useRef('');
 
   const t = buildThemeT(theme);
 
   const registerBookingsRefresh = useCallback((fn) => { refreshRef.current.bookings = fn; }, []);
   const registerAvailabilityRefresh = useCallback((fn) => { refreshRef.current.availability = fn; }, []);
   const registerClientsRefresh = useCallback((fn) => { refreshRef.current.clients = fn; }, []);
+  // Dashboard bookings page registers the currently selected day so the FAB
+  // booking/dyspozycja options prefill that day instead of today.
+  const registerSelectedDate = useCallback((dateStr) => { selectedDateRef.current = dateStr || ''; }, []);
 
-  const newBooking = useCallback((prefill) => { setBookingPrefill(prefill || null); setAction('booking'); }, []);
+  const newBooking = useCallback((prefill) => {
+    const pre = prefill || (selectedDateRef.current ? { _prefill: true, session_date: selectedDateRef.current } : null);
+    setBookingPrefill(pre);
+    setAction('booking');
+  }, []);
   const newAvailability = useCallback((prefill) => {
-    const pre = prefill || (role === 'artist' && selfArtistId ? { artist_id: selfArtistId } : null);
+    let pre = prefill || null;
+    if (!pre && role === 'artist' && selfArtistId) pre = { artist_id: selfArtistId };
+    if (selectedDateRef.current) pre = { ...(pre || {}), date: selectedDateRef.current };
     setAvailPrefill(pre);
     setAction('availability');
   }, [role, selfArtistId]);
@@ -73,7 +83,7 @@ export function CreateMenuProvider({ children, role, theme, selfArtistId }) {
   };
 
   return (
-    <CreateMenuContext.Provider value={{ newBooking, newAvailability, newClient, newPromotion, newHealthForm, registerBookingsRefresh, registerAvailabilityRefresh, registerClientsRefresh, role }}>
+    <CreateMenuContext.Provider value={{ newBooking, newAvailability, newClient, newPromotion, newHealthForm, registerBookingsRefresh, registerAvailabilityRefresh, registerClientsRefresh, registerSelectedDate, role }}>
       {children}
       {role !== 'user' && !action && (
         <CreateMenuFAB
