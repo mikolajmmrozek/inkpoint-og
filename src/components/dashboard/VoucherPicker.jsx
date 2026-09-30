@@ -15,12 +15,17 @@ const inputStyle = {
   letterSpacing: '0.1em',
 };
 
-// Extract code from a scanned QR value — may be a full URL or a bare code.
+// Extract code from a scanned QR value — supports the current home-page format
+// (?voucher=CODE / ?v=CODE / #voucher=CODE), the legacy /voucher/CODE path, or a bare code.
 const extractCode = (raw) => {
   if (!raw) return '';
   const s = String(raw).trim();
+  // legacy format: /voucher/CODE
   const m = s.match(/\/voucher\/([^/?#]+)/);
   if (m) return m[1];
+  // current format: ?voucher=CODE, ?v=CODE, #voucher=CODE (or &voucher=CODE in a longer query)
+  const qm = s.match(/[?&#](?:voucher|v)=([^&#]+)/);
+  if (qm) return qm[1];
   // bare code: take last path-like token or whole string
   const parts = s.split(/[\/\s]/);
   return (parts[parts.length - 1] || s).toUpperCase();

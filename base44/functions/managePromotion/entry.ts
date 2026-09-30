@@ -118,10 +118,11 @@ export default async function (req: Request): Promise<Response> {
       const assignment_permanent = !!body.assignment_permanent;
       const assigned_until = body.assigned_until || '';
 
-      // QR (voucher only)
+      // QR (voucher only) — points to the public home page so any phone scan lands on the
+      // studio site, while the code is embedded as ?voucher=CODE for the in-app scanner.
       let qr_code_url = '';
       if (type === 'voucher') {
-        const voucherUrl = `${appUrl}/voucher/${code}`;
+        const voucherUrl = `${appUrl}/?voucher=${code}`;
         try {
           const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=10&data=${encodeURIComponent(voucherUrl)}`;
           const imgRes = await fetch(qrApi);
