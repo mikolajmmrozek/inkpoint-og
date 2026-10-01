@@ -35,9 +35,11 @@ const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, 
 const MINUTE_OPTIONS = ['00', '15', '30', '45'];
 
 function TimeDropdown({ value, onChange, border, text }) {
-  const [h, m] = (value || '09:00').split(':');
-  const setH = (newH) => onChange(`${newH}:${m || '00'}`);
-  const setM = (newM) => onChange(`${h || '09'}:${newM}`);
+  const parts = (value || '09:00').split(':');
+  const h = parts[0] || '09';
+  const m = MINUTE_OPTIONS.includes(parts[1]) ? parts[1] : '00';
+  const setH = (newH) => onChange(`${newH}:${m}`);
+  const setM = (newM) => onChange(`${h}:${newM}`);
   const selectStyle = {
     background: '#1a1a1a', border: `0.5px solid ${border}`, color: text,
     padding: '6px 8px', fontSize: '14px', outline: 'none', fontFamily: 'var(--font-body)',
