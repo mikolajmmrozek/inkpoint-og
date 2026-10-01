@@ -210,11 +210,11 @@ export default function QuickAvailabilityModal({ prefill, role, onClose, onSaved
                 <div>
                   {label('Od')}
                   <div className="flex gap-1 items-center">
-                    <select value={(startTime || '09:00').split(':')[0]} onChange={(e) => setStartTime(`${e.target.value}:${(startTime || '00').split(':')[1]}`)} style={{ ...inputStyle, padding: '6px 8px', flex: 1 }}>
+                    <select value={(startTime || '09:00').split(':')[0]} onChange={(e) => setStartTime(`${e.target.value}:${(startTime || '09:00').split(':')[1] || '00'}`)} style={{ ...inputStyle, padding: '6px 8px', flex: 1 }}>
                       {HOUR_OPTIONS.map((h) => <option key={h} value={h}>{h}</option>)}
                     </select>
                     <span style={{ color: t.text }}>:</span>
-                    <select value={(startTime || '09:00').split(':')[1]} onChange={(e) => setStartTime(`${(startTime || '09').split(':')[0]}:${e.target.value}`)} style={{ ...inputStyle, padding: '6px 8px', flex: 1 }}>
+                    <select value={(startTime || '09:00').split(':')[1]} onChange={(e) => setStartTime(`${(startTime || '09:00').split(':')[0] || '09'}:${e.target.value}`)} style={{ ...inputStyle, padding: '6px 8px', flex: 1 }}>
                       {MINUTE_OPTIONS.map((m) => <option key={m} value={m}>{m}</option>)}
                     </select>
                   </div>
@@ -222,11 +222,11 @@ export default function QuickAvailabilityModal({ prefill, role, onClose, onSaved
                 <div>
                   {label('Do')}
                   <div className="flex gap-1 items-center">
-                    <select value={(endTime || '17:00').split(':')[0]} onChange={(e) => setEndTime(`${e.target.value}:${(endTime || '00').split(':')[1]}`)} style={{ ...inputStyle, padding: '6px 8px', flex: 1 }}>
+                    <select value={(endTime || '17:00').split(':')[0]} onChange={(e) => setEndTime(`${e.target.value}:${(endTime || '17:00').split(':')[1] || '00'}`)} style={{ ...inputStyle, padding: '6px 8px', flex: 1 }}>
                       {HOUR_OPTIONS.map((h) => <option key={h} value={h}>{h}</option>)}
                     </select>
                     <span style={{ color: t.text }}>:</span>
-                    <select value={(endTime || '17:00').split(':')[1]} onChange={(e) => setEndTime(`${(endTime || '17').split(':')[0]}:${e.target.value}`)} style={{ ...inputStyle, padding: '6px 8px', flex: 1 }}>
+                    <select value={(endTime || '17:00').split(':')[1]} onChange={(e) => setEndTime(`${(endTime || '17:00').split(':')[0] || '17'}:${e.target.value}`)} style={{ ...inputStyle, padding: '6px 8px', flex: 1 }}>
                       {MINUTE_OPTIONS.map((m) => <option key={m} value={m}>{m}</option>)}
                     </select>
                   </div>
