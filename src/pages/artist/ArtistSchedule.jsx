@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { useAuth } from '@/lib/AuthContext';
 import { ChevronLeft, ChevronRight, Plus, X, Search, Zap, RefreshCw, FileText, Edit3, Wallet, Phone, Mail, QrCode, Check } from 'lucide-react';
 import { format, addDays, subDays, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, isSameMonth, isToday, parseISO } from 'date-fns';
@@ -1046,6 +1047,10 @@ export default function ArtistSchedule() {
       base44.functions.invoke('manageGoogleCalendar', { action: 'sync' }).catch(() => {});
     }, 2000);
   }, [artist?.id]);
+
+  // Realtime — grafik i sesje odświeżają się na żywo
+  useRealtimeSync('Booking', () => loadBookings(), [artist?.id]);
+  useRealtimeSync('ArtistAvailability', () => loadAvailability(), [artist?.id]);
 
   const handleDayClick = (day) => {
     setSelectedDate(day);

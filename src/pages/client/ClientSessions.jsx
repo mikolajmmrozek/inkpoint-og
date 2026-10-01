@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { AnimatePresence } from 'framer-motion';
 import { parseISO, isAfter, isToday } from 'date-fns';
 import SessionCard from '@/components/client/SessionCard';
@@ -29,6 +30,9 @@ export default function ClientSessions() {
   useEffect(() => {
     if (user?.email) load().catch(() => setLoading(false));
   }, [user]);
+
+  // Realtime — sesje i statusy odświeżają się na żywo (np. zmiana statusu przez admina/artystę)
+  useRealtimeSync('Booking', () => { if (user?.email) load().catch(() => {}); }, [user?.email]);
 
   const today = new Date();
   const upcoming = bookings.filter(b => {

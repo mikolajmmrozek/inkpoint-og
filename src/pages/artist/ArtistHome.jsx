@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { useAuth } from '@/lib/AuthContext';
 import { Link } from 'react-router-dom';
 import { Calendar, Clock, TrendingUp, X, ChevronLeft, ChevronRight, Search, Zap, Wallet, Phone, Mail, QrCode, FileText, Check } from 'lucide-react';
@@ -499,6 +500,12 @@ export default function ArtistHome() {
     base44.entities.HealthForm.list('-created_date', 300)
       .then(forms => setHealthStatusMap(buildHealthFormStatusMap(forms)))
       .catch(() => {});
+  }, [artist?.id]);
+
+  // Realtime — nadchodzące sesje i statystyki odświeżają się na żywo
+  useRealtimeSync('Booking', () => {
+    if (!artist?.id) return;
+    base44.entities.Booking.filter({ artist_id: artist.id }, '-session_date', 100).then(setBookings);
   }, [artist?.id]);
 
   const now = new Date();

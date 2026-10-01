@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { format, parseISO, isAfter, isToday } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import { Calendar, Clock, User, FileText, AlertCircle, ChevronRight } from 'lucide-react';
@@ -25,6 +26,14 @@ export default function ClientHome() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [user]);
+
+  // Realtime — statystyki i następna sesja odświeżają się na żywo
+  useRealtimeSync('Booking', () => {
+    if (!user?.email) return;
+    base44.entities.Booking.filter({ client_email: user.email }, '-session_date', 200)
+      .then(res => setBookings(res.filter(b => b.status !== 'cancelled')))
+      .catch(() => {});
+  }, [user?.email]);
 
   if (loading) {
     return <div className="flex justify-center py-20"><div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} /></div>;

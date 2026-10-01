@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { AnimatePresence } from 'framer-motion';
 import { Calendar, List, Clock, ChevronLeft, ChevronRight, Search, X, Inbox } from 'lucide-react';
 import { format, isSameDay, addDays, subDays } from 'date-fns';
@@ -225,6 +226,10 @@ export default function DashboardBookings() {
     registerBookingsRefresh(refreshBookings);
     registerAvailabilityRefresh(refreshAvailability);
   }, [registerBookingsRefresh, registerAvailabilityRefresh, refreshBookings, refreshAvailability]);
+
+  // Realtime — odśwież kalendarz i listy natychmiast po dodaniu / edycji / zmianie statusu / usunięciu
+  useRealtimeSync('Booking', () => { refreshBookings(); loadHealthForms(); });
+  useRealtimeSync('ArtistAvailability', () => { refreshAvailability(); });
 
   // Keep the create-menu's booking/dyspozycja prefill in sync with the selected day.
   useEffect(() => {
