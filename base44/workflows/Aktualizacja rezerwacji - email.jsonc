@@ -1,8 +1,8 @@
 {
   "name": "Aktualizacja rezerwacji \u2014 email",
-  "description": "Wysy\u0142a klientowi maila o zmianie szczeg\u00f3\u0142\u00f3w rezerwacji (data, godzina, artysta, miejsce itp.), gdy studio zaktualizuje istniej\u0105c\u0105 rezerwacj\u0119. Pomija zmiany samego statusu (te obs\u0142uguje mail potwierdzaj\u0105cy).",
+  "description": "Wysy\u0142a klientowi maila o zmianie szczeg\u00f3\u0142\u00f3w rezerwacji (data, godzina, artysta, miejsce itp.), gdy studio zaktualizuje istniej\u0105c\u0105 rezerwacj\u0119. Pomija zmiany samego statusu (te obs\u0142uguje mail potwierdzaj\u0105cy) oraz anulowania (te maj\u0105 w\u0142asny mail).",
   "trigger": {
-    "condition": "${ (.trigger.event == \"update\") and (.trigger.changed_fields | index(\"status\") == null) }",
+    "condition": "${ (.trigger.event == \"update\") and (.trigger.data.status != \"cancelled\") }",
     "config": {
       "trigger_type": "entity",
       "events": [
@@ -15,7 +15,7 @@
     "document": {
       "dsl": "1.0.0",
       "name": "booking_update_email",
-      "version": "1.0",
+      "version": "1.2",
       "namespace": "base44"
     },
     "do": [
@@ -27,7 +27,8 @@
             "args": {
               "bookingId": "${ .trigger.data.id }",
               "event": "${ .trigger.event }",
-              "changed_fields": "${ .trigger.changed_fields }"
+              "changed_fields": "${ .trigger.changed_fields }",
+              "old_data": "${ .trigger.old_data }"
             }
           },
           "then": "end",
