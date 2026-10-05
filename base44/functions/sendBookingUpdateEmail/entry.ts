@@ -59,6 +59,13 @@ export default async function(req: Request): Promise<Response> {
       return Response.json({ success: true, skipped: true, reason: 'cancelled-has-own-email' });
     }
 
+    // If the client edited the session themselves (description, placement, reference
+    // images) from their panel, don't send them an "update" email — they made the
+    // change, so notifying them about their own edit is noise.
+    if (booking.last_editor === 'client') {
+      return Response.json({ success: true, skipped: true, reason: 'client-self-edit' });
+    }
+
     // Determine which tracked fields actually changed.
     const changed = TRACKED_FIELDS.filter(f => {
       if (!changedFields.includes(f.key)) return false;

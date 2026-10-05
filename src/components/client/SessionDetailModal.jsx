@@ -40,7 +40,7 @@ export default function SessionDetailModal({ booking, theme, priceLabel, onClose
   };
 
   const saveImages = async (next) => {
-    const updated = await base44.entities.Booking.update(booking.id, { reference_images: next });
+    const updated = await base44.entities.Booking.update(booking.id, { reference_images: next, last_editor: 'client' });
     onUpdated(updated);
   };
 
@@ -48,7 +48,7 @@ export default function SessionDetailModal({ booking, theme, priceLabel, onClose
     if (!hasChanges) return;
     setSaving(true);
     try {
-      const patch = {};
+      const patch = { last_editor: 'client' };
       if (hasDescChanged) patch.tattoo_description = descDraft;
       if (hasPlaceChanged) patch.tattoo_placement = placeDraft;
       const updated = await base44.entities.Booking.update(booking.id, patch);
