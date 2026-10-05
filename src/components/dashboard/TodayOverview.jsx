@@ -52,14 +52,15 @@ export default function TodayOverview({ bookings, t, theme, onBookingUpdate, art
   // Monthly stats (current month)
   const monthDate = new Date();
   const monthName = monthDate.toLocaleDateString('pl-PL', { month: 'long' });
+  const monthYear = monthDate.getFullYear();
   const ym = (d) => {
     const dt = new Date(d);
     return dt.getFullYear() * 12 + dt.getMonth();
   };
   const curYm = ym(new Date());
   const monthBookings = bookings.filter(b => b.session_date && ym(b.session_date) === curYm && b.status !== 'cancelled');
-  // Sessions count: total planned this month (excluding cancelled).
-  const monthSessionsCount = monthBookings.length;
+  // Sessions count: completed sessions this month.
+  const monthSessionsCount = monthBookings.filter(b => b.status === 'completed').length;
   // Past sessions this month already settled.
   const todayStrM = new Date().toISOString().split('T')[0];
   const pastMonthSettled = monthBookings.filter(b => (b.session_date || '') <= todayStrM);
@@ -100,24 +101,30 @@ export default function TodayOverview({ bookings, t, theme, onBookingUpdate, art
 
       {/* Monthly summary tiles — admin only */}
       {variant !== 'artist' && (
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <Link to="/dashboard/bookings" className="p-4 transition-all duration-300 hover:opacity-80" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
-            <div className="flex items-center gap-1.5 mb-2">
-              <Calendar size={11} color="var(--brand)" />
-              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Sesje · {monthName}</p>
-            </div>
-            <p style={{ ...display, fontSize: '2rem', color: t.value, lineHeight: 1, letterSpacing: '0.03em' }}>{monthSessionsCount}</p>
-            <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '5px' }}>jeszcze zaplanowanych: {monthUpcomingCount}</p>
-          </Link>
-          <div className="p-4" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
-            <div className="flex items-center gap-1.5 mb-2">
-              <Wallet size={11} color="var(--brand)" />
-              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Zarobek studia · {monthName}</p>
-            </div>
-            <p style={{ ...display, fontSize: '2rem', color: 'var(--brand)', lineHeight: 1, letterSpacing: '0.03em' }}>{formatCompact(monthSettledStudio)} <span style={{ ...mono, fontSize: '11px', color: t.muted }}>PLN</span></p>
-            <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '5px' }}>jeszcze do zarobienia: {formatCompact(monthUpcomingStudio)} PLN</p>
+        <>
+          <div className="flex items-center gap-2 mb-2 mt-6">
+            <Calendar size={13} color="var(--brand)" />
+            <p style={{ ...mono, fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.18em', textTransform: 'uppercase' }}>Przegląd miesiąca · {monthName} {monthYear}</p>
           </div>
-        </div>
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <Link to="/dashboard/bookings" className="p-4 transition-all duration-300 hover:opacity-80" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
+              <div className="flex items-center gap-1.5 mb-2">
+                <Calendar size={11} color="var(--brand)" />
+                <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Wykonane sesje · {monthName}</p>
+              </div>
+              <p style={{ ...display, fontSize: '2rem', color: t.value, lineHeight: 1, letterSpacing: '0.03em' }}>{monthSessionsCount}</p>
+              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '5px' }}>jeszcze zaplanowanych: {monthUpcomingCount}</p>
+            </Link>
+            <div className="p-4" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
+              <div className="flex items-center gap-1.5 mb-2">
+                <Wallet size={11} color="var(--brand)" />
+                <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Zarobek studia · {monthName}</p>
+              </div>
+              <p style={{ ...display, fontSize: '2rem', color: 'var(--brand)', lineHeight: 1, letterSpacing: '0.03em' }}>{formatCompact(monthSettledStudio)} <span style={{ ...mono, fontSize: '11px', color: t.muted }}>PLN</span></p>
+              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '5px' }}>jeszcze do zarobienia: {formatCompact(monthUpcomingStudio)} PLN</p>
+            </div>
+          </div>
+        </>
       )}
 
       <div className="p-6 mb-4" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
