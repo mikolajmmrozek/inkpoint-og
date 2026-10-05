@@ -57,7 +57,7 @@ export default function DashboardHome() {
       // Future: pending + confirmed only, limited to 10
       // Past overdue: only pending/confirmed sessions that still need action
       const todayBookings = bookings
-        .filter(b => b.session_date === todayStr && b.status !== 'cancelled')
+        .filter(b => b.session_date === todayStr && (b.status === 'pending' || b.status === 'confirmed'))
         .sort((a, b) => (a.session_time || '').localeCompare(b.session_time || ''));
       const futureActive = bookings
         .filter(b => (b.session_date || '') > todayStr && (b.status === 'pending' || b.status === 'confirmed'))
@@ -100,7 +100,7 @@ export default function DashboardHome() {
   const buildPendingByDay = (bookingsArr) => {
     const todayStr = new Date().toISOString().split('T')[0];
     const todayBookings = bookingsArr
-      .filter(b => b.session_date === todayStr && b.status !== 'cancelled')
+      .filter(b => b.session_date === todayStr && (b.status === 'pending' || b.status === 'confirmed'))
       .sort((a, b) => (a.session_time || '').localeCompare(b.session_time || ''));
     const futureActive = bookingsArr
       .filter(b => (b.session_date || '') > todayStr && (b.status === 'pending' || b.status === 'confirmed'))
