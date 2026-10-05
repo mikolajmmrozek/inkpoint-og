@@ -56,14 +56,16 @@ export default function DashboardHome() {
       // Today: show ALL sessions (except cancelled) for day-of operations
       // Future: pending + confirmed only, limited to 10
       // Past overdue: only pending/confirmed sessions that still need action
+      // Only sessions that still need action: not completed, not cancelled, not settled.
+      const needsAction = b => !b.is_settled && b.status !== 'completed' && b.status !== 'cancelled';
       const todayBookings = bookings
-        .filter(b => b.session_date === todayStr && (b.status === 'pending' || b.status === 'confirmed'))
+        .filter(b => b.session_date === todayStr && needsAction(b))
         .sort((a, b) => (a.session_time || '').localeCompare(b.session_time || ''));
       const futureActive = bookings
-        .filter(b => (b.session_date || '') > todayStr && (b.status === 'pending' || b.status === 'confirmed'))
+        .filter(b => (b.session_date || '') > todayStr && needsAction(b))
         .sort((a, b) => (a.session_date || '').localeCompare(b.session_date || '') || (a.session_time || '').localeCompare(b.session_time || ''));
       const pastOverdue = bookings
-        .filter(b => (b.session_date || '') < todayStr && (b.status === 'pending' || b.status === 'confirmed'))
+        .filter(b => (b.session_date || '') < todayStr && needsAction(b))
         .sort((a, b) => (b.session_date || '').localeCompare(a.session_date || '') || (a.session_time || '').localeCompare(b.session_time || ''));
       const futureLimited = futureActive.slice(0, 10);
       const grouped = {};
@@ -99,15 +101,16 @@ export default function DashboardHome() {
 
   const buildPendingByDay = (bookingsArr) => {
     const todayStr = new Date().toISOString().split('T')[0];
+    const needsAction = b => !b.is_settled && b.status !== 'completed' && b.status !== 'cancelled';
     const todayBookings = bookingsArr
-      .filter(b => b.session_date === todayStr && (b.status === 'pending' || b.status === 'confirmed'))
+      .filter(b => b.session_date === todayStr && needsAction(b))
       .sort((a, b) => (a.session_time || '').localeCompare(b.session_time || ''));
     const futureActive = bookingsArr
-      .filter(b => (b.session_date || '') > todayStr && (b.status === 'pending' || b.status === 'confirmed'))
+      .filter(b => (b.session_date || '') > todayStr && needsAction(b))
       .sort((a, b) => (a.session_date || '').localeCompare(b.session_date || '') || (a.session_time || '').localeCompare(b.session_time || ''));
-    // Past overdue: only sessions that still need action (pending or confirmed).
+    // Past overdue: only sessions that still need action.
     const pastOverdue = bookingsArr
-      .filter(b => (b.session_date || '') < todayStr && (b.status === 'pending' || b.status === 'confirmed'))
+      .filter(b => (b.session_date || '') < todayStr && needsAction(b))
       .sort((a, b) => (b.session_date || '').localeCompare(a.session_date || '') || (a.session_time || '').localeCompare(b.session_time || ''));
     const futureLimited = futureActive.slice(0, 10);
     const grouped = {};
