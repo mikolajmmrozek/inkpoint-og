@@ -55,10 +55,11 @@ export default async function(req: Request): Promise<Response> {
       } catch (e) { /* default to no account */ }
     }
 
-    // Links
+    // Links — the form preview deep-links into the client panel with the form_id,
+    // which auto-opens the full printable PDF document for this specific form.
     const panelLink = `${APP_URL}/panel`;
     const loginLink = `${APP_URL}/`;
-    const formPreviewLink = `${APP_URL}/panel/health-forms`;
+    const formPreviewLink = `${APP_URL}/panel/health-forms?form_id=${form.id}`;
 
     // Booking detail rows
     const bookingRows: string[] = [];
