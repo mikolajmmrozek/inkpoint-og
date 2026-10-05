@@ -8,11 +8,9 @@ import {
 const TRACKED_FIELDS = [
   { key: 'session_date', label: 'Data' },
   { key: 'session_time', label: 'Godzina' },
-  { key: 'session_end_time', label: 'Godzina zakończenia' },
   { key: 'artist_name', label: 'Artysta' },
   { key: 'service_name', label: 'Usługa' },
   { key: 'tattoo_placement', label: 'Miejsce' },
-  { key: 'estimated_price', label: 'Cena' },
 ];
 
 function fmtValue(key: string, v: any) {
