@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Upload, Loader2, Edit2, Check, Hand } from 'lucide-react';
+import { X, Upload, Loader2, Check, Hand, Pencil } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 const MAX_IMAGES = 10;
@@ -105,9 +105,30 @@ export default function SessionDetailModal({ booking, theme, priceLabel, onClose
               {booking.session_date || '—'}{booking.session_time ? ` · ${booking.session_time}` : ''}
             </h3>
           </div>
-          <button onClick={onClose} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '8px' }}>
-            <X size={18} />
-          </button>
+          <div className="flex items-center gap-2">
+            {isEditable && !editing && (
+              <button
+                onClick={startEdit}
+                className="flex items-center gap-2"
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '9px',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  padding: '8px 14px',
+                  border: `0.5px solid ${t.fuchsia}`,
+                  color: t.fuchsia,
+                  background: 'transparent',
+                  cursor: 'pointer',
+                }}
+              >
+                <Pencil size={12} /> EDYTUJ
+              </button>
+            )}
+            <button onClick={onClose} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '8px' }}>
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         <div className="p-5 space-y-6">
@@ -119,18 +140,11 @@ export default function SessionDetailModal({ booking, theme, priceLabel, onClose
               <div><p style={labelStyle}>Usługa</p><p style={{ color: t.text }}>{booking.service_name}</p></div>
             )}
 
-            {/* Miejsce na ciele — editable */}
+            {/* Miejsce na ciele */}
             <div>
-              <div className="flex items-center justify-between" style={{ marginBottom: '4px' }}>
-                <div className="flex items-center gap-1.5">
-                  <Hand size={11} color={t.muted} />
-                  <p style={labelStyle}>Miejsce na ciele</p>
-                </div>
-                {isEditable && !editing && (
-                  <button onClick={startEdit} title="Edytuj" style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: 0, display: 'flex' }}>
-                    <Edit2 size={11} />
-                  </button>
-                )}
+              <div className="flex items-center gap-1.5" style={{ marginBottom: '4px' }}>
+                <Hand size={11} color={t.muted} />
+                <p style={labelStyle}>Miejsce na ciele</p>
               </div>
               {editing ? (
                 <input
@@ -155,16 +169,9 @@ export default function SessionDetailModal({ booking, theme, priceLabel, onClose
             </div>
           </div>
 
-          {/* Opis projektu — editable */}
+          {/* Opis projektu */}
           <div>
-            <div className="flex items-center justify-between" style={{ marginBottom: '4px' }}>
-              <p style={labelStyle}>Opis projektu</p>
-              {isEditable && !editing && (
-                <button onClick={startEdit} title="Edytuj" style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: 0, display: 'flex' }}>
-                  <Edit2 size={11} />
-                </button>
-              )}
-            </div>
+            <p style={{ ...labelStyle, marginBottom: '4px' }}>Opis projektu</p>
             {editing ? (
               <textarea
                 value={descDraft}
@@ -175,11 +182,9 @@ export default function SessionDetailModal({ booking, theme, priceLabel, onClose
               />
             ) : booking.tattoo_description ? (
               <p style={{ fontSize: '13px', color: t.text, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{booking.tattoo_description}</p>
-            ) : isEditable ? (
-              <button onClick={startEdit} style={{ fontSize: '12px', color: t.muted, background: 'none', border: `0.5px dashed ${t.border}`, padding: '12px', width: '100%', cursor: 'pointer', textAlign: 'left' }}>
-                + Dodaj opis projektu
-              </button>
-            ) : null}
+            ) : (
+              <p style={{ fontSize: '13px', color: t.muted, fontStyle: 'italic' }}>— brak opisu</p>
+            )}
           </div>
 
           <div>
