@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { useAuth } from '@/lib/AuthContext';
@@ -1061,6 +1061,19 @@ export default function ArtistSchedule() {
   // Realtime — grafik i sesje odświeżają się na żywo
   useRealtimeSync('Booking', () => loadBookings(), [artist?.id]);
   useRealtimeSync('ArtistAvailability', () => loadAvailability(), [artist?.id]);
+
+  // Deep link from a notification: open the booking's modal and jump to its day.
+  const [searchParams] = useSearchParams();
+  const pendingBookingId = searchParams.get('booking_id');
+  useEffect(() => {
+    if (loading || bookings.length === 0) return;
+    if (!pendingBookingId) return;
+    const found = bookings.find(b => b.id === pendingBookingId);
+    if (found) {
+      if (found.session_date) setSelectedDate(new Date(found.session_date));
+      setSelectedBooking(found);
+    }
+  }, [loading, bookings, pendingBookingId]);
 
   const handleDayClick = (day) => {
     setSelectedDate(day);

@@ -264,11 +264,17 @@ export default function DashboardBookings() {
     }
   };
 
+  // Deep link from a notification: open the booking's detail panel and jump to its day.
+  const pendingBookingId = searchParams.get('booking_id');
   useEffect(() => {
-    if (loadedOnce.current) return;
-    loadedOnce.current = true;
-    load();
-  }, []);
+    if (loading || bookings.length === 0) return;
+    if (!pendingBookingId) return;
+    const found = bookings.find(b => b.id === pendingBookingId);
+    if (found) {
+      if (found.session_date) setSelectedDate(new Date(found.session_date));
+      setSelected(found);
+    }
+  }, [loading, bookings, pendingBookingId]);
 
   const updateStatus = async (id, status) => {
     await base44.entities.Booking.update(id, { status });

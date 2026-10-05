@@ -143,13 +143,21 @@ Deno.serve(async (req) => {
         }
         const changeSummary = changes.join(', ');
 
+        // Deep link straight to the booking + its day so the admin/artist lands on it.
+        const adminLink = booking.session_date
+          ? `/dashboard/bookings?booking_id=${booking.id}&date=${booking.session_date}`
+          : `/dashboard/bookings?booking_id=${booking.id}`;
+        const artistLink = booking.session_date
+          ? `/artist/schedule?booking_id=${booking.id}&date=${booking.session_date}`
+          : `/artist/schedule?booking_id=${booking.id}`;
+
         // Notify admins (shared inbox)
         notifications.push({
           target_email: 'tattoo.wolsztyn@gmail.com',
           title: 'Klient zaktualizował szczegóły sesji',
           message: `${booking.client_name || 'Klient'} — ${booking.session_date || '—'}${booking.session_time ? ' o ' + booking.session_time : ''}: ${changeSummary}`,
           category: 'booking',
-          link_path: '/dashboard/bookings',
+          link_path: adminLink,
           is_read: false,
           booking_id: booking.id,
         });
@@ -164,7 +172,7 @@ Deno.serve(async (req) => {
                 title: 'Klient zaktualizował szczegóły sesji',
                 message: `${booking.client_name || 'Klient'} — ${booking.session_date || '—'}${booking.session_time ? ' o ' + booking.session_time : ''}: ${changeSummary}`,
                 category: 'booking',
-                link_path: '/artist/schedule',
+                link_path: artistLink,
                 is_read: false,
                 booking_id: booking.id,
               });
