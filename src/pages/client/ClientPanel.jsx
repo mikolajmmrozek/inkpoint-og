@@ -163,7 +163,7 @@ export default function ClientPanel() {
   return (
     <ClientThemeContext.Provider value={{ theme, toggleTheme, client }}>
       <CreateMenuProvider role="user" theme={theme}>
-      <div className="min-h-screen flex" style={{ background: bg, color: textColor }}>
+      <div className="min-h-screen flex" data-theme={theme} style={{ background: bg, color: textColor }}>
         <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} theme={theme} toggleTheme={toggleTheme} clientName={clientName} userEmail={user.email} />
         <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
           <div className="flex items-center gap-4 px-6 py-4" style={{ borderBottom: `0.5px solid ${border}`, background: topBarBg }}>

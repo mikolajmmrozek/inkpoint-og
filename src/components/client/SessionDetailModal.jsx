@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Upload, Loader2, Edit2, Check } from 'lucide-react';
+import { X, Upload, Loader2, Edit2, Check, Hand } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 const MAX_IMAGES = 10;
@@ -8,8 +8,7 @@ export default function SessionDetailModal({ booking, theme, priceLabel, onClose
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const [lightbox, setLightbox] = useState(null);
-  const [editingDesc, setEditingDesc] = useState(false);
-  const [editingPlace, setEditingPlace] = useState(false);
+  const [editing, setEditing] = useState(false);
   const [descDraft, setDescDraft] = useState(booking.tattoo_description || '');
   const [placeDraft, setPlaceDraft] = useState(booking.tattoo_placement || '');
   const [saving, setSaving] = useState(false);
@@ -24,39 +23,43 @@ export default function SessionDetailModal({ booking, theme, priceLabel, onClose
   // Only allow editing upcoming, non-cancelled sessions.
   const isEditable = booking.status !== 'cancelled' && booking.status !== 'completed';
 
+  const hasDescChanged = descDraft !== (booking.tattoo_description || '');
+  const hasPlaceChanged = placeDraft !== (booking.tattoo_placement || '');
+  const hasChanges = hasDescChanged || hasPlaceChanged;
+
+  const startEdit = () => {
+    setDescDraft(booking.tattoo_description || '');
+    setPlaceDraft(booking.tattoo_placement || '');
+    setEditing(true);
+  };
+
+  const cancelEdit = () => {
+    setDescDraft(booking.tattoo_description || '');
+    setPlaceDraft(booking.tattoo_placement || '');
+    setEditing(false);
+  };
+
   const saveImages = async (next) => {
     const updated = await base44.entities.Booking.update(booking.id, { reference_images: next });
     onUpdated(updated);
   };
 
-  const saveDesc = async () => {
+  const handleSave = async () => {
+    if (!hasChanges) return;
     setSaving(true);
     try {
-      const updated = await base44.entities.Booking.update(booking.id, { tattoo_description: descDraft });
+      const patch = {};
+      if (hasDescChanged) patch.tattoo_description = descDraft;
+      if (hasPlaceChanged) patch.tattoo_placement = placeDraft;
+      const updated = await base44.entities.Booking.update(booking.id, patch);
       onUpdated(updated);
-      setEditingDesc(false);
+      setEditing(false);
     } catch (e) {
-      setError('Błąd zapisu opisu');
+      setError('Błąd zapisu');
     } finally {
       setSaving(false);
     }
   };
-
-  const savePlace = async () => {
-    setSaving(true);
-    try {
-      const updated = await base44.entities.Booking.update(booking.id, { tattoo_placement: placeDraft });
-      onUpdated(updated);
-      setEditingPlace(false);
-    } catch (e) {
-      setError('Błąd zapisu miejsca');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const startEditDesc = () => { setDescDraft(booking.tattoo_description || ''); setEditingDesc(true); };
-  const startEditPlace = () => { setPlaceDraft(booking.tattoo_placement || ''); setEditingPlace(true); };
 
   const handleUpload = async (e) => {
     const files = Array.from(e.target.files || []);
@@ -84,7 +87,7 @@ export default function SessionDetailModal({ booking, theme, priceLabel, onClose
   const inputStyle = {
     width: '100%',
     background: 'transparent',
-    border: `0.5px solid ${t.fuchsia}`,
+    border: `0.5px solid ${t.border}`,
     color: t.text,
     padding: '8px 10px',
     fontSize: '13px',
@@ -116,35 +119,28 @@ export default function SessionDetailModal({ booking, theme, priceLabel, onClose
               <div><p style={labelStyle}>Usługa</p><p style={{ color: t.text }}>{booking.service_name}</p></div>
             )}
 
-            {/* Miejsce — editable */}
+            {/* Miejsce na ciele — editable */}
             <div>
               <div className="flex items-center justify-between" style={{ marginBottom: '4px' }}>
-                <p style={labelStyle}>Miejsce</p>
-                {isEditable && !editingPlace && (
-                  <button onClick={startEditPlace} title="Edytuj" style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: 0, display: 'flex' }}>
+                <div className="flex items-center gap-1.5">
+                  <Hand size={11} color={t.muted} />
+                  <p style={labelStyle}>Miejsce na ciele</p>
+                </div>
+                {isEditable && !editing && (
+                  <button onClick={startEdit} title="Edytuj" style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: 0, display: 'flex' }}>
                     <Edit2 size={11} />
                   </button>
                 )}
               </div>
-              {editingPlace ? (
-                <div className="space-y-2">
-                  <input
-                    type="text"
-                    value={placeDraft}
-                    onChange={e => setPlaceDraft(e.target.value)}
-                    placeholder="np. przedramię, lewe ramię..."
-                    autoFocus
-                    style={inputStyle}
-                  />
-                  <div className="flex gap-2">
-                    <button onClick={savePlace} disabled={saving} style={{ background: 'var(--brand)', color: '#fff', border: 'none', padding: '6px 14px', fontSize: '9px', fontFamily: 'var(--font-mono)', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: saving ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      {saving ? <Loader2 size={11} className="animate-spin" /> : <Check size={11} />} Zapisz
-                    </button>
-                    <button onClick={() => setEditingPlace(false)} disabled={saving} style={{ background: 'none', border: `0.5px solid ${t.border}`, color: t.muted, padding: '6px 14px', fontSize: '9px', fontFamily: 'var(--font-mono)', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer' }}>
-                      Anuluj
-                    </button>
-                  </div>
-                </div>
+              {editing ? (
+                <input
+                  type="text"
+                  value={placeDraft}
+                  onChange={e => setPlaceDraft(e.target.value)}
+                  placeholder="np. przedramię, lewe ramię..."
+                  autoFocus
+                  style={inputStyle}
+                />
               ) : (
                 <p style={{ color: t.text }}>{booking.tattoo_placement || (isEditable ? '— dodaj miejsce' : '—')}</p>
               )}
@@ -163,40 +159,27 @@ export default function SessionDetailModal({ booking, theme, priceLabel, onClose
           <div>
             <div className="flex items-center justify-between" style={{ marginBottom: '4px' }}>
               <p style={labelStyle}>Opis projektu</p>
-              {isEditable && !editingDesc && (
-                <button onClick={startEditDesc} title="Edytuj" style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: 0, display: 'flex' }}>
+              {isEditable && !editing && (
+                <button onClick={startEdit} title="Edytuj" style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: 0, display: 'flex' }}>
                   <Edit2 size={11} />
                 </button>
               )}
             </div>
-            {editingDesc ? (
-              <div className="space-y-2">
-                <textarea
-                  value={descDraft}
-                  onChange={e => setDescDraft(e.target.value)}
-                  placeholder="Opisz swój projekt, styl, kolory, wielkość..."
-                  autoFocus
-                  rows={5}
-                  style={{ ...inputStyle, resize: 'vertical', minHeight: '120px' }}
-                />
-                <div className="flex gap-2">
-                  <button onClick={saveDesc} disabled={saving} style={{ background: 'var(--brand)', color: '#fff', border: 'none', padding: '6px 14px', fontSize: '9px', fontFamily: 'var(--font-mono)', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: saving ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    {saving ? <Loader2 size={11} className="animate-spin" /> : <Check size={11} />} Zapisz
-                  </button>
-                  <button onClick={() => setEditingDesc(false)} disabled={saving} style={{ background: 'none', border: `0.5px solid ${t.border}`, color: t.muted, padding: '6px 14px', fontSize: '9px', fontFamily: 'var(--font-mono)', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer' }}>
-                    Anuluj
-                  </button>
-                </div>
-              </div>
-            ) : (
-              booking.tattoo_description ? (
-                <p style={{ fontSize: '13px', color: t.text, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{booking.tattoo_description}</p>
-              ) : isEditable ? (
-                <button onClick={startEditDesc} style={{ fontSize: '12px', color: t.muted, background: 'none', border: `0.5px dashed ${t.border}`, padding: '12px', width: '100%', cursor: 'pointer', textAlign: 'left' }}>
-                  + Dodaj opis projektu
-                </button>
-              ) : null
-            )}
+            {editing ? (
+              <textarea
+                value={descDraft}
+                onChange={e => setDescDraft(e.target.value)}
+                placeholder="Opisz swój projekt, styl, kolory, wielkość..."
+                rows={5}
+                style={{ ...inputStyle, resize: 'vertical', minHeight: '120px' }}
+              />
+            ) : booking.tattoo_description ? (
+              <p style={{ fontSize: '13px', color: t.text, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{booking.tattoo_description}</p>
+            ) : isEditable ? (
+              <button onClick={startEdit} style={{ fontSize: '12px', color: t.muted, background: 'none', border: `0.5px dashed ${t.border}`, padding: '12px', width: '100%', cursor: 'pointer', textAlign: 'left' }}>
+                + Dodaj opis projektu
+              </button>
+            ) : null}
           </div>
 
           <div>
@@ -238,6 +221,43 @@ export default function SessionDetailModal({ booking, theme, priceLabel, onClose
             )}
           </div>
         </div>
+
+        {/* Single save bar for both fields */}
+        {editing && (
+          <div className="flex items-center gap-3 p-5" style={{ borderTop: `0.5px solid ${t.border}` }}>
+            <button
+              onClick={handleSave}
+              disabled={saving || !hasChanges}
+              className="btn-oxblood flex items-center gap-2"
+              style={{ opacity: (saving || !hasChanges) ? 0.5 : 1, cursor: (saving || !hasChanges) ? 'default' : 'pointer' }}
+            >
+              {saving ? <><Loader2 size={13} className="animate-spin" /> ZAPISYWANIE...</> : <><Check size={13} /> ZAPISZ ZMIANY</>}
+            </button>
+            <button
+              onClick={cancelEdit}
+              disabled={saving}
+              style={{
+                fontSize: '10px',
+                fontFamily: 'var(--font-mono)',
+                fontWeight: 500,
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                padding: '13px 31px',
+                background: 'transparent',
+                color: t.text,
+                border: `0.5px solid ${t.text}`,
+                cursor: 'pointer',
+              }}
+            >
+              ANULUJ
+            </button>
+            {!hasChanges && (
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>
+                Brak zmian do zapisania
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {lightbox && (
