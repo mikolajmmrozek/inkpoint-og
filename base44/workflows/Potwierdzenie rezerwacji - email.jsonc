@@ -1,0 +1,38 @@
+{
+  "name": "Potwierdzenie rezerwacji \u2014 email",
+  "description": "Po utworzeniu rezerwacji wysy\u0142a klientowi potwierdzenie z danymi sesji i wezwaniem do logowania lub za\u0142o\u017cenia konta.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "Booking"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "booking_confirmation_email",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "send_confirmation": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendBookingConfirmationEmail",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Wy\u015blij potwierdzenie rezerwacji",
+            "description": "Email z danymi sesji i CTA do logowania/konta"
+          }
+        }
+      }
+    ]
+  }
+}

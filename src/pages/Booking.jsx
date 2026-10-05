@@ -163,11 +163,8 @@ export default function Booking() {
     delete bookingData.client_last_name;
     try {
       const booking = await base44.entities.Booking.create(bookingData);
-      try {
-        await base44.functions.invoke('sendBookingConfirmationEmail', { bookingId: booking.id });
-      } catch (e) {
-        console.warn('Email send failed:', e);
-      }
+      // Confirmation email is sent by the "Potwierdzenie rezerwacji — email" workflow
+      // on every booking creation — no need to invoke it inline (would duplicate).
       setSubmitting(false);
       setSubmitted(true);
     } catch (err) {
