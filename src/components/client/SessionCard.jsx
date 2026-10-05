@@ -1,6 +1,6 @@
 import { format, parseISO, isAfter, isToday } from 'date-fns';
 import { pl } from 'date-fns/locale';
-import { Clock, User, MapPin, MessageSquare, RefreshCw, Eye } from 'lucide-react';
+import { Clock, User, Hand, MessageSquare, RefreshCw, Eye } from 'lucide-react';
 
 const STATUS_LABELS = { pending: 'Oczekująca', confirmed: 'Potwierdzona', completed: 'Zakończona', cancelled: 'Anulowana' };
 
@@ -41,7 +41,7 @@ export default function SessionCard({ booking, theme = 'dark', priceLabel, onCha
             )}
             {booking.tattoo_placement && (
               <span className="flex items-center gap-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted }}>
-                <MapPin size={10} /> {booking.tattoo_placement}
+                <Hand size={10} /> {booking.tattoo_placement}
               </span>
             )}
           </div>
