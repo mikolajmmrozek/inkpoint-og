@@ -2,7 +2,7 @@
   "name": "Anulowanie rezerwacji \u2014 email",
   "description": "Wysy\u0142a klientowi maila o anulowaniu rezerwacji, gdy status bookinga zmieni si\u0119 na 'cancelled'. Zawiera przycisk 'Um\u00f3w ponownie' oraz dane kontaktowe studia.",
   "trigger": {
-    "condition": "${ (.trigger.event == \"update\") and (.trigger.changed_fields | index(\"status\") != null) and (.trigger.data.status == \"cancelled\") }",
+    "condition": "${ (.trigger.event_type == \"update\") and (.trigger.changed_fields | index(\"status\") != null) and (.trigger.data.status == \"cancelled\") }",
     "config": {
       "trigger_type": "entity",
       "events": [
@@ -15,7 +15,7 @@
     "document": {
       "dsl": "1.0.0",
       "name": "booking_cancellation_email",
-      "version": "1.0",
+      "version": "1.1",
       "namespace": "base44"
     },
     "do": [

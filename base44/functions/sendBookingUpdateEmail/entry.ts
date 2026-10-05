@@ -41,7 +41,7 @@ export default async function(req: Request): Promise<Response> {
     }
 
     // Only send on actual update events (not create — that's the confirmation email's job).
-    const eventType = body.event?.type;
+    const eventType = body.event_type || body.event?.type;
     if (eventType === 'create') {
       return Response.json({ success: true, skipped: true, reason: 'create-not-update' });
     }

@@ -2,7 +2,7 @@
   "name": "Potwierdzenie rezerwacji \u2014 email",
   "description": "Wysy\u0142a klientowi potwierdzenie z danymi sesji, gdy rezerwacja uzyska status 'confirmed': przy tworzeniu rezerwacji r\u0119cznej (admin/artysta \u2014 status od razu confirmed) albo przy zmianie statusu na confirmed (potwierdzenie rezerwacji z formularza online).",
   "trigger": {
-    "condition": "${ (.trigger.event == \"create\") or ((.trigger.event == \"update\") and (.trigger.changed_fields | index(\"status\") != null)) }",
+    "condition": "${ (((.trigger.event_type == \"create\") or ((.trigger.event_type == \"update\") and (.trigger.changed_fields | index(\"status\") != null))) and (.trigger.data.status == \"confirmed\")) }",
     "config": {
       "trigger_type": "entity",
       "events": [
@@ -16,7 +16,7 @@
     "document": {
       "dsl": "1.0.0",
       "name": "booking_confirmation_email",
-      "version": "1.3",
+      "version": "1.4",
       "namespace": "base44"
     },
     "do": [
@@ -27,14 +27,14 @@
             "function_name": "sendBookingConfirmationEmail",
             "args": {
               "bookingId": "${ .trigger.data.id }",
-              "event": "${ .trigger.event }",
+              "event_type": "${ .trigger.event_type }",
               "mode": "confirmed"
             }
           },
           "then": "end",
           "x-base44": {
             "title": "Wy\u015blij potwierdzenie rezerwacji",
-            "description": "Email \u201eTwoja rezerwacja jest potwierdzona\u201d \u2014 wysy\u0142any, gdy booking.status === 'confirmed' (sprawdzane wewn\u0105trz funkcji)."
+            "description": "Email \u201eTwoja rezerwacja jest potwierdzona\u201d \u2014 wysy\u0142any, gdy rezerwacja ma status 'confirmed'."
           }
         }
       }

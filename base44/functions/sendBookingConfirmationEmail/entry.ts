@@ -19,12 +19,7 @@ export default async function(req: Request): Promise<Response> {
       return Response.json({ success: false, error: 'No booking data' }, { status: 400 });
     }
 
-    // Only send to clients — never when the creator is the client themselves (online form
-    // already shows a success screen). We still send for dashboard/artist-created bookings.
-    const isClientCreated = booking.source === 'online_form' && body.event?.type !== 'create';
-    if (isClientCreated) {
-      return Response.json({ success: true, skipped: true });
-    }
+    const eventType = body.event_type || body.event?.type;
 
     // Two distinct messages:
     // 1) "oczekująca"  — sent when an online-form booking is first created (status pending)
@@ -44,7 +39,7 @@ export default async function(req: Request): Promise<Response> {
       return Response.json({ success: true, skipped: true, reason: `status=${booking.status}, source=${booking.source}` });
     }
     // Don't send the "oczekująca" notice on updates — only at creation.
-    if (mode === 'pending' && body.event?.type && body.event.type !== 'create') {
+    if (mode === 'pending' && eventType && eventType !== 'create') {
       return Response.json({ success: true, skipped: true, reason: 'pending-only-on-create' });
     }
     // Don't re-send the "potwierdzona" notice on every update — only when status changed.

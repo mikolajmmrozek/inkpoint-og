@@ -1,8 +1,8 @@
 {
   "name": "Aktualizacja rezerwacji \u2014 email",
-  "description": "Wysy\u0142a klientowi maila o zmianie szczeg\u00f3\u0142\u00f3w rezerwacji (data, godzina, artysta, miejsce itp.), gdy studio zaktualizuje istniej\u0105c\u0105 rezerwacj\u0119. Pomija zmiany samego statusu (te obs\u0142uguje mail potwierdzaj\u0105cy) oraz anulowania (te maj\u0105 w\u0142asny mail).",
+  "description": "Wysy\u0142a klientowi jednego maila o zmianie szczeg\u00f3\u0142\u00f3w rezerwacji (data, godzina, artysta, miejsce itp.), gdy studio zaktualizuje istniej\u0105c\u0105 rezerwacj\u0119. Pomija anulowania (maj\u0105 w\u0142asny mail) oraz zmiany, kt\u00f3re nie dotycz\u0105 szczeg\u00f3\u0142\u00f3w sesji.",
   "trigger": {
-    "condition": "${ (.trigger.event == \"update\") and (.trigger.data.status != \"cancelled\") }",
+    "condition": "${ (.trigger.event_type == \"update\") and (.trigger.data.status != \"cancelled\") and any((.trigger.changed_fields // [])[]; IN(\"session_date\",\"session_time\",\"session_end_time\",\"artist_name\",\"service_name\",\"tattoo_placement\",\"estimated_price\")) }",
     "config": {
       "trigger_type": "entity",
       "events": [
@@ -15,7 +15,7 @@
     "document": {
       "dsl": "1.0.0",
       "name": "booking_update_email",
-      "version": "1.2",
+      "version": "1.3",
       "namespace": "base44"
     },
     "do": [
@@ -26,7 +26,7 @@
             "function_name": "sendBookingUpdateEmail",
             "args": {
               "bookingId": "${ .trigger.data.id }",
-              "event": "${ .trigger.event }",
+              "event_type": "${ .trigger.event_type }",
               "changed_fields": "${ .trigger.changed_fields }",
               "old_data": "${ .trigger.old_data }"
             }
@@ -34,7 +34,7 @@
           "then": "end",
           "x-base44": {
             "title": "Wy\u015blij aktualizacj\u0119 rezerwacji",
-            "description": "Email o zmianie szczeg\u00f3\u0142\u00f3w sesji \u2014 wysy\u0142any, gdy studio zmieni dat\u0119, godzin\u0119 lub inne szczeg\u00f3\u0142y rezerwacji."
+            "description": "Jeden email o zmianie szczeg\u00f3\u0142\u00f3w sesji (np. data i godzina razem)."
           }
         }
       }
