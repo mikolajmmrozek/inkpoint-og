@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Loader2, Shield, KeyRound, Check, Mail, Apple, Edit3 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
-export default function AccountSecurity({ user, t }) {
+export default function AccountSecurity({ user, client, t }) {
   const [editing, setEditing] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -11,7 +11,7 @@ export default function AccountSecurity({ user, t }) {
   const [changed, setChanged] = useState(false);
   const [error, setError] = useState('');
 
-  const authProvider = user?.auth_provider || user?.provider || user?.oauth_provider;
+  const authProvider = client?.auth_provider || user?.auth_provider || user?.provider || user?.oauth_provider;
   const isSocialLogin = authProvider && ['google', 'apple', 'facebook'].includes(authProvider.toLowerCase());
 
   const handleSave = async () => {

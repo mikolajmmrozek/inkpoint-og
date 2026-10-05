@@ -58,6 +58,14 @@
       "type": "boolean",
       "default": false,
       "description": "Czy klient jest zablokowany \u2014 traci mo\u017cliwo\u015b\u0107 rezerwacji sesji i wysy\u0142ania wiadomo\u015bci, bez informowania o blokadzie"
+    },
+    "auth_provider": {
+      "type": "string",
+      "enum": [
+        "google",
+        "email"
+      ],
+      "description": "Dostawca logowania: google = logowanie przez Google OAuth, email = e-mail/has\u0142o"
     }
   },
   "required": [

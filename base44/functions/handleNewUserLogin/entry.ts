@@ -8,6 +8,19 @@ Deno.serve(async (req) => {
 
     let roleApplied = false;
 
+    // Mark the client's auth provider as Google on first login.
+    // The app uses Google OAuth exclusively — no password login is offered — so any
+    // newly authenticated user is a Google user. This lets the profile UI hide the
+    // password-change section (Google manages the password).
+    try {
+      const clients = await base44.asServiceRole.entities.Client.filter({ user_id: user.id });
+      if (clients.length > 0 && !clients[0].auth_provider) {
+        await base44.asServiceRole.entities.Client.update(clients[0].id, { auth_provider: 'google' });
+      }
+    } catch (e) {
+      console.error('Failed to set auth_provider on client:', e);
+    }
+
     // Check for pending staff invite by email
     const pending = await base44.asServiceRole.entities.PendingStaffInvite.filter({
       email: user.email

@@ -196,7 +196,7 @@ export default function ClientProfile() {
       </div>
 
       {/* ── BEZPIECZEŃSTWO ── */}
-      <AccountSecurity user={user} t={t} />
+      <AccountSecurity user={user} client={client} t={t} />
     </div>
   );
 }
