@@ -55,15 +55,19 @@ export default function DashboardHome() {
 
       // Today: show ALL sessions (except cancelled) for day-of operations
       // Future: pending + confirmed only, limited to 10
+      // Past overdue: only pending/confirmed sessions that still need action
       const todayBookings = bookings
         .filter(b => b.session_date === todayStr && b.status !== 'cancelled')
         .sort((a, b) => (a.session_time || '').localeCompare(b.session_time || ''));
       const futureActive = bookings
         .filter(b => (b.session_date || '') > todayStr && (b.status === 'pending' || b.status === 'confirmed'))
         .sort((a, b) => (a.session_date || '').localeCompare(b.session_date || '') || (a.session_time || '').localeCompare(b.session_time || ''));
+      const pastOverdue = bookings
+        .filter(b => (b.session_date || '') < todayStr && (b.status === 'pending' || b.status === 'confirmed'))
+        .sort((a, b) => (b.session_date || '').localeCompare(a.session_date || '') || (a.session_time || '').localeCompare(b.session_time || ''));
       const futureLimited = futureActive.slice(0, 10);
       const grouped = {};
-      [...todayBookings, ...futureLimited].forEach(b => {
+      [...pastOverdue, ...todayBookings, ...futureLimited].forEach(b => {
         const day = b.session_date || 'Brak daty';
         if (!grouped[day]) grouped[day] = [];
         grouped[day].push(b);
@@ -101,9 +105,13 @@ export default function DashboardHome() {
     const futureActive = bookingsArr
       .filter(b => (b.session_date || '') > todayStr && (b.status === 'pending' || b.status === 'confirmed'))
       .sort((a, b) => (a.session_date || '').localeCompare(b.session_date || '') || (a.session_time || '').localeCompare(b.session_time || ''));
+    // Past overdue: only sessions that still need action (pending or confirmed).
+    const pastOverdue = bookingsArr
+      .filter(b => (b.session_date || '') < todayStr && (b.status === 'pending' || b.status === 'confirmed'))
+      .sort((a, b) => (b.session_date || '').localeCompare(a.session_date || '') || (a.session_time || '').localeCompare(b.session_time || ''));
     const futureLimited = futureActive.slice(0, 10);
     const grouped = {};
-    [...todayBookings, ...futureLimited].forEach(b => {
+    [...pastOverdue, ...todayBookings, ...futureLimited].forEach(b => {
       const day = b.session_date || 'Brak daty';
       if (!grouped[day]) grouped[day] = [];
       grouped[day].push(b);
