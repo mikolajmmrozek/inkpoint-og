@@ -57,8 +57,9 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, user, onC
       session_date: b?.session_date || format(new Date(), 'yyyy-MM-dd'),
       session_time: b?.session_time || getDefaultSessionTime(), session_end_time: '', session_duration: 0,
       tattoo_description: '', tattoo_placement: '', estimated_price: '',
-      service_id: '', service_name: '', notes: '', status: 'pending', deposit_paid: false,
+      service_id: '', service_name: '', notes: '', status: 'confirmed', deposit_paid: false,
       artist_id: artist.id, artist_name: artist.name,
+      source: 'dashboard',
     };
   };
 

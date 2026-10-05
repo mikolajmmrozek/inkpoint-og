@@ -1,0 +1,42 @@
+{
+  "name": "Zg\u0142oszenie rezerwacji \u2014 email",
+  "description": "Wysy\u0142a klientowi maila \u201eoczekuj\u0105ca\u201d z danymi sesji, gdy rezerwacja zostanie utworzona przez formularz online (status pending). Studio potwierdza j\u0105 osobnym mailem z drugiego workflowu.",
+  "trigger": {
+    "condition": "${ (.trigger.event == \"create\") and (.trigger.data.source == \"online_form\") }",
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "Booking"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "booking_pending_email",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "send_pending_notice": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendBookingConfirmationEmail",
+            "args": {
+              "bookingId": "${ .trigger.data.id }",
+              "event": "${ .trigger.event }",
+              "mode": "pending"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Wy\u015blij zg\u0142oszenie rezerwacji",
+            "description": "Email \u201eOtrzymali\u015bmy Twoje zg\u0142oszenie\u201d \u2014 wysy\u0142any dla rezerwacji z formularza online (status pending)."
+          }
+        }
+      }
+    ]
+  }
+}

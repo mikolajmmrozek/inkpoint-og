@@ -91,13 +91,14 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
       notes: '',
       admin_notes: '',
       client_notes: '',
-      status: 'pending',
+      status: 'confirmed',
       deposit_amount: p?.deposit_amount || 0,
       estimated_price: p?.estimated_price || '',
       health_form_completed: false,
       service_id: p?.service_id || '',
       service_name: p?.service_name || '',
       reference_images: [],
+      source: 'dashboard',
     };
   };
   const [form, setForm] = useState(() => buildForm(booking));

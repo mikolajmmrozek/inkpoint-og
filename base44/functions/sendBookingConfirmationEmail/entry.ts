@@ -23,6 +23,30 @@ export default async function(req: Request): Promise<Response> {
       return Response.json({ success: true, skipped: true });
     }
 
+    // Two distinct messages:
+    // 1) "oczekująca"  — sent when an online-form booking is first created (status pending)
+    // 2) "potwierdzona" — sent when the booking becomes confirmed (manual booking, or
+    //    studio confirming a pending online booking).
+    // The caller can suggest a mode via body.mode ('pending' | 'confirmed'), but the
+    // actual booking status decides: a 'pending' suggestion only applies when the booking
+    // is still pending; a 'confirmed' suggestion only applies when it's confirmed.
+    let mode: 'pending' | 'confirmed';
+    if (booking.source === 'online_form' && booking.status === 'pending') {
+      // Online-form booking still awaiting studio confirmation.
+      mode = 'pending';
+    } else if (booking.status === 'confirmed') {
+      mode = 'confirmed';
+    } else {
+      // Neither pending-online nor confirmed — nothing to tell the client yet.
+      return Response.json({ success: true, skipped: true, reason: `status=${booking.status}, source=${booking.source}` });
+    }
+    // Don't send the "oczekująca" notice on updates — only at creation.
+    if (mode === 'pending' && body.event?.type && body.event.type !== 'create') {
+      return Response.json({ success: true, skipped: true, reason: 'pending-only-on-create' });
+    }
+    // Don't re-send the "potwierdzona" notice on every update — only when status changed.
+    // The workflow gates this (status must be in changed_fields), so we trust it.
+
     // Get studio settings
     const settings = await base44.asServiceRole.entities.SiteSettings.filter({ key: 'contact' });
     const contact = settings.length > 0 ? settings[0] : {};
@@ -153,7 +177,10 @@ export default async function(req: Request): Promise<Response> {
     if (contact.contact_instagram_url) contactRows.push(contactLine('Instagram', `<a href="${contact.contact_instagram_url}" style="${linkStyle}">${contact.contact_instagram || 'Znajdź nas'}</a>`));
     if (contact.contact_facebook_url) contactRows.push(contactLine('Facebook', `<a href="${contact.contact_facebook_url}" style="${linkStyle}">${contact.contact_facebook || 'Znajdź nas'}</a>`));
 
+    const isPendingMode = mode === 'pending';
+    const statusLabel = isPendingMode ? 'OCZEKUJE POTWIERDZENIA' : 'POTWIERDZONA';
     const detailRows: string[] = [
+      detailRow('Status', statusLabel),
       detailRow('Data', dateStr),
       detailRow('Godzina', timeStr),
     ];
@@ -194,7 +221,7 @@ export default async function(req: Request): Promise<Response> {
           <!-- Pink header band -->
           <tr>
             <td style="background:#FF007F;padding:28px 32px;">
-              <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;font-family:Arial,Helvetica,sans-serif;">Potwierdzenie Rezerwacji</h1>
+              <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;font-family:Arial,Helvetica,sans-serif;">${isPendingMode ? 'Otrzymaliśmy Twoje Zgłoszenie' : 'Twoja Rezerwacja Jest Potwierdzona'}</h1>
               <p style="margin:6px 0 0 0;color:#ffffff;font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;opacity:0.95;">Romans Tattoo &middot; Inkflow</p>
             </td>
           </tr>
@@ -203,7 +230,9 @@ export default async function(req: Request): Promise<Response> {
           <tr>
             <td style="padding:28px 32px 8px 32px;">
               <p style="${pStyle}">Cześć ${clientFirstName},</p>
-              <p style="${pStyle}">Otrzymaliśmy Twoje zgłoszenie rezerwacji. Oto szczegóły sesji:</p>
+              ${isPendingMode
+                ? `<p style="${pStyle}">Dziękujemy za zgłoszenie rezerwacji! Twoja sesja ma teraz status <strong style="color:#0a0a0a;">oczekująca</strong> — studio wkrótce ją potwierdzi. O szczegółach poinformujemy Cię w osobnej wiadomości. Oto dane, które podałeś:</p>`
+                : `<p style="${pStyle}">Twoja rezerwacja została <strong style="color:#0a0a0a;">potwierdzona</strong> przez studio. Cieszymy się na Twoją wizytę! Oto szczegóły sesji:</p>`}
             </td>
           </tr>
 
@@ -277,18 +306,23 @@ export default async function(req: Request): Promise<Response> {
     const { accessToken } = await base44.asServiceRole.connectors.getConnection('gmail');
 
     // Build RFC 2822 MIME message — Gmail's API requires base64url-encoded raw.
-    const subject = `Potwierdzenie rezerwacji — ${dateStr}`;
+    const subject = isPendingMode
+      ? `Otrzymaliśmy Twoje zgłoszenie rezerwacji — ${dateStr}`
+      : `Twoja rezerwacja jest potwierdzona — ${dateStr}`;
     const fromName = 'Romans Tattoo';
     const fromEmail = 'tattoo.wolsztyn@gmail.com';
     const toEmail = booking.client_email;
 
     // Plain-text alternative (multipart/alternative) for clients that don't render HTML.
     const textBody = [
-      `POTWIERDZENIE REZERWACJI — ROMANS TATTOO`,
+      isPendingMode ? `OTRZYMALIŚMY TWOJE ZGŁOSZENIE — ROMANS TATTOO` : `TWOJA REZERWACJA JEST POTWIERDZONA — ROMANS TATTOO`,
       ``,
       `Cześć ${clientFirstName},`,
-      `Otrzymaliśmy Twoje zgłoszenie rezerwacji. Oto szczegóły sesji:`,
+      isPendingMode
+        ? `Dziękujemy za zgłoszenie rezerwacji! Twoja sesja ma teraz status oczekująca — studio wkrótce ją potwierdzi. Oto dane, które podałeś:`
+        : `Twoja rezerwacja została potwierdzona przez studio. Oto szczegóły sesji:`,
       ``,
+      `  Status:     ${isPendingMode ? 'OCZEKUJE POTWIERDZENIA' : 'POTWIERDZONA'}`,
       `  Data:       ${dateStr}`,
       `  Godzina:    ${timeStr}`,
       booking.artist_name ? `  Tatuażysta: ${booking.artist_name}` : '',
