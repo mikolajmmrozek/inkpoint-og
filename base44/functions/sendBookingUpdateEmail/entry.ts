@@ -55,6 +55,11 @@ export default async function(req: Request): Promise<Response> {
     if (changedFields.includes('status') && changedFields.length === 1) {
       return Response.json({ success: true, skipped: true, reason: 'status-only' });
     }
+    // Cancellation has its own dedicated email — skip the generic update email when the
+    // booking was cancelled (even if other fields changed alongside status).
+    if (booking.status === 'cancelled') {
+      return Response.json({ success: true, skipped: true, reason: 'cancelled-has-own-email' });
+    }
 
     // Determine which tracked fields actually changed.
     const changed = TRACKED_FIELDS.filter(f => {
