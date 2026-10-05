@@ -68,6 +68,20 @@ export default function NotificationPanel({ open, onClose, userEmail, theme, not
     if (notif.category === 'message' && notif.link_data) {
       targetPath = `${notif.link_path}?email=${encodeURIComponent(notif.link_data)}`;
     }
+    // For booking notifications, ensure booking_id + date are in the URL so the
+    // destination page can deep-link straight to the session. Old notifications
+    // stored only "/dashboard/bookings" without the query string — reconstruct it.
+    if (notif.category === 'booking' && notif.booking_id) {
+      try {
+        const [base, qs] = (targetPath || '').split('?');
+        const params = new URLSearchParams(qs || '');
+        if (!params.get('booking_id')) {
+          params.set('booking_id', notif.booking_id);
+          if (notif.booking_date) params.set('date', notif.booking_date);
+          targetPath = `${base}?${params.toString()}`;
+        }
+      } catch (e) {}
+    }
     if (targetPath) {
       onClose();
       navigate(targetPath);
