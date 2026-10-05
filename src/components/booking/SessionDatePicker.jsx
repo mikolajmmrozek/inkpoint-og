@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getAvailabilityForDay } from '@/components/dashboard/ArtistScheduleEditor';
 
 const SLOT_INTERVAL = 15;
-const BOOKING_DURATION = 60;
+const DEFAULT_DURATION = 60;
 
 const DAY_SHORT = ['Nd', 'Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb'];
 const WEEKDAYS = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb', 'Nd'];
@@ -22,7 +22,7 @@ function minToTime(min) {
   return `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
 }
 
-export default function SessionDatePicker({ artistId, selectedDate, selectedTime, onDateChange, onTimeChange, serviceId }) {
+export default function SessionDatePicker({ artistId, selectedDate, selectedTime, onDateChange, onTimeChange, serviceId, durationOverride }) {
   const [availability, setAvailability] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,6 +48,10 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
 
   const getDayBookings = (dateStr) => bookings.filter(b => b.session_date === dateStr);
 
+  // Effective session duration: explicit override (editing an existing booking) → service
+  // duration → default 60 min.
+  const sessionDuration = durationOverride || service?.duration_minutes || DEFAULT_DURATION;
+
   // Returns array of { time, status: 'free' | 'booked' | 'outside' }
   const getAllSlots = (dateStr) => {
     const avail = getAvailabilityForDay(availability, artistId, dateStr);
@@ -61,10 +65,12 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
     const startHour = Math.floor(workStart / 60);
     const startAligned = startHour * 60; // may be before workStart
     const slots = [];
-    for (let t = startAligned; t + BOOKING_DURATION <= workEnd; t += SLOT_INTERVAL) {
+    for (let t = startAligned; t + sessionDuration <= workEnd; t += SLOT_INTERVAL) {
       const slotStart = t;
-      const slotEnd = t + BOOKING_DURATION;
+      const slotEnd = t + sessionDuration;
       const withinHours = slotStart >= workStart && slotEnd <= workEnd;
+      // A slot fits only if the whole session window is free — no collision with any
+      // existing booking. A 4h session needs a 4h gap, not just an empty 15-min slot.
       const hasOverlap = dayBk.some(b => {
         const bkStart = toMin(b.session_time);
         const bkEnd = toMin(b.session_end_time) || (bkStart + (b.session_duration || 60));
@@ -79,6 +85,21 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
   };
 
   const getAvailableSlots = (dateStr) => getAllSlots(dateStr).filter(s => s.status === 'free').map(s => s.time);
+
+  // Day availability level for the colored dots in the calendar.
+  // 'full'   = workday with no existing bookings → full availability (green)
+  // 'partial'= workday with some bookings but free slots still fit (orange)
+  // 'none'   = not a workday, too early, or no slot fits the session duration
+  const getDayStatus = (dateStr) => {
+    const avail = getAvailabilityForDay(availability, artistId, dateStr);
+    if (!avail.isWorkday) return 'none';
+    if (!isDateEarlyEnough(dateStr)) return 'none';
+    const dayBk = getDayBookings(dateStr);
+    const slots = getAllSlots(dateStr);
+    const hasFree = slots.some(s => s.status === 'free');
+    if (!hasFree) return 'none';
+    return dayBk.length === 0 ? 'full' : 'partial';
+  };
 
   const getMinBookingTime = () => {
     if (!service?.min_advance_booking || service.min_advance_booking.value === 0) return 0;
@@ -181,8 +202,10 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
               </button>
               {dayTiles.map(day => {
                 const dateStr = format(day, 'yyyy-MM-dd');
-                const hasSlots = isDayAvailable(dateStr);
+                const dayStatus = getDayStatus(dateStr);
+                const hasSlots = dayStatus !== 'none';
                 const isSelected = selectedDate === dateStr;
+                const dotColor = dayStatus === 'full' ? '#16a34a' : dayStatus === 'partial' ? '#f97316' : null;
                 return (
                   <button
                     key={dateStr}
@@ -191,12 +214,13 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
                     className="flex-shrink-0 transition-all duration-200"
                     style={{
                       minWidth: '72px',
-                      padding: '12px 8px',
+                      padding: '12px 8px 16px',
                       border: `0.5px solid ${isSelected ? 'var(--brand)' : hasSlots ? 'hsl(var(--border))' : 'hsl(var(--card))'}`,
                       background: isSelected ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent',
                       cursor: hasSlots ? 'pointer' : 'default',
                       opacity: hasSlots ? 1 : 0.25,
                       textAlign: 'center',
+                      position: 'relative',
                     }}
                   >
                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: isSelected ? 'var(--brand)' : 'rgb(var(--foreground-rgb) / 0.4)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
@@ -208,6 +232,9 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', color: 'rgb(var(--foreground-rgb) / 0.3)', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: '2px' }}>
                       {format(day, 'MMM', { locale: pl })}
                     </div>
+                    {dotColor && (
+                      <div style={{ position: 'absolute', bottom: '5px', left: '50%', transform: 'translateX(-50%)', width: '5px', height: '5px', borderRadius: '50%', background: dotColor }} />
+                    )}
                   </button>
                 );
               })}
@@ -319,9 +346,11 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
                 {calendarDays.map(day => {
                   const dateStr = format(day, 'yyyy-MM-dd');
                   const isPast = isBefore(day, today);
-                  const hasSlots = !isPast && isDayAvailable(dateStr);
+                  const dayStatus = !isPast ? getDayStatus(dateStr) : 'none';
+                  const hasSlots = dayStatus !== 'none';
                   const isSelected = selectedDate === dateStr;
                   const isTodayDate = isToday(day);
+                  const dotColor = dayStatus === 'full' ? '#16a34a' : dayStatus === 'partial' ? '#f97316' : null;
                   return (
                     <button
                       key={day.toISOString()}
@@ -338,8 +367,8 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
                         position: 'relative',
                       }}
                     >
-                      {hasSlots && !isSelected && (
-                        <div style={{ position: 'absolute', bottom: '3px', left: '50%', transform: 'translateX(-50%)', width: '4px', height: '4px', borderRadius: '50%', background: 'var(--brand)' }} />
+                      {dotColor && !isSelected && (
+                        <div style={{ position: 'absolute', bottom: '3px', left: '50%', transform: 'translateX(-50%)', width: '5px', height: '5px', borderRadius: '50%', background: dotColor }} />
                       )}
                       <span style={{
                         fontFamily: 'var(--font-mono)',
@@ -355,10 +384,14 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
               </div>
 
               {/* Legend */}
-              <div className="flex items-center gap-4 mt-4 pt-4" style={{ borderTop: '0.5px solid hsl(var(--border))' }}>
+              <div className="flex flex-wrap items-center gap-4 mt-4 pt-4" style={{ borderTop: '0.5px solid hsl(var(--border))' }}>
                 <div className="flex items-center gap-2">
-                  <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--brand)' }} />
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'rgb(var(--foreground-rgb) / 0.4)', letterSpacing: '0.08em' }}>WOLNE TERMINY</span>
+                  <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#16a34a' }} />
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'rgb(var(--foreground-rgb) / 0.4)', letterSpacing: '0.08em' }}>PEŁNA DOSTĘPNOŚĆ</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#f97316' }} />
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'rgb(var(--foreground-rgb) / 0.4)', letterSpacing: '0.08em' }}>CZĘŚCIOWA</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div style={{ width: '8px', height: '1px', background: 'rgb(var(--foreground-rgb) / 0.15)' }} />

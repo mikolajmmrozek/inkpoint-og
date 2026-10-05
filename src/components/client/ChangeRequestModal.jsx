@@ -85,6 +85,7 @@ export default function ChangeRequestModal({ booking, theme = 'dark', onClose, o
           selectedTime={newTime}
           onDateChange={setNewDate}
           onTimeChange={setNewTime}
+          durationOverride={booking.session_duration}
         />
 
         <div className="mt-6 pt-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
