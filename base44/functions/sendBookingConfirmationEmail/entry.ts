@@ -191,8 +191,8 @@ export default async function(req: Request): Promise<Response> {
           <!-- Pink header band -->
           <tr>
             <td style="background:#FF007F;padding:28px 32px;">
-              <h1 style="margin:0;color:#0a0a0a;font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;font-family:Arial,Helvetica,sans-serif;">Potwierdzenie Rezerwacji</h1>
-              <p style="margin:6px 0 0 0;color:#0a0a0a;font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;opacity:0.85;">Romans Tattoo &middot; Inkflow</p>
+              <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;font-family:Arial,Helvetica,sans-serif;">Potwierdzenie Rezerwacji</h1>
+              <p style="margin:6px 0 0 0;color:#ffffff;font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;opacity:0.95;">Romans Tattoo &middot; Inkflow</p>
             </td>
           </tr>
 
@@ -214,7 +214,7 @@ export default async function(req: Request): Promise<Response> {
             </td>
           </tr>
 
-          <!-- Health survey CTA — single prominent button -->
+          ${!isConsultation ? `<!-- Health survey CTA — single prominent button -->
           <tr>
             <td style="padding:24px 32px 0 32px;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#0a0a0a;border-radius:10px;">
@@ -225,7 +225,7 @@ export default async function(req: Request): Promise<Response> {
                 </td></tr>
               </table>
             </td>
-          </tr>
+          </tr>` : ''}
 
           <!-- Account CTA -->
           <tr>
@@ -293,9 +293,7 @@ export default async function(req: Request): Promise<Response> {
       booking.tattoo_placement ? `  Miejsce:    ${booking.tattoo_placement}` : '',
       `  Cena:       ${priceText}`,
       ``,
-      `Ankieta Zdrowotna:`,
-      `Wypełnij ankietę online przed wizytą: ${surveyLink}`,
-      ``,
+      (!isConsultation ? `Ankieta Zdrowotna:\nWypełnij ankietę online przed wizytą: ${surveyLink}\n` : ``),
       hasAccount
         ? `Twoje Konto:\nZaloguj się do panelu: ${panelLink}`
         : `Załóż Konto:\nZałóż konto lub zaloguj się: ${loginLink}`,
