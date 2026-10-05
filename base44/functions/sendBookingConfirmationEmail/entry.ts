@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
+import MailComposer from 'npm:nodemailer@6.9.16/lib/mail-composer/index.js';
 
 export default async function(req: Request): Promise<Response> {
   try {
@@ -104,120 +105,111 @@ export default async function(req: Request): Promise<Response> {
     const loginLink = `${appUrl}/`;
     const panelLink = `${appUrl}/panel`;
 
+    // Email-safe styling: every style is inline (many mail clients drop <style> blocks)
+    const h3Style = 'color:#333333;font-size:16px;margin:12px 0 8px 0;text-transform:uppercase;font-weight:bold;';
+    const pStyle = 'margin:4px 0;color:#666666;';
+    const linkStyle = 'color:#FF007F;text-decoration:none;';
+    const buttonStyle = 'display:inline-block;background:#FF007F;background-image:linear-gradient(135deg,#FF007F,#CC0066);color:#ffffff;padding:12px 28px;text-decoration:none;border-radius:2px;margin:16px 0;font-size:13px;font-weight:bold;text-transform:uppercase;letter-spacing:0.1em;';
+    const detailRow = (label: string, value: string) => `
+              <tr>
+                <td style="padding:8px 0;border-bottom:1px solid #eeeeee;font-weight:bold;color:#333333;">${label}</td>
+                <td align="right" style="padding:8px 0;border-bottom:1px solid #eeeeee;color:#666666;">${value}</td>
+              </tr>`;
+    const contactLine = (label: string, inner: string) =>
+      `<p style="margin:4px 0;font-size:13px;color:#666666;"><strong style="color:#333333;">${label}:</strong> ${inner}</p>`;
+
     // Account CTA section — different copy depending on whether client has an account
     const accountSection = hasAccount
       ? `
-        <div class="section">
-          <h3>Twoje Konto</h3>
-          <p>Zaloguj się na swoje konto, aby przeglądać sesje, prosić o zmianę terminu oraz kupować i realizować vouchery.</p>
-          <a href="${panelLink}" class="cta-button">Zaloguj się do panelu</a>
+        <div style="margin:20px 0;">
+          <h3 style="${h3Style}">Twoje Konto</h3>
+          <p style="${pStyle}">Zaloguj się na swoje konto, aby przeglądać sesje, prosić o zmianę terminu oraz kupować i realizować vouchery.</p>
+          <a href="${panelLink}" style="${buttonStyle}">Zaloguj się do panelu</a>
         </div>`
       : `
-        <div class="section">
-          <h3>Załóż Konto</h3>
-          <p>Nie masz jeszcze konta? Załóż je lub zaloguj się, aby móc przeglądać swoje sesje, prosić o zmianę terminu oraz kupować i realizować vouchery.</p>
-          <a href="${loginLink}" class="cta-button">Załóż konto / Zaloguj się</a>
+        <div style="margin:20px 0;">
+          <h3 style="${h3Style}">Załóż Konto</h3>
+          <p style="${pStyle}">Nie masz jeszcze konta? Załóż je lub zaloguj się, aby móc przeglądać swoje sesje, prosić o zmianę terminu oraz kupować i realizować vouchery.</p>
+          <a href="${loginLink}" style="${buttonStyle}">Załóż konto / Zaloguj się</a>
         </div>`;
 
     // Email HTML
-    const htmlBody = `
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <style>
-          body { font-family: Arial, sans-serif; color: #333; line-height: 1.6; background: #f9f9f9; }
-          .container { max-width: 600px; margin: 0 auto; background: #fff; border: 1px solid #ddd; padding: 40px; }
-          .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #FF007F; padding-bottom: 20px; }
-          .header h1 { color: #FF007F; margin: 0; font-size: 24px; }
-          .section { margin: 20px 0; }
-          .section h3 { color: #333; font-size: 16px; margin: 12px 0 8px 0; text-transform: uppercase; font-weight: bold; }
-          .section p { margin: 4px 0; color: #666; }
-          .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
-          .detail-label { font-weight: bold; color: #333; }
-          .detail-value { color: #666; }
-          .cta-button { display: inline-block; background: linear-gradient(135deg, #FF007F, #CC0066); color: #fff; padding: 12px 28px; text-decoration: none; border-radius: 2px; margin: 16px 0; font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; }
-          .cta-button:hover { opacity: 0.9; }
-          .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #999; text-align: center; }
-          .contact-info { background: #f5f5f5; padding: 15px; margin: 10px 0; border-left: 3px solid #FF007F; }
-          .contact-info p { margin: 4px 0; font-size: 13px; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>Potwierdzenie Rezerwacji</h1>
-          </div>
+    const priceText = booking.estimated_price ? `${Number(booking.estimated_price).toLocaleString('pl-PL')} PLN` : 'BEZPŁATNIE';
+    const htmlBody = `<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Potwierdzenie rezerwacji</title>
+</head>
+<body style="margin:0;padding:0;background:#f9f9f9;font-family:Arial,Helvetica,sans-serif;color:#333333;line-height:1.6;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f9f9f9;">
+    <tr>
+      <td align="center" style="padding:24px 12px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;background:#ffffff;border:1px solid #dddddd;">
+          <tr>
+            <td style="padding:40px;">
 
-          <div class="section">
-            <p>Cześć ${booking.client_name || 'Kliencie'},</p>
-            <p>Otrzymaliśmy Twoje zgłoszenie rezerwacji. Oto szczegóły sesji:</p>
-          </div>
+              <div style="text-align:center;margin-bottom:30px;border-bottom:2px solid #FF007F;padding-bottom:20px;">
+                <h1 style="color:#FF007F;margin:0;font-size:24px;">Potwierdzenie Rezerwacji</h1>
+              </div>
 
-          <div class="section">
-            <h3>Szczegóły Sesji</h3>
-            <div class="detail-row">
-              <span class="detail-label">Data:</span>
-              <span class="detail-value">${dateStr}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Godzina:</span>
-              <span class="detail-value">${timeStr}</span>
-            </div>
-            ${booking.artist_name ? `
-            <div class="detail-row">
-              <span class="detail-label">Tatuażysta:</span>
-              <span class="detail-value">${booking.artist_name}</span>
-            </div>` : ''}
-            ${booking.service_name ? `
-            <div class="detail-row">
-              <span class="detail-label">Usługa:</span>
-              <span class="detail-value">${booking.service_name}</span>
-            </div>` : ''}
-            ${booking.tattoo_placement ? `
-            <div class="detail-row">
-              <span class="detail-label">Miejsce:</span>
-              <span class="detail-value">${booking.tattoo_placement}</span>
-            </div>` : ''}
-            <div class="detail-row">
-              <span class="detail-label">Cena:</span>
-              <span class="detail-value">${booking.estimated_price ? `${Number(booking.estimated_price).toLocaleString('pl-PL')} PLN` : 'BEZPŁATNIE'}</span>
-            </div>
-          </div>
+              <div style="margin:20px 0;">
+                <p style="${pStyle}">Cześć ${booking.client_name || 'Kliencie'},</p>
+                <p style="${pStyle}">Otrzymaliśmy Twoje zgłoszenie rezerwacji. Oto szczegóły sesji:</p>
+              </div>
 
-          <div class="section">
-            <h3>Ankieta Zdrowotna</h3>
-            <p>Aby zaoszczędzić czas w studiu, wypełnij naszą ankietę zdrowotną online. Zajmie Ci to zaledwie kilka minut.</p>
-            <a href="${surveyLink}" class="cta-button">Wypełnij Ankietę</a>
-          </div>
+              <div style="margin:20px 0;">
+                <h3 style="${h3Style}">Szczegóły Sesji</h3>
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  ${detailRow('Data:', dateStr)}
+                  ${detailRow('Godzina:', timeStr)}
+                  ${booking.artist_name ? detailRow('Tatuażysta:', booking.artist_name) : ''}
+                  ${booking.service_name ? detailRow('Usługa:', booking.service_name) : ''}
+                  ${booking.tattoo_placement ? detailRow('Miejsce:', booking.tattoo_placement) : ''}
+                  ${detailRow('Cena:', priceText)}
+                </table>
+              </div>
 
-          ${accountSection}
+              <div style="margin:20px 0;">
+                <h3 style="${h3Style}">Ankieta Zdrowotna</h3>
+                <p style="${pStyle}">Aby zaoszczędzić czas w studiu, wypełnij naszą ankietę zdrowotną online. Zajmie Ci to zaledwie kilka minut.</p>
+                <a href="${surveyLink}" style="${buttonStyle}">Wypełnij Ankietę</a>
+              </div>
 
-          <div class="section">
-            <h3>Gdzie Nas Znaleźć</h3>
-            <div class="contact-info">
-              ${contact.contact_address_street ? `<p><strong>Adres:</strong> ${contact.contact_address_street}, ${contact.contact_address_city || ''}</p>` : ''}
-              ${contact.contact_phone ? `<p><strong>Telefon:</strong> <a href="tel:${contact.contact_phone}" style="color: #FF007F; text-decoration: none;">${contact.contact_phone}</a></p>` : ''}
-              ${contact.contact_email ? `<p><strong>Email:</strong> <a href="mailto:${contact.contact_email}" style="color: #FF007F; text-decoration: none;">${contact.contact_email}</a></p>` : ''}
-              ${contact.contact_instagram_url ? `<p><strong>Instagram:</strong> <a href="${contact.contact_instagram_url}" style="color: #FF007F; text-decoration: none;">${contact.contact_instagram || 'Znajdź nas'}</a></p>` : ''}
-              ${contact.contact_facebook_url ? `<p><strong>Facebook:</strong> <a href="${contact.contact_facebook_url}" style="color: #FF007F; text-decoration: none;">${contact.contact_facebook || 'Znajdź nas'}</a></p>` : ''}
-            </div>
-          </div>
+              ${accountSection}
 
-          ${!isConsultation && prepareItems.length > 0 ? `
-          <div class="section">
-            <h3>Przygotuj Się</h3>
-            <ul style="padding-left: 20px; color: #666;">
-              ${prepareItems.join('\n              ')}
-            </ul>
-          </div>` : ''}
+              <div style="margin:20px 0;">
+                <h3 style="${h3Style}">Gdzie Nas Znaleźć</h3>
+                <div style="background:#f5f5f5;padding:15px;margin:10px 0;border-left:3px solid #FF007F;">
+                  ${contact.contact_address_street ? contactLine('Adres', `${contact.contact_address_street}, ${contact.contact_address_city || ''}`) : ''}
+                  ${contact.contact_phone ? contactLine('Telefon', `<a href="tel:${contact.contact_phone}" style="${linkStyle}">${contact.contact_phone}</a>`) : ''}
+                  ${contact.contact_email ? contactLine('Email', `<a href="mailto:${contact.contact_email}" style="${linkStyle}">${contact.contact_email}</a>`) : ''}
+                  ${contact.contact_instagram_url ? contactLine('Instagram', `<a href="${contact.contact_instagram_url}" style="${linkStyle}">${contact.contact_instagram || 'Znajdź nas'}</a>`) : ''}
+                  ${contact.contact_facebook_url ? contactLine('Facebook', `<a href="${contact.contact_facebook_url}" style="${linkStyle}">${contact.contact_facebook || 'Znajdź nas'}</a>`) : ''}
+                </div>
+              </div>
 
-          <div class="footer">
-            <p style="margin: 8px 0;">Dziękujemy za zaufanie!</p>
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
+              ${!isConsultation && prepareItems.length > 0 ? `
+              <div style="margin:20px 0;">
+                <h3 style="${h3Style}">Przygotuj Się</h3>
+                <ul style="padding-left:20px;color:#666666;">
+                  ${prepareItems.join('\n                  ')}
+                </ul>
+              </div>` : ''}
+
+              <div style="margin-top:30px;padding-top:20px;border-top:1px solid #eeeeee;font-size:12px;color:#999999;text-align:center;">
+                <p style="margin:8px 0;">Dziękujemy za zaufanie!</p>
+              </div>
+
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
 
     // Send email via the connected Gmail account (tattoo.wolsztyn@gmail.com)
     const { accessToken } = await base44.asServiceRole.connectors.getConnection('gmail');
@@ -228,25 +220,35 @@ export default async function(req: Request): Promise<Response> {
     const fromEmail = 'tattoo.wolsztyn@gmail.com';
     const toEmail = booking.client_email;
 
-    // UTF-8 safe base64url encoder (replaces deprecated unescape/encodeURIComponent combo
-    // that corrupted Polish characters). Works for both subject and full MIME message.
-    const utf8ToBase64Url = (str: string): string => {
-      const bytes = new TextEncoder().encode(str);
-      let binary = '';
-      for (const byte of bytes) binary += String.fromCharCode(byte);
-      return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    };
+    // Plain-text alternative (multipart/alternative) for clients that don't render HTML
+    const textBody = htmlBody
+      .replace(/<style[\s\S]*?<\/style>/gi, '')
+      .replace(/<\/(p|h1|h3|tr|li|div)>/gi, '\n')
+      .replace(/<\/td>/gi, ' ')
+      .replace(/<[^>]+>/g, '')
+      .replace(/[ \t]+/g, ' ')
+      .replace(/\n\s*\n+/g, '\n')
+      .trim();
 
-    const mimeMessage = [
-      `From: ${fromName} <${fromEmail}>`,
-      `To: ${toEmail}`,
-      `Subject: =?UTF-8?B?${utf8ToBase64Url(subject)}?=`,
-      `MIME-Version: 1.0`,
-      `Content-Type: text/html; charset=UTF-8`,
-      `Content-Transfer-Encoding: base64`,
-      ``,
-      utf8ToBase64Url(htmlBody),
-    ].join('\r\n');
+    // Let a MIME library build the message: it handles UTF-8, encoded-word subject,
+    // line wrapping and the multipart structure correctly.
+    const mail = new MailComposer({
+      from: { name: fromName, address: fromEmail },
+      to: toEmail,
+      subject,
+      text: textBody,
+      html: htmlBody,
+    });
+    const messageBytes: Uint8Array = await new Promise((resolve, reject) => {
+      mail.compile().build((err: Error | null, msg: Uint8Array) => (err ? reject(err) : resolve(msg)));
+    });
+
+    // Gmail API expects the whole RFC 2822 message as base64url
+    let binary = '';
+    for (let i = 0; i < messageBytes.length; i += 0x8000) {
+      binary += String.fromCharCode(...messageBytes.subarray(i, i + 0x8000));
+    }
+    const raw = btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
     const gmailResponse = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
       method: 'POST',
@@ -254,7 +256,7 @@ export default async function(req: Request): Promise<Response> {
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ raw: utf8ToBase64Url(mimeMessage) }),
+      body: JSON.stringify({ raw }),
     });
 
     if (!gmailResponse.ok) {
