@@ -179,14 +179,13 @@ export function buildHealthFormHtml(form, template, guardianForm, mode = 'print'
   </table><div class="decl" style="margin-top:10px">Wyrażam zgodę jako prawny opiekun na wykonanie zabiegu tatuażu/piercingu osobie niepełnoletniej wskazanej powyżej. Oświadczam, że zapoznałem/-am się z możliwymi powikłaniami i ryzykiem związanym z wykonywanym zabiegiem oraz z zasadami pielęgnacji po zabiegu.</div>${guardianForm.guardian_signature ? `<p style="margin-top:8px;font-weight:600;font-size:9pt;color:#444">Podpis opiekuna:</p><div class="sig"><img src="${guardianForm.guardian_signature}" alt="Podpis opiekuna" /></div>` : ''}</div>` : ''}
 
 </div>
-${mode === 'print' ? "<script>window.addEventListener('load',function(){setTimeout(function(){window.print();},500);})</script>" : ''}
 </body></html>`;
 }
 
-// Open or save the health form as a PDF document. mode = 'print' opens in a new tab
-// (auto-triggers the browser print dialog, where the user can save as PDF); 'save'
-// downloads the HTML document directly.
-export function openHealthFormPdf(form, template, guardianForm, mode = 'print') {
+// Open or save the health form as a PDF document. mode = 'open' opens a preview in a
+// new tab (the user can print or save as PDF from the browser); 'save' downloads the
+// HTML document directly.
+export function openHealthFormPdf(form, template, guardianForm, mode = 'open') {
   const clientName = form.client_name || `${form.client_first_name || ''} ${form.client_last_name || ''}`.trim();
   const html = buildHealthFormHtml(form, template, guardianForm, mode);
   const blob = new Blob([html], { type: 'text/html;charset=utf-8' });

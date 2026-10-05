@@ -39,7 +39,7 @@ export default function ClientHealthForms() {
     }).catch(() => {}).finally(() => setLoading(false));
   }, [user]);
 
-  const openFormPdf = (form, mode = 'print') => {
+  const openFormPdf = (form, mode = 'open') => {
     const guardianForm = guardianForms.find(g => g.health_form_id === form.id);
     openHealthFormPdf(form, template, guardianForm, mode);
   };
@@ -52,7 +52,7 @@ export default function ClientHealthForms() {
     if (formId) {
       const form = forms.find(f => f.id === formId);
       if (form) {
-        openFormPdf(form, 'print');
+        openFormPdf(form, 'open');
         // Clean the URL so a refresh doesn't re-open the PDF.
         const url = new URL(window.location.href);
         url.searchParams.delete('form_id');
@@ -138,7 +138,7 @@ export default function ClientHealthForms() {
               >
                 <div className="flex items-center justify-between">
                   <button
-                    onClick={() => openFormPdf(f, 'print')}
+                    onClick={() => openFormPdf(f, 'open')}
                     className="flex-1 text-left"
                     style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                   >
@@ -156,7 +156,7 @@ export default function ClientHealthForms() {
                       OTWÓRZ →
                     </span>
                     <button
-                      onClick={() => openFormPdf(f, 'print')}
+                      onClick={() => openFormPdf(f, 'open')}
                       title="Otwórz"
                       style={{ background: 'none', border: `0.5px solid ${t.border}`, color: t.muted, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px' }}
                     >
