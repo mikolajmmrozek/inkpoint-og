@@ -217,32 +217,50 @@ export default async function(req: Request): Promise<Response> {
       </html>
     `;
 
-    // Send email via Resend (Google Calendar connection lacks gmail.send scope)
-    const resendApiKey = Deno.env.get('RESEND_API_KEY');
-    if (!resendApiKey) {
-      return Response.json({ success: false, error: 'RESEND_API_KEY not configured' }, { status: 500 });
-    }
+    // Send email via the connected Gmail account (tattoo.wolsztyn@gmail.com)
+    const { accessToken } = await base44.asServiceRole.connectors.getConnection('gmail');
 
-    const resendResponse = await fetch('https://api.resend.com/emails', {
+    // Build RFC 2822 MIME message — Gmail's API requires base64url-encoded raw.
+    const subject = `Potwierdzenie rezerwacji — ${dateStr}`;
+    const fromName = 'Romans Tattoo';
+    const fromEmail = 'tattoo.wolsztyn@gmail.com';
+    const toEmail = booking.client_email;
+
+    // RFC 2047 encode the subject (Polish chars) and RFC 2045 encode the HTML body
+    const encodeSubject = (str: string): string =>
+      `=?UTF-8?B?${btoa(unescape(encodeURIComponent(str)))}?=`;
+    const encodeBody = (str: string): string =>
+      btoa(unescape(encodeURIComponent(str)))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+
+    const mimeMessage = [
+      `From: ${fromName} <${fromEmail}>`,
+      `To: ${toEmail}`,
+      `Subject: ${encodeSubject(subject)}`,
+      `MIME-Version: 1.0`,
+      `Content-Type: text/html; charset=UTF-8`,
+      `Content-Transfer-Encoding: base64`,
+      ``,
+      htmlBody,
+    ].join('\r\n');
+
+    const gmailResponse = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${resendApiKey}`,
+        'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        from: 'Romans Tattoo <noreply@mail.tattoostudio.pl>',
-        to: booking.client_email,
-        subject: `Potwierdzenie rezerwacji — ${dateStr}`,
-        html: htmlBody,
-      }),
+      body: JSON.stringify({ raw: encodeBody(mimeMessage) }),
     });
 
-    if (!resendResponse.ok) {
-      const error = await resendResponse.json();
-      return Response.json({ success: false, error: `Resend API error: ${error.message}` }, { status: 500 });
+    if (!gmailResponse.ok) {
+      const error = await gmailResponse.json().catch(() => ({}));
+      return Response.json({ success: false, error: `Gmail API error: ${error.error?.message || gmailResponse.statusText}` }, { status: 500 });
     }
 
-    return Response.json({ success: true, message: 'Email sent', hasAccount });
+    return Response.json({ success: true, message: 'Email sent via Gmail', hasAccount });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
