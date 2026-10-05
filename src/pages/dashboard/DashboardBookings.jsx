@@ -264,6 +264,12 @@ export default function DashboardBookings() {
     }
   };
 
+  useEffect(() => {
+    if (loadedOnce.current) return;
+    loadedOnce.current = true;
+    load();
+  }, []);
+
   // Deep link from a notification: open the booking's detail panel and jump to its day.
   const pendingBookingId = searchParams.get('booking_id');
   useEffect(() => {
