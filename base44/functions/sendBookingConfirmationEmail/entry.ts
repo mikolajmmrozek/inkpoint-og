@@ -163,10 +163,11 @@ export default async function(req: Request): Promise<Response> {
               <span class="detail-label">Godzina:</span>
               <span class="detail-value">${timeStr}</span>
             </div>
+            ${booking.artist_name ? `
             <div class="detail-row">
               <span class="detail-label">Tatuażysta:</span>
-              <span class="detail-value">${booking.artist_name || 'TBD'}</span>
-            </div>
+              <span class="detail-value">${booking.artist_name}</span>
+            </div>` : ''}
             ${booking.service_name ? `
             <div class="detail-row">
               <span class="detail-label">Usługa:</span>
@@ -202,12 +203,13 @@ export default async function(req: Request): Promise<Response> {
             </div>
           </div>
 
+          ${!isConsultation && prepareItems.length > 0 ? `
           <div class="section">
             <h3>Przygotuj Się</h3>
             <ul style="padding-left: 20px; color: #666;">
               ${prepareItems.join('\n              ')}
             </ul>
-          </div>
+          </div>` : ''}
 
           <div class="footer">
             <p style="margin: 8px 0;">Dziękujemy za zaufanie!</p>
