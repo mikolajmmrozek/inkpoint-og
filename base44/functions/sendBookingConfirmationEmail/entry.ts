@@ -42,8 +42,42 @@ export default async function(req: Request): Promise<Response> {
       : '—';
     const timeStr = booking.session_time || 'TBD';
 
+    // Determine if this is a consultation (no need for guardian/nutrition reminders)
+    const isConsultation = /konsultacj/i.test(booking.service_name || '');
+
+    // Check if we already know the client isn't a minor (from a filled health form)
+    let knownNotMinor = false;
+    try {
+      const forms = await base44.asServiceRole.entities.HealthForm.filter({ booking_id: booking.id });
+      if (forms.length > 0 && forms[0].is_minor === false) knownNotMinor = true;
+    } catch (e) { /* default: unknown */ }
+
     // Links
     const appUrl = 'https://romanstattoo.base44.app';
+
+    // Before-treatment preparation document link (if studio has one configured)
+    let beforeInstructionsLink = '';
+    try {
+      const instructions = await base44.asServiceRole.entities.Instruction.filter({ type: 'before_tattoo' });
+      if (instructions.length > 0 && instructions[0].content) {
+        beforeInstructionsLink = `${appUrl}/instructions?type=before_tattoo`;
+      }
+    } catch (e) { /* no instruction doc configured */ }
+
+    // Build "Przygotuj się" checklist conditionally
+    const prepareItems = [
+      '<li>Przyjdź 10-15 minut przed zaplanowaną godziną</li>',
+      '<li>Weź ze sobą dokument tożsamości (obowiązkowy)</li>',
+    ];
+    if (!isConsultation && !knownNotMinor) {
+      prepareItems.push('<li>Jeśli jesteś niepełnoletni, przyjdź z opiekunem prawnym w celu podpisania zgody na wykonanie zabiegu</li>');
+    }
+    if (!isConsultation) {
+      prepareItems.push('<li>Zadbaj o prawidłowe odżywienie i sen przed sesją</li>');
+    }
+    if (beforeInstructionsLink) {
+      prepareItems.push(`<li><a href="${beforeInstructionsLink}" style="color: #FF007F; text-decoration: none;">Zobacz jak przygotować się do zabiegu</a></li>`);
+    }
     const surveyLink = booking.health_form_token
       ? `${appUrl}/health-form?token=${booking.health_form_token}`
       : `${appUrl}/health-form?booking_id=${booking.id}`;
@@ -125,7 +159,7 @@ export default async function(req: Request): Promise<Response> {
             </div>` : ''}
             <div class="detail-row">
               <span class="detail-label">Cena:</span>
-              <span class="detail-value">${booking.estimated_price ? Number(booking.estimated_price).toLocaleString('pl-PL') : '-'} PLN</span>
+              <span class="detail-value">${booking.estimated_price ? `${Number(booking.estimated_price).toLocaleString('pl-PL')} PLN` : 'BEZPŁATNIE'}</span>
             </div>
           </div>
 
@@ -144,16 +178,14 @@ export default async function(req: Request): Promise<Response> {
               ${contact.contact_phone ? `<p><strong>Telefon:</strong> <a href="tel:${contact.contact_phone}" style="color: #FF007F; text-decoration: none;">${contact.contact_phone}</a></p>` : ''}
               ${contact.contact_email ? `<p><strong>Email:</strong> <a href="mailto:${contact.contact_email}" style="color: #FF007F; text-decoration: none;">${contact.contact_email}</a></p>` : ''}
               ${contact.contact_instagram_url ? `<p><strong>Instagram:</strong> <a href="${contact.contact_instagram_url}" style="color: #FF007F; text-decoration: none;">${contact.contact_instagram || 'Znajdź nas'}</a></p>` : ''}
+              ${contact.contact_facebook_url ? `<p><strong>Facebook:</strong> <a href="${contact.contact_facebook_url}" style="color: #FF007F; text-decoration: none;">${contact.contact_facebook || 'Znajdź nas'}</a></p>` : ''}
             </div>
           </div>
 
           <div class="section">
             <h3>Przygotuj Się</h3>
             <ul style="padding-left: 20px; color: #666;">
-              <li>Przyjdź 10-15 minut przed zaplanowaną godziną</li>
-              <li>Weź ze sobą dokument tożsamości (obowiązkowy)</li>
-              <li>Jeśli to procedura na nieletnim — opiekun musi podpisać zgodę</li>
-              <li>Zadbaj o prawidłowe odżywienie i sen przed sesją</li>
+              ${prepareItems.join('\n              ')}
             </ul>
           </div>
 

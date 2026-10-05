@@ -19,6 +19,7 @@ import HealthFormPage from './pages/HealthFormPage';
 import HealthFormQR from './pages/HealthFormQR';
 import TermsAndConditions from './pages/TermsAndConditions';
 import FAQ from './pages/FAQ';
+import Instructions from './pages/Instructions';
 
 // Dashboard
 import Dashboard from './pages/dashboard/Dashboard';
@@ -109,6 +110,7 @@ const AuthenticatedApp = () => {
       <Route path="/health-form-qr" element={<HealthFormQR />} />
       <Route path="/terms" element={<TermsAndConditions />} />
       <Route path="/faq" element={<FAQ />} />
+      <Route path="/instructions" element={<Instructions />} />
       <Route path="/feedback" element={<FeedbackSurvey />} />
       <Route path="/voucher/:code" element={<Voucher />} />
 
