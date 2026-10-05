@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, Plus, X, Search, Zap, RefreshCw, FileText, E
 import { format, addDays, subDays, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, isSameMonth, isToday, parseISO } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useCreateMenu } from '@/components/create/CreateMenuContext';
 import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
 import SettlementModal from '@/components/dashboard/SettlementModal';
 import { openHealthFormQRPage } from '@/lib/qrPage';
@@ -984,6 +985,14 @@ export default function ArtistSchedule() {
   const [healthStatusMap, setHealthStatusMap] = useState({});
   const [selectedAvailability, setSelectedAvailability] = useState(null); // { record, dateStr }
   const [searchQuery, setSearchQuery] = useState('');
+
+  const createMenu = useCreateMenu() || {};
+  const registerSelectedDate = createMenu.registerSelectedDate || (() => {});
+
+  // Keep the create-menu's booking/dyspozycja prefill in sync with the selected day.
+  useEffect(() => {
+    registerSelectedDate(selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '');
+  }, [registerSelectedDate, selectedDate]);
 
   const loadAvailability = useCallback(() => {
     if (!artist?.id) return;
