@@ -93,6 +93,86 @@ Deno.serve(async (req) => {
         } catch (e) {}
       }
 
+      // Client edited session details (description, placement, reference images) —
+      // notify the assigned artist and admins. We detect this by comparing old vs new
+      // values of the editable fields. Only fire when something actually changed.
+      const detailFields = ['tattoo_description', 'tattoo_placement', 'reference_images'];
+      const detailChanged = oldBooking && detailFields.some(f => {
+        const oldVal = JSON.stringify(oldBooking[f] ?? null);
+        const newVal = JSON.stringify(booking[f] ?? null);
+        return oldVal !== newVal;
+      });
+
+      if (detailChanged) {
+        // Determine who made the change — only notify when the client did it.
+        // An admin/artist editing from the dashboard won't trigger these client-edit
+        // notifications. We infer "client edit" when the current user (created_by_id of
+        // the update) is NOT linked to an artist profile and is NOT an admin.
+        let editorIsArtist = false;
+        let editorIsAdmin = false;
+
+        if (booking.created_by_id) {
+          // Note: the SDK's update event payload uses created_by_id of the booking record,
+          // not the editor. The platform doesn't expose "who updated". We treat detail
+          // changes on a booking that has source='online_form' or belongs to a client
+          // as client-originated, UNLESS the booking's artist_id matches an artist user
+          // whose id equals the booking's last editor. Since we can't reliably tell,
+          // we notify the artist+admin on any detail change — the client UI is the only
+          // place clients edit these fields, and admin/artist edits to these fields
+          // are rare and would warrant a heads-up anyway.
+          try {
+            const artistUser = await base44.asServiceRole.entities.User.filter({ 'data.artist_id': booking.artist_id }, null, 1);
+            if (artistUser.length > 0 && artistUser[0].id === booking.created_by_id) {
+              editorIsArtist = true;
+            }
+          } catch (e) {}
+        }
+
+        // Build a readable summary of what changed.
+        const changes = [];
+        if (JSON.stringify(oldBooking.tattoo_description ?? null) !== JSON.stringify(booking.tattoo_description ?? null)) {
+          changes.push('opis projektu');
+        }
+        if (JSON.stringify(oldBooking.tattoo_placement ?? null) !== JSON.stringify(booking.tattoo_placement ?? null)) {
+          changes.push('miejsce zabiegu');
+        }
+        const oldImgCount = (oldBooking.reference_images || []).length;
+        const newImgCount = (booking.reference_images || []).length;
+        if (oldImgCount !== newImgCount) {
+          changes.push(newImgCount > oldImgCount ? `zdjęcia (+${newImgCount - oldImgCount})` : `zdjęcia (-${oldImgCount - newImgCount})`);
+        }
+        const changeSummary = changes.join(', ');
+
+        // Notify admins (shared inbox)
+        notifications.push({
+          target_email: 'tattoo.wolsztyn@gmail.com',
+          title: 'Klient zaktualizował szczegóły sesji',
+          message: `${booking.client_name || 'Klient'} — ${booking.session_date || '—'}${booking.session_time ? ' o ' + booking.session_time : ''}: ${changeSummary}`,
+          category: 'booking',
+          link_path: '/dashboard/bookings',
+          is_read: false,
+          booking_id: booking.id,
+        });
+
+        // Notify the assigned artist (if not the editor themselves)
+        if (booking.artist_id && !editorIsArtist) {
+          try {
+            const artistUser = await base44.asServiceRole.entities.User.filter({ 'data.artist_id': booking.artist_id }, null, 1);
+            if (artistUser.length > 0 && artistUser[0].email) {
+              notifications.push({
+                target_email: artistUser[0].email,
+                title: 'Klient zaktualizował szczegóły sesji',
+                message: `${booking.client_name || 'Klient'} — ${booking.session_date || '—'}${booking.session_time ? ' o ' + booking.session_time : ''}: ${changeSummary}`,
+                category: 'booking',
+                link_path: '/artist/schedule',
+                is_read: false,
+                booking_id: booking.id,
+              });
+            }
+          } catch (e) {}
+        }
+      }
+
       // Status changed — notify the client
       if (oldBooking && booking.status !== oldBooking.status && booking.client_email) {
         const statusLabels = {

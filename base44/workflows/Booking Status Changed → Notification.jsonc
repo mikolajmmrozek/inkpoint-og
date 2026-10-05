@@ -1,20 +1,9 @@
 {
-  "name": "Booking Status Changed \u2192 Notification",
-  "description": "When booking status changes, notify the client.",
-  "trigger": {
-    "condition": "${ (.trigger.changed_fields | index(\"status\") != null) }",
-    "config": {
-      "trigger_type": "entity",
-      "events": [
-        "update"
-      ],
-      "entity_name": "Booking"
-    }
-  },
+  "name": "Booking Update \u2192 Notification",
   "definition": {
     "document": {
       "dsl": "1.0.0",
-      "name": "booking_status_changed_notification",
+      "name": "booking_update_notification",
       "version": "1.0",
       "namespace": "base44"
     },
@@ -30,6 +19,17 @@
         }
       }
     ]
+  },
+  "description": "When booking status or client-editable session details (description, placement, reference images) change, route notifications to the right recipients.",
+  "trigger": {
+    "condition": "${ (.trigger.changed_fields | index(\"status\") != null) or (.trigger.changed_fields | index(\"tattoo_description\") != null) or (.trigger.changed_fields | index(\"tattoo_placement\") != null) or (.trigger.changed_fields | index(\"reference_images\") != null) }",
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "update"
+      ],
+      "entity_name": "Booking"
+    }
   },
   "x-base44-migrated-from-automation": {
     "legacy_payload_function": "handleBookingNotification"
