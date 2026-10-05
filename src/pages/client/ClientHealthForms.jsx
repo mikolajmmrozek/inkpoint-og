@@ -3,7 +3,7 @@ import { useOutletContext } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { format, parseISO } from 'date-fns';
 import { pl } from 'date-fns/locale';
-import { FileText, AlertCircle, Download, Printer } from 'lucide-react';
+import { FileText, AlertCircle, Download, ExternalLink } from 'lucide-react';
 import { openHealthFormPdf } from '@/lib/healthFormPdf';
 
 export default function ClientHealthForms() {
@@ -157,10 +157,10 @@ export default function ClientHealthForms() {
                     </span>
                     <button
                       onClick={() => openFormPdf(f, 'print')}
-                      title="Drukuj / Zapisz jako PDF"
+                      title="Otwórz"
                       style={{ background: 'none', border: `0.5px solid ${t.border}`, color: t.muted, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px' }}
                     >
-                      <Printer size={12} />
+                      <ExternalLink size={12} />
                     </button>
                     <button
                       onClick={() => openFormPdf(f, 'save')}
