@@ -157,7 +157,10 @@ export default async function(req: Request): Promise<Response> {
       detailRow('Data', dateStr),
       detailRow('Godzina', timeStr),
     ];
-    if (booking.artist_name) detailRows.push(detailRow('Tatuażysta', booking.artist_name));
+    if (booking.artist_name && procedureCategory !== 'studio') {
+      const artistLabel = isPiercing ? 'Piercer' : 'Tatuażysta';
+      detailRows.push(detailRow(artistLabel, booking.artist_name));
+    }
     if (booking.service_name) detailRows.push(detailRow('Usługa', booking.service_name));
     if (booking.tattoo_placement) detailRows.push(detailRow('Miejsce', booking.tattoo_placement));
     detailRows.push(detailRow('Cena', priceText));
