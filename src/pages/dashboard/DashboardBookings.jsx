@@ -151,16 +151,7 @@ function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPa
                   {items.length} {items.length === 1 ? 'sesja' : 'sesji'}
                 </span>
               </div>
-              {date !== 'Brak daty' && (() => { const off = getOffForDate(date); return off.length > 0 ? (
-                <div className="mb-2" style={{ border: '0.5px solid rgb(var(--brand-rgb) /0.25)', background: 'rgb(var(--brand-rgb) /0.05)' }}>
-                  {off.map((o, i) => (
-                    <div key={i} className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: i < off.length - 1 ? '0.5px solid rgb(var(--brand-rgb) /0.2)' : 'none' }}>
-                      <div style={{ width: '6px', height: '6px', borderRadius: '1px', background: 'var(--brand)', flexShrink: 0 }} />
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.06em', flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>WOLNE · {o.artist.name}{o.timeRange ? ` · ${o.timeRange}` : ' · cały dzień'}{o.note ? ` · ${o.note}` : ''}</span>
-                    </div>
-                  ))}
-                </div>
-              ) : null; })()}
+
               <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
                 {items.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={items} selected={selected} setSelected={setSelected} artists={artists} t={t} healthStatusMap={healthStatusMap} />)}
               </div>
