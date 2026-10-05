@@ -61,6 +61,9 @@ export default function SettlementModal({ booking, user, onClose, onSettled, t }
         .filter(p => p.amount > 0);
       const updates = {
         final_amount: Math.round(finalNum * 100) / 100,
+        // Sync the booking price with the settled amount so stats (which read
+        // estimated_price) reflect the actual session price after settlement.
+        estimated_price: Math.round(finalNum * 100) / 100,
         deposit_amount: Math.round(depositNum * 100) / 100,
         deposit_paid: depositNum > 0,
         payment_breakdown: breakdown,
