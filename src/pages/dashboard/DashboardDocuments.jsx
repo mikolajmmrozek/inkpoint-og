@@ -17,7 +17,8 @@ const LANG_OPTIONS = [
 const INSTRUCTION_TYPES = [
   { key: 'aftercare_tattoo', label: 'Pielęgnacja tatuażu' },
   { key: 'aftercare_piercing', label: 'Pielęgnacja piercingu' },
-  { key: 'before_tattoo', label: 'Zalecenia przed tatuażem' },
+  { key: 'before_tattoo', label: 'Przygotowanie do tatuażu' },
+  { key: 'before_piercing', label: 'Przygotowanie do piercingu' },
   { key: 'after_piercing', label: 'Zalecenia po piercingu' },
 ];
 

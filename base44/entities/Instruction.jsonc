@@ -8,6 +8,7 @@
         "aftercare_tattoo",
         "aftercare_piercing",
         "before_tattoo",
+        "before_piercing",
         "after_piercing"
       ],
       "description": "Typ instrukcji"

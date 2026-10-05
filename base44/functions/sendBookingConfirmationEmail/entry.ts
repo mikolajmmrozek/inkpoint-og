@@ -45,6 +45,24 @@ export default async function(req: Request): Promise<Response> {
     // Determine if this is a consultation (no need for guardian/nutrition reminders)
     const isConsultation = /konsultacj/i.test(booking.service_name || '');
 
+    // Determine procedure category — look up the linked Service for its category
+    // (tattoo/piercing/studio) so we can link the right preparation document.
+    let procedureCategory = '';
+    if (booking.service_id) {
+      try {
+        const svc = await base44.asServiceRole.entities.Service.get(booking.service_id);
+        if (svc?.category) procedureCategory = svc.category;
+      } catch (e) { /* ignore */ }
+    }
+    // Fall back to service name hints when no linked service
+    if (!procedureCategory) {
+      const name = (booking.service_name || '').toLowerCase();
+      if (/piercing/.test(name)) procedureCategory = 'piercing';
+      else if (/tatu|tatoo|tattoo/.test(name)) procedureCategory = 'tattoo';
+    }
+    const isPiercing = procedureCategory === 'piercing';
+    const isTattoo = procedureCategory === 'tattoo';
+
     // Check if we already know the client isn't a minor (from a filled health form)
     let knownNotMinor = false;
     try {
@@ -55,12 +73,14 @@ export default async function(req: Request): Promise<Response> {
     // Links
     const appUrl = 'https://romanstattoo.base44.app';
 
-    // Before-treatment preparation document link (if studio has one configured)
+    // Before-treatment preparation document link — tattoo vs piercing separately.
+    // Only link when a matching document exists and has content.
     let beforeInstructionsLink = '';
+    const beforeType = isPiercing ? 'before_piercing' : 'before_tattoo';
     try {
-      const instructions = await base44.asServiceRole.entities.Instruction.filter({ type: 'before_tattoo' });
+      const instructions = await base44.asServiceRole.entities.Instruction.filter({ type: beforeType });
       if (instructions.length > 0 && instructions[0].content) {
-        beforeInstructionsLink = `${appUrl}/instructions?type=before_tattoo`;
+        beforeInstructionsLink = `${appUrl}/instructions?type=${beforeType}`;
       }
     } catch (e) { /* no instruction doc configured */ }
 
