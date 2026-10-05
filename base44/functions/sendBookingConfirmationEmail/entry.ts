@@ -1,5 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
-import MailComposer from 'npm:nodemailer@6.9.16/lib/mail-composer/index.js';
+import {
+  APP_URL, sectionStyle, h3Style, pStyle, mutedStyle, linkStyle, buttonStyle,
+  detailRow, clientFirstName, fmtDate, buildContactRows, sendViaGmail,
+} from '../../shared/bookingEmail.ts';
 
 export default async function(req: Request): Promise<Response> {
   try {
@@ -96,7 +99,7 @@ export default async function(req: Request): Promise<Response> {
     } catch (e) { /* default: unknown */ }
 
     // Links
-    const appUrl = 'https://romanstattoo.base44.app';
+    const appUrl = APP_URL;
 
     // Before-treatment preparation document link — tattoo vs piercing separately.
     // Only link when a matching document exists and has content.
@@ -129,22 +132,7 @@ export default async function(req: Request): Promise<Response> {
     const loginLink = `${appUrl}/`;
     const panelLink = `${appUrl}/panel`;
 
-    // Email-safe styling: every style is inline (many mail clients drop <style> blocks).
-    // Compact layout matching the approved PDF reference: pink header band, tight detail
-    // table, single prominent survey CTA, modular account/contact blocks, dark footer.
-    const sectionStyle = 'margin:22px 0 0 0;';
-    const h3Style = 'color:#0a0a0a;font-size:11px;margin:0 0 10px 0;text-transform:uppercase;font-weight:700;letter-spacing:0.12em;font-family:Arial,Helvetica,sans-serif;';
-    const pStyle = 'margin:0 0 8px 0;color:#3a3a3a;font-size:14px;line-height:1.55;';
-    const mutedStyle = 'margin:0;color:#7a7a7a;font-size:12px;line-height:1.5;';
-    const linkStyle = 'color:#FF007F;text-decoration:none;font-weight:600;';
-    const buttonStyle = 'display:inline-block;background:#FF007F;color:#0a0a0a;padding:14px 30px;text-decoration:none;border-radius:6px;margin:14px 0 4px 0;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;font-family:Arial,Helvetica,sans-serif;';
-    const detailRow = (label: string, value: string) => `
-                  <tr>
-                    <td style="padding:9px 0;font-size:13px;font-weight:700;color:#0a0a0a;border-bottom:1px solid #f0f0f0;">${label}</td>
-                    <td align="right" style="padding:9px 0;font-size:13px;color:#3a3a3a;border-bottom:1px solid #f0f0f0;">${value}</td>
-                  </tr>`;
-    const contactLine = (label: string, inner: string) =>
-      `<tr><td style="padding:5px 0;font-size:12px;font-weight:700;color:#0a0a0a;white-space:nowrap;">${label}</td><td style="padding:5px 0 0 14px;font-size:12px;color:#3a3a3a;">${inner}</td></tr>`;
+    // Email-safe styling: inline styles via shared helpers (see base44/shared/bookingEmail.ts).
 
     // Account CTA section — different copy depending on whether client has an account.
     // Rendered as a compact highlighted block with its own CTA, mirroring the approved PDF.
@@ -168,14 +156,8 @@ export default async function(req: Request): Promise<Response> {
 
     // Email HTML — compact layout matching the approved PDF reference.
     const priceText = booking.estimated_price ? `${Number(booking.estimated_price).toLocaleString('pl-PL')} PLN` : 'BEZPŁATNIE';
-    const clientFirstName = (booking.client_name || 'Kliencie').split(' ')[0];
-
-    const contactRows: string[] = [];
-    if (contact.contact_address_street) contactRows.push(contactLine('Adres', `${contact.contact_address_street}, ${contact.contact_address_city || ''}`));
-    if (contact.contact_phone) contactRows.push(contactLine('Telefon', `<a href="tel:${contact.contact_phone}" style="${linkStyle}">${contact.contact_phone}</a>`));
-    if (contact.contact_email) contactRows.push(contactLine('Email', `<a href="mailto:${contact.contact_email}" style="${linkStyle}">${contact.contact_email}</a>`));
-    if (contact.contact_instagram_url) contactRows.push(contactLine('Instagram', `<a href="${contact.contact_instagram_url}" style="${linkStyle}">${contact.contact_instagram || 'Znajdź nas'}</a>`));
-    if (contact.contact_facebook_url) contactRows.push(contactLine('Facebook', `<a href="${contact.contact_facebook_url}" style="${linkStyle}">${contact.contact_facebook || 'Znajdź nas'}</a>`));
+    const firstName = clientFirstName(booking);
+    const contactRows = buildContactRows(contact);
 
     const isPendingMode = mode === 'pending';
     const statusLabel = isPendingMode ? 'OCZEKUJE POTWIERDZENIA' : 'POTWIERDZONA';
@@ -229,7 +211,7 @@ export default async function(req: Request): Promise<Response> {
           <!-- Body -->
           <tr>
             <td style="padding:28px 32px 8px 32px;">
-              <p style="${pStyle}">Cześć ${clientFirstName},</p>
+              <p style="${pStyle}">Cześć ${firstName},</p>
               ${isPendingMode
                 ? `<p style="${pStyle}">Dziękujemy za zgłoszenie rezerwacji! Twoja sesja ma teraz status <strong style="color:#0a0a0a;">oczekująca</strong> — studio wkrótce ją potwierdzi. O szczegółach poinformujemy Cię w osobnej wiadomości. Oto dane, które podałeś:</p>`
                 : `<p style="${pStyle}">Twoja rezerwacja została <strong style="color:#0a0a0a;">potwierdzona</strong> przez studio. Cieszymy się na Twoją wizytę! Oto szczegóły sesji:</p>`}
@@ -305,7 +287,6 @@ export default async function(req: Request): Promise<Response> {
     // Send email via the connected Gmail account (tattoo.wolsztyn@gmail.com)
     const { accessToken } = await base44.asServiceRole.connectors.getConnection('gmail');
 
-    // Build RFC 2822 MIME message — Gmail's API requires base64url-encoded raw.
     const subject = isPendingMode
       ? `Otrzymaliśmy Twoje zgłoszenie rezerwacji — ${dateStr}`
       : `Twoja rezerwacja jest potwierdzona — ${dateStr}`;
@@ -317,7 +298,7 @@ export default async function(req: Request): Promise<Response> {
     const textBody = [
       isPendingMode ? `OTRZYMALIŚMY TWOJE ZGŁOSZENIE — ROMANS TATTOO` : `TWOJA REZERWACJA JEST POTWIERDZONA — ROMANS TATTOO`,
       ``,
-      `Cześć ${clientFirstName},`,
+      `Cześć ${firstName},`,
       isPendingMode
         ? `Dziękujemy za zgłoszenie rezerwacji! Twoja sesja ma teraz status oczekująca — studio wkrótce ją potwierdzi. Oto dane, które podałeś:`
         : `Twoja rezerwacja została potwierdzona przez studio. Oto szczegóły sesji:`,
@@ -345,39 +326,7 @@ export default async function(req: Request): Promise<Response> {
       `Dziękujemy za zaufanie!`,
     ].filter(Boolean).join('\n').trim();
 
-    // Let a MIME library build the message: it handles UTF-8, encoded-word subject,
-    // line wrapping and the multipart structure correctly.
-    const mail = new MailComposer({
-      from: { name: fromName, address: fromEmail },
-      to: toEmail,
-      subject,
-      text: textBody,
-      html: htmlBody,
-    });
-    const messageBytes: Uint8Array = await new Promise((resolve, reject) => {
-      mail.compile().build((err: Error | null, msg: Uint8Array) => (err ? reject(err) : resolve(msg)));
-    });
-
-    // Gmail API expects the whole RFC 2822 message as base64url
-    let binary = '';
-    for (let i = 0; i < messageBytes.length; i += 0x8000) {
-      binary += String.fromCharCode(...messageBytes.subarray(i, i + 0x8000));
-    }
-    const raw = btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-
-    const gmailResponse = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ raw }),
-    });
-
-    if (!gmailResponse.ok) {
-      const error = await gmailResponse.json().catch(() => ({}));
-      return Response.json({ success: false, error: `Gmail API error: ${error.error?.message || gmailResponse.statusText}` }, { status: 500 });
-    }
+    await sendViaGmail(accessToken, fromName, fromEmail, toEmail, subject, textBody, htmlBody);
 
     return Response.json({ success: true, message: 'Email sent via Gmail', hasAccount });
   } catch (error) {
