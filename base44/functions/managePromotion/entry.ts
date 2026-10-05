@@ -245,6 +245,32 @@ export default async function (req: Request): Promise<Response> {
       return Response.json({ promotion: updated, redeemed: amount, balance: newBalance, fullyUsed });
     }
 
+    // Klient dodaje voucher do swojego konta wyłącznie po kodzie.
+    if (action === 'claim') {
+      const code = String(body.code || '').trim().toUpperCase();
+      if (!code) return Response.json({ error: 'Podaj kod vouchera' }, { status: 400 });
+      const list = await base44.asServiceRole.entities.Promotion.filter({ code });
+      const p: any = list.find((x: any) => x.type === 'voucher');
+      if (!p) return Response.json({ error: 'Voucher o takim kodzie nie istnieje' }, { status: 404 });
+      if (p.revoked) return Response.json({ error: 'Voucher odwołany' }, { status: 400 });
+      if (p.is_active === false) return Response.json({ error: 'Voucher wyłączony' }, { status: 400 });
+      const now = Date.now();
+      const exp = p.expires_at ? new Date(p.expires_at).getTime() : 0;
+      const graceExp = p.grace_expires_at ? new Date(p.grace_expires_at).getTime() : 0;
+      const isGrace = p.is_grace && graceExp > now;
+      if (!isGrace && exp && exp < now) return Response.json({ error: 'Voucher wygasł' }, { status: 400 });
+      const amount = isGrace ? (p.balance || p.grace_value || p.value || 0) : (p.balance ?? p.value ?? 0);
+      if (amount <= 0 && !isGrace) return Response.json({ error: 'Voucher wykorzystany' }, { status: 400 });
+      if (p.assigned_client_email && p.assigned_client_email.toLowerCase() !== String(user.email).toLowerCase()) {
+        return Response.json({ error: 'Voucher jest przypisany do innego konta' }, { status: 403 });
+      }
+      await base44.asServiceRole.entities.Promotion.update(p.id, {
+        assigned_client_email: user.email,
+        assignment_permanent: true,
+      });
+      return Response.json({ success: true, code: p.code });
+    }
+
     if (action === 'send_email') {
       if (!isAdmin) return Response.json({ error: 'Forbidden' }, { status: 403 });
       const p: any = await base44.entities.Promotion.get(body.promotion_id);

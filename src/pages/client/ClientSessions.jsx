@@ -8,6 +8,8 @@ import { parseISO, isAfter, isToday } from 'date-fns';
 import SessionCard from '@/components/client/SessionCard';
 import ChangeRequestModal from '@/components/client/ChangeRequestModal';
 import MessageModal from '@/components/client/MessageModal';
+import SessionDetailModal from '@/components/client/SessionDetailModal';
+import { getPriceLabel } from '@/lib/priceLabel';
 
 export default function ClientSessions() {
   const { client, user, theme } = useOutletContext();
@@ -16,6 +18,9 @@ export default function ClientSessions() {
   const [tab, setTab] = useState('upcoming');
   const [changeRequestBooking, setChangeRequestBooking] = useState(null);
   const [messageBooking, setMessageBooking] = useState(null);
+  const [previewBooking, setPreviewBooking] = useState(null);
+  const [services, setServices] = useState([]);
+  const priceFor = (b) => getPriceLabel(b, services.find(s => s.id === b.service_id));
 
   const t = theme === 'light'
     ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: 'var(--brand)' }
@@ -30,6 +35,10 @@ export default function ClientSessions() {
   useEffect(() => {
     if (user?.email) load().catch(() => setLoading(false));
   }, [user]);
+
+  useEffect(() => {
+    base44.entities.Service.list().then(setServices).catch(() => {});
+  }, []);
 
   // Realtime — sesje i statusy odświeżają się na żywo (np. zmiana statusu przez admina/artystę)
   useRealtimeSync('Booking', () => { if (user?.email) load().catch(() => {}); }, [user?.email]);
@@ -106,6 +115,8 @@ export default function ClientSessions() {
               key={b.id}
               booking={b}
               theme={theme}
+              priceLabel={priceFor(b)}
+              onPreview={setPreviewBooking}
               onChangeRequest={setChangeRequestBooking}
               onMessage={setMessageBooking}
               showActions={tab === 'upcoming'}
@@ -134,6 +145,16 @@ export default function ClientSessions() {
           theme={theme}
           onClose={() => setMessageBooking(null)}
           onSent={() => setMessageBooking(null)}
+        />
+      )}
+
+      {previewBooking && (
+        <SessionDetailModal
+          booking={previewBooking}
+          theme={theme}
+          priceLabel={priceFor(previewBooking)}
+          onClose={() => setPreviewBooking(null)}
+          onUpdated={(updated) => { setPreviewBooking(updated); load(); }}
         />
       )}
     </div>

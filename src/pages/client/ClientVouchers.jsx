@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Gift, QrCode, ExternalLink, Copy, Check, Clock } from 'lucide-react';
+import ClaimVoucherForm from '@/components/client/ClaimVoucherForm';
 
 export default function ClientVouchers() {
   const { user, theme } = useOutletContext();
@@ -14,12 +15,13 @@ export default function ClientVouchers() {
     ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.65)', mutedLow: 'rgba(0,0,0,0.55)', fuchsia: 'var(--brand)', panelBg: '#FAFAFA' }
     : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.75)', mutedLow: 'rgba(245,240,235,0.65)', fuchsia: 'var(--brand)', panelBg: '#141414' };
 
+  const load = () => base44.entities.Promotion.list('-created_date', 200)
+    .then(res => setVouchers(res.filter(p => p.type === 'voucher')))
+    .catch(() => {})
+    .finally(() => setLoading(false));
+
   useEffect(() => {
-    if (!user?.email) return;
-    base44.entities.Promotion.list('-created_date', 200)
-      .then(res => setVouchers(res.filter(p => p.type === 'voucher')))
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    if (user?.email) load();
   }, [user]);
 
   const computeStatus = (p) => {
@@ -65,6 +67,8 @@ export default function ClientVouchers() {
           Pokaż kod lub QR w studio, aby zrealizować voucher na sesję.
         </p>
       </div>
+
+      <ClaimVoucherForm onClaimed={load} />
 
       {vouchers.length === 0 ? (
         <div className="py-20 text-center" style={{ border: `0.5px solid ${t.border}`, background: t.panelBg }}>

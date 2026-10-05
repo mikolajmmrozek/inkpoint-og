@@ -4,9 +4,19 @@ import { base44 } from '@/api/base44Client';
 import { Loader2, Edit3, Check } from 'lucide-react';
 import AccountSecurity from '@/components/client/AccountSecurity';
 
+const formFromClient = (client) => {
+  const parts = (client.name || '').split(' ');
+  return {
+    first_name: client.first_name || parts[0] || '',
+    last_name: client.last_name || parts.slice(1).join(' '),
+    phone: client.phone || '',
+    notes: client.notes || '',
+  };
+};
+
 export default function ClientProfile() {
   const { client, user, theme } = useOutletContext();
-  const [form, setForm] = useState({ phone: '', notes: '' });
+  const [form, setForm] = useState({ first_name: '', last_name: '', phone: '', notes: '' });
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -17,7 +27,7 @@ export default function ClientProfile() {
 
   useEffect(() => {
     if (client) {
-      setForm({ phone: client.phone || '', notes: client.notes || '' });
+      setForm(formFromClient(client));
     }
   }, [client]);
 
@@ -25,6 +35,9 @@ export default function ClientProfile() {
     if (!client?.id) return;
     setSaving(true);
     await base44.entities.Client.update(client.id, {
+      first_name: form.first_name,
+      last_name: form.last_name,
+      name: `${form.first_name} ${form.last_name}`.trim(),
       phone: form.phone,
       notes: form.notes,
     });
@@ -42,7 +55,7 @@ export default function ClientProfile() {
 
   const handleCancel = () => {
     if (client) {
-      setForm({ phone: client.phone || '', notes: client.notes || '' });
+      setForm(formFromClient(client));
     }
     setEditing(false);
   };
@@ -104,11 +117,24 @@ export default function ClientProfile() {
         </div>
 
         <div className="space-y-5">
-          {/* Read-only: name & email */}
-          <div>
-            {label('Imię i Nazwisko')}
-            <input readOnly value={client?.name || user?.full_name || ''} style={readOnlyStyle} />
-          </div>
+          {/* Editable: imię i nazwisko */}
+          {[['first_name', 'Imię'], ['last_name', 'Nazwisko']].map(([key, text]) => (
+            <div key={key}>
+              {label(text)}
+              {editing ? (
+                <input
+                  style={inputStyle}
+                  value={form[key]}
+                  onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
+                  onFocus={e => e.target.style.borderBottomColor = t.fuchsia}
+                  onBlur={e => e.target.style.borderBottomColor = t.border}
+                />
+              ) : (
+                <input readOnly value={form[key] || '—'} style={readOnlyStyle} />
+              )}
+            </div>
+          ))}
+          {/* E-mail jest identyfikatorem konta logowania — tylko do odczytu */}
           <div>
             {label('E-mail')}
             <input readOnly value={user?.email || ''} style={readOnlyStyle} />

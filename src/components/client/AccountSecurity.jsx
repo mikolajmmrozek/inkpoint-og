@@ -191,14 +191,7 @@ export default function AccountSecurity({ user, t }) {
         </p>
       )}
 
-      {isSocialLogin && (
-        <div className="flex items-start gap-3 p-4" style={{ border: `0.5px solid ${t.border}`, background: t.bg === '#FFFFFF' ? 'rgba(0,0,0,0.02)' : 'rgba(255,255,255,0.02)' }}>
-          <Shield size={14} color={t.muted} className="flex-shrink-0 mt-0.5" />
-          <p style={{ fontSize: '12px', color: t.muted, lineHeight: 1.5 }}>
-            Twoje hasło jest zarządzane przez {providerLabel}. Aby je zmienić, zaloguj się do swojego konta u dostawcy.
-          </p>
-        </div>
-      )}
+
     </div>
   );
 }

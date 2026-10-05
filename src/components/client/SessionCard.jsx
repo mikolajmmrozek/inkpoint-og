@@ -1,10 +1,10 @@
 import { format, parseISO, isAfter, isToday } from 'date-fns';
 import { pl } from 'date-fns/locale';
-import { Clock, User, MapPin, MessageSquare, RefreshCw } from 'lucide-react';
+import { Clock, User, MapPin, MessageSquare, RefreshCw, Eye } from 'lucide-react';
 
 const STATUS_LABELS = { pending: 'Oczekująca', confirmed: 'Potwierdzona', completed: 'Zakończona', cancelled: 'Anulowana' };
 
-export default function SessionCard({ booking, theme = 'dark', onChangeRequest, onMessage, showActions }) {
+export default function SessionCard({ booking, theme = 'dark', priceLabel, onChangeRequest, onMessage, onPreview, showActions }) {
   const t = theme === 'light'
     ? { border: '#E5E5E5', text: '#111111', muted: 'rgba(0,0,0,0.4)', mutedLow: 'rgba(0,0,0,0.3)', fuchsia: 'var(--brand)' }
     : { border: '#262626', text: '#F5F0EB', muted: 'rgba(245,240,235,0.5)', mutedLow: 'rgba(245,240,235,0.3)', fuchsia: 'var(--brand)' };
@@ -13,9 +13,12 @@ export default function SessionCard({ booking, theme = 'dark', onChangeRequest, 
 
   const isCancelled = booking.status === 'cancelled';
   const isPast = booking.session_date ? !isAfter(parseISO(booking.session_date), new Date()) && !isToday(parseISO(booking.session_date)) : true;
+  const images = booking.reference_images || [];
 
   let dateStr = booking.session_date || '—';
   try { dateStr = format(parseISO(booking.session_date), 'd MMMM yyyy', { locale: pl }); } catch {}
+
+  const actionBtn = { fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', background: 'transparent', cursor: 'pointer' };
 
   return (
     <div className="p-5" style={{ border: `0.5px solid ${t.border}`, opacity: isCancelled ? 0.5 : 1 }}>
@@ -60,25 +63,52 @@ export default function SessionCard({ booking, theme = 'dark', onChangeRequest, 
         </p>
       )}
 
-      {/* Actions */}
-      {showActions && !isCancelled && !isPast && (
-        <div className="flex gap-2 mt-4 pt-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
-          <button
-            onClick={() => onChangeRequest(booking)}
-            className="flex items-center gap-2"
-            style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: 'pointer' }}
-          >
-            <RefreshCw size={11} /> POPROŚ O ZMIANĘ TERMINU
-          </button>
-          <button
-            onClick={() => onMessage(booking)}
-            className="flex items-center gap-2"
-            style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}
-          >
-            <MessageSquare size={11} /> WYŚLIJ WIADOMOŚĆ
-          </button>
+      {priceLabel && (
+        <div className="flex items-baseline gap-2 mt-3 flex-wrap" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px' }}>
+          <span style={{ color: t.muted, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Cena orientacyjna</span>
+          <span style={{ color: t.text, fontWeight: 600 }}>{priceLabel}</span>
+          <span style={{ fontSize: '9px', color: t.mutedLow }}>* zależy od wielkości i wzoru</span>
         </div>
       )}
+
+      {images.length > 0 && (
+        <div className="flex gap-2 mt-3 flex-wrap">
+          {images.slice(0, 4).map((img, idx) => (
+            <img
+              key={img + idx}
+              src={img}
+              alt={`ref-${idx}`}
+              onClick={() => onPreview(booking)}
+              style={{ width: '52px', height: '52px', objectFit: 'cover', border: `0.5px solid ${t.border}`, cursor: 'pointer' }}
+            />
+          ))}
+          {images.length > 4 && (
+            <div
+              onClick={() => onPreview(booking)}
+              style={{ width: '52px', height: '52px', border: `0.5px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: t.muted, cursor: 'pointer' }}
+            >
+              +{images.length - 4}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className="flex flex-wrap gap-2 mt-4 pt-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
+        <button onClick={() => onPreview(booking)} className="flex items-center gap-2" style={{ ...actionBtn, border: `0.5px solid ${t.border}`, color: t.text }}>
+          <Eye size={11} /> PODGLĄD I ZDJĘCIA
+        </button>
+        {showActions && !isCancelled && !isPast && (
+          <>
+            <button onClick={() => onChangeRequest(booking)} className="flex items-center gap-2" style={{ ...actionBtn, border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia }}>
+              <RefreshCw size={11} /> POPROŚ O ZMIANĘ TERMINU
+            </button>
+            <button onClick={() => onMessage(booking)} className="flex items-center gap-2" style={{ ...actionBtn, border: `0.5px solid ${t.border}`, color: t.muted }}>
+              <MessageSquare size={11} /> WYŚLIJ WIADOMOŚĆ
+            </button>
+          </>
+        )}
+      </div>
     </div>
   );
 }
