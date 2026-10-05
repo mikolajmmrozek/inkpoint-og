@@ -228,24 +228,24 @@ export default async function(req: Request): Promise<Response> {
     const fromEmail = 'tattoo.wolsztyn@gmail.com';
     const toEmail = booking.client_email;
 
-    // RFC 2047 encode the subject (Polish chars) and RFC 2045 encode the HTML body
-    const encodeSubject = (str: string): string =>
-      `=?UTF-8?B?${btoa(unescape(encodeURIComponent(str)))}?=`;
-    const encodeBody = (str: string): string =>
-      btoa(unescape(encodeURIComponent(str)))
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
-        .replace(/=+$/, '');
+    // UTF-8 safe base64url encoder (replaces deprecated unescape/encodeURIComponent combo
+    // that corrupted Polish characters). Works for both subject and full MIME message.
+    const utf8ToBase64Url = (str: string): string => {
+      const bytes = new TextEncoder().encode(str);
+      let binary = '';
+      for (const byte of bytes) binary += String.fromCharCode(byte);
+      return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    };
 
     const mimeMessage = [
       `From: ${fromName} <${fromEmail}>`,
       `To: ${toEmail}`,
-      `Subject: ${encodeSubject(subject)}`,
+      `Subject: =?UTF-8?B?${utf8ToBase64Url(subject)}?=`,
       `MIME-Version: 1.0`,
       `Content-Type: text/html; charset=UTF-8`,
       `Content-Transfer-Encoding: base64`,
       ``,
-      htmlBody,
+      utf8ToBase64Url(htmlBody),
     ].join('\r\n');
 
     const gmailResponse = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
@@ -254,7 +254,7 @@ export default async function(req: Request): Promise<Response> {
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ raw: encodeBody(mimeMessage) }),
+      body: JSON.stringify({ raw: utf8ToBase64Url(mimeMessage) }),
     });
 
     if (!gmailResponse.ok) {
