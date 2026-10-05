@@ -130,7 +130,7 @@ export default async function(req: Request): Promise<Response> {
             <tr><td style="padding:18px 20px;">
               <h3 style="${h3Style}">Twoje Konto</h3>
               <p style="${pStyle}">Zaloguj się, aby przeglądać sesje, prosić o zmianę terminu oraz kupować i realizować vouchery.</p>
-              <a href="${panelLink}" style="${buttonStyle}">Zaloguj się do panelu</a>
+              <a href="${panelLink}" style="${buttonStyle}color:#ffffff;">Zaloguj się do panelu</a>
             </td></tr>
           </table>`
       : `
@@ -138,7 +138,7 @@ export default async function(req: Request): Promise<Response> {
             <tr><td style="padding:18px 20px;">
               <h3 style="${h3Style}">Załóż Konto</h3>
               <p style="${pStyle}">Nie masz jeszcze konta? Załóż je lub zaloguj się, aby móc przeglądać sesje, prosić o zmianę terminu oraz kupować i realizować vouchery.</p>
-              <a href="${loginLink}" style="${buttonStyle}">Załóż konto / Zaloguj się</a>
+              <a href="${loginLink}" style="${buttonStyle}color:#ffffff;">Załóż konto / Zaloguj się</a>
             </td></tr>
           </table>`;
 
@@ -221,7 +221,7 @@ export default async function(req: Request): Promise<Response> {
                 <tr><td style="padding:20px 22px;">
                   <h3 style="color:#FF007F;font-size:11px;margin:0 0 8px 0;text-transform:uppercase;font-weight:700;letter-spacing:0.12em;font-family:Arial,Helvetica,sans-serif;">Ankieta Zdrowotna</h3>
                   <p style="margin:0 0 14px 0;color:#f5f0eb;font-size:13px;line-height:1.55;">Wypełnij ankietę online przed wizytą, aby zaoszczędzić czas w studiu. Zajmie to zaledwie kilka minut.</p>
-                  <a href="${surveyLink}" style="display:inline-block;background:#FF007F;color:#0a0a0a;padding:13px 28px;text-decoration:none;border-radius:6px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;font-family:Arial,Helvetica,sans-serif;">Wypełnij Ankietę</a>
+                  <a href="${surveyLink}" style="display:inline-block;background:#FF007F;color:#ffffff;padding:13px 28px;text-decoration:none;border-radius:6px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;font-family:Arial,Helvetica,sans-serif;">Wypełnij Ankietę</a>
                 </td></tr>
               </table>
             </td>
