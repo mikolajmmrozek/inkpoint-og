@@ -88,9 +88,14 @@ export default function TodayOverview({ bookings, t, theme, onBookingUpdate, art
       {/* Monthly overview — admin only, separate category above daily cash */}
       {variant !== 'artist' && (
         <div className="mb-10">
-          <div className="flex items-center gap-2 mb-1.5">
-            <Calendar size={13} color="var(--brand)" />
-            <p style={{ ...mono, fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.18em', textTransform: 'uppercase' }}>Przegląd miesiąca</p>
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center gap-2">
+              <Calendar size={13} color="var(--brand)" />
+              <p style={{ ...mono, fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.18em', textTransform: 'uppercase' }}>Przegląd miesiąca</p>
+            </div>
+            <Link to="/dashboard/stats" className="flex items-center gap-1" style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              STATYSTYKI <ArrowRight size={11} />
+            </Link>
           </div>
           <p style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>{monthName} {monthYear}</p>
           <div className="grid grid-cols-2 gap-3">
