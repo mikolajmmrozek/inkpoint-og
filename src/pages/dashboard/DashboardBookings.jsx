@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { AnimatePresence } from 'framer-motion';
-import { Calendar, List, Clock, ChevronLeft, ChevronRight, Search, X, Inbox } from 'lucide-react';
+import { Calendar, List, Clock, ChevronLeft, ChevronRight, Search, X, Inbox, Wallet } from 'lucide-react';
 import { format, isSameDay, addDays, subDays } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import { useTheme } from './Dashboard';
@@ -191,7 +191,10 @@ export default function DashboardBookings() {
   const [healthStatusMap, setHealthStatusMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
+  const initialFilter = searchParams.get('filter');
+  const isToSettleMode = initialFilter === 'to_settle';
   const [statusFilters, setStatusFilters] = useState(() => {
+    if (isToSettleMode) return [];
     const f = searchParams.get('filter');
     return f ? [f] : [];
   });
@@ -204,8 +207,12 @@ export default function DashboardBookings() {
   const [viewMode, setViewMode] = useState(searchParams.get('view') || 'calendar');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [listPage, setListPage] = useState(0);
-  const [listTab, setListTab] = useState('upcoming');
+  const [listTab, setListTab] = useState(() => {
+    const tab = searchParams.get('tab');
+    return tab === 'past' ? 'past' : 'upcoming';
+  });
   const [searchQuery, setSearchQuery] = useState('');
+  const [toSettleMode, setToSettleMode] = useState(isToSettleMode);
 
   const [loadError, setLoadError] = useState(null);
   const loadedOnce = useRef(false);
@@ -369,6 +376,13 @@ export default function DashboardBookings() {
   const listBookings = (() => {
     let base = bookings.filter(b => statusMatch(b) && artistMatch(b));
     
+    // "Do rozliczenia" filter: past sessions (up to today) that are not settled,
+    // not completed and not cancelled.
+    if (toSettleMode) {
+      const todayStr = format(new Date(), 'yyyy-MM-dd');
+      base = base.filter(b => (b.session_date || '') <= todayStr && !b.is_settled && b.status !== 'completed' && b.status !== 'cancelled');
+    }
+    
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       base = base.filter(b =>
@@ -393,13 +407,17 @@ export default function DashboardBookings() {
       base = base.filter(b => b.session_date && isSameDay(new Date(b.session_date), selectedDate || new Date()));
       base = [...base].sort((a, b) => (a.session_time || '').localeCompare(b.session_time || ''));
     }
-    if (viewMode === 'list') {
+    if (viewMode === 'list' && !toSettleMode) {
       const todayStr = format(new Date(), 'yyyy-MM-dd');
       if (listTab === 'upcoming') {
         base = [...base].filter(b => (b.session_date || '') >= todayStr).sort((a, b) => (a.session_date || '').localeCompare(b.session_date || ''));
       } else {
         base = [...base].filter(b => (b.session_date || '') < todayStr).sort((a, b) => (b.session_date || '').localeCompare(a.session_date || ''));
       }
+    }
+    // In toSettleMode the list is already filtered + sorted above (past, newest first).
+    if (viewMode === 'list' && toSettleMode) {
+      base = [...base].sort((a, b) => (b.session_date || '').localeCompare(a.session_date || '') || (a.session_time || '').localeCompare(b.session_time || ''));
     }
     return base;
   })();
@@ -681,7 +699,23 @@ export default function DashboardBookings() {
             {/* List section */}
              {showListSection && (
               <div>
-                {viewMode === 'list' && !searchQuery.trim() && (
+                {viewMode === 'list' && toSettleMode && !searchQuery.trim() && (
+                  <div className="flex items-center justify-between mb-4 px-4 py-3" style={{ border: `0.5px solid var(--brand)`, background: 'rgb(var(--brand-rgb) /0.06)' }}>
+                    <div className="flex items-center gap-2">
+                      <Wallet size={12} color="var(--brand)" />
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                        FILTR: DO ROZLICZENIA — sesje przeszłe nierozliczone
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setToSettleMode(false)}
+                      style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      <X size={12} /> WYCZYŚĆ
+                    </button>
+                  </div>
+                )}
+                {viewMode === 'list' && !searchQuery.trim() && !toSettleMode && (
                   <div className="flex mb-4" style={{ border: `0.5px solid ${t.border}` }}>
                     {[{ key: 'upcoming', label: 'NADCHODZĄCE' }, { key: 'past', label: 'PRZESZŁE' }].map(tab => (
                       <button

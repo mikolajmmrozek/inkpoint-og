@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, Users, MessageSquare, FileText, TrendingUp, Clock, AlertCircle, ClipboardList } from 'lucide-react';
+import { Calendar, Users, MessageSquare, FileText, TrendingUp, Clock, AlertCircle, ClipboardList, Wallet } from 'lucide-react';
 import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
 import { AnimatePresence } from 'framer-motion';
 import { useTheme } from './Dashboard';
@@ -18,7 +18,7 @@ import { formatCompact } from '@/lib/formatNumber';
 export default function DashboardHome() {
   const { theme } = useTheme();
   const isMobile = useIsMobile();
-  const [stats, setStats] = useState({ bookings: 0, pending: 0, messages: 0, forms: 0 });
+  const [stats, setStats] = useState({ bookings: 0, pending: 0, messages: 0, forms: 0, toSettle: 0 });
   const [pendingByDay, setPendingByDay] = useState([]);
   const [draftForms, setDraftForms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,11 +46,14 @@ export default function DashboardHome() {
       const futureBookings = bookings.filter(b => (b.session_date || '') >= todayStr);
       const pending = bookings.filter(b => b.status === 'pending');
       const completedForms = healthForms.filter(f => !f.is_draft);
+      // Sessions needing settlement: past or today, not cancelled, not settled, not completed.
+      const toSettle = bookings.filter(b => (b.session_date || '') <= todayStr && b.status !== 'cancelled' && b.status !== 'completed' && !b.is_settled);
       setStats({
         bookings: futureBookings.length,
         pending: pending.length,
         messages: messages.length,
         forms: completedForms.length,
+        toSettle: toSettle.length,
       });
 
       // Today: show ALL sessions (except cancelled) for day-of operations
@@ -64,12 +67,10 @@ export default function DashboardHome() {
       const futureActive = bookings
         .filter(b => (b.session_date || '') > todayStr && needsAction(b))
         .sort((a, b) => (a.session_date || '').localeCompare(b.session_date || '') || (a.session_time || '').localeCompare(b.session_time || ''));
-      const pastOverdue = bookings
-        .filter(b => (b.session_date || '') < todayStr && needsAction(b))
-        .sort((a, b) => (b.session_date || '').localeCompare(a.session_date || '') || (a.session_time || '').localeCompare(b.session_time || ''));
+      // No past overdue in the overview — those live in the "Do rozliczenia" filter.
       const futureLimited = futureActive.slice(0, 10);
       const grouped = {};
-      [...pastOverdue, ...todayBookings, ...futureLimited].forEach(b => {
+      [...todayBookings, ...futureLimited].forEach(b => {
         const day = b.session_date || 'Brak daty';
         if (!grouped[day]) grouped[day] = [];
         grouped[day].push(b);
@@ -96,7 +97,7 @@ export default function DashboardHome() {
     { label: 'Wszystkie rezerwacje', value: stats.bookings, icon: Calendar, link: '/dashboard/bookings' },
     { label: 'Oczekujące', value: stats.pending, icon: Clock, link: '/dashboard/bookings?filter=pending&view=list' },
     { label: 'Nowe wiadomości', value: stats.messages, icon: MessageSquare, link: '/dashboard/messages' },
-    { label: 'Ankiety zdrowotne', value: stats.forms, icon: FileText, link: '/dashboard/health-forms' },
+    { label: 'Do rozliczenia', value: stats.toSettle, icon: Wallet, link: '/dashboard/bookings?filter=to_settle&view=list&tab=past' },
   ];
 
   const buildPendingByDay = (bookingsArr) => {
@@ -108,13 +109,10 @@ export default function DashboardHome() {
     const futureActive = bookingsArr
       .filter(b => (b.session_date || '') > todayStr && needsAction(b))
       .sort((a, b) => (a.session_date || '').localeCompare(b.session_date || '') || (a.session_time || '').localeCompare(b.session_time || ''));
-    // Past overdue: only sessions that still need action.
-    const pastOverdue = bookingsArr
-      .filter(b => (b.session_date || '') < todayStr && needsAction(b))
-      .sort((a, b) => (b.session_date || '').localeCompare(a.session_date || '') || (a.session_time || '').localeCompare(b.session_time || ''));
+    // No past overdue in the overview — those live in the "Do rozliczenia" filter.
     const futureLimited = futureActive.slice(0, 10);
     const grouped = {};
-    [...pastOverdue, ...todayBookings, ...futureLimited].forEach(b => {
+    [...todayBookings, ...futureLimited].forEach(b => {
       const day = b.session_date || 'Brak daty';
       if (!grouped[day]) grouped[day] = [];
       grouped[day].push(b);
