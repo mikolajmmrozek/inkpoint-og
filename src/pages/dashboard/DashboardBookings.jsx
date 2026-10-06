@@ -16,6 +16,7 @@ import { buildHealthFormStatusMap, resolveBookingHealthStatus } from '@/lib/heal
 import HealthFormBadge from '@/components/booking/HealthFormBadge';
 import GroupedBookingList from '@/components/booking/GroupedBookingList';
 import BookingFilters from '@/components/dashboard/BookingFilters';
+import PendingRequestsView from '@/components/dashboard/PendingRequestsView';
 import { getThumbnailUrl } from '@/lib/thumbnail';
 import { useCreateMenu } from '@/components/create/CreateMenuContext';
 
@@ -462,24 +463,6 @@ export default function DashboardBookings() {
 
   const pendingCount = bookings.filter(b => b.status === 'pending').length;
 
-  const pendingViewBookings = (() => {
-    if (viewMode !== 'pending') return [];
-    let base = bookings.filter(b => b.status === 'pending' || b.status === 'cancelled');
-    if (statusFilters.length > 0) base = base.filter(b => statusFilters.includes(b.status));
-    if (artistFilters.length > 0) base = base.filter(b => artistFilters.includes(b.artist_id));
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      base = base.filter(b =>
-        (b.client_name || '').toLowerCase().includes(q) ||
-        (b.session_id || '').toLowerCase().includes(q) ||
-        (b.client_email || '').toLowerCase().includes(q) ||
-        (b.tattoo_placement || '').toLowerCase().includes(q) ||
-        (b.notes || '').toLowerCase().includes(q)
-      );
-    }
-    return [...base].sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
-  })();
-
   const showListSection = (viewMode === 'calendar' && searchQuery.trim()) || viewMode === 'list' || viewMode === 'day';
 
   // Split search results into upcoming / past for calendar & day views — nearest sessions first.
@@ -561,7 +544,7 @@ export default function DashboardBookings() {
                 onClick={() => { setViewMode(mode); if (mode !== 'day' && mode !== 'calendar' && mode !== 'pending') setSelectedDate(new Date()); }}
                 className="p-2.5 transition-all"
                 style={{ background: viewMode === mode ? 'rgb(var(--brand-rgb) /0.1)' : 'transparent', color: viewMode === mode ? 'var(--brand)' : t.muted, border: 'none', cursor: 'pointer' }}
-                title={mode === 'pending' ? 'Nowe rezerwacje (do weryfikacji)' : ''}
+                title={mode === 'pending' ? 'Do weryfikacji — oczekujące rezerwacje i prośby o zmianę' : ''}
                 style={{ position: 'relative', background: viewMode === mode ? 'rgb(var(--brand-rgb) /0.1)' : 'transparent', color: viewMode === mode ? 'var(--brand)' : t.muted, border: 'none', cursor: 'pointer' }}
               >
                 <Icon size={14} />
@@ -767,27 +750,17 @@ export default function DashboardBookings() {
             )}
           </div>
 
-          {/* Pending view (Nowe rezerwacje — do weryfikacji) */}
+          {/* Pending view (Do weryfikacji — oczekujące rezerwacje + prośby o zmianę) */}
           {viewMode === 'pending' && (
-            <div>
-              <div style={{ padding: '10px 16px', background: t.bg, border: `0.5px solid ${t.border}`, marginBottom: '8px' }}>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: t.title, letterSpacing: '0.08em' }}>
-                  DO WERYFIKACJI
-                </p>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: pendingViewBookings.length > 0 ? t.fuchsia : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
-                  {pendingViewBookings.length} {pendingViewBookings.length === 1 ? 'REZERWACJA' : pendingViewBookings.length >= 2 && pendingViewBookings.length <= 4 ? 'REZERWACJE' : 'REZERWACJI'}
-                </p>
-              </div>
-              {pendingViewBookings.length === 0 ? (
-                <div className="py-12 text-center" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK REZERWACJI DO WERYFIKACJI</p>
-                </div>
-              ) : (
-                <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-                  {pendingViewBookings.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={pendingViewBookings} selected={selected} setSelected={setSelected} artists={artists} t={t} healthStatusMap={healthStatusMap} />)}
-                </div>
-              )}
-            </div>
+            <PendingRequestsView
+              bookings={bookings}
+              artists={artists}
+              t={t}
+              theme={theme}
+              onConfirmBooking={updateStatus}
+              onOpenBooking={(b) => setSelected(b)}
+              refreshBookings={refreshBookings}
+            />
           )}
 
           {/* Detail panel */}

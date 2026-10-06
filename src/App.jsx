@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { ThemeProvider } from '@/lib/ThemeProvider';
@@ -57,7 +57,7 @@ import ClientMessages from './pages/client/ClientMessages';
 import FeedbackSurvey from './pages/FeedbackSurvey';
 import Voucher from './pages/Voucher';
 import ChangeRequest from './pages/ChangeRequest';
-import DashboardChangeRequests from './pages/dashboard/DashboardChangeRequests';
+
 import ScrollToTop from './components/ScrollToTop';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -137,7 +137,7 @@ const AuthenticatedApp = () => {
         <Route path="promotions" element={<DashboardPromotions />} />
         <Route path="users" element={<DashboardUsers />} />
         <Route path="notifications" element={<NotificationsPage />} />
-        <Route path="change-requests" element={<DashboardChangeRequests />} />
+        <Route path="change-requests" element={<Navigate to="/dashboard/bookings?view=pending" replace />} />
       </Route>
 
       {/* Artist panel */}

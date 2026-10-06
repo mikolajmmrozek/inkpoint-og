@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, Users, MessageSquare, FileText, TrendingUp, Clock, AlertCircle, ClipboardList, Wallet, CalendarClock } from 'lucide-react';
+import { Calendar, MessageSquare, TrendingUp, AlertCircle, ClipboardList, Wallet, Inbox } from 'lucide-react';
 import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
 import { AnimatePresence } from 'framer-motion';
 import { useTheme } from './Dashboard';
@@ -96,10 +96,12 @@ export default function DashboardHome() {
     ? { label: 'var(--brand)', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.62)', fuchsia: 'var(--brand)', border: '#E5E5E5', cardBg: '#FFFFFF', cardBorder: '#E5E5E5', value: '#111111', rowHover: 'rgba(0,0,0,0.03)', rowBorder: '#E5E5E5', pageBg: '#D5D5D5' }
     : { label: 'var(--brand)', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.72)', fuchsia: 'var(--brand)', border: '#262626', cardBg: 'rgba(255,255,255,0.06)', cardBorder: '#262626', value: '#F5F0EB', rowHover: 'rgba(255,255,255,0.05)', rowBorder: '#262626', pageBg: '#0A0A0A' };
 
+  // Połączony kafekl: oczekujące rezerwacje + prośby o zmianę terminu → jeden widok w Rezerwacjach.
+  const pendingAndRequests = stats.pending + stats.changeRequests;
+
   const KPI = [
     { label: 'Wszystkie rezerwacje', value: stats.bookings, icon: Calendar, link: '/dashboard/bookings' },
-    { label: 'Oczekujące', value: stats.pending, icon: Clock, link: '/dashboard/bookings?filter=pending&view=list' },
-    { label: 'Prośby o zmianę', value: stats.changeRequests, icon: CalendarClock, link: '/dashboard/change-requests' },
+    { label: 'Do weryfikacji', value: pendingAndRequests, icon: Inbox, link: '/dashboard/bookings?view=pending', sublabel: `${stats.pending} rezerw. · ${stats.changeRequests} zmiany` },
     { label: 'Nowe wiadomości', value: stats.messages, icon: MessageSquare, link: '/dashboard/messages' },
     { label: 'Do rozliczenia', value: stats.toSettle, icon: Wallet, link: '/dashboard/bookings?filter=to_settle&view=list&tab=past' },
   ];
@@ -129,7 +131,7 @@ export default function DashboardHome() {
   return (
     <div>
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-12">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
         {KPI.map((kpi, i) => {
           const Icon = kpi.icon;
           return (
@@ -150,6 +152,11 @@ export default function DashboardHome() {
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px' }}>
                   {kpi.label}
                 </p>
+                {kpi.sublabel && (
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.08em', marginTop: '3px', opacity: 0.85 }}>
+                    {kpi.sublabel}
+                  </p>
+                )}
               </Link>
             </motion.div>
           );

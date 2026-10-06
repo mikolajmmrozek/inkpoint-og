@@ -2,7 +2,7 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Calendar, Users, BookOpen, MessageSquare, FileText, LogOut, BarChart2, Menu, X, Sun, Moon, Settings, UserCircle, PieChart, Star, FolderOpen, Scissors, ShieldCheck, Bell, PanelLeftClose, PanelLeftOpen, Home as HomeIcon, Gift, CalendarClock } from 'lucide-react';
+import { Calendar, Users, BookOpen, MessageSquare, FileText, LogOut, BarChart2, Menu, X, Sun, Moon, Settings, UserCircle, PieChart, Star, FolderOpen, Scissors, ShieldCheck, Bell, PanelLeftClose, PanelLeftOpen, Home as HomeIcon, Gift } from 'lucide-react';
 import BottomNav from '@/components/panel/BottomNav';
 import NotificationBell from '@/components/panel/NotificationBell';
 import NotificationPanel from '@/components/panel/NotificationPanel';
@@ -18,7 +18,6 @@ export const useTheme = () => useContext(ThemeContext);
 const NAV = [
   { path: '/dashboard', label: 'Przegląd', icon: BarChart2, exact: true },
   { path: '/dashboard/bookings', label: 'Rezerwacje', icon: Calendar },
-  { path: '/dashboard/change-requests', label: 'Zmiany terminu', icon: CalendarClock },
   { path: '/dashboard/artists', label: 'Artyści', icon: Users },
   { path: '/dashboard/blog', label: 'Blog', icon: BookOpen },
   { path: '/dashboard/messages', label: 'Wiadomości', icon: MessageSquare },
@@ -37,8 +36,7 @@ const NAV = [
 const getBadgeForPath = (path, counts) => {
   const map = {
     '/dashboard/messages': counts.messages > 0 ? { type: 'count', value: counts.messages } : null,
-    '/dashboard/bookings': counts.pendingBookings > 0 ? { type: 'count', value: counts.pendingBookings } : null,
-    '/dashboard/change-requests': counts.openChangeRequests > 0 ? { type: 'count', value: counts.openChangeRequests } : null,
+    '/dashboard/bookings': (counts.pendingBookings + counts.openChangeRequests) > 0 ? { type: 'count', value: counts.pendingBookings + counts.openChangeRequests } : null,
     '/dashboard/health-forms': counts.newHealthForms > 0 ? { type: 'count', value: counts.newHealthForms } : null,
     '/dashboard/feedback': counts.unpublishedFeedback > 0 ? { type: 'count', value: counts.unpublishedFeedback } : null,
     '/dashboard/clients': counts.newClients > 0 ? { type: 'count', value: counts.newClients } : null,
