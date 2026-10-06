@@ -25,8 +25,10 @@ export default function SignatureCanvas({ value, onChange, label, clearLabel, sh
         setIsEmpty(false);
       };
       img.src = value;
+    } else {
+      setIsEmpty(true);
     }
-  }, [canvasBg]);
+  }, [canvasBg, value]);
 
   const getPos = (e, canvas) => {
     const rect = canvas.getBoundingClientRect();

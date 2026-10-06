@@ -567,20 +567,6 @@ export default function DashboardBookings() {
             statusOptions={viewMode === 'pending' ? ['pending', 'cancelled'] : STATUS_OPTIONS}
             t={t}
           />
-          <button
-            onClick={() => setViewMode('pending')}
-            className="btn-oxblood"
-            style={{ padding: '8px 14px', background: viewMode === 'pending' ? 'var(--brand)' : undefined, position: 'relative', display: 'flex', alignItems: 'center', gap: '6px' }}
-            title="Do weryfikacji — oczekujące rezerwacje i prośby o zmianę"
-          >
-            <Inbox size={14} />
-            DO WERYFIKACJI
-            {pendingCount > 0 && (
-              <span style={{ minWidth: '16px', height: '16px', background: viewMode === 'pending' ? '#F5F0EB' : 'var(--brand)', color: viewMode === 'pending' ? 'var(--brand)' : '#F5F0EB', fontSize: '9px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', padding: '0 4px', fontFamily: 'var(--font-mono)' }}>
-                {pendingCount > 9 ? '9+' : pendingCount}
-              </span>
-            )}
-          </button>
         </div>
 
         {/* Row 3: search */}
