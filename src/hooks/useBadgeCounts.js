@@ -18,6 +18,7 @@ export function useBadgeCounts({ role, userEmail }) {
     newHealthForms: 0,
     unpublishedFeedback: 0,
     newClients: 0,
+    openChangeRequests: 0,
   });
 
   useEffect(() => {
@@ -33,6 +34,7 @@ export function useBadgeCounts({ role, userEmail }) {
         newHealthForms: 0,
         unpublishedFeedback: 0,
         newClients: 0,
+        openChangeRequests: 0,
       };
 
       // Wiadomości
@@ -114,6 +116,13 @@ export function useBadgeCounts({ role, userEmail }) {
           );
           results.newClients = clients.length;
         } catch (e) {}
+
+        try {
+          const crs = await base44.entities.ChangeRequest.list('-created_date', 100);
+          results.openChangeRequests = crs.filter(
+            (r) => r.status === 'pending' || r.status === 'studio_proposed'
+          ).length;
+        } catch (e) {}
       }
 
       if (!cancelled) setCounts(results);
@@ -192,6 +201,12 @@ export function useBadgeCounts({ role, userEmail }) {
             const unreadChange = wasDeleted ? -1 : (isUnpublished ? 1 : 0);
             setCounts(prev => ({ ...prev, unpublishedFeedback: Math.max(0, prev.unpublishedFeedback + unreadChange) }));
           })
+        );
+      } catch (e) {}
+
+      try {
+        unsubs.push(
+          base44.entities.ChangeRequest.subscribe(() => loadAll())
         );
       } catch (e) {}
     }
