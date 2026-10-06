@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Check, X, CalendarClock, Clock, Loader2 } from 'lucide-react';
 import SessionDatePicker from '@/components/booking/SessionDatePicker';
 import { getThumbnailUrl } from '@/lib/thumbnail';
+import { getThemeVars } from '@/lib/themeVars';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -246,7 +247,7 @@ export default function PendingRequestsView({ bookings, artists, t, theme, onCon
         )}
 
         {isPending && proposeMode === r.id && (
-          <div className="mt-4 pt-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
+          <div className="mt-4 pt-4" style={{ borderTop: `0.5px solid ${t.border}`, ...getThemeVars(theme) }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '10px' }}>
               ZAPROPUJ NOWY TERMIN
             </p>

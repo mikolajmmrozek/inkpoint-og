@@ -1,4 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
+import {
+  APP_URL, sectionStyle, h3Style, pStyle, mutedStyle, buttonStyle,
+  detailRow, clientFirstName, fmtDate, buildContactRows, sendViaGmail,
+} from '../../shared/bookingEmail.ts';
 
 /**
  * Single source of truth for the change-request lifecycle.
@@ -11,6 +15,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
  *  - "client_decline"   — client declines studio's proposal → request status = declined_by_client, original booking untouched
  * The original confirmed booking is only modified on accept_requested and client_accept.
  */
+
+const getAppUrl = () => (typeof Deno !== 'undefined' && Deno.env.get('APP_URL')) || APP_URL;
 
 // Compute end time (HH:MM) from a start time and duration in minutes.
 function computeEndTime(startTime: string, durationMinutes: number): string {
@@ -135,18 +141,11 @@ export default async function(req: Request): Promise<Response> {
         });
       } catch (e) { /* non-fatal */ }
 
-      // Send rejection email to client via Gmail.
+      // Send rejection email to client via Gmail — booking-template email.
       try {
-        await sendChangeRequestEmail(base44, {
-          type: 'rejected',
-          cr,
-          firstName: (cr.client_name || '').split(' ')[0] || 'Kliencie',
-          originalDate: cr.original_date,
-          originalTime: cr.original_time || '',
-          requestedDate: cr.requested_date,
-          requestedTime: cr.requested_time || '',
-        });
-      } catch (e) { /* non-fatal */ }
+        const booking = await base44.asServiceRole.entities.Booking.filter({ id: cr.booking_id }).then(r => r[0]);
+        await sendChangeRequestEmail(base44, { type: 'rejected', cr, booking });
+      } catch (e) { console.error('Rejection email failed:', e?.message || e); }
 
       return Response.json({ success: true, status: 'rejected' });
     }
@@ -189,16 +188,9 @@ export default async function(req: Request): Promise<Response> {
 
       // Send a dedicated "studio accepted your new date" email (clearer than the generic update email).
       try {
-        await sendChangeRequestEmail(base44, {
-          type: 'accepted_by_studio',
-          cr,
-          firstName: (cr.client_name || '').split(' ')[0] || 'Kliencie',
-          originalDate: cr.original_date,
-          originalTime: cr.original_time || '',
-          requestedDate: cr.requested_date,
-          requestedTime: cr.requested_time || '',
-        });
-      } catch (e) { /* non-fatal */ }
+        const booking = await base44.asServiceRole.entities.Booking.filter({ id: cr.booking_id }).then(r => r[0]);
+        await sendChangeRequestEmail(base44, { type: 'accepted_by_studio', cr, booking });
+      } catch (e) { console.error('Acceptance email failed:', e?.message || e); }
 
       // Also trigger the generic booking update email (for the calendar/sync record).
       try {
@@ -250,7 +242,7 @@ export default async function(req: Request): Promise<Response> {
       // Send email via Gmail with a deep link to the acceptance page.
       try {
         const { accessToken } = await base44.asServiceRole.connectors.getConnection('gmail');
-        const appUrl = (typeof Deno !== 'undefined' && Deno.env.get('APP_URL')) || 'https://romanstattoo.base44.app';
+        const appUrl = getAppUrl();
         const acceptLink = `${appUrl}/change-request?id=${requestId}`;
         const firstName = (cr.client_name || '').split(' ')[0] || 'Kliencie';
 
@@ -292,7 +284,7 @@ ${studioNote ? `<tr><td style="padding:16px 32px 0 32px;"><p style="margin:0;fon
 </table></td></tr></table></body></html>`;
 
         await sendViaGmail(accessToken, 'Romans Tattoo', 'tattoo.wolsztyn@gmail.com', cr.client_email, subject, textBody, htmlBody);
-      } catch (e) { /* non-fatal — notification still created */ }
+      } catch (e) { console.error('Proposal email failed:', e?.message || e); }
 
       return Response.json({ success: true, status: 'studio_proposed' });
     }
@@ -303,112 +295,195 @@ ${studioNote ? `<tr><td style="padding:16px 32px 0 32px;"><p style="margin:0;fon
   }
 }
 
-// ── Helper: send raw email via Gmail API with proper MIME encoding ───────
-// Uses MailComposer-like base64url encoding to avoid UTF-8 corruption.
-async function sendViaGmail(accessToken: string, fromName: string, fromEmail: string, toEmail: string, subject: string, textBody: string, htmlBody: string) {
-  // Build RFC 2822 message with UTF-8 charset to preserve Polish characters.
-  const email = [
-    `From: ${fromName} <${fromEmail}>`,
-    `To: ${toEmail}`,
-    `Subject: =?UTF-8?B?${btoa(unescape(encodeURIComponent(subject)))}?=`,
-    `MIME-Version: 1.0`,
-    `Content-Type: text/html; charset=UTF-8`,
-    `Content-Transfer-Encoding: base64`,
-    ``,
-  ].join('\r\n');
-
-  // Encode body as base64 (UTF-8 safe)
-  const bodyBase64 = btoa(unescape(encodeURIComponent(htmlBody)));
-  const raw = btoa(unescape(encodeURIComponent(email + bodyBase64)))
-    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-
-  const res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ raw }),
-  });
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Gmail send failed: ${res.status} ${errText}`);
-  }
-  return res.json();
-}
-
 // ── Helper: send change-request status email to the client ─────────────
+// Mirrors the booking-update email template:
+//   - change section (the rejected / accepted change)
+//   - "Aktualne szczegóły sesji" (from the live booking)
+//   - account CTA, contact info, footer
 // type: "rejected" | "accepted_by_studio"
-// Uses the same Gmail account as the proposal email.
 async function sendChangeRequestEmail(base44: any, opts: {
   type: 'rejected' | 'accepted_by_studio';
   cr: any;
-  firstName: string;
-  originalDate: string;
-  originalTime: string;
-  requestedDate: string;
-  requestedTime: string;
+  booking: any;
 }) {
-  const { type, cr, firstName, originalDate, originalTime, requestedDate, requestedTime } = opts;
+  const { type, cr, booking } = opts;
   const { accessToken } = await base44.asServiceRole.connectors.getConnection('gmail');
-  const appUrl = (typeof Deno !== 'undefined' && Deno.env.get('APP_URL')) || 'https://romanstattoo.base44.app';
-  const sessionsLink = `${appUrl}/panel/sessions`;
+  const panelLink = `${getAppUrl()}/panel`;
 
   const isRejected = type === 'rejected';
+  const firstName = clientFirstName(booking || cr);
+
+  // Studio contact settings + procedure category (same logic as sendBookingUpdateEmail).
+  const settings = await base44.asServiceRole.entities.SiteSettings.filter({ key: 'contact' });
+  const contact = settings.length > 0 ? settings[0] : {};
+
+  let procedureCategory = '';
+  if (booking?.service_id) {
+    try {
+      const svc = await base44.asServiceRole.entities.Service.get(booking.service_id);
+      if (svc?.category) procedureCategory = svc.category;
+    } catch (e) { /* ignore */ }
+  }
+  if (!procedureCategory) {
+    const name = (booking?.service_name || '').toLowerCase();
+    if (/piercing/.test(name)) procedureCategory = 'piercing';
+    else if (/tatu|tatoo|tattoo/.test(name)) procedureCategory = 'tattoo';
+  }
+  const isPiercing = procedureCategory === 'piercing';
+
+  // Change section.
+  const origText = `${fmtDate(cr.original_date)} ${cr.original_time || ''}`.trim();
+  const reqText = `${fmtDate(cr.requested_date)} ${cr.requested_time || ''}`.trim();
+  const changeSectionTitle = isRejected ? 'Odrzucona Zmiana' : 'Co Się Zmieniło';
+  const changeRow = isRejected
+    ? `<tr>
+        <td style="padding:9px 0;font-size:13px;font-weight:700;color:#0a0a0a;border-bottom:1px solid #f0f0f0;">Data i godzina</td>
+        <td align="right" style="padding:9px 0;font-size:13px;color:#b0b0b0;border-bottom:1px solid #f0f0f0;text-decoration:line-through;">${reqText}</td>
+        <td align="right" style="padding:9px 0 9px 14px;font-size:13px;color:#FF007F;border-bottom:1px solid #f0f0f0;font-weight:700;">Odrzucono</td>
+      </tr>`
+    : `<tr>
+        <td style="padding:9px 0;font-size:13px;font-weight:700;color:#0a0a0a;border-bottom:1px solid #f0f0f0;">Data i godzina</td>
+        <td align="right" style="padding:9px 0;font-size:13px;color:#b0b0b0;border-bottom:1px solid #f0f0f0;text-decoration:line-through;">${origText}</td>
+        <td align="right" style="padding:9px 0 9px 14px;font-size:13px;color:#0a0a0a;border-bottom:1px solid #f0f0f0;font-weight:700;">${reqText}</td>
+      </tr>`;
+
+  // Current session details (live booking — after the decision).
+  const dateStr = fmtDate(booking?.session_date || cr.original_date) || '—';
+  const timeStr = booking?.session_time || cr.original_time || 'TBD';
+  const priceText = booking?.estimated_price ? `${Number(booking.estimated_price).toLocaleString('pl-PL')} PLN` : 'BEZPŁATNIE';
+  const artistName = booking?.artist_name || cr.artist_name;
+
+  const currentRows: string[] = [
+    detailRow('Data', dateStr),
+    detailRow('Godzina', timeStr),
+  ];
+  if (artistName && procedureCategory !== 'studio') {
+    currentRows.push(detailRow(isPiercing ? 'Piercer' : 'Tatuażysta', artistName));
+  }
+  if (booking?.service_name) currentRows.push(detailRow('Usługa', booking.service_name));
+  if (booking?.tattoo_placement) currentRows.push(detailRow('Miejsce', booking.tattoo_placement));
+  currentRows.push(detailRow('Cena', priceText));
+
+  const contactRows = buildContactRows(contact);
+
   const headerTitle = isRejected ? 'Prośba O Zmianę Terminu Odrzucona' : 'Studio Zaakceptowało Twój Nowy Termin';
   const subject = isRejected
-    ? `Prośba o zmianę terminu odrzucona — ${originalDate}`
-    : `Nowy termin potwierdzony — ${requestedDate}`;
+    ? `Prośba o zmianę terminu odrzucona — ${dateStr}`
+    : `Nowy termin potwierdzony — ${dateStr}`;
+  const introText = isRejected
+    ? 'Studio nie mogło zmienić terminu Twojej sesji. Twoja prośba o zmianę została odrzucona, a dotychczasowy termin pozostaje potwierdzony. Poniżej znajdziesz odrzuconą zmianę oraz aktualne dane sesji.'
+    : 'Studio zaakceptowało Twój nowy termin sesji. Poniżej znajdziesz, co uległo zmianie, oraz aktualne dane sesji.';
 
-  const textBody = isRejected
-    ? [
-        `Cześć ${firstName},`,
-        ``,
-        `Studio nie mogło zmienić terminu Twojej sesji.`,
-        ``,
-        `Pierwotny termin: ${originalDate} ${originalTime}`,
-        `Prosiłeś o: ${requestedDate} ${requestedTime}`,
-        ``,
-        `Pierwotny termin pozostaje potwierdzony.`,
-        ``,
-        `Zaloguj się do panelu, aby sprawdzić szczegóły:`,
-        `${sessionsLink}`,
-        ``,
-        `Romans Tattoo`,
-      ].join('\n')
-    : [
-        `Cześć ${firstName},`,
-        ``,
-        `Studio zaakceptowało Twój nowy termin sesji!`,
-        ``,
-        `Pierwotny termin: ${originalDate} ${originalTime}`,
-        `Nowy termin: ${requestedDate} ${requestedTime}`,
-        ``,
-        `Twoja sesja została przeniesiona na nowy termin.`,
-        ``,
-        `Zaloguj się do panelu, aby sprawdzić szczegóły:`,
-        `${sessionsLink}`,
-        ``,
-        `Romans Tattoo`,
-      ].join('\n');
+  const textBody = [
+    `Cześć ${firstName},`,
+    ``,
+    isRejected
+      ? 'Studio nie mogło zmienić terminu Twojej sesji. Dotychczasowy termin pozostaje potwierdzony.'
+      : 'Studio zaakceptowało Twój nowy termin sesji.',
+    ``,
+    isRejected ? `Odrzucona zmiana: ${reqText}` : `Zmiana: ${origText} → ${reqText}`,
+    `Aktualna sesja: ${dateStr} ${timeStr}`,
+    ``,
+    `Zaloguj się do panelu, aby sprawdzić szczegóły:`,
+    `${panelLink}`,
+    ``,
+    `Romans Tattoo`,
+  ].join('\n');
 
-  const htmlBody = `<!DOCTYPE html><html lang="pl"><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#f4f4f5;font-family:Arial,Helvetica,sans-serif;color:#0a0a0a;line-height:1.5;">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f4f5;"><tr><td align="center" style="padding:28px 12px;">
-<table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:560px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
-<tr><td style="background:#FF007F;padding:28px 32px;"><h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;">${headerTitle}</h1><p style="margin:6px 0 0 0;color:#ffffff;font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;opacity:0.95;">Romans Tattoo</p></td></tr>
-<tr><td style="padding:28px 32px 8px 32px;"><p style="margin:0 0 16px 0;font-size:15px;">Cześć ${firstName},</p><p style="margin:0 0 16px 0;font-size:15px;">${isRejected
-    ? 'Studio nie mogło zmienić terminu Twojej sesji. Pierwotny termin pozostaje potwierdzony.'
-    : 'Studio zaakceptowało Twój nowy termin sesji! Twoja sesja została przeniesiona.'}</p></td></tr>
-<tr><td style="padding:0 32px;">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f9f9f9;border-radius:8px;padding:18px 20px;">
-<tr><td style="padding:8px 0;font-size:13px;color:#b0b0b0;border-bottom:1px solid #f0f0f0;">Pierwotny termin</td><td align="right" style="padding:8px 0;font-size:13px;color:#0a0a0a;border-bottom:1px solid #f0f0f0;">${originalDate} ${originalTime}</td></tr>
-<tr><td style="padding:8px 0;font-size:13px;color:#b0b0b0;border-bottom:1px solid #f0f0f0;">Prosiłeś o</td><td align="right" style="padding:8px 0;font-size:13px;color:#0a0a0a;border-bottom:1px solid #f0f0f0;">${requestedDate} ${requestedTime}</td></tr>
-<tr><td style="padding:8px 0;font-size:13px;font-weight:700;color:#FF007F;">${isRejected ? 'Status' : 'Nowy termin'}</td><td align="right" style="padding:8px 0;font-size:13px;font-weight:700;color:#FF007F;">${isRejected ? 'Odrzucono — pierwotny termin potwierdzony' : `${requestedDate} ${requestedTime}`}</td></tr>
-</table>
-</td></tr>
-<tr><td style="padding:16px 32px 28px 32px;"><a href="${sessionsLink}" style="display:inline-block;background:#FF007F;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:8px;text-transform:uppercase;letter-spacing:0.06em;">ZALOGUJ SIĘ DO PANELU</a></td></tr>
-<tr><td style="padding:0 32px 28px 32px;"><p style="margin:0;color:#b0b0b0;font-size:11px;">Otrzymujesz tę wiadomość, ponieważ studio odpowiedziało na Twoją prośbę o zmianę terminu w Romans Tattoo.</p></td></tr>
-</table></td></tr></table></body></html>`;
+  const htmlBody = `<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${headerTitle}</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f4f5;font-family:Arial,Helvetica,sans-serif;color:#0a0a0a;line-height:1.5;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f4f5;">
+    <tr>
+      <td align="center" style="padding:28px 12px;">
+        <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:560px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background:#FF007F;padding:28px 32px;">
+              <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;font-family:Arial,Helvetica,sans-serif;">${headerTitle}</h1>
+              <p style="margin:6px 0 0 0;color:#ffffff;font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;opacity:0.95;">Romans Tattoo &middot; Inkflow</p>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:28px 32px 8px 32px;">
+              <p style="${pStyle}">Cześć ${firstName},</p>
+              <p style="${pStyle}">${introText}</p>
+            </td>
+          </tr>
+
+          <!-- Change -->
+          <tr>
+            <td style="padding:6px 32px 0 32px;">
+              <h3 style="${h3Style}">${changeSectionTitle}</h3>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                ${changeRow}
+              </table>
+            </td>
+          </tr>
+
+          <!-- Current details -->
+          <tr>
+            <td style="padding:0 32px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="${sectionStyle}">
+                <tr><td style="padding:0;">
+                  <h3 style="${h3Style}">Aktualne Szczegóły Sesji</h3>
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                    ${currentRows.join('')}
+                  </table>
+                </td></tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Account CTA -->
+          <tr>
+            <td style="padding:0 32px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="${sectionStyle}background:#fff5fb;border:1px solid #ffe0ef;border-radius:8px;">
+                <tr><td style="padding:18px 20px;">
+                  <h3 style="${h3Style}">Twoje Konto</h3>
+                  <p style="${pStyle}">Zaloguj się do panelu, aby sprawdzić szczegóły sesji, poprosić o inną zmianę terminu lub skontaktować się ze studiem.</p>
+                  <a href="${panelLink}" style="${buttonStyle}">Zaloguj się do panelu</a>
+                </td></tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Contact -->
+          <tr>
+            <td style="padding:0 32px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="${sectionStyle}">
+                <tr><td style="padding:0;">
+                  <h3 style="${h3Style}">Gdzie Nas Znaleźć</h3>
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                    ${contactRows.join('')}
+                  </table>
+                </td></tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:24px 32px 28px 32px;">
+              <p style="${mutedStyle}">W razie pytań prosimy o kontakt ze studiem.</p>
+              <p style="margin:6px 0 0 0;color:#b0b0b0;font-size:11px;">Otrzymujesz tę wiadomość, ponieważ studio odpowiedziało na Twoją prośbę o zmianę terminu w Romans Tattoo.</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
 
   await sendViaGmail(accessToken, 'Romans Tattoo', 'tattoo.wolsztyn@gmail.com', cr.client_email, subject, textBody, htmlBody);
 }
