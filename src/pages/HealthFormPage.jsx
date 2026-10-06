@@ -138,12 +138,14 @@ export default function HealthFormPage() {
   const setField = (key, value) => setForm(f => ({ ...f, [key]: value }));
   const setGuardianField = (key, value) => setGuardian(g => ({ ...g, [key]: value }));
 
-  // Save draft after each step change
-  const saveDraft = async (currentForm, currentDraftId) => {
+  // Save draft after each step change — persists the current step so a page
+  // refresh resumes on the same step instead of restarting the form.
+  const saveDraft = async (currentForm, currentDraftId, currentStep, currentLang, currentGuardian) => {
     const fullName = `${currentForm.client_first_name} ${currentForm.client_last_name}`.trim();
+    const draftPayload = { ...currentForm, client_name: fullName, current_step: currentStep, draft_lang: currentLang, draft_guardian: currentGuardian };
     // Update existing record in place — preserves its is_draft status (no spurious drafts when editing a completed form)
     if (currentDraftId) {
-      await base44.entities.HealthForm.update(currentDraftId, { ...currentForm, client_name: fullName }).catch(() => {});
+      await base44.entities.HealthForm.update(currentDraftId, draftPayload).catch(() => {});
       return currentDraftId;
     }
     // Before creating a new draft, reuse an existing draft for the same email (avoids duplicate drafts)
@@ -157,7 +159,7 @@ export default function HealthFormPage() {
       }
     }
     if (currentForm.client_first_name || currentForm.client_email) {
-      const created = await base44.entities.HealthForm.create({ ...currentForm, client_name: fullName || 'Draft', is_draft: true }).catch(() => null);
+      const created = await base44.entities.HealthForm.create({ ...currentForm, client_name: fullName || 'Draft', is_draft: true, current_step: currentStep, draft_lang: currentLang, draft_guardian: currentGuardian }).catch(() => null);
       if (created?.id) {
         setDraftId(created.id);
         return created.id;
@@ -239,6 +241,39 @@ export default function HealthFormPage() {
               client_email: bk.client_email || '',
               client_phone: bk.client_phone || '',
             }));
+          }
+        } catch (_) {}
+      }
+
+      // General QR (no booking, no edit): auto-resume the most recent draft so
+      // a refresh returns the user to the step they were on. Only the newest
+      // draft is considered; completed/old forms are ignored.
+      if (!bookingId && !editFormId) {
+        try {
+          const recentDrafts = await base44.entities.HealthForm.filter({ is_draft: true }, '-updated_date', 1);
+          if (recentDrafts[0]?.id) {
+            const d = recentDrafts[0];
+            const merged = {
+              ...getBaseForm(),
+              ...buildInitialState(latestTemplate),
+              ...d,
+              form_filled_date: new Date().toISOString().split('T')[0],
+            };
+            const allBoolKeys = [
+              ...(latestTemplate?.medical_fields || []).map(f => f.field_key),
+              ...(latestTemplate?.procedure_questions || []).map(q => q.field_key),
+            ];
+            allBoolKeys.forEach(k => {
+              if (merged[k] === null || merged[k] === undefined) merged[k] = false;
+            });
+            setForm(() => merged);
+            setDraftId(d.id);
+            if (d.draft_lang) setLang(d.draft_lang);
+            if (d.draft_guardian) setGuardian(d.draft_guardian);
+            if (d.current_step && STEPS.includes(d.current_step)) setStep(d.current_step);
+            else setStep('personal');
+            setLoading(false);
+            return;
           }
         } catch (_) {}
       }
@@ -775,8 +810,9 @@ export default function HealthFormPage() {
                   onClick={async () => {
                     if (canProceed()) {
                       setShowErrors(false);
-                      await saveDraft(form, draftId);
-                      setStep(steps[currentStepIndex + 1]);
+                      const nextStep = steps[currentStepIndex + 1];
+                      await saveDraft(form, draftId, nextStep, lang, guardian);
+                      setStep(nextStep);
                     } else setShowErrors(true);
                   }}
                   style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', background: 'linear-gradient(135deg, var(--brand) 0%, var(--brand) 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', width: '100%', opacity: canProceed() ? 1 : 0.7 }}
