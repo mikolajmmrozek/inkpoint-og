@@ -135,6 +135,19 @@ export default async function(req: Request): Promise<Response> {
         });
       } catch (e) { /* non-fatal */ }
 
+      // Send rejection email to client via Gmail.
+      try {
+        await sendChangeRequestEmail(base44, {
+          type: 'rejected',
+          cr,
+          firstName: (cr.client_name || '').split(' ')[0] || 'Kliencie',
+          originalDate: cr.original_date,
+          originalTime: cr.original_time || '',
+          requestedDate: cr.requested_date,
+          requestedTime: cr.requested_time || '',
+        });
+      } catch (e) { /* non-fatal */ }
+
       return Response.json({ success: true, status: 'rejected' });
     }
 
@@ -174,7 +187,20 @@ export default async function(req: Request): Promise<Response> {
         });
       } catch (e) { /* non-fatal */ }
 
-      // Trigger the booking update email workflow by invoking sendBookingUpdateEmail with old_data.
+      // Send a dedicated "studio accepted your new date" email (clearer than the generic update email).
+      try {
+        await sendChangeRequestEmail(base44, {
+          type: 'accepted_by_studio',
+          cr,
+          firstName: (cr.client_name || '').split(' ')[0] || 'Kliencie',
+          originalDate: cr.original_date,
+          originalTime: cr.original_time || '',
+          requestedDate: cr.requested_date,
+          requestedTime: cr.requested_time || '',
+        });
+      } catch (e) { /* non-fatal */ }
+
+      // Also trigger the generic booking update email (for the calendar/sync record).
       try {
         await base44.asServiceRole.functions.invoke('sendBookingUpdateEmail', {
           bookingId: cr.booking_id,
@@ -240,7 +266,7 @@ export default async function(req: Request): Promise<Response> {
           ``,
           `Pierwotny termin pozostaje potwierdzony, dopóki nie zaakceptujesz propozycji.`,
           ``,
-          `Aby zaakceptować lub odrzucić, wejdź na:`,
+          `Kliknij poniższy link, aby potwierdzić nowy termin lub zaloguj się do panelu, aby go zmienić:`,
           `${acceptLink}`,
           ``,
           `Romans Tattoo`,
@@ -260,7 +286,8 @@ export default async function(req: Request): Promise<Response> {
 </td></tr>
 ${studioNote ? `<tr><td style="padding:16px 32px 0 32px;"><p style="margin:0;font-size:13px;color:#0a0a0a;"><strong>Notatka od studia:</strong> ${studioNote}</p></td></tr>` : ''}
 <tr><td style="padding:16px 32px 8px 32px;"><p style="margin:0;font-size:13px;color:#666;">Pierwotny termin pozostaje potwierdzony, dopóki nie zaakceptujesz propozycji.</p></td></tr>
-<tr><td style="padding:16px 32px 28px 32px;"><a href="${acceptLink}" style="display:inline-block;background:#FF007F;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:8px;text-transform:uppercase;letter-spacing:0.06em;">Zaakceptuj lub odrzuć</a></td></tr>
+<tr><td style="padding:16px 32px 8px 32px;"><a href="${acceptLink}" style="display:inline-block;background:#FF007F;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:8px;text-transform:uppercase;letter-spacing:0.06em;">POTWIERDŹ TERMIN</a></td></tr>
+<tr><td style="padding:0 32px 8px 32px;"><p style="margin:0;font-size:12px;color:#666;">lub <a href="${appUrl}/panel/sessions" style="color:#FF007F;text-decoration:none;font-weight:600;">zaloguj się do panelu</a>, aby zaproponować inny termin.</p></td></tr>
 <tr><td style="padding:0 32px 28px 32px;"><p style="margin:0;color:#b0b0b0;font-size:11px;">Otrzymujesz tę wiadomość, ponieważ studio odpowiedziało na Twoją prośbę o zmianę terminu w Romans Tattoo.</p></td></tr>
 </table></td></tr></table></body></html>`;
 
@@ -308,4 +335,80 @@ async function sendViaGmail(accessToken: string, fromName: string, fromEmail: st
     throw new Error(`Gmail send failed: ${res.status} ${errText}`);
   }
   return res.json();
+}
+
+// ── Helper: send change-request status email to the client ─────────────
+// type: "rejected" | "accepted_by_studio"
+// Uses the same Gmail account as the proposal email.
+async function sendChangeRequestEmail(base44: any, opts: {
+  type: 'rejected' | 'accepted_by_studio';
+  cr: any;
+  firstName: string;
+  originalDate: string;
+  originalTime: string;
+  requestedDate: string;
+  requestedTime: string;
+}) {
+  const { type, cr, firstName, originalDate, originalTime, requestedDate, requestedTime } = opts;
+  const { accessToken } = await base44.asServiceRole.connectors.getConnection('gmail');
+  const appUrl = (typeof Deno !== 'undefined' && Deno.env.get('APP_URL')) || 'https://romanstattoo.base44.app';
+  const sessionsLink = `${appUrl}/panel/sessions`;
+
+  const isRejected = type === 'rejected';
+  const headerTitle = isRejected ? 'Prośba O Zmianę Terminu Odrzucona' : 'Studio Zaakceptowało Twój Nowy Termin';
+  const subject = isRejected
+    ? `Prośba o zmianę terminu odrzucona — ${originalDate}`
+    : `Nowy termin potwierdzony — ${requestedDate}`;
+
+  const textBody = isRejected
+    ? [
+        `Cześć ${firstName},`,
+        ``,
+        `Studio nie mogło zmienić terminu Twojej sesji.`,
+        ``,
+        `Pierwotny termin: ${originalDate} ${originalTime}`,
+        `Prosiłeś o: ${requestedDate} ${requestedTime}`,
+        ``,
+        `Pierwotny termin pozostaje potwierdzony.`,
+        ``,
+        `Zaloguj się do panelu, aby sprawdzić szczegóły:`,
+        `${sessionsLink}`,
+        ``,
+        `Romans Tattoo`,
+      ].join('\n')
+    : [
+        `Cześć ${firstName},`,
+        ``,
+        `Studio zaakceptowało Twój nowy termin sesji!`,
+        ``,
+        `Pierwotny termin: ${originalDate} ${originalTime}`,
+        `Nowy termin: ${requestedDate} ${requestedTime}`,
+        ``,
+        `Twoja sesja została przeniesiona na nowy termin.`,
+        ``,
+        `Zaloguj się do panelu, aby sprawdzić szczegóły:`,
+        `${sessionsLink}`,
+        ``,
+        `Romans Tattoo`,
+      ].join('\n');
+
+  const htmlBody = `<!DOCTYPE html><html lang="pl"><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#f4f4f5;font-family:Arial,Helvetica,sans-serif;color:#0a0a0a;line-height:1.5;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f4f5;"><tr><td align="center" style="padding:28px 12px;">
+<table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:560px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+<tr><td style="background:#FF007F;padding:28px 32px;"><h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;">${headerTitle}</h1><p style="margin:6px 0 0 0;color:#ffffff;font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;opacity:0.95;">Romans Tattoo</p></td></tr>
+<tr><td style="padding:28px 32px 8px 32px;"><p style="margin:0 0 16px 0;font-size:15px;">Cześć ${firstName},</p><p style="margin:0 0 16px 0;font-size:15px;">${isRejected
+    ? 'Studio nie mogło zmienić terminu Twojej sesji. Pierwotny termin pozostaje potwierdzony.'
+    : 'Studio zaakceptowało Twój nowy termin sesji! Twoja sesja została przeniesiona.'}</p></td></tr>
+<tr><td style="padding:0 32px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f9f9f9;border-radius:8px;padding:18px 20px;">
+<tr><td style="padding:8px 0;font-size:13px;color:#b0b0b0;border-bottom:1px solid #f0f0f0;">Pierwotny termin</td><td align="right" style="padding:8px 0;font-size:13px;color:#0a0a0a;border-bottom:1px solid #f0f0f0;">${originalDate} ${originalTime}</td></tr>
+<tr><td style="padding:8px 0;font-size:13px;color:#b0b0b0;border-bottom:1px solid #f0f0f0;">Prosiłeś o</td><td align="right" style="padding:8px 0;font-size:13px;color:#0a0a0a;border-bottom:1px solid #f0f0f0;">${requestedDate} ${requestedTime}</td></tr>
+<tr><td style="padding:8px 0;font-size:13px;font-weight:700;color:#FF007F;">${isRejected ? 'Status' : 'Nowy termin'}</td><td align="right" style="padding:8px 0;font-size:13px;font-weight:700;color:#FF007F;">${isRejected ? 'Odrzucono — pierwotny termin potwierdzony' : `${requestedDate} ${requestedTime}`}</td></tr>
+</table>
+</td></tr>
+<tr><td style="padding:16px 32px 28px 32px;"><a href="${sessionsLink}" style="display:inline-block;background:#FF007F;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:8px;text-transform:uppercase;letter-spacing:0.06em;">ZALOGUJ SIĘ DO PANELU</a></td></tr>
+<tr><td style="padding:0 32px 28px 32px;"><p style="margin:0;color:#b0b0b0;font-size:11px;">Otrzymujesz tę wiadomość, ponieważ studio odpowiedziało na Twoją prośbę o zmianę terminu w Romans Tattoo.</p></td></tr>
+</table></td></tr></table></body></html>`;
+
+  await sendViaGmail(accessToken, 'Romans Tattoo', 'tattoo.wolsztyn@gmail.com', cr.client_email, subject, textBody, htmlBody);
 }
