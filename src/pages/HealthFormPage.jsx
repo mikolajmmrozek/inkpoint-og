@@ -245,39 +245,6 @@ export default function HealthFormPage() {
         } catch (_) {}
       }
 
-      // General QR (no booking, no edit): auto-resume the most recent draft so
-      // a refresh returns the user to the step they were on. Only the newest
-      // draft is considered; completed/old forms are ignored.
-      if (!bookingId && !editFormId) {
-        try {
-          const recentDrafts = await base44.entities.HealthForm.filter({ is_draft: true }, '-updated_date', 1);
-          if (recentDrafts[0]?.id) {
-            const d = recentDrafts[0];
-            const merged = {
-              ...getBaseForm(),
-              ...buildInitialState(latestTemplate),
-              ...d,
-              form_filled_date: new Date().toISOString().split('T')[0],
-            };
-            const allBoolKeys = [
-              ...(latestTemplate?.medical_fields || []).map(f => f.field_key),
-              ...(latestTemplate?.procedure_questions || []).map(q => q.field_key),
-            ];
-            allBoolKeys.forEach(k => {
-              if (merged[k] === null || merged[k] === undefined) merged[k] = false;
-            });
-            setForm(() => merged);
-            setDraftId(d.id);
-            if (d.draft_lang) setLang(d.draft_lang);
-            if (d.draft_guardian) setGuardian(d.draft_guardian);
-            if (d.current_step && STEPS.includes(d.current_step)) setStep(d.current_step);
-            else setStep('personal');
-            setLoading(false);
-            return;
-          }
-        } catch (_) {}
-      }
-
       // Edit mode: load existing form
       if (editFormId) {
         try {
