@@ -121,7 +121,7 @@ export default function SessionCard({ booking, theme = 'dark', priceLabel, onCha
             <Hourglass size={11} />
             {openChangeRequest.status === 'studio_proposed'
               ? <a href={`/change-request?id=${openChangeRequest.id}`} style={{ color: t.fuchsia, textDecoration: 'none' }}>STUDIO ZAPROPONOWAŁO TERMIN — SPRAWDŹ</a>
-              : 'OCZEKUJE NA DECYZJĘ STUDIA'}
+              : 'OCZEKUJE NA POTWIERDZENIE'}
           </div>
         )}
         {showActions && !isCancelled && !isPast && booking.status === 'confirmed' && !openChangeRequest && (
