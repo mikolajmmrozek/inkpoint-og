@@ -6,17 +6,24 @@ import { base44 } from '@/api/base44Client';
  * Call this after creating, editing, status-changing, or deleting a booking
  * so the stored count stays accurate.
  */
-export async function recomputeClientTotalSessions(clientEmail) {
-  if (!clientEmail) return;
-  const email = clientEmail.toLowerCase().trim();
+export async function recomputeClientTotalSessions(clientEmail, clientName) {
+  const email = (clientEmail || '').toLowerCase().trim();
+  const name = (clientName || '').trim();
+  if (!email && !name) return;
   try {
     const [bookings, clients] = await Promise.all([
-      base44.entities.Booking.filter({ client_email: email }, '-session_date', 1000),
+      base44.entities.Booking.filter(email ? { client_email: email } : { client_name: name }, '-session_date', 1000),
       base44.entities.Client.list('-created_date', 2000),
     ]);
-    const client = clients.find(c => (c.email || '').toLowerCase().trim() === email);
+    // Dopasuj klienta: po emailu (preferowane), inaczej po nazwie.
+    const client = email
+      ? clients.find(c => (c.email || '').toLowerCase().trim() === email)
+      : clients.find(c => (c.name || '').trim() === name);
     if (!client) return;
-    const completedCount = bookings.filter(b => b.status === 'completed').length;
+    // Policz zakończone sesje — dopasuj po emailu, a gdy pusty, po nazwie.
+    const completedCount = bookings.filter(b => b.status === 'completed' && (
+      email ? true : (b.client_name || '').trim() === name
+    )).length;
     if ((client.total_sessions || 0) !== completedCount) {
       await base44.entities.Client.update(client.id, { total_sessions: completedCount });
     }

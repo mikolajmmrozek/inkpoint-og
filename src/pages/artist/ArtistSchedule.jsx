@@ -215,7 +215,7 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, user, ava
     } else {
       await base44.entities.Booking.update(booking.id, data);
     }
-    if (form.client_email) recomputeClientTotalSessions(form.client_email).catch(() => {});
+    if (form.client_email || form.client_name) recomputeClientTotalSessions(form.client_email, form.client_name).catch(() => {});
     setSaving(false);
     onSaved();
     // Auto-sync to Google Calendar (silent — no error if not connected)
@@ -228,14 +228,14 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, user, ava
     if (newStatus === 'cancelled') {
       // Mark as cancelled but keep visible for admin — artist cannot delete
       await base44.entities.Booking.update(booking.id, { status: 'cancelled' });
-      if (form.client_email) recomputeClientTotalSessions(form.client_email).catch(() => {});
+      if (form.client_email || form.client_name) recomputeClientTotalSessions(form.client_email, form.client_name).catch(() => {});
       onSaved();
       base44.functions.invoke('manageGoogleCalendar', { action: 'sync_one', booking_id: booking.id }).catch(() => {});
       return;
     }
     await base44.entities.Booking.update(booking.id, { status: newStatus });
     setForm(f => ({ ...f, status: newStatus }));
-    if (form.client_email) recomputeClientTotalSessions(form.client_email).catch(() => {});
+    if (form.client_email || form.client_name) recomputeClientTotalSessions(form.client_email, form.client_name).catch(() => {});
     onSaved();
     base44.functions.invoke('manageGoogleCalendar', { action: 'sync_one', booking_id: booking.id }).catch(() => {});
   };

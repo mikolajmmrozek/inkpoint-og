@@ -409,8 +409,9 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
       }
     }
 
-    // Recompute client's completed session count (excludes cancelled)
-    if (form.client_email) recomputeClientTotalSessions(form.client_email).catch(() => {});
+    // Recompute client's completed session count (excludes cancelled).
+    // Call even when email is empty — falls back to client_name.
+    if (form.client_email || form.client_name) recomputeClientTotalSessions(form.client_email, form.client_name).catch(() => {});
     setSaving(false);
     onSaved();
     // Auto-sync to Google Calendar (silent — no error if not connected)

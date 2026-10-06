@@ -289,8 +289,9 @@ export default function DashboardBookings() {
     base44.functions.invoke('manageGoogleCalendar', { action: 'sync_one', booking_id: id }).catch(() => {});
 
     const booking = bookings.find(b => b.id === id);
-    // Recompute client's completed session count (excludes cancelled)
-    if (booking?.client_email) recomputeClientTotalSessions(booking.client_email).catch(() => {});
+    // Recompute client's completed session count (excludes cancelled). 
+    // Call even when email is empty — falls back to client_name.
+    if (booking?.client_email || booking?.client_name) recomputeClientTotalSessions(booking?.client_email, booking?.client_name).catch(() => {});
 
     if (status === 'completed') {
       if (booking?.client_email) {
@@ -310,7 +311,7 @@ export default function DashboardBookings() {
     await base44.entities.Booking.delete(id);
     setBookings(b => b.filter(x => x.id !== id));
     setSelected(null);
-    if (bk?.client_email) recomputeClientTotalSessions(bk.client_email).catch(() => {});
+    if (bk?.client_email || bk?.client_name) recomputeClientTotalSessions(bk?.client_email, bk?.client_name).catch(() => {});
   };
 
   useEffect(() => {

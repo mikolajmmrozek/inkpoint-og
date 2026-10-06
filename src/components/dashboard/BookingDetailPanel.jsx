@@ -57,19 +57,23 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
   };
 
   useEffect(() => {
-    if (!booking.client_email) return;
-    base44.entities.Booking.filter({ client_email: booking.client_email })
+    // Gdy klient ma email — szukamy po emailu. Gdy nie ma — po imieniu i nazwisku (fallback).
+    const hasEmail = !!(booking.client_email && booking.client_email.trim());
+    const clientName = (booking.client_name || '').trim();
+    const bookFilter = hasEmail ? { client_email: booking.client_email } : { client_name: clientName };
+    base44.entities.Booking.filter(bookFilter)
       .then(sessions => {
         setClientHistory(sessions.filter(s => s.id !== booking.id).sort((a, b) => (b.session_date || '').localeCompare(a.session_date || '')));
       }).catch(() => {});
-    base44.entities.Client.filter({ email: booking.client_email })
+    const clientFilter = hasEmail ? { email: booking.client_email } : { name: clientName };
+    base44.entities.Client.filter(clientFilter)
       .then(clients => {
         if (clients.length > 0) {
           setClientRecord(clients[0]);
           setClientNotes(clients[0].notes || '');
         }
       }).catch(() => {});
-  }, [booking.id, booking.client_email]);
+  }, [booking.id, booking.client_email, booking.client_name]);
 
   const saveNotes = async () => {
     if (!clientRecord) return;
