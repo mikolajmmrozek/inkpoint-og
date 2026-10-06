@@ -123,7 +123,13 @@ export default function ClientPanel() {
 
   useEffect(() => {
     if (isLoadingAuth || !authChecked) return;
-    if (authError || !isAuthenticated || !user) return;
+
+    // Not logged in → send to the login page; after login the user returns to this exact URL.
+    if (!isAuthenticated || !user) {
+      base44.auth.redirectToLogin(window.location.href);
+      return;
+    }
+    if (authError) return;
 
     // Role-based redirect
     if (user.role === 'admin') { navigate('/dashboard', { replace: true }); return; }
