@@ -1,13 +1,31 @@
+import { useState, useEffect } from 'react';
 import { format, parseISO, isAfter, isToday } from 'date-fns';
 import { pl } from 'date-fns/locale';
-import { Clock, User, Hand, MessageSquare, RefreshCw, Eye } from 'lucide-react';
+import { Clock, User, Hand, MessageSquare, RefreshCw, Eye, Hourglass } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 
 const STATUS_LABELS = { pending: 'Oczekująca', confirmed: 'Potwierdzona', completed: 'Zakończona', cancelled: 'Anulowana' };
 
 export default function SessionCard({ booking, theme = 'dark', priceLabel, onChangeRequest, onMessage, onPreview, showActions }) {
+  const [openChangeRequest, setOpenChangeRequest] = useState(null);
+
   const t = theme === 'light'
     ? { border: '#E5E5E5', text: '#111111', muted: 'rgba(0,0,0,0.4)', mutedLow: 'rgba(0,0,0,0.3)', fuchsia: 'var(--brand)' }
     : { border: '#262626', text: '#F5F0EB', muted: 'rgba(245,240,235,0.5)', mutedLow: 'rgba(245,240,235,0.3)', fuchsia: 'var(--brand)' };
+
+  // Load any open change request for this booking (pending or studio_proposed).
+  useEffect(() => {
+    if (!showActions || booking.status !== 'confirmed') return;
+    let cancelled = false;
+    base44.entities.ChangeRequest.filter({ booking_id: booking.id }, '-created_date', 5)
+      .then(list => {
+        if (cancelled) return;
+        const open = list.find(r => r.status === 'pending' || r.status === 'studio_proposed');
+        setOpenChangeRequest(open || null);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [booking.id, showActions, booking.status]);
 
   const STATUS_COLORS = { pending: '#f59e0b', confirmed: '#16a34a', completed: '#3b82f6', cancelled: theme === 'light' ? 'rgba(0,0,0,0.3)' : 'rgba(245,240,235,0.3)' };
 
@@ -98,7 +116,15 @@ export default function SessionCard({ booking, theme = 'dark', priceLabel, onCha
         <button onClick={() => onPreview(booking)} className="flex items-center gap-2" style={{ ...actionBtn, border: `0.5px solid ${t.border}`, color: t.text }}>
           <Eye size={11} /> PODGLĄD I ZDJĘCIA
         </button>
-        {showActions && !isCancelled && !isPast && (
+        {showActions && !isCancelled && !isPast && booking.status === 'confirmed' && openChangeRequest && (
+          <div className="flex items-center gap-2" style={{ ...actionBtn, border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, cursor: 'default', background: 'rgb(var(--brand-rgb) /0.05)' }}>
+            <Hourglass size={11} />
+            {openChangeRequest.status === 'studio_proposed'
+              ? <a href={`/change-request?id=${openChangeRequest.id}`} style={{ color: t.fuchsia, textDecoration: 'none' }}>STUDIO ZAPROPONOWAŁO TERMIN — SPRAWDŹ</a>
+              : 'OCZEKUJE NA DECYZJĘ STUDIA'}
+          </div>
+        )}
+        {showActions && !isCancelled && !isPast && booking.status === 'confirmed' && !openChangeRequest && (
           <>
             <button onClick={() => onChangeRequest(booking)} className="flex items-center gap-2" style={{ ...actionBtn, border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia }}>
               <RefreshCw size={11} /> POPROŚ O ZMIANĘ TERMINU

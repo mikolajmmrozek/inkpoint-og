@@ -2,7 +2,7 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Calendar, Users, BookOpen, MessageSquare, FileText, LogOut, BarChart2, Menu, X, Sun, Moon, Settings, UserCircle, PieChart, Star, FolderOpen, Scissors, ShieldCheck, Bell, PanelLeftClose, PanelLeftOpen, Home as HomeIcon, Gift } from 'lucide-react';
+import { Calendar, Users, BookOpen, MessageSquare, FileText, LogOut, BarChart2, Menu, X, Sun, Moon, Settings, UserCircle, PieChart, Star, FolderOpen, Scissors, ShieldCheck, Bell, PanelLeftClose, PanelLeftOpen, Home as HomeIcon, Gift, CalendarClock } from 'lucide-react';
 import BottomNav from '@/components/panel/BottomNav';
 import NotificationBell from '@/components/panel/NotificationBell';
 import NotificationPanel from '@/components/panel/NotificationPanel';
@@ -18,6 +18,7 @@ export const useTheme = () => useContext(ThemeContext);
 const NAV = [
   { path: '/dashboard', label: 'Przegląd', icon: BarChart2, exact: true },
   { path: '/dashboard/bookings', label: 'Rezerwacje', icon: Calendar },
+  { path: '/dashboard/change-requests', label: 'Zmiany terminu', icon: CalendarClock },
   { path: '/dashboard/artists', label: 'Artyści', icon: Users },
   { path: '/dashboard/blog', label: 'Blog', icon: BookOpen },
   { path: '/dashboard/messages', label: 'Wiadomości', icon: MessageSquare },

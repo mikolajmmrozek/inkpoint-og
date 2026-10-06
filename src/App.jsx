@@ -56,6 +56,8 @@ import ClientProfile from './pages/client/ClientProfile';
 import ClientMessages from './pages/client/ClientMessages';
 import FeedbackSurvey from './pages/FeedbackSurvey';
 import Voucher from './pages/Voucher';
+import ChangeRequest from './pages/ChangeRequest';
+import DashboardChangeRequests from './pages/dashboard/DashboardChangeRequests';
 import ScrollToTop from './components/ScrollToTop';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -113,6 +115,7 @@ const AuthenticatedApp = () => {
       <Route path="/instructions" element={<Instructions />} />
       <Route path="/feedback" element={<FeedbackSurvey />} />
       <Route path="/voucher/:code" element={<Voucher />} />
+      <Route path="/change-request" element={<ChangeRequest />} />
 
       {/* Dashboard (admin only) */}
       <Route path="/dashboard" element={<Dashboard />}>
@@ -134,6 +137,7 @@ const AuthenticatedApp = () => {
         <Route path="promotions" element={<DashboardPromotions />} />
         <Route path="users" element={<DashboardUsers />} />
         <Route path="notifications" element={<NotificationsPage />} />
+        <Route path="change-requests" element={<DashboardChangeRequests />} />
       </Route>
 
       {/* Artist panel */}

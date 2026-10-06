@@ -1,0 +1,114 @@
+{
+  "name": "ChangeRequest",
+  "type": "object",
+  "properties": {
+    "booking_id": {
+      "type": "string",
+      "description": "ID powi\u0105zanej rezerwacji (sesji)"
+    },
+    "session_id": {
+      "type": "string",
+      "description": "ID sesji (cache z Booking.session_id)"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Imi\u0119 i nazwisko klienta (cache)"
+    },
+    "client_email": {
+      "type": "string",
+      "description": "E-mail klienta (cache)"
+    },
+    "artist_id": {
+      "type": "string",
+      "description": "ID artysty (cache)"
+    },
+    "artist_name": {
+      "type": "string",
+      "description": "Nazwa artysty (cache)"
+    },
+    "original_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Pierwotna, potwierdzona data sesji"
+    },
+    "original_time": {
+      "type": "string",
+      "description": "Pierwotna godzina sesji (HH:MM)"
+    },
+    "original_end_time": {
+      "type": "string",
+      "description": "Pierwotna godzina zako\u0144czenia (HH:MM)"
+    },
+    "requested_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Termin zaproponowany przez klienta"
+    },
+    "requested_time": {
+      "type": "string",
+      "description": "Godzina zaproponowana przez klienta (HH:MM)"
+    },
+    "requested_end_time": {
+      "type": "string",
+      "description": "Godzina zako\u0144czenia proponowana przez klienta (HH:MM)"
+    },
+    "session_duration": {
+      "type": "number",
+      "description": "Czas trwania sesji w minutach (cache z Booking)"
+    },
+    "studio_proposed_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Termin zaproponowany przez studio (gdy studio proponuje inny)"
+    },
+    "studio_proposed_time": {
+      "type": "string",
+      "description": "Godzina zaproponowana przez studio (HH:MM)"
+    },
+    "studio_proposed_end_time": {
+      "type": "string",
+      "description": "Godzina zako\u0144czenia zaproponowana przez studio (HH:MM)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "rejected",
+        "accepted_by_studio",
+        "studio_proposed",
+        "accepted_by_client",
+        "declined_by_client",
+        "expired"
+      ],
+      "default": "pending",
+      "description": "Status pro\u015bby: pending = czeka na admina, rejected = admin odrzuci\u0142, accepted_by_studio = admin zaakceptowa\u0142 termin klienta, studio_proposed = admin zaproponowa\u0142 inny termin, accepted_by_client = klient zaakceptowa\u0142 propozycj\u0119 studia, declined_by_client = klient odrzuci\u0142 propozycj\u0119 studia, expired = wygas\u0142a"
+    },
+    "client_note": {
+      "type": "string",
+      "description": "Opcjonalna notatka od klienta do pro\u015bby"
+    },
+    "studio_note": {
+      "type": "string",
+      "description": "Opcjonalna notatka od studia (do\u0142\u0105czana do e-maila z propozycj\u0105)"
+    },
+    "resolved_date": {
+      "type": "string",
+      "description": "Data rozstrzygni\u0119cia (ISO)"
+    },
+    "resolved_by_id": {
+      "type": "string",
+      "description": "ID u\u017cytkownika, kt\u00f3ry rozstrzygn\u0105\u0142 pro\u015bb\u0119 (admin)"
+    },
+    "resolved_by_name": {
+      "type": "string",
+      "description": "Imi\u0119/nazwa osoby rozstrzygaj\u0105cej (cache)"
+    }
+  },
+  "required": [
+    "booking_id",
+    "client_email",
+    "original_date",
+    "requested_date",
+    "status"
+  ]
+}

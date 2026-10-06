@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, Users, MessageSquare, FileText, TrendingUp, Clock, AlertCircle, ClipboardList, Wallet } from 'lucide-react';
+import { Calendar, Users, MessageSquare, FileText, TrendingUp, Clock, AlertCircle, ClipboardList, Wallet, CalendarClock } from 'lucide-react';
 import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
 import { AnimatePresence } from 'framer-motion';
 import { useTheme } from './Dashboard';
@@ -18,7 +18,7 @@ import { formatCompact } from '@/lib/formatNumber';
 export default function DashboardHome() {
   const { theme } = useTheme();
   const isMobile = useIsMobile();
-  const [stats, setStats] = useState({ bookings: 0, pending: 0, messages: 0, forms: 0, toSettle: 0 });
+  const [stats, setStats] = useState({ bookings: 0, pending: 0, messages: 0, forms: 0, toSettle: 0, changeRequests: 0 });
   const [pendingByDay, setPendingByDay] = useState([]);
   const [draftForms, setDraftForms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +37,8 @@ export default function DashboardHome() {
       base44.entities.HealthForm.filter({ is_draft: true }, '-created_date', 50),
       base44.entities.Artist.list(),
       base44.entities.HealthForm.list('-created_date', 300),
-    ]).then(([bookings, messages, forms, drafts, artistData, healthForms]) => {
+      base44.entities.ChangeRequest.list('-created_date', 200),
+    ]).then(([bookings, messages, forms, drafts, artistData, healthForms, changeRequests]) => {
       setAllBookings(bookings);
       setArtists(artistData);
       setHealthStatusMap(buildHealthFormStatusMap(healthForms));
@@ -48,12 +49,14 @@ export default function DashboardHome() {
       const completedForms = healthForms.filter(f => !f.is_draft);
       // Sessions needing settlement: past or today, not cancelled, not settled, not completed.
       const toSettle = bookings.filter(b => (b.session_date || '') <= todayStr && b.status !== 'cancelled' && b.status !== 'completed' && !b.is_settled);
+      const openChangeRequests = changeRequests.filter(r => r.status === 'pending' || r.status === 'studio_proposed');
       setStats({
         bookings: futureBookings.length,
         pending: pending.length,
         messages: messages.length,
         forms: completedForms.length,
         toSettle: toSettle.length,
+        changeRequests: openChangeRequests.length,
       });
 
       // Today: show ALL sessions (except cancelled) for day-of operations
@@ -96,6 +99,7 @@ export default function DashboardHome() {
   const KPI = [
     { label: 'Wszystkie rezerwacje', value: stats.bookings, icon: Calendar, link: '/dashboard/bookings' },
     { label: 'Oczekujące', value: stats.pending, icon: Clock, link: '/dashboard/bookings?filter=pending&view=list' },
+    { label: 'Prośby o zmianę', value: stats.changeRequests, icon: CalendarClock, link: '/dashboard/change-requests' },
     { label: 'Nowe wiadomości', value: stats.messages, icon: MessageSquare, link: '/dashboard/messages' },
     { label: 'Do rozliczenia', value: stats.toSettle, icon: Wallet, link: '/dashboard/bookings?filter=to_settle&view=list&tab=past' },
   ];
@@ -125,7 +129,7 @@ export default function DashboardHome() {
   return (
     <div>
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-12">
         {KPI.map((kpi, i) => {
           const Icon = kpi.icon;
           return (

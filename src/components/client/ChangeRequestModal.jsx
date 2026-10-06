@@ -5,9 +5,10 @@ import { X, RefreshCw, Loader2 } from 'lucide-react';
 import SessionDatePicker from '@/components/booking/SessionDatePicker';
 
 export default function ChangeRequestModal({ booking, theme = 'dark', onClose, onSaved }) {
-  const [newDate, setNewDate] = useState(booking.session_date || '');
-  const [newTime, setNewTime] = useState(booking.session_time || '');
+  const [newDate, setNewDate] = useState('');
+  const [newTime, setNewTime] = useState('');
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
 
   const t = theme === 'light'
     ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.55)', fuchsia: 'var(--brand)', overlay: 'rgba(0,0,0,0.5)' }
@@ -16,31 +17,21 @@ export default function ChangeRequestModal({ booking, theme = 'dark', onClose, o
   const handleConfirm = async () => {
     if (!newDate || !newTime) return;
     setSaving(true);
-
-    // Calculate new end time
-    const [h, m] = newTime.split(':').map(Number);
-    const duration = booking.session_duration || 60;
-    const endTotal = h * 60 + m + duration;
-    const newEndTime = `${String(Math.floor(endTotal / 60)).padStart(2, '0')}:${String(endTotal % 60).padStart(2, '0')}`;
-
-    const changeNote = `\n[Klient prosi o zmianę terminu z ${booking.session_date} ${booking.session_time || ''} na ${newDate} ${newTime} — ${new Date().toISOString().split('T')[0]}]`;
-
-    await base44.entities.Booking.update(booking.id, {
-      session_date: newDate,
-      session_time: newTime,
-      session_end_time: newEndTime,
-      status: 'pending',
-      notes: (booking.notes || '') + changeNote,
-    });
-
-    // Track activity
-    base44.functions.invoke('trackUserActivity', {
-      event_type: 'change_request',
-      metadata: { booking_id: booking.id, old_date: booking.session_date, new_date: newDate, new_time: newTime }
-    }).catch(() => null);
-
-    setSaving(false);
-    onSaved();
+    setError(null);
+    try {
+      const res = await base44.functions.invoke('manageChangeRequest', {
+        action: 'create',
+        booking_id: booking.id,
+        requested_date: newDate,
+        requested_time: newTime,
+      });
+      if (res?.data?.error) throw new Error(res.data.error);
+      setSaving(false);
+      onSaved();
+    } catch (e) {
+      setError(e.message || 'Nie udało się wysłać prośby.');
+      setSaving(false);
+    }
   };
 
   return (
@@ -70,7 +61,7 @@ export default function ChangeRequestModal({ booking, theme = 'dark', onClose, o
         {/* Current booking summary */}
         <div className="mb-6 p-3" style={{ border: `0.5px solid ${t.border}`, background: theme === 'light' ? 'rgba(0,0,0,0.02)' : 'rgba(255,255,255,0.02)' }}>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>
-            OBECNY TERMIN
+            OBECNY TERMIN (POTWIERDZONY)
           </p>
           <p style={{ fontSize: '13px', color: t.text }}>
             {booking.session_date} {booking.session_time && `· ${booking.session_time}`}
@@ -88,9 +79,15 @@ export default function ChangeRequestModal({ booking, theme = 'dark', onClose, o
           durationOverride={booking.session_duration}
         />
 
+        {error && (
+          <div className="mt-4 p-3" style={{ border: '0.5px solid var(--brand)', background: 'rgb(var(--brand-rgb) /0.08)' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em' }}>⚠ {error}</p>
+          </div>
+        )}
+
         <div className="mt-6 pt-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
           <p style={{ fontSize: '12px', color: t.muted, marginBottom: '16px', lineHeight: 1.5 }}>
-            Twoja prośba o zmianę zostanie wysłana do studia. Po akceptacji otrzymasz potwierdzenie na e-mail.
+            Twoja obecna sesja pozostaje potwierdzona. Prośba trafi do studia — po akceptacji otrzymasz potwierdzenie na e-mail, a termin zostanie zmieniony.
           </p>
           <div className="flex gap-3">
             <button
