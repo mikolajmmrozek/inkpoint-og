@@ -185,10 +185,17 @@ export default function ClientPanel() {
               <div className="hidden lg:block">
                 <NotificationBell userEmail={user.email} theme={theme} onClick={() => setNotifOpen(true)} />
               </div>
-              <div className="w-2 h-2 rounded-full" style={{ background: 'var(--brand)' }} />
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: mutedColor, letterSpacing: '0.1em' }}>
-                {user?.email}
-              </p>
+              <Link to="/panel/profile" title="Mój profil">
+                {client?.avatar_url ? (
+                  <img src={client.avatar_url} alt={clientName} style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover', border: `0.5px solid ${border}` }} />
+                ) : (
+                  <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'rgba(var(--brand-rgb),0.12)', border: '0.5px solid rgba(var(--brand-rgb),0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontFamily: 'var(--font-display)', fontSize: '13px', color: 'var(--brand)', letterSpacing: '0.05em' }}>
+                      {clientName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+              </Link>
             </div>
           </div>
           <div className="flex-1 p-6 lg:p-10 overflow-y-auto pb-20 lg:pb-10">
