@@ -1,8 +1,9 @@
 export default function DatePickerCustom({ value, onChange, showErrors, t, textPrimary, textMuted, borderColor }) {
+  const currentYear = new Date().getFullYear();
   const parsedDate = value ? new Date(value) : null;
-  const day = parsedDate?.getDate() || '';
-  const month = parsedDate?.getMonth() + 1 || '';
-  const year = parsedDate?.getFullYear() || '';
+  const day = parsedDate ? parsedDate.getDate() : '';
+  const month = parsedDate ? parsedDate.getMonth() + 1 : '';
+  const year = parsedDate ? parsedDate.getFullYear() : '';
 
   const handleChange = (newDay, newMonth, newYear) => {
     const d = newDay || day || 1;
@@ -13,8 +14,6 @@ export default function DatePickerCustom({ value, onChange, showErrors, t, textP
       onChange(dateStr);
     }
   };
-
-  const currentYear = new Date().getFullYear();
 
   const days = Array.from({ length: 31 }, (_, i) => i + 1);
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
