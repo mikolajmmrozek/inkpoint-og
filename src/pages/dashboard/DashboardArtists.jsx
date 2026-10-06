@@ -28,6 +28,7 @@ export default function DashboardArtists() {
     ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: 'var(--brand)', modalBg: '#FFFFFF' }
     : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: 'var(--brand)', modalBg: '#0A0A0A' };
   const [artists, setArtists] = useState([]);
+  const [allServices, setAllServices] = useState([]); // master list of services
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({});
@@ -38,6 +39,10 @@ export default function DashboardArtists() {
   const [showAddCommission, setShowAddCommission] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null); // artist to delete
   const [commissionDeleteConfirm, setCommissionDeleteConfirm] = useState(null); // commission entry to delete
+  // Per-service overrides for the artist being edited:
+  // { [serviceId]: { performs: boolean, bookable_online: boolean } }
+  const [serviceOverrides, setServiceOverrides] = useState({});
+  const [savingServices, setSavingServices] = useState(false);
 
   const load = async () => {
     const data = await base44.entities.Artist.list('-created_date', 50);
@@ -45,6 +50,15 @@ export default function DashboardArtists() {
     setArtists(sorted);
     setLoading(false);
   };
+
+  const loadServices = async () => {
+    const data = await base44.entities.Service.list('-created_date', 200);
+    const active = data.filter(s => s.is_active !== false);
+    setAllServices(active);
+  };
+
+  // Load service list once on mount — it's reused across every artist edit.
+  useEffect(() => { loadServices(); }, []);
 
   const handleDragEnd = async ({ source, destination }) => {
     if (!destination || destination.index === source.index) return;
@@ -64,6 +78,53 @@ export default function DashboardArtists() {
     setCommissionHistory([]);
     setShowAddCommission(false);
     setNewCommission({ cut_percent: 60, effective_from: format(new Date(), 'yyyy-MM-dd'), note: '' });
+    setServiceOverrides({}); // new artist performs nothing yet
+  };
+
+  // Toggle one of the two per-service flags for the artist being edited.
+  const toggleServiceFlag = (serviceId, flag) => {
+    setServiceOverrides(prev => {
+      const current = prev[serviceId] || { performs: false, bookable_online: false };
+      const next = { ...current, [flag]: !current[flag] };
+      // Turning "performs" off also disables bookable_online (can't book what you don't perform).
+      if (flag === 'performs' && !next.performs) next.bookable_online = false;
+      // Turning "performs" on defaults bookable_online to true.
+      if (flag === 'performs' && next.performs) next.bookable_online = true;
+      return { ...prev, [serviceId]: next };
+    });
+  };
+
+  // Bulk-save all per-service changes: update each touched Service record's
+  // artist_ids and hidden_from_clients arrays in one pass.
+  const handleSaveServices = async () => {
+    if (editing === 'new' || !editing?.id) return;
+    setSavingServices(true);
+    try {
+      const artistId = editing.id;
+      const updates = [];
+      allServices.forEach(s => {
+        const o = serviceOverrides[s.id];
+        if (!o) return;
+        const currentPerforms = (s.artist_ids || []).includes(artistId);
+        const currentHidden = (s.hidden_from_clients || []).includes(artistId);
+        // Desired state
+        const wantPerforms = o.performs;
+        const wantHidden = o.performs && !o.bookable_online; // only hide if performs but not bookable
+        if (currentPerforms === wantPerforms && currentHidden === wantHidden) return; // no change
+        const artistIds = wantPerforms
+          ? Array.from(new Set([...(s.artist_ids || []), artistId]))
+          : (s.artist_ids || []).filter(id => id !== artistId);
+        const hiddenFromClients = wantHidden
+          ? Array.from(new Set([...(s.hidden_from_clients || []), artistId]))
+          : (s.hidden_from_clients || []).filter(id => id !== artistId);
+        updates.push({ id: s.id, artist_ids: artistIds, hidden_from_clients: hiddenFromClients });
+      });
+      if (updates.length > 0) {
+        await base44.entities.Service.bulkUpdate(updates);
+      }
+    } finally {
+      setSavingServices(false);
+    }
   };
 
   const openEdit = async (a) => {
@@ -74,6 +135,16 @@ export default function DashboardArtists() {
     setNewCommission({ cut_percent: a.artist_cut_percent ?? 60, effective_from: format(new Date(), 'yyyy-MM-dd'), note: '' });
     const history = await base44.entities.ArtistCommissionHistory.filter({ artist_id: a.id }, '-effective_from', 50);
     setCommissionHistory(history);
+    // Compute per-service state from the live service records.
+    const svcs = allServices.length > 0 ? allServices : await base44.entities.Service.list('-created_date', 200);
+    const overrides = {};
+    svcs.forEach(s => {
+      const performs = (s.artist_ids || []).includes(a.id);
+      const hidden = (s.hidden_from_clients || []).includes(a.id);
+      // bookable_online defaults true when the artist performs the service and isn't hidden.
+      overrides[s.id] = { performs, bookable_online: performs && !hidden };
+    });
+    setServiceOverrides(overrides);
   };
 
   const handleSave = async () => {
@@ -175,7 +246,7 @@ export default function DashboardArtists() {
 
               {/* Tabs */}
               <div className="flex mb-6" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-                {[['profile', 'Profil'], ...(editing !== 'new' ? [['schedule', 'Grafik']] : [])].map(([key, lbl]) => (
+                {[['profile', 'Profil'], ...(editing !== 'new' ? [['schedule', 'Grafik'], ['services', 'Usługi']] : [])].map(([key, lbl]) => (
                   <button key={key} onClick={() => setActiveTab(key)} style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '8px 16px', background: 'transparent', border: 'none', borderBottom: `1.5px solid ${activeTab === key ? 'var(--brand)' : 'transparent'}`, color: activeTab === key ? 'var(--brand)' : t.muted, cursor: 'pointer', marginBottom: '-0.5px' }}>{lbl}</button>
                 ))}
               </div>
@@ -183,6 +254,87 @@ export default function DashboardArtists() {
               {/* Schedule tab */}
               {activeTab === 'schedule' && editing !== 'new' && (
                 <ArtistScheduleEditor artistId={editing.id} t={{ border: t.border, text: t.text, muted: t.muted, cardBg: 'transparent' }} />
+              )}
+
+              {/* Services tab */}
+              {activeTab === 'services' && editing !== 'new' && (
+                <div>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.08em', lineHeight: 1.6, marginBottom: '18px' }}>
+                    Zaznacz, które usługi wykonuje ten artysta, i czy klient może je u niego zarezerwować online. Odznacz kilka naraz — zmiany zapiszesz jednym kliknięciem poniżej.
+                  </p>
+                  {allServices.length === 0 ? (
+                    <div className="py-10 text-center">
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK USŁUG W STUDIU</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {allServices.map(s => {
+                        const o = serviceOverrides[s.id] || { performs: false, bookable_online: false };
+                        return (
+                          <div key={s.id} style={{ border: `0.5px solid ${o.performs ? 'var(--brand)' : t.border}`, background: o.performs ? 'rgb(var(--brand-rgb) /0.04)' : 'transparent', padding: '12px 14px' }}>
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="min-w-0 flex-1">
+                                <p style={{ color: t.text, fontSize: '13px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</p>
+                                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: '3px' }}>
+                                  {s.category === 'tattoo' ? 'TATUAŻ' : s.category === 'piercing' ? 'PIERCING' : 'STUDIO'}
+                                  {s.duration_minutes ? ` · ${s.duration_minutes} min` : ''}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-5 flex-shrink-0">
+                                {/* Checkbox 1: performs */}
+                                <button
+                                  type="button"
+                                  onClick={() => toggleServiceFlag(s.id, 'performs')}
+                                  className="flex items-center gap-2"
+                                  style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', color: o.performs ? '#16a34a' : t.muted }}
+                                >
+                                  <div style={{ width: '14px', height: '14px', border: `0.5px solid ${o.performs ? '#16a34a' : t.border}`, background: o.performs ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    {o.performs && <span style={{ color: '#fff', fontSize: '9px' }}>✓</span>}
+                                  </div>
+                                  Wykonuje
+                                </button>
+                                {/* Checkbox 2: bookable online (disabled if not performs) */}
+                                <button
+                                  type="button"
+                                  onClick={() => o.performs && toggleServiceFlag(s.id, 'bookable_online')}
+                                  disabled={!o.performs}
+                                  className="flex items-center gap-2"
+                                  style={{ background: 'none', border: 'none', cursor: o.performs ? 'pointer' : 'default', opacity: o.performs ? 1 : 0.3, fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', color: o.bookable_online ? '#16a34a' : t.muted }}
+                                >
+                                  <div style={{ width: '14px', height: '14px', border: `0.5px solid ${o.bookable_online ? '#16a34a' : t.border}`, background: o.bookable_online ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    {o.bookable_online && <span style={{ color: '#fff', fontSize: '9px' }}>✓</span>}
+                                  </div>
+                                  Rezerwacja online
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  <div className="flex gap-4" style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '16px', marginTop: '20px' }}>
+                    <button onClick={handleSaveServices} disabled={savingServices} className="btn-oxblood flex-1" style={{ opacity: savingServices ? 0.5 : 1 }}>
+                      {savingServices ? 'ZAPISYWANIE...' : 'ZAPISZ USŁUGI'}
+                    </button>
+                    <button
+                      onClick={() => setEditing(null)}
+                      style={{
+                        backgroundColor: 'transparent',
+                        color: t.muted,
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.1em',
+                        padding: '14px 32px',
+                        border: `0.5px solid ${t.border}`,
+                        cursor: 'pointer',
+                        transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                      }}
+                    >ANULUJ</button>
+                  </div>
+                </div>
               )}
 
               <div className="space-y-6" style={{ display: activeTab === 'profile' ? 'block' : 'none' }}>
