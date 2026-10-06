@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import {
-  APP_URL, sectionStyle, h3Style, pStyle, mutedStyle, linkStyle, buttonStyle,
+  APP_URL, buildAppUrl, sectionStyle, h3Style, pStyle, mutedStyle, linkStyle, buttonStyle,
   detailRow, clientFirstName, fmtDate, fmtPrice, buildContactRows, sendViaGmail,
 } from '../../shared/bookingEmail.ts';
 
@@ -96,8 +96,7 @@ export default async function(req: Request): Promise<Response> {
     }
     const isPiercing = procedureCategory === 'piercing';
 
-    const appUrl = APP_URL;
-    const panelLink = `${appUrl}/panel`;
+    const panelLink = buildAppUrl('/panel');
 
     // Build "what changed" list — old value shown struck through, new value bold.
     const changeRows = changed.map(f => {

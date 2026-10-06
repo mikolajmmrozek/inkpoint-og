@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import {
-  APP_URL, sectionStyle, h3Style, pStyle, mutedStyle, buttonStyle,
+  APP_URL, buildAppUrl, sectionStyle, h3Style, pStyle, mutedStyle, buttonStyle,
   detailRow, clientFirstName, fmtDate, fmtPrice, buildContactRows, sendViaGmail,
 } from '../../shared/bookingEmail.ts';
 
@@ -57,9 +57,9 @@ export default async function(req: Request): Promise<Response> {
 
     // Links — the form preview deep-links into the client panel with the form_id,
     // which auto-opens the full printable PDF document for this specific form.
-    const panelLink = `${APP_URL}/panel`;
-    const loginLink = `${APP_URL}/`;
-    const formPreviewLink = `${APP_URL}/panel/health-forms?form_id=${form.id}`;
+    const panelLink = buildAppUrl('/panel');
+    const loginLink = buildAppUrl('/');
+    const formPreviewLink = buildAppUrl(`/panel/health-forms?form_id=${form.id}`);
 
     // Booking detail rows
     const bookingRows: string[] = [];

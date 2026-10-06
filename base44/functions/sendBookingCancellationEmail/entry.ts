@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import {
-  APP_URL, sectionStyle, h3Style, pStyle, mutedStyle, buttonStyle,
+  APP_URL, buildAppUrl, sectionStyle, h3Style, pStyle, mutedStyle, buttonStyle,
   detailRow, clientFirstName, fmtDate, buildContactRows, sendViaGmail,
 } from '../../shared/bookingEmail.ts';
 
@@ -43,9 +43,8 @@ export default async function(req: Request): Promise<Response> {
     }
     const isPiercing = procedureCategory === 'piercing';
 
-    const appUrl = APP_URL;
-    const bookingLink = `${appUrl}/booking`;
-    const panelLink = `${appUrl}/panel`;
+    const bookingLink = buildAppUrl('/booking');
+    const panelLink = buildAppUrl('/panel');
 
     const dateStr = booking.session_date ? fmtDate(booking.session_date) : '—';
     const timeStr = booking.session_time || 'TBD';

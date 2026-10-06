@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import {
-  APP_URL, sectionStyle, h3Style, pStyle, mutedStyle, linkStyle, buttonStyle,
+  APP_URL, buildAppUrl, sectionStyle, h3Style, pStyle, mutedStyle, linkStyle, buttonStyle,
   detailRow, clientFirstName, fmtDate, buildContactRows, sendViaGmail,
 } from '../../shared/bookingEmail.ts';
 
@@ -93,9 +93,6 @@ export default async function(req: Request): Promise<Response> {
       if (forms.length > 0 && forms[0].is_minor === false) knownNotMinor = true;
     } catch (e) { /* default: unknown */ }
 
-    // Links
-    const appUrl = APP_URL;
-
     // Before-treatment preparation document link — tattoo vs piercing separately.
     // Only link when a matching document exists and has content.
     let beforeInstructionsLink = '';
@@ -103,7 +100,7 @@ export default async function(req: Request): Promise<Response> {
     try {
       const instructions = await base44.asServiceRole.entities.Instruction.filter({ type: beforeType });
       if (instructions.length > 0 && instructions[0].content) {
-        beforeInstructionsLink = `${appUrl}/instructions?type=${beforeType}`;
+        beforeInstructionsLink = buildAppUrl(`/instructions?type=${beforeType}`);
       }
     } catch (e) { /* no instruction doc configured */ }
 
@@ -122,10 +119,10 @@ export default async function(req: Request): Promise<Response> {
       prepareItems.push(`<li><a href="${beforeInstructionsLink}" style="color: #FF007F; text-decoration: none;">Zobacz jak przygotować się do zabiegu</a></li>`);
     }
     const surveyLink = booking.health_form_token
-      ? `${appUrl}/health-form?token=${booking.health_form_token}`
-      : `${appUrl}/health-form?booking_id=${booking.id}`;
-    const loginLink = `${appUrl}/`;
-    const panelLink = `${appUrl}/panel`;
+      ? buildAppUrl(`/health-form?token=${booking.health_form_token}`)
+      : buildAppUrl(`/health-form?booking_id=${booking.id}`);
+    const loginLink = buildAppUrl('/');
+    const panelLink = buildAppUrl('/panel');
 
     // Email-safe styling: inline styles via shared helpers (see base44/shared/bookingEmail.ts).
 

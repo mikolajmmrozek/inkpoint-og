@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import {
-  APP_URL, sectionStyle, h3Style, pStyle, mutedStyle, buttonStyle,
+  APP_URL, buildAppUrl, sectionStyle, h3Style, pStyle, mutedStyle, buttonStyle,
   detailRow, clientFirstName, fmtDate, buildContactRows, sendViaGmail,
 } from '../../shared/bookingEmail.ts';
 
@@ -16,7 +16,7 @@ import {
  * The original confirmed booking is only modified on accept_requested and client_accept.
  */
 
-const getAppUrl = () => (typeof Deno !== 'undefined' && Deno.env.get('APP_URL')) || APP_URL;
+const getAppUrl = () => buildAppUrl();
 
 // Compute end time (HH:MM) from a start time and duration in minutes.
 function computeEndTime(startTime: string, durationMinutes: number): string {
@@ -233,11 +233,11 @@ export default async function(req: Request): Promise<Response> {
         });
       } catch (e) { /* non-fatal */ }
 
-      // Send email via Gmail with a deep link to the acceptance page.
+      // Send email via Gmail with a deep link to the client panel.
+      // The panel shows the studio's proposal with accept/decline actions.
       try {
         const { accessToken } = await base44.asServiceRole.connectors.getConnection('gmail');
-        const appUrl = getAppUrl();
-        const acceptLink = `${appUrl}/panel/sessions`;
+        const acceptLink = buildAppUrl('/panel/sessions');
         const firstName = (cr.client_name || '').split(' ')[0] || 'Kliencie';
 
         const subject = `Studio proponuje nowy termin — ${propDate}`;
@@ -272,8 +272,8 @@ export default async function(req: Request): Promise<Response> {
 </td></tr>
 ${studioNote ? `<tr><td style="padding:16px 32px 0 32px;"><p style="margin:0;font-size:13px;color:#0a0a0a;"><strong>Notatka od studia:</strong> ${studioNote}</p></td></tr>` : ''}
 <tr><td style="padding:16px 32px 8px 32px;"><p style="margin:0;font-size:13px;color:#666;">Pierwotny termin pozostaje potwierdzony, dopóki nie zaakceptujesz propozycji.</p></td></tr>
-<tr><td style="padding:16px 32px 8px 32px;"><a href="${acceptLink}" style="display:inline-block;background:#FF007F;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:8px;text-transform:uppercase;letter-spacing:0.06em;">ZALOGUJ SIĘ DO PANELU</a></td></tr>
-<tr><td style="padding:0 32px 8px 32px;"><p style="margin:0;font-size:12px;color:#666;">W panelu klienta zobaczysz propozycję studia i będziesz mógł ją zaakceptować lub odrzucić.</p></td></tr>
+<tr><td style="padding:16px 32px 8px 32px;"><a href="${acceptLink}" style="display:inline-block;background:#FF007F;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:8px;text-transform:uppercase;letter-spacing:0.06em;">POTWIERDŹ TERMIN</a></td></tr>
+<tr><td style="padding:0 32px 8px 32px;"><p style="margin:0;font-size:12px;color:#666;">Przycisk przeniesie Cię do panelu klienta, gdzie zobaczysz propozycję studia i będziesz mógł ją zaakceptować lub odrzucić.</p></td></tr>
 <tr><td style="padding:0 32px 28px 32px;"><p style="margin:0;color:#b0b0b0;font-size:11px;">Otrzymujesz tę wiadomość, ponieważ studio odpowiedziało na Twoją prośbę o zmianę terminu w Romans Tattoo.</p></td></tr>
 </table></td></tr></table></body></html>`;
 
@@ -302,7 +302,7 @@ async function sendChangeRequestEmail(base44: any, opts: {
 }) {
   const { type, cr, booking } = opts;
   const { accessToken } = await base44.asServiceRole.connectors.getConnection('gmail');
-  const panelLink = `${getAppUrl()}/panel`;
+  const panelLink = buildAppUrl('/panel');
 
   const isRejected = type === 'rejected';
   const firstName = clientFirstName(booking || cr);

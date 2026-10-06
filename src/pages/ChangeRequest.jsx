@@ -220,17 +220,21 @@ export default function ChangeRequest() {
             </div>
           </>
         ) : (
-          <div className="p-4" style={{ border: `0.5px solid ${t.border}`, background: 'rgba(255,255,255,0.02)' }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-              TA PROŚBA ZOSTAŁA JUŻ ROZSTRZYGNIĘTA
+          <div className="p-5" style={{ border: `0.5px solid ${t.border}`, background: 'rgba(255,255,255,0.02)' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
+              TA ZMIANA JUŻ NIE JEST AKTUALNA
             </p>
-            <p style={{ fontSize: '13px', color: t.text, marginTop: '6px' }}>
-              Status: {cr.status === 'accepted_by_client' ? 'Zaakceptowana przez Ciebie'
-                : cr.status === 'declined_by_client' ? 'Odrzucona przez Ciebie'
-                : cr.status === 'accepted_by_studio' ? 'Zaakceptowana przez studio'
-                : cr.status === 'rejected' ? 'Odrzucona przez studio'
-                : cr.status}
+            <p style={{ fontSize: '14px', color: t.text, marginBottom: '20px', lineHeight: 1.5 }}>
+              {cr.status === 'accepted_by_client' ? 'Zaakceptowałeś już tę propozycję nowego terminu.'
+                : cr.status === 'declined_by_client' ? 'Odrzuciłeś już tę propozycję. Pierwotny termin pozostaje potwierdzony.'
+                : cr.status === 'accepted_by_studio' ? 'Studio zaakceptowało Twój proponowany termin.'
+                : cr.status === 'rejected' ? 'Studio odrzuciło Twoją prośbę o zmianę. Pierwotny termin pozostaje potwierdzony.'
+                : cr.status === 'expired' ? 'Ta prośba o zmianę terminu wygasła.'
+                : 'Ta prośba została już rozstrzygnięta.'}
             </p>
+            <button onClick={() => navigate('/panel/sessions')} className="btn-oxblood inline-flex items-center gap-2">
+              <ArrowLeft size={13} /> WRÓĆ DO PANELU KLIENTA
+            </button>
           </div>
         )}
       </div>

@@ -3,6 +3,16 @@
 
 export const APP_URL = 'https://romanstattoo.base44.app';
 
+/** Normalize a base URL (strip trailing slashes) and join a path safely.
+ *  Prevents double-slash links (e.g. //panel/sessions) when the configured
+ *  APP_URL secret ends with a trailing slash. */
+export function buildAppUrl(path: string = ''): string {
+  const envUrl = (typeof Deno !== 'undefined' && Deno.env.get('APP_URL')) || APP_URL;
+  const base = String(envUrl).replace(/\/+$/, '');
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${base}${cleanPath}`;
+}
+
 export const sectionStyle = 'margin:22px 0 0 0;';
 export const h3Style = 'color:#0a0a0a;font-size:11px;margin:0 0 10px 0;text-transform:uppercase;font-weight:700;letter-spacing:0.12em;font-family:Arial,Helvetica,sans-serif;';
 export const pStyle = 'margin:0 0 8px 0;color:#3a3a3a;font-size:14px;line-height:1.55;';
