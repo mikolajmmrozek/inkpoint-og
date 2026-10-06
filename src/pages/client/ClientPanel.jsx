@@ -157,6 +157,11 @@ export default function ClientPanel() {
   if (authError || !isAuthenticated) return null;
   if (user.role !== 'user') return null;
 
+  // Allow child pages (e.g. ClientProfile) to refresh the client record after an update.
+  const reloadClient = () => base44.entities.Client.filter({ email: user.email })
+    .then(clients => { if (clients.length > 0) setClient(clients[0]); })
+    .catch(() => {});
+
   const clientName = client?.name || user.full_name || user.email;
 
   const bg = theme === 'light' ? '#F8F8F8' : '#0A0A0A';
@@ -187,7 +192,7 @@ export default function ClientPanel() {
             </div>
           </div>
           <div className="flex-1 p-6 lg:p-10 overflow-y-auto pb-20 lg:pb-10">
-            <Outlet context={{ client, user, theme }} />
+            <Outlet context={{ client, user, theme, reloadClient }} />
           </div>
         </div>
         <BottomNav theme={theme} role="user" calendarPath="/panel/sessions" messagesPath="/panel/messages" notificationsPath="/panel/notifications" userEmail={user.email} />

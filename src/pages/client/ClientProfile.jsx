@@ -3,6 +3,7 @@ import { useOutletContext } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Loader2, Edit3, Check } from 'lucide-react';
 import AccountSecurity from '@/components/client/AccountSecurity';
+import ClientAvatar from '@/components/client/ClientAvatar';
 
 const formFromClient = (client) => {
   const parts = (client.name || '').split(' ');
@@ -15,7 +16,7 @@ const formFromClient = (client) => {
 };
 
 export default function ClientProfile() {
-  const { client, user, theme } = useOutletContext();
+  const { client, user, theme, reloadClient } = useOutletContext();
   const [form, setForm] = useState({ first_name: '', last_name: '', phone: '', notes: '' });
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -98,6 +99,24 @@ export default function ClientProfile() {
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 400, color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>
           Twój Profil
         </h1>
+      </div>
+
+      {/* ── AVATAR ── */}
+      <div className="pt-6 mb-8" style={{ borderTop: `0.5px solid ${t.border}` }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>
+          ZDJĘCIE PROFLOWE
+        </p>
+        <ClientAvatar
+          client={client}
+          user={user}
+          t={t}
+          size={110}
+          onSave={async (avatarUrl) => {
+            if (!client?.id) return;
+            await base44.entities.Client.update(client.id, { avatar_url: avatarUrl });
+            if (reloadClient) await reloadClient();
+          }}
+        />
       </div>
 
       {/* ── DANE ── */}

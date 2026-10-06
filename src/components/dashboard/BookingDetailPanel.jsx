@@ -162,26 +162,40 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
         className="fixed top-0 right-0 h-full z-50 w-full sm:w-96 overflow-y-auto"
         style={{ borderLeft: `0.5px solid ${t.border}`, background: t.bg, padding: '24px', pointerEvents: showImageLightbox ? 'none' : 'auto' }}
       >
-        {/* Header: name + client button + close */}
+        {/* Header: avatar + name + client button + close */}
         <div className="flex justify-between items-start mb-3">
-          <div className="min-w-0 flex-1">
-            <h3 style={{ ...display, fontSize: '1.5rem', color: t.title, letterSpacing: '0.04em', lineHeight: 1.1 }}>
-              {booking.client_name}
-            </h3>
-            {(phone || email) && (
-              <p style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.05em', marginTop: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {phone}{phone && email ? ' · ' : ''}{email}
-              </p>
-            )}
-          </div>
-          <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             <button
               onClick={() => setShowClientView(true)}
               title="Dane klienta"
-              style={{ color: 'var(--brand)', background: 'rgb(var(--brand-rgb) /0.06)', border: '0.5px solid rgb(var(--brand-rgb) /0.3)', cursor: 'pointer', padding: '7px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              className="flex-shrink-0 rounded-full overflow-hidden flex items-center justify-center"
+              style={{
+                width: '44px', height: '44px', borderRadius: '50%',
+                border: '0.5px solid rgb(var(--brand-rgb) /0.4)',
+                background: 'rgb(var(--brand-rgb) /0.06)',
+                cursor: 'pointer', padding: 0,
+              }}
             >
-              <User size={14} />
+              {clientRecord?.avatar_url ? (
+                <img src={clientRecord.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+              ) : (
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: '16px', color: 'var(--brand)', letterSpacing: '0.04em' }}>
+                  {(booking.client_name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
+                </span>
+              )}
             </button>
+            <div className="min-w-0">
+              <h3 style={{ ...display, fontSize: '1.5rem', color: t.title, letterSpacing: '0.04em', lineHeight: 1.1 }}>
+                {booking.client_name}
+              </h3>
+              {(phone || email) && (
+                <p style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.05em', marginTop: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {phone}{phone && email ? ' · ' : ''}{email}
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
             <button onClick={onClose} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', padding: '7px' }}>
               <X size={16} />
             </button>

@@ -22,6 +22,10 @@
       "type": "string",
       "description": "Numer telefonu"
     },
+    "avatar_url": {
+      "type": "string",
+      "description": "URL zdj\u0119cia profilowego klienta (uploadowane przez klienta w panelu lub pobrane od dostawcy logowania, np. Google)"
+    },
     "notes": {
       "type": "string",
       "description": "Notatki o kliencie (alergie, preferencje itp.)"
