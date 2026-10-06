@@ -1,27 +1,25 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, Check, X, ArrowLeft } from 'lucide-react';
+import { Loader2, Check, X, ArrowLeft, LogIn } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 
 export default function ChangeRequest() {
   const navigate = useNavigate();
-  const { isAuthenticated, isLoadingAuth, authChecked, navigateToLogin } = useAuth();
+  const { isAuthenticated, isLoadingAuth, authChecked, authError } = useAuth();
   const [cr, setCr] = useState(null);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState(false);
   const [error, setError] = useState(null);
 
-  const theme = 'dark';
   const t = { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.5)', fuchsia: 'var(--brand)' };
 
-  // While auth is still being resolved, show a loader — don't call the backend
-  // function prematurely (it requires a logged-in user and throws on 401).
+  // Load the request once auth has settled and the user is logged in.
   useEffect(() => {
     if (isLoadingAuth || !authChecked) return;
     if (!isAuthenticated) {
-      // Not logged in — redirect to the platform login, which returns here after auth.
-      navigateToLogin();
+      // Not logged in — stop loading; the UI below offers the login link.
+      setLoading(false);
       return;
     }
 
@@ -32,7 +30,6 @@ export default function ChangeRequest() {
       setLoading(false);
       return;
     }
-    // Load via the client function — it scopes by the logged-in user's email.
     base44.functions.invoke('clientChangeRequest', { action: 'list_mine' })
       .then(res => {
         const list = res?.data?.data || [];
@@ -53,7 +50,6 @@ export default function ChangeRequest() {
     try {
       const res = await base44.functions.invoke('clientChangeRequest', { action, request_id: cr.id });
       if (res?.data?.error) throw new Error(res.data.error);
-      // Success — go back to sessions.
       navigate('/panel/sessions');
     } catch (e) {
       setError(e.message || 'Wystąpił błąd.');
@@ -61,7 +57,14 @@ export default function ChangeRequest() {
     }
   };
 
-  if (isLoadingAuth || !authChecked || (loading && isAuthenticated)) {
+  const goToLogin = () => {
+    // Direct redirect to the platform login; after login the user lands back here,
+    // or on /panel/sessions where the change-request badge is visible.
+    window.location.href = '/panel/sessions';
+  };
+
+  // Loading spinner while auth or data is resolving.
+  if (isLoadingAuth || !authChecked || (loading && isAuthenticated && !error)) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: t.bg }}>
         <Loader2 size={24} className="animate-spin" style={{ color: t.fuchsia }} />
@@ -69,11 +72,43 @@ export default function ChangeRequest() {
     );
   }
 
+  // Not logged in → simple screen with a login link (no black screen, no redirect loop).
   if (!isAuthenticated) {
-    // navigateToLogin() was called above; render a loader while it takes over.
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: t.bg }}>
-        <Loader2 size={24} className="animate-spin" style={{ color: t.fuchsia }} />
+      <div className="min-h-screen flex flex-col items-center justify-center p-6" style={{ background: t.bg }}>
+        <div className="max-w-md text-center">
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>
+            ROMANS TATTOO
+          </p>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', color: t.title, letterSpacing: '0.04em', marginBottom: '16px' }}>
+            Zaloguj się
+          </h1>
+          <p style={{ color: t.muted, fontSize: '14px', marginBottom: '28px', lineHeight: 1.6 }}>
+            Aby zobaczyć propozycję nowego terminu sesji i ją zaakceptować, musisz być zalogowany w panelu klienta.
+          </p>
+          <button onClick={goToLogin} className="btn-oxblood inline-flex items-center gap-2">
+            <LogIn size={13} /> ZALOGUJ SIĘ / PRZEJDŹ DO PANELU
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Auth error from context (e.g. expired token) → same simple screen.
+  if (authError) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-6" style={{ background: t.bg }}>
+        <div className="max-w-md text-center">
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: t.title, letterSpacing: '0.04em', marginBottom: '16px' }}>
+            Wymagane logowanie
+          </h1>
+          <p style={{ color: t.muted, fontSize: '14px', marginBottom: '28px' }}>
+            Twoja sesja wygasła. Zaloguj się ponownie, aby kontynuować.
+          </p>
+          <button onClick={goToLogin} className="btn-oxblood inline-flex items-center gap-2">
+            <LogIn size={13} /> ZALOGUJ SIĘ
+          </button>
+        </div>
       </div>
     );
   }
@@ -97,7 +132,6 @@ export default function ChangeRequest() {
     );
   }
 
-  // Only studio_proposed requests are actionable here.
   const isActionable = cr.status === 'studio_proposed';
 
   return (
@@ -114,7 +148,6 @@ export default function ChangeRequest() {
           Propozycja studia
         </h1>
 
-        {/* Timeline */}
         <div className="mb-6 space-y-3">
           <div className="p-3" style={{ border: `0.5px solid ${t.border}`, background: 'rgba(255,255,255,0.02)' }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>
