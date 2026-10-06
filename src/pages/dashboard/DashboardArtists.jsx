@@ -363,19 +363,37 @@ export default function DashboardArtists() {
                   </label>
                 </div>
 
-                {/* Visibility toggle */}
-                <div className="flex items-center gap-6 pt-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
-                  <button
-                    type="button"
-                    onClick={() => setForm(f => ({ ...f, is_visible: f.is_visible === false ? true : false }))}
-                    className="flex items-center gap-2"
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.is_visible === false ? t.muted : '#16a34a' }}
-                  >
-                    <div style={{ width: '12px', height: '12px', border: `0.5px solid ${form.is_visible === false ? t.border : '#16a34a'}`, background: form.is_visible === false ? 'transparent' : '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {form.is_visible !== false && <span style={{ color: '#fff', fontSize: '8px' }}>✓</span>}
-                    </div>
-                    Widoczny na stronie artystów
-                  </button>
+                {/* Visibility toggles */}
+                <div className="flex flex-col gap-4 pt-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
+                  <div className="flex flex-wrap items-center gap-6">
+                    <button
+                      type="button"
+                      onClick={() => setForm(f => ({ ...f, is_visible: f.is_visible === false ? true : false }))}
+                      className="flex items-center gap-2"
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.is_visible === false ? t.muted : '#16a34a' }}
+                    >
+                      <div style={{ width: '12px', height: '12px', border: `0.5px solid ${form.is_visible === false ? t.border : '#16a34a'}`, background: form.is_visible === false ? 'transparent' : '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {form.is_visible !== false && <span style={{ color: '#fff', fontSize: '8px' }}>✓</span>}
+                      </div>
+                      Widoczny na stronie artystów
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setForm(f => ({ ...f, bookable_online: f.bookable_online === false ? true : false }))}
+                      className="flex items-center gap-2"
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.bookable_online === false ? t.muted : '#16a34a' }}
+                    >
+                      <div style={{ width: '12px', height: '12px', border: `0.5px solid ${form.bookable_online === false ? t.border : '#16a34a'}`, background: form.bookable_online === false ? 'transparent' : '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {form.bookable_online !== false && <span style={{ color: '#fff', fontSize: '8px' }}>✓</span>}
+                      </div>
+                      Dostępny w rezerwacji online
+                    </button>
+                  </div>
+                  {form.bookable_online === false && (
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.08em', lineHeight: 1.5 }}>
+                      Klient nie zobaczy tego artysty w formularzu rezerwacji. Admin i sam artysta nadal mogą go zapisywać w panelu.
+                    </p>
+                  )}
                 </div>
 
                 <div className="flex gap-4" style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '16px' }}>

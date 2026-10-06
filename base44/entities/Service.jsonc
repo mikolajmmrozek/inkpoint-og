@@ -59,6 +59,14 @@
       },
       "description": "Lista ID artyst\u00f3w wykonuj\u0105cych t\u0119 us\u0142ug\u0119"
     },
+    "hidden_from_clients": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Lista ID artyst\u00f3w, dla kt\u00f3rych ta us\u0142uga jest ukryta przed klientem w rezerwacji online. Admin i sam artysta nadal widz\u0105 i mog\u0105 zapisywa\u0107. Pusta lub brak = widoczna dla wszystkich."
+    },
     "visibility": {
       "type": "string",
       "enum": [

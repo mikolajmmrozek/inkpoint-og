@@ -29,6 +29,7 @@ const EMPTY_FORM = {
   price_min: '',
   price_max: '',
   artist_ids: [],
+  hidden_from_clients: [],
   members_only: false,
   min_advance_booking: { unit: 'minutes', value: 0 },
   is_active: true,
@@ -78,7 +79,7 @@ export default function DashboardServices() {
     const minAdvanceBooking = s.min_advance_booking && typeof s.min_advance_booking === 'object' 
       ? { ...EMPTY_FORM.min_advance_booking, ...s.min_advance_booking }
       : { ...EMPTY_FORM.min_advance_booking };
-    setForm({ ...EMPTY_FORM, ...s, artist_ids: s.artist_ids || [], min_advance_booking: minAdvanceBooking }); 
+    setForm({ ...EMPTY_FORM, ...s, artist_ids: s.artist_ids || [], hidden_from_clients: s.hidden_from_clients || [], min_advance_booking: minAdvanceBooking });
     setEditing(s); 
   };
   const closeModal = () => setEditing(null);
@@ -555,6 +556,41 @@ export default function DashboardServices() {
                       </button>
                     );
                   })}
+                </div>
+              </div>
+
+              {/* Per-artist client visibility */}
+              <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px' }}>UKRYJ DLA KLIENTÓW</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginBottom: '12px' }}>Zaznacz artystów, dla których ta usługa ma być niewidoczna w rezerwacji online. Admin i sam artysta nadal mogą ją zapisywać.</p>
+                <div className="flex flex-wrap gap-2">
+                  {(form.artist_ids?.length > 0 ? artists.filter(a => form.artist_ids.includes(a.id)) : artists).map(a => {
+                    const hidden = form.hidden_from_clients?.includes(a.id);
+                    return (
+                      <button
+                        key={a.id}
+                        type="button"
+                        onClick={() => {
+                          const current = form.hidden_from_clients || [];
+                          set('hidden_from_clients', hidden ? current.filter(id => id !== a.id) : [...current, a.id]);
+                        }}
+                        className="flex items-center gap-2 px-3 py-2"
+                        style={{
+                          border: `0.5px solid ${hidden ? t.muted : t.border}`,
+                          color: hidden ? '#f97316' : t.muted,
+                          background: hidden ? 'rgba(249,115,22,0.08)' : 'transparent',
+                          fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer',
+                        }}
+                      >
+                        {a.photo_url && <img src={a.photo_url} alt={a.name} style={{ width: '20px', height: '20px', borderRadius: 'var(--radius)', objectFit: 'cover' }} />}
+                        {a.name}
+                        {hidden && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', color: '#f97316', letterSpacing: '0.1em' }}>UKRYTA</span>}
+                      </button>
+                    );
+                  })}
+                  {(form.artist_ids?.length > 0 ? artists.filter(a => form.artist_ids.includes(a.id)) : artists).length === 0 && (
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>Najpierw dodaj artystów powyżej.</p>
+                  )}
                 </div>
               </div>
 

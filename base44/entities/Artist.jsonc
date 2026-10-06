@@ -55,7 +55,12 @@
     "is_visible": {
       "type": "boolean",
       "default": true,
-      "description": "Czy artysta jest widoczny na stronie publicznej"
+      "description": "Czy artysta jest widoczny na publicznej stronie artyst\u00f3w"
+    },
+    "bookable_online": {
+      "type": "boolean",
+      "default": true,
+      "description": "Czy klient mo\u017ce wybra\u0107 tego artyst\u0119 w rezerwacji online. false = ca\u0142kowicie ukryty w formularzu rezerwacji (nawet kafel), ale admin i sam artysta nadal mog\u0105 go zapisywa\u0107 w panelu."
     },
     "artist_cut_percent": {
       "type": "number",

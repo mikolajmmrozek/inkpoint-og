@@ -117,9 +117,12 @@ export default function Booking() {
 
   const getVisibleServices = () => {
     return services.filter(s => {
-      if (!s.artist_ids?.includes(data.artist_id)) return false;
+      // Empty artist_ids = service for everyone; otherwise must include selected artist.
+      if (s.artist_ids?.length > 0 && !s.artist_ids.includes(data.artist_id)) return false;
       if (s.visibility === 'hidden') return false;
       if (s.visibility === 'members_only' && !isLoggedIn) return false;
+      // Per-artist hide: if the selected artist is in hidden_from_clients, the client can't book.
+      if (s.hidden_from_clients?.includes(data.artist_id)) return false;
       return true;
     });
   };
@@ -296,7 +299,9 @@ export default function Booking() {
                   <div className="flex justify-center py-12">
                     <div className="w-8 h-px animate-pulse" style={{ background: 'var(--brand)' }} />
                   </div>
-                ) : artists.map(artist => (
+                ) : artists
+                  .filter(a => a.bookable_online !== false)
+                  .map(artist => (
                   <button
                     key={artist.id}
                     onClick={() => { update('artist_id', artist.id); update('artist_name', artist.name); }}
