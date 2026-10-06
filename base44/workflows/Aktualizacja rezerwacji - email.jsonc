@@ -1,8 +1,8 @@
 {
   "name": "Aktualizacja rezerwacji \u2014 email",
-  "description": "Wysy\u0142a klientowi jednego maila o zmianie szczeg\u00f3\u0142\u00f3w rezerwacji (data, godzina rozpocz\u0119cia, artysta, miejsce itp.), gdy studio zaktualizuje istniej\u0105c\u0105 rezerwacj\u0119. Pomija anulowania (maj\u0105 w\u0142asny mail), zmiany godziny zako\u0144czenia oraz zmiany ceny, oraz inne zmiany, kt\u00f3re nie dotycz\u0105 szczeg\u00f3\u0142\u00f3w sesji widocznych dla klienta.",
+  "description": "Wysy\u0142a klientowi jednego maila o zmianie szczeg\u00f3\u0142\u00f3w rezerwacji (data, godzina rozpocz\u0119cia, artysta, miejsce itp.), gdy studio zaktualizuje istniej\u0105c\u0105 rezerwacj\u0119. Pomija anulowania (maj\u0105 w\u0142asny mail), zmiany godziny zako\u0144czenia oraz zmiany ceny, edycje dokonane przez klienta w panelu (last_editor=client), oraz edycje z pro\u015bby o zmian\u0119 terminu (last_editor=change_request \u2014 maj\u0105 w\u0142asne maile), oraz inne zmiany, kt\u00f3re nie dotycz\u0105 szczeg\u00f3\u0142\u00f3w sesji widocznych dla klienta.",
   "trigger": {
-    "condition": "${ (.trigger.event_type == \"update\") and (.trigger.data.status != \"cancelled\") and any((.trigger.changed_fields // [])[]; IN(\"session_date\",\"session_time\",\"artist_name\",\"service_name\",\"tattoo_placement\")) }",
+    "condition": "${ (.trigger.event_type == \"update\") and (.trigger.data.status != \"cancelled\") and (.trigger.data.last_editor != \"client\") and (.trigger.data.last_editor != \"change_request\") and any((.trigger.changed_fields // [])[]; IN(\"session_date\",\"session_time\",\"artist_name\",\"service_name\",\"tattoo_placement\")) }",
     "config": {
       "trigger_type": "entity",
       "events": [
@@ -15,7 +15,7 @@
     "document": {
       "dsl": "1.0.0",
       "name": "booking_update_email",
-      "version": "1.4",
+      "version": "1.5",
       "namespace": "base44"
     },
     "do": [

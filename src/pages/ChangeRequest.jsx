@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, Check, X, ArrowLeft } from 'lucide-react';
+import { useAuth } from '@/lib/AuthContext';
 
 export default function ChangeRequest() {
   const navigate = useNavigate();
+  const { isAuthenticated, isLoadingAuth, authChecked, navigateToLogin } = useAuth();
   const [cr, setCr] = useState(null);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState(false);
@@ -13,7 +15,16 @@ export default function ChangeRequest() {
   const theme = 'dark';
   const t = { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.5)', fuchsia: 'var(--brand)' };
 
+  // While auth is still being resolved, show a loader — don't call the backend
+  // function prematurely (it requires a logged-in user and throws on 401).
   useEffect(() => {
+    if (isLoadingAuth || !authChecked) return;
+    if (!isAuthenticated) {
+      // Not logged in — redirect to the platform login, which returns here after auth.
+      navigateToLogin();
+      return;
+    }
+
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
     if (!id) {
@@ -34,7 +45,7 @@ export default function ChangeRequest() {
       })
       .catch(() => setError('Nie udało się załadować prośby.'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [isLoadingAuth, authChecked, isAuthenticated]);
 
   const handleAction = async (action) => {
     setActing(true);
@@ -50,7 +61,16 @@ export default function ChangeRequest() {
     }
   };
 
-  if (loading) {
+  if (isLoadingAuth || !authChecked || (loading && isAuthenticated)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: t.bg }}>
+        <Loader2 size={24} className="animate-spin" style={{ color: t.fuchsia }} />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    // navigateToLogin() was called above; render a loader while it takes over.
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: t.bg }}>
         <Loader2 size={24} className="animate-spin" style={{ color: t.fuchsia }} />

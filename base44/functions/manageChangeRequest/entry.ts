@@ -161,6 +161,9 @@ export default async function(req: Request): Promise<Response> {
         session_date: cr.requested_date,
         session_time: cr.requested_time,
         session_end_time: cr.requested_end_time,
+        // Suppress the generic "Aktualizacja rezerwacji" email — the dedicated
+        // change-request email handles notification for this path.
+        last_editor: 'change_request',
         // keep status confirmed — the studio just accepted the new time.
       });
 
@@ -234,7 +237,7 @@ export default async function(req: Request): Promise<Response> {
       try {
         const { accessToken } = await base44.asServiceRole.connectors.getConnection('gmail');
         const appUrl = getAppUrl();
-        const acceptLink = `${appUrl}/change-request?id=${requestId}`;
+        const acceptLink = `${appUrl}/panel/sessions`;
         const firstName = (cr.client_name || '').split(' ')[0] || 'Kliencie';
 
         const subject = `Studio proponuje nowy termin — ${propDate}`;
@@ -249,7 +252,7 @@ export default async function(req: Request): Promise<Response> {
           ``,
           `Pierwotny termin pozostaje potwierdzony, dopóki nie zaakceptujesz propozycji.`,
           ``,
-          `Kliknij poniższy link, aby potwierdzić nowy termin lub zaloguj się do panelu, aby go zmienić:`,
+          `Zaloguj się do panelu, aby sprawdzić propozycję i potwierdzić lub odrzucić nowy termin:`,
           `${acceptLink}`,
           ``,
           `Romans Tattoo`,
@@ -269,8 +272,8 @@ export default async function(req: Request): Promise<Response> {
 </td></tr>
 ${studioNote ? `<tr><td style="padding:16px 32px 0 32px;"><p style="margin:0;font-size:13px;color:#0a0a0a;"><strong>Notatka od studia:</strong> ${studioNote}</p></td></tr>` : ''}
 <tr><td style="padding:16px 32px 8px 32px;"><p style="margin:0;font-size:13px;color:#666;">Pierwotny termin pozostaje potwierdzony, dopóki nie zaakceptujesz propozycji.</p></td></tr>
-<tr><td style="padding:16px 32px 8px 32px;"><a href="${acceptLink}" style="display:inline-block;background:#FF007F;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:8px;text-transform:uppercase;letter-spacing:0.06em;">POTWIERDŹ TERMIN</a></td></tr>
-<tr><td style="padding:0 32px 8px 32px;"><p style="margin:0;font-size:12px;color:#666;">lub <a href="${appUrl}/panel/sessions" style="color:#FF007F;text-decoration:none;font-weight:600;">zaloguj się do panelu</a>, aby zaproponować inny termin.</p></td></tr>
+<tr><td style="padding:16px 32px 8px 32px;"><a href="${acceptLink}" style="display:inline-block;background:#FF007F;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:8px;text-transform:uppercase;letter-spacing:0.06em;">ZALOGUJ SIĘ DO PANELU</a></td></tr>
+<tr><td style="padding:0 32px 8px 32px;"><p style="margin:0;font-size:12px;color:#666;">W panelu klienta zobaczysz propozycję studia i będziesz mógł ją zaakceptować lub odrzucić.</p></td></tr>
 <tr><td style="padding:0 32px 28px 32px;"><p style="margin:0;color:#b0b0b0;font-size:11px;">Otrzymujesz tę wiadomość, ponieważ studio odpowiedziało na Twoją prośbę o zmianę terminu w Romans Tattoo.</p></td></tr>
 </table></td></tr></table></body></html>`;
 

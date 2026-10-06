@@ -45,13 +45,16 @@ export default async function(req: Request): Promise<Response> {
 
       // ── CLIENT_ACCEPT — apply the studio's proposal to the booking ─────
       if (action === 'client_accept') {
-        const oldBooking = await base44.asServiceRole.entities.Booking.filter({ id: cr.booking_id }).then(r => r[0]);
-        if (!oldBooking) return Response.json({ error: 'Powiązana rezerwacja nie istnieje' }, { status: 404 });
+        const booking = await base44.asServiceRole.entities.Booking.filter({ id: cr.booking_id }).then(r => r[0]);
+        if (!booking) return Response.json({ error: 'Powiązana rezerwacja nie istnieje' }, { status: 404 });
 
         const updated = await base44.asServiceRole.entities.Booking.update(cr.booking_id, {
           session_date: cr.studio_proposed_date,
           session_time: cr.studio_proposed_time,
           session_end_time: cr.studio_proposed_end_time,
+          // Suppress the generic "Aktualizacja rezerwacji" email — the dedicated
+          // change-request email handles notification for this path.
+          last_editor: 'change_request',
           // status stays confirmed
         });
 
@@ -73,15 +76,9 @@ export default async function(req: Request): Promise<Response> {
           });
         } catch (e) { /* non-fatal */ }
 
-        // Trigger booking update email
-        try {
-          await base44.asServiceRole.functions.invoke('sendBookingUpdateEmail', {
-            bookingId: cr.booking_id,
-            oldBooking,
-            event_type: 'update',
-          });
-        } catch (e) { /* non-fatal */ }
-
+        // No update email here — the dedicated change-request email handles
+        // notification, and last_editor='change_request' suppresses the generic
+        // "Aktualizacja rezerwacji" workflow email (see that workflow's condition).
         return Response.json({ success: true, status: 'accepted_by_client', booking: updated });
       }
 
