@@ -157,7 +157,6 @@ export default async function(req: Request): Promise<Response> {
       }
 
       // Update the booking to the requested date/time. Original is overwritten.
-      const oldBooking = await base44.asServiceRole.entities.Booking.filter({ id: cr.booking_id }).then(r => r[0]);
       const updated = await base44.asServiceRole.entities.Booking.update(cr.booking_id, {
         session_date: cr.requested_date,
         session_time: cr.requested_time,
@@ -192,15 +191,7 @@ export default async function(req: Request): Promise<Response> {
         await sendChangeRequestEmail(base44, { type: 'accepted_by_studio', cr, booking });
       } catch (e) { console.error('Acceptance email failed:', e?.message || e); }
 
-      // Also trigger the generic booking update email (for the calendar/sync record).
-      try {
-        await base44.asServiceRole.functions.invoke('sendBookingUpdateEmail', {
-          bookingId: cr.booking_id,
-          oldBooking,
-          event_type: 'update',
-        });
-      } catch (e) { /* non-fatal — notification still created */ }
-
+      // Only the dedicated change-request email is sent — no duplicate update email.
       return Response.json({ success: true, status: 'accepted_by_studio', booking: updated });
     }
 
