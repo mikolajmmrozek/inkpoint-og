@@ -110,6 +110,19 @@ export default function HealthFormPage() {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [step]);
 
+  // Odciążenie ankiety: wyłącz dekoracyjne gradienty i stałe tło dziedziczone z body,
+  // zostawiając tylko jednolity kolor tła ustawiany inline. Dotyczy tylko tej strony.
+  useEffect(() => {
+    const prevBodyImage = document.body.style.backgroundImage;
+    const prevBodyAttach = document.body.style.backgroundAttachment;
+    document.body.style.backgroundImage = 'none';
+    document.body.style.backgroundAttachment = 'scroll';
+    return () => {
+      document.body.style.backgroundImage = prevBodyImage;
+      document.body.style.backgroundAttachment = prevBodyAttach;
+    };
+  }, []);
+
   const t = T[lang] || T.pl;
   const activeTemplate = template;
 
