@@ -36,7 +36,9 @@ export default function StepConsents({ form, setField, t, showErrors, templateDa
   const allChecked = consents.length > 0 && consents.every(c => !!form[c.field_key]);
   const toggleAll = () => {
     const newVal = !allChecked;
-    consents.forEach(c => setField(c.field_key, newVal));
+    const updates = {};
+    consents.forEach(c => { updates[c.field_key] = newVal; });
+    setField('__batch__', updates);
   };
 
   const termsUrl = lang && lang !== 'pl' ? `/terms?lang=${lang}` : '/terms';

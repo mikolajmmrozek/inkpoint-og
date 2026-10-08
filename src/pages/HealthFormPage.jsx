@@ -148,7 +148,14 @@ export default function HealthFormPage() {
   })();
   const steps = isMinor ? [...STEPS, 'guardian'] : [...STEPS];
 
-  const setField = (key, value) => setForm(f => ({ ...f, [key]: value }));
+  const setField = (key, value) => {
+    // Batch update: pass { __batch__: { k1: v1, k2: v2 } } to merge multiple fields in one state update.
+    if (key === '__batch__' && value && typeof value === 'object') {
+      setForm(f => ({ ...f, ...value }));
+      return;
+    }
+    setForm(f => ({ ...f, [key]: value }));
+  };
   const setGuardianField = (key, value) => setGuardian(g => ({ ...g, [key]: value }));
 
   // Save draft after each step change — persists the current step so a page
