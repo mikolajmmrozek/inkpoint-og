@@ -22,8 +22,8 @@ export default function StepPersonal({ form, setField, t, inputStyle, showErrors
 
       {/* Email */}
       <div>
-        <label style={labelStyle(false)}>{t.email}</label>
-        <input type="email" style={inputStyle} value={form.client_email || ''} onChange={e => setField('client_email', e.target.value)} />
+        <label style={labelStyle(showErrors && !form.client_email)}>{t.email} * {showErrors && !form.client_email && `(${t.required?.toLowerCase() || 'wymagane'})`}</label>
+        <input type="email" style={inp('client_email', true)} value={form.client_email || ''} onChange={e => setField('client_email', e.target.value)} />
       </div>
 
       {/* Imię / nazwisko */}
@@ -67,8 +67,8 @@ export default function StepPersonal({ form, setField, t, inputStyle, showErrors
 
       {/* Telefon */}
       <div>
-        <label style={labelStyle(showErrors && !form.client_phone)}>{t.phone} * {showErrors && !form.client_phone && `(${t.required?.toLowerCase() || 'wymagane'})`}</label>
-        <input type="tel" style={inp('client_phone', true)} value={form.client_phone || ''} onChange={e => setField('client_phone', e.target.value)} />
+        <label style={labelStyle(false)}>{t.phone}</label>
+        <input type="tel" style={inputStyle} value={form.client_phone || ''} onChange={e => setField('client_phone', e.target.value)} />
       </div>
 
       {/* PESEL */}
