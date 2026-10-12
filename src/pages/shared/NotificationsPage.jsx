@@ -153,14 +153,9 @@ export default function NotificationsPage() {
                       {format(new Date(notif.created_date), 'dd.MM.yyyy HH:mm')}
                     </p>
                   </div>
-                  <div className="flex-shrink-0 flex items-center gap-2">
-                    {!notif.is_read && (
-                      <button onClick={(e) => markRead(notif.id, e)} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '5px 8px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }} title="Oznacz jako przeczytane">
-                        <Check size={11} /> Przeczytane
-                      </button>
-                    )}
-                    <button onClick={(e) => deleteNotification(notif.id, e)} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '5px 8px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }} title="Usuń">
-                      <Trash2 size={11} /> Usuń
+                  <div className="flex-shrink-0 flex items-center">
+                    <button onClick={(e) => deleteNotification(notif.id, e)} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px', opacity: 0.6 }} title="Usuń">
+                      <Trash2 size={14} color={t.muted} />
                     </button>
                   </div>
               </div>
