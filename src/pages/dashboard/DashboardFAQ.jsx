@@ -124,7 +124,7 @@ export default function DashboardFAQ() {
               >
                 <Save size={13} /> Zapisz
               </button>
-              <button onClick={closeForm} className="px-5 py-2" style={{ background: 'transparent', border: `0.5px solid ${border}`, color: mutedColor, fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer' }}>
+              <button onClick={closeForm} className="px-5 py-2" style={{ background: 'transparent', border: `0.5px solid ${border}`, color: mutedColor, fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
                 Anuluj
               </button>
             </div>
@@ -147,7 +147,7 @@ export default function DashboardFAQ() {
           <div className="w-6 h-px animate-pulse" style={{ background: 'var(--brand)' }} />
         </div>
       ) : faqs.length === 0 ? (
-        <div className="text-center py-20" style={{ border: `0.5px solid ${border}` }}>
+        <div className="text-center py-20" style={{ border: `0.5px solid ${border}`, borderRadius: 'var(--radius)' }}>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: mutedColor, letterSpacing: '0.1em' }}>BRAK PYTAŃ — DODAJ PIERWSZE</p>
         </div>
       ) : (
@@ -163,7 +163,7 @@ export default function DashboardFAQ() {
                 <button
                   onClick={() => openEdit(item)}
                   className="px-3 py-1"
-                  style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: mutedColor, border: `0.5px solid ${border}`, background: 'transparent', cursor: 'pointer', letterSpacing: '0.1em', textTransform: 'uppercase' }}
+                  style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: mutedColor, border: `0.5px solid ${border}`, background: 'transparent', cursor: 'pointer', letterSpacing: '0.1em', textTransform: 'uppercase', borderRadius: 'var(--radius)' }}
                 >
                   Edytuj
                 </button>

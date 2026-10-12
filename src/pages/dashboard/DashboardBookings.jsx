@@ -509,7 +509,7 @@ export default function DashboardBookings() {
   return (
     <div>
       {loadError && bookings.length === 0 && (
-        <div className="mb-6 p-6 text-center" style={{ border: `0.5px solid ${t.border}` }}>
+        <div className="mb-6 p-6 text-center" style={{ border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)' }}>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px' }}>
             ⚠ Nie udało się pobrać danych (limit zapytań). Spróbuj ponownie za chwilę.
           </p>
@@ -591,7 +591,7 @@ export default function DashboardBookings() {
       {loading ? (
         <div className="space-y-3" aria-busy="true">
           {/* Calendar skeleton */}
-          <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '20px' }}>
+          <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '20px', borderRadius: 'var(--radius)' }}>
             <div className="flex items-center justify-between mb-6">
               <div style={{ width: '18px', height: '18px', background: t.border }} />
               <div style={{ height: '24px', width: '180px', background: t.border, opacity: 0.6 }} />
@@ -605,7 +605,7 @@ export default function DashboardBookings() {
             </div>
           </div>
           {/* Day sessions skeleton */}
-          <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+          <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)', overflow: 'hidden' }}>
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="flex items-center gap-3 p-4" style={{ borderBottom: i < 3 ? `0.5px solid ${t.border}` : 'none' }}>
                 <div style={{ width: '48px', height: '32px', background: t.border, opacity: 0.3 }} />
@@ -643,7 +643,7 @@ export default function DashboardBookings() {
             {/* Search results (calendar view + search) — split into upcoming / past, nearest first */}
             {viewMode === 'calendar' && searchQuery.trim() && searchSplit && (
               <div className="mb-6">
-                <div style={{ padding: '10px 16px', background: t.bg, border: `0.5px solid ${t.border}`, marginBottom: '12px' }}>
+                <div style={{ padding: '10px 16px', background: t.bg, border: `0.5px solid ${t.border}`, marginBottom: '12px', borderRadius: 'var(--radius)' }}>
                   <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: t.title, letterSpacing: '0.08em' }}>
                     WYNIKI WYSZUKIWANIA
                   </p>
@@ -675,7 +675,7 @@ export default function DashboardBookings() {
              {showListSection && (
               <div>
                 {viewMode === 'list' && toSettleMode && !searchQuery.trim() && (
-                  <div className="flex items-center justify-between mb-4 px-4 py-3" style={{ border: `0.5px solid var(--brand)`, background: 'rgb(var(--brand-rgb) /0.06)' }}>
+                  <div className="flex items-center justify-between mb-4 px-4 py-3" style={{ border: `0.5px solid var(--brand)`, background: 'rgb(var(--brand-rgb) /0.06)', borderRadius: 'var(--radius)' }}>
                     <div className="flex items-center gap-2">
                       <Wallet size={12} color="var(--brand)" />
                       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>

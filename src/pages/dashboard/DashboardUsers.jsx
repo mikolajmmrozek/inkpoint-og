@@ -104,7 +104,7 @@ export default function DashboardUsers() {
   return (
     <div>
       {/* Invite form */}
-      <div className="p-6 mb-8" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+      <div className="p-6 mb-8" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
         <div className="flex items-center gap-2 mb-6">
           <UserPlus size={14} color="var(--brand)" />
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>ZAPROŚ UŻYTKOWNIKA</p>
@@ -152,7 +152,7 @@ export default function DashboardUsers() {
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em', marginBottom: '12px' }}>⚠ {inviteError}</p>
         )}
         {inviteSuccess && (
-          <div className="mb-4 px-3 py-2 flex items-center justify-between" style={{ border: '0.5px solid #16a34a', background: 'rgba(22,163,74,0.06)' }}>
+          <div className="mb-4 px-3 py-2 flex items-center justify-between" style={{ border: '0.5px solid #16a34a', background: 'rgba(22,163,74,0.06)', borderRadius: 'var(--radius)' }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#16a34a', letterSpacing: '0.08em' }}>
               ✓ Zaproszenie wysłane na {inviteSuccess.email} — rola: {ROLE_LABELS[inviteSuccess.role]}
             </p>
@@ -184,11 +184,11 @@ export default function DashboardUsers() {
           ZAREJESTROWANI UŻYTKOWNICY ({users.length})
         </p>
         {loading ? (
-          <div className="p-8 text-center" style={{ border: `0.5px solid ${t.cardBorder}` }}>
+          <div className="p-8 text-center" style={{ border: `0.5px solid ${t.cardBorder}`, borderRadius: 'var(--radius)' }}>
             <div className="w-8 h-px mx-auto animate-pulse" style={{ background: 'var(--brand)' }} />
           </div>
         ) : (
-          <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+          <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)', overflow: 'hidden' }}>
             {users.filter(u => u.role === 'artist' || u.role === 'admin').map((u, i) => {
               const linkedArtist = artists.find(a => a.id === u.artist_id);
               const filtered = users.filter(uu => uu.role === 'artist' || uu.role === 'admin');
@@ -202,7 +202,7 @@ export default function DashboardUsers() {
                     </p>
                   </div>
                   <div className="flex items-center gap-3 flex-shrink-0">
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', padding: '3px 8px', border: `0.5px solid ${ROLE_COLORS[u.role] || '#9ca3af'}`, color: ROLE_COLORS[u.role] || '#9ca3af' }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', padding: '3px 8px', border: `0.5px solid ${ROLE_COLORS[u.role] || '#9ca3af'}`, color: ROLE_COLORS[u.role] || '#9ca3af', borderRadius: 'var(--radius)' }}>
                       {ROLE_LABELS[u.role] || u.role?.toUpperCase()}
                     </span>
                     <button
@@ -222,7 +222,7 @@ export default function DashboardUsers() {
       {/* Edit user modal */}
       {editingUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={() => setEditingUser(null)}>
-          <div className="w-full max-w-md p-8" style={{ background: theme === 'light' ? '#FFFFFF' : '#0A0A0A', border: `0.5px solid ${t.cardBorder}` }} onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-md p-8" style={{ background: theme === 'light' ? '#FFFFFF' : '#0A0A0A', border: `0.5px solid ${t.cardBorder}`, borderRadius: 'var(--radius)' }} onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <div>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>EDYCJA UŻYTKOWNIKA</p>

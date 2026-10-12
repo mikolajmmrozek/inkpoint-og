@@ -154,7 +154,7 @@ export default function DashboardFeedback() {
           </a>
           <button
             onClick={handleCopyLink}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${t.border}`, color: copied ? '#16a34a' : t.muted, background: 'transparent', cursor: 'pointer', transition: 'color 0.2s' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${t.border}`, color: copied ? '#16a34a' : t.muted, background: 'transparent', cursor: 'pointer', transition: 'color 0.2s', borderRadius: 'var(--radius)' }}
           >
             {copied ? <Check size={13} /> : <Copy size={13} />}
             {copied ? 'SKOPIOWANO!' : 'KOPIUJ LINK'}
@@ -188,7 +188,7 @@ export default function DashboardFeedback() {
           <div className="flex items-center gap-1 px-4 py-2 flex-wrap" style={{ borderBottom: `0.5px solid ${t.border}` }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginRight: '6px' }}>SORTUJ:</span>
             {[{ key: 'newest', label: 'Najnowsze' }, { key: 'oldest', label: 'Najstarsze' }, { key: 'highest', label: 'Najwyższa ocena' }, { key: 'lowest', label: 'Najniższa ocena' }].map(opt => (
-              <button key={opt.key} onClick={() => setSortBy(opt.key)} style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 8px', border: `0.5px solid ${sortBy === opt.key ? t.fuchsia : t.border}`, color: sortBy === opt.key ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer' }}>
+              <button key={opt.key} onClick={() => setSortBy(opt.key)} style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 8px', border: `0.5px solid ${sortBy === opt.key ? t.fuchsia : t.border}`, color: sortBy === opt.key ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
                 {opt.label}
               </button>
             ))}
@@ -236,7 +236,7 @@ export default function DashboardFeedback() {
                   <button
                     onClick={() => togglePublish.mutate({ id: fb.id, val: !fb.is_published })}
                     title={fb.is_published ? 'Ukryj' : 'Opublikuj'}
-                    style={{ background: 'none', border: `0.5px solid ${t.border}`, cursor: 'pointer', padding: '6px', color: fb.is_published ? '#16a34a' : t.muted }}
+                    style={{ background: 'none', border: `0.5px solid ${t.border}`, cursor: 'pointer', padding: '6px', color: fb.is_published ? '#16a34a' : t.muted, borderRadius: 'var(--radius)' }}
                   >
                     {fb.is_published ? <Eye size={14} /> : <EyeOff size={14} />}
                   </button>
@@ -244,7 +244,7 @@ export default function DashboardFeedback() {
                     <a
                       href={`mailto:${fb.client_email}?subject=Twoja opinia w Romans Tattoo`}
                       title="Napisz email"
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', border: `0.5px solid ${t.border}`, padding: '6px', color: t.muted, textDecoration: 'none' }}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', border: `0.5px solid ${t.border}`, padding: '6px', color: t.muted, textDecoration: 'none', borderRadius: 'var(--radius)' }}
                     >
                       <Mail size={14} />
                     </a>
@@ -252,7 +252,7 @@ export default function DashboardFeedback() {
                   <button
                     onClick={() => deleteFeedback.mutate(fb.id)}
                     title="Usuń"
-                    style={{ background: 'none', border: `0.5px solid ${t.border}`, cursor: 'pointer', padding: '6px', color: 'var(--brand)' }}
+                    style={{ background: 'none', border: `0.5px solid ${t.border}`, cursor: 'pointer', padding: '6px', color: 'var(--brand)', borderRadius: 'var(--radius)' }}
                   >
                     <Trash2 size={14} />
                   </button>
@@ -289,7 +289,7 @@ export default function DashboardFeedback() {
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>Pytania w ankiecie</p>
               <div className="space-y-2 mb-4">
                 {(cf.questions || DEFAULT_QUESTIONS).map((q, idx) => (
-                  <div key={q.id} style={{ border: `0.5px solid ${t.border}`, padding: '12px 16px', background: t.bg }}>
+                  <div key={q.id} style={{ border: `0.5px solid ${t.border}`, padding: '12px 16px', background: t.bg, borderRadius: 'var(--radius)' }}>
                     <div className="flex items-start gap-3">
                       <div className="flex-1 space-y-2">
                         <input
@@ -338,7 +338,7 @@ export default function DashboardFeedback() {
                     key={type}
                     type="button"
                     onClick={() => setConfigForm(f => ({ ...f, questions: [...(f.questions || []), { id: `custom_${Date.now()}`, label: type === 'stars' ? 'Nowa ocena gwiazdkowa' : 'Nowe pytanie tekstowe', type, required: false, enabled: true }] }))}
-                    style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                    style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', borderRadius: 'var(--radius)' }}
                   >
                     <Plus size={10} /> {type === 'stars' ? 'Gwiazdki' : type === 'textarea' ? 'Tekst długi' : 'Tekst krótki'}
                   </button>

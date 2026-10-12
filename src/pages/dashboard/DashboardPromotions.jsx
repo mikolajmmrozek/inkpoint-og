@@ -300,7 +300,7 @@ export default function DashboardPromotions() {
       <div className="mb-6">
         <div className="flex gap-2">
           {[['voucher', 'VOUCHERY'], ['discount', 'KODY ZNIŻKOWE']].map(([v, lbl]) => (
-            <button key={v} onClick={() => { setView(v); setFilterStatus(''); }} style={{ border: `0.5px solid ${view === v ? 'var(--brand)' : t.border}`, color: view === v ? 'var(--brand)' : t.muted, background: view === v ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '9px 18px', cursor: 'pointer' }}>{lbl}</button>
+            <button key={v} onClick={() => { setView(v); setFilterStatus(''); }} style={{ border: `0.5px solid ${view === v ? 'var(--brand)' : t.border}`, color: view === v ? 'var(--brand)' : t.muted, background: view === v ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '9px 18px', cursor: 'pointer', borderRadius: 'var(--radius)' }}>{lbl}</button>
           ))}
         </div>
       </div>
@@ -310,7 +310,7 @@ export default function DashboardPromotions() {
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>STATUS</p>
           <div className="flex flex-wrap gap-2">
             {statusFilters.map(v => (
-              <button key={v || 'all'} onClick={() => setFilterStatus(v)} style={{ border: `0.5px solid ${filterStatus === v ? 'var(--brand)' : t.border}`, color: filterStatus === v ? 'var(--brand)' : t.muted, background: filterStatus === v ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '7px 14px', cursor: 'pointer' }}>
+              <button key={v || 'all'} onClick={() => setFilterStatus(v)} style={{ border: `0.5px solid ${filterStatus === v ? 'var(--brand)' : t.border}`, color: filterStatus === v ? 'var(--brand)' : t.muted, background: filterStatus === v ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '7px 14px', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
                 {v === '' ? 'WSZYSTKIE' : STATUS[v].label}
               </button>
             ))}
@@ -318,14 +318,14 @@ export default function DashboardPromotions() {
         </div>
         <div className="flex-1 min-w-[200px]">
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>SZUKAJ</p>
-          <input type="text" placeholder="Kod lub e-mail..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '7px 12px', fontSize: '13px', color: t.text, fontFamily: 'var(--font-body)', outline: 'none' }} onFocus={e => e.target.style.borderColor = 'var(--brand)'} onBlur={e => e.target.style.borderColor = t.border} />
+          <input type="text" placeholder="Kod lub e-mail..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '7px 12px', fontSize: '13px', color: t.text, fontFamily: 'var(--font-body)', outline: 'none', borderRadius: 'var(--radius)' }} onFocus={e => e.target.style.borderColor = 'var(--brand)'} onBlur={e => e.target.style.borderColor = t.border} />
         </div>
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-20"><div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} /></div>
       ) : filtered.length === 0 ? (
-        <div className="py-20 text-center" style={{ border: `0.5px solid ${t.border}` }}>
+        <div className="py-20 text-center" style={{ border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)' }}>
           <Gift size={28} color={t.muted} style={{ margin: '0 auto 12px' }} />
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK {view === 'voucher' ? 'VOUCHERÓW' : 'KODÓW'}</p>
         </div>
@@ -434,7 +434,7 @@ export default function DashboardPromotions() {
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>TYP</p>
                 <div className="flex gap-2">
                   {[['voucher', 'VOUCHER NA OKAZICIELA'], ['discount', 'KOD ZNIŻKOWY']].map(([v, lbl]) => (
-                    <button key={v} type="button" disabled={!!editFor} onClick={() => setForm(f => ({ ...f, type: v, value_type: v === 'voucher' ? 'amount' : f.value_type }))} style={{ flex: 1, border: `0.5px solid ${form.type === v ? 'var(--brand)' : t.border}`, color: form.type === v ? 'var(--brand)' : t.muted, background: form.type === v ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px', cursor: editFor ? 'not-allowed' : 'pointer', opacity: editFor ? 0.5 : 1 }}>{lbl}</button>
+                    <button key={v} type="button" disabled={!!editFor} onClick={() => setForm(f => ({ ...f, type: v, value_type: v === 'voucher' ? 'amount' : f.value_type }))} style={{ flex: 1, border: `0.5px solid ${form.type === v ? 'var(--brand)' : t.border}`, color: form.type === v ? 'var(--brand)' : t.muted, background: form.type === v ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px', cursor: editFor ? 'not-allowed' : 'pointer', opacity: editFor ? 0.5 : 1, borderRadius: 'var(--radius)' }}>{lbl}</button>
                   ))}
                 </div>
               </div>
@@ -478,7 +478,7 @@ export default function DashboardPromotions() {
                   {label('Tryb użycia')}
                   <div className="flex gap-2">
                     {[['single', 'JEDNORAZOWY'], ['multi', 'WIELORAZOWY']].map(([v, lbl]) => (
-                      <button key={v} type="button" onClick={() => set('usage_mode', v)} style={{ border: `0.5px solid ${form.usage_mode === v ? 'var(--brand)' : t.border}`, color: form.usage_mode === v ? 'var(--brand)' : t.muted, background: form.usage_mode === v ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', cursor: 'pointer' }}>{lbl}</button>
+                      <button key={v} type="button" onClick={() => set('usage_mode', v)} style={{ border: `0.5px solid ${form.usage_mode === v ? 'var(--brand)' : t.border}`, color: form.usage_mode === v ? 'var(--brand)' : t.muted, background: form.usage_mode === v ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', cursor: 'pointer', borderRadius: 'var(--radius)' }}>{lbl}</button>
                     ))}
                   </div>
                 </div>

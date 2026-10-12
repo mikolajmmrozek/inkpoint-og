@@ -257,7 +257,7 @@ export default function DashboardHealthForms() {
       </div>
 
       {/* General form link section */}
-      <div className="mb-6 p-4" style={{ border: `0.5px solid ${t.border}`, background: 'rgb(var(--brand-rgb) /0.03)' }}>
+      <div className="mb-6 p-4" style={{ border: `0.5px solid ${t.border}`, background: 'rgb(var(--brand-rgb) /0.03)', borderRadius: 'var(--radius)' }}>
         <div className="flex items-center justify-between mb-3">
           <p style={{ ...mono, fontSize: '8px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
             LINK OGÓLNY DO ANKIETY
@@ -265,22 +265,22 @@ export default function DashboardHealthForms() {
           <a
             href="/dashboard/form-template"
             className="flex items-center gap-1.5"
-            style={{ ...mono, fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', textDecoration: 'none' }}
+            style={{ ...mono, fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', textDecoration: 'none', borderRadius: 'var(--radius)' }}
           >
             <Settings size={10} /> EDYTUJ SZABLON
           </a>
         </div>
         <div className="flex items-center gap-2">
-          <div style={{ flex: 1, padding: '8px 10px', border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: '2px' }}>
+          <div style={{ flex: 1, padding: '8px 10px', border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
             <p style={{ ...mono, fontSize: '9px', color: t.muted, wordBreak: 'break-all' }}>{generalFormLink}</p>
           </div>
           <button
             onClick={copyGeneralLink}
-            style={{ ...mono, fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${copiedGeneral ? '#16a34a' : t.border}`, color: copiedGeneral ? '#16a34a' : t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0 }}
+            style={{ ...mono, fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 12px', border: `0.5px solid ${copiedGeneral ? '#16a34a' : t.border}`, color: copiedGeneral ? '#16a34a' : t.muted, background: 'transparent', cursor: 'pointer', flexShrink: 0, borderRadius: 'var(--radius)' }}
           >
             {copiedGeneral ? '✓ SKOPIOWANO' : 'KOPIUJ'}
           </button>
-          <a href={generalFormLink} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', border: `0.5px solid ${t.border}`, color: t.muted, cursor: 'pointer' }}>
+          <a href={generalFormLink} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', border: `0.5px solid ${t.border}`, color: t.muted, cursor: 'pointer', borderRadius: 'var(--radius)' }}>
             <ExternalLink size={13} />
           </a>
         </div>
@@ -288,12 +288,12 @@ export default function DashboardHealthForms() {
 
       {/* Pending links section */}
       {pendingBookings.length > 0 && (
-        <div className="mb-6" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+        <div className="mb-6" style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)', overflow: 'hidden' }}>
           <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: `0.5px solid ${t.border}` }}>
             <p style={{ ...mono, fontSize: '8px', color: t.fuchsia, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
               REZERWACJE BEZ ANKIETY — WYŚLIJ LINK
             </p>
-            <button onClick={dismissAllReminders} className="flex items-center gap-1.5" style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${t.border}`, padding: '4px 10px', cursor: 'pointer' }}>
+            <button onClick={dismissAllReminders} className="flex items-center gap-1.5" style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${t.border}`, padding: '4px 10px', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
               <X size={10} /> UKRYJ WSZYSTKIE ({pendingBookings.length})
             </button>
           </div>
@@ -325,7 +325,7 @@ export default function DashboardHealthForms() {
                   <ExternalLink size={12} />
                 </a>
                 <button onClick={() => copyLink(b)}
-                  style={{ ...mono, fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${copiedId === b.id ? '#16a34a' : t.border}`, color: copiedId === b.id ? '#16a34a' : t.muted, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  style={{ ...mono, fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${copiedId === b.id ? '#16a34a' : t.border}`, color: copiedId === b.id ? '#16a34a' : t.muted, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', borderRadius: 'var(--radius)' }}>
                   <Copy size={10} /> {copiedId === b.id ? 'SKOPIOWANO' : 'KOPIUJ LINK'}
                 </button>
               </div>
@@ -336,12 +336,12 @@ export default function DashboardHealthForms() {
 
       {/* Drafts section */}
       {filteredDrafts.length > 0 && (
-        <div className="mb-6" style={{ border: `0.5px solid rgba(255,165,0,0.4)`, background: 'rgba(255,165,0,0.03)' }}>
+        <div className="mb-6" style={{ border: `0.5px solid rgba(255,165,0,0.4)`, background: 'rgba(255,165,0,0.03)', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
           <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: `0.5px solid rgba(255,165,0,0.3)` }}>
             <p style={{ ...mono, fontSize: '8px', color: '#f97316', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
               NIEDOKOŃCZONE ANKIETY (DRAFT) — {filteredDrafts.length}
             </p>
-            <button onClick={deleteAllDrafts} className="flex items-center gap-1.5" style={{ ...mono, fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: '0.5px solid var(--brand)', padding: '4px 10px', cursor: 'pointer' }}>
+            <button onClick={deleteAllDrafts} className="flex items-center gap-1.5" style={{ ...mono, fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: '0.5px solid var(--brand)', padding: '4px 10px', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
               <Trash2 size={10} /> USUŃ WSZYSTKIE ({filteredDrafts.length})
             </button>
           </div>
@@ -354,11 +354,11 @@ export default function DashboardHealthForms() {
                 <p style={{ ...mono, fontSize: '8px', color: 'rgba(255,165,0,0.7)', marginTop: '2px' }}>Ostatnia aktywność: {safeFormat(form.updated_date || form.created_date, 'dd.MM.yyyy HH:mm')}</p>
               </div>
               <div className="flex items-center gap-2">
-                <span style={{ ...mono, fontSize: '7px', color: '#f97316', border: '0.5px solid #f97316', padding: '2px 6px' }}>DRAFT</span>
+                <span style={{ ...mono, fontSize: '7px', color: '#f97316', border: '0.5px solid #f97316', padding: '2px 6px', borderRadius: 'var(--radius)' }}>DRAFT</span>
                 <a
                   href={`/health-form?edit_form_id=${form.id}`}
                   title="Kontynuuj wypełnianie"
-                  style={{ ...mono, fontSize: '8px', color: '#f97316', border: '0.5px solid #f97316', padding: '3px 8px', textDecoration: 'none', letterSpacing: '0.08em', cursor: 'pointer' }}
+                  style={{ ...mono, fontSize: '8px', color: '#f97316', border: '0.5px solid #f97316', padding: '3px 8px', textDecoration: 'none', letterSpacing: '0.08em', cursor: 'pointer', borderRadius: 'var(--radius)' }}
                 >
                   KONTYNUUJ
                 </a>
@@ -377,7 +377,7 @@ export default function DashboardHealthForms() {
 
       {/* Ankiety zdrowotne */}
       <div className="mb-8">
-        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, marginBottom: '12px' }}>
+        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, marginBottom: '12px', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
           <div className="px-4 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
             <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
               ANKIETY ZDROWOTNE ({filteredForms.length}) — UKOŃCZONE
@@ -395,7 +395,7 @@ export default function DashboardHealthForms() {
                 <span style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>Niepełnoletni klient</span>
               </div>
             </div>
-            <div className="flex items-center gap-2" style={{ border: `0.5px solid ${t.border}`, padding: '6px 10px' }}>
+            <div className="flex items-center gap-2" style={{ border: `0.5px solid ${t.border}`, padding: '6px 10px', borderRadius: 'var(--radius)' }}>
               <Search size={12} color={t.muted} />
               <input
                 type="text"
@@ -409,7 +409,7 @@ export default function DashboardHealthForms() {
               <button
                 onClick={markAllFormsAsRead}
                 className="mt-2 flex items-center gap-2"
-                style={{ ...mono, fontSize: '8px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: '0.5px solid ' + t.fuchsia, padding: '5px 10px', cursor: 'pointer' }}
+                style={{ ...mono, fontSize: '8px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: '0.5px solid ' + t.fuchsia, padding: '5px 10px', cursor: 'pointer', borderRadius: 'var(--radius)' }}
               >
                 <CheckCheck size={11} /> Oznacz wszystkie jako przeczytane
               </button>

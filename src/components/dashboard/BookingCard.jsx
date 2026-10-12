@@ -133,7 +133,7 @@ export default function BookingCard({ bookingId, t, theme, onAction, readOnly = 
 
   return (
     <>
-      <div style={{ border: `0.5px solid ${t.border}`, background: 'rgb(var(--brand-rgb) /0.03)', padding: '16px' }}>
+      <div style={{ border: `0.5px solid ${t.border}`, background: 'rgb(var(--brand-rgb) /0.03)', padding: '16px', borderRadius: 'var(--radius)' }}>
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
@@ -147,6 +147,7 @@ export default function BookingCard({ bookingId, t, theme, onAction, readOnly = 
             color: STATUS_COLORS[booking.status],
             border: `0.5px solid ${STATUS_COLORS[booking.status]}`,
             padding: '3px 8px',
+            borderRadius: 'var(--radius)',
           }}>
             {STATUS_LABELS[booking.status]}
           </span>
@@ -198,7 +199,7 @@ export default function BookingCard({ bookingId, t, theme, onAction, readOnly = 
               <div className="grid grid-cols-4 gap-1.5 mt-2">
                 {booking.reference_images.map((url, i) => (
                   <a key={i} href={url} target="_blank" rel="noopener noreferrer">
-                    <img src={url} alt="" className="w-full h-14 object-cover" style={{ border: `0.5px solid ${t.border}` }} />
+                    <img src={url} alt="" className="w-full h-14 object-cover" style={{ border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)' }} />
                   </a>
                 ))}
               </div>
@@ -214,14 +215,14 @@ export default function BookingCard({ bookingId, t, theme, onAction, readOnly = 
               <button
                 onClick={() => handleStatusChange('confirmed')}
                 disabled={actionLoading}
-                style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', background: 'transparent', border: '0.5px solid #16a34a', color: '#16a34a', cursor: actionLoading ? 'wait' : 'pointer', opacity: actionLoading ? 0.5 : 1 }}
+                style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', background: 'transparent', border: '0.5px solid #16a34a', color: '#16a34a', cursor: actionLoading ? 'wait' : 'pointer', opacity: actionLoading ? 0.5 : 1, borderRadius: 'var(--radius)' }}
               >
                 <Check size={10} /> POTWIERDŹ
               </button>
               <button
                 onClick={() => handleStatusChange('cancelled')}
                 disabled={actionLoading}
-                style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', background: 'transparent', border: `0.5px solid ${t.border}`, color: t.muted, cursor: actionLoading ? 'wait' : 'pointer', opacity: actionLoading ? 0.5 : 1 }}
+                style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', background: 'transparent', border: `0.5px solid ${t.border}`, color: t.muted, cursor: actionLoading ? 'wait' : 'pointer', opacity: actionLoading ? 0.5 : 1, borderRadius: 'var(--radius)' }}
               >
                 <X size={10} /> ODRZUĆ
               </button>
@@ -232,14 +233,14 @@ export default function BookingCard({ bookingId, t, theme, onAction, readOnly = 
               <button
                 onClick={() => handleStatusChange('completed')}
                 disabled={actionLoading}
-                style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', background: 'transparent', border: '0.5px solid #2563eb', color: '#2563eb', cursor: actionLoading ? 'wait' : 'pointer', opacity: actionLoading ? 0.5 : 1 }}
+                style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', background: 'transparent', border: '0.5px solid #2563eb', color: '#2563eb', cursor: actionLoading ? 'wait' : 'pointer', opacity: actionLoading ? 0.5 : 1, borderRadius: 'var(--radius)' }}
               >
                 <CheckCircle size={10} /> ZAKOŃCZ
               </button>
               <button
                 onClick={() => handleStatusChange('cancelled')}
                 disabled={actionLoading}
-                style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', background: 'transparent', border: `0.5px solid ${t.border}`, color: t.muted, cursor: actionLoading ? 'wait' : 'pointer', opacity: actionLoading ? 0.5 : 1 }}
+                style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', background: 'transparent', border: `0.5px solid ${t.border}`, color: t.muted, cursor: actionLoading ? 'wait' : 'pointer', opacity: actionLoading ? 0.5 : 1, borderRadius: 'var(--radius)' }}
               >
                 <X size={10} /> ANULUJ
               </button>
@@ -249,7 +250,7 @@ export default function BookingCard({ bookingId, t, theme, onAction, readOnly = 
             <button
               onClick={() => handleStatusChange('pending')}
               disabled={actionLoading}
-              style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', background: 'transparent', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, cursor: actionLoading ? 'wait' : 'pointer', opacity: actionLoading ? 0.5 : 1 }}
+              style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', background: 'transparent', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, cursor: actionLoading ? 'wait' : 'pointer', opacity: actionLoading ? 0.5 : 1, borderRadius: 'var(--radius)' }}
             >
               PRZYWRÓĆ
             </button>
@@ -260,12 +261,12 @@ export default function BookingCard({ bookingId, t, theme, onAction, readOnly = 
             <button
               onClick={() => setShowStatusDropdown(v => !v)}
               disabled={actionLoading}
-              style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', background: 'transparent', border: `0.5px solid ${t.border}`, color: t.muted, cursor: 'pointer' }}
+              style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', background: 'transparent', border: `0.5px solid ${t.border}`, color: t.muted, cursor: 'pointer', borderRadius: 'var(--radius)' }}
             >
               ZMIEŃ STATUS {showStatusDropdown ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
             </button>
             {showStatusDropdown && (
-              <div style={{ position: 'absolute', bottom: '100%', left: 0, marginBottom: '4px', background: t.bg === '#FFFFFF' ? '#FFFFFF' : '#111111', border: `0.5px solid ${t.border}`, zIndex: 50, minWidth: '140px' }}>
+              <div style={{ position: 'absolute', bottom: '100%', left: 0, marginBottom: '4px', background: t.bg === '#FFFFFF' ? '#FFFFFF' : '#111111', border: `0.5px solid ${t.border}`, zIndex: 50, minWidth: '140px', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
                 {STATUS_OPTIONS.map(s => (
                   <button
                     key={s}
@@ -282,7 +283,7 @@ export default function BookingCard({ bookingId, t, theme, onAction, readOnly = 
           {/* Edit */}
           <button
             onClick={() => setShowEditModal(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', background: 'transparent', border: `0.5px solid ${t.border}`, color: t.muted, cursor: 'pointer' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 12px', background: 'transparent', border: `0.5px solid ${t.border}`, color: t.muted, cursor: 'pointer', borderRadius: 'var(--radius)' }}
           >
             <Edit size={10} /> EDYTUJ
           </button>

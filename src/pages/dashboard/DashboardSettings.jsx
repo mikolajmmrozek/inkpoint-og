@@ -137,7 +137,7 @@ export default function DashboardSettings() {
               letterSpacing: '0.1em',
               textTransform: 'uppercase',
               padding: '10px 16px',
-              border: `0.5px solid ${activeTab === tab ? t.fuchsia : t.border}`,
+              border: `0.5px solid ${activeTab === tab ? t.fuchsia : t.border}`, borderRadius: 'var(--radius)',
               color: activeTab === tab ? t.fuchsia : t.muted,
               background: 'transparent',
               cursor: 'pointer',
@@ -151,7 +151,7 @@ export default function DashboardSettings() {
       {activeTab === 'theme' ? (
         <ThemeSettings t={t} />
       ) : (
-      <div className="max-w-2xl space-y-10" style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '40px' }}>
+      <div className="max-w-2xl space-y-10" style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '40px', borderRadius: 'var(--radius)' }}>
         {activeTab === 'hero' && (
         <div>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '24px' }}>

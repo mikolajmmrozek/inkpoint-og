@@ -235,7 +235,7 @@ export default function DashboardStats() {
           <select
             value={selectedYear}
             onChange={e => setSelectedYear(Number(e.target.value))}
-            style={{ background: t.bg, border: `0.5px solid ${t.border}`, color: t.text, ...mono, fontSize: '10px', letterSpacing: '0.08em', padding: '8px 12px', cursor: 'pointer', outline: 'none', colorScheme: theme === 'light' ? 'light' : 'dark' }}
+            style={{ background: t.bg, border: `0.5px solid ${t.border}`, color: t.text, ...mono, fontSize: '10px', letterSpacing: '0.08em', padding: '8px 12px', cursor: 'pointer', outline: 'none', colorScheme: theme === 'light' ? 'light' : 'dark', borderRadius: 'var(--radius)' }}
           >
             {years.map(y => <option key={y} value={y}>{y}</option>)}
           </select>
@@ -244,7 +244,7 @@ export default function DashboardStats() {
           <div className="flex flex-wrap gap-1">
             <button
               onClick={() => setSelectedArtistId('all')}
-              style={{ ...mono, fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '7px 12px', border: `0.5px solid ${selectedArtistId === 'all' ? t.fuchsia : t.border}`, color: selectedArtistId === 'all' ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer' }}
+              style={{ ...mono, fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '7px 12px', border: `0.5px solid ${selectedArtistId === 'all' ? t.fuchsia : t.border}`, color: selectedArtistId === 'all' ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}
             >
               Wszyscy
             </button>
@@ -252,7 +252,7 @@ export default function DashboardStats() {
               <button
                 key={a.id}
                 onClick={() => setSelectedArtistId(a.id)}
-                style={{ ...mono, fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '7px 12px', border: `0.5px solid ${selectedArtistId === a.id ? t.fuchsia : t.border}`, color: selectedArtistId === a.id ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer' }}
+                style={{ ...mono, fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '7px 12px', border: `0.5px solid ${selectedArtistId === a.id ? t.fuchsia : t.border}`, color: selectedArtistId === a.id ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}
               >
                 {a.name}
               </button>
@@ -325,11 +325,11 @@ export default function DashboardStats() {
                   PŁATNOŚCI DZIENNIE — {format(paymentWeekStart, 'd MMM', { locale: pl })} — {format(addDays(paymentWeekStart, 6), 'd MMM yyyy', { locale: pl })}
                 </p>
                 <div className="flex items-center justify-end gap-2 mb-4">
-                  <button onClick={() => setPaymentWeekStart(addWeeks(paymentWeekStart, -1))} style={{ padding: '6px', border: `0.5px solid ${t.border}`, background: t.bg, color: t.muted, cursor: 'pointer' }}>
+                  <button onClick={() => setPaymentWeekStart(addWeeks(paymentWeekStart, -1))} style={{ padding: '6px', border: `0.5px solid ${t.border}`, background: t.bg, color: t.muted, cursor: 'pointer', borderRadius: 'var(--radius)' }}>
                     <ChevronLeft size={13} />
                   </button>
-                  <button onClick={() => setPaymentWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))} style={{ ...mono, fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${t.border}`, color: t.muted, background: t.bg, cursor: 'pointer' }}>DZIŚ</button>
-                  <button onClick={() => setPaymentWeekStart(addWeeks(paymentWeekStart, 1))} style={{ padding: '6px', border: `0.5px solid ${t.border}`, background: t.bg, color: t.muted, cursor: 'pointer' }}>
+                  <button onClick={() => setPaymentWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))} style={{ ...mono, fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '6px 10px', border: `0.5px solid ${t.border}`, color: t.muted, background: t.bg, cursor: 'pointer', borderRadius: 'var(--radius)' }}>DZIŚ</button>
+                  <button onClick={() => setPaymentWeekStart(addWeeks(paymentWeekStart, 1))} style={{ padding: '6px', border: `0.5px solid ${t.border}`, background: t.bg, color: t.muted, cursor: 'pointer', borderRadius: 'var(--radius)' }}>
                     <ChevronRight size={13} />
                   </button>
                 </div>
@@ -358,14 +358,14 @@ export default function DashboardStats() {
               <div className="flex gap-1">
                 {[{ key: 'monthly', label: 'Miesięczny' }, { key: 'daily', label: 'Dzienny' }].map(tab => (
                   <button key={tab.key} onClick={() => setBreakdownView(tab.key)}
-                    style={{ ...mono, fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '7px 14px', border: `0.5px solid ${breakdownView === tab.key ? t.fuchsia : t.border}`, color: breakdownView === tab.key ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer' }}>
+                    style={{ ...mono, fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '7px 14px', border: `0.5px solid ${breakdownView === tab.key ? t.fuchsia : t.border}`, color: breakdownView === tab.key ? t.fuchsia : t.muted, background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
                     {tab.label}
                   </button>
                 ))}
               </div>
               {breakdownView === 'daily' && (
                 <select value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))}
-                  style={{ background: t.bg, border: `0.5px solid ${t.border}`, color: t.text, ...mono, fontSize: '10px', letterSpacing: '0.06em', padding: '7px 12px', cursor: 'pointer', outline: 'none', colorScheme: theme === 'light' ? 'light' : 'dark' }}>
+                  style={{ background: t.bg, border: `0.5px solid ${t.border}`, color: t.text, ...mono, fontSize: '10px', letterSpacing: '0.06em', padding: '7px 12px', cursor: 'pointer', outline: 'none', colorScheme: theme === 'light' ? 'light' : 'dark', borderRadius: 'var(--radius)' }}>
                   {MONTHS_FULL.map((m, i) => <option key={i} value={i}>{m}</option>)}
                 </select>
               )}

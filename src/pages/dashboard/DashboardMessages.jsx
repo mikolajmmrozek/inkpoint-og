@@ -215,7 +215,7 @@ export default function DashboardMessages() {
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Szukaj po imieniu, emailu, telefonie, treści wiadomości..."
-            style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '12px 14px 12px 38px', fontSize: '13px', color: t.text, fontFamily: 'var(--font-body)', outline: 'none' }}
+            style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '12px 14px 12px 38px', fontSize: '13px', color: t.text, fontFamily: 'var(--font-body)', outline: 'none', borderRadius: 'var(--radius)' }}
             onFocus={e => e.target.style.borderColor = t.fuchsia}
             onBlur={e => e.target.style.borderColor = t.border}
           />
@@ -232,7 +232,7 @@ export default function DashboardMessages() {
 
       <div className="grid lg:grid-cols-5 gap-6">
         {/* Thread List */}
-        <div className={`lg:col-span-2 ${selectedEmail ? 'hidden lg:block' : 'block'}`} style={{ border: `0.5px solid ${t.border}`, background: t.bg, minHeight: '500px' }}>
+        <div className={`lg:col-span-2 ${selectedEmail ? 'hidden lg:block' : 'block'}`} style={{ border: `0.5px solid ${t.border}`, background: t.bg, minHeight: '500px', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
@@ -283,7 +283,7 @@ export default function DashboardMessages() {
         </div>
 
         {/* Conversation View */}
-        <div className={`lg:col-span-3 ${selectedEmail ? 'flex' : 'hidden'} lg:flex`} style={{ border: `0.5px solid ${t.border}`, background: t.bg, maxHeight: 'calc(100vh - 160px)', minHeight: '400px', flexDirection: 'column', overflow: 'hidden' }}>
+        <div className={`lg:col-span-3 ${selectedEmail ? 'flex' : 'hidden'} lg:flex`} style={{ border: `0.5px solid ${t.border}`, background: t.bg, maxHeight: 'calc(100vh - 160px)', minHeight: '400px', flexDirection: 'column', overflow: 'hidden', borderRadius: 'var(--radius)' }}>
           {selectedThread ? (
             <>
               {/* Thread header */}
@@ -327,7 +327,7 @@ export default function DashboardMessages() {
                   if (msg.message_type === 'status_change') {
                     return (
                       <div key={msg.id} className="flex justify-center">
-                        <div style={{ background: 'rgb(var(--brand-rgb) /0.06)', border: `0.5px solid rgb(var(--brand-rgb) /0.2)`, padding: '10px 16px', maxWidth: '80%', textAlign: 'center' }}>
+                        <div style={{ background: 'rgb(var(--brand-rgb) /0.06)', border: `0.5px solid rgb(var(--brand-rgb) /0.2)`, padding: '10px 16px', maxWidth: '80%', textAlign: 'center', borderRadius: 'var(--radius)' }}>
                           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '4px' }}>
                             STATUS REZERWACJI
                           </p>
@@ -349,7 +349,7 @@ export default function DashboardMessages() {
                         <div style={{
                           padding: '10px 14px',
                           background: isAdmin ? t.adminBubble : t.bubbleBg,
-                          borderRadius: '2px',
+                          borderRadius: 'var(--radius)',
                           color: isAdmin ? '#F5F0EB' : t.text,
                         }}>
                           <MessageContent message={msg} t={t} isAdmin={isAdmin} />
@@ -375,14 +375,14 @@ export default function DashboardMessages() {
                     onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendReply(); } }}
                     rows={1}
                     placeholder="Napisz odpowiedź..."
-                    style={{ flex: 1, background: 'transparent', border: `0.5px solid ${t.border}`, padding: '10px 12px', fontSize: '13px', color: t.text, fontFamily: 'var(--font-body)', resize: 'none', outline: 'none', minHeight: '40px', maxHeight: '120px' }}
+                    style={{ flex: 1, background: 'transparent', border: `0.5px solid ${t.border}`, padding: '10px 12px', fontSize: '13px', color: t.text, fontFamily: 'var(--font-body)', resize: 'none', outline: 'none', minHeight: '40px', maxHeight: '120px', borderRadius: 'var(--radius)' }}
                     onFocus={e => e.target.style.borderColor = t.fuchsia}
                     onBlur={e => e.target.style.borderColor = t.border}
                   />
                   <button
                     onClick={sendReply}
                     disabled={sending || !replyText.trim()}
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px', background: 'linear-gradient(135deg, var(--brand), var(--brand))', border: 'none', cursor: sending || !replyText.trim() ? 'not-allowed' : 'pointer', opacity: sending || !replyText.trim() ? 0.4 : 1, transition: 'all 0.3s' }}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px', background: 'linear-gradient(135deg, var(--brand), var(--brand))', border: 'none', cursor: sending || !replyText.trim() ? 'not-allowed' : 'pointer', opacity: sending || !replyText.trim() ? 0.4 : 1, transition: 'all 0.3s', borderRadius: 'var(--radius)' }}
                   >
                     {sending ? <Loader2 size={14} className="animate-spin" color="#F5F0EB" /> : <Send size={14} color="#F5F0EB" />}
                   </button>

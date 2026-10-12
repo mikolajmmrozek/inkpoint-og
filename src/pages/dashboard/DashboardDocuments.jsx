@@ -297,7 +297,7 @@ export default function DashboardDocuments() {
             </div>
             <div className="flex items-center gap-2">
               {/* Language selector */}
-              <div className="flex items-center gap-1.5" style={{ border: `0.5px solid ${t.border}`, padding: '6px 10px' }}>
+              <div className="flex items-center gap-1.5" style={{ border: `0.5px solid ${t.border}`, padding: '6px 10px', borderRadius: 'var(--radius)' }}>
                 <Globe size={11} color={t.muted} />
                 <select
                   value={viewLang}
@@ -370,7 +370,7 @@ export default function DashboardDocuments() {
               onClick={() => handlePrint(docData, label, translatedContent)}
               disabled={translating}
               className="flex items-center gap-2"
-              style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 20px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', opacity: translating ? 0.5 : 1 }}
+              style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 20px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', opacity: translating ? 0.5 : 1, borderRadius: 'var(--radius)' }}
             >
               <Printer size={12} /> DRUKUJ
             </button>
@@ -378,7 +378,7 @@ export default function DashboardDocuments() {
               onClick={() => handleShare(translatedContent || docData, label)}
               disabled={translating}
               className="flex items-center gap-2"
-              style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 20px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', opacity: translating ? 0.5 : 1 }}
+              style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 20px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', opacity: translating ? 0.5 : 1, borderRadius: 'var(--radius)' }}
             >
               <Share2 size={12} /> UDOSTĘPNIJ
             </button>
@@ -386,7 +386,7 @@ export default function DashboardDocuments() {
               <button
                 onClick={() => setDeleteConfirmInstr(docData.id)}
                 className="flex items-center gap-2"
-                style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 20px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}
+                style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 20px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}
               >
                 <Trash2 size={12} /> USUŃ
               </button>
@@ -412,7 +412,7 @@ export default function DashboardDocuments() {
               <button
                 onClick={() => { setEditingInstr('new'); setInstrForm({ type: '', title: '', content: '' }); setSaveError(null); }}
                 className="flex items-center gap-2"
-                style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: 'pointer' }}
+                style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}
               >
                 <Plus size={12} /> DODAJ NOWY
               </button>
@@ -444,7 +444,7 @@ export default function DashboardDocuments() {
               <button
                 onClick={() => { setTermsForm(terms || { title: 'Regulamin Studia', content: '' }); setEditingTerms(true); setSaveError(null); }}
                 className="flex items-center gap-2"
-                style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: 'pointer' }}
+                style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}
               >
                 <Plus size={12} /> DODAJ NOWY
               </button>
@@ -468,7 +468,7 @@ export default function DashboardDocuments() {
               <button
                 onClick={() => { setLegalForm(cookiesPolicy || { title: 'Polityka Cookies', content: '' }); setEditingLegal('cookies'); setSaveError(null); }}
                 className="flex items-center gap-2"
-                style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: 'pointer' }}
+                style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}
               >
                 <Plus size={12} /> DODAJ NOWY
               </button>

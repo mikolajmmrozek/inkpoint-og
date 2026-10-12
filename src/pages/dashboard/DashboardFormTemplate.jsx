@@ -50,7 +50,7 @@ const DEFAULT_SECTION_INTROS = {
 
 function SectionCard({ title, color, open, onToggle, children, fg, borderCol, cardBg, dividerCol }) {
   return (
-    <div style={{ border: `0.5px solid ${open ? color : borderCol}`, background: cardBg, transition: 'border-color 0.2s' }}>
+    <div style={{ border: `0.5px solid ${open ? color : borderCol}`, background: cardBg, transition: 'border-color 0.2s', borderRadius: 'var(--radius)' }}>
       <button
         type="button"
         onClick={onToggle}

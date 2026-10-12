@@ -277,7 +277,7 @@ export default function DashboardClients() {
       </div>
 
       {/* Search — full width above list */}
-      <div className="mb-4 flex items-center" style={{ border: `0.5px solid ${t.border}`, padding: '8px 14px', gap: '8px' }}>
+      <div className="mb-4 flex items-center" style={{ border: `0.5px solid ${t.border}`, padding: '8px 14px', gap: '8px', borderRadius: 'var(--radius)' }}>
         <Search size={12} color={t.muted} />
         <input
           placeholder="Szukaj po nazwisku, emailu, telefonie..."
@@ -298,7 +298,7 @@ export default function DashboardClients() {
           <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
         </div>
       ) : (
-        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)', overflow: 'hidden' }}>
           {/* Header — hidden on mobile */}
           <div className="hidden md:grid grid-cols-12 px-4 py-2" style={{ borderBottom: `0.5px solid ${t.border}` }}>
             {['Imię i Nazwisko', 'Email', 'Telefon', 'Sesje', ''].map((h, i) => (
@@ -466,7 +466,7 @@ export default function DashboardClients() {
       {/* Repeat prompt */}
       {newSessionClient && repeatPromptVisible && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.75)' }}>
-          <div style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '36px', maxWidth: '460px', width: '100%' }}>
+          <div style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '36px', maxWidth: '460px', width: '100%', borderRadius: 'var(--radius)' }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>NOWA SESJA</p>
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em', marginBottom: '20px' }}>
               {newSessionClient.name}
@@ -474,7 +474,7 @@ export default function DashboardClients() {
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em', marginBottom: '12px', textTransform: 'uppercase' }}>
               Ostatnia sesja:
             </p>
-            <div style={{ border: `0.5px solid ${t.border}`, padding: '14px 16px', marginBottom: '20px' }}>
+            <div style={{ border: `0.5px solid ${t.border}`, padding: '14px 16px', marginBottom: '20px', borderRadius: 'var(--radius)' }}>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: t.text, marginBottom: '4px' }}>{lastSessionForClient?.session_date} · {lastSessionForClient?.artist_name || '—'}</p>
               {lastSessionForClient?.tattoo_placement && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted }}>{lastSessionForClient.tattoo_placement}{lastSessionForClient.tattoo_description ? ` — ${lastSessionForClient.tattoo_description}` : ''}</p>}
               {lastSessionForClient?.estimated_price && <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', marginTop: '4px' }}>{lastSessionForClient.estimated_price} PLN</p>}
@@ -527,7 +527,7 @@ export default function DashboardClients() {
       {/* Merge modal */}
       {mergeSource && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.8)' }} onClick={() => setMergeSource(null)}>
-          <div className="w-full max-w-lg" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '36px' }} onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-lg" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '36px', borderRadius: 'var(--radius)' }} onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-2">
               <div className="flex items-center gap-2">
                 <Merge size={14} color="#a855f7" />
@@ -542,7 +542,7 @@ export default function DashboardClients() {
             {/* Source */}
             <div className="mb-5">
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>DUPLIKAT (zostanie usunięty)</p>
-              <div style={{ border: `0.5px solid #a855f7`, padding: '12px 16px', background: 'rgba(168,85,247,0.05)' }}>
+              <div style={{ border: `0.5px solid #a855f7`, padding: '12px 16px', background: 'rgba(168,85,247,0.05)', borderRadius: 'var(--radius)' }}>
                 <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{mergeSource.name}</p>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, marginTop: '3px' }}>
                   {[mergeSource.email, mergeSource.phone].filter(Boolean).join(' · ') || '—'} · {mergeSource.total_sessions || 0} sesji
@@ -554,7 +554,7 @@ export default function DashboardClients() {
             <div className="mb-5">
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>DOCELOWY PROFIL (zostanie zachowany)</p>
               {mergeTarget ? (
-                <div style={{ border: `0.5px solid #16a34a`, padding: '12px 16px', background: 'rgba(22,163,74,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ border: `0.5px solid #16a34a`, padding: '12px 16px', background: 'rgba(22,163,74,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderRadius: 'var(--radius)' }}>
                   <div>
                     <p style={{ color: t.text, fontSize: '14px', fontWeight: 500 }}>{mergeTarget.name}</p>
                     <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, marginTop: '3px' }}>
@@ -565,7 +565,7 @@ export default function DashboardClients() {
                 </div>
               ) : (
                 <div>
-                  <div style={{ border: `0.5px solid ${t.border}`, padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <div style={{ border: `0.5px solid ${t.border}`, padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', borderRadius: 'var(--radius)' }}>
                     <Search size={11} color={t.muted} />
                     <input
                       autoFocus
@@ -576,7 +576,7 @@ export default function DashboardClients() {
                     />
                   </div>
                   {mergeSearch.trim() && (
-                    <div style={{ border: `0.5px solid ${t.border}`, maxHeight: '200px', overflowY: 'auto' }}>
+                    <div style={{ border: `0.5px solid ${t.border}`, maxHeight: '200px', overflowY: 'auto', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
                       {clients
                         .filter(c => c.id !== mergeSource.id && (
                           c.name?.toLowerCase().includes(mergeSearch.toLowerCase()) ||
@@ -604,7 +604,7 @@ export default function DashboardClients() {
             </div>
 
             {mergeTarget && (
-              <div className="mb-5 px-4 py-3" style={{ background: 'rgba(168,85,247,0.05)', border: `0.5px solid rgba(168,85,247,0.3)` }}>
+              <div className="mb-5 px-4 py-3" style={{ background: 'rgba(168,85,247,0.05)', border: `0.5px solid rgba(168,85,247,0.3)`, borderRadius: 'var(--radius)' }}>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#a855f7', letterSpacing: '0.1em', marginBottom: '4px' }}>PO POŁĄCZENIU:</p>
                 <p style={{ fontSize: '12px', color: t.muted, lineHeight: 1.6 }}>
                   Wszystkie sesje i ankiety z <strong style={{ color: t.text }}>{mergeSource.name}</strong> zostaną przeniesione na <strong style={{ color: t.text }}>{mergeTarget.name}</strong>. Profil duplikatu zostanie usunięty.
@@ -639,7 +639,7 @@ export default function DashboardClients() {
       {/* Edit modal */}
       {editing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={() => setEditing(null)}>
-          <div className="w-full max-w-lg" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '36px' }} onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-lg" style={{ border: `0.5px solid ${t.border}`, background: t.modalBg, padding: '36px', borderRadius: 'var(--radius)' }} onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-8">
               <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 400, color: t.title, letterSpacing: '0.04em' }}>
                 {editing === 'new' ? 'Nowy Klient' : 'Edytuj Klienta'}

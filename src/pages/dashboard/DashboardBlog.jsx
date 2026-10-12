@@ -219,7 +219,7 @@ export default function DashboardBlog() {
                   <button
                     onClick={() => setForm(f => ({ ...f, is_published: !f.is_published }))}
                     className="flex items-center gap-3 px-4 py-3 transition-all"
-                    style={{ border: `0.5px solid ${form.is_published ? '#16a34a' : t.border}`, color: form.is_published ? '#16a34a' : t.muted, background: 'transparent', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}
+                    style={{ border: `0.5px solid ${form.is_published ? '#16a34a' : t.border}`, color: form.is_published ? '#16a34a' : t.muted, background: 'transparent', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', borderRadius: 'var(--radius)' }}
                   >
                     {form.is_published ? <Eye size={12} /> : <EyeOff size={12} />}
                     {form.is_published ? 'OPUBLIKOWANY' : 'SZKIC'}
@@ -274,7 +274,7 @@ export default function DashboardBlog() {
              </div>
              {/* Mobile: actions in a row */}
              <div className="flex items-center gap-1 md:gap-3 flex-shrink-0 w-full md:w-auto justify-end" style={{ marginTop: '8px', paddingRight: '4px' }}>
-               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', md: '8px', letterSpacing: '0.1em', padding: '2px 6px', border: `0.5px solid ${post.is_published ? '#4A7C59' : '#262626'}`, color: post.is_published ? '#4A7C59' : 'rgba(245,240,235,0.3)' }}>
+               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', md: '8px', letterSpacing: '0.1em', padding: '2px 6px', border: `0.5px solid ${post.is_published ? '#4A7C59' : '#262626'}`, color: post.is_published ? '#4A7C59' : 'rgba(245,240,235,0.3)', borderRadius: 'var(--radius)' }}>
                  {post.is_published ? 'LIVE' : 'SZKIC'}
                </span>
                <button onClick={() => togglePublish(post)} style={{ color: t.muted, cursor: 'pointer', background: 'none', border: 'none', padding: '6px', minWidth: '28px', minHeight: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

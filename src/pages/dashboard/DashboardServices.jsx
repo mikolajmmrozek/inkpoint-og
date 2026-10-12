@@ -189,7 +189,7 @@ export default function DashboardServices() {
                   key={cat || 'all'}
                   onClick={() => setFilterCategory(cat)}
                   style={{
-                    border: `0.5px solid ${active ? 'var(--brand)' : t.border}`,
+                    border: `0.5px solid ${active ? 'var(--brand)' : t.border}`, borderRadius: 'var(--radius)',
                     color: active ? 'var(--brand)' : t.muted,
                     background: active ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent',
                     fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase',
@@ -216,7 +216,7 @@ export default function DashboardServices() {
                     onClick={() => setFilterArtist(a?.id || '')}
                     className="flex items-center gap-2"
                     style={{
-                      border: `0.5px solid ${active ? 'var(--brand)' : t.border}`,
+                      border: `0.5px solid ${active ? 'var(--brand)' : t.border}`, borderRadius: 'var(--radius)', borderRadius: 'var(--radius)',
                       color: active ? 'var(--brand)' : t.muted,
                       background: active ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent',
                       fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase',
@@ -241,7 +241,7 @@ export default function DashboardServices() {
           placeholder="Szukaj usługi..."
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
-          style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '10px 36px', fontSize: '13px', color: t.text, fontFamily: 'var(--font-body)', outline: 'none' }}
+          style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '10px 36px', fontSize: '13px', color: t.text, fontFamily: 'var(--font-body)', outline: 'none', borderRadius: 'var(--radius)' }}
           onFocus={e => e.target.style.borderColor = 'var(--brand)'}
           onBlur={e => e.target.style.borderColor = t.border}
         />
@@ -258,7 +258,7 @@ export default function DashboardServices() {
           <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
         </div>
       ) : services.length === 0 ? (
-        <div className="py-20 text-center" style={{ border: `0.5px solid ${t.border}` }}>
+        <div className="py-20 text-center" style={{ border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)' }}>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK USŁUG</p>
           <button onClick={openNew} className="mt-4 btn-oxblood" style={{ padding: '10px 24px' }}>DODAJ PIERWSZĄ USŁUGĘ</button>
         </div>
@@ -439,7 +439,7 @@ export default function DashboardServices() {
                     <img src={form.image_url} alt="preview" style={{ width: '120px', height: '80px', objectFit: 'cover', border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)' }} />
                   </div>
                 )}
-                <label className="flex items-center gap-2 cursor-pointer" style={{ border: `0.5px solid ${t.border}`, padding: '8px 14px', display: 'inline-flex', color: t.muted, fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                <label className="flex items-center gap-2 cursor-pointer" style={{ border: `0.5px solid ${t.border}`, padding: '8px 14px', display: 'inline-flex', color: t.muted, fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', borderRadius: 'var(--radius)' }}>
                   {uploadingImage ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
                   {uploadingImage ? 'WGRYWANIE...' : 'WGRAJ ZDJĘCIE'}
                   <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploadingImage} />
@@ -545,7 +545,7 @@ export default function DashboardServices() {
                         onClick={() => toggleArtist(a.id)}
                         className="flex items-center gap-2 px-3 py-2"
                         style={{
-                          border: `0.5px solid ${selected ? 'var(--brand)' : t.border}`,
+                          border: `0.5px solid ${selected ? 'var(--brand)' : t.border}`, borderRadius: 'var(--radius)',
                           color: selected ? 'var(--brand)' : t.muted,
                           background: selected ? 'rgb(var(--brand-rgb) /0.06)' : 'transparent',
                           fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer',
@@ -576,7 +576,7 @@ export default function DashboardServices() {
                         }}
                         className="flex items-center gap-2 px-3 py-2"
                         style={{
-                          border: `0.5px solid ${hidden ? t.muted : t.border}`,
+                          border: `0.5px solid ${hidden ? t.muted : t.border}`, borderRadius: 'var(--radius)',
                           color: hidden ? '#f97316' : t.muted,
                           background: hidden ? 'rgba(249,115,22,0.08)' : 'transparent',
                           fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer',

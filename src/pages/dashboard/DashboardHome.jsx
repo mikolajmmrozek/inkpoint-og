@@ -207,9 +207,9 @@ export default function DashboardHome() {
                       {f.created_date ? ` · ${new Date(f.created_date).toLocaleDateString('pl-PL')}` : ''}
                     </p>
                   </div>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: '0.5px solid var(--brand)', color: 'var(--brand)', flexShrink: 0 }}>
-                    DRAFT
-                  </span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', border: '0.5px solid var(--brand)', color: 'var(--brand)', flexShrink: 0, borderRadius: 'var(--radius)' }}>
+                     DRAFT
+                   </span>
                 </button>
               );
             })}
@@ -232,11 +232,11 @@ export default function DashboardHome() {
         </div>
 
         {loading ? (
-          <div className="p-8 text-center" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+          <div className="p-8 text-center" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
             <div className="w-8 h-px mx-auto animate-pulse" style={{ background: 'var(--brand)' }} />
           </div>
         ) : pendingByDay.length === 0 ? (
-          <div className="p-8 text-center" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+          <div className="p-8 text-center" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
               ✓ BRAK SESJI DO POTWIERDZENIA
             </p>
@@ -263,7 +263,7 @@ export default function DashboardHome() {
                       <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.muted }}>0 sesji</span>
                     </div>
                     {/* No sessions message */}
-                    <div className="py-3 px-4 flex items-center justify-center gap-2" style={{ border: `0.5px solid #16a34a`, background: t.cardBg }}>
+                    <div className="py-3 px-4 flex items-center justify-center gap-2" style={{ border: `0.5px solid #16a34a`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
                       <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#16a34a', flexShrink: 0 }} />
                       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
                         BRAK SESJI DZIŚ

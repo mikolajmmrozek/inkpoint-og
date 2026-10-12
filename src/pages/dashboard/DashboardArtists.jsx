@@ -271,7 +271,7 @@ export default function DashboardArtists() {
                       {allServices.map(s => {
                         const o = serviceOverrides[s.id] || { performs: false, bookable_online: false };
                         return (
-                          <div key={s.id} style={{ border: `0.5px solid ${o.performs ? 'var(--brand)' : t.border}`, background: o.performs ? 'rgb(var(--brand-rgb) /0.04)' : 'transparent', padding: '12px 14px' }}>
+                          <div key={s.id} style={{ border: `0.5px solid ${o.performs ? 'var(--brand)' : t.border}`, background: o.performs ? 'rgb(var(--brand-rgb) /0.04)' : 'transparent', padding: '12px 14px', borderRadius: 'var(--radius)' }}>
                             <div className="flex items-center justify-between gap-3">
                               <div className="min-w-0 flex-1">
                                 <p style={{ color: t.text, fontSize: '13px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</p>
@@ -366,13 +366,13 @@ export default function DashboardArtists() {
                 </div>
 
                 {/* Revenue split */}
-                <div style={{ border: `0.5px solid ${t.border}`, padding: '16px' }}>
+                <div style={{ border: `0.5px solid ${t.border}`, padding: '16px', borderRadius: 'var(--radius)' }}>
                   <div className="flex items-center justify-between mb-3">
                     <label style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Podział przychodu</label>
                     {editing !== 'new' && (
                       <button
                         onClick={() => setShowAddCommission(v => !v)}
-                        style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: showAddCommission ? 'var(--brand)' : t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${showAddCommission ? 'var(--brand)' : t.border}`, padding: '4px 10px', cursor: 'pointer' }}
+                        style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: showAddCommission ? 'var(--brand)' : t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${showAddCommission ? 'var(--brand)' : t.border}`, padding: '4px 10px', cursor: 'pointer', borderRadius: 'var(--radius)' }}
                       >
                         + ZMIEŃ STAWKĘ
                       </button>
@@ -456,7 +456,7 @@ export default function DashboardArtists() {
                       </div>
                       <div className="space-y-2">
                         {commissionHistory.map((entry, i) => (
-                          <div key={entry.id} className="flex items-center justify-between" style={{ padding: '8px 10px', background: i === 0 ? 'rgba(22,163,74,0.06)' : 'transparent', border: `0.5px solid ${i === 0 ? 'rgba(22,163,74,0.3)' : t.border}` }}>
+                          <div key={entry.id} className="flex items-center justify-between" style={{ padding: '8px 10px', background: i === 0 ? 'rgba(22,163,74,0.06)' : 'transparent', border: `0.5px solid ${i === 0 ? 'rgba(22,163,74,0.3)' : t.border}`, borderRadius: 'var(--radius)' }}>
                             <div>
                               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: i === 0 ? '#16a34a' : t.text, fontWeight: i === 0 ? 600 : 400 }}>
                                 {entry.cut_percent}% artysta / {100 - entry.cut_percent}% studio
@@ -488,7 +488,7 @@ export default function DashboardArtists() {
                 <div>
                   <label className="block mb-3" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Zdjęcie profilowe</label>
                   {form.photo_url && <img src={form.photo_url} alt="" className="w-24 h-24 object-cover mb-3" style={{ filter: 'brightness(0.7)', borderRadius: 'var(--radius)' }} />}
-                  <label style={{ display: 'inline-block', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '10px', padding: '8px 16px', background: 'transparent', border: `0.5px solid ${t.border}`, color: t.text, transition: 'all 0.2s ease' }} className="hover:opacity-70">
+                  <label style={{ display: 'inline-block', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '10px', padding: '8px 16px', background: 'transparent', border: `0.5px solid ${t.border}`, color: t.text, transition: 'all 0.2s ease', borderRadius: 'var(--radius)' }} className="hover:opacity-70">
                     {uploading ? 'PRZESYŁANIE...' : 'WYBIERZ ZDJĘCIE'}
                     <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
                   </label>
@@ -509,7 +509,7 @@ export default function DashboardArtists() {
                       </div>
                     ))}
                   </div>
-                  <label style={{ display: 'inline-block', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '10px', padding: '8px 16px', background: 'transparent', border: `0.5px solid ${t.border}`, color: t.text, transition: 'all 0.2s ease' }} className="hover:opacity-70">
+                  <label style={{ display: 'inline-block', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '10px', padding: '8px 16px', background: 'transparent', border: `0.5px solid ${t.border}`, color: t.text, transition: 'all 0.2s ease', borderRadius: 'var(--radius)' }} className="hover:opacity-70">
                     {uploading ? 'PRZESYŁANIE...' : 'DODAJ DO PORTFOLIO'}
                     <input type="file" accept="image/*" multiple onChange={handlePortfolioUpload} className="hidden" />
                   </label>
