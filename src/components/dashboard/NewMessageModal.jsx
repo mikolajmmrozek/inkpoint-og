@@ -113,7 +113,7 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
         className="w-full max-w-lg max-h-[85vh] overflow-y-auto"
-        style={{ border: `0.5px solid ${t.border}`, background: t.bg || '#0A0A0A', padding: '32px' }}
+        style={{ border: `0.5px solid ${t.border}`, background: t.bg || '#0A0A0A', padding: '32px', borderRadius: 'var(--radius)' }}
         onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-between items-start mb-6">
@@ -132,13 +132,13 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
           <div className="flex gap-2">
             <button
               onClick={() => { setRecipientType('client'); setSelectedRecipient(null); setSearchQuery(''); }}
-              style={{ flex: 1, padding: '10px', border: `0.5px solid ${recipientType === 'client' ? 'var(--brand)' : t.border}`, color: recipientType === 'client' ? 'var(--brand)' : t.muted, background: recipientType === 'client' ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer' }}
+              style={{ flex: 1, padding: '10px', border: `0.5px solid ${recipientType === 'client' ? 'var(--brand)' : t.border}`, color: recipientType === 'client' ? 'var(--brand)' : t.muted, background: recipientType === 'client' ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', borderRadius: 'var(--radius)' }}
             >
               KLIENT
             </button>
             <button
               onClick={() => { setRecipientType('studio'); setSelectedRecipient(null); setSearchQuery(''); }}
-              style={{ flex: 1, padding: '10px', border: `0.5px solid ${recipientType === 'studio' ? 'var(--brand)' : t.border}`, color: recipientType === 'studio' ? 'var(--brand)' : t.muted, background: recipientType === 'studio' ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer' }}
+              style={{ flex: 1, padding: '10px', border: `0.5px solid ${recipientType === 'studio' ? 'var(--brand)' : t.border}`, color: recipientType === 'studio' ? 'var(--brand)' : t.muted, background: recipientType === 'studio' ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', borderRadius: 'var(--radius)' }}
             >
               STUDIO
             </button>
@@ -147,7 +147,7 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
 
         {/* Search */}
         <div className="mb-4">
-          <div className="flex items-center gap-2" style={{ border: `0.5px solid ${searchQuery ? 'var(--brand)' : t.border}`, padding: '8px 12px' }}>
+          <div className="flex items-center gap-2" style={{ border: `0.5px solid ${searchQuery ? 'var(--brand)' : t.border}`, padding: '8px 12px', borderRadius: 'var(--radius)' }}>
             <Search size={12} color={searchQuery ? 'var(--brand)' : t.muted} />
             <input
               type="text"
@@ -166,7 +166,7 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
 
         {/* Search results or selected recipient */}
         {selectedRecipient ? (
-          <div className="mb-4 p-3" style={{ border: '0.5px solid rgb(var(--brand-rgb) /0.3)', background: 'rgb(var(--brand-rgb) /0.04)' }}>
+          <div className="mb-4 p-3" style={{ border: '0.5px solid rgb(var(--brand-rgb) /0.3)', background: 'rgb(var(--brand-rgb) /0.04)', borderRadius: 'var(--radius)' }}>
             <div className="flex items-center justify-between">
               <div>
                 <p style={{ fontSize: '13px', color: t.text, fontWeight: 500 }}>{selectedRecipient.name}</p>
@@ -178,7 +178,7 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
             </div>
           </div>
         ) : (
-          <div className="mb-4" style={{ border: `0.5px solid ${t.border}`, maxHeight: '200px', overflowY: 'auto' }}>
+          <div className="mb-4" style={{ border: `0.5px solid ${t.border}`, maxHeight: '200px', overflowY: 'auto', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
             {loading ? (
               <div className="py-8 text-center">
                 <Loader2 size={16} className="animate-spin mx-auto" color="var(--brand)" />
@@ -218,7 +218,7 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
             onChange={e => setMessageText(e.target.value)}
             rows={4}
             placeholder="Wpisz wiadomość..."
-            style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '10px 12px', fontSize: '13px', color: t.text, fontFamily: 'var(--font-body)', resize: 'vertical', outline: 'none' }}
+            style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '10px 12px', fontSize: '13px', color: t.text, fontFamily: 'var(--font-body)', resize: 'vertical', outline: 'none', borderRadius: 'var(--radius)' }}
             onFocus={e => e.target.style.borderColor = 'var(--brand)'}
             onBlur={e => e.target.style.borderColor = t.border}
           />

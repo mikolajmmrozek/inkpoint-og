@@ -107,7 +107,7 @@ export default function SettlementModal({ booking, user, onClose, onSettled, t }
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
         className="w-full max-w-lg max-h-screen overflow-y-auto p-5 sm:p-8"
-        style={{ border: `0.5px solid ${t.border}`, background: t.bg === '#FFFFFF' ? '#FFFFFF' : '#0A0A0A' }}
+        style={{ border: `0.5px solid ${t.border}`, background: t.bg === '#FFFFFF' ? '#FFFFFF' : '#0A0A0A', borderRadius: 'var(--radius)' }}
         onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-6">
@@ -154,7 +154,7 @@ export default function SettlementModal({ booking, user, onClose, onSettled, t }
                 style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
               />
             </div>
-            <div className="flex items-center justify-between p-3" style={{ border: `0.5px solid ${t.border}`, background: 'rgb(var(--brand-rgb) /0.04)' }}>
+            <div className="flex items-center justify-between p-3" style={{ border: `0.5px solid ${t.border}`, background: 'rgb(var(--brand-rgb) /0.04)', borderRadius: 'var(--radius)' }}>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Do rozliczenia</span>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '16px', color: 'var(--brand)', fontWeight: 600 }}>{remainder.toLocaleString('pl-PL')} PLN</span>
             </div>
@@ -238,7 +238,7 @@ export default function SettlementModal({ booking, user, onClose, onSettled, t }
             )}
 
             {/* Suma */}
-            <div className="flex items-center justify-between p-3 mt-4" style={{ border: `0.5px solid ${diff === 0 ? '#16a34a' : '#ef4444'}`, background: diff === 0 ? 'rgba(22,163,74,0.05)' : 'rgba(239,68,68,0.05)' }}>
+            <div className="flex items-center justify-between p-3 mt-4" style={{ border: `0.5px solid ${diff === 0 ? '#16a34a' : '#ef4444'}`, background: diff === 0 ? 'rgba(22,163,74,0.05)' : 'rgba(239,68,68,0.05)', borderRadius: 'var(--radius)' }}>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Suma wpłat</span>
               <div className="text-right">
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: '16px', color: diff === 0 ? '#16a34a' : '#ef4444', fontWeight: 600 }}>{paymentsSum.toLocaleString('pl-PL')} PLN</span>

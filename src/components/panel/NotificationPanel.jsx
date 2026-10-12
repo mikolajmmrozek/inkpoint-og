@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { getNotificationEmail } from '@/lib/adminConstants';
-import { X, Bell, CheckCheck, Calendar, MessageSquare, Info, FileText } from 'lucide-react';
+import { X, Bell, CheckCheck, Calendar, MessageSquare, Info, FileText, Check, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 
@@ -50,6 +50,13 @@ export default function NotificationPanel({ open, onClose, userEmail, theme, not
     try {
       await base44.entities.Notification.update(id, { is_read: true });
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
+    } catch (e) {}
+  };
+
+  const deleteNotification = async (id) => {
+    try {
+      await base44.entities.Notification.delete(id);
+      setNotifications(prev => prev.filter(n => n.id !== id));
     } catch (e) {}
   };
 
@@ -111,7 +118,7 @@ export default function NotificationPanel({ open, onClose, userEmail, theme, not
           <div className="flex items-center gap-2">
             <button
               onClick={() => { onClose(); navigate(notificationsPath); }}
-              style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', border: `0.5px solid ${t.fuchsia}`, padding: '6px 12px', cursor: 'pointer' }}
+              style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', border: `0.5px solid ${t.fuchsia}`, padding: '6px 12px', cursor: 'pointer', borderRadius: 'var(--radius)' }}
             >
               Pokaż wszystkie
             </button>
@@ -167,12 +174,17 @@ export default function NotificationPanel({ open, onClose, userEmail, theme, not
                          {format(new Date(notif.created_date), 'dd.MM.yyyy HH:mm')}
                        </p>
                      </div>
-                     {!notif.is_read && (
-                       <div className="flex-shrink-0 mt-1.5">
-                         <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: t.fuchsia }} />
-                       </div>
-                     )}
-                   </div>
+                     <div className="flex-shrink-0 flex items-center gap-2 mt-1.5">
+                       {!notif.is_read && (
+                         <button onClick={(e) => { e.stopPropagation(); markRead(notif.id); }} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 7px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }} title="Oznacz jako przeczytane">
+                           <Check size={10} /> Przeczytane
+                         </button>
+                       )}
+                       <button onClick={(e) => { e.stopPropagation(); deleteNotification(notif.id); }} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 7px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }} title="Usuń">
+                         <Trash2 size={10} /> Usuń
+                       </button>
+                     </div>
+                     </div>
                 );
               })}
               {notifications.length > 10 && (
@@ -182,7 +194,7 @@ export default function NotificationPanel({ open, onClose, userEmail, theme, not
                        onClose();
                        navigate(notificationsPath);
                      }}
-                    style={{ width: '100%', padding: '10px', fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', border: `0.5px solid ${t.fuchsia}`, cursor: 'pointer' }}
+                    style={{ width: '100%', padding: '10px', fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', border: `0.5px solid ${t.fuchsia}`, cursor: 'pointer', borderRadius: 'var(--radius)' }}
                   >
                     Pokaż wszystkie
                   </button>

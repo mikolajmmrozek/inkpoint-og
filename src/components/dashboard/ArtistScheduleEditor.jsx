@@ -109,7 +109,7 @@ function TimeDropdown({ value, onChange, border, text }) {
 
   const selectStyle = {
     background: text === '#F5F0EB' ? '#1a1a1a' : '#FFFFFF',
-    border: `0.5px solid ${border}`,
+    border: `0.5px solid ${border}`, borderRadius: 'var(--radius)',
     color: text,
     padding: '6px 8px',
     fontSize: '14px',
@@ -147,7 +147,7 @@ function ExceptionRow({ group, color, border, muted, text, onView, onEdit, onDel
   try { dateStr = format(parseISO(ex.date), 'd MMM yyyy', { locale: pl }); } catch {}
 
   return (
-    <div className="cursor-pointer" style={{ border: `0.5px solid ${color}33`, background: `${color}06` }}
+    <div className="cursor-pointer" style={{ border: `0.5px solid ${color}33`, background: `${color}06`, borderRadius: 'var(--radius)' }}
       onClick={() => onView(group)}
       onMouseEnter={e => e.currentTarget.style.background = `${color}10`}
       onMouseLeave={e => e.currentTarget.style.background = `${color}06`}
@@ -387,7 +387,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
   });
 
   const SegBtn = ({ active, onClick, children }) => (
-    <button onClick={onClick} style={{ flex: 1, padding: '6px 10px', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', background: active ? 'rgb(var(--brand-rgb) /0.1)' : 'transparent', border: `0.5px solid ${active ? 'var(--brand)' : border}`, color: active ? 'var(--brand)' : muted, cursor: 'pointer' }}>
+    <button onClick={onClick} style={{ flex: 1, padding: '6px 10px', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', background: active ? 'rgb(var(--brand-rgb) /0.1)' : 'transparent', border: `0.5px solid ${active ? 'var(--brand)' : border}`, color: active ? 'var(--brand)' : muted, cursor: 'pointer', borderRadius: 'var(--radius)' }}>
       {children}
     </button>
   );
@@ -406,7 +406,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
             GRAFIK TYGODNIOWY ({activeCount} dni)
           </p>
-          <button onClick={applyDefault} disabled={saving} style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 8px', border: `0.5px solid ${border}`, color: muted, background: 'transparent', cursor: 'pointer' }}>
+          <button onClick={applyDefault} disabled={saving} style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 8px', border: `0.5px solid ${border}`, color: muted, background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
             RESETUJ DO DOMYŚLNEGO
           </button>
         </div>
@@ -416,7 +416,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
             const rec = getDayEntry(value);
             return (
               <div key={value} className="flex items-center gap-3" style={{ padding: '5px 0', borderBottom: `0.5px solid ${border}18` }}>
-                <button onClick={() => toggleDay(value)} style={{ width: '28px', height: '28px', flexShrink: 0, border: `0.5px solid ${active ? 'var(--brand)' : border}`, background: active ? 'rgb(var(--brand-rgb) /0.1)' : 'transparent', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '9px', color: active ? 'var(--brand)' : muted }}>
+                <button onClick={() => toggleDay(value)} style={{ width: '28px', height: '28px', flexShrink: 0, border: `0.5px solid ${active ? 'var(--brand)' : border}`, background: active ? 'rgb(var(--brand-rgb) /0.1)' : 'transparent', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '9px', color: active ? 'var(--brand)' : muted, borderRadius: 'var(--radius)' }}>
                   {label}
                 </button>
                 {active && rec ? (
@@ -445,7 +445,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
             DODAJ WOLNE
           </p>
           {!showForm && (
-            <button onClick={() => { setShowForm(true); setEditingGroup(null); setEntry(EMPTY_ENTRY); }} style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${border}`, color: muted, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <button onClick={() => { setShowForm(true); setEditingGroup(null); setEntry(EMPTY_ENTRY); }} style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${border}`, color: muted, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', borderRadius: 'var(--radius)' }}>
               <Plus size={10} /> DODAJ
             </button>
           )}
@@ -453,7 +453,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
 
         {/* Form */}
         {showForm && (
-          <div className="mb-4 p-4 space-y-4" style={{ border: `0.5px solid rgb(var(--brand-rgb) /0.25)`, background: 'rgb(var(--brand-rgb) /0.02)' }}>
+          <div className="mb-4 p-4 space-y-4" style={{ border: `0.5px solid rgb(var(--brand-rgb) /0.25)`, background: 'rgb(var(--brand-rgb) /0.02)', borderRadius: 'var(--radius)' }}>
             <div className="flex items-center justify-between">
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
                 {editingGroup ? `EDYTUJ WPIS (×${editingGroup.count})` : 'NOWY WPIS'}
@@ -535,7 +535,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
                   />
                   <button
                     onClick={() => setEntry(e => ({ ...e, repeat_indefinite: !e.repeat_indefinite, repeat_until: '' }))}
-                    style={{ flexShrink: 0, fontFamily: 'var(--font-mono)', fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${entry.repeat_indefinite ? 'var(--brand)' : border}`, color: entry.repeat_indefinite ? 'var(--brand)' : muted, background: entry.repeat_indefinite ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                    style={{ flexShrink: 0, fontFamily: 'var(--font-mono)', fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 10px', border: `0.5px solid ${entry.repeat_indefinite ? 'var(--brand)' : border}`, color: entry.repeat_indefinite ? 'var(--brand)' : muted, background: entry.repeat_indefinite ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', cursor: 'pointer', whiteSpace: 'nowrap', borderRadius: 'var(--radius)' }}
                   >
                     Do odwołania
                   </button>
@@ -550,7 +550,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
             </div>
 
             {editingGroup && (
-              <div style={{ padding: '8px 10px', background: 'rgb(var(--brand-rgb) /0.04)', border: '0.5px solid rgb(var(--brand-rgb) /0.2)' }}>
+              <div style={{ padding: '8px 10px', background: 'rgb(var(--brand-rgb) /0.04)', border: '0.5px solid rgb(var(--brand-rgb) /0.2)', borderRadius: 'var(--radius)' }}>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', color: 'var(--brand)', letterSpacing: '0.1em' }}>
                   Zmiana zakresu dat: wpisy poza nowym zakresem zostaną usunięte, nowe daty zostaną dodane.
                 </p>
@@ -566,7 +566,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
               >
                 {saving ? 'ZAPISUJĘ...' : editingGroup ? 'ZAPISZ ZMIANY' : 'ZAPISZ'}
               </button>
-              <button onClick={cancelForm} style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: `0.5px solid ${border}`, color: muted, background: 'transparent', cursor: 'pointer' }}>ANULUJ</button>
+              <button onClick={cancelForm} style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: `0.5px solid ${border}`, color: muted, background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}>ANULUJ</button>
             </div>
           </div>
         )}

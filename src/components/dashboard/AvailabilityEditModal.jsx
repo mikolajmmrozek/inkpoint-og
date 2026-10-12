@@ -115,7 +115,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
   );
 
   const SegBtn = ({ active, onClick, children }) => (
-    <button type="button" onClick={onClick} style={{ flex: 1, padding: '6px 8px', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', background: active ? 'rgb(var(--brand-rgb) /0.1)' : 'transparent', border: `0.5px solid ${active ? 'var(--brand)' : t.border}`, color: active ? 'var(--brand)' : t.muted, cursor: 'pointer' }}>
+    <button type="button" onClick={onClick} style={{ flex: 1, padding: '6px 8px', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', background: active ? 'rgb(var(--brand-rgb) /0.1)' : 'transparent', border: `0.5px solid ${active ? 'var(--brand)' : t.border}`, color: active ? 'var(--brand)' : t.muted, cursor: 'pointer', borderRadius: 'var(--radius)' }}>
       {children}
     </button>
   );
@@ -211,7 +211,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
           className="w-full max-w-md overflow-y-auto"
-          style={{ background: t.bg, border: `0.5px solid ${t.border}`, padding: '28px', maxHeight: '90vh' }}
+          style={{ background: t.bg, border: `0.5px solid ${t.border}`, padding: '28px', maxHeight: '90vh', borderRadius: 'var(--radius)' }}
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
@@ -239,7 +239,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
           {step === 'view' && (
             <div className="space-y-4">
               {isRecurring && (
-                <div className="flex items-center gap-2 px-3 py-2" style={{ background: `${typeColor}08`, border: `0.5px solid ${typeColor}30` }}>
+                <div className="flex items-center gap-2 px-3 py-2" style={{ background: `${typeColor}08`, border: `0.5px solid ${typeColor}30`, borderRadius: 'var(--radius)' }}>
                   <RefreshCw size={10} color={typeColor} style={{ flexShrink: 0 }} />
                   <div>
                     <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: typeColor, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
@@ -263,7 +263,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                 >EDYTUJ</button>
                 <button
                   onClick={() => isRecurring ? setStep('confirm_delete_scope') : setStep('confirm_delete')}
-                  style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: `0.5px solid rgb(var(--brand-rgb) /0.4)`, color: 'var(--brand)', background: 'transparent', cursor: 'pointer' }}
+                  style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: `0.5px solid rgb(var(--brand-rgb) /0.4)`, color: 'var(--brand)', background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}
                 >USUŃ</button>
               </div>
             </div>
@@ -281,7 +281,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                   ['cycle', 'CAŁY CYKL', `${repeatDisplay} · ${groupRecords.length} wpisów`],
                 ].map(([scope, title, sub]) => (
                   <button key={scope} onClick={() => { setEditScope(scope); setStep('edit'); }}
-                    style={{ display: 'block', width: '100%', textAlign: 'left', padding: '12px 14px', border: `0.5px solid ${t.border}`, background: 'transparent', cursor: 'pointer' }}
+                    style={{ display: 'block', width: '100%', textAlign: 'left', padding: '12px 14px', border: `0.5px solid ${t.border}`, background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}
                     onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--brand)'}
                     onMouseLeave={e => e.currentTarget.style.borderColor = t.border}>
                     <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>{title}</p>
@@ -305,7 +305,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                   ['cycle', 'CAŁY CYKL', `${repeatDisplay} · ${groupRecords.length} wpisów`],
                 ].map(([scope, title, sub]) => (
                   <button key={scope} onClick={() => { setDeleteScope(scope); setStep('confirm_delete'); }}
-                    style={{ display: 'block', width: '100%', textAlign: 'left', padding: '12px 14px', border: `0.5px solid ${t.border}`, background: 'transparent', cursor: 'pointer' }}
+                    style={{ display: 'block', width: '100%', textAlign: 'left', padding: '12px 14px', border: `0.5px solid ${t.border}`, background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}
                     onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--brand)'}
                     onMouseLeave={e => e.currentTarget.style.borderColor = t.border}>
                     <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>{title}</p>
@@ -320,7 +320,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
           {/* ── CONFIRM DELETE (monit potwierdzenia) ── */}
           {step === 'confirm_delete' && (
             <div className="space-y-4">
-              <div className="flex items-start gap-3 px-3 py-3" style={{ background: 'rgb(var(--brand-rgb) /0.06)', border: '0.5px solid rgb(var(--brand-rgb) /0.3)' }}>
+              <div className="flex items-start gap-3 px-3 py-3" style={{ background: 'rgb(var(--brand-rgb) /0.06)', border: '0.5px solid rgb(var(--brand-rgb) /0.3)', borderRadius: 'var(--radius)' }}>
                 <AlertTriangle size={16} color="var(--brand)" style={{ flexShrink: 0, marginTop: '2px' }} />
                 <div>
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>
@@ -340,7 +340,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                   {saving ? 'USUWAM...' : 'TAK, USUŃ'}
                 </button>
                 <button onClick={() => setStep(isRecurring ? 'confirm_delete_scope' : 'view')}
-                  style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 14px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}>
+                  style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 14px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
                   ANULUJ
                 </button>
               </div>
@@ -351,7 +351,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
           {step === 'edit' && (
             <div className="space-y-4">
               {editScope === 'occurrence' && (
-                <div style={{ padding: '8px 10px', background: 'rgb(var(--brand-rgb) /0.05)', border: '0.5px solid rgb(var(--brand-rgb) /0.2)' }}>
+                <div style={{ padding: '8px 10px', background: 'rgb(var(--brand-rgb) /0.05)', border: '0.5px solid rgb(var(--brand-rgb) /0.2)', borderRadius: 'var(--radius)' }}>
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.1em' }}>EDYTUJESZ TYLKO: {dateDisplay}</p>
                 </div>
               )}

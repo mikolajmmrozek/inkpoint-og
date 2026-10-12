@@ -104,7 +104,7 @@ export default function ClientQuickViewModal({ booking, clientRecord, clientHist
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
         className="w-full max-w-md max-h-[88vh] overflow-y-auto p-6"
-        style={{ border: `0.5px solid ${t.border}`, background: t.bg === '#FFFFFF' ? '#FFFFFF' : '#0A0A0A' }}
+        style={{ border: `0.5px solid ${t.border}`, background: t.bg === '#FFFFFF' ? '#FFFFFF' : '#0A0A0A', borderRadius: 'var(--radius)' }}
         onClick={e => e.stopPropagation()}
       >
         {/* Header with avatar */}
@@ -133,18 +133,18 @@ export default function ClientQuickViewModal({ booking, clientRecord, clientHist
         {/* Quick contact actions */}
         <div className="grid grid-cols-2 gap-2 mb-5">
           {phone ? (
-            <a href={`tel:${phone.replace(/\s/g, '')}`} className="flex items-center justify-center gap-2 py-2.5" style={{ border: `0.5px solid ${t.border}`, color: t.text, textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            <a href={`tel:${phone.replace(/\s/g, '')}`} className="flex items-center justify-center gap-2 py-2.5" style={{ border: `0.5px solid ${t.border}`, color: t.text, textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', borderRadius: 'var(--radius)' }}>
               <Phone size={12} color="#16a34a" /> ZADZWOŃ
             </a>
           ) : (
-            <div className="flex items-center justify-center py-2.5" style={{ border: `0.5px solid ${t.border}`, color: t.muted, fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em' }}>BRAK TELEFONU</div>
+            <div className="flex items-center justify-center py-2.5" style={{ border: `0.5px solid ${t.border}`, color: t.muted, fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', borderRadius: 'var(--radius)' }}>BRAK TELEFONU</div>
           )}
           {email ? (
-            <a href={`mailto:${email}`} className="flex items-center justify-center gap-2 py-2.5" style={{ border: `0.5px solid ${t.border}`, color: t.text, textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            <a href={`mailto:${email}`} className="flex items-center justify-center gap-2 py-2.5" style={{ border: `0.5px solid ${t.border}`, color: t.text, textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', borderRadius: 'var(--radius)' }}>
               <Mail size={12} color="var(--brand)" /> EMAIL
             </a>
           ) : (
-            <div className="flex items-center justify-center py-2.5" style={{ border: `0.5px solid ${t.border}`, color: t.muted, fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em' }}>BRAK EMAIL</div>
+            <div className="flex items-center justify-center py-2.5" style={{ border: `0.5px solid ${t.border}`, color: t.muted, fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', borderRadius: 'var(--radius)' }}>BRAK EMAIL</div>
           )}
         </div>
 

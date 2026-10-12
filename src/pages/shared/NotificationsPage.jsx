@@ -118,7 +118,7 @@ export default function NotificationsPage() {
       </div>
 
       {/* List */}
-      <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, minHeight: '400px' }}>
+      <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, minHeight: '400px', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
@@ -155,16 +155,13 @@ export default function NotificationsPage() {
                   </div>
                   <div className="flex-shrink-0 flex items-center gap-2">
                     {!notif.is_read && (
-                      <button onClick={(e) => markRead(notif.id, e)} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px' }} title="Oznacz jako przeczytane">
-                        <Check size={13} color={t.fuchsia} />
+                      <button onClick={(e) => markRead(notif.id, e)} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '5px 8px', border: `0.5px solid ${t.fuchsia}`, color: t.fuchsia, background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }} title="Oznacz jako przeczytane">
+                        <Check size={11} /> Przeczytane
                       </button>
                     )}
-                    <button onClick={(e) => deleteNotification(notif.id, e)} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px' }} title="Usuń">
-                      <Trash2 size={13} color={t.muted} />
+                    <button onClick={(e) => deleteNotification(notif.id, e)} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '5px 8px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }} title="Usuń">
+                      <Trash2 size={11} /> Usuń
                     </button>
-                    {!notif.is_read && (
-                      <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: t.fuchsia, marginLeft: '2px' }} />
-                    )}
                   </div>
               </div>
             );
@@ -198,7 +195,7 @@ export default function NotificationsPage() {
       {/* Confirmation modal — delete all */}
       {confirmDeleteAll && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.85)' }} onClick={() => setConfirmDeleteAll(false)}>
-          <div className="w-full max-w-sm" style={{ background: t.bg, border: `0.5px solid ${t.border}`, padding: '36px' }} onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-sm" style={{ background: t.bg, border: `0.5px solid ${t.border}`, padding: '36px', borderRadius: 'var(--radius)' }} onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-2 mb-4">
               <Trash2 size={16} color="#FF4444" />
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#FF4444', letterSpacing: '0.2em', textTransform: 'uppercase' }}>USUŃ WSZYSTKIE</p>

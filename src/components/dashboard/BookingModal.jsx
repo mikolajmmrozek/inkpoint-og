@@ -438,7 +438,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
     {/* Repeat session prompt — rendered outside modal to avoid overflow clipping */}
     {repeatPrompt && (
       <div className="fixed inset-0 z-[70] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.85)' }}>
-        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg === '#FFFFFF' ? '#FFFFFF' : '#0A0A0A', padding: '36px', maxWidth: '460px', width: '100%' }}>
+        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg === '#FFFFFF' ? '#FFFFFF' : '#0A0A0A', padding: '36px', maxWidth: '460px', width: '100%', borderRadius: 'var(--radius)' }}>
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <History size={14} color="var(--brand)" />
@@ -452,7 +452,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
             {repeatPrompt.client.name}
           </h3>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>OSTATNIA SESJA</p>
-          <div style={{ border: `0.5px solid ${t.border}`, padding: '14px 16px', marginBottom: '20px' }}>
+          <div style={{ border: `0.5px solid ${t.border}`, padding: '14px 16px', marginBottom: '20px', borderRadius: 'var(--radius)' }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: t.text, marginBottom: '4px' }}>
               {repeatPrompt.lastSession.session_date}{repeatPrompt.lastSession.artist_name ? ` · ${repeatPrompt.lastSession.artist_name}` : ''}
             </p>
@@ -487,7 +487,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
         className="w-full max-w-2xl max-h-screen overflow-y-auto p-5 sm:p-10"
-        style={{ border: `0.5px solid ${t.border}`, background: t.bg === '#FFFFFF' ? '#FFFFFF' : '#0A0A0A' }}
+        style={{ border: `0.5px solid ${t.border}`, background: t.bg === '#FFFFFF' ? '#FFFFFF' : '#0A0A0A', borderRadius: 'var(--radius)' }}
         onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-8">
@@ -521,7 +521,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
             <div className="mt-4">{label('Email')}<input {...inp('client_email', 'email')} /></div>
             <div className="mt-4">{label('Telefon')}<input {...inp('client_phone')} /></div>
             {selectedClient && (
-              <div className="mt-3 p-3" style={{ background: 'rgb(var(--brand-rgb) /0.04)', border: '0.5px solid rgb(var(--brand-rgb) /0.2)' }}>
+              <div className="mt-3 p-3" style={{ background: 'rgb(var(--brand-rgb) /0.04)', border: '0.5px solid rgb(var(--brand-rgb) /0.2)', borderRadius: 'var(--radius)' }}>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
                   ISTNIEJĄCY KLIENT · {selectedClient.total_sessions || 0} SESJI
                 </p>
@@ -574,7 +574,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                     type="button"
                     onClick={() => handleCategoryChange(val)}
                     style={{
-                      border: `0.5px solid ${selectedCategory === val ? 'var(--brand)' : t.border}`,
+                      border: `0.5px solid ${selectedCategory === val ? 'var(--brand)' : t.border}`, borderRadius: 'var(--radius)',
                       color: selectedCategory === val ? 'var(--brand)' : t.muted,
                       background: selectedCategory === val ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent',
                       fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em',
@@ -655,7 +655,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
               })()}
             </div>
             {form.service_id && (
-              <div className="mt-3 px-3 py-2 flex items-center gap-2" style={{ background: 'rgb(var(--brand-rgb) /0.05)', border: '0.5px solid rgb(var(--brand-rgb) /0.2)' }}>
+              <div className="mt-3 px-3 py-2 flex items-center gap-2" style={{ background: 'rgb(var(--brand-rgb) /0.05)', border: '0.5px solid rgb(var(--brand-rgb) /0.2)', borderRadius: 'var(--radius)' }}>
                 <Zap size={10} color="var(--brand)" />
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em' }}>
                   USŁUGA WYBRANA · CENA I CZAS UZUPEŁNIONE AUTOMATYCZNIE

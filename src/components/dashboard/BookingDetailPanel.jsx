@@ -164,7 +164,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
         exit={{ x: '100%' }}
         transition={{ type: 'tween', duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
         className="fixed top-0 right-0 h-full z-50 w-full sm:w-96 overflow-y-auto"
-        style={{ borderLeft: `0.5px solid ${t.border}`, background: t.bg, padding: '24px', pointerEvents: showImageLightbox ? 'none' : 'auto' }}
+        style={{ borderLeft: `0.5px solid ${t.border}`, background: t.bg, padding: '24px', pointerEvents: showImageLightbox ? 'none' : 'auto', borderRadius: 'var(--radius) 0 0 var(--radius)' }}
       >
         {/* Header: avatar + name + client button + close */}
         <div className="flex justify-between items-start mb-3">
