@@ -538,7 +538,7 @@ export default function DashboardBookings() {
           >
             DZISIAJ
           </button>
-          <div className="flex" style={{ border: `0.5px solid ${t.border}` }}>
+          <div className="flex" style={{ border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)', overflow: 'hidden' }}>
             {[{ mode: 'calendar', icon: Calendar }, { mode: 'day', icon: Clock }, { mode: 'list', icon: List }, { mode: 'pending', icon: Inbox }].map(({ mode, icon: Icon }) => (
               <button
                 key={mode}
@@ -571,7 +571,7 @@ export default function DashboardBookings() {
         </div>
 
         {/* Row 3: search */}
-        <div className="flex items-center gap-2 w-full" style={{ border: `0.5px solid ${searchQuery ? 'var(--brand)' : t.border}`, padding: '8px 14px', background: t.bg }}>
+        <div className="flex items-center gap-2 w-full" style={{ border: `0.5px solid ${searchQuery ? 'var(--brand)' : t.border}`, padding: '8px 14px', background: t.bg, borderRadius: 'var(--radius)' }}>
           <Search size={12} color={searchQuery ? 'var(--brand)' : t.muted} />
           <input
             type="text"
@@ -691,7 +691,7 @@ export default function DashboardBookings() {
                   </div>
                 )}
                 {viewMode === 'list' && !searchQuery.trim() && !toSettleMode && (
-                  <div className="flex mb-4" style={{ border: `0.5px solid ${t.border}` }}>
+                  <div className="flex mb-4" style={{ border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)', overflow: 'hidden' }}>
                     {[{ key: 'upcoming', label: 'NADCHODZĄCE' }, { key: 'past', label: 'PRZESZŁE' }].map(tab => (
                       <button
                         key={tab.key}

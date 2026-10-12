@@ -666,6 +666,7 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
               style={{
                 minHeight: '52px', padding: '6px 4px',
                 border: isSelected ? `0.5px solid var(--brand)` : isBlocked ? `0.5px solid rgb(var(--brand-rgb) /0.35)` : isToday ? `0.5px solid ${t.cardBorder}` : `0.5px solid transparent`,
+                borderRadius: 'var(--radius)',
                 background: isSelected
                   ? 'rgb(var(--brand-rgb) /0.12)'
                   : isFullDayOff
@@ -677,7 +678,7 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
               {avail && avail.type === 'free' && (
                 <div style={{ position: 'absolute', top: '2px', right: '2px', width: '5px', height: '5px', borderRadius: '1px', background: '#16a34a', opacity: 0.7 }} />
               )}
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: isSelected ? 'var(--brand)' : isBlocked ? 'var(--brand)' : isToday ? t.title : isSameMonth(day, viewMonth) ? t.text : t.muted, fontWeight: isToday ? 600 : 400 }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: isSelected ? 'var(--brand)' : isToday ? 'var(--brand)' : isSameMonth(day, viewMonth) ? t.text : t.muted, fontWeight: isSelected ? 700 : isToday ? 600 : 400 }}>
                 {format(day, 'd')}
               </span>
               <div className="flex gap-0.5 mt-1 flex-wrap justify-center">
@@ -1103,7 +1104,7 @@ export default function ArtistSchedule() {
         <div className="flex gap-2 flex-wrap">
           {[['month', 'MIESIĘCZNY'], ['hourly', 'GODZINOWY'], ['list', 'LISTA']].map(([mode, lbl]) => (
             <button key={mode} onClick={() => setViewMode(mode)}
-              style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '7px 12px', border: `0.5px solid ${viewMode === mode ? 'var(--brand)' : t.cardBorder}`, color: viewMode === mode ? 'var(--brand)' : t.muted, background: viewMode === mode ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', cursor: 'pointer' }}>
+              style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '7px 12px', border: `0.5px solid ${viewMode === mode ? 'var(--brand)' : t.cardBorder}`, color: viewMode === mode ? 'var(--brand)' : t.muted, background: viewMode === mode ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
               {lbl}
             </button>
           ))}
@@ -1115,7 +1116,7 @@ export default function ArtistSchedule() {
 
       {/* Search bar */}
       <div className="mb-4">
-        <div className="flex items-center gap-2 w-full" style={{ border: `0.5px solid ${searchQuery ? 'var(--brand)' : t.cardBorder}`, padding: '8px 14px', background: t.cardBg }}>
+        <div className="flex items-center gap-2 w-full" style={{ border: `0.5px solid ${searchQuery ? 'var(--brand)' : t.cardBorder}`, padding: '8px 14px', background: t.cardBg, borderRadius: 'var(--radius)' }}>
           <Search size={12} color={searchQuery ? 'var(--brand)' : t.muted} />
           <input
             type="text"

@@ -11,6 +11,7 @@ const chipStyle = (active, t) => ({
   color: active ? t.fuchsia : t.muted,
   background: active ? 'rgb(var(--brand-rgb) /0.06)' : 'transparent',
   cursor: 'pointer',
+  borderRadius: 'var(--radius)',
 });
 
 export default function BookingFilters({ artists, artistFilters, toggleArtist, setArtistFilters, statusFilters, toggleStatus, setStatusFilters, statusOptions, t }) {
@@ -40,6 +41,7 @@ export default function BookingFilters({ artists, artistFilters, toggleArtist, s
           color: activeCount > 0 ? t.fuchsia : t.muted,
           background: activeCount > 0 ? 'rgb(var(--brand-rgb) /0.06)' : 'transparent',
           cursor: 'pointer',
+          borderRadius: 'var(--radius)',
         }}
       >
         <SlidersHorizontal size={12} /> Filtry
@@ -62,6 +64,7 @@ export default function BookingFilters({ artists, artistFilters, toggleArtist, s
             border: `0.5px solid ${t.border}`,
             boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
             padding: '16px',
+            borderRadius: 'var(--radius)',
           }}
         >
           <div className="flex items-center justify-between mb-4">

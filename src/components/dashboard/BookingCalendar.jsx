@@ -104,6 +104,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
                   : isOffDay
                     ? '0.5px solid rgb(var(--brand-rgb) /0.35)'
                     : (searchQuery && dayBookings.length > 0) ? `0.5px solid var(--brand)` : isToday ? `0.5px solid ${t.border}` : '0.5px solid transparent',
+                borderRadius: 'var(--radius)',
                 cursor: 'pointer',
                 minHeight: '52px',
                 opacity: isFullDayOff && !isSelected ? 0.75 : 1,
@@ -118,8 +119,8 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
               <span style={{
                 fontFamily: 'var(--font-mono)',
                 fontSize: '14px',
-                color: isSelected ? 'var(--brand)' : isOffDay ? 'var(--brand)' : isToday ? t.title : isSameMonth(day, viewMonth) ? t.text : t.muted,
-                fontWeight: isToday ? 600 : 400,
+                color: isSelected ? 'var(--brand)' : isToday ? 'var(--brand)' : isSameMonth(day, viewMonth) ? t.text : t.muted,
+                fontWeight: isSelected ? 700 : isToday ? 600 : 400,
               }}>
                 {format(day, 'd')}
               </span>
