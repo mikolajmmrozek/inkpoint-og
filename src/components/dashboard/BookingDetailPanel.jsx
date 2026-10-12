@@ -210,12 +210,12 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
         {(phone || email) && (
           <div className="flex gap-2 mb-5">
             {phone && (
-              <a href={`tel:${phone.replace(/\s/g, '')}`} className="flex items-center justify-center gap-1.5 flex-1 py-2" style={{ border: `0.5px solid ${t.border}`, color: t.text, textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              <a href={`tel:${phone.replace(/\s/g, '')}`} className="flex items-center justify-center gap-1.5 flex-1 py-2" style={{ border: `0.5px solid ${t.border}`, color: t.text, textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', borderRadius: 'var(--radius)' }}>
                 <Phone size={11} color="#16a34a" /> ZADZWOŃ
               </a>
             )}
             {email && (
-              <a href={`mailto:${email}`} className="flex items-center justify-center gap-1.5 flex-1 py-2" style={{ border: `0.5px solid ${t.border}`, color: t.text, textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              <a href={`mailto:${email}`} className="flex items-center justify-center gap-1.5 flex-1 py-2" style={{ border: `0.5px solid ${t.border}`, color: t.text, textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', borderRadius: 'var(--radius)' }}>
                 <Mail size={11} color="var(--brand)" /> EMAIL
               </a>
             )}
@@ -234,14 +234,14 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
           <button
             onClick={safeOnEdit}
             className="flex items-center gap-1.5 justify-center py-2.5 px-3 transition-all hover:opacity-70"
-            style={{ border: `0.5px solid ${t.border}`, color: t.muted, fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer' }}
+            style={{ border: `0.5px solid ${t.border}`, color: t.muted, fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}
           >
             <Edit size={11} /> EDYTUJ
           </button>
           <button
             onClick={() => setShowDeleteConfirm(true)}
             className="flex items-center gap-1.5 justify-center py-2.5 px-3 transition-all hover:opacity-70"
-            style={{ border: '0.5px solid var(--brand)', color: 'var(--brand)', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer' }}
+            style={{ border: '0.5px solid var(--brand)', color: 'var(--brand)', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}
           >
             <Trash2 size={11} />
           </button>
@@ -259,7 +259,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
                   ...mono, fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase',
                   padding: '7px', border: `0.5px solid ${booking.status === s ? STATUS_COLORS[s] : t.border}`,
                   color: booking.status === s ? STATUS_COLORS[s] : t.muted,
-                  background: 'transparent', cursor: 'pointer',
+                  background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)',
                 }}
               >{s}</button>
             ))}
@@ -268,7 +268,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
 
         {/* Health form section */}
         {booking.health_form_completed ? (
-          <div className="mb-5 p-3" style={{ border: '0.5px solid rgba(22,163,74,0.3)', background: 'rgba(22,163,74,0.04)' }}>
+          <div className="mb-5 p-3" style={{ border: '0.5px solid rgba(22,163,74,0.3)', background: 'rgba(22,163,74,0.04)', borderRadius: 'var(--radius)' }}>
             <div className="flex items-center gap-2 mb-2">
               <FileText size={11} color="#16a34a" />
               <p style={{ ...mono, fontSize: '8px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
@@ -277,13 +277,13 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
             </div>
             <button
               onClick={openHealthForm}
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#16a34a', background: 'transparent', padding: '7px 10px', border: '0.5px solid rgba(22,163,74,0.4)', marginTop: '6px', cursor: 'pointer', width: '100%' }}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#16a34a', background: 'transparent', padding: '7px 10px', border: '0.5px solid rgba(22,163,74,0.4)', marginTop: '6px', cursor: 'pointer', width: '100%', borderRadius: 'var(--radius)' }}
             >
               <FileText size={10} /> PODGLĄD ANKIETY
             </button>
           </div>
         ) : (
-          <div className="mb-5 p-3" style={{ border: '0.5px solid rgb(var(--brand-rgb) /0.3)', background: 'rgb(var(--brand-rgb) /0.04)' }}>
+          <div className="mb-5 p-3" style={{ border: '0.5px solid rgb(var(--brand-rgb) /0.3)', background: 'rgb(var(--brand-rgb) /0.04)', borderRadius: 'var(--radius)' }}>
             <p style={{ ...mono, fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>
               ANKIETA ZDROWOTNA — BRAK
             </p>
@@ -291,21 +291,21 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
               <button onClick={() => openHealthFormQRPage(formUrl)}
                 title="Pokaż kod QR do ankiety"
                 className="flex items-center gap-1.5 flex-1 justify-center py-2"
-                style={{ border: '0.5px solid var(--brand)', color: 'var(--brand)', ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer' }}>
+                style={{ border: '0.5px solid var(--brand)', color: 'var(--brand)', ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
                 <QrCode size={12} /> QR
               </button>
               <button onClick={copyFormLink}
                 className="flex items-center gap-1.5 flex-1 justify-center py-2"
-                style={{ border: '0.5px solid var(--brand)', color: 'var(--brand)', ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer' }}>
+                style={{ border: '0.5px solid var(--brand)', color: 'var(--brand)', ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
                 {copied ? <><Check size={11} /> SKOPIOWANO</> : <><Copy size={11} /> LINK</>}
               </button>
               <button onClick={sendFormEmail} disabled={sendingEmail}
                 className="flex items-center gap-1.5 flex-1 justify-center py-2"
-                style={{ border: `0.5px solid ${emailSent ? '#16a34a' : t.border}`, color: emailSent ? '#16a34a' : t.muted, ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer', opacity: sendingEmail ? 0.6 : 1 }}>
+                style={{ border: `0.5px solid ${emailSent ? '#16a34a' : t.border}`, color: emailSent ? '#16a34a' : t.muted, ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer', opacity: sendingEmail ? 0.6 : 1, borderRadius: 'var(--radius)' }}>
                 {sendingEmail ? <Loader2 size={11} className="animate-spin" /> : emailSent ? <><Check size={11} /> WYSŁANO</> : <><Mail size={11} /> EMAIL</>}
               </button>
               <a href={formUrl} target="_blank" rel="noopener noreferrer"
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px 10px', border: `0.5px solid ${t.border}`, color: t.muted, textDecoration: 'none' }}>
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px 10px', border: `0.5px solid ${t.border}`, color: t.muted, textDecoration: 'none', borderRadius: 'var(--radius)' }}>
                 <ExternalLink size={11} />
               </a>
             </div>
@@ -314,7 +314,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
 
         {/* Settlement summary */}
         {currentBooking.is_settled && currentBooking.payment_breakdown && (
-          <div className="mb-5 p-3" style={{ border: '0.5px solid rgba(22,163,74,0.3)', background: 'rgba(22,163,74,0.04)' }}>
+          <div className="mb-5 p-3" style={{ border: '0.5px solid rgba(22,163,74,0.3)', background: 'rgba(22,163,74,0.04)', borderRadius: 'var(--radius)' }}>
             <div className="flex items-center gap-2 mb-3">
               <Check size={11} color="#16a34a" />
               <p style={{ ...mono, fontSize: '8px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
@@ -380,7 +380,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
                     src={imgUrl}
                     alt={`ref-${idx}`}
                     className="w-full h-20 object-cover cursor-pointer"
-                    style={{ border: `0.5px solid ${t.border}` }}
+                    style={{ border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)' }}
                     onClick={() => { setLightboxImageIndex(idx); setShowImageLightbox(true); }}
                   />
                 </div>
@@ -398,7 +398,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
               onChange={e => { setClientNotes(e.target.value); setNotesSaved(false); }}
               rows={3}
               placeholder="Alergie, preferencje, uwagi..."
-              style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '8px 10px', fontSize: '12px', color: t.title, fontFamily: 'var(--font-body)', resize: 'vertical', outline: 'none', lineHeight: 1.5 }}
+              style={{ width: '100%', background: 'transparent', border: `0.5px solid ${t.border}`, padding: '8px 10px', fontSize: '12px', color: t.title, fontFamily: 'var(--font-body)', resize: 'vertical', outline: 'none', lineHeight: 1.5, borderRadius: 'var(--radius)' }}
               onFocus={e => e.target.style.borderColor = 'var(--brand)'}
               onBlur={e => e.target.style.borderColor = t.border}
             />
@@ -406,7 +406,7 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
               onClick={saveNotes}
               disabled={savingNotes}
               className="flex items-center gap-1.5 mt-2 py-1.5 px-3"
-              style={{ border: `0.5px solid ${notesSaved ? '#16a34a' : t.border}`, color: notesSaved ? '#16a34a' : t.muted, ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer', opacity: savingNotes ? 0.6 : 1 }}
+              style={{ border: `0.5px solid ${notesSaved ? '#16a34a' : t.border}`, color: notesSaved ? '#16a34a' : t.muted, ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer', opacity: savingNotes ? 0.6 : 1, borderRadius: 'var(--radius)' }}
             >
               {savingNotes ? <Loader2 size={10} className="animate-spin" /> : notesSaved ? <><Check size={10} /> ZAPISANO</> : <><Save size={10} /> ZAPISZ</>}
             </button>
