@@ -86,7 +86,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
           const isOffDay = dayOff.length > 0;
           // Full-day off = no time range on any entry; partial = at least one entry has a time range
           const isFullDayOff = isOffDay && dayOff.every(o => !o.timeRange);
-          const offTitle = isOffDay ? dayOff.map(o => `${o.artist.name}${o.note ? ` (${o.note})` : ''}${o.timeRange ? ` · ${o.timeRange}` : ' · cały dzień'}`).join(', ') : '';
+          const offTitle = isOffDay ? dayOff.map(o => `${o.artist.name}${o.note ? ` (${o.note})` : ''}${o.timeRange ? ` · ${o.timeRange}` : ' · cały dzień'}`).join('\n') : '';
 
           return (
             <button
@@ -111,11 +111,6 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
               }}
               title={offTitle}
             >
-              {isOffDay && (
-                <span style={{ position: 'absolute', top: '2px', left: '3px', fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.02em', lineHeight: 1 }} >
-                  {dayOff.length}
-                </span>
-              )}
               <span style={{
                 fontFamily: 'var(--font-mono)',
                 fontSize: '14px',
@@ -149,7 +144,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
           {selectedDayOff.length > 0 && (
             <div className="mb-3 space-y-1">
               {selectedDayOff.map((o, i) => (
-                <div key={i} className="flex items-center gap-2 px-3 py-2" style={{ border: `0.5px solid rgb(var(--brand-rgb) /0.25)`, background: 'rgb(var(--brand-rgb) /0.05)' }}>
+                <div key={i} className="flex items-center gap-2 px-3 py-2" style={{ border: `0.5px solid rgb(var(--brand-rgb) /0.25)`, background: 'rgb(var(--brand-rgb) /0.05)', borderRadius: 'var(--radius)' }}>
                   <div style={{ width: '6px', height: '6px', borderRadius: '1px', background: 'var(--brand)', flexShrink: 0 }} />
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.06em', flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     WOLNE · {o.artist.name}{o.timeRange ? ` · ${o.timeRange}` : ' · cały dzień'}{o.note ? ` · ${o.note}` : ''}
@@ -159,14 +154,14 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
             </div>
           )}
           {selectedDayBookings.length === 0 && !searchQuery.trim() ? (
-            <div className="py-8 text-center" style={{ border: `0.5px solid ${t.border}`, background: 'rgb(var(--brand-rgb) /0.02)' }}>
+            <div className="py-8 text-center" style={{ border: `0.5px solid ${t.border}`, background: 'rgb(var(--brand-rgb) /0.02)', borderRadius: 'var(--radius)' }}>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em', marginBottom: '12px' }}>BRAK SESJI W TEN DZIEŃ</p>
               <button onClick={onAddBooking} className="btn-oxblood" style={{ fontSize: '10px', padding: '8px 20px' }}>
                 + DODAJ SESJĘ
               </button>
             </div>
           ) : selectedDayBookings.length > 0 && !searchQuery.trim() && (
-            <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+            <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)', overflow: 'hidden' }}>
               {selectedDayBookings.map((b, i) => {
                 const artist = artists.find(a => a.id === b.artist_id);
                 return (
