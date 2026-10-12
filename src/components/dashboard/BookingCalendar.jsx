@@ -50,7 +50,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
   const WEEKDAYS = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Ndz'];
 
   return (
-    <div className="p-3 sm:p-6" style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
+    <div className="p-3 sm:p-6" style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)', overflow: 'hidden' }}>
       {/* Month nav */}
       <div className="flex items-center justify-between mb-6">
         <button onClick={() => setViewMonth(m => subMonths(m, 1))} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
