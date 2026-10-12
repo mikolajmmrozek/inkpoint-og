@@ -17,6 +17,7 @@ export default function HealthFormBadge({ status = 'none', style, fontSize = '7p
         padding: '2px 6px',
         border: `0.5px solid ${s.color}`,
         color: s.color,
+        borderRadius: 'var(--radius)',
         ...style,
       }}
     >
