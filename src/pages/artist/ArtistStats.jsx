@@ -184,7 +184,7 @@ export default function ArtistStats() {
 
       {/* Daily table */}
       {viewMode === 'daily' && (
-        <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+        <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)', overflow: 'hidden' }}>
           <div className="grid grid-cols-4 gap-4 p-3" style={{ borderBottom: `0.5px solid ${t.rowBorder}` }}>
             {['Data', 'Sesje', 'Łączna kwota', 'Mój zarobek'].map(h => (
               <p key={h} style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{h}</p>

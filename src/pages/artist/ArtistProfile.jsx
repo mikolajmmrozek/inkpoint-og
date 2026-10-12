@@ -82,14 +82,14 @@ export default function ArtistProfile() {
 
       {/* Schedule tab */}
       {activeTab === 'schedule' && (
-        <div className="p-6" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+        <div className="p-6" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
           <ArtistScheduleEditor artistId={artist?.id} t={{ border: t.inputBorder, text: t.text, muted: t.muted, cardBg: 'transparent' }} />
         </div>
       )}
 
       <div className="space-y-6" style={{ display: activeTab === 'profile' ? 'block' : 'none' }}>
         {/* Photo */}
-        <div className="p-6" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+        <div className="p-6" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>ZDJĘCIE PROFILOWE</p>
           <div className="flex items-center gap-6">
             {artist?.photo_url ? (
@@ -103,7 +103,7 @@ export default function ArtistProfile() {
             )}
             <label style={{ cursor: 'pointer' }}>
               <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
-              <span style={{ fontSize: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-mono)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', padding: '8px 16px', border: `0.5px solid ${t.text}`, color: t.text, cursor: 'pointer', transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+              <span style={{ fontSize: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-mono)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', padding: '8px 16px', border: `0.5px solid ${t.text}`, color: t.text, cursor: 'pointer', transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)', borderRadius: 'var(--radius)' }}>
                 <Upload size={12} /> {uploading ? 'WYSYŁAM...' : 'ZMIEŃ ZDJĘCIE'}
               </span>
             </label>
@@ -111,7 +111,7 @@ export default function ArtistProfile() {
         </div>
 
         {/* Bio & Instagram */}
-        <div className="p-6" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+        <div className="p-6" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>INFORMACJE</p>
           <div className="space-y-4">
             <div>
@@ -133,7 +133,7 @@ export default function ArtistProfile() {
         </div>
 
         {/* Portfolio */}
-        <div className="p-6" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+        <div className="p-6" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
           <div className="flex items-center justify-between mb-4">
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
               PORTFOLIO ({(artist?.portfolio_images || []).length} zdjęć)
@@ -150,11 +150,11 @@ export default function ArtistProfile() {
           ) : (
             <div className="grid grid-cols-3 gap-2">
               {(artist.portfolio_images || []).map((img, i) => (
-                <div key={i} style={{ position: 'relative', aspectRatio: '1', overflow: 'hidden' }}>
+                <div key={i} style={{ position: 'relative', aspectRatio: '1', overflow: 'hidden', borderRadius: 'var(--radius)' }}>
                   <img src={img.url} alt={img.caption} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" />
                   <button
                     onClick={() => removePortfolioImage(i)}
-                    style={{ position: 'absolute', top: '4px', right: '4px', background: 'rgba(0,0,0,0.7)', border: 'none', color: 'var(--brand)', cursor: 'pointer', width: '22px', height: '22px', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ position: 'absolute', top: '4px', right: '4px', background: 'rgba(0,0,0,0.7)', border: 'none', color: 'var(--brand)', cursor: 'pointer', width: '22px', height: '22px', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--radius)' }}
                   >×</button>
                 </div>
               ))}

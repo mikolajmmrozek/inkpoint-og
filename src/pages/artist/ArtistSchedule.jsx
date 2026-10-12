@@ -249,7 +249,7 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, user, ava
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
         className="w-full max-w-xl max-h-[90vh] overflow-y-auto"
-        style={{ background: t.bg, border: `0.5px solid ${t.border}`, padding: '32px' }}
+        style={{ background: t.bg, border: `0.5px solid ${t.border}`, padding: '32px', borderRadius: 'var(--radius)' }}
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
@@ -272,7 +272,7 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, user, ava
         {!isNew && !editing && (
           <div className="mb-6 space-y-4">
             <div className="flex items-center gap-3 flex-wrap">
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 12px', border: `0.5px solid ${STATUS_COLORS[form.status]}`, color: STATUS_COLORS[form.status] }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 12px', border: `0.5px solid ${STATUS_COLORS[form.status]}`, color: STATUS_COLORS[form.status], borderRadius: 'var(--radius)' }}>
                 {STATUS_LABELS[form.status]}
               </span>
               {form.deposit_paid && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#16a34a', letterSpacing: '0.08em' }}>✓ DEPOZYT</span>}
@@ -286,12 +286,12 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, user, ava
                 <div className="flex gap-2 flex-wrap">
                   {Object.entries(STATUS_LABELS).filter(([k]) => k !== form.status && k !== 'cancelled').map(([k, lbl]) => (
                     <button key={k} onClick={() => handleStatusChange(k)}
-                      style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[k]}`, color: STATUS_COLORS[k], background: 'transparent', cursor: 'pointer' }}>
+                      style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${STATUS_COLORS[k]}`, color: STATUS_COLORS[k], background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
                       → {lbl}
                     </button>
                   ))}
                   <button onClick={() => handleStatusChange('cancelled')}
-                    style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 10px', border: '0.5px solid #9ca3af', color: '#9ca3af', background: 'transparent', cursor: 'pointer' }}>
+                    style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 10px', border: '0.5px solid #9ca3af', color: '#9ca3af', background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
                     → Anuluj
                   </button>
                 </div>
@@ -302,12 +302,12 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, user, ava
             {(phone || email) && (
               <div className="flex gap-2">
                 {phone && (
-                  <a href={`tel:${phone.replace(/\s/g, '')}`} className="flex items-center justify-center gap-1.5 flex-1 py-2" style={{ border: `0.5px solid ${t.border}`, color: t.text, textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                  <a href={`tel:${phone.replace(/\s/g, '')}`} className="flex items-center justify-center gap-1.5 flex-1 py-2" style={{ border: `0.5px solid ${t.border}`, color: t.text, textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', borderRadius: 'var(--radius)' }}>
                     <Phone size={11} color="#16a34a" /> ZADZWOŃ
                   </a>
                 )}
                 {email && (
-                  <a href={`mailto:${email}`} className="flex items-center justify-center gap-1.5 flex-1 py-2" style={{ border: `0.5px solid ${t.border}`, color: t.text, textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                  <a href={`mailto:${email}`} className="flex items-center justify-center gap-1.5 flex-1 py-2" style={{ border: `0.5px solid ${t.border}`, color: t.text, textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', borderRadius: 'var(--radius)' }}>
                     <Mail size={11} color="var(--brand)" /> EMAIL
                   </a>
                 )}
@@ -327,7 +327,7 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, user, ava
 
             {/* Settlement summary */}
             {form.is_settled && form.payment_breakdown && (
-              <div className="p-3" style={{ border: '0.5px solid rgba(22,163,74,0.3)', background: 'rgba(22,163,74,0.04)' }}>
+              <div className="p-3" style={{ border: '0.5px solid rgba(22,163,74,0.3)', background: 'rgba(22,163,74,0.04)', borderRadius: 'var(--radius)' }}>
                 <div className="flex items-center gap-2 mb-3">
                   <Check size={11} color="#16a34a" />
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase' }}>ROZLICZONO</p>
@@ -365,21 +365,21 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, user, ava
 
             {/* Health form section */}
             {form.health_form_completed ? (
-              <div className="p-3" style={{ border: '0.5px solid rgba(22,163,74,0.3)', background: 'rgba(22,163,74,0.04)' }}>
+              <div className="p-3" style={{ border: '0.5px solid rgba(22,163,74,0.3)', background: 'rgba(22,163,74,0.04)', borderRadius: 'var(--radius)' }}>
                 <div className="flex items-center gap-2 mb-2">
                   <FileText size={11} color="#16a34a" />
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase' }}>ANKIETA ZDROWOTNA — WYPEŁNIONA</p>
                 </div>
-                <button onClick={() => setShowHealthForm(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#16a34a', background: 'transparent', padding: '7px 10px', border: '0.5px solid rgba(22,163,74,0.4)', marginTop: '6px', cursor: 'pointer', width: '100%' }}>
+                <button onClick={() => setShowHealthForm(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#16a34a', background: 'transparent', padding: '7px 10px', border: '0.5px solid rgba(22,163,74,0.4)', marginTop: '6px', cursor: 'pointer', width: '100%', borderRadius: 'var(--radius)' }}>
                   <FileText size={10} /> PODGLĄD ANKIETY
                 </button>
               </div>
             ) : (
-              <div className="p-3" style={{ border: '0.5px solid rgb(var(--brand-rgb) /0.3)', background: 'rgb(var(--brand-rgb) /0.04)' }}>
+              <div className="p-3" style={{ border: '0.5px solid rgb(var(--brand-rgb) /0.3)', background: 'rgb(var(--brand-rgb) /0.04)', borderRadius: 'var(--radius)' }}>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>ANKIETA ZDROWOTNA — BRAK</p>
                 <button onClick={() => openHealthFormQRPage(formUrl)} title="Pokaż kod QR do ankiety"
                   className="flex items-center gap-1.5 justify-center w-full py-2"
-                  style={{ border: '0.5px solid var(--brand)', color: 'var(--brand)', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer' }}>
+                  style={{ border: '0.5px solid var(--brand)', color: 'var(--brand)', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
                   <QrCode size={12} /> QR
                 </button>
               </div>
@@ -483,7 +483,7 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, user, ava
                 )}
               </div>
               {form.service_id && (
-                <div className="mt-2 px-3 py-1 flex items-center gap-2" style={{ background: 'rgb(var(--brand-rgb) /0.05)', border: '0.5px solid rgb(var(--brand-rgb) /0.2)' }}>
+              <div className="mt-2 px-3 py-1 flex items-center gap-2" style={{ background: 'rgb(var(--brand-rgb) /0.05)', border: '0.5px solid rgb(var(--brand-rgb) /0.2)', borderRadius: 'var(--radius)' }}>
                   <Zap size={10} color="var(--brand)" />
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em' }}>CZAS I CENA UZUPEŁNIONE</p>
                 </div>
@@ -851,7 +851,7 @@ function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, o
   };
 
   return (
-    <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+    <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)', overflow: 'hidden' }}>
       {/* Date nav */}
       <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: `0.5px solid ${t.cardBorder}` }}>
         <button onClick={() => onDateChange(subDays(selectedDate, 1))} style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer' }}><ChevronLeft size={16} /></button>
@@ -1136,7 +1136,7 @@ export default function ArtistSchedule() {
       {/* Search results — grouped by day */}
       {searchQuery.trim() && (
         <div className="mb-6">
-          <div style={{ padding: '10px 16px', background: t.cardBg, border: `0.5px solid ${t.cardBorder}`, marginBottom: '12px' }}>
+          <div style={{ padding: '10px 16px', background: t.cardBg, border: `0.5px solid ${t.cardBorder}`, marginBottom: '12px', borderRadius: 'var(--radius)' }}>
             <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: t.title, letterSpacing: '0.08em' }}>WYNIKI WYSZUKIWANIA</p>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: searchResults.length > 0 ? 'var(--brand)' : t.muted, letterSpacing: '0.1em', marginTop: '3px' }}>
               {searchResults.length} {searchResults.length === 1 ? 'SESJA' : searchResults.length >= 2 && searchResults.length <= 4 ? 'SESJE' : 'SESJI'}
@@ -1206,7 +1206,7 @@ export default function ArtistSchedule() {
             const label = record.is_available ? 'Dyspozycja' : 'Wolne';
             const timeStr = record.start_time && record.end_time ? `${record.start_time}–${record.end_time}` : 'Cały dzień';
             return (
-              <div className="flex items-center gap-2 mb-3 px-3 py-2" style={{ border: `0.5px solid ${color}40`, background: `${color}08` }}>
+              <div className="flex items-center gap-2 mb-3 px-3 py-2" style={{ border: `0.5px solid ${color}40`, background: `${color}08`, borderRadius: 'var(--radius)' }}>
                 <div style={{ width: '6px', height: '6px', borderRadius: '1px', background: color, flexShrink: 0 }} />
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color, letterSpacing: '0.06em' }}>{label} · {timeStr}</span>
                 {record.note && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color, opacity: 0.7, marginLeft: '4px' }}>{record.note}</span>}
