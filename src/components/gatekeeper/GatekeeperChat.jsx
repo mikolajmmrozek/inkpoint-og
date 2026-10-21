@@ -39,14 +39,24 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
     setMessages(conv?.messages || []);
   }, []);
 
+  // Historia jest przypisana do zalogowanego użytkownika (created_by_id) —
+  // każdy admin widzi wyłącznie własne rozmowy, nic się nie przecina.
+  const loadMyChats = useCallback(async () => {
+    const me = await base44.auth.me();
+    const list = ((await base44.agents.listConversations({ agent_name: 'Gatekeeper' })) || [])
+      .filter(c => c.created_by_id === me.id)
+      .sort(byUpdatedDesc);
+    setConversations(list);
+    return list;
+  }, []);
+
   // Start: wczytaj historię rozmów i otwórz ostatnią; brak — nowa rozmowa
   useEffect(() => {
     let active = true;
     const start = async () => {
       try {
-        const list = (await base44.agents.listConversations({ agent_name: 'Gatekeeper' }) || []).sort(byUpdatedDesc);
+        const list = await loadMyChats();
         if (!active) return;
-        setConversations(list);
         const last = list[0];
         if (last) {
           const full = await base44.agents.getConversation(last.id);
@@ -66,7 +76,7 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
     };
     start();
     return () => { active = false; };
-  }, [patchConversation]);
+  }, [loadMyChats, patchConversation]);
 
   // Subskrypcja aktywnej rozmowy
   useEffect(() => {
@@ -132,8 +142,7 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
     setError(null);
     setLoading(true);
     try {
-      const list = (await base44.agents.listConversations({ agent_name: 'Gatekeeper' }) || []).sort(byUpdatedDesc);
-      setConversations(list);
+      const list = await loadMyChats();
       const last = list[0];
       if (last) patchConversation(await base44.agents.getConversation(last.id));
       else patchConversation(await base44.agents.createConversation({ agent_name: 'Gatekeeper', metadata: { name: 'Nowa rozmowa' } }));
