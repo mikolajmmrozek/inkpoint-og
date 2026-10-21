@@ -1,0 +1,36 @@
+{
+  "name": "PlatformOwner",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string",
+      "description": "E-mail konta z nadrz\u0119dnym dost\u0119pem do danych wszystkich studi\u00f3w (w\u0142a\u015bciciel platformy)"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Czy dost\u0119p nadrz\u0119dny jest aktywny"
+    },
+    "note": {
+      "type": "string",
+      "description": "Notatka (np. rola w zespole buduj\u0105cym platform\u0119)"
+    },
+    "added_by": {
+      "type": "string",
+      "description": "Kto doda\u0142 to konto"
+    }
+  },
+  "required": [
+    "email"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": false,
+    "update": false,
+    "delete": false
+  }
+}

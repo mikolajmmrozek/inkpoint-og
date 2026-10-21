@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { X, Send, Loader2, Bot, RefreshCw } from 'lucide-react';
+import { X, Send, Loader2, Bot, RefreshCw, Brain } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import MessageBubble from './MessageBubble';
+import GatekeeperMemoryPanel from './GatekeeperMemoryPanel';
 
 const SUGGESTIONS = [
   'Co potrafisz? Opisz swoje funkcje',
@@ -24,6 +25,7 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [input, setInput] = useState('');
+  const [view, setView] = useState('chat'); // 'chat' | 'memory'
   const scrollRef = useRef(null);
   const convRef = useRef(null);
 
@@ -103,13 +105,31 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Asystent AI · tylko administrator</p>
             </div>
           </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: '4px' }} aria-label="Zamknij">
-            <X size={18} />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setView(v => v === 'memory' ? 'chat' : 'memory')}
+              title="Pamięć Gatekeepera"
+              aria-label="Pamięć Gatekeepera"
+              style={{
+                background: view === 'memory' ? 'rgb(var(--brand-rgb) / 0.1)' : 'none',
+                border: `0.5px solid ${view === 'memory' ? 'var(--brand)' : 'transparent'}`,
+                cursor: 'pointer', color: view === 'memory' ? 'var(--brand)' : t.muted,
+                padding: '5px', borderRadius: 'var(--radius)',
+              }}
+            >
+              <Brain size={16} />
+            </button>
+            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: '4px' }} aria-label="Zamknij">
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
+        {/* Pamięć — panel z historią zmian (właściciel platformy widzi wszystkie studia) */}
+        {view === 'memory' && <GatekeeperMemoryPanel theme={theme} />}
+
         {/* Messages */}
-        <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4">
+        {view === 'chat' && <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4">
           {loading ? (
             <div className="flex flex-col items-center justify-center h-full gap-3">
               <Loader2 size={20} className="animate-spin" style={{ color: 'var(--brand)' }} />
@@ -150,10 +170,10 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
               )}
             </>
           )}
-        </div>
+        </div>}
 
         {/* Input */}
-        <div className="px-3 py-3" style={{ borderTop: `0.5px solid ${t.border}` }}>
+        {view === 'chat' && <div className="px-3 py-3" style={{ borderTop: `0.5px solid ${t.border}` }}>
           <div className="flex items-end gap-2">
             <textarea
               value={input}
@@ -173,7 +193,7 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
               <Send size={15} />
             </button>
           </div>
-        </div>
+        </div>}
       </motion.div>
     </div>
   );

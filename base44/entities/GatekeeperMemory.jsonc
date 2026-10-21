@@ -1,0 +1,76 @@
+{
+  "name": "GatekeeperMemory",
+  "type": "object",
+  "properties": {
+    "agent_name": {
+      "type": "string",
+      "default": "Gatekeeper",
+      "description": "Nazwa asystenta, do kt\u00f3rego nale\u017cy ta pami\u0119\u0107"
+    },
+    "studio_id": {
+      "type": "string",
+      "default": "romanstattoo",
+      "description": "Identyfikator studia (tenant) \u2014 pami\u0119\u0107 jest izolowana per studio"
+    },
+    "memory_key": {
+      "type": "string",
+      "description": "Kr\u00f3tki klucz wpisu (slug, np. 'styl_odpowiedzi')"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "style",
+        "preference"
+      ],
+      "description": "Kategoria: style = styl pracy/odpowiedzi, preference = preferencja administratora"
+    },
+    "content": {
+      "type": "string",
+      "description": "Tre\u015b\u0107 zapami\u0119tanej preferencji (max 600 znak\u00f3w, bez danych klient\u00f3w)"
+    },
+    "version": {
+      "type": "number",
+      "description": "Numer wersji wpisu (ro\u015bnie przy ka\u017cdej zmianie)"
+    },
+    "is_current": {
+      "type": "boolean",
+      "default": true,
+      "description": "True = aktualna wersja; false = wersja archiwalna (historia)"
+    },
+    "source_version": {
+      "type": "number",
+      "description": "Numer wersji, z kt\u00f3rej przywr\u00f3cono ten wpis (tylko dla wpis\u00f3w odtworzonych)"
+    },
+    "author_type": {
+      "type": "string",
+      "enum": [
+        "assistant",
+        "admin"
+      ],
+      "description": "Kto zapisa\u0142: assistant = Gatekeeper nauczy\u0142 si\u0119 sam, admin = r\u0119cznie z panelu"
+    },
+    "author_name": {
+      "type": "string",
+      "description": "Imi\u0119/nazwa autora zmiany"
+    }
+  },
+  "required": [
+    "agent_name",
+    "studio_id",
+    "memory_key",
+    "category",
+    "content",
+    "version",
+    "is_current"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": false,
+    "update": false,
+    "delete": false
+  }
+}

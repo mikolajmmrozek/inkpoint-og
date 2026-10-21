@@ -7,6 +7,7 @@ const TOOL_LABELS = {
   artistavailability: 'Dyspozycje', healthform: 'Ankieta zdrowotna', changerequest: 'Prośba o zmianę',
   contactmessage: 'Wiadomości', feedback: 'Opinie', notification: 'Powiadomienia',
   artistcommissionhistory: 'Stawki artystów', userlog: 'Log aktywności', user: 'Użytkownicy',
+  gatekeepermemory: 'Pamięć Gatekeepera',
 };
 
 function toolLabel(name = '') {
