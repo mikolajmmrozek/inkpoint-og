@@ -44,7 +44,7 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
   const loadMyChats = useCallback(async () => {
     const me = await base44.auth.me();
     const list = ((await base44.agents.listConversations({ agent_name: 'Gatekeeper' })) || [])
-      .filter(c => c.created_by_id === me.id)
+      .filter(c => c.created_by_id === me.id && !c.metadata?.archived)
       .sort(byUpdatedDesc);
     setConversations(list);
     return list;
@@ -121,9 +121,18 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
   const send = async (text) => {
     const content = (text ?? input).trim();
     if (!content || !conversation) return;
+    const isFirstMessage = !messages.some(m => m.role === 'user');
     setInput('');
     setError(null);
     setMessages(prev => [...prev, { role: 'user', content }]);
+    if (isFirstMessage) {
+      // Rozmowa dostaje automatyczną nazwę z pierwszej wiadomości użytkownika
+      const autoName = content.replace(/\s+/g, ' ').slice(0, 42) + (content.length > 42 ? '…' : '');
+      setConversations(prev => prev.map(c => c.id === conversation.id
+        ? { ...c, metadata: { ...(c.metadata || {}), name: autoName } }
+        : c));
+      base44.functions.invoke('manageConversation', { conversation_id: conversation.id, action: 'rename', name: autoName }).catch(() => {});
+    }
     // odśwież tytuł i kolejność na liście historii
     setConversations(prev => {
       const updated = prev.map(c => c.id === conversation.id
@@ -150,6 +159,31 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
       setError('Nie udało się uruchomić asystenta. Spróbuj ponownie.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Zmiana nazwy rozmowy (zapisywana w metadanych rozmowy)
+  const renameConversation = async (id, name) => {
+    setConversations(prev => prev.map(c => c.id === id ? { ...c, metadata: { ...(c.metadata || {}), name } } : c));
+    try {
+      await base44.functions.invoke('manageConversation', { conversation_id: id, action: 'rename', name });
+    } catch {
+      setError('Nie udało się zmienić nazwy rozmowy. Spróbuj ponownie.');
+    }
+  };
+
+  // Usunięcie rozmowy z historii (archiwizacja) + przełączenie na inną
+  const removeConversation = async (id) => {
+    const rest = conversations.filter(c => c.id !== id);
+    setConversations(rest);
+    try {
+      await base44.functions.invoke('manageConversation', { conversation_id: id, action: 'archive' });
+      if (conversation?.id === id) {
+        if (rest[0]) patchConversation(await base44.agents.getConversation(rest[0].id));
+        else patchConversation(await base44.agents.createConversation({ agent_name: 'Gatekeeper', metadata: { name: 'Nowa rozmowa' } }));
+      }
+    } catch {
+      setError('Nie udało się usunąć rozmowy. Spróbuj ponownie.');
     }
   };
 
@@ -225,7 +259,7 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
 
         {/* Historia rozmów */}
         {view === 'history' && (
-          <ChatHistoryPanel t={t} conversations={conversations} activeId={conversation?.id} onSelect={openConversation} onNew={newChat} creating={creating} />
+          <ChatHistoryPanel t={t} conversations={conversations} activeId={conversation?.id} onSelect={openConversation} onNew={newChat} creating={creating} onRename={renameConversation} onDelete={removeConversation} />
         )}
 
         {/* Aktywna rozmowa */}

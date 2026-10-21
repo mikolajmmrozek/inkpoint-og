@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import { pl } from 'date-fns/locale';
-import { Plus, MessageSquare } from 'lucide-react';
+import { Plus, MessageSquare, Pencil, Trash2, Check, X } from 'lucide-react';
+import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 
 // Tytuł rozmowy: nadana nazwa, a inaczej pierwszy komunikat użytkownika
 export const convTitle = (conv) => {
@@ -12,7 +14,27 @@ export const convTitle = (conv) => {
   return 'Nowa rozmowa';
 };
 
-export default function ChatHistoryPanel({ t, conversations, activeId, onSelect, onNew, creating }) {
+export default function ChatHistoryPanel({ t, conversations, activeId, onSelect, onNew, creating, onRename, onDelete }) {
+  const [editingId, setEditingId] = useState(null);
+  const [editName, setEditName] = useState('');
+  const [deleteId, setDeleteId] = useState(null);
+
+  const iconBtn = {
+    background: 'none', border: 'none', cursor: 'pointer', color: t.muted,
+    padding: '3px', flexShrink: 0, display: 'flex',
+  };
+
+  const startRename = (c) => {
+    setEditingId(c.id);
+    setEditName(convTitle(c));
+  };
+
+  const submitRename = (c) => {
+    const name = editName.trim();
+    if (name && name !== convTitle(c)) onRename(c.id, name);
+    setEditingId(null);
+  };
+
   return (
     <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-2">
       <button
@@ -38,32 +60,65 @@ export default function ChatHistoryPanel({ t, conversations, activeId, onSelect,
 
       {conversations.map(c => {
         const active = c.id === activeId;
+        const editing = editingId === c.id;
         let when = '';
         try { when = format(parseISO(c.updated_date || c.created_date), 'd MMM, HH:mm', { locale: pl }); } catch {}
         return (
-          <button
+          <div
             key={c.id}
-            onClick={() => onSelect(c.id)}
+            onClick={() => !editing && onSelect(c.id)}
             className="text-left w-full"
             style={{
               display: 'flex', gap: '8px', alignItems: 'flex-start',
               background: active ? 'rgb(var(--brand-rgb) / 0.1)' : 'rgba(128,128,128,0.05)',
               border: `0.5px solid ${active ? 'var(--brand)' : t.border}`,
-              borderRadius: 'var(--radius)', padding: '8px 10px', cursor: 'pointer',
+              borderRadius: 'var(--radius)', padding: '8px 10px', cursor: editing ? 'default' : 'pointer',
             }}
           >
             <MessageSquare size={12} color={active ? 'var(--brand)' : t.muted} style={{ flexShrink: 0, marginTop: '2px' }} />
-            <span style={{ minWidth: 0 }}>
-              <span style={{ display: 'block', fontSize: '12px', color: t.text, lineHeight: 1.35, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {convTitle(c)}
-              </span>
+            <span style={{ minWidth: 0, flex: 1 }}>
+              {editing ? (
+                <span style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                  <input
+                    autoFocus
+                    value={editName}
+                    onChange={e => setEditName(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') { e.preventDefault(); submitRename(c); }
+                      if (e.key === 'Escape') setEditingId(null);
+                    }}
+                    onClick={e => e.stopPropagation()}
+                    style={{ flex: 1, minWidth: 0, background: 'transparent', border: 'none', borderBottom: `0.5px solid var(--brand)`, color: t.text, fontSize: '12px', padding: '2px 0', outline: 'none', fontFamily: 'var(--font-body)' }}
+                  />
+                  <button onClick={e => { e.stopPropagation(); submitRename(c); }} title="Zapisz nazwę" style={iconBtn}><Check size={12} color="var(--brand)" /></button>
+                  <button onClick={e => { e.stopPropagation(); setEditingId(null); }} title="Anuluj" style={iconBtn}><X size={12} /></button>
+                </span>
+              ) : (
+                <span style={{ display: 'block', fontSize: '12px', color: t.text, lineHeight: 1.35, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {convTitle(c)}
+                </span>
+              )}
               <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px' }}>
                 {when} · {(c.messages || []).length} wiadomości
               </span>
             </span>
-          </button>
+            {!editing && (
+              <span style={{ display: 'flex', gap: '2px', flexShrink: 0 }} onClick={e => e.stopPropagation()}>
+                <button onClick={() => startRename(c)} title="Zmień nazwę" style={iconBtn}><Pencil size={10} /></button>
+                <button onClick={() => setDeleteId(c.id)} title="Usuń rozmowę" style={iconBtn}><Trash2 size={11} /></button>
+              </span>
+            )}
+          </div>
         );
       })}
+
+      <ConfirmDeleteDialog
+        open={!!deleteId}
+        title="Usuń rozmowę"
+        message="Czy na pewno chcesz usunąć tę rozmowę? Zniknie z Twojej historii i nie można tego cofnąć."
+        onConfirm={() => { onDelete(deleteId); setDeleteId(null); }}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   );
 }
