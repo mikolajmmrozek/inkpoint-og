@@ -8,6 +8,7 @@ import QuickAvailabilityModal from './QuickAvailabilityModal';
 import QuickClientModal from './QuickClientModal';
 import QuickPromotionModal from './QuickPromotionModal';
 import { openHealthFormQRPage } from '@/lib/qrPage';
+import GatekeeperChat from '@/components/gatekeeper/GatekeeperChat';
 
 const CreateMenuContext = createContext(null);
 export const useCreateMenu = () => useContext(CreateMenuContext);
@@ -51,6 +52,7 @@ export function CreateMenuProvider({ children, role, theme, selfArtistId }) {
   const newHealthForm = useCallback(() => {
     openHealthFormQRPage(`${window.location.origin}/health-form`);
   }, []);
+  const newGatekeeper = useCallback(() => setAction('gatekeeper'), []);
 
   const closeAll = () => { setAction(null); setBookingPrefill(null); setAvailPrefill(null); };
 
@@ -83,7 +85,7 @@ export function CreateMenuProvider({ children, role, theme, selfArtistId }) {
   };
 
   return (
-    <CreateMenuContext.Provider value={{ newBooking, newAvailability, newClient, newPromotion, newHealthForm, registerBookingsRefresh, registerAvailabilityRefresh, registerClientsRefresh, registerSelectedDate, role }}>
+    <CreateMenuContext.Provider value={{ newBooking, newAvailability, newClient, newPromotion, newHealthForm, newGatekeeper, registerBookingsRefresh, registerAvailabilityRefresh, registerClientsRefresh, registerSelectedDate, role }}>
       {children}
       {role !== 'user' && !action && (
         <CreateMenuFAB
@@ -94,6 +96,7 @@ export function CreateMenuProvider({ children, role, theme, selfArtistId }) {
           onNewHealthForm={newHealthForm}
           onNewClient={newClient}
           onNewPromotion={newPromotion}
+          onNewGatekeeper={newGatekeeper}
         />
       )}
       <AnimatePresence>
@@ -142,6 +145,13 @@ export function CreateMenuProvider({ children, role, theme, selfArtistId }) {
           />
         )}
       </AnimatePresence>
+      {action === 'gatekeeper' && (
+        <GatekeeperChat
+          key="gatekeeper"
+          theme={theme}
+          onClose={closeAll}
+        />
+      )}
     </CreateMenuContext.Provider>
   );
 }
