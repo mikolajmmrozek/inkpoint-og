@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { X, Send, Loader2, Bot, RefreshCw, Brain } from 'lucide-react';
+import { X, Send, Bot, Brain, History, Plus } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import MessageBubble from './MessageBubble';
+import ChatThread from './ChatThread';
+import ChatHistoryPanel, { convTitle } from './ChatHistoryPanel';
 import GatekeeperMemoryPanel from './GatekeeperMemoryPanel';
 
 const SUGGESTIONS = [
@@ -18,26 +19,56 @@ const THEME = {
   dark: { bg: '#0A0A0A', border: '#262626', text: '#F5F0EB', muted: 'rgba(245,240,235,0.5)' },
 };
 
+const byUpdatedDesc = (a, b) => (b.updated_date || b.created_date || '').localeCompare(a.updated_date || a.created_date || '');
+
 export default function GatekeeperChat({ theme = 'dark', onClose }) {
   const t = THEME[theme === 'light' ? 'light' : 'dark'];
-  const [conversation, setConversation] = useState(null);
+  const [conversations, setConversations] = useState([]);
+  const [conversation, setConversation] = useState(null); // aktywna rozmowa (pełny obiekt)
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
   const [error, setError] = useState(null);
   const [input, setInput] = useState('');
-  const [view, setView] = useState('chat'); // 'chat' | 'memory'
-  const scrollRef = useRef(null);
+  const [view, setView] = useState('chat'); // 'chat' | 'history' | 'memory'
   const convRef = useRef(null);
 
-  useEffect(() => {
-    let active = true;
-    base44.agents.createConversation({ agent_name: 'Gatekeeper', metadata: { name: 'Gatekeeper' } })
-      .then(c => { if (active) { convRef.current = c; setConversation(c); setMessages(c.messages || []); } })
-      .catch(() => active && setError('Nie udało się uruchomić asystenta. Spróbuj ponownie.'))
-      .finally(() => active && setLoading(false));
-    return () => { active = false; };
+  const patchConversation = useCallback((conv) => {
+    setConversation(conv);
+    convRef.current = conv;
+    setMessages(conv?.messages || []);
   }, []);
 
+  // Start: wczytaj historię rozmów i otwórz ostatnią; brak — nowa rozmowa
+  useEffect(() => {
+    let active = true;
+    const start = async () => {
+      try {
+        const list = (await base44.agents.listConversations({ agent_name: 'Gatekeeper' }) || []).sort(byUpdatedDesc);
+        if (!active) return;
+        setConversations(list);
+        const last = list[0];
+        if (last) {
+          const full = await base44.agents.getConversation(last.id);
+          if (active) patchConversation(full);
+        } else {
+          const c = await base44.agents.createConversation({ agent_name: 'Gatekeeper', metadata: { name: 'Nowa rozmowa' } });
+          if (active) {
+            setConversations([c]);
+            patchConversation(c);
+          }
+        }
+      } catch {
+        if (active) setError('Nie udało się uruchomić asystenta. Spróbuj ponownie.');
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+    start();
+    return () => { active = false; };
+  }, [patchConversation]);
+
+  // Subskrypcja aktywnej rozmowy
   useEffect(() => {
     if (!conversation) return;
     const unsubscribe = base44.agents.subscribeToConversation(conversation.id, (data) => {
@@ -46,10 +77,36 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
     return () => { if (typeof unsubscribe === 'function') unsubscribe(); };
   }, [conversation]);
 
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [messages, loading]);
+  const newChat = async () => {
+    if (creating) return;
+    setCreating(true);
+    setError(null);
+    try {
+      const c = await base44.agents.createConversation({ agent_name: 'Gatekeeper', metadata: { name: 'Nowa rozmowa' } });
+      setConversations(prev => [c, ...prev]);
+      patchConversation(c);
+      setView('chat');
+    } catch {
+      setError('Nie udało się utworzyć rozmowy. Spróbuj ponownie.');
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const openConversation = async (id) => {
+    if (id === conversation?.id) { setView('chat'); return; }
+    setLoading(true);
+    setError(null);
+    try {
+      const c = await base44.agents.getConversation(id);
+      patchConversation(c);
+      setView('chat');
+    } catch {
+      setError('Nie udało się otworzyć rozmowy. Spróbuj ponownie.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const send = async (text) => {
     const content = (text ?? input).trim();
@@ -57,6 +114,13 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
     setInput('');
     setError(null);
     setMessages(prev => [...prev, { role: 'user', content }]);
+    // odśwież tytuł i kolejność na liście historii
+    setConversations(prev => {
+      const updated = prev.map(c => c.id === conversation.id
+        ? { ...c, updated_date: new Date().toISOString(), messages: [...(c.messages || []), { role: 'user', content }] }
+        : c);
+      return updated.sort(byUpdatedDesc);
+    });
     try {
       await base44.agents.addMessage(convRef.current || conversation, { role: 'user', content });
     } catch {
@@ -64,17 +128,31 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
     }
   };
 
-  const retry = () => {
+  const retry = async () => {
     setError(null);
     setLoading(true);
-    base44.agents.createConversation({ agent_name: 'Gatekeeper', metadata: { name: 'Gatekeeper' } })
-      .then(c => { convRef.current = c; setConversation(c); setMessages(c.messages || []); })
-      .catch(() => setError('Nie udało się uruchomić asystenta. Spróbuj ponownie.'))
-      .finally(() => setLoading(false));
+    try {
+      const list = (await base44.agents.listConversations({ agent_name: 'Gatekeeper' }) || []).sort(byUpdatedDesc);
+      setConversations(list);
+      const last = list[0];
+      if (last) patchConversation(await base44.agents.getConversation(last.id));
+      else patchConversation(await base44.agents.createConversation({ agent_name: 'Gatekeeper', metadata: { name: 'Nowa rozmowa' } }));
+    } catch {
+      setError('Nie udało się uruchomić asystenta. Spróbuj ponownie.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const isResponding = messages.length > 0 && messages[messages.length - 1].role === 'user';
   const showSuggestions = !loading && !error && messages.filter(m => m.role === 'user').length === 0;
+
+  const headerBtn = (active) => ({
+    background: active ? 'rgb(var(--brand-rgb) / 0.1)' : 'none',
+    border: `0.5px solid ${active ? 'var(--brand)' : 'transparent'}`,
+    cursor: 'pointer', color: active ? 'var(--brand)' : t.muted,
+    padding: '5px', borderRadius: 'var(--radius)',
+  });
 
   return (
     <div className="fixed inset-0 z-[62] flex items-end justify-center sm:items-end sm:justify-end p-3 sm:p-5" style={{ pointerEvents: 'none' }}>
@@ -96,26 +174,34 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-          <div className="flex items-center gap-2.5">
-            <span style={{ width: '32px', height: '32px', borderRadius: 'var(--radius)', background: 'var(--brand)', color: 'var(--btn-text, #F5F0EB)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="flex-shrink-0" style={{ width: '32px', height: '32px', borderRadius: 'var(--radius)', background: 'var(--brand)', color: 'var(--btn-text, #F5F0EB)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Bot size={16} />
             </span>
-            <div>
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.05rem', color: t.text, letterSpacing: '0.06em', lineHeight: 1 }}>GATEKEEPER</p>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Asystent AI · tylko administrator</p>
+            <div className="min-w-0">
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.05rem', color: t.text, letterSpacing: '0.06em', lineHeight: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {view === 'chat' && conversation ? convTitle(conversation) : view === 'memory' ? 'PAMIĘĆ' : 'HISTORIA ROZMÓW'}
+              </p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Gatekeeper · Asystent AI</p>
             </div>
           </div>
           <div className="flex items-center gap-1">
+            <button onClick={newChat} disabled={creating} title="Nowa rozmowa" aria-label="Nowa rozmowa" style={{ ...headerBtn(false), opacity: creating ? 0.5 : 1 }}>
+              <Plus size={16} />
+            </button>
+            <button
+              onClick={() => setView(v => v === 'history' ? 'chat' : 'history')}
+              title="Historia rozmów"
+              aria-label="Historia rozmów"
+              style={headerBtn(view === 'history')}
+            >
+              <History size={16} />
+            </button>
             <button
               onClick={() => setView(v => v === 'memory' ? 'chat' : 'memory')}
               title="Pamięć Gatekeepera"
               aria-label="Pamięć Gatekeepera"
-              style={{
-                background: view === 'memory' ? 'rgb(var(--brand-rgb) / 0.1)' : 'none',
-                border: `0.5px solid ${view === 'memory' ? 'var(--brand)' : 'transparent'}`,
-                cursor: 'pointer', color: view === 'memory' ? 'var(--brand)' : t.muted,
-                padding: '5px', borderRadius: 'var(--radius)',
-              }}
+              style={headerBtn(view === 'memory')}
             >
               <Brain size={16} />
             </button>
@@ -128,51 +214,15 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
         {/* Pamięć — panel z historią zmian (właściciel platformy widzi wszystkie studia) */}
         {view === 'memory' && <GatekeeperMemoryPanel theme={theme} />}
 
-        {/* Messages */}
-        {view === 'chat' && <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center h-full gap-3">
-              <Loader2 size={20} className="animate-spin" style={{ color: 'var(--brand)' }} />
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Uruchamiam Gatekeepera...</p>
-            </div>
-          ) : error && messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-4">
-              <p style={{ fontSize: '13px', color: t.muted, lineHeight: 1.5 }}>{error}</p>
-              <button onClick={retry} className="flex items-center gap-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--brand)', border: '0.5px solid var(--brand)', background: 'transparent', padding: '7px 14px', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
-                <RefreshCw size={11} /> SPRÓB PONOWNIE
-              </button>
-            </div>
-          ) : (
-            <>
-              {messages.map((m, i) => <MessageBubble key={i} message={m} t={t} />)}
-              {isResponding && (
-                <div className="flex items-center gap-2 mb-3">
-                  <span style={{ width: '26px', height: '26px', borderRadius: 'var(--radius)', background: 'var(--brand)', color: 'var(--btn-text, #F5F0EB)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontFamily: 'var(--font-mono)', fontSize: '10px', fontWeight: 700 }}>G</span>
-                  <span style={{ display: 'flex', gap: '4px', padding: '10px 14px', background: 'rgba(128,128,128,0.06)', border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)' }}>
-                    {[0, 1, 2].map(d => <span key={d} style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--brand)', opacity: 1 - d * 0.25, animation: `pulse 1.2s ${d * 0.2}s infinite` }} />)}
-                  </span>
-                </div>
-              )}
-              {showSuggestions && (
-                <div className="flex flex-col gap-1.5 mt-1">
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '2px' }}>POPULARNE PYTANIA</p>
-                  {SUGGESTIONS.map(s => (
-                    <button key={s} onClick={() => send(s)} className="text-left" style={{ fontSize: '12px', color: t.text, background: 'rgba(128,128,128,0.05)', border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)', padding: '8px 12px', cursor: 'pointer', lineHeight: 1.4 }}
-                      onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--brand)'}
-                      onMouseLeave={e => e.currentTarget.style.borderColor = t.border}>
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              )}
-              {error && messages.length > 0 && (
-                <p style={{ fontSize: '12px', color: '#ef4444', marginBottom: '8px' }}>{error}</p>
-              )}
-            </>
-          )}
-        </div>}
+        {/* Historia rozmów */}
+        {view === 'history' && (
+          <ChatHistoryPanel t={t} conversations={conversations} activeId={conversation?.id} onSelect={openConversation} onNew={newChat} creating={creating} />
+        )}
 
-        {/* Input */}
+        {/* Aktywna rozmowa */}
+        {view === 'chat' && (
+          <ChatThread t={t} loading={loading} error={error} messages={messages} isResponding={isResponding} showSuggestions={showSuggestions} suggestions={SUGGESTIONS} onRetry={retry} onSuggestion={send} />
+        )}
         {view === 'chat' && <div className="px-3 py-3" style={{ borderTop: `0.5px solid ${t.border}` }}>
           <div className="flex items-end gap-2">
             <textarea
