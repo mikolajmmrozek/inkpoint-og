@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { X, Send, Bot, Brain, History, Plus } from 'lucide-react';
+import { X, Send, Bot, Brain, History, Plus, Paperclip, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import ChatThread from './ChatThread';
 import ChatHistoryPanel, { convTitle } from './ChatHistoryPanel';
@@ -30,8 +30,11 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState(null);
   const [input, setInput] = useState('');
+  const [attachment, setAttachment] = useState(null); // { name, url } — media przesłane przez admina
+  const [uploading, setUploading] = useState(false);
   const [view, setView] = useState('chat'); // 'chat' | 'history' | 'memory'
   const convRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const patchConversation = useCallback((conv) => {
     setConversation(conv);
@@ -118,16 +121,34 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
     }
   };
 
+  // Dołączanie zdjęcia/pliku do rozmowy — admin przesyła, Gatekeeper używa URL-a tam, gdzie wskaże
+  const attachFile = async (file) => {
+    if (!file || uploading) return;
+    setUploading(true);
+    setError(null);
+    try {
+      const res = await base44.integrations.Core.UploadPublicFile({ file });
+      setAttachment({ name: file.name || 'plik', url: res?.file_url });
+    } catch {
+      setError('Nie udało się przesłać pliku. Spróbuj ponownie.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const send = async (text) => {
-    const content = (text ?? input).trim();
-    if (!content || !conversation) return;
+    const base = (text ?? input).trim();
+    if ((!base && !attachment) || !conversation) return;
+    const content = attachment ? `${base}\n\n[Załącznik: ${attachment.url}]` : base;
+    setAttachment(null);
     const isFirstMessage = !messages.some(m => m.role === 'user');
     setInput('');
     setError(null);
     setMessages(prev => [...prev, { role: 'user', content }]);
     if (isFirstMessage) {
       // Rozmowa dostaje automatyczną nazwę z pierwszej wiadomości użytkownika
-      const autoName = content.replace(/\s+/g, ' ').slice(0, 42) + (content.length > 42 ? '…' : '');
+      const autoNameSrc = (base || 'Załącznik').replace(/\s+/g, ' ');
+      const autoName = autoNameSrc.slice(0, 42) + (autoNameSrc.length > 42 ? '…' : '');
       setConversations(prev => prev.map(c => c.id === conversation.id
         ? { ...c, metadata: { ...(c.metadata || {}), name: autoName } }
         : c));
@@ -267,7 +288,33 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
           <ChatThread t={t} loading={loading} error={error} messages={messages} isResponding={isResponding} showSuggestions={showSuggestions} suggestions={SUGGESTIONS} onRetry={retry} onSuggestion={send} />
         )}
         {view === 'chat' && <div className="px-3 py-3" style={{ borderTop: `0.5px solid ${t.border}` }}>
+          {attachment && (
+            <div className="flex items-center justify-between mb-2" style={{ padding: '6px 10px', background: 'rgb(var(--brand-rgb) / 0.08)', border: '0.5px solid var(--brand)', borderRadius: 'var(--radius)' }}>
+              <span style={{ fontSize: '11px', color: t.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {attachment.name}
+              </span>
+              <button onClick={() => setAttachment(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, display: 'flex', padding: '2px' }} aria-label="Usuń załącznik">
+                <X size={12} />
+              </button>
+            </div>
+          )}
           <div className="flex items-end gap-2">
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={e => { const f = e.target.files?.[0]; if (f) attachFile(f); e.target.value = ''; }}
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading || loading || !!error}
+              title="Dołącz zdjęcie"
+              aria-label="Dołącz zdjęcie"
+              style={{ width: '40px', height: '40px', flexShrink: 0, background: 'transparent', color: uploading ? 'var(--brand)' : t.muted, border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+              {uploading ? <Loader2 size={15} className="animate-spin" /> : <Paperclip size={15} />}
+            </button>
             <textarea
               value={input}
               onChange={e => setInput(e.target.value)}
@@ -279,8 +326,8 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
             />
             <button
               onClick={() => send()}
-              disabled={!input.trim() || loading || isResponding}
-              style={{ width: '40px', height: '40px', flexShrink: 0, background: 'var(--brand)', color: 'var(--btn-text, #F5F0EB)', border: 'none', borderRadius: 'var(--radius)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: !input.trim() || loading || isResponding ? 0.4 : 1 }}
+              disabled={(!input.trim() && !attachment) || loading || isResponding || uploading}
+              style={{ width: '40px', height: '40px', flexShrink: 0, background: 'var(--brand)', color: 'var(--btn-text, #F5F0EB)', border: 'none', borderRadius: 'var(--radius)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: (!input.trim() && !attachment) || loading || isResponding || uploading ? 0.4 : 1 }}
               aria-label="Wyślij"
             >
               <Send size={15} />
