@@ -209,6 +209,19 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
   };
 
   const isResponding = messages.length > 0 && messages[messages.length - 1].role === 'user';
+
+  // Po zakończeniu odpowiedzi asystenta odśwież metadane rozmowy (np. nazwę zmienioną przez Gatekeepera)
+  const wasRespondingRef = useRef(false);
+  useEffect(() => {
+    if (wasRespondingRef.current && !isResponding && conversation?.id) {
+      base44.agents.getConversation(conversation.id).then(c => {
+        if (!c?.id) return;
+        setConversations(prev => prev.map(x => x.id === c.id ? { ...x, metadata: c.metadata } : x));
+        setConversation(prev => prev?.id === c.id ? { ...prev, metadata: c.metadata } : prev);
+      }).catch(() => {});
+    }
+    wasRespondingRef.current = isResponding;
+  }, [isResponding, conversation]);
   const showSuggestions = !loading && !error && messages.filter(m => m.role === 'user').length === 0;
 
   const headerBtn = (active) => ({

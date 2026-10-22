@@ -4,7 +4,18 @@ export default async function (req) {
   const user = await base44.auth.me();
   if (!user || user.role !== "admin") return Response.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { conversation_id, action, name } = await req.json();
+  let { conversation_id, action, name } = await req.json();
+
+  // Bez conversation_id (np. wywołanie z czatu Gatekeepera): użyj najnowszej rozmowy tego administratora
+  if (!conversation_id) {
+    const list = await base44.agents.listConversations({ agent_name: "Gatekeeper" });
+    const mine = (list || [])
+      .filter(c => c.created_by_id === user.id && !(c.metadata || {}).archived)
+      .sort((a, b) => (b.updated_date || b.created_date || "").localeCompare(a.updated_date || a.created_date || ""));
+    conversation_id = mine[0]?.id;
+  }
+  if (!conversation_id) return Response.json({ error: "conversation not found" }, { status: 404 });
+
   const conv = await base44.agents.getConversation(conversation_id);
   if (!conv || !conv.id) return Response.json({ error: "not found" }, { status: 404 });
   // Każdy admin zarządza wyłącznie własnymi rozmowami
