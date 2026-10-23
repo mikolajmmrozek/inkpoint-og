@@ -10,10 +10,9 @@ export default function DatePickerCustom({ value, onChange, showErrors, t, textP
   const now = new Date();
   const localToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-  // Bez appearance: none — na mobile psuje ono natywny kalendarz systemowy.
-  // Tło i kolor tekstu dopasowane do motywu; pusty input ma przezroczysty kolor,
-  // żeby native placeholder nie nakładał się na nasz przykładowy tekst.
-  const inputStyle = {
+  // Ramkę i odstępy rysuje zwykły kontener: natywne pole daty na iOS
+  // nie może powiększyć widocznego pola o własne odstępy. Kalendarz zostaje natywny.
+  const fieldStyle = {
     background: isLight ? '#FFFFFF' : 'rgba(255,255,255,0.09)',
     border: `0.5px solid ${showErrors && !value ? 'var(--brand)' : bc}`,
     borderRadius: '4px',
@@ -25,6 +24,7 @@ export default function DatePickerCustom({ value, onChange, showErrors, t, textP
     minWidth: 0,
     display: 'block',
     boxSizing: 'border-box',
+    overflow: 'hidden',
     outline: 'none',
     fontFamily: 'var(--font-body)',
     colorScheme: isLight ? 'light' : 'dark',
@@ -35,13 +35,13 @@ export default function DatePickerCustom({ value, onChange, showErrors, t, textP
       <label style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: showErrors && !value ? 'var(--brand)' : tm, letterSpacing: '0.15em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
         {t.dateOfBirth} * {showErrors && !value && '(wymagane)'}
       </label>
-      <div style={{ position: 'relative' }}>
+      <div style={{ ...fieldStyle, position: 'relative' }}>
         <input
           type="date"
           value={value || ''}
           max={localToday}
           onChange={e => onChange(e.target.value || '')}
-          style={inputStyle}
+          className="block h-[1.6em] w-full min-w-0 max-w-full box-border border-0 bg-transparent p-0 m-0 font-body text-base leading-[1.6] text-inherit outline-none"
         />
         {!hasValue && (
           <span
