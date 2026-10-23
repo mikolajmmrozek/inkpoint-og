@@ -41,6 +41,7 @@ export default function DatePickerCustom({ value, onChange, showErrors, t, textP
           value={value || ''}
           max={localToday}
           onChange={e => onChange(e.target.value || '')}
+          onFocus={() => { if (!value) onChange('2000-01-01'); }}
           className="block h-[1.6em] w-full min-w-0 max-w-full box-border border-0 bg-transparent p-0 m-0 font-body text-base leading-[1.6] text-inherit outline-none"
         />
         {!hasValue && (
