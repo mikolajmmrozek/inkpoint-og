@@ -148,6 +148,11 @@
       "type": "string",
       "description": "ID wydarzenia w Google Calendar (do synchronizacji)"
     },
+    "form_reminder_hidden": {
+      "type": "boolean",
+      "default": false,
+      "description": "Przypomnienie o brakuj\u0105cej ankiecie ukryte przez admina (X przy pozycji lub 'Ukryj wszystkie') \u2014 ukryte sesje nie zliczaj\u0105 si\u0119 w liczniku rezerwacji bez ankiety"
+    },
     "last_editor": {
       "type": "string",
       "enum": [

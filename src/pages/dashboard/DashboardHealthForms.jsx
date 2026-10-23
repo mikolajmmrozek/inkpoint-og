@@ -30,16 +30,6 @@ export default function DashboardHealthForms() {
   const [exporting, setExporting] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
   const [sendingLinkEmail, setSendingLinkEmail] = useState(null);
-  const [dismissedReminders, setDismissedReminders] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('dismissedFormReminders') || '[]'); } catch { return []; }
-  });
-
-  const dismissReminder = (bookingId) => {
-    const next = [...dismissedReminders, bookingId];
-    setDismissedReminders(next);
-    localStorage.setItem('dismissedFormReminders', JSON.stringify(next));
-  };
-
   useEffect(() => {
     Promise.all([
       base44.entities.HealthForm.list('-form_filled_date', 5000),
@@ -47,12 +37,22 @@ export default function DashboardHealthForms() {
       base44.entities.Booking.list('-session_date', 5000),
       base44.entities.Client.list('-created_date', 5000),
       base44.entities.HealthFormTemplate.filter({ key: 'default' }),
-    ]).then(([f, g, b, c, tplArr]) => {
+    ]).then(async ([f, g, b, c, tplArr]) => {
       if (tplArr?.length > 0) setTemplate(tplArr[0]);
       setForms(f);
       setGuardianForms(g);
-      setBookings(b);
       setClients(c);
+      let bookingList = b;
+      // Migracja: stare ukrycia z localStorage przenosimy na flagę po stronie serwera
+      try {
+        const legacy = JSON.parse(localStorage.getItem('dismissedFormReminders') || '[]');
+        if (Array.isArray(legacy) && legacy.length > 0) {
+          await base44.entities.Booking.updateMany({ id: { $in: legacy } }, { $set: { form_reminder_hidden: true } });
+          bookingList = b.map(x => legacy.includes(x.id) ? { ...x, form_reminder_hidden: true } : x);
+        }
+      } catch (e) {}
+      localStorage.removeItem('dismissedFormReminders');
+      setBookings(bookingList);
     }).finally(() => setLoading(false));
   }, []);
 
@@ -83,7 +83,7 @@ export default function DashboardHealthForms() {
   };
 
   // Bookings without completed health form
-  const pendingBookings = bookings.filter(b => !b.health_form_completed && b.status !== 'cancelled' && !dismissedReminders.includes(b.id));
+  const pendingBookings = bookings.filter(b => !b.health_form_completed && b.status !== 'cancelled' && !b.form_reminder_hidden);
 
   // Separate drafts from completed forms
   const completedForms = forms.filter(f => !f.is_draft);
@@ -214,11 +214,20 @@ export default function DashboardHealthForms() {
     setSelected(null);
   };
 
-  const dismissAllReminders = () => {
+  const dismissReminder = async (booking) => {
+    try {
+      await base44.entities.Booking.update(booking.id, { form_reminder_hidden: true });
+      setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, form_reminder_hidden: true } : b));
+    } catch (e) {}
+  };
+
+  const dismissAllReminders = async () => {
     if (!window.confirm(`Ukryć wszystkie przypomnienia (${pendingBookings.length})?`)) return;
-    const next = [...dismissedReminders, ...pendingBookings.map(b => b.id)];
-    setDismissedReminders(next);
-    localStorage.setItem('dismissedFormReminders', JSON.stringify(next));
+    const ids = pendingBookings.map(b => b.id);
+    try {
+      await base44.entities.Booking.updateMany({ id: { $in: ids } }, { $set: { form_reminder_hidden: true } });
+      setBookings(prev => prev.map(b => ids.includes(b.id) ? { ...b, form_reminder_hidden: true } : b));
+    } catch (e) {}
   };
 
   const deleteAllDrafts = async () => {
@@ -308,7 +317,7 @@ export default function DashboardHealthForms() {
               </div>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => dismissReminder(b.id)}
+                  onClick={() => dismissReminder(b)}
                   title="Ukryj przypomnienie"
                   style={{ color: t.muted, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', opacity: 0.6 }}
                 >
