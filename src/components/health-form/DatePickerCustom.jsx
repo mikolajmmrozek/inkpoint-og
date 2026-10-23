@@ -23,7 +23,6 @@ export default function DatePickerCustom({ value, onChange, showErrors, t, textP
     width: '100%',
     outline: 'none',
     fontFamily: 'var(--font-body)',
-    minHeight: '44px',
     colorScheme: isLight ? 'light' : 'dark',
   };
 
