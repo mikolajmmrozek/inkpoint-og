@@ -768,7 +768,7 @@ export default function HealthFormPage() {
             </div>
           )}
 
-          {step === 'personal' && <StepPersonal form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} textPrimary={textPrimary} textMuted={textMuted} borderColor={borderColor} />}
+          {step === 'personal' && <StepPersonal form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} textPrimary={textPrimary} textMuted={textMuted} borderColor={borderColor} theme={theme} />}
           {step === 'medical' && <StepMedical form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={activeTemplate} lang={lang} textPrimary={textPrimary} textMuted={textMuted} borderColor={borderColor} />}
           {step === 'procedure' && <StepProcedure form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={activeTemplate} lang={lang} textPrimary={textPrimary} textMuted={textMuted} borderColor={borderColor} />}
           {step === 'declaration' && <StepDeclaration form={form} setField={setField} t={t} inputStyle={inputStyle} showErrors={showErrors} templateData={activeTemplate} lang={lang} textPrimary={textPrimary} textMuted={textMuted} borderColor={borderColor} />}

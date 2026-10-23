@@ -1,6 +1,6 @@
 import DatePickerCustom from './DatePickerCustom';
 
-export default function StepPersonal({ form, setField, t, inputStyle, showErrors, textPrimary, textMuted, borderColor }) {
+export default function StepPersonal({ form, setField, t, inputStyle, showErrors, textPrimary, textMuted, borderColor, theme }) {
   const isMinor = form.date_of_birth
     ? new Date().getFullYear() - new Date(form.date_of_birth).getFullYear() < 18
     : false;
@@ -40,7 +40,7 @@ export default function StepPersonal({ form, setField, t, inputStyle, showErrors
 
       {/* Data urodzenia */}
       <div>
-        <DatePickerCustom value={form.date_of_birth} onChange={v => setField('date_of_birth', v)} showErrors={showErrors} t={t} textPrimary={textPrimary} textMuted={textMuted} borderColor={borderColor} />
+        <DatePickerCustom value={form.date_of_birth} onChange={v => setField('date_of_birth', v)} showErrors={showErrors} t={t} textPrimary={textPrimary} textMuted={textMuted} borderColor={borderColor} theme={theme} />
         {isMinor && (
           <div className="mt-2 px-3 py-2 flex items-center gap-2" style={{ background: 'rgb(var(--brand-rgb) /0.08)', border: '0.5px solid rgb(var(--brand-rgb) /0.3)' }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.08em' }}>⚠ {t.minorWarning}</p>

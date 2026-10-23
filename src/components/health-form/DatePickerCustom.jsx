@@ -1,8 +1,14 @@
-export default function DatePickerCustom({ value, onChange, showErrors, t, textPrimary, textMuted, borderColor }) {
+export default function DatePickerCustom({ value, onChange, showErrors, t, textPrimary, textMuted, borderColor, theme }) {
   const tc = textPrimary || '#F5F0EB';
   const tm = textMuted || 'rgba(245,240,235,0.5)';
   const bc = borderColor || '#262626';
 
+  // Dzisiejsza data w czasie lokalnym (bez toISOString, które przez UTC
+  // mogło dać wczorajszą/jutrzejszą datę przy zmianie strefy lub o północy)
+  const now = new Date();
+  const localToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+  // Bez appearance: none — na mobile psuje ono natywny kalendarz systemowy
   const inputStyle = {
     background: 'rgba(255,255,255,0.09)',
     border: `0.5px solid ${showErrors && !value ? 'var(--brand)' : bc}`,
@@ -13,9 +19,8 @@ export default function DatePickerCustom({ value, onChange, showErrors, t, textP
     width: '100%',
     outline: 'none',
     fontFamily: 'var(--font-body)',
-    appearance: 'none',
-    WebkitAppearance: 'none',
     minHeight: '44px',
+    colorScheme: theme === 'light' ? 'light' : 'dark',
   };
 
   return (
@@ -26,7 +31,7 @@ export default function DatePickerCustom({ value, onChange, showErrors, t, textP
       <input
         type="date"
         value={value || ''}
-        max={new Date().toISOString().split('T')[0]}
+        max={localToday}
         onChange={e => onChange(e.target.value || '')}
         style={inputStyle}
       />
