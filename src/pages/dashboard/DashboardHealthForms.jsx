@@ -99,6 +99,7 @@ export default function DashboardHealthForms() {
       form.client_last_name?.toLowerCase().includes(q) ||
       form.client_email?.toLowerCase().includes(q) ||
       (form.form_filled_date && format(new Date(form.form_filled_date), 'dd.MM.yyyy').includes(q)) ||
+      form.form_number?.toLowerCase().includes(q) ||
       form.id?.toLowerCase().includes(q) ||
       form.id?.slice(-8).toLowerCase().includes(q);
   });
@@ -108,6 +109,7 @@ export default function DashboardHealthForms() {
     return !q ||
       form.client_name?.toLowerCase().includes(q) ||
       form.client_first_name?.toLowerCase().includes(q) ||
+      form.form_number?.toLowerCase().includes(q) ||
       form.client_email?.toLowerCase().includes(q);
   });
 
@@ -351,6 +353,7 @@ export default function DashboardHealthForms() {
               <div>
                 <p style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>{form.client_name || form.client_first_name || '—'}</p>
                 <p style={{ ...mono, fontSize: '8px', color: t.muted, marginTop: '2px' }}>{form.client_email || 'brak email'}</p>
+                {form.form_number && <p style={{ ...mono, fontSize: '8px', color: 'rgba(255,165,0,0.7)', marginTop: '2px' }}>NR: {form.form_number}</p>}
                 <p style={{ ...mono, fontSize: '8px', color: 'rgba(255,165,0,0.7)', marginTop: '2px' }}>Ostatnia aktywność: {safeFormat(form.updated_date || form.created_date, 'dd.MM.yyyy HH:mm')}</p>
               </div>
               <div className="flex items-center gap-2">
@@ -399,7 +402,7 @@ export default function DashboardHealthForms() {
               <Search size={12} color={t.muted} />
               <input
                 type="text"
-                placeholder="Szukaj: imię, email, data, #ID..."
+                placeholder="Szukaj: imię, email, data, #ID, nr ankiety..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 style={{ background: 'transparent', border: 'none', outline: 'none', color: t.text, fontSize: '11px', width: '100%', fontFamily: 'var(--font-body)' }}
@@ -448,7 +451,7 @@ export default function DashboardHealthForms() {
                         <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>
                           {form.procedure_type && `${form.procedure_type} · `}
                           {form.form_filled_date ? safeFormat(form.form_filled_date, 'dd.MM.yyyy') : ''}
-                          {' · '}{form.id?.slice(-8).toUpperCase()}
+                          {' · '}{(form.form_number || form.id?.slice(-8) || '').toUpperCase()}
                         </p>
                       </div>
                     </div>

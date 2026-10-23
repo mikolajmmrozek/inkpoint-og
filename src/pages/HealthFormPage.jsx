@@ -10,6 +10,7 @@ import StepConsents from '@/components/health-form/StepConsents';
 import StepGuardian from '@/components/health-form/StepGuardian';
 import LangDropdown from '@/components/health-form/LangDropdown';
 import SignatureCanvas from '@/components/health-form/SignatureCanvas';
+import { compactSignatures, generateFormNumber } from '@/lib/signature';
 
 // Fields that should NEVER be copied from a previous form
 const SKIP_PREFILL_FIELDS = new Set([
@@ -18,6 +19,7 @@ const SKIP_PREFILL_FIELDS = new Set([
   'procedure_type', 'body_placement',
   'is_update_only', 'previous_form_id', 'is_minor', 'guardian_consent_form_id',
   'client_name', // regenerated from first+last
+  'form_number', // numer nadawany przy utworzeniu, nie kopiowany ze starej ankiety
 ]);
 
 const STEPS = ['personal', 'medical', 'procedure', 'declaration', 'consents', 'signature'];
@@ -162,7 +164,8 @@ export default function HealthFormPage() {
   // refresh resumes on the same step instead of restarting the form.
   const saveDraft = async (currentForm, currentDraftId, currentStep, currentLang, currentGuardian) => {
     const fullName = `${currentForm.client_first_name} ${currentForm.client_last_name}`.trim();
-    const draftPayload = { ...currentForm, client_name: fullName, current_step: currentStep, draft_lang: currentLang, draft_guardian: currentGuardian };
+    // Podpisy są zmniejszane przed zapisem — zbyt długi podpis nie blokuje zapisu draftu.
+    const draftPayload = await compactSignatures({ ...currentForm, client_name: fullName, current_step: currentStep, draft_lang: currentLang, draft_guardian: currentGuardian });
     // Update existing record in place — preserves its is_draft status (no spurious drafts when editing a completed form)
     if (currentDraftId) {
       await base44.entities.HealthForm.update(currentDraftId, draftPayload).catch(() => {});
@@ -174,12 +177,14 @@ export default function HealthFormPage() {
       const existingDrafts = await base44.entities.HealthForm.filter({ client_email: currentForm.client_email, is_draft: true }, '-updated_date', 1).catch(() => []);
       if (existingDrafts[0]?.id) {
         setDraftId(existingDrafts[0].id);
-        await base44.entities.HealthForm.update(existingDrafts[0].id, { ...currentForm, client_name: fullName }).catch(() => {});
+        // Stary draft bez numeru dostaje go przy najbliższym zapisie
+        if (!existingDrafts[0].form_number) draftPayload.form_number = generateFormNumber();
+        await base44.entities.HealthForm.update(existingDrafts[0].id, draftPayload).catch(() => {});
         return existingDrafts[0].id;
       }
     }
     if (currentForm.client_first_name || currentForm.client_email) {
-      const created = await base44.entities.HealthForm.create({ ...currentForm, client_name: fullName || 'Draft', is_draft: true, current_step: currentStep, draft_lang: currentLang, draft_guardian: currentGuardian }).catch(() => null);
+      const created = await base44.entities.HealthForm.create({ ...draftPayload, client_name: fullName || 'Draft', is_draft: true, form_number: currentForm.form_number || generateFormNumber() }).catch(() => null);
       if (created?.id) {
         setDraftId(created.id);
         return created.id;
@@ -424,7 +429,9 @@ export default function HealthFormPage() {
     setSubmitError(null);
     try {
       const fullName = `${form.client_first_name} ${form.client_last_name}`.trim();
-      const formData = { ...form, client_name: fullName, is_minor: isMinor, is_draft: false };
+      // Podpisy zmniejszone przed zapisem; ankieta z draftu zachowuje swój numer, nowa dostaje świeży
+      const formData = await compactSignatures({ ...form, client_name: fullName, is_minor: isMinor, is_draft: false });
+      if (!draftId && !formData.form_number) formData.form_number = generateFormNumber();
 
       // 1. Save the health form — this is the critical part
       let savedForm;
@@ -443,14 +450,14 @@ export default function HealthFormPage() {
         const guardianBody = guardian.body_placement || form.body_placement || '';
         let guardianForm;
         try {
-          guardianForm = await base44.entities.GuardianConsentForm.create({
+          guardianForm = await base44.entities.GuardianConsentForm.create(await compactSignatures({
             ...guardian,
             body_placement: guardianBody,
             health_form_id: savedForm.id,
             booking_id: form.booking_id,
             minor_client_name: fullName,
             minor_date_of_birth: form.date_of_birth,
-          });
+          }));
         } catch (e) {
           setSubmitError('Nie udało się zapisać zgody opiekuna prawnego. Spróbuj ponownie.');
           return; // keep the form open so the guardian step is not silently lost
@@ -489,7 +496,8 @@ export default function HealthFormPage() {
     setSubmitError(null);
     try {
       const fullName = `${form.client_first_name} ${form.client_last_name}`.trim();
-      const formData = { ...form, client_name: fullName, is_update_only: true, is_minor: isMinor, is_draft: false };
+      const formData = await compactSignatures({ ...form, client_name: fullName, is_update_only: true, is_minor: isMinor, is_draft: false });
+      if (!draftId && !formData.form_number) formData.form_number = generateFormNumber();
 
       if (draftId) {
         await base44.entities.HealthForm.update(draftId, formData);

@@ -161,6 +161,7 @@ export default function HealthFormPreviewModal({ bookingId, healthFormId, client
               <Row label="Zabieg" value={form.procedure_type} t={t} />
               <Row label="Miejsce" value={form.body_placement} t={t} />
               <Row label="Data wypełnienia" value={form.form_filled_date} t={t} />
+              <Row label="Numer ankiety" value={form.form_number || '—'} t={t} />
 
               {/* Medical — only flagged */}
               {(() => {

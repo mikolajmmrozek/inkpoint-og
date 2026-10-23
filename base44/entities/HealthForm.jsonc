@@ -6,6 +6,10 @@
       "type": "string",
       "description": "ID powi\u0105zanej rezerwacji (opcjonalne \u2014 ankieta mo\u017ce by\u0107 wype\u0142niona bez rezerwacji)"
     },
+    "form_number": {
+      "type": "string",
+      "description": "Unikalny numer ankiety (np. AF-20261023-4821) \u2014 nadawany przy utworzeniu, u\u0142atwia namierzenie draft\u00f3w"
+    },
     "client_first_name": {
       "type": "string"
     },

@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
+import { compressSignatureDataUrl } from '@/lib/signature';
 
 export default function SignatureCanvas({ value, onChange, label, clearLabel, showErrors, theme, textMuted, borderColor }) {
   const canvasRef = useRef(null);
@@ -70,12 +71,15 @@ export default function SignatureCanvas({ value, onChange, label, clearLabel, sh
     setIsEmpty(false);
   };
 
-  const endDraw = () => {
+  const endDraw = async () => {
     if (!drawing.current) return;
     drawing.current = false;
     try {
-      const dataUrl = canvasRef.current.toDataURL('image/png');
-      onChange(dataUrl);
+      const raw = canvasRef.current.toDataURL('image/png');
+      onChange(raw);
+      // Zmniejsz podpis od razu, żeby zawsze mieścił się w limicie zapisu (błąd "exceeds the maximum allowed size")
+      const compact = await compressSignatureDataUrl(raw);
+      if (compact && compact !== raw) onChange(compact);
     } catch (e) {
       // Canvas might be tainted — still allow saving
     }
