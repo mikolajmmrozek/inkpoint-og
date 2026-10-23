@@ -8,6 +8,7 @@ const TOOL_LABELS = {
   contactmessage: 'Wiadomości', feedback: 'Opinie', notification: 'Powiadomienia',
   artistcommissionhistory: 'Stawki artystów', userlog: 'Log aktywności', user: 'Użytkownicy',
   gatekeepermemory: 'Pamięć Gatekeepera',
+  gatekeeperops: 'Zarządzanie danymi',
 };
 
 function toolLabel(name = '') {
