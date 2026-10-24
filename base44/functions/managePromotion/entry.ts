@@ -44,7 +44,7 @@ function buildVoucherEmailHtml(p: any, link: string, loginLink: string, panelLin
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="${sectionStyle}background:#fff5fb;border:1px solid #ffe0ef;border-radius:8px;">
             <tr><td style="padding:18px 20px;">
               <h3 style="${h3Style}">Twoje Konto</h3>
-              <p style="${pStyle}">Zaloguj się do swojego panelu, aby przeglądać sesje, vouchery i prosić o zmianę terminu.</p>
+              <p style="${pStyle}">Zaloguj się do swojego panelu, aby przeglądać sesje, vouchery i ankiety.</p>
               <a href="${panelLink}" style="${buttonStyle}color:#ffffff;">Zaloguj się do panelu</a>
             </td></tr>
           </table>`
