@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { bookingUpdate } from '@/lib/bookingAudit';
 import { Check, X, Edit, CheckCircle, Loader2, ChevronDown, ChevronUp, Calendar } from 'lucide-react';
 import BookingModal from './BookingModal';
 import { format } from 'date-fns';
@@ -76,7 +77,7 @@ export default function BookingCard({ bookingId, t, theme, onAction, readOnly = 
     setShowStatusDropdown(false);
     try {
       // Update booking status
-      await base44.entities.Booking.update(booking.id, { status: newStatus });
+      await bookingUpdate(booking.id, { status: newStatus });
       setBooking(b => ({ ...b, status: newStatus }));
 
       // Add system message to the conversation thread

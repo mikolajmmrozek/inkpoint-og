@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useOutletContext, useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import { bookingCreate, bookingUpdate } from '@/lib/bookingAudit';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { useAuth } from '@/lib/AuthContext';
 import { ChevronLeft, ChevronRight, Plus, X, Search, Zap, RefreshCw, FileText, Edit3, Wallet, Phone, Mail, QrCode, Check } from 'lucide-react';
@@ -203,7 +204,7 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, user, ava
     let savedBookingId = booking?.id;
     if (isNew) {
       data.session_id = `SES-${format(new Date(), 'yyyyMMdd')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-      const created = await base44.entities.Booking.create(data);
+      const created = await bookingCreate(data);
       savedBookingId = created?.id;
       // Upsert client (basic info only; total_sessions recomputed from completed bookings)
       if (form.client_email) {
@@ -213,7 +214,7 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, user, ava
         }
       }
     } else {
-      await base44.entities.Booking.update(booking.id, data);
+      await bookingUpdate(booking.id, data);
     }
     if (form.client_email || form.client_name) recomputeClientTotalSessions(form.client_email, form.client_name).catch(() => {});
     setSaving(false);
@@ -227,13 +228,13 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, user, ava
   const handleStatusChange = async (newStatus) => {
     if (newStatus === 'cancelled') {
       // Mark as cancelled but keep visible for admin — artist cannot delete
-      await base44.entities.Booking.update(booking.id, { status: 'cancelled' });
+      await bookingUpdate(booking.id, { status: 'cancelled' });
       if (form.client_email || form.client_name) recomputeClientTotalSessions(form.client_email, form.client_name).catch(() => {});
       onSaved();
       base44.functions.invoke('manageGoogleCalendar', { action: 'sync_one', booking_id: booking.id }).catch(() => {});
       return;
     }
-    await base44.entities.Booking.update(booking.id, { status: newStatus });
+    await bookingUpdate(booking.id, { status: newStatus });
     setForm(f => ({ ...f, status: newStatus }));
     if (form.client_email || form.client_name) recomputeClientTotalSessions(form.client_email, form.client_name).catch(() => {});
     onSaved();

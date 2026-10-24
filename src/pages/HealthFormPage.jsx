@@ -472,7 +472,7 @@ export default function HealthFormPage() {
 
       if (booking) {
         try {
-          await base44.entities.Booking.update(booking.id, { health_form_completed: true });
+          await base44.entities.Booking.update(booking.id, { health_form_completed: true, last_editor: 'client' });
         } catch (e) { warnings.push('aktualizacja rezerwacji'); }
       }
 
@@ -506,7 +506,7 @@ export default function HealthFormPage() {
       }
 
       if (booking) {
-        await base44.entities.Booking.update(booking.id, { health_form_completed: true });
+        await base44.entities.Booking.update(booking.id, { health_form_completed: true, last_editor: 'client' });
       }
 
       await upsertClient(form);

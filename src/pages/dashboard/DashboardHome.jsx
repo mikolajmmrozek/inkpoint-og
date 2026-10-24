@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { bookingUpdate, bookingDelete } from '@/lib/bookingAudit';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Calendar, MessageSquare, TrendingUp, AlertCircle, ClipboardList, Wallet, Inbox } from 'lucide-react';
@@ -399,7 +400,7 @@ export default function DashboardHome() {
           theme={theme}
           onClose={() => setSelectedBooking(null)}
           onStatusChange={(id, status) => {
-            base44.entities.Booking.update(id, { status }).then((updated) => {
+            bookingUpdate(id, { status }).then((updated) => {
               setAllBookings(prev => {
                 const next = prev.map(b => b.id === id ? updated : b);
                 setPendingByDay(buildPendingByDay(next));
@@ -409,7 +410,7 @@ export default function DashboardHome() {
           }}
           onEdit={() => { setEditingBooking(selectedBooking); setSelectedBooking(null); }}
           onDelete={async (id) => {
-            await base44.entities.Booking.delete(id);
+            await bookingDelete(id);
             setAllBookings(prev => prev.filter(b => b.id !== id));
             setPendingByDay(prev => prev.map(({ date, items }) => ({ date, items: items.filter(b => b.id !== id) })).filter(({ items }) => items.length > 0));
             setSelectedBooking(null);

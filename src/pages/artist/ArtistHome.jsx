@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import { bookingUpdate } from '@/lib/bookingAudit';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { useAuth } from '@/lib/AuthContext';
 import { Link } from 'react-router-dom';
@@ -114,7 +115,7 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, user, onC
     const fullName = `${form.client_first_name || ''} ${form.client_last_name || ''}`.trim() || form.client_name;
     const data = { ...form, client_name: fullName };
     try {
-      await base44.entities.Booking.update(booking.id, data);
+      await bookingUpdate(booking.id, data);
       onSaved();
     } finally {
       setSaving(false);
@@ -136,11 +137,11 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, user, onC
 
   const handleStatusChange = async (newStatus) => {
     if (newStatus === 'cancelled') {
-      await base44.entities.Booking.update(booking.id, { status: 'cancelled' });
+      await bookingUpdate(booking.id, { status: 'cancelled' });
       onSaved();
       return;
     }
-    await base44.entities.Booking.update(booking.id, { status: newStatus });
+    await bookingUpdate(booking.id, { status: newStatus });
     setForm(f => ({ ...f, status: newStatus }));
     onSaved();
   };

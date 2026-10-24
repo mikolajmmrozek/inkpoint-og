@@ -1,5 +1,6 @@
 import { useState, useContext, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { bookingUpdate, bookingDelete } from '@/lib/bookingAudit';
 import { FileText, X, ExternalLink, Copy, Shield, AlertTriangle, Search, Download, Mail, Trash2, Settings, Loader2, Edit3, Printer, CheckCheck, Plus, QrCode } from 'lucide-react';
 import { openHealthFormQRPage } from '@/lib/qrPage';
 import { format } from 'date-fns';
@@ -487,12 +488,12 @@ export default function DashboardHealthForms() {
             theme={theme}
             onClose={() => setSelectedSession(null)}
             onStatusChange={async (id, status) => {
-              await base44.entities.Booking.update(id, { status });
+              await bookingUpdate(id, { status });
               setBookings(b => b.map(x => x.id === id ? { ...x, status } : x));
               setSelectedSession(s => s?.id === id ? { ...s, status } : s);
             }}
             onDelete={async (id) => {
-              await base44.entities.Booking.delete(id);
+              await bookingDelete(id);
               setBookings(b => b.filter(x => x.id !== id));
               setSelectedSession(null);
             }}

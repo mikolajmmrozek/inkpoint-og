@@ -161,6 +161,22 @@
         "change_request"
       ],
       "description": "Kto ostatnio edytowa\u0142 szczeg\u00f3\u0142y sesji: client = klient w panelu, dashboard = admin/artysta, change_request = zmiana przez pro\u015bb\u0119 o zmian\u0119 terminu (t\u0142umi maila aktualizacji \u2014 maile id\u0105 z manageChangeRequest)."
+    },
+    "last_editor_id": {
+      "type": "string",
+      "description": "ID u\u017cytkownika, kt\u00f3ry ostatnio edytowa\u0142 rezerwacj\u0119 z panelu (admin/artysta) \u2014 do logu audytu zmian"
+    },
+    "last_editor_name": {
+      "type": "string",
+      "description": "Imi\u0119/nazwa ostatniego edytora z panelu (cache) \u2014 do logu audytu zmian"
+    },
+    "last_editor_role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "user"
+      ],
+      "description": "Rola ostatniego edytora z panelu: admin albo user (artysta) \u2014 do logu audytu zmian"
     }
   },
   "required": [

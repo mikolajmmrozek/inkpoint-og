@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { bookingUpdate, bookingDelete } from '@/lib/bookingAudit';
 import { useTheme } from './Dashboard';
 import { Search, Edit2, Trash2, X, Plus, ChevronDown, ChevronUp, CalendarPlus, Merge, Loader2, UserPlus, Check, Ban } from 'lucide-react';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
@@ -216,7 +217,7 @@ export default function DashboardClients() {
 
     // Re-assign bookings
     await Promise.all(srcBookings.map(b =>
-      base44.entities.Booking.update(b.id, {
+      bookingUpdate(b.id, {
         client_name: targetName,
         client_email: targetEmail,
         client_phone: targetPhone,
@@ -440,12 +441,12 @@ export default function DashboardClients() {
             theme={theme}
             onClose={() => setSelectedBooking(null)}
             onStatusChange={async (id, status) => {
-              await base44.entities.Booking.update(id, { status });
+              await bookingUpdate(id, { status });
               setBookings(b => b.map(x => x.id === id ? { ...x, status } : x));
               setSelectedBooking(s => s?.id === id ? { ...s, status } : s);
             }}
             onDelete={async (id) => {
-              await base44.entities.Booking.delete(id);
+              await bookingDelete(id);
               setBookings(b => b.filter(x => x.id !== id));
               setSelectedBooking(null);
             }}

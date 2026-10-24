@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Zap, History, CalendarPlus } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { bookingCreate, bookingUpdate } from '@/lib/bookingAudit';
 import ClientSearch from './ClientSearch';
 import ReferenceImagesUpload from './ReferenceImagesUpload';
 import { findTimeOffConflict, findDoubleBookingConflict } from '@/lib/bookingConflicts';
@@ -336,7 +337,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
     }
 
     if (isNew) {
-      const created = await base44.entities.Booking.create(data);
+      const created = await bookingCreate(data);
       savedBookingId = created?.id;
       // Upsert client in Client database
       let existingClient = selectedClient;
@@ -391,7 +392,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
         });
       }
     } else {
-      await base44.entities.Booking.update(booking.id, data);
+      await bookingUpdate(booking.id, data);
       // Update client notes on the Client entity when editing
       if (form.client_email) {
         const email = form.client_email.toLowerCase().trim();

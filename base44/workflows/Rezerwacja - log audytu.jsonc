@@ -1,0 +1,47 @@
+{
+  "name": "Rezerwacja \u2014 log audytu",
+  "description": "Przy ka\u017cdej operacji na rezerwacji (utworzenie, edycja, usuni\u0119cie) zapisuje do BookingAuditLog wpis z informacj\u0105, kto jej dokona\u0142 (klient / artysta / admin / system), jakie pola zmieniono i jakie by\u0142y poprzednie warto\u015bci. Pomija zmiany wy\u0142\u0105cznie techniczne (synchronizacja Google Calendar, ukrywanie przypomnie\u0144, pola oznaczenia autora edycji).",
+  "trigger": {
+    "condition": "${ .trigger.event_type != \"update\" or any((.trigger.changed_fields // [])[]; (. != \"gcal_event_id\" and . != \"form_reminder_hidden\" and . != \"last_editor\" and . != \"last_editor_id\" and . != \"last_editor_name\" and . != \"last_editor_role\")) }",
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create",
+        "update",
+        "delete"
+      ],
+      "entity_name": "Booking"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "booking_audit_log",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "log_change": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "recordBookingAudit",
+            "args": {
+              "event_type": "${ .trigger.event_type }",
+              "entity_id": "${ .trigger.entity_id }",
+              "data": "${ .trigger.data }",
+              "old_data": "${ .trigger.old_data }",
+              "changed_fields": "${ .trigger.changed_fields }",
+              "payload_too_large": "${ .trigger.payload_too_large }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Zapisz wpis audytu",
+            "description": "Kto i co zmieni\u0142 w rezerwacji"
+          }
+        }
+      }
+    ]
+  }
+}

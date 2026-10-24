@@ -1,0 +1,83 @@
+{
+  "name": "BookingAuditLog",
+  "type": "object",
+  "properties": {
+    "booking_id": {
+      "type": "string",
+      "description": "ID rezerwacji (Booking.id), kt\u00f3rej dotyczy wpis"
+    },
+    "session_id": {
+      "type": "string",
+      "description": "Numer sesji (cache z Booking.session_id)"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Imi\u0119 i nazwisko klienta (cache)"
+    },
+    "artist_name": {
+      "type": "string",
+      "description": "Nazwa artysty (cache)"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "created",
+        "updated",
+        "deleted"
+      ],
+      "description": "Rodzaj operacji: created = utworzenie, updated = edycja, deleted = usuni\u0119cie rezerwacji"
+    },
+    "actor_type": {
+      "type": "string",
+      "enum": [
+        "client",
+        "artist",
+        "admin",
+        "system"
+      ],
+      "description": "Kto wykona\u0142 operacj\u0119: client = klient, artist = artysta, admin = administrator, system = automat (np. synchronizacja)"
+    },
+    "actor_name": {
+      "type": "string",
+      "description": "Imi\u0119/nazwa autora operacji (np. imi\u0119 admina/artysty albo nazwa klienta)"
+    },
+    "changed_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Lista zmienionych p\u00f3l rezerwacji (bez p\u00f3l technicznych)"
+    },
+    "changes": {
+      "type": "object",
+      "description": "Szczeg\u00f3\u0142y zmian: {pole: {from, to}} \u2014 poprzednia i nowa warto\u015b\u0107 (skr\u00f3cone)"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Czytelny opis zdarzenia po polsku (np. 'Artysta Roman: zmieni\u0142 dat\u0119 sesji')"
+    }
+  },
+  "required": [
+    "booking_id",
+    "action",
+    "actor_type"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": false
+  }
+}

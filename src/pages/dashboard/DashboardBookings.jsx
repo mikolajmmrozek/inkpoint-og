@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import { bookingUpdate, bookingDelete } from '@/lib/bookingAudit';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { AnimatePresence } from 'framer-motion';
 import { Calendar, List, Clock, ChevronLeft, ChevronRight, Search, X, Inbox, Wallet } from 'lucide-react';
@@ -282,7 +283,7 @@ export default function DashboardBookings() {
   }, [loading, bookings, pendingBookingId]);
 
   const updateStatus = async (id, status) => {
-    await base44.entities.Booking.update(id, { status });
+    await bookingUpdate(id, { status });
     setBookings(b => b.map(x => x.id === id ? { ...x, status } : x));
     if (selected?.id === id) setSelected(s => ({ ...s, status }));
     // Auto-sync to Google Calendar (silent — no error if not connected)
@@ -308,7 +309,7 @@ export default function DashboardBookings() {
 
   const deleteBooking = async (id) => {
     const bk = bookings.find(b => b.id === id);
-    await base44.entities.Booking.delete(id);
+    await bookingDelete(id);
     setBookings(b => b.filter(x => x.id !== id));
     setSelected(null);
     if (bk?.client_email || bk?.client_name) recomputeClientTotalSessions(bk?.client_email, bk?.client_name).catch(() => {});

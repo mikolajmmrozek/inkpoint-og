@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { X, Wallet, Plus, Trash2, Check } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { bookingUpdate } from '@/lib/bookingAudit';
 import VoucherPicker from '@/components/dashboard/VoucherPicker';
 
 const PAYMENT_METHODS = [
@@ -73,7 +74,7 @@ export default function SettlementModal({ booking, user, onClose, onSettled, t }
         settled_date: new Date().toISOString(),
         status: 'completed',
       };
-      await base44.entities.Booking.update(booking.id, updates);
+      await bookingUpdate(booking.id, updates);
       // Redeem vouchers on both first settlement and edit. The backend rejects an amount
       // exceeding the current balance, so an already-fully-redeemed voucher is skipped
       // (error caught below) — no double deduction — while a voucher stored but never

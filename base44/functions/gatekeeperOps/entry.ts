@@ -180,6 +180,13 @@ const ENTITIES = {
     filter: ['email', 'role'],
     sensitive: [],
   },
+  BookingAuditLog: {
+    ops: READ_ONLY, // niezmienny log audytu rezerwacji — wyłącznie odczyt
+    required: [],
+    fields: ['booking_id', 'session_id', 'client_name', 'artist_name', 'action', 'actor_type', 'actor_name', 'changed_fields', 'changes', 'summary'],
+    filter: ['booking_id', 'session_id', 'action', 'actor_type', 'client_name'],
+    sensitive: [],
+  },
 };
 
 const TOKEN_TTL_MS = 15 * 60 * 1000;
@@ -380,6 +387,10 @@ export default async function (req: Request): Promise<Response> {
     if (action === 'delete') {
       const record = await ent.get(body.id);
       if (!record) return Response.json({ error: 'Rekord nie istnieje' }, { status: 404 });
+      if (entityName === 'Booking') {
+        // Audyt — stempel autora przed usunięciem (wpis audytu odczyta te pola)
+        await ent.update(body.id, { last_editor: 'dashboard', last_editor_id: user.id, last_editor_name: user.full_name || user.email || '', last_editor_role: user.role }).catch(() => {});
+      }
       await ent.delete(body.id);
       return Response.json({ status: 'executed', entity: entityName, action, deleted: pickSummary(maskRecord(record, cfg, true), cfg) });
     }
@@ -422,6 +433,11 @@ export default async function (req: Request): Promise<Response> {
       if (entityName === 'Booking') {
         if (!payload.session_id) payload.session_id = genSessionId();
         if (!payload.source) payload.source = 'dashboard';
+        // Audyt — oznacz autora zmiany (log audytu odczyta te pola)
+        payload.last_editor = 'dashboard';
+        payload.last_editor_id = user.id;
+        payload.last_editor_name = user.full_name || user.email || '';
+        payload.last_editor_role = user.role;
       }
       const created = await ent.create(payload);
       return Response.json({ status: 'executed', entity: entityName, action, record: created });
@@ -465,6 +481,11 @@ export default async function (req: Request): Promise<Response> {
         changes.settled_by_name = user.full_name || user.email;
         changes.settled_date = new Date().toISOString();
       }
+      // Audyt — oznacz autora zmiany (log audytu odczyta te pola)
+      changes.last_editor = 'dashboard';
+      changes.last_editor_id = user.id;
+      changes.last_editor_name = user.full_name || user.email || '';
+      changes.last_editor_role = user.role;
     }
     const updated = await ent.update(body.id, changes);
     return Response.json({ status: 'executed', entity: entityName, action, record: updated });
