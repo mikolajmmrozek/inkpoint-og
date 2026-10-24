@@ -304,6 +304,7 @@ export default async function (req: Request): Promise<Response> {
         type, code, value_type, value, original_value: value, balance: value,
         usage_mode, assigned_client_email, assigned_until, assignment_permanent,
         expires_at, qr_code_url, status: 'active',
+        admin_notes: body.admin_notes || '',
       });
 
       // optional email
@@ -334,6 +335,7 @@ export default async function (req: Request): Promise<Response> {
       if (body.assigned_client_email !== undefined) updates.assigned_client_email = body.assigned_client_email || '';
       if (body.assignment_permanent !== undefined) updates.assignment_permanent = !!body.assignment_permanent;
       if (body.assigned_until !== undefined) updates.assigned_until = body.assigned_until || '';
+      if (body.admin_notes !== undefined) updates.admin_notes = body.admin_notes || '';
       if (body.is_active !== undefined) updates.is_active = !!body.is_active;
       const updated = await base44.entities.Promotion.update(body.promotion_id, updates);
       return Response.json({ promotion: updated });

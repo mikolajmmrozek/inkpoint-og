@@ -100,6 +100,10 @@
       "type": "string",
       "description": "ID zakupu (na przysz\u0142o\u015b\u0107, gdy vouchery kupowane online)"
     },
+    "admin_notes": {
+      "type": "string",
+      "description": "Notatki wewn\u0119trzne administrator\u00f3w (np. kto dla kogo kupi\u0142 voucher) \u2014 niewidoczne dla klienta na stronie vouchera"
+    },
     "status": {
       "type": "string",
       "enum": [

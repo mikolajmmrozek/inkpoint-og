@@ -46,7 +46,7 @@ const ENTITIES = {
     // create/update delegowane do managePromotion (normalny proces: kod QR, e-mail, salda)
     ops: { read: true, create: true, update: true, delete: true },
     required: ['type', 'value', 'expires_at'],
-    fields: ['type', 'code', 'value_type', 'value', 'usage_mode', 'expires_at', 'assigned_client_email', 'assigned_until', 'assignment_permanent', 'send_email', 'email_to', 'is_active', 'revoked', 'grace_value', 'grace_expires_at'],
+    fields: ['type', 'code', 'value_type', 'value', 'usage_mode', 'expires_at', 'assigned_client_email', 'assigned_until', 'assignment_permanent', 'send_email', 'email_to', 'is_active', 'revoked', 'grace_value', 'grace_expires_at', 'admin_notes'],
     filter: ['code', 'type', 'status', 'assigned_client_email', 'is_active', 'revoked'],
     sensitive: ['value', 'balance', 'status', 'revoked', 'grace_value'],
   },
@@ -411,6 +411,7 @@ export default async function (req: Request): Promise<Response> {
           assignment_permanent: dat.assignment_permanent,
           send_email: dat.send_email,
           email_to: dat.email_to,
+          admin_notes: dat.admin_notes,
         });
         return Response.json({ status: 'executed', entity: entityName, action, promotion: inv.data, process: 'managePromotion' });
       }
@@ -446,7 +447,7 @@ export default async function (req: Request): Promise<Response> {
     // update
     if (entityName === 'Promotion') {
       const changes = dat.changes;
-      const updateFields = ['value', 'value_type', 'usage_mode', 'expires_at', 'assigned_client_email', 'assigned_until', 'assignment_permanent', 'is_active'];
+      const updateFields = ['value', 'value_type', 'usage_mode', 'expires_at', 'assigned_client_email', 'assigned_until', 'assignment_permanent', 'is_active', 'admin_notes'];
       const graceKeys = ['grace_value', 'grace_expires_at'];
       const results: any = {};
       const plain = pick(changes, updateFields);

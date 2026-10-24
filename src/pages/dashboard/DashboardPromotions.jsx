@@ -39,6 +39,7 @@ const EMPTY_FORM = {
   assigned_until: '',
   send_email: false,
   email_to: '',
+  admin_notes: '',
 };
 
 export default function DashboardPromotions() {
@@ -103,6 +104,7 @@ export default function DashboardPromotions() {
 
   const valueStr = (p) => p.value_type === 'percent' ? `${p.value}%` : `${p.value} PLN`;
   const dateStr = (p) => p.expires_at ? new Date(p.expires_at).toLocaleDateString('pl-PL') : '—';
+  const purchasedStr = (p) => p.created_date ? new Date(p.created_date).toLocaleDateString('pl-PL') : '—';
 
   const openEdit = (p) => {
     setEditFor(p);
@@ -119,6 +121,7 @@ export default function DashboardPromotions() {
       assigned_until: p.assigned_until ? p.assigned_until.slice(0, 10) : '',
       send_email: false,
       email_to: '',
+      admin_notes: p.admin_notes || '',
     });
     setCreateOpen(true);
   };
@@ -143,6 +146,7 @@ export default function DashboardPromotions() {
           assignment_permanent: form.type === 'voucher' ? true : form.assignment_permanent,
           assigned_until: form.type === 'voucher' ? '' : (form.assigned_until ? toISO(form.assigned_until.slice(0, 10)) : ''),
           is_active: form.type === 'discount' ? form.is_active : undefined,
+          admin_notes: form.admin_notes || '',
         });
         toast({ title: 'Zapisano zmiany' });
       } else {
@@ -160,6 +164,7 @@ export default function DashboardPromotions() {
           is_active: form.type === 'discount' ? form.is_active : undefined,
           send_email: form.send_email,
           email_to: form.send_email ? form.email_to : undefined,
+          admin_notes: form.admin_notes || undefined,
         });
         if (res?.data?.email?.error) toast({ title: 'Voucher utworzony, ale e-mail nie wysłany', description: res.data.email.error, variant: 'destructive' });
         else toast({ title: form.type === 'voucher' ? 'Voucher utworzony' : 'Kod zniżkowy utworzony' });
@@ -332,9 +337,13 @@ export default function DashboardPromotions() {
       ) : view === 'voucher' ? (
         <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
           <div className="hidden md:grid grid-cols-12 px-4 py-2" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-            {['Kod', 'Wartość', 'Saldo', 'Ważny do', 'Status', ''].map((lbl, i) => (
-              <span key={i} className={i === 0 ? 'col-span-3' : i === 2 ? 'col-span-1' : i === 5 ? 'col-span-2' : 'col-span-2'} style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>{lbl}</span>
-            ))}
+            <span className="col-span-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Kod</span>
+            <span className="col-span-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Wartość</span>
+            <span className="col-span-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Saldo</span>
+            <span className="col-span-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Zakup</span>
+            <span className="col-span-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Ważny do</span>
+            <span className="col-span-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Status</span>
+            <span className="col-span-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase' }}></span>
           </div>
           {filtered.map((p, i) => {
             const st = computeStatus(p);
@@ -342,11 +351,16 @@ export default function DashboardPromotions() {
             const rowBorder = isLast ? 'none' : `0.5px solid ${t.border}`;
             return (
               <div key={p.id} className="grid grid-cols-2 md:grid-cols-12 gap-2 px-4 py-3 items-center" style={{ borderBottom: rowBorder }}>
-                <div className="col-span-2 md:col-span-3 flex items-center gap-2">
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '14px', letterSpacing: '0.12em', color: t.title, fontWeight: 600 }}>{p.code}</p>
-                  <button onClick={() => copyCode(p)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: '2px' }}>
-                    {copied === p.id ? <Check size={12} color="#16a34a" /> : <Copy size={12} />}
-                  </button>
+                <div className="col-span-2 md:col-span-2">
+                  <div className="flex items-center gap-2">
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '14px', letterSpacing: '0.12em', color: t.title, fontWeight: 600 }}>{p.code}</p>
+                    <button onClick={() => copyCode(p)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: '2px' }}>
+                      {copied === p.id ? <Check size={12} color="#16a34a" /> : <Copy size={12} />}
+                    </button>
+                  </div>
+                  {p.admin_notes && (
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.04em', marginTop: '4px', lineHeight: 1.4, wordBreak: 'break-word' }}>✎ {p.admin_notes}</p>
+                  )}
                 </div>
                 <div className="col-span-1 md:col-span-2">
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--brand)' }}>{valueStr(p)}</p>
@@ -355,6 +369,9 @@ export default function DashboardPromotions() {
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: t.muted }}>{p.balance !== undefined && p.balance !== p.value ? `${p.balance} PLN` : '—'}</p>
                 </div>
                 <div className="col-span-1 md:col-span-2">
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: t.muted }}>{purchasedStr(p)}</p>
+                </div>
+                <div className="col-span-1 md:col-span-1">
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: t.muted }}>{dateStr(p)}</p>
                 </div>
                 <div className="col-span-1 md:col-span-2">
@@ -390,7 +407,9 @@ export default function DashboardPromotions() {
                 </div>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', color: 'var(--brand)', letterSpacing: '0.03em', marginBottom: '12px' }}>{valueStr(p)}</p>
                 <div className="space-y-1 mb-3" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.04em' }}>
+                  <p>Zakup: {purchasedStr(p)}</p>
                   <p>Ważny do: {dateStr(p)}</p>
+                  {p.admin_notes && <p style={{ wordBreak: 'break-word' }}>✎ {p.admin_notes}</p>}
                   {p.assigned_client_email && <p>Przypisany: {p.assigned_client_email}</p>}
                   {p.assignment_permanent && <p>Przypisanie: stałe</p>}
                   {p.assigned_until && !p.assignment_permanent && <p>Przypisanie do: {new Date(p.assigned_until).toLocaleDateString('pl-PL')}</p>}
@@ -521,6 +540,20 @@ export default function DashboardPromotions() {
                   )}
                 </div>
               )}
+
+              <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>NOTATKI (WEWNĘTRZNE)</p>
+                {label('Notatka dla administratorów — np. kto dla kogo kupił (niewidoczna dla klienta)')}
+                <textarea
+                  value={form.admin_notes || ''}
+                  onChange={e => set('admin_notes', e.target.value)}
+                  rows={2}
+                  placeholder="np. Kasia kupiła dla Marka na urodziny"
+                  style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'vertical' }}
+                  onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'}
+                  onBlur={e => e.target.style.borderBottomColor = t.border}
+                />
+              </div>
 
               {!editFor && (
                 <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
