@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
-import { sendViaGmail } from '../../shared/bookingEmail.ts';
+import { sendViaGmail, sectionStyle, h3Style, pStyle, mutedStyle, buttonStyle, detailRow, buildContactRows } from '../../shared/bookingEmail.ts';
+import { buildVoucherPdfBase64 } from '../../shared/voucherPdf.ts';
 
 const CHARSET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
@@ -11,51 +12,204 @@ function genCode(len = 8) {
   return s;
 }
 
-function buildEmail(p: any, link: string): string {
-  const valueStr = p.value_type === 'percent' ? `${p.value}%` : `${p.value} PLN`;
-  const isVoucher = p.type === 'voucher';
-  const expiry = p.expires_at ? new Date(p.expires_at).toLocaleDateString('pl-PL') : '';
-  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0A0A0A;font-family:Inter,Arial,sans-serif;">
-  <div style="max-width:480px;margin:0 auto;padding:32px 24px;color:#F5F0EB;">
-    <p style="font-family:monospace;font-size:10px;letter-spacing:0.2em;color:#FF007F;text-transform:uppercase;margin:0 0 4px;">ROMANS TATTOO</p>
-    <h1 style="font-size:28px;font-weight:400;letter-spacing:0.04em;margin:0 0 20px;">${isVoucher ? 'Twój voucher' : 'Twój kod zniżkowy'}</h1>
-    <p style="font-size:15px;line-height:1.6;color:#F5F0EB;opacity:0.85;margin:0 0 24px;">
-      ${isVoucher ? 'Prezentujemy Ci voucher o wartości' : 'Otrzymujesz kod zniżkowy o wartości'}
-      <strong style="color:#FF007F;">${valueStr}</strong>.
-    </p>
-    <div style="border:0.5px solid #262626;padding:20px;text-align:center;margin:0 0 20px;">
-      <p style="font-family:monospace;font-size:9px;letter-spacing:0.15em;color:#888;text-transform:uppercase;margin:0 0 8px;">KOD</p>
-      <p style="font-family:monospace;font-size:24px;letter-spacing:0.2em;color:#FF007F;margin:0;">${p.code}</p>
-      ${p.qr_code_url ? `<img src="${p.qr_code_url}" alt="QR" style="width:180px;height:180px;margin:16px auto 0;display:block;" />` : ''}
-    </div>
-    <a href="${link}" style="display:inline-block;background:#FF007F;color:#F5F0EB;font-family:monospace;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;padding:14px 28px;text-decoration:none;">${isVoucher ? 'Zobacz voucher' : 'Zobacz kod'}</a>
-    ${expiry ? `<p style="font-family:monospace;font-size:9px;color:#666;margin:24px 0 0;letter-spacing:0.05em;">Ważny do: ${expiry}</p>` : ''}
-  </div></body></html>`;
+const FROM_NAME = 'Romans Tattoo';
+const FROM_EMAIL = 'tattoo.wolsztyn@gmail.com';
+
+// Dane kontaktowe studia + informacja, czy odbiorca ma już konto w aplikacji.
+async function loadEmailContext(base44: any, to: string) {
+  let contact: any = {};
+  try {
+    const settings = await base44.asServiceRole.entities.SiteSettings.filter({ key: 'contact' });
+    if (settings.length > 0) contact = settings[0];
+  } catch (_) {}
+  let hasAccount = false;
+  if (to) {
+    try {
+      const users = await base44.asServiceRole.entities.User.filter({ email: to }, null, 1);
+      hasAccount = users.length > 0;
+    } catch (_) {}
+  }
+  return { contact, hasAccount };
 }
 
-// Wersja tekstowa e-maila z voucherem (alternatywa dla klientów bez HTML).
-function buildEmailText(p: any, link: string): string {
-  const valueStr = p.value_type === 'percent' ? `${p.value}%` : `${p.value} PLN`;
+// Email z voucherem w stylu maili rezerwacyjnych (shared/bookingEmail.ts):
+// biała karta, różowa belka nagłówka, sekcja konta (załóż / zaloguj się), dane studia, stopka.
+function buildVoucherEmailHtml(p: any, link: string, loginLink: string, panelLink: string, contact: any, hasAccount: boolean, contactRows: string[]): string {
+  const isVoucher = p.type === 'voucher';
+  const valueStr = p.value_type === 'percent' ? `${p.value}%` : `${Number(p.value).toLocaleString('pl-PL')} PLN`;
+  const expiryStr = p.expires_at ? new Date(p.expires_at).toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
+
+  const accountSection = hasAccount
+    ? `
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="${sectionStyle}background:#fff5fb;border:1px solid #ffe0ef;border-radius:8px;">
+            <tr><td style="padding:18px 20px;">
+              <h3 style="${h3Style}">Twoje Konto</h3>
+              <p style="${pStyle}">Zaloguj się do swojego panelu, aby przeglądać sesje, vouchery i prosić o zmianę terminu.</p>
+              <a href="${panelLink}" style="${buttonStyle}color:#ffffff;">Zaloguj się do panelu</a>
+            </td></tr>
+          </table>`
+    : `
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="${sectionStyle}background:#fff5fb;border:1px solid #ffe0ef;border-radius:8px;">
+            <tr><td style="padding:18px 20px;">
+              <h3 style="${h3Style}">Załóż Konto</h3>
+              <p style="${pStyle}">Nie masz jeszcze konta? Załóż je lub zaloguj się, aby móc przeglądać sesje, prosić o zmianę terminu oraz kupować i realizować vouchery.</p>
+              <a href="${loginLink}" style="${buttonStyle}color:#ffffff;">Załóż konto / Zaloguj się</a>
+            </td></tr>
+          </table>`;
+
+  const qrBlock = isVoucher
+    ? `
+          <tr>
+            <td style="padding:24px 32px 0 32px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#0a0a0a;border-radius:10px;">
+                <tr><td align="center" style="padding:20px 22px;">
+                  <h3 style="color:#FF007F;font-size:11px;margin:0 0 8px 0;text-transform:uppercase;font-weight:700;letter-spacing:0.12em;font-family:Arial,Helvetica,sans-serif;">Zrealizuj Voucher</h3>
+                  ${p.qr_code_url ? `<img src="${p.qr_code_url}" alt="Kod QR vouchera" width="130" height="130" style="display:block;margin:0 auto 10px auto;background:#ffffff;padding:6px;border-radius:6px;" />` : ''}
+                  <p style="margin:0 0 14px 0;color:#f5f0eb;font-size:13px;line-height:1.55;">Pokaż kod przy wizycie albo zeskanuj QR, aby zrealizować voucher.</p>
+                  <a href="${link}" style="display:inline-block;background:#FF007F;color:#ffffff;padding:13px 28px;text-decoration:none;border-radius:6px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;font-family:Arial,Helvetica,sans-serif;">Zobacz Voucher Online</a>
+                </td></tr>
+              </table>
+            </td>
+          </tr>`
+    : '';
+
+  return `<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${isVoucher ? 'Twój voucher podarunkowy' : 'Twój kod zniżkowy'}</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f4f5;font-family:Arial,Helvetica,sans-serif;color:#0a0a0a;line-height:1.5;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f4f5;">
+    <tr>
+      <td align="center" style="padding:28px 12px;">
+        <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:560px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+
+          <!-- Pink header band -->
+          <tr>
+            <td style="background:#FF007F;padding:28px 32px;">
+              <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;font-family:Arial,Helvetica,sans-serif;">${isVoucher ? 'Twój Voucher Podarunkowy' : 'Twój Kod Zniżkowy'}</h1>
+              <p style="margin:6px 0 0 0;color:#ffffff;font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;opacity:0.95;">Romans Tattoo &middot; Inkflow</p>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:28px 32px 8px 32px;">
+              <p style="${pStyle}">Cześć,</p>
+              <p style="${pStyle}">${isVoucher
+                ? `Prezentujemy Ci <strong style="color:#0a0a0a;">voucher podarunkowy</strong> o wartości <strong style="color:#FF007F;">${valueStr}</strong> do wykorzystania na usługi w naszym studiu.`
+                : `Otrzymujesz <strong style="color:#0a0a0a;">kod zniżkowy</strong> o wartości <strong style="color:#FF007F;">${valueStr}</strong> na usługi w naszym studiu.`}</p>
+            </td>
+          </tr>
+
+          <!-- Details -->
+          <tr>
+            <td style="padding:6px 32px 0 32px;">
+              <h3 style="${h3Style}">Szczegóły</h3>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                ${detailRow('Kod', p.code)}
+                ${detailRow('Wartość', valueStr)}
+                ${expiryStr ? detailRow('Ważny do', expiryStr) : ''}
+              </table>
+            </td>
+          </tr>
+
+          ${qrBlock}
+
+          <!-- Account CTA -->
+          <tr>
+            <td style="padding:0 32px;">
+              ${accountSection}
+            </td>
+          </tr>
+
+          <!-- Contact -->
+          <tr>
+            <td style="padding:0 32px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="${sectionStyle}">
+                <tr><td style="padding:0;">
+                  <h3 style="${h3Style}">Gdzie Nas Znaleźć</h3>
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                    ${contactRows.join('')}
+                  </table>
+                </td></tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:24px 32px 28px 32px;">
+              <p style="${mutedStyle}">Dziękujemy za zaufanie!</p>
+              <p style="margin:6px 0 0 0;color:#b0b0b0;font-size:11px;">Otrzymujesz tę wiadomość, ponieważ ${isVoucher ? 'otrzymałeś voucher do' : 'otrzymałeś kod zniżkowy do'} Romans Tattoo.${isVoucher ? ' Voucher znajdziesz też w załączniku (PDF).' : ''}</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+// Wersja tekstowa (multipart/alternative) z danymi studia i sekcją konta.
+function buildVoucherEmailText(p: any, link: string, loginLink: string, panelLink: string, contact: any, hasAccount: boolean): string {
+  const isVoucher = p.type === 'voucher';
+  const valueStr = p.value_type === 'percent' ? `${p.value}%` : `${Number(p.value).toLocaleString('pl-PL')} PLN`;
   const expiry = p.expires_at ? new Date(p.expires_at).toLocaleDateString('pl-PL') : '';
   return [
-    'ROMANS TATTOO',
-    '',
-    p.type === 'voucher' ? 'Prezentujemy Ci voucher o wartości' : 'Otrzymujesz kod zniżkowy o wartości',
-    `${valueStr}.`,
-    '',
-    `KOD: ${p.code}`,
-    '',
-    `Zobacz tutaj: ${link}`,
-    expiry ? `Ważny do: ${expiry}` : '',
-  ].filter(Boolean).join('\n');
+    `ROMANS TATTOO`,
+    ``,
+    isVoucher ? `Prezentujemy Ci voucher o wartości ${valueStr}.` : `Otrzymujesz kod zniżkowy o wartości ${valueStr}.`,
+    ``,
+    `  Kod:       ${p.code}`,
+    expiry ? `  Ważny do:  ${expiry}` : '',
+    ``,
+    isVoucher ? `Zobacz voucher: ${link}` : `Zobacz kod: ${link}`,
+    ``,
+    hasAccount
+      ? `Twoje Konto:\nZaloguj się do panelu: ${panelLink}`
+      : `Załóż Konto:\nZałóż konto lub zaloguj się: ${loginLink}`,
+    ``,
+    contact.contact_address_street ? `  Adres:     ${contact.contact_address_street}, ${contact.contact_address_city || ''}` : '',
+    contact.contact_phone ? `  Telefon:   ${contact.contact_phone}` : '',
+    contact.contact_email ? `  Email:     ${contact.contact_email}` : '',
+    contact.contact_instagram_url ? `  Instagram: ${contact.contact_instagram || 'Znajdź nas'} — ${contact.contact_instagram_url}` : '',
+    contact.contact_facebook_url ? `  Facebook:  ${contact.contact_facebook || 'Znajdź nas'} — ${contact.contact_facebook_url}` : '',
+    ``,
+    `Dziękujemy za zaufanie!`,
+  ].filter(Boolean).join('\n').trim();
 }
 
-// Wysyłka przez zsynchronizowane konto Gmail studia (tattoo.wolsztyn@gmail.com).
-async function sendVoucherEmail(base44: any, to: string, subject: string, html: string, text: string) {
+// Kompletna wysyłka: kontekst (dane studia + konto odbiorcy), HTML + tekst,
+// voucher jako załącznik PDF, wysyłka przez Gmail studia.
+async function deliverVoucherEmail(base44: any, p: any, to: string) {
   try {
+    const siteUrl = 'https://romanstattoo.base44.app';
+    const { contact, hasAccount } = await loadEmailContext(base44, to);
+    const link = `${siteUrl}/voucher/${p.code}`;
+    const loginLink = siteUrl;
+    const panelLink = `${siteUrl}/panel`;
+    const contactRows = buildContactRows(contact);
+    const subject = p.type === 'voucher' ? 'Twój voucher od Roman Tattoo' : 'Twój kod zniżkowy od Roman Tattoo';
+    const htmlBody = buildVoucherEmailHtml(p, link, loginLink, panelLink, contact, hasAccount, contactRows);
+    const textBody = buildVoucherEmailText(p, link, loginLink, panelLink, contact, hasAccount);
+
+    // Załącznik: voucher w PDF (tylko vouchery)
+    let attachments: any[] = [];
+    if (p.type === 'voucher') {
+      try {
+        const pdf = await buildVoucherPdfBase64(p, contact);
+        if (pdf) attachments = [{ filename: `Voucher-${p.code}.pdf`, content: pdf, contentType: 'application/pdf' }];
+      } catch (_) { /* brak załącznika zamiast błędu wysyłki */ }
+    }
+
     const { accessToken } = await base44.asServiceRole.connectors.getConnection('gmail');
-    await sendViaGmail(accessToken, 'Romans Tattoo', 'tattoo.wolsztyn@gmail.com', to, subject, text, html);
-    return { success: true };
+    await sendViaGmail(accessToken, FROM_NAME, FROM_EMAIL, to, subject, textBody, htmlBody, attachments);
+    return { success: true, attachment: attachments.length > 0 };
   } catch (e: any) {
     return { error: e.message };
   }
@@ -155,9 +309,7 @@ export default async function (req: Request): Promise<Response> {
       // optional email
       let emailResult = null;
       if (body.send_email && body.email_to) {
-        const link = `${appUrl}/voucher/${code}`;
-        const subject = type === 'voucher' ? 'Twój voucher od Roman Tattoo' : 'Twój kod zniżkowy od Roman Tattoo';
-        emailResult = await sendVoucherEmail(base44, body.email_to, subject, buildEmail(created, link), buildEmailText(created, link));
+        emailResult = await deliverVoucherEmail(base44, created, body.email_to);
       }
 
       return Response.json({ promotion: created, email: emailResult });
@@ -285,9 +437,7 @@ export default async function (req: Request): Promise<Response> {
       const p: any = await base44.entities.Promotion.get(body.promotion_id);
       const to = body.to || p.assigned_client_email;
       if (!to) return Response.json({ error: 'Brak odbiorcy' }, { status: 400 });
-      const link = `${appUrl}/voucher/${p.code}`;
-      const subject = p.type === 'voucher' ? 'Twój voucher od Roman Tattoo' : 'Twój kod zniżkowy od Roman Tattoo';
-      const emailResult = await sendVoucherEmail(base44, to, subject, buildEmail(p, link), buildEmailText(p, link));
+      const emailResult = await deliverVoucherEmail(base44, p, to);
       return Response.json({ email: emailResult });
     }
 

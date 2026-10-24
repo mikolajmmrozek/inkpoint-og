@@ -50,14 +50,24 @@ export function buildContactRows(contact: any) {
 }
 
 // Wrap Gmail sending: build MIME via MailComposer, base64url-encode, POST to Gmail API.
-export async function sendViaGmail(accessToken: string, fromName: string, fromEmail: string, toEmail: string, subject: string, textBody: string, htmlBody: string) {
-  const mail = new (await import('npm:nodemailer@6.9.16/lib/mail-composer/index.js')).default({
+// Optional attachments: [{ filename, content (base64), contentType }] — sent as real email attachments.
+export async function sendViaGmail(accessToken: string, fromName: string, fromEmail: string, toEmail: string, subject: string, textBody: string, htmlBody: string, attachments: any[] = []) {
+  const opts: any = {
     from: { name: fromName, address: fromEmail },
     to: toEmail,
     subject,
     text: textBody,
     html: htmlBody,
-  });
+  };
+  if (attachments && attachments.length > 0) {
+    opts.attachments = attachments.map((a: any) => ({
+      filename: a.filename,
+      content: a.content,
+      encoding: 'base64',
+      contentType: a.contentType || 'application/pdf',
+    }));
+  }
+  const mail = new (await import('npm:nodemailer@6.9.16/lib/mail-composer/index.js')).default(opts);
   const messageBytes: Uint8Array = await new Promise((resolve, reject) => {
     mail.compile().build((err: Error | null, msg: Uint8Array) => (err ? reject(err) : resolve(msg)));
   });
