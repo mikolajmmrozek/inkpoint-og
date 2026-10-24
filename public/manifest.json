@@ -1,9 +1,10 @@
 {
+  "id": "/dashboard",
   "name": "Panel studia — Romans Tattoo",
   "short_name": "Panel",
   "description": "Panel zarządzania studiem Romans Tattoo",
-  "start_url": "https://romanstattoo.base44.app/dashboard",
-  "scope": "https://romanstattoo.base44.app",
+  "start_url": "/dashboard",
+  "scope": "/",
   "display": "standalone",
   "theme_color": "#000000",
   "background_color": "#0a0a0a",

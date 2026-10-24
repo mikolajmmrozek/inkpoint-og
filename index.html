@@ -9,18 +9,6 @@
   </head>
   <body>
     <div id="root"></div>
-    <script>
-      // iOS "Add to Home Screen" uses the manifest's start_url, ignoring the current page.
-      // Swap in the dashboard manifest so icons saved on /dashboard open that path.
-      (function () {
-        var path = window.location.pathname;
-        var manifest = document.querySelector('link[rel="manifest"]');
-        if (!manifest) return;
-        if (path.indexOf('/dashboard') === 0) {
-          manifest.setAttribute('href', '/manifest-dashboard.json');
-        }
-      })();
-    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
