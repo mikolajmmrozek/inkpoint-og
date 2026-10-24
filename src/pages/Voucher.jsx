@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Download, Printer, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { downloadVoucherPDF, printVoucherPDF } from '@/lib/voucherPdf';
+import VoucherAuthScreen from '@/components/voucher/VoucherAuthScreen';
 
 const A4_WIDTH = '210mm';
 const A4_HEIGHT = '297mm';
@@ -15,6 +16,8 @@ export default function Voucher() {
   const [recipientName, setRecipientName] = useState('');
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [needsAuth, setNeedsAuth] = useState(false);
+  const [assignedElsewhere, setAssignedElsewhere] = useState(false);
   const [pdfBusy, setPdfBusy] = useState(false);
   const sheetRef = useRef(null);
 
@@ -40,7 +43,22 @@ export default function Voucher() {
         const theme = allSettings.find(s => s.key === 'theme') || {};
         setSettings({ ...theme, ...contact, primary_color: theme.primary_color || contact.primary_color });
         const found = promos.find(p => p.type === 'voucher');
-        if (!found) { setNotFound(true); setLoading(false); return; }
+        if (!found) {
+          // Voucher może istnieć, ale być niewidoczny bez zalogowania (RLS: tylko przypisany klient lub admin).
+          try {
+            const res = await base44.functions.invoke('checkVoucherAccess', { code });
+            const data = res?.data || res;
+            if (data?.exists && data?.assigned) {
+              let loggedIn = false;
+              try { loggedIn = await base44.auth.isAuthenticated(); } catch { /* anonimowy */ }
+              if (cancelled) return;
+              if (loggedIn) { setAssignedElsewhere(true); setLoading(false); return; }
+              setNeedsAuth(true); setLoading(false); return;
+            }
+          } catch { /* brak odpowiedzi → traktuj jak nieznaleziony */ }
+          if (cancelled) return;
+          setNotFound(true); setLoading(false); return;
+        }
         setPromo(found);
         if (found.assigned_client_email) {
           try {
@@ -108,6 +126,14 @@ export default function Voucher() {
 
   if (notFound) {
     return <MessageScreen title="Voucher nie istnieje" desc="Ten kod nie został znaleziony. Sprawdź kod lub skontaktuj się ze studiem." />;
+  }
+
+  if (needsAuth) {
+    return <VoucherAuthScreen settings={settings} variant="assigned" />;
+  }
+
+  if (assignedElsewhere) {
+    return <MessageScreen title="Voucher niedostępny" desc="Ten voucher jest przypisany do innego konta. Zaloguj się adresem e-mail, na który został wysłany voucher, aby go zobaczyć." />;
   }
 
   if (isUsed) {
