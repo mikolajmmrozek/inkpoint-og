@@ -59,27 +59,9 @@ import Voucher from './pages/Voucher';
 import ChangeRequest from './pages/ChangeRequest';
 
 import ScrollToTop from './components/ScrollToTop';
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-
-const isIOSStandalone = () => {
-  return window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
-};
 
 const AuthenticatedApp = () => {
-  const { user, isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!isLoadingAuth && !isLoadingPublicSettings && !authError && isIOSStandalone()) {
-      const currentPath = window.location.pathname;
-      // Only auto-redirect if not already on a specific route that user navigated to
-      if (currentPath === '/' && !window.location.search) {
-        const target = user?.role === 'artist' ? '/artist' : user?.role === 'user' ? '/panel' : '/dashboard';
-        navigate(target, { replace: true });
-      }
-    }
-  }, [isLoadingAuth, isLoadingPublicSettings, authError, navigate]);
+  const { isLoadingPublicSettings, isLoadingAuth, authError, navigateToLogin } = useAuth();
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
