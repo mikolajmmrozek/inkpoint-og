@@ -93,7 +93,7 @@ export default function BookingCard({ bookingId, t, theme, onAction, readOnly = 
 
       // Send email notification to client
       try {
-        await base44.functions.invoke('sendEmailViaResend', {
+        await base44.functions.invoke('sendStudioEmail', {
           to: booking.client_email,
           subject: getStatusEmailSubject(newStatus),
           body: getStatusMessage(newStatus, booking),

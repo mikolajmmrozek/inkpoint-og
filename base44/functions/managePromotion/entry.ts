@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
-import { secrets } from 'base44:runtime';
+import { sendViaGmail } from '../../shared/bookingEmail.ts';
 
 const CHARSET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
@@ -33,21 +33,30 @@ function buildEmail(p: any, link: string): string {
   </div></body></html>`;
 }
 
-async function sendVoucherEmail(to: string, subject: string, html: string) {
-  const key = secrets.get('RESEND_API_KEY');
-  if (!key) return { error: 'RESEND_API_KEY not configured' };
+// Wersja tekstowa e-maila z voucherem (alternatywa dla klientów bez HTML).
+function buildEmailText(p: any, link: string): string {
+  const valueStr = p.value_type === 'percent' ? `${p.value}%` : `${p.value} PLN`;
+  const expiry = p.expires_at ? new Date(p.expires_at).toLocaleDateString('pl-PL') : '';
+  return [
+    'ROMANS TATTOO',
+    '',
+    p.type === 'voucher' ? 'Prezentujemy Ci voucher o wartości' : 'Otrzymujesz kod zniżkowy o wartości',
+    `${valueStr}.`,
+    '',
+    `KOD: ${p.code}`,
+    '',
+    `Zobacz tutaj: ${link}`,
+    expiry ? `Ważny do: ${expiry}` : '',
+  ].filter(Boolean).join('\n');
+}
+
+// Wysyłka przez zsynchronizowane konto Gmail studia (tattoo.wolsztyn@gmail.com).
+async function sendVoucherEmail(base44: any, to: string, subject: string, html: string, text: string) {
   try {
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: 'Romans Tattoo <tattoo.wolsztyn@gmail.com>', to, subject, html }),
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      return { error: `Resend error: ${err.message || res.status}` };
-    }
+    const { accessToken } = await base44.asServiceRole.connectors.getConnection('gmail');
+    await sendViaGmail(accessToken, 'Romans Tattoo', 'tattoo.wolsztyn@gmail.com', to, subject, text, html);
     return { success: true };
-  } catch (e) {
+  } catch (e: any) {
     return { error: e.message };
   }
 }
@@ -148,7 +157,7 @@ export default async function (req: Request): Promise<Response> {
       if (body.send_email && body.email_to) {
         const link = `${appUrl}/voucher/${code}`;
         const subject = type === 'voucher' ? 'Twój voucher od Roman Tattoo' : 'Twój kod zniżkowy od Roman Tattoo';
-        emailResult = await sendVoucherEmail(body.email_to, subject, buildEmail(created, link));
+        emailResult = await sendVoucherEmail(base44, body.email_to, subject, buildEmail(created, link), buildEmailText(created, link));
       }
 
       return Response.json({ promotion: created, email: emailResult });
@@ -278,7 +287,7 @@ export default async function (req: Request): Promise<Response> {
       if (!to) return Response.json({ error: 'Brak odbiorcy' }, { status: 400 });
       const link = `${appUrl}/voucher/${p.code}`;
       const subject = p.type === 'voucher' ? 'Twój voucher od Roman Tattoo' : 'Twój kod zniżkowy od Roman Tattoo';
-      const emailResult = await sendVoucherEmail(to, subject, buildEmail(p, link));
+      const emailResult = await sendVoucherEmail(base44, to, subject, buildEmail(p, link), buildEmailText(p, link));
       return Response.json({ email: emailResult });
     }
 

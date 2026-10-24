@@ -228,7 +228,7 @@ export default function DashboardDocuments() {
     try {
       const { docData, label } = shareDoc;
       const plainText = (docData?.content || '').replace(/<[^>]+>/g, '');
-      await base44.functions.invoke('sendEmailViaResend', {
+      await base44.functions.invoke('sendStudioEmail', {
         to: shareEmail,
         subject: docData?.title || label,
         body: `${docData?.title || label}\n\n${plainText}`,

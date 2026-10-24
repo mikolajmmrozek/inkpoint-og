@@ -302,7 +302,7 @@ export default function DashboardBookings() {
         const subject = cfg.email_subject || 'Jak minęła Twoja sesja? Podziel się opinią!';
         const bodyTemplate = cfg.email_body || 'Cześć {client_name},\n\nDziękujemy za wizytę!\n\nOcena: {link}';
         const body = bodyTemplate.replace('{client_name}', booking.client_name || '').replace('{link}', surveyLink);
-        await base44.functions.invoke('sendEmailViaResend', { to: booking.client_email, subject, body }).catch(() => {});
+        await base44.functions.invoke('sendStudioEmail', { to: booking.client_email, subject, body }).catch(() => {});
       }
     }
   };

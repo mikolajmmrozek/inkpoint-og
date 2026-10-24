@@ -92,7 +92,7 @@ export default function NewMessageModal({ onClose, onSent, t, defaultRecipient }
         attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
       });
       try {
-        await base44.functions.invoke('sendEmailViaResend', {
+        await base44.functions.invoke('sendStudioEmail', {
           to: selectedRecipient.email,
           subject: 'Wiadomość od Romans Tattoo',
           body: messageText,
