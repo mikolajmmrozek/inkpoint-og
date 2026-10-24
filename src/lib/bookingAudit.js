@@ -13,7 +13,8 @@ async function editorPatch() {
       last_editor: 'dashboard',
       last_editor_id: user.id,
       last_editor_name: user.full_name || user.email || '',
-      last_editor_role: user.role || 'user',
+      // Schemat Bookingu dopuszcza tylko 'admin'/'user' (artysta = 'user').
+      last_editor_role: user.role === 'admin' ? 'admin' : 'user',
     };
   } catch {
     return {};
