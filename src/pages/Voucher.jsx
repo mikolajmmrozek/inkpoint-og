@@ -133,7 +133,7 @@ export default function Voucher() {
   }
 
   if (assignedElsewhere) {
-    return <MessageScreen title="Voucher niedostępny" desc="Ten voucher jest przypisany do innego konta. Zaloguj się adresem e-mail, na który został wysłany voucher, aby go zobaczyć." />;
+    return <VoucherAuthScreen settings={settings} variant="other-account" />;
   }
 
   if (isUsed) {
