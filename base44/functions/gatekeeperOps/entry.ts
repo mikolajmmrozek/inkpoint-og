@@ -47,7 +47,7 @@ const ENTITIES = {
     ops: { read: true, create: true, update: true, delete: true },
     required: ['type', 'value', 'expires_at'],
     fields: ['type', 'code', 'value_type', 'value', 'usage_mode', 'expires_at', 'assigned_client_email', 'assigned_until', 'assignment_permanent', 'send_email', 'email_to', 'is_active', 'revoked', 'grace_value', 'grace_expires_at', 'admin_notes'],
-    filter: ['code', 'type', 'status', 'assigned_client_email', 'is_active', 'revoked'],
+    filter: ['code', 'type', 'status', 'assigned_client_email', 'is_active', 'revoked', 'admin_notes', 'created_date'],
     sensitive: ['value', 'balance', 'status', 'revoked', 'grace_value'],
   },
   ArtistAvailability: {
