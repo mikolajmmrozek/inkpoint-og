@@ -72,6 +72,31 @@ function FunctionDisplay({ toolCall, t }) {
   );
 }
 
+const IMAGE_URL_RE = /\.(png|jpe?g|gif|webp|svg|bmp)(\?[^)\s]*)?$/i;
+const AUTOLINK_RE = /(^|[\s>])(https?:\/\/[^\s<>()\[\]]+)/g;
+
+// Gołe adresy URL w treści zamieniamy na linki markdown
+// (adresy już osadzone w [nazwa](adres) nie są poprzedzone spacją — nie zostaną podwójnie opakowane).
+const autolinkUrls = (text) => String(text).replace(AUTOLINK_RE, (m, pre, url) => `${pre}[${url}](${url})`);
+
+function markdownComponents(t) {
+  const imgStyle = {
+    maxWidth: '100%',
+    maxHeight: '260px',
+    objectFit: 'contain',
+    borderRadius: 'var(--radius)',
+    border: `0.5px solid ${t.border}`,
+    display: 'block',
+    marginTop: '6px',
+  };
+  return {
+    a: ({ href, children }) => IMAGE_URL_RE.test(href)
+      ? <img src={href} alt="" style={imgStyle} />
+      : <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--brand)' }}>{children}</a>,
+    img: ({ src, alt }) => <img src={src} alt={alt || ''} style={imgStyle} />,
+  };
+}
+
 export default function MessageBubble({ message, t }) {
   const isUser = message.role === 'user';
   return (
@@ -95,7 +120,7 @@ export default function MessageBubble({ message, t }) {
               wordBreak: 'break-word',
             }}
           >
-            {isUser ? message.content : <ReactMarkdown>{message.content}</ReactMarkdown>}
+            {isUser ? message.content : <ReactMarkdown components={markdownComponents(t)}>{autolinkUrls(message.content)}</ReactMarkdown>}
           </div>
         )}
       </div>
