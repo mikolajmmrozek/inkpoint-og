@@ -196,7 +196,7 @@ export default async function(req: Request): Promise<Response> {
           <tr>
             <td style="background:#FF007F;padding:28px 32px;">
               <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;font-family:Arial,Helvetica,sans-serif;">${isPendingMode ? 'Otrzymaliśmy Twoje Zgłoszenie' : 'Twoja Rezerwacja Jest Potwierdzona'}</h1>
-              <p style="margin:6px 0 0 0;color:#ffffff;font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;opacity:0.95;">Romans Tattoo &middot; Inkflow</p>
+              <p style="margin:6px 0 0 0;color:#ffffff;font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;opacity:0.95;">Romans Tattoo &middot; Inkpoint</p>
             </td>
           </tr>
 

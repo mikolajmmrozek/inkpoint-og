@@ -1,5 +1,5 @@
 {
-  "name": "Romans tattoo - Inkflow",
+  "name": "Romans tattoo - Inkpoint",
   "site": {
     "installCommand": "npm install",
     "buildCommand": "npm run build",
