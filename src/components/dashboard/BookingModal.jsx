@@ -336,6 +336,9 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
       data.session_id = `SES-${date}-${random}`;
     }
 
+    // Sesje tworzone przez artystę zawsze startują jako confirmed
+    if (isNew && lockArtistId) data.status = 'confirmed';
+
     if (isNew) {
       const created = await bookingCreate(data);
       savedBookingId = created?.id;
@@ -767,7 +770,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                 onChange={e => set('status', e.target.value)}
                 style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark' }}
               >
-                {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                {STATUS_OPTIONS.filter(s => !lockArtistId || s !== 'pending').map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
           </div>

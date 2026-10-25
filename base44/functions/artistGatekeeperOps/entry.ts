@@ -223,7 +223,8 @@ export default async function (req: Request): Promise<Response> {
       payload.artist_name = artistName;
       if (!payload.session_id) payload.session_id = genSessionId();
       payload.source = 'dashboard';
-      payload.status = 'pending';
+      // Sesje tworzone przez artystę (również przez asystenta) zawsze startują jako confirmed
+      payload.status = 'confirmed';
       if (payload.deposit_amount !== undefined) payload.deposit_paid = Number(payload.deposit_amount) > 0;
       payload.last_editor = 'dashboard';
       payload.last_editor_id = user.id;
@@ -233,7 +234,7 @@ export default async function (req: Request): Promise<Response> {
       const created = await base44.entities.Booking.create(payload);
       return Response.json({
         status: 'executed', entity: 'Booking', action, record: created,
-        note: 'Nowa rezerwacja uruchamia automatycznie powiadomienia studia, konwersację z klientem i synchronizację z Google Calendar. Status sesji to pending — potwierdzenie należy do administratora.',
+        note: 'Nowa rezerwacja uruchamia automatycznie powiadomienia studia, konwersację z klientem i synchronizację z Google Calendar. Status sesji to confirmed — artysta sam potwierdza swoje sesje.',
       });
     }
 
