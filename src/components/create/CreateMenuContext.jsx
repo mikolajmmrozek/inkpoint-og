@@ -9,6 +9,7 @@ import QuickClientModal from './QuickClientModal';
 import QuickPromotionModal from './QuickPromotionModal';
 import { openHealthFormQRPage } from '@/lib/qrPage';
 import GatekeeperChat from '@/components/gatekeeper/GatekeeperChat';
+import ArtistGatekeeperChat from '@/components/gatekeeper/ArtistGatekeeperChat';
 
 const CreateMenuContext = createContext(null);
 export const useCreateMenu = () => useContext(CreateMenuContext);
@@ -146,11 +147,9 @@ export function CreateMenuProvider({ children, role, theme, selfArtistId }) {
         )}
       </AnimatePresence>
       {action === 'gatekeeper' && (
-        <GatekeeperChat
-          key="gatekeeper"
-          theme={theme}
-          onClose={closeAll}
-        />
+        role === 'artist'
+          ? <ArtistGatekeeperChat key="gatekeeper" theme={theme} onClose={closeAll} />
+          : <GatekeeperChat key="gatekeeper" theme={theme} onClose={closeAll} />
       )}
     </CreateMenuContext.Provider>
   );

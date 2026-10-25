@@ -14,7 +14,7 @@ export default function CreateMenuFAB({ onNewBooking, onNewAvailability, onNewHe
     { icon: CalendarPlus, label: 'Rezerwacja', action: onNewBooking },
     { icon: FileText, label: 'Ankieta', action: onNewHealthForm },
     ...(role === 'admin' ? [{ icon: Ticket, label: 'Promocje', action: onNewPromotion }] : []),
-    ...(role === 'admin' ? [{ icon: Bot, label: 'Gatekeeper', action: onNewGatekeeper }] : []),
+    ...(['admin', 'artist'].includes(role) ? [{ icon: Bot, label: role === 'artist' ? 'Asystent AI' : 'Gatekeeper', action: onNewGatekeeper }] : []),
     { icon: Clock, label: 'Dyspozycja', action: onNewAvailability },
     ...(role === 'admin' ? [{ icon: UserPlus, label: 'Klient', action: onNewClient }] : []),
   ];

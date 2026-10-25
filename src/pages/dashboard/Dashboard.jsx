@@ -2,7 +2,7 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Calendar, Users, BookOpen, MessageSquare, FileText, LogOut, BarChart2, Menu, X, Sun, Moon, Settings, UserCircle, PieChart, Star, FolderOpen, Scissors, ShieldCheck, Bell, PanelLeftClose, PanelLeftOpen, Home as HomeIcon, Gift, Bot } from 'lucide-react';
+import { Calendar, Users, BookOpen, MessageSquare, FileText, LogOut, BarChart2, Menu, X, Sun, Moon, Settings, UserCircle, PieChart, Star, FolderOpen, Scissors, ShieldCheck, Bell, PanelLeftClose, PanelLeftOpen, Home as HomeIcon, Gift } from 'lucide-react';
 import BottomNav from '@/components/panel/BottomNav';
 import NotificationBell from '@/components/panel/NotificationBell';
 import NotificationPanel from '@/components/panel/NotificationPanel';
@@ -30,7 +30,6 @@ const NAV = [
   { path: '/dashboard/feedback', label: 'Opinie', icon: Star },
   { path: '/dashboard/stats', label: 'Statystyki', icon: PieChart },
   { path: '/dashboard/users', label: 'Użytkownicy', icon: ShieldCheck },
-  { path: '/dashboard/agent-activity', label: 'Asystenci AI', icon: Bot },
   { path: '/dashboard/settings', label: 'Ustawienia', icon: Settings },
 ];
 
