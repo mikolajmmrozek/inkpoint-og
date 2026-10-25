@@ -97,14 +97,9 @@ export default async function (req: Request): Promise<Response> {
           const res: any = await base44.entities.Booking.filter({ artist_id: artistId, ...filters }, { sort: rawSort, limit });
           items = (Array.isArray(res) ? res : (res?.items || [])).slice(0, limit);
         } else if (entityName === 'Client') {
-          const bookings = await ownBookings();
-          const emails = [...new Set(bookings.map(b => (b.client_email || '').toLowerCase()).filter(Boolean))];
-          const clients: any[] = [];
-          for (let i = 0; i < emails.length; i += 50) {
-            const res: any = await base44.entities.Client.filter({ email: { $in: emails.slice(i, i + 50) } });
-            clients.push(...(Array.isArray(res) ? res : (res?.items || [])));
-          }
-          let out = clients;
+          // Artyści mają dostęp do wszystkich klientów studia (nie tylko własnych sesji)
+          const res: any = await base44.entities.Client.filter({}, { sort: rawSort, limit: 500 });
+          let out = Array.isArray(res) ? res : (res?.items || []);
           if (filters.email) out = out.filter(c => (c.email || '').toLowerCase() === String(filters.email).toLowerCase());
           if (filters.search) {
             const q = String(filters.search).toLowerCase();
@@ -166,7 +161,6 @@ export default async function (req: Request): Promise<Response> {
       if (!body.id) return Response.json({ error: 'Brak id rekordu' }, { status: 400 });
       const bookings = await ownBookings();
       const ownIds = bookings.map(b => b.id);
-      const ownEmails = bookings.map(b => (b.client_email || '').toLowerCase()).filter(Boolean);
 
       let record: any = null;
       if (entityName === 'Booking') {
@@ -176,7 +170,7 @@ export default async function (req: Request): Promise<Response> {
       }
       if (entityName === 'Client') {
         record = await base44.entities.Client.get(body.id).catch(() => null);
-        if (!record || !ownEmails.includes((record.email || '').toLowerCase())) return notFound(entityName);
+        if (!record) return notFound(entityName);
         return Response.json({ entity: entityName, record });
       }
       if (entityName === 'HealthForm' || entityName === 'GuardianConsentForm') {
@@ -209,7 +203,7 @@ export default async function (req: Request): Promise<Response> {
       return Response.json({ error: 'Usunięcie sesji jest trwale zablokowane dla asystenta artysty. Zamiast tego możesz (po potwierdzeniu) anulować sesję zmieniając status.' }, { status: 400 });
     }
 
-    // ── TWORZENIE SESJI (Booking) — wykonanie od razu ───────────────
+    // ── TWORZENIE SESJI (Booking) — dwuetapowo, ZAWSZE wymaga potwierdzenia ──
     if (action === 'create') {
       if (entityName !== 'Booking') return Response.json({ error: `Tworzenie rekordów ${entityName} nie jest dostępne dla asystenta artysty — możesz tworzyć wyłącznie własne sesje (Booking).` }, { status: 400 });
       const dat = body.data || {};
@@ -218,7 +212,32 @@ export default async function (req: Request): Promise<Response> {
       const missing = ['client_name', 'client_email', 'session_date'].filter(f => !dat[f]);
       if (missing.length > 0) return Response.json({ error: `Brak wymaganych pól: ${missing.join(', ')}` }, { status: 400 });
 
-      const payload: any = pick(dat, BOOKING_CREATE_FIELDS);
+      // Token wiąże się wyłącznie z danymi przekazanymi przez artystę (bez pól nadawanych przez serwer)
+      const clean = pick(dat, BOOKING_CREATE_FIELDS);
+      const tokenData = { data: clean };
+
+      if (!body.confirm_token) {
+        const confirm_token = await signToken(user.id, 'create', 'Booking', tokenData, 'artist-gatekeeper-confirm');
+        return Response.json({
+          status: 'awaiting_confirmation', entity: 'Booking', action,
+          proposed: clean,
+          sensitive: true,
+          side_effects: [
+            'Nowa rezerwacja uruchamia powiadomienia studia, konwersację z klientem i synchronizację z Google Calendar.',
+            'Sesja powstanie ze statusem confirmed — artysta sam potwierdza swoje sesje.',
+          ],
+          confirm_token,
+          expires_in_seconds: TOKEN_TTL_MS / 1000,
+          hint: 'Przedstaw artyście podsumowanie i po uzyskaniu potwierdzenia wywołaj ponownie z identycznymi danymi oraz confirm_token.',
+        });
+      }
+
+      const tokenOk = await verifyToken(body.confirm_token, user.id, 'create', 'Booking', tokenData, 'artist-gatekeeper-confirm');
+      if (!tokenOk) {
+        return Response.json({ error: 'Token potwierdzenia nieprawidłowy lub wygasł (max 15 min). Wygeneruj nową propozycję bez confirm_token, uzyskaj potwierdzenie artysty i wykonaj ponownie.' }, { status: 400 });
+      }
+
+      const payload: any = { ...clean };
       payload.artist_id = artistId;
       payload.artist_name = artistName;
       if (!payload.session_id) payload.session_id = genSessionId();
