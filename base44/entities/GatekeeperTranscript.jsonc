@@ -1,0 +1,101 @@
+{
+  "name": "GatekeeperTranscript",
+  "type": "object",
+  "properties": {
+    "agent_name": {
+      "type": "string",
+      "default": "GatekeeperArtist",
+      "description": "Nazwa agenta, kt\u00f3rego dotyczy wpis"
+    },
+    "conversation_id": {
+      "type": "string",
+      "description": "ID rozmowy agenta"
+    },
+    "conversation_name": {
+      "type": "string",
+      "description": "Nazwa rozmowy (z metadanych)"
+    },
+    "artist_id": {
+      "type": "string",
+      "description": "ID artysty-w\u0142a\u015bciciela agenta"
+    },
+    "artist_name": {
+      "type": "string",
+      "description": "Nazwa artysty (cache)"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "ID zalogowanego u\u017cytkownika (artysty) \u2014 rozr\u00f3\u017cnia agenta od u\u017cytkownika"
+    },
+    "user_role": {
+      "type": "string",
+      "default": "artist",
+      "description": "Rola u\u017cytkownika w tej wymianie"
+    },
+    "user_message": {
+      "type": "string",
+      "description": "Wiadomo\u015b\u0107 u\u017cytkownika (zanonimizowana \u2014 bez danych osobowych klient\u00f3w)"
+    },
+    "assistant_message": {
+      "type": "string",
+      "description": "Odpowied\u017a asystenta (zanonimizowana)"
+    },
+    "tool_calls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Nazwa narz\u0119dzia"
+          },
+          "status": {
+            "type": "string",
+            "description": "Status wywo\u0142ania (pending/success/failed/...)"
+          },
+          "arguments": {
+            "type": "string",
+            "description": "Argumenty wywo\u0142ania (zanonimizowane, skr\u00f3cone)"
+          },
+          "result": {
+            "type": "string",
+            "description": "Wynik wywo\u0142ania (zanonimizowany, skr\u00f3cony)"
+          }
+        }
+      },
+      "description": "Wywo\u0142ania narz\u0119dzi podczas wymiany (zanonimizowane)"
+    },
+    "had_error": {
+      "type": "boolean",
+      "default": false,
+      "description": "Czy wymiana zako\u0144czy\u0142a si\u0119 b\u0142\u0119dem"
+    },
+    "error_note": {
+      "type": "string",
+      "description": "Kr\u00f3tki opis b\u0142\u0119du (zanonimizowany)"
+    },
+    "instruction_version": {
+      "type": "string",
+      "description": "Wersja bazowych instrukcji agenta w momencie wymiany \u2014 odr\u00f3\u017cnia wp\u0142yw promptu od personalizacji"
+    },
+    "memory_entries": {
+      "type": "number",
+      "description": "Liczba aktualnych wpis\u00f3w pami\u0119ci tego agenta w momencie wymiany"
+    }
+  },
+  "required": [
+    "agent_name",
+    "artist_id",
+    "user_message"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": false,
+    "update": false,
+    "delete": false
+  }
+}

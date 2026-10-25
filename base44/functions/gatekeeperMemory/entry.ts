@@ -1,28 +1,15 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { asList } from '../../shared/gatekeeperData.ts';
+import { CATEGORIES, KEY_RE, MAX_CONTENT, sanitize, contentHasClientData } from '../../shared/gatekeeperMemoryRules.ts';
 
 const DEFAULT_STUDIO_ID = 'romanstattoo';
-const CATEGORIES = ['style', 'preference'];
-const KEY_RE = /^[a-z0-9_]{3,40}$/;
-const MAX_CONTENT = 600;
 const AUTHOR_TYPES = ['assistant', 'admin'];
-
-const asList = (res) => Array.isArray(res) ? res : (res?.items || []);
-
-const sanitize = (str) => typeof str === 'string' ? str.trim() : '';
 
 // Nadrzędny dostęp właściciela platformy to osobny, jawny check (lista PlatformOwner),
 // nie rola admina studia — konto studia nie może się same podnieść.
 async function isPlatformOwner(base44, email) {
   const owners = asList(await base44.asServiceRole.entities.PlatformOwner.filter({ email: email, is_active: true }));
   return owners.length > 0;
-}
-
-// Pamięć Gatekeepera może zawierać wyłącznie preferencje i styl pracy —
-// blokujemy wzorce danych klientów (e-mail, długie ciągi cyfr: telefon/PESEL)
-function contentHasClientData(content) {
-  if (content.includes('@')) return true;
-  if (/\d{7,}/.test(content)) return true;
-  return false;
 }
 
 Deno.serve(async (req) => {

@@ -1,0 +1,78 @@
+{
+  "name": "ArtistGatekeeperMemory",
+  "type": "object",
+  "properties": {
+    "artist_id": {
+      "type": "string",
+      "description": "ID artysty-w\u0142a\u015bciciela tej pami\u0119ci \u2014 pami\u0119\u0107 jest prywatna i izolowana per artysta"
+    },
+    "artist_name": {
+      "type": "string",
+      "description": "Nazwa artysty (cache)"
+    },
+    "agent_name": {
+      "type": "string",
+      "default": "GatekeeperArtist",
+      "description": "Nazwa asystenta (zawsze GatekeeperArtist)"
+    },
+    "memory_key": {
+      "type": "string",
+      "description": "Kr\u00f3tki klucz wpisu (slug, np. 'styl_odpowiedzi')"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "style",
+        "preference"
+      ],
+      "description": "Kategoria: style = styl pracy/odpowiedzi, preference = preferencja artysty"
+    },
+    "content": {
+      "type": "string",
+      "description": "Tre\u015b\u0107 zapami\u0119tanej preferencji (max 600 znak\u00f3w, bez danych klient\u00f3w)"
+    },
+    "version": {
+      "type": "number",
+      "description": "Numer wersji wpisu (ro\u015bnie przy ka\u017cdej zmianie)"
+    },
+    "is_current": {
+      "type": "boolean",
+      "default": true,
+      "description": "True = aktualna wersja; false = wersja archiwalna (historia)"
+    },
+    "seeded_from": {
+      "type": "string",
+      "description": "Oznaczenie wpisu skopiowanego z bazy Gatekeepera administrator\u00f3w przy pierwszym uruchomieniu agenta artysty (np. 'admin_gatekeeper')"
+    },
+    "author_type": {
+      "type": "string",
+      "enum": [
+        "assistant",
+        "admin"
+      ],
+      "description": "Kto zapisa\u0142: assistant = agent nauczy\u0142 si\u0119 sam, admin = r\u0119cznie z panelu"
+    },
+    "author_name": {
+      "type": "string",
+      "description": "Imi\u0119/nazwa autora zmiany"
+    }
+  },
+  "required": [
+    "artist_id",
+    "memory_key",
+    "category",
+    "content",
+    "version",
+    "is_current"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": false,
+    "update": false,
+    "delete": false
+  }
+}

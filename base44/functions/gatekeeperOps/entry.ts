@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
-import { secrets } from 'base44:runtime';
+import { TOKEN_TTL_MS, signToken, verifyToken } from '../../shared/gatekeeperConfirm.ts';
+import { builtinFields, maskRecord, pick, genSessionId } from '../../shared/gatekeeperData.ts';
 
 // ─────────────────────────────────────────────────────────────────────────
 // gatekeeperOps — narzędzie Gatekeepera do zarządzania danymi Dashboard.
@@ -189,78 +190,6 @@ const ENTITIES = {
   },
 };
 
-const TOKEN_TTL_MS = 15 * 60 * 1000;
-const builtinFields = ['id', 'created_date', 'updated_date', 'created_by_id'];
-
-async function hmacHex(str) {
-  const keyMaterial = (secrets.get('BASE44_APP_ID') || 'gatekeeper-ops') + '|gatekeeper-confirm';
-  const enc = new TextEncoder();
-  const key = await crypto.subtle.importKey('raw', enc.encode(keyMaterial), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(str));
-  let hex = '';
-  const bytes = new Uint8Array(sig);
-  for (let i = 0; i < bytes.length; i++) hex += bytes[i].toString(16).padStart(2, '0');
-  return hex;
-}
-
-// Kanoniczna serializacja (posortowane klucze) — token nie zależy od kolejności pól w obiekcie,
-// dzięki czemu asystent może przekazać te same dane w innej kolejności klucz:wartość.
-function stableStringify(v) {
-  if (v === null || typeof v !== 'object') return JSON.stringify(v);
-  if (Array.isArray(v)) return '[' + v.map(stableStringify).join(',') + ']';
-  const keys = Object.keys(v).sort();
-  return '{' + keys.map(k => JSON.stringify(k) + ':' + stableStringify(v[k])).join(',') + '}';
-}
-
-function tokenPayload(userId, action, entity, dat) {
-  return stableStringify({ uid: userId, act: action, ent: entity, dat });
-}
-
-async function signToken(userId, action, entity, dat) {
-  const ts = Date.now();
-  const sig = await hmacHex(ts + '|' + tokenPayload(userId, action, entity, dat));
-  return `${ts}.${sig}`;
-}
-
-async function verifyToken(token, userId, action, entity, dat) {
-  if (typeof token !== 'string') return false;
-  const dot = token.indexOf('.');
-  if (dot <= 0) return false;
-  const ts = Number(token.slice(0, dot));
-  const sig = token.slice(dot + 1);
-  if (!ts || !Number.isFinite(ts) || Date.now() - ts > TOKEN_TTL_MS) return false;
-  const expect = await hmacHex(ts + '|' + tokenPayload(userId, action, entity, dat));
-  return expect === sig;
-}
-
-function maskRecord(record, cfg, includeSensitive) {
-  if (includeSensitive || !cfg || (!cfg.mask && !cfg.maskPattern)) return record;
-  const out = {};
-  for (const k of Object.keys(record)) {
-    if (cfg.mask && cfg.mask.includes(k)) { out[k] = '[ukryte — dane wrażliwe]'; continue; }
-    if (cfg.maskPattern && cfg.maskPattern.test(k)) { out[k] = '[ukryte — dane wrażliwe]'; continue; }
-    out[k] = record[k];
-  }
-  return out;
-}
-
-function unknownKeys(payload, allowed) {
-  const bad = Object.keys(payload || {}).filter(k => !allowed.includes(k) && !builtinFields.includes(k));
-  return bad;
-}
-
-function pick(record, keys) {
-  const out = {};
-  for (const k of keys) if (record && record[k] !== undefined) out[k] = record[k];
-  return out;
-}
-
-function genSessionId() {
-  const d = new Date();
-  const ymd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
-  return `SES-${ymd}-${Math.floor(1000 + Math.random() * 9000)}`;
-}
-
 function pickSummary(record, cfg) {
   // Skrócony podsumowujący widok rekordu (bez długich treści)
   const out = {};
@@ -362,7 +291,7 @@ export default async function (req: Request): Promise<Response> {
       }
       const touched = action === 'update' ? Object.keys(dat.changes) : action === 'create' ? Object.keys(dat) : ['*cały rekord*'];
       const sensitiveFields = touched.filter(f => cfg.sensitive.includes(f));
-      const confirm_token = await signToken(user.id, action, entityName, dat);
+      const confirm_token = await signToken(user.id, action, entityName, dat, 'gatekeeper-confirm');
       return Response.json({
         status: 'awaiting_confirmation',
         entity: entityName,
@@ -379,7 +308,7 @@ export default async function (req: Request): Promise<Response> {
     }
 
     // ── ETAP 2: wykonanie (z confirm_token) ──────────────────────────
-    const tokenOk = await verifyToken(body.confirm_token, user.id, action, entityName, dat);
+    const tokenOk = await verifyToken(body.confirm_token, user.id, action, entityName, dat, 'gatekeeper-confirm');
     if (!tokenOk) {
       return Response.json({ error: 'Token potwierdzenia nieprawidłowy lub wygasł (max 15 min). Wygeneruj nową propozycję bez confirm_token, uzyskaj potwierdzenie administratora i wykonaj ponownie.' }, { status: 400 });
     }
