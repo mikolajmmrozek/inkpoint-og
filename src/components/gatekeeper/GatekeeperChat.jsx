@@ -336,7 +336,7 @@ export default function GatekeeperChat({ theme = 'dark', onClose, agentName = 'G
           <div className="flex items-end gap-2">
             <input
               type="file"
-              accept="image/*"
+              accept="image/*,.pdf"
               ref={fileInputRef}
               style={{ display: 'none' }}
               onChange={e => { const f = e.target.files?.[0]; if (f) attachFile(f); e.target.value = ''; }}
@@ -345,8 +345,8 @@ export default function GatekeeperChat({ theme = 'dark', onClose, agentName = 'G
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading || loading || !!error}
-                title="Dołącz zdjęcie"
-                aria-label="Dołącz zdjęcie"
+                title="Dołącz zdjęcie lub PDF"
+                aria-label="Dołącz zdjęcie lub PDF"
                 style={{ width: '40px', height: '40px', flexShrink: 0, background: 'transparent', color: uploading ? 'var(--brand)' : t.muted, border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
                 {uploading ? <Loader2 size={15} className="animate-spin" /> : <Paperclip size={15} />}

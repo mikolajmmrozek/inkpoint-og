@@ -25,7 +25,7 @@ export default function ArtistGatekeeperChat({ theme = 'dark', onClose }) {
       conversationToolName="artistManageConversation"
       suggestions={SUGGESTIONS}
       showMemory={false}
-      allowAttachments={false}
+      allowAttachments={true}
       logger={logger}
       subtitle="Gatekeeper · Asystent Artysty"
     />

@@ -35,14 +35,14 @@ export default function VoucherAuthScreen({ settings, variant }) {
               <button
                 onClick={switchAccount}
                 className="flex items-center gap-2"
-                style={{ background: brand, color: '#FFFFFF', fontFamily: 'var(--font-mono)', fontSize: '10px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '13px 22px', border: 'none', cursor: 'pointer' }}
+                style={{ background: brand, color: '#FFFFFF', fontFamily: 'var(--font-mono)', fontSize: '10px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '13px 22px', border: 'none', cursor: 'pointer', borderRadius: 'var(--radius)' }}
               >
                 <Repeat size={13} /> Przełącz konto
               </button>
               <a
                 href="/"
                 className="flex items-center gap-2"
-                style={{ background: 'transparent', color: '#1A1A1A', fontFamily: 'var(--font-mono)', fontSize: '10px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '12px 21px', border: '1px solid #1A1A1A', cursor: 'pointer', textDecoration: 'none' }}
+                style={{ background: 'transparent', color: '#1A1A1A', fontFamily: 'var(--font-mono)', fontSize: '10px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '12px 21px', border: '1px solid #1A1A1A', cursor: 'pointer', textDecoration: 'none', borderRadius: 'var(--radius)' }}
               >
                 <Home size={13} /> Strona główna
               </a>
@@ -52,14 +52,14 @@ export default function VoucherAuthScreen({ settings, variant }) {
               <button
                 onClick={login}
                 className="flex items-center gap-2"
-                style={{ background: brand, color: '#FFFFFF', fontFamily: 'var(--font-mono)', fontSize: '10px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '13px 22px', border: 'none', cursor: 'pointer' }}
+                style={{ background: brand, color: '#FFFFFF', fontFamily: 'var(--font-mono)', fontSize: '10px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '13px 22px', border: 'none', cursor: 'pointer', borderRadius: 'var(--radius)' }}
               >
                 <LogIn size={13} /> Zaloguj się
               </button>
               <button
                 onClick={login}
                 className="flex items-center gap-2"
-                style={{ background: 'transparent', color: '#1A1A1A', fontFamily: 'var(--font-mono)', fontSize: '10px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '12px 21px', border: '1px solid #1A1A1A', cursor: 'pointer' }}
+                style={{ background: 'transparent', color: '#1A1A1A', fontFamily: 'var(--font-mono)', fontSize: '10px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '12px 21px', border: '1px solid #1A1A1A', cursor: 'pointer', borderRadius: 'var(--radius)' }}
               >
                 <UserPlus size={13} /> Załóż konto
               </button>

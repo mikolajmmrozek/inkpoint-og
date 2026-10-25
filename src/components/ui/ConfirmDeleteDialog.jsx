@@ -32,7 +32,7 @@ export default function ConfirmDeleteDialog({ open, title, message, onConfirm, o
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             className="w-full max-w-sm"
-            style={{ background: bg, border: `0.5px solid ${border}`, padding: '32px' }}
+            style={{ background: bg, border: `0.5px solid ${border}`, padding: '32px', borderRadius: 'var(--radius)' }}
             onClick={e => e.stopPropagation()}
           >
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
@@ -47,13 +47,13 @@ export default function ConfirmDeleteDialog({ open, title, message, onConfirm, o
             <div className="flex gap-3">
               <button
                 onClick={onConfirm}
-                style={{ flex: 1, padding: '10px', background: 'linear-gradient(135deg,var(--brand),var(--brand))', color: '#F5F0EB', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }}
+                style={{ flex: 1, padding: '10px', background: 'var(--brand)', color: 'var(--btn-text, #F5F0EB)', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', borderRadius: 'var(--radius)' }}
               >
                 USUŃ
               </button>
               <button
                 onClick={onCancel}
-                style={{ flex: 1, padding: '10px', background: 'transparent', color: mutedColor, fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', border: `0.5px solid ${border}`, cursor: 'pointer' }}
+                style={{ flex: 1, padding: '10px', background: 'transparent', color: mutedColor, fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', border: `0.5px solid ${border}`, cursor: 'pointer', borderRadius: 'var(--radius)' }}
               >
                 ANULUJ
               </button>
