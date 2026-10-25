@@ -11,6 +11,7 @@ import StepGuardian from '@/components/health-form/StepGuardian';
 import LangDropdown from '@/components/health-form/LangDropdown';
 import SignatureCanvas from '@/components/health-form/SignatureCanvas';
 import { compactSignatures, generateFormNumber } from '@/lib/signature';
+import { trackAction } from '@/lib/diagnosticTracker';
 
 // Fields that should NEVER be copied from a previous form
 const SKIP_PREFILL_FIELDS = new Set([
@@ -73,7 +74,9 @@ function getBaseForm() {
 export default function HealthFormPage() {
   const [lang, setLang] = useState('pl');
   const [langMenuOpen, setLangMenuOpen] = useState(false);
-  const [step, setStep] = useState('lang-select');
+  const [step, setStepRaw] = useState('lang-select');
+  // Tracker diagnostyczny: nazwa kroku ankiety (bez treści formularza)
+  const setStep = (s) => { trackAction('hf_step:' + s); setStepRaw(s); };
   const [theme, setTheme] = useState(() => localStorage.getItem('healthFormTheme') || 'dark');
   const toggleTheme = () => {
     const next = theme === 'dark' ? 'light' : 'dark';
@@ -818,7 +821,7 @@ export default function HealthFormPage() {
                 <button
                   type="button"
                   onClick={() => {
-                    if (canProceed() && !submitting) { useQuickRefresh ? handleQuickRefresh() : handleSubmit(); }
+                    if (canProceed() && !submitting) { trackAction('hf_submit'); useQuickRefresh ? handleQuickRefresh() : handleSubmit(); }
                     else setShowErrors(true);
                   }}
                   style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 32px', background: 'linear-gradient(135deg, var(--brand) 0%, var(--brand) 100%)', color: '#F5F0EB', border: 'none', cursor: 'pointer', width: '100%', opacity: canProceed() && !submitting ? 1 : 0.5 }}

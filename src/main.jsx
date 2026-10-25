@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from '@/App.jsx'
 import '@/index.css'
+import { initDiagnosticTracker } from '@/lib/diagnosticTracker'
 
 // Unregister any stale service workers that may cache old React copies
 if ('serviceWorker' in navigator) {
@@ -20,6 +21,9 @@ if (typeof document !== 'undefined') {
     }
   }, { passive: false });
 }
+
+// Dyskretny tracker akcji i błędów — bez wpływu na interfejs
+initDiagnosticTracker()
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <App />
