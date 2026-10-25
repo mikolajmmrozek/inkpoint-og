@@ -40,6 +40,7 @@ import DashboardFeedback from './pages/dashboard/DashboardFeedback';
 import DashboardServices from './pages/dashboard/DashboardServices';
 import DashboardPromotions from './pages/dashboard/DashboardPromotions';
 import DashboardUsers from './pages/dashboard/DashboardUsers';
+import DashboardAgentActivity from './pages/dashboard/DashboardAgentActivity';
 import NotificationsPage from './pages/shared/NotificationsPage';
 import ArtistPanel from './pages/artist/ArtistPanel';
 import ArtistHome from './pages/artist/ArtistHome';
@@ -118,6 +119,7 @@ const AuthenticatedApp = () => {
         <Route path="services" element={<DashboardServices />} />
         <Route path="promotions" element={<DashboardPromotions />} />
         <Route path="users" element={<DashboardUsers />} />
+        <Route path="agent-activity" element={<DashboardAgentActivity />} />
         <Route path="notifications" element={<NotificationsPage />} />
         <Route path="change-requests" element={<Navigate to="/dashboard/bookings?view=pending" replace />} />
       </Route>

@@ -2,7 +2,7 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Calendar, BarChart2, User, LogOut, Menu, X, Sun, Moon, MessageSquare, Bell, PanelLeftClose, PanelLeftOpen, Home as HomeIcon } from 'lucide-react';
+import { Calendar, BarChart2, User, LogOut, Menu, X, Sun, Moon, MessageSquare, Bell, PanelLeftClose, PanelLeftOpen, Home as HomeIcon, Bot } from 'lucide-react';
 import BottomNav from '@/components/panel/BottomNav';
 import NotificationBell from '@/components/panel/NotificationBell';
 import NotificationPanel from '@/components/panel/NotificationPanel';
@@ -10,6 +10,7 @@ import NotificationSidebarItem from '@/components/panel/NotificationSidebarItem'
 import SidebarBadge from '@/components/panel/SidebarBadge';
 import { useBadgeCounts } from '@/hooks/useBadgeCounts';
 import { CreateMenuProvider } from '@/components/create/CreateMenuContext';
+import ArtistGatekeeperChat from '@/components/gatekeeper/ArtistGatekeeperChat';
 
 export const ArtistThemeContext = createContext({ theme: 'dark', toggleTheme: () => {} });
 export const useArtistTheme = () => useContext(ArtistThemeContext);
@@ -29,7 +30,7 @@ const getBadgeForPath = (path, counts) => {
   return map[path] || null;
 };
 
-function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, artist, userEmail, onNotifClick, collapsed, onToggleCollapse }) {
+function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, artist, userEmail, onNotifClick, onGatekeeperClick, collapsed, onToggleCollapse }) {
   const location = useLocation();
   const isActive = (nav) => nav.exact ? location.pathname === nav.path : location.pathname.startsWith(nav.path);
   const counts = useBadgeCounts({ role: 'artist', userEmail });
@@ -101,6 +102,19 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, artist, user
               onDesktopClick={() => { setSidebarOpen(false); onNotifClick(); }}
               collapsed={collapsed}
             />
+            <button
+              onClick={() => { setSidebarOpen(false); onGatekeeperClick(); }}
+              className="w-full flex items-center gap-3 px-4 py-3 whitespace-nowrap overflow-hidden hover:opacity-70 transition-colors duration-200 mt-1"
+              style={{ color: 'rgba(var(--brand-rgb),0.9)', background: 'transparent', border: 'none', cursor: 'pointer' }}
+              title={collapsed ? 'Gatekeeper — Twój asystent AI' : ''}
+            >
+              <div className="shrink-0 flex items-center justify-center" style={{ width: 20 }}>
+                <Bot size={20} color="var(--brand)" />
+              </div>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                Asystent AI
+              </span>
+            </button>
           </div>
         </nav>
 
@@ -153,6 +167,7 @@ export default function ArtistPanel() {
   const [artist, setArtist] = useState(null);
   const [loadingArtist, setLoadingArtist] = useState(true);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [gatekeeperOpen, setGatekeeperOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('artistSidebarCollapsed') === 'true');
   const location = useLocation();
 
@@ -230,7 +245,7 @@ export default function ArtistPanel() {
     <ArtistThemeContext.Provider value={{ theme, toggleTheme, artist }}>
       <CreateMenuProvider role="artist" theme={theme} selfArtistId={artist?.id}>
       <div className="min-h-screen flex overflow-x-hidden" style={{ background: bg, color: textColor }}>
-        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} theme={theme} toggleTheme={toggleTheme} artist={artist} userEmail={user.email} onNotifClick={() => setNotifOpen(true)} collapsed={sidebarCollapsed} onToggleCollapse={toggleSidebarCollapse} />
+        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} theme={theme} toggleTheme={toggleTheme} artist={artist} userEmail={user.email} onNotifClick={() => setNotifOpen(true)} onGatekeeperClick={() => setGatekeeperOpen(true)} collapsed={sidebarCollapsed} onToggleCollapse={toggleSidebarCollapse} />
 
         <div className={`flex-1 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'} flex flex-col min-h-screen min-w-0 transition-all duration-500`}>
           {/* Top bar */}
@@ -270,6 +285,7 @@ export default function ArtistPanel() {
         </div>
         <BottomNav theme={theme} role="artist" calendarPath="/artist/schedule" messagesPath="/artist/messages" notificationsPath="/artist/notifications" userEmail={user.email} />
         <NotificationPanel open={notifOpen} onClose={() => setNotifOpen(false)} userEmail={user.email} theme={theme} notificationsPath="/artist/notifications" />
+        {gatekeeperOpen && <ArtistGatekeeperChat theme={theme} onClose={() => setGatekeeperOpen(false)} />}
       </div>
       </CreateMenuProvider>
     </ArtistThemeContext.Provider>

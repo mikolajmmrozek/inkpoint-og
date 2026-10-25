@@ -21,7 +21,7 @@ const THEME = {
 
 const byUpdatedDesc = (a, b) => (b.updated_date || b.created_date || '').localeCompare(a.updated_date || a.created_date || '');
 
-export default function GatekeeperChat({ theme = 'dark', onClose }) {
+export default function GatekeeperChat({ theme = 'dark', onClose, agentName = 'Gatekeeper', conversationToolName = 'manageConversation', suggestions = SUGGESTIONS, showMemory = true, allowAttachments = true, logger = null, subtitle = 'Gatekeeper · Asystent AI' }) {
   const t = THEME[theme === 'light' ? 'light' : 'dark'];
   const [conversations, setConversations] = useState([]);
   const [conversation, setConversation] = useState(null); // aktywna rozmowa (pełny obiekt)
@@ -46,7 +46,7 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
   // każdy admin widzi wyłącznie własne rozmowy, nic się nie przecina.
   const loadMyChats = useCallback(async () => {
     const me = await base44.auth.me();
-    const list = ((await base44.agents.listConversations({ agent_name: 'Gatekeeper' })) || [])
+    const list = ((await base44.agents.listConversations({ agent_name: agentName })) || [])
       .filter(c => c.created_by_id === me.id && !c.metadata?.archived)
       .sort(byUpdatedDesc);
     setConversations(list);
@@ -65,7 +65,7 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
           const full = await base44.agents.getConversation(last.id);
           if (active) patchConversation(full);
         } else {
-          const c = await base44.agents.createConversation({ agent_name: 'Gatekeeper', metadata: { name: 'Nowa rozmowa' } });
+          const c = await base44.agents.createConversation({ agent_name: agentName, metadata: { name: 'Nowa rozmowa' } });
           if (active) {
             setConversations([c]);
             patchConversation(c);
@@ -95,7 +95,7 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
     setCreating(true);
     setError(null);
     try {
-      const c = await base44.agents.createConversation({ agent_name: 'Gatekeeper', metadata: { name: 'Nowa rozmowa' } });
+      const c = await base44.agents.createConversation({ agent_name: agentName, metadata: { name: 'Nowa rozmowa' } });
       setConversations(prev => [c, ...prev]);
       patchConversation(c);
       setView('chat');
@@ -152,7 +152,7 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
       setConversations(prev => prev.map(c => c.id === conversation.id
         ? { ...c, metadata: { ...(c.metadata || {}), name: autoName } }
         : c));
-      base44.functions.invoke('manageConversation', { conversation_id: conversation.id, action: 'rename', name: autoName }).catch(() => {});
+      base44.functions.invoke(conversationToolName, { conversation_id: conversation.id, action: 'rename', name: autoName }).catch(() => {});
     }
     // odśwież tytuł i kolejność na liście historii
     setConversations(prev => {
@@ -175,7 +175,7 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
       const list = await loadMyChats();
       const last = list[0];
       if (last) patchConversation(await base44.agents.getConversation(last.id));
-      else patchConversation(await base44.agents.createConversation({ agent_name: 'Gatekeeper', metadata: { name: 'Nowa rozmowa' } }));
+      else patchConversation(await base44.agents.createConversation({ agent_name: agentName, metadata: { name: 'Nowa rozmowa' } }));
     } catch {
       setError('Nie udało się uruchomić asystenta. Spróbuj ponownie.');
     } finally {
@@ -187,7 +187,7 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
   const renameConversation = async (id, name) => {
     setConversations(prev => prev.map(c => c.id === id ? { ...c, metadata: { ...(c.metadata || {}), name } } : c));
     try {
-      await base44.functions.invoke('manageConversation', { conversation_id: id, action: 'rename', name });
+      await base44.functions.invoke(conversationToolName, { conversation_id: id, action: 'rename', name });
     } catch {
       setError('Nie udało się zmienić nazwy rozmowy. Spróbuj ponownie.');
     }
@@ -198,10 +198,10 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
     const rest = conversations.filter(c => c.id !== id);
     setConversations(rest);
     try {
-      await base44.functions.invoke('manageConversation', { conversation_id: id, action: 'archive' });
+      await base44.functions.invoke(conversationToolName, { conversation_id: id, action: 'archive' });
       if (conversation?.id === id) {
         if (rest[0]) patchConversation(await base44.agents.getConversation(rest[0].id));
-        else patchConversation(await base44.agents.createConversation({ agent_name: 'Gatekeeper', metadata: { name: 'Nowa rozmowa' } }));
+        else patchConversation(await base44.agents.createConversation({ agent_name: agentName, metadata: { name: 'Nowa rozmowa' } }));
       }
     } catch {
       setError('Nie udało się usunąć rozmowy. Spróbuj ponownie.');
@@ -219,6 +219,26 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
         setConversations(prev => prev.map(x => x.id === c.id ? { ...x, metadata: c.metadata } : x));
         setConversation(prev => prev?.id === c.id ? { ...prev, metadata: c.metadata } : prev);
       }).catch(() => {});
+      // Log obserwacyjny (np. Gatekeeper artysty) — serwer anonimizuje dane klientów przed zapisem
+      if (logger) {
+        let lastUserIdx = -1;
+        for (let i = messages.length - 1; i >= 0; i--) { if (messages[i].role === 'user') { lastUserIdx = i; break; } }
+        if (lastUserIdx >= 0) {
+          const after = messages.slice(lastUserIdx + 1).filter(m => m.role === 'assistant');
+          const toolCalls = after.flatMap(m => m.tool_calls || []);
+          const userMsg = messages[lastUserIdx];
+          const assistantText = after.map(m => m.content || '').join('\n').trim();
+          if (userMsg.content || assistantText || toolCalls.length) {
+            logger({
+              conversation_id: conversation.id,
+              conversation_name: conversation.metadata?.name || '',
+              user_message: userMsg.content || '',
+              assistant_message: assistantText,
+              tool_calls: toolCalls.map(tc => ({ name: tc.name, status: tc.status, arguments: tc.arguments_string, result: typeof tc.results === 'string' ? tc.results : (tc.results ? JSON.stringify(tc.results) : '') })),
+            }).catch(() => {});
+          }
+        }
+      }
     }
     wasRespondingRef.current = isResponding;
   }, [isResponding, conversation]);
@@ -259,7 +279,7 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
               <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.05rem', color: t.text, letterSpacing: '0.06em', lineHeight: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {view === 'chat' && conversation ? convTitle(conversation) : view === 'memory' ? 'PAMIĘĆ' : 'HISTORIA ROZMÓW'}
               </p>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Gatekeeper · Asystent AI</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{subtitle}</p>
             </div>
           </div>
           <div className="flex items-center gap-1">
@@ -274,14 +294,16 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
             >
               <History size={16} />
             </button>
-            <button
-              onClick={() => setView(v => v === 'memory' ? 'chat' : 'memory')}
-              title="Pamięć Gatekeepera"
-              aria-label="Pamięć Gatekeepera"
-              style={headerBtn(view === 'memory')}
-            >
-              <Brain size={16} />
-            </button>
+            {showMemory && (
+              <button
+                onClick={() => setView(v => v === 'memory' ? 'chat' : 'memory')}
+                title="Pamięć Gatekeepera"
+                aria-label="Pamięć Gatekeepera"
+                style={headerBtn(view === 'memory')}
+              >
+                <Brain size={16} />
+              </button>
+            )}
             <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: '4px' }} aria-label="Zamknij">
               <X size={18} />
             </button>
@@ -289,7 +311,7 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
         </div>
 
         {/* Pamięć — panel z historią zmian (właściciel platformy widzi wszystkie studia) */}
-        {view === 'memory' && <GatekeeperMemoryPanel theme={theme} />}
+        {view === 'memory' && showMemory && <GatekeeperMemoryPanel theme={theme} />}
 
         {/* Historia rozmów */}
         {view === 'history' && (
@@ -298,7 +320,7 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
 
         {/* Aktywna rozmowa */}
         {view === 'chat' && (
-          <ChatThread t={t} loading={loading} error={error} messages={messages} isResponding={isResponding} showSuggestions={showSuggestions} suggestions={SUGGESTIONS} onRetry={retry} onSuggestion={send} />
+          <ChatThread t={t} loading={loading} error={error} messages={messages} isResponding={isResponding} showSuggestions={showSuggestions} suggestions={suggestions} onRetry={retry} onSuggestion={send} />
         )}
         {view === 'chat' && <div className="px-3 py-3" style={{ borderTop: `0.5px solid ${t.border}` }}>
           {attachment && (
@@ -319,15 +341,17 @@ export default function GatekeeperChat({ theme = 'dark', onClose }) {
               style={{ display: 'none' }}
               onChange={e => { const f = e.target.files?.[0]; if (f) attachFile(f); e.target.value = ''; }}
             />
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading || loading || !!error}
-              title="Dołącz zdjęcie"
-              aria-label="Dołącz zdjęcie"
-              style={{ width: '40px', height: '40px', flexShrink: 0, background: 'transparent', color: uploading ? 'var(--brand)' : t.muted, border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            >
-              {uploading ? <Loader2 size={15} className="animate-spin" /> : <Paperclip size={15} />}
-            </button>
+            {allowAttachments && (
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading || loading || !!error}
+                title="Dołącz zdjęcie"
+                aria-label="Dołącz zdjęcie"
+                style={{ width: '40px', height: '40px', flexShrink: 0, background: 'transparent', color: uploading ? 'var(--brand)' : t.muted, border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                {uploading ? <Loader2 size={15} className="animate-spin" /> : <Paperclip size={15} />}
+              </button>
+            )}
             <textarea
               value={input}
               onChange={e => setInput(e.target.value)}
