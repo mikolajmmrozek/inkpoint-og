@@ -355,7 +355,6 @@ export default function GatekeeperChat({ theme = 'dark', onClose, agentName = 'G
             <textarea
               value={input}
               onChange={e => setInput(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
               placeholder="Napisz do Gatekeepera..."
               rows={1}
               disabled={loading || !!error}
