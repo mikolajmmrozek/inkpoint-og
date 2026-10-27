@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { makeSyncLogger } from '../../shared/syncLog.ts';
 
 // ─────────────────────────────────────────────────────────────────────────
 // recordBookingAudit — zapisuje wpis historii zmian rezerwacji (BookingAuditLog).
@@ -40,7 +41,7 @@ const FIELD_LABELS = {
 const NOISE_FIELDS = [
   'gcal_event_id', 'form_reminder_hidden',
   'last_editor', 'last_editor_id', 'last_editor_name', 'last_editor_role',
-  'created_date', 'updated_date', 'created_by_id',
+  'created_date', 'updated_date', 'created_by_id', 'created_by', 'is_sample',
 ];
 
 function truncateVal(v) {
@@ -54,20 +55,30 @@ function truncateVal(v) {
   return String(v);
 }
 
-function deriveActor(eventType, data) {
-  if (data?.last_editor === 'client') return { type: 'client', name: data?.client_name || 'Klient' };
-  if (data?.last_editor === 'change_request') return { type: 'client', name: data?.client_name || 'Klient (prośba o zmianę)' };
+// Atrybucja autora operacji. Pola last_editor* NA REKORDZIE są trwałe — jeśli
+// w TEJ operacji nie zmieniły się (nie ma ich w changed_fields), oznaczenie
+// edytora pochodzi z poprzedniej edycji i NIE jest dowodem, że ta osoba
+// wykonała bieżący zapis (np. fantomowy zapis platformy albo automat).
+// inherited=true oznacza atrybucję dziedziczoną — logowana i oznaczana
+// w podsumowaniu wpisu, żeby nie przypisywać nikomu działania bez podstaw.
+function deriveActor(eventType, data, changedRaw) {
+  const editorTouched = eventType === 'create'
+    || changedRaw.some((f) => f === 'last_editor' || f === 'last_editor_id');
+  const inherited = !editorTouched;
+  if (data?.last_editor === 'client') return { type: 'client', name: data?.client_name || 'Klient', inherited };
+  if (data?.last_editor === 'change_request') return { type: 'client', name: data?.client_name || 'Klient (prośba o zmianę)', inherited };
   if (data?.last_editor === 'dashboard' || data?.last_editor_id) {
     const isAdmin = data?.last_editor_role === 'admin';
     return {
       type: isAdmin ? 'admin' : 'artist',
       name: data?.last_editor_name || (isAdmin ? 'Admin (panel)' : 'Artysta (panel)'),
+      inherited,
     };
   }
   if (eventType === 'create' && data?.source === 'online_form') {
-    return { type: 'client', name: data?.client_name || 'Klient (formularz online)' };
+    return { type: 'client', name: data?.client_name || 'Klient (formularz online)', inherited: false };
   }
-  return { type: 'system', name: 'System' };
+  return { type: 'system', name: 'System', inherited: false };
 }
 
 export default async function (req: Request): Promise<Response> {
@@ -81,6 +92,7 @@ export default async function (req: Request): Promise<Response> {
     const eventType = String(body.event_type || 'update');
     const entityId = String(body.entity_id || '');
     if (!entityId) return Response.json({ error: 'Brak entity_id' }, { status: 400 });
+    const { log } = makeSyncLogger('[BOOKING-AUDIT]');
 
     let data = body.data || null;
     const oldData = body.old_data || null;
@@ -92,10 +104,11 @@ export default async function (req: Request): Promise<Response> {
     const changedRaw = Array.isArray(body.changed_fields) ? body.changed_fields : [];
     const changed = changedRaw.filter((f) => !NOISE_FIELDS.includes(f));
     if (eventType === 'update' && changed.length === 0) {
+      log('skipped_technical_only', { booking_id: entityId, event_type: eventType, changed_fields: changedRaw });
       return Response.json({ ok: true, skipped: true, reason: 'Tylko pola techniczne' });
     }
 
-    const actor = deriveActor(eventType, data);
+    const actor = deriveActor(eventType, data, changedRaw);
     const changes = {};
     for (const f of changed) {
       changes[f] = {
@@ -118,6 +131,22 @@ export default async function (req: Request): Promise<Response> {
       summary = `${who} — zmiany: ${what || 'dane sesji'}`;
     }
     if (data?.session_id && (action === 'created' || action === 'deleted')) summary += ` (${data.session_id})`;
+    if (actor.inherited) {
+      summary += ' — oznaczenie edytora dziedziczone z poprzedniego zapisu (pole last_editor bez zmian w tej operacji)';
+    }
+
+    // Log techniczny z korelacją: kto/uważany-kto, co dokładnie się zmieniło
+    // w tym zapisie i czy atrybucja pochodzi z tego zapisu czy z rekordu.
+    log('audit_entry', {
+      booking_id: entityId,
+      session_id: data?.session_id || null,
+      event_type: eventType,
+      changed_fields: changedRaw,
+      changed_real_fields: changed,
+      actor_type: actor.type,
+      actor_name: actor.name,
+      attribution_inherited: !!actor.inherited,
+    });
 
     await base44.asServiceRole.entities.BookingAuditLog.create({
       booking_id: entityId,

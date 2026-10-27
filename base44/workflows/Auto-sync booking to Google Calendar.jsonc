@@ -1,8 +1,6 @@
 {
-  "name": "Auto-sync booking to Google Calendar",
-  "description": "Automatyczna synchronizacja ka\u017cdej rezerwacji do dedykowanego kalendarza Google artysty \u2014 uruchamiana przy tworzeniu, edycji i usuwaniu rezerwacji.",
   "trigger": {
-    "condition": "${ (.trigger.changed_fields | index(\"gcal_event_id\") == null) }",
+    "condition": "${ .trigger.event_type != \"update\" or ((.trigger.changed_fields // []) | length) == 0 or any((.trigger.changed_fields // [])[]; (. | IN(\"gcal_event_id\",\"form_reminder_hidden\",\"last_editor\",\"last_editor_id\",\"last_editor_name\",\"last_editor_role\",\"created_by_id\",\"created_date\",\"updated_date\",\"is_sample\") | not)) }",
     "config": {
       "trigger_type": "entity",
       "events": [
@@ -33,6 +31,8 @@
       }
     ]
   },
+  "name": "Auto-sync booking to Google Calendar",
+  "description": "Automatyczna synchronizacja ka\u017cdej rezerwacji do dedykowanego kalendarza Google artysty \u2014 uruchamiana przy tworzeniu, edycji i usuwaniu rezerwacji. Pomija zapisy wy\u0142\u0105cznie techniczne (fantomowe zapisy platformy: gcal_event_id, pola last_editor*, created_by_id, created_date, updated_date, is_sample, form_reminder_hidden), kt\u00f3re nie zmieniaj\u0105 tre\u015bci wydarzenia, a uruchamia\u0142y zb\u0119dne, r\u00f3wnoleg\u0142e synchronizacje.",
   "x-base44-migrated-from-automation": {
     "legacy_payload_function": "manageGoogleCalendar"
   }

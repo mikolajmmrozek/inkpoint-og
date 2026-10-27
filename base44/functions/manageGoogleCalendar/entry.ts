@@ -1,12 +1,31 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import { deterministicEventId } from '../../shared/calendarSyncCore.ts';
+import { makeSyncLogger } from '../../shared/syncLog.ts';
 
 Deno.serve(async (req) => {
+  let log = (_step, _obj = {}) => {};
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json().catch(() => ({}));
     const isAutomation = !!body.event;
     const action = body.action || (isAutomation ? 'sync_by_booking' : 'status');
+
+    // Log techniczny z identyfikatorem korelacji — każde wywołanie synchronizacji
+    // zostawia ślad: co je wywołało, z jakiego triggera (typ zdarzenia, zmienione
+    // pola), co zostało zrobione na każdym kroku i z jakim wynikiem. Dzięki temu
+    // w logach da się odróżnić realną zmianę od fantomowego zapisu technicznego
+    // i od równoległych/powtórzonych wywołań.
+    const sl = makeSyncLogger('[GCAL-SYNC]');
+    log = sl.log;
+    const changedFields = Array.isArray(body.changed_fields) ? body.changed_fields
+      : (Array.isArray(body.event?.changed_fields) ? body.event.changed_fields : null);
+    log('start', {
+      action,
+      automation: isAutomation,
+      event_type: body.event?.type || null,
+      entity_id: body.event?.entity_id || body.booking_id || (body.data && body.data.id) || null,
+      changed_fields: changedFields,
+    });
 
     // Skip auth for automation calls (entity automations have no user context)
     if (!isAutomation) {
@@ -220,7 +239,18 @@ Deno.serve(async (req) => {
 
     // ── Helper: sync a single booking to the artist's calendar ──
     async function syncBooking(bk, headers) {
-      if (!bk.artist_id) return { action: 'skipped', reason: 'no_artist' };
+      log('booking_start', {
+        booking_id: bk.id,
+        status: bk.status,
+        artist_id: bk.artist_id,
+        session_date: bk.session_date,
+        session_time: bk.session_time,
+        has_gcal_event_id: !!bk.gcal_event_id,
+      });
+      if (!bk.artist_id) {
+        log('booking_skip', { booking_id: bk.id, reason: 'no_artist' });
+        return { action: 'skipped', reason: 'no_artist' };
+      }
 
       const artist = await base44.asServiceRole.entities.Artist.get(bk.artist_id);
       if (!artist) return { action: 'skipped', reason: 'artist_not_found' };
@@ -261,6 +291,7 @@ Deno.serve(async (req) => {
         if (bk.gcal_event_id) {
           await base44.asServiceRole.entities.Booking.update(bk.id, { gcal_event_id: '' });
         }
+        log('cancelled_cleanup', { booking_id: bk.id, deleted_from: deletedFrom.length, errors: errors.length });
         if (deletedFrom.length > 0) {
           console.log(`[manageGoogleCalendar] Cancelled booking ${bk.id}, deleted events:`, JSON.stringify(deletedFrom));
         }
@@ -269,6 +300,7 @@ Deno.serve(async (req) => {
 
       // Skip if missing date/time
       if (!bk.session_date || !bk.session_time) {
+        log('booking_skip', { booking_id: bk.id, reason: 'missing_date_or_time' });
         return { action: 'skipped' };
       }
 
@@ -282,6 +314,7 @@ Deno.serve(async (req) => {
           `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodedId}`,
           { method: 'PUT', headers, body: JSON.stringify(eventBody) }
         );
+        log('update_by_id', { booking_id: bk.id, ok: res.ok, http: res.status, event_id: bk.gcal_event_id });
         if (res.ok) {
           updatedEventId = bk.gcal_event_id;
         } else if (res.status !== 404) {
@@ -294,6 +327,7 @@ Deno.serve(async (req) => {
       // ── Step 2: If not updated by ID, search current calendar by content (client name + date) ──
       if (!updatedEventId) {
         const foundEvent = await findEventByContent(calendarId, bk, headers);
+        log('content_search', { booking_id: bk.id, found: !!foundEvent, event_id: foundEvent ? foundEvent.id : null });
         if (foundEvent) {
           const res = await fetch(
             `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(foundEvent.id)}`,
@@ -320,15 +354,18 @@ Deno.serve(async (req) => {
         // nigdy nie tworzą duplikatu — drugie utworzenie zwraca 409 i doprowadza
         // istniejące wydarzenie do aktualności.
         const detId = await deterministicEventId(bk.id);
+        log('create_attempt', { booking_id: bk.id, det_id: detId });
         const res = await fetch(
           `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`,
           { method: 'POST', headers, body: JSON.stringify({ ...eventBody, id: detId }) }
         );
+        log('create_result', { booking_id: bk.id, det_id: detId, http: res.status });
         if (res.status === 409) {
           const updRes = await fetch(
             `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(detId)}`,
             { method: 'PUT', headers, body: JSON.stringify(eventBody) }
           );
+          log('create_conflict_recovered', { booking_id: bk.id, det_id: detId, http: updRes.status, ok: updRes.ok });
           if (updRes.ok) {
             updatedEventId = detId;
             action = 'updated';
@@ -364,6 +401,8 @@ Deno.serve(async (req) => {
       if (combined.deleted_from.length > 0) {
         console.log(`[manageGoogleCalendar] Cleaned orphaned events for booking ${bk.id}:`, JSON.stringify(combined.deleted_from));
       }
+      log('cleanup', { booking_id: bk.id, deleted_from: combined.deleted_from.length, errors: combined.errors.length });
+      log('booking_done', { booking_id: bk.id, action, gcal_event_id: updatedEventId });
 
       return { action, gcal_event_id: updatedEventId, cleanup: combined };
     }
@@ -421,6 +460,20 @@ Deno.serve(async (req) => {
         return Response.json({ error: 'booking_id required' }, { status: 400 });
       }
 
+      // Ochrona idempotentności: fantomowy zapis techniczny (np. is_sample,
+      // updated_date, created_by_id — zapisywany przez platformę tuż po realnej
+      // edycji) nie zmienia treści wydarzenia. Nie uruchamiajmy synchronizacji
+      // ani czyszczenia kalendarzy — to z nich brały się równoległe, powtórzone
+      // przebiegi i duplikaty. Warunek workflowu odfiltrowuje je już na wejściu;
+      // ten sam filtr tutaj chroni przy wywołaniu bezpośrednim.
+      const TECHNICAL_FIELDS = ['gcal_event_id', 'form_reminder_hidden', 'last_editor', 'last_editor_id',
+        'last_editor_name', 'last_editor_role', 'created_by_id', 'created_by', 'created_date', 'updated_date', 'is_sample'];
+      if (body.event?.type === 'update' && changedFields && changedFields.length > 0
+        && changedFields.every((f) => TECHNICAL_FIELDS.includes(f))) {
+        log('skip_technical_only_update', { booking_id: bookingId, changed_fields: changedFields });
+        return Response.json({ success: true, action: 'skipped', reason: 'technical_fields_only', changed_fields: changedFields });
+      }
+
       const conn = await getSharedConnection();
       if (!conn) return Response.json({ success: true, action: 'skipped', reason: 'no_shared_connection' });
 
@@ -431,6 +484,11 @@ Deno.serve(async (req) => {
 
       // Handle delete events from automation
       if (body.event?.type === 'delete') {
+        log('automation_delete_event', {
+          entity_id: body.event?.entity_id || null,
+          has_event_id: !!body.data?.gcal_event_id,
+          artist_id: body.data?.artist_id || null,
+        });
         const deletedBooking = body.data;
         if (deletedBooking?.gcal_event_id && deletedBooking?.artist_id) {
           const artist = await base44.asServiceRole.entities.Artist.get(deletedBooking.artist_id).catch(() => null);
@@ -453,6 +511,7 @@ Deno.serve(async (req) => {
 
     return Response.json({ error: 'Unknown action' }, { status: 400 });
   } catch (error) {
+    log('error', { message: error.message });
     return Response.json({ error: error.message }, { status: 500 });
   }
 });

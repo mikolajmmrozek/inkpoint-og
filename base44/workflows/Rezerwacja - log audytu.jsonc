@@ -1,8 +1,8 @@
 {
   "name": "Rezerwacja \u2014 log audytu",
-  "description": "Przy ka\u017cdej operacji na rezerwacji (utworzenie, edycja, usuni\u0119cie) zapisuje do BookingAuditLog wpis z informacj\u0105, kto jej dokona\u0142 (klient / artysta / admin / system), jakie pola zmieniono i jakie by\u0142y poprzednie warto\u015bci. Pomija zmiany wy\u0142\u0105cznie techniczne (synchronizacja Google Calendar, ukrywanie przypomnie\u0144, pola oznaczenia autora edycji).",
+  "description": "Przy ka\u017cdej operacji na rezerwacji (utworzenie, edycja, usuni\u0119cie) zapisuje do BookingAuditLog wpis z informacj\u0105, kto jej dokona\u0142 (klient / artysta / admin / system), jakie pola zmieniono i jakie by\u0142y poprzednie warto\u015bci. Pomija zapisy wy\u0142\u0105cznie techniczne \u2014 w tym fantomowe zapisy platformy (created_by_id, created_date, updated_date, is_sample), synchronizacj\u0119 Google Calendar, ukrywanie przypomnie\u0144 i pola oznaczenia autora edycji \u2014 \u017ceby nie powstawa\u0142y wpisy wygl\u0105daj\u0105ce jak rapid-fire edycje cz\u0142owieka.",
   "trigger": {
-    "condition": "${ .trigger.event_type != \"update\" or any((.trigger.changed_fields // [])[]; (. != \"gcal_event_id\" and . != \"form_reminder_hidden\" and . != \"last_editor\" and . != \"last_editor_id\" and . != \"last_editor_name\" and . != \"last_editor_role\")) }",
+    "condition": "${ .trigger.event_type != \"update\" or any((.trigger.changed_fields // [])[]; (. | IN(\"gcal_event_id\",\"form_reminder_hidden\",\"last_editor\",\"last_editor_id\",\"last_editor_name\",\"last_editor_role\",\"created_by_id\",\"created_by\",\"created_date\",\"updated_date\",\"is_sample\") | not)) }",
     "config": {
       "trigger_type": "entity",
       "events": [
