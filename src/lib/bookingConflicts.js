@@ -13,7 +13,7 @@ export function getExceptionForDate(records, dateStr) {
 }
 
 // Determine whether an artist is off (unavailable) on a given date.
-// Returns { off: boolean, note, timeRange, isException }.
+// Returns { off: boolean, note, timeRange, isException, record }.
 export function isArtistOffOnDate(records, artistId, dateStr) {
   const dow = new Date(dateStr + 'T12:00:00').getDay();
   const artistRecords = (records || []).filter(r => r.artist_id === artistId);
@@ -24,6 +24,7 @@ export function isArtistOffOnDate(records, artistId, dateStr) {
       note: ex.note || '',
       timeRange: ex.start_time && ex.end_time ? (dayWindowLabel(ex, dateStr) || `${ex.start_time}–${ex.end_time}`) : null,
       isException: true,
+      record: ex,
     };
   }
   const recurringOff = artistRecords.find(r => r.type === 'recurring' && r.day_of_week === dow && r.is_available === false);
@@ -33,6 +34,7 @@ export function isArtistOffOnDate(records, artistId, dateStr) {
       note: recurringOff.note || 'Cykliczne wolne',
       timeRange: recurringOff.start_time ? `${recurringOff.start_time}–${recurringOff.end_time}` : null,
       isException: false,
+      record: recurringOff,
     };
   }
   return { off: false, note: '', timeRange: null, isException: false };

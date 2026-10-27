@@ -13,6 +13,7 @@ import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModa
 import SettlementModal from '@/components/dashboard/SettlementModal';
 import { openHealthFormQRPage } from '@/lib/qrPage';
 import AvailabilityEditModal from '@/components/dashboard/AvailabilityEditModal';
+import AvailabilityDayBanner from '@/components/booking/AvailabilityDayBanner';
 import ReferenceImagesUpload from '@/components/dashboard/ReferenceImagesUpload';
 import { exceptionCoversDate, getDayWindow, dayWindowLabel } from '@/lib/availability';
 import { findTimeOffConflict, findDoubleBookingConflict } from '@/lib/bookingConflicts';
@@ -709,20 +710,15 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
           const color = avail.type === 'free' ? '#16a34a' : 'var(--brand)';
           const timeStr = dayWindowLabel(avail.record, dateStr) || 'Cały dzień';
           return (
-            <button
-              onClick={() => {
-                onAvailabilityClick({ record: avail.record, dateStr, allRecords: [avail.record] });
-              }}
-              className="flex items-center gap-2 w-full mb-3 px-3 py-2 text-left"
-              style={{ border: `0.5px solid ${color}40`, background: `${color}08`, cursor: 'pointer' }}
-            >
-              <div style={{ width: '6px', height: '6px', borderRadius: '1px', background: color, flexShrink: 0 }} />
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color, letterSpacing: '0.06em' }}>
-                {avail.type === 'free' ? 'Dyspozycja' : 'Blokada'} · {timeStr}
-              </span>
-              {isRecurring && <RefreshCw size={9} color={color} style={{ opacity: 0.7 }} />}
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color, opacity: 0.6, marginLeft: 'auto' }}>KLIKNIJ ABY EDYTOWAĆ →</span>
-            </button>
+            <div className="mb-3">
+              <AvailabilityDayBanner
+                color={color}
+                label={`${avail.type === 'free' ? 'Dyspozycja' : 'Blokada'} · ${timeStr}`}
+                note={avail.record.note}
+                recurring={isRecurring}
+                onClick={() => onAvailabilityClick({ record: avail.record, dateStr, allRecords: [avail.record] })}
+              />
+            </div>
           );
         })()}
 
@@ -1169,10 +1165,13 @@ export default function ArtistSchedule() {
             const label = record.is_available ? 'Dyspozycja' : 'Wolne';
             const timeStr = ex ? (dayWindowLabel(ex, dateStr) || 'Cały dzień') : (record.start_time && record.end_time ? `${record.start_time}–${record.end_time}` : 'Cały dzień');
             return (
-              <div className="flex items-center gap-2 mb-3 px-3 py-2" style={{ border: `0.5px solid ${color}40`, background: `${color}08`, borderRadius: 'var(--radius)' }}>
-                <div style={{ width: '6px', height: '6px', borderRadius: '1px', background: color, flexShrink: 0 }} />
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color, letterSpacing: '0.06em' }}>{label} · {timeStr}</span>
-                {record.note && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color, opacity: 0.7, marginLeft: '4px' }}>{record.note}</span>}
+              <div className="mb-3">
+                <AvailabilityDayBanner
+                  color={color}
+                  label={`${label} · ${timeStr}`}
+                  note={record.note}
+                  onClick={ex ? () => setSelectedAvailability({ record: ex, dateStr, allRecords: [ex] }) : undefined}
+                />
               </div>
             );
           })()}

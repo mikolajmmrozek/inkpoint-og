@@ -5,6 +5,7 @@ import { pl } from 'date-fns/locale';
 import { getArtistsOffForDate } from '@/lib/bookingConflicts';
 import { resolveBookingHealthStatus } from '@/lib/healthFormStatus';
 import HealthFormBadge from '@/components/booking/HealthFormBadge';
+import AvailabilityDayBanner from '@/components/booking/AvailabilityDayBanner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { getThumbnailUrl } from '@/lib/thumbnail';
 
@@ -15,7 +16,7 @@ const STATUS_COLORS = {
   cancelled: '#9ca3af',
 };
 
-export default function BookingCalendar({ bookings, onDayClick, selectedDate, t, artists = [], onAddBooking, searchQuery = '', onBookingClick, availabilityRecords = [], artistFilter = 'all', healthStatusMap = {}, showSessionsList = true }) {
+export default function BookingCalendar({ bookings, onDayClick, selectedDate, t, artists = [], onAddBooking, searchQuery = '', onBookingClick, availabilityRecords = [], artistFilter = 'all', healthStatusMap = {}, showSessionsList = true, onAvailabilityClick }) {
   const [viewMonth, setViewMonth] = useState(new Date());
   const isMobile = useIsMobile();
   const today = new Date();
@@ -144,12 +145,14 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
           {selectedDayOff.length > 0 && (
             <div className="mb-3 space-y-1">
               {selectedDayOff.map((o, i) => (
-                <div key={i} className="flex items-center gap-2 px-3 py-2" style={{ border: `0.5px solid rgb(var(--brand-rgb) /0.25)`, background: 'rgb(var(--brand-rgb) /0.05)', borderRadius: 'var(--radius)' }}>
-                  <div style={{ width: '6px', height: '6px', borderRadius: '1px', background: 'var(--brand)', flexShrink: 0 }} />
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.06em', flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    WOLNE · {o.artist.name}{o.timeRange ? ` · ${o.timeRange}` : ' · cały dzień'}{o.note ? ` · ${o.note}` : ''}
-                  </span>
-                </div>
+                <AvailabilityDayBanner
+                  key={i}
+                  color="var(--brand)"
+                  label={`WOLNE · ${o.artist.name}${o.timeRange ? ` · ${o.timeRange}` : ' · cały dzień'}`}
+                  note={o.note}
+                  recurring={!!(o.record && o.record.repeat && o.record.repeat !== 'none')}
+                  onClick={o.isException && o.record && onAvailabilityClick ? () => onAvailabilityClick({ record: o.record, dateStr: selectedDateStr }) : undefined}
+                />
               ))}
             </div>
           )}

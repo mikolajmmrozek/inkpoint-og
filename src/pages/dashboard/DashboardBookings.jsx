@@ -18,6 +18,7 @@ import HealthFormBadge from '@/components/booking/HealthFormBadge';
 import GroupedBookingList from '@/components/booking/GroupedBookingList';
 import BookingFilters from '@/components/dashboard/BookingFilters';
 import PendingRequestsView from '@/components/dashboard/PendingRequestsView';
+import AvailabilityEditModal from '@/components/dashboard/AvailabilityEditModal';
 import { getThumbnailUrl } from '@/lib/thumbnail';
 import { useCreateMenu } from '@/components/create/CreateMenuContext';
 
@@ -181,6 +182,7 @@ export default function DashboardBookings() {
   const [bookings, setBookings] = useState([]);
   const [artists, setArtists] = useState([]);
   const [availabilityRecords, setAvailabilityRecords] = useState([]);
+  const [editingAvailability, setEditingAvailability] = useState(null);
   const [healthStatusMap, setHealthStatusMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
@@ -638,6 +640,7 @@ export default function DashboardBookings() {
                 artistFilter={artistFilters}
                 healthStatusMap={healthStatusMap}
                 showSessionsList={!searchQuery.trim()}
+                onAvailabilityClick={setEditingAvailability}
               />
             )}
 
@@ -779,6 +782,17 @@ export default function DashboardBookings() {
             )}
           </AnimatePresence>
 
+          {/* Edycja dyspozycji/blokady z kalendarza — ten sam modal co artysta */}
+          {editingAvailability && (
+            <AvailabilityEditModal
+              record={editingAvailability.record}
+              allRecords={[editingAvailability.record]}
+              dateStr={editingAvailability.dateStr}
+              theme={theme}
+              onClose={() => setEditingAvailability(null)}
+              onSaved={() => { setEditingAvailability(null); refreshAvailability(); }}
+            />
+          )}
         </div>
       )}
     </div>
