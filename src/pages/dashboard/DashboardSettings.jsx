@@ -198,7 +198,7 @@ export default function DashboardSettings() {
               onBlur={e => e.target.style.borderBottomColor = t.border}
             />
             <p className="mt-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>
-              Np. "ROMANS\nTATTOO" — ostatnie 3 znaki drugiej linii będą w kolorze fuchsia.
+              Np. "ROMANS\nTATTOO" — ostatnia linia będzie wyróżniona kolorem wiodącym (nieco mniejszą czcionką).
             </p>
           </div>
 
