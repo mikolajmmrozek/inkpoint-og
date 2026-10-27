@@ -17,7 +17,7 @@ const NO_DELETE = { read: true, create: true, update: true };
 const ENTITIES = {
   Booking: {
     ops: { read: true, create: true, update: true, delete: true },
-    required: ['client_name', 'client_email', 'session_date'],
+    required: ['client_name', 'session_date'], // client_email opcjonalny — nie każdy klient ma e-mail
     fields: ['session_id', 'service_id', 'service_name', 'client_name', 'client_email', 'client_phone', 'artist_id', 'artist_name', 'session_date', 'session_time', 'session_end_time', 'session_duration', 'tattoo_description', 'tattoo_placement', 'reference_images', 'estimated_price', 'deposit_paid', 'deposit_amount', 'final_amount', 'payment_breakdown', 'is_settled', 'status', 'health_form_completed', 'notes', 'admin_notes', 'source', 'gcal_event_id', 'last_editor', 'form_reminder_hidden'],
     filter: ['session_id', 'client_name', 'client_email', 'client_phone', 'artist_id', 'artist_name', 'session_date', 'status', 'is_settled', 'health_form_completed'],
     sensitive: ['deposit_amount', 'final_amount', 'payment_breakdown', 'is_settled', 'status'],
@@ -447,7 +447,7 @@ function sideEffectsFor(entityName, action, dat) {
   if (entityName === 'Booking') {
     const changed = action === 'update' ? Object.keys(dat.changes) : [];
     const fx: string[] = [];
-    if (action === 'create') fx.push('Nowa rezerwacja uruchamia automatycznie: powiadomienia studia, konwersację z klientem i synchronizację z Google Calendar.');
+    if (action === 'create') fx.push('Nowa rezerwacja uruchamia automatycznie: powiadomienia studia, konwersację z klientem i synchronizację z Google Calendar. Jeśli klient nie ma e-maila, e-mail i powiadomienia dla klienta są pomijane.');
     if (action === 'delete') fx.push('Usunięcie rezerwacji jest nieodwracalne i uruchamia czyszczenie wydarzenia w Google Calendar.');
     if (changed.some(f => ['session_date', 'session_time', 'artist_name', 'service_name', 'tattoo_placement'].includes(f))) {
       fx.push('Zmiana daty/godziny/artysty/usługi/miejsca wyśle klientowi e-mail z aktualizacją i zsynchronizuje Google Calendar.');

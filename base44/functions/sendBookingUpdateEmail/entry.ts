@@ -38,6 +38,11 @@ export default async function(req: Request): Promise<Response> {
       return Response.json({ success: false, error: 'No booking data' }, { status: 400 });
     }
 
+    // Klient bez e-maila (np. sesja utworzona przez Gatekeepera) — nie ma dokogo wysłać, pomijamy bez błędu.
+    if (!booking.client_email) {
+      return Response.json({ success: true, skipped: true, reason: 'no client email' });
+    }
+
     // Only send on actual update events (not create — that's the confirmation email's job).
     const eventType = body.event_type || body.event?.type;
     if (eventType === 'create') {

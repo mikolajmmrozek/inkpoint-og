@@ -223,7 +223,7 @@ export default async function (req: Request): Promise<Response> {
       const dat = body.data || {};
       const bad = Object.keys(dat).filter(k => !BOOKING_CREATE_FIELDS.includes(k) && !builtinFields.includes(k));
       if (bad.length > 0) return Response.json({ error: `Niedozwolone pola: ${bad.join(', ')}. Dozwolone: ${BOOKING_CREATE_FIELDS.join(', ')}` }, { status: 400 });
-      const missing = ['client_name', 'client_email', 'session_date'].filter(f => !dat[f]);
+      const missing = ['client_name', 'session_date'].filter(f => !dat[f]); // client_email opcjonalny — nie każdy klient ma e-mail
       if (missing.length > 0) return Response.json({ error: `Brak wymaganych pól: ${missing.join(', ')}` }, { status: 400 });
 
       // Token wiąże się wyłącznie z danymi przekazanymi przez artystę (bez pól nadawanych przez serwer)

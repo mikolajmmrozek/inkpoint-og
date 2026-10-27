@@ -18,7 +18,8 @@
       "type": "string"
     },
     "client_email": {
-      "type": "string"
+      "type": "string",
+      "description": "E-mail klienta \u2014 opcjonalny: nie ka\u017cdy klient ma e-mail; klient bez e-maila nie dostaje wiadomo\u015bci automatycznych"
     },
     "client_phone": {
       "type": "string"
@@ -181,7 +182,6 @@
   },
   "required": [
     "client_name",
-    "client_email",
     "session_date"
   ]
 }

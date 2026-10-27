@@ -19,6 +19,11 @@ export default async function(req: Request): Promise<Response> {
       return Response.json({ success: false, error: 'No booking data' }, { status: 400 });
     }
 
+    // Klient bez e-maila (np. sesja utworzona przez Gatekeepera) — nie ma dokogo wysłać, pomijamy bez błędu.
+    if (!booking.client_email) {
+      return Response.json({ success: true, skipped: true, reason: 'no client email' });
+    }
+
     // Only send when the booking is actually cancelled.
     if (booking.status !== 'cancelled') {
       return Response.json({ success: true, skipped: true, reason: `status=${booking.status}` });
