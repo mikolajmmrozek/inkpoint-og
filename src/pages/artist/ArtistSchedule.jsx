@@ -649,7 +649,7 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
     const recurring = (availabilityRecords || []).find(r => r.type === 'recurring' && r.day_of_week === getDay(day));
     return !recurring || recurring.is_available === false;
   };
-  const offNumColor = theme === 'light' ? 'rgba(0,0,0,0.45)' : '#8f8f8f';
+  const offNumColor = theme === 'light' ? 'rgba(0,0,0,0.24)' : 'rgba(245,240,235,0.25)';
 
   return (
     <div>
