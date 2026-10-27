@@ -71,17 +71,12 @@ export default function StudioHero() {
               <motion.span
                 key={i}
                 className="block"
-                style={{ fontSize: 'clamp(5rem, 14vw, 13rem)' }}
+                style={{ fontSize: i === 1 ? 'clamp(4.2rem, 11.5vw, 11rem)' : 'clamp(5rem, 14vw, 13rem)', color: i === 1 ? 'var(--brand)' : 'inherit' }}
                 initial={{ opacity: 0, y: 60 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 + i * 0.15, duration: 1, ease: [0.16, 1, 0.3, 1] }}
               >
-                {i === 1 ? (
-                  <>
-                    <span style={{ color: 'hsl(var(--foreground))' }}>{line.slice(0, -3)}</span>
-                    <span style={{ color: 'var(--brand)' }}>{line.slice(-3)}</span>
-                  </>
-                ) : line}
+                {line}
               </motion.span>
             ))}
           </h1>
