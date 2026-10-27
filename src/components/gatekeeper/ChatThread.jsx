@@ -1,9 +1,31 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Loader2, RefreshCw } from 'lucide-react';
 import MessageBubble from './MessageBubble';
+import TurnStatusBubble from './TurnStatusBubble';
 
 export default function ChatThread({ t, loading, error, messages, isResponding, showSuggestions, suggestions, onRetry, onSuggestion }) {
   const scrollRef = useRef(null);
+
+  // Grupujemy wiadomości w tury (odpowiedzi na jedną wiadomość użytkownika):
+  // jedna tura = jeden dymek statusu zamiast osobnych bloków technicznych
+  const turns = useMemo(() => {
+    const list = [];
+    let current = null;
+    messages.forEach((m) => {
+      if (m.role === 'user') {
+        current = { user: m, assistant: [], toolCalls: [], key: `turn-${list.length}` };
+        list.push(current);
+      } else {
+        if (!current) {
+          current = { user: null, assistant: [], toolCalls: [], key: `turn-${list.length}` };
+          list.push(current);
+        }
+        if (String(m.content || '').trim()) current.assistant.push(m);
+        (m.tool_calls || []).forEach((tc) => current.toolCalls.push(tc));
+      }
+    });
+    return list;
+  }, [messages]);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -26,7 +48,13 @@ export default function ChatThread({ t, loading, error, messages, isResponding, 
         </div>
       ) : (
         <>
-          {messages.map((m, i) => <MessageBubble key={i} message={m} t={t} />)}
+          {turns.map((turn) => (
+            <div key={turn.key}>
+              {turn.user && <MessageBubble message={turn.user} t={t} />}
+              {turn.assistant.map((m, i) => <MessageBubble key={i} message={m} t={t} />)}
+              {turn.toolCalls.length > 0 && <TurnStatusBubble toolCalls={turn.toolCalls} t={t} seed={turn.key} />}
+            </div>
+          ))}
           {isResponding && (
             <div className="flex items-center gap-2 mb-3">
               <span style={{ width: '26px', height: '26px', borderRadius: 'var(--radius)', background: 'var(--brand)', color: 'var(--btn-text, #F5F0EB)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontFamily: 'var(--font-mono)', fontSize: '10px', fontWeight: 700 }}>G</span>
