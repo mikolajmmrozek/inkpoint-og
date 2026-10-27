@@ -1,14 +1,25 @@
 import { useState, useEffect, useRef } from 'react';
-import { Mic, Square, X, Loader2 } from 'lucide-react';
+import { Mic, MicOff, Square, X, Loader2, RotateCcw } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 const fmt = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
+// Sprawdzenie stanu uprawnienia mikrofonu (granted / denied / prompt; null = brak API)
+const micPermission = async () => {
+  try {
+    const p = await navigator.permissions?.query({ name: 'microphone' });
+    return p?.state || null;
+  } catch { return null; }
+};
+
 // Wiadomość głosowa: nagrywanie → prywatny magazyn → rozpoznanie mowy (Whisper)
 // → transkrypcja trafia do pola czatu, można ją doprecyzować przed wysłaniem.
+// Uprawnienie mikrofonu jest sprawdzane PRZED nagrywaniem; problemy pokazuje
+// lokalny pasek podpowiedzi z przyciskiem ponownej próby (nie blokuje czatu).
 export default function VoiceRecorder({ t, disabled, onStateChange, onTranscript, onError }) {
   const [state, setState] = useState('idle'); // idle | recording | processing
   const [seconds, setSeconds] = useState(0);
+  const [hint, setHint] = useState(null);
   const recRef = useRef(null);
   const chunksRef = useRef([]);
   const streamRef = useRef(null);
@@ -59,11 +70,26 @@ export default function VoiceRecorder({ t, disabled, onStateChange, onTranscript
   const start = async () => {
     if (disabled || state !== 'idle') return;
     if (typeof MediaRecorder === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
-      onError?.('Ta przeglądarka nie obsługuje nagrań głosowych.');
-      return;
+      return setHint('Ta przeglądarka nie obsługuje nagrań głosowych. Użyj Chrome, Safari lub aktualnej przeglądarki mobilnej.');
+    }
+    if (typeof window !== 'undefined' && !window.isSecureContext) {
+      return setHint('Mikrofon działa tylko na stronie otwartej po HTTPS (np. w opublikowanej aplikacji, nie w podglądzie edytora).');
+    }
+    setHint(null);
+    const perm = await micPermission();
+    if (perm === 'denied') {
+      return setHint('Mikrofon jest zablokowany dla tej strony. Kliknij ikonę zamka / ustawień obok adresu, zezwól na mikrofon, odśwież stronę i spróbuj ponownie.');
     }
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+      });
+      // Weryfikacja: mikrofon musi zwracać aktywną ścieżkę audio, inaczej nagranie byłoby puste
+      const track = stream.getAudioTracks?.()[0];
+      if (!track || track.readyState !== 'live' || track.enabled === false) {
+        cleanup();
+        return setHint('Mikrofon nie odpowiada (brak aktywnej ścieżki audio). Sprawdź, czy nie jest zajęty przez inną aplikację, i spróbuj ponownie.');
+      }
       streamRef.current = stream;
       const mime = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'].find(m => MediaRecorder.isTypeSupported?.(m));
       const rec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
@@ -76,9 +102,15 @@ export default function VoiceRecorder({ t, disabled, onStateChange, onTranscript
       setSeconds(0);
       timerRef.current = setInterval(() => setSeconds(s => s + 1), 1000);
       setPhase('recording');
-    } catch {
+    } catch (e) {
       cleanup();
-      onError?.('Brak dostępu do mikrofonu.');
+      if (e?.name === 'NotAllowedError' || e?.name === 'SecurityError' || e?.name === 'PermissionDeniedError') {
+        setHint('Nie udzielono dostępu do mikrofonu. Zezwól na mikrofon w pytaniu przeglądarki (lub w ustawieniach strony) i spróbuj ponownie.');
+      } else if (e?.name === 'NotReadableError' || e?.name === 'TrackStartError' || e?.name === 'AbortError') {
+        setHint('Mikrofon jest zajęty przez inną aplikację albo nie działa. Zamknij inne programy używające mikrofonu i spróbuj ponownie.');
+      } else {
+        setHint('Nie udało się uruchomić mikrofonu. Spróbuj ponownie.');
+      }
     }
   };
 
@@ -101,6 +133,19 @@ export default function VoiceRecorder({ t, disabled, onStateChange, onTranscript
     setSeconds(0);
     setPhase('idle');
   };
+
+  // Problem z mikrofonem: pasek podpowiedzi z ponowną próbą (nie blokuje reszty czatu)
+  if (state === 'idle' && hint) {
+    return (
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px', border: '0.5px solid #ef444455', background: 'rgba(239,68,68,0.06)', borderRadius: 'var(--radius)' }}>
+        <MicOff size={13} color="#ef4444" style={{ flexShrink: 0 }} />
+        <span style={{ fontSize: '11px', color: t.text, flex: 1, lineHeight: 1.4 }}>{hint}</span>
+        <button onClick={() => { setHint(null); start(); }} title="Spróbuj ponownie" aria-label="Spróbuj ponownie" style={{ background: 'transparent', color: 'var(--brand)', border: '0.5px solid var(--brand)', borderRadius: 'var(--radius)', padding: '6px', cursor: 'pointer', display: 'flex', flexShrink: 0 }}>
+          <RotateCcw size={12} />
+        </button>
+      </div>
+    );
+  }
 
   if (state === 'idle') {
     return (
