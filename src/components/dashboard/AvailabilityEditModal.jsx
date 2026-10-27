@@ -34,16 +34,17 @@ const REPEAT_LABELS = { weekly: 'Co tydzień', biweekly: 'Co 2 tygodnie', monthl
 const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
 const MINUTE_OPTIONS = ['00', '15', '30', '45'];
 
-function TimeDropdown({ value, onChange, border, text }) {
+function TimeDropdown({ value, onChange, border, text, theme }) {
   const parts = (value || '09:00').split(':');
   const h = parts[0] || '09';
   const m = MINUTE_OPTIONS.includes(parts[1]) ? parts[1] : '00';
   const setH = (newH) => onChange(`${newH}:${m}`);
   const setM = (newM) => onChange(`${h}:${newM}`);
   const selectStyle = {
-    background: '#1a1a1a', border: `0.5px solid ${border}`, color: text,
+    background: theme === 'light' ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.06)',
+    border: `0.5px solid ${border}`, color: text,
     padding: '6px 8px', fontSize: '14px', outline: 'none', fontFamily: 'var(--font-body)',
-    cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none', borderRadius: 0, flex: 1,
+    cursor: 'pointer', borderRadius: 'var(--radius)', flex: 1,
   };
   return (
     <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
@@ -336,7 +337,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
               </div>
               <div className="flex gap-3 pt-2">
                 <button onClick={handleDelete} disabled={saving}
-                  style={{ flex: 1, fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 14px', background: 'linear-gradient(135deg,var(--brand),var(--brand))', color: '#F5F0EB', border: 'none', cursor: 'pointer' }}>
+                  style={{ flex: 1, fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 14px', background: 'var(--brand)', color: 'var(--btn-text, #F5F0EB)', border: 'none', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
                   {saving ? 'USUWAM...' : 'TAK, USUŃ'}
                 </button>
                 <button onClick={() => setStep(isRecurring ? 'confirm_delete_scope' : 'view')}
@@ -356,7 +357,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                 </div>
               )}
               {editScope === 'cycle' && (
-                <div style={{ padding: '10px 12px', background: 'rgba(22,163,74,0.05)', border: '0.5px solid rgba(22,163,74,0.25)' }}>
+                <div style={{ padding: '10px 12px', background: 'rgba(22,163,74,0.05)', border: '0.5px solid rgba(22,163,74,0.25)', borderRadius: 'var(--radius)' }}>
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>EDYTUJESZ CAŁY CYKL</p>
                   {cyclePreview && (
                     <div className="space-y-1">
@@ -382,7 +383,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                 <div>
                   {lbl('DATA STARTU')}
                   <input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
-                    style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '8px 0', fontSize: '13px', width: '100%', outline: 'none', fontFamily: 'var(--font-body)', colorScheme: 'dark' }} />
+                    style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '8px 0', fontSize: '13px', width: '100%', outline: 'none', fontFamily: 'var(--font-body)', colorScheme: theme === 'light' ? 'light' : 'dark' }} />
                 </div>
               )}
 
@@ -394,8 +395,8 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                 </div>
                 {form.timeMode === 'hours' && (
                   <div className="grid grid-cols-2 gap-3">
-                    <div>{lbl('OD')}<TimeDropdown value={form.start_time} onChange={v => setForm(f => ({ ...f, start_time: v }))} border={t.inputBorder} text={t.text} /></div>
-                    <div>{lbl('DO')}<TimeDropdown value={form.end_time} onChange={v => setForm(f => ({ ...f, end_time: v }))} border={t.inputBorder} text={t.text} /></div>
+                    <div>{lbl('OD')}<TimeDropdown value={form.start_time} onChange={v => setForm(f => ({ ...f, start_time: v }))} border={t.inputBorder} text={t.text} theme={theme} /></div>
+                    <div>{lbl('DO')}<TimeDropdown value={form.end_time} onChange={v => setForm(f => ({ ...f, end_time: v }))} border={t.inputBorder} text={t.text} theme={theme} /></div>
                   </div>
                 )}
               </div>
@@ -417,9 +418,9 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                         <input type="date" value={form.repeat_until}
                           onChange={e => setForm(f => ({ ...f, repeat_until: e.target.value, repeat_indefinite: false }))}
                           disabled={form.repeat_indefinite}
-                          style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '8px 0', fontSize: '13px', flex: 1, outline: 'none', fontFamily: 'var(--font-body)', colorScheme: 'dark', opacity: form.repeat_indefinite ? 0.3 : 1 }} />
+                          style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '8px 0', fontSize: '13px', flex: 1, outline: 'none', fontFamily: 'var(--font-body)', colorScheme: theme === 'light' ? 'light' : 'dark', opacity: form.repeat_indefinite ? 0.3 : 1 }} />
                         <button type="button" onClick={() => setForm(f => ({ ...f, repeat_indefinite: !f.repeat_indefinite, repeat_until: '' }))}
-                          style={{ flexShrink: 0, fontFamily: 'var(--font-mono)', fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 8px', border: `0.5px solid ${form.repeat_indefinite ? 'var(--brand)' : t.border}`, color: form.repeat_indefinite ? 'var(--brand)' : t.muted, background: form.repeat_indefinite ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                          style={{ flexShrink: 0, fontFamily: 'var(--font-mono)', fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 8px', border: `0.5px solid ${form.repeat_indefinite ? 'var(--brand)' : t.border}`, color: form.repeat_indefinite ? 'var(--brand)' : t.muted, background: form.repeat_indefinite ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', cursor: 'pointer', whiteSpace: 'nowrap', borderRadius: 'var(--radius)' }}>
                           Do odwołania
                         </button>
                       </div>
@@ -439,7 +440,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                   {saving ? 'ZAPISUJĘ...' : 'ZAPISZ'}
                 </button>
                 <button onClick={() => setStep(isRecurring ? 'confirm_edit' : 'view')}
-                  style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 12px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer' }}>
+                  style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 12px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
                   ANULUJ
                 </button>
               </div>
