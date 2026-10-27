@@ -71,7 +71,7 @@ export default function StudioHero() {
               <motion.span
                 key={i}
                 className="block"
-                style={{ fontSize: i === 1 ? 'clamp(4.2rem, 11.5vw, 11rem)' : 'clamp(5rem, 14vw, 13rem)', color: i === 1 ? 'var(--brand)' : 'inherit' }}
+                style={{ fontSize: i === lines.length - 1 ? 'clamp(4.2rem, 11.5vw, 11rem)' : 'clamp(5rem, 14vw, 13rem)', color: i === lines.length - 1 ? 'var(--brand)' : 'inherit' }}
                 initial={{ opacity: 0, y: 60 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 + i * 0.15, duration: 1, ease: [0.16, 1, 0.3, 1] }}
