@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { CheckCircle2, XCircle, Loader2, ChevronRight, ChevronDown } from 'lucide-react';
+import { XCircle, Loader2, ChevronRight, ChevronDown, Bot } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 // Jedyny dymek statusu dla całej tury rozmowy — zamiast wielu bloków technicznych.
@@ -59,7 +59,7 @@ function errorDescription(tc) {
 const AVATAR = {
   width: '26px', height: '26px', borderRadius: 'var(--radius)', background: 'var(--brand)',
   color: 'var(--btn-text, #F5F0EB)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-  flexShrink: 0, fontFamily: 'var(--font-mono)', fontSize: '10px', fontWeight: 700,
+  flexShrink: 0,
 };
 
 export default function TurnStatusBubble({ toolCalls, t, seed }) {
@@ -70,6 +70,8 @@ export default function TurnStatusBubble({ toolCalls, t, seed }) {
   const failed = toolCalls.find(isFailed);
   const running = [...toolCalls].reverse().find(isRunning);
   const status = failed ? 'error' : running ? 'working' : 'ok';
+
+
 
   // Pełne szczegóły błędu — tylko do logów i konsoli przeglądarki, nigdy do interfejsu
   useEffect(() => {
@@ -84,6 +86,10 @@ export default function TurnStatusBubble({ toolCalls, t, seed }) {
     }).catch(() => {});
   }, [status, errorId, failed]);
 
+  // Po sukcesie nie pokazujemy dymka z zielonym "OK" — wystarczy sama odpowiedź.
+  // Dymek zostaje tylko w trakcie pracy ("Pracuję · …") i przy błędzie.
+  if (status === 'ok') return null;
+
   const chip = {
     display: 'flex', alignItems: 'center', gap: '7px', width: 'fit-content',
     padding: '7px 12px',
@@ -97,22 +103,16 @@ export default function TurnStatusBubble({ toolCalls, t, seed }) {
 
   return (
     <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-      <span style={AVATAR}>G</span>
+      <span style={AVATAR}><Bot size={15} /></span>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxWidth: '82%' }}>
         <div style={chip} onClick={() => status === 'error' && setOpen((o) => !o)}>
           {status === 'error' ? (
             <XCircle size={11} color="#ef4444" />
-          ) : status === 'working' ? (
-            <Loader2 size={11} className="animate-spin" style={{ color: 'var(--brand)' }} />
           ) : (
-            <CheckCircle2 size={11} color="#16a34a" />
+            <Loader2 size={11} className="animate-spin" style={{ color: 'var(--brand)' }} />
           )}
           <span>
-            {status === 'error'
-              ? 'Wystąpił błąd'
-              : status === 'working'
-                ? `Pracuję · ${toolLabel(running?.name)}`
-                : 'OK'}
+            {status === 'error' ? 'Wystąpił błąd' : `Pracuję · ${toolLabel(running?.name)}`}
           </span>
           {status === 'error' && (open ? <ChevronDown size={11} /> : <ChevronRight size={11} />)}
         </div>

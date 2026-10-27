@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { Loader2, RefreshCw } from 'lucide-react';
+import { Bot, Loader2, RefreshCw } from 'lucide-react';
 import MessageBubble from './MessageBubble';
 import TurnStatusBubble from './TurnStatusBubble';
 
@@ -57,7 +57,7 @@ export default function ChatThread({ t, loading, error, messages, isResponding, 
           ))}
           {isResponding && (
             <div className="flex items-center gap-2 mb-3">
-              <span style={{ width: '26px', height: '26px', borderRadius: 'var(--radius)', background: 'var(--brand)', color: 'var(--btn-text, #F5F0EB)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontFamily: 'var(--font-mono)', fontSize: '10px', fontWeight: 700 }}>G</span>
+              <span style={{ width: '26px', height: '26px', borderRadius: 'var(--radius)', background: 'var(--brand)', color: 'var(--btn-text, #F5F0EB)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Bot size={15} /></span>
               <span style={{ display: 'flex', gap: '4px', padding: '10px 14px', background: 'rgba(128,128,128,0.06)', border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)' }}>
                 {[0, 1, 2].map(d => <span key={d} style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--brand)', opacity: 1 - d * 0.25, animation: `pulse 1.2s ${d * 0.2}s infinite` }} />)}
               </span>

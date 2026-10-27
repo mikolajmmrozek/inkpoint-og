@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Bot } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Lightbox from '@/components/ui/Lightbox';
 import FilePreviewModal from '@/components/panel/FilePreviewModal';
@@ -69,7 +70,7 @@ export default function MessageBubble({ message, t }) {
   return (
     <div className="flex gap-2 mb-3" style={{ justifyContent: isUser ? 'flex-end' : 'flex-start' }}>
       {!isUser && (
-        <span style={{ width: '26px', height: '26px', borderRadius: 'var(--radius)', background: 'var(--brand)', color: 'var(--btn-text, #F5F0EB)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontFamily: 'var(--font-mono)', fontSize: '10px', fontWeight: 700, marginTop: '2px' }}>G</span>
+        <span style={{ width: '26px', height: '26px', borderRadius: 'var(--radius)', background: 'var(--brand)', color: 'var(--btn-text, #F5F0EB)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px' }}><Bot size={15} /></span>
       )}
       <div style={{ maxWidth: '82%' }}>
         <div
