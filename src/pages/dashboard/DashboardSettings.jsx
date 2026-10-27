@@ -167,7 +167,7 @@ export default function DashboardSettings() {
               <video src={form.hero_video_url} controls className="w-full max-h-40 mb-3" style={{ background: '#000' }} />
             )}
             <div className="flex gap-3 items-center flex-wrap">
-              <label className="btn-ghost-parchment inline-block cursor-pointer text-center" style={{ fontSize: '10px', padding: '10px 20px' }}>
+              <label className="inline-block cursor-pointer text-center" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 20px', background: 'transparent', border: `0.5px solid ${t.text}`, color: t.text, borderRadius: 'var(--radius)' }}>
                 {uploading ? 'PRZESYŁANIE...' : form.hero_video_url ? 'ZMIEŃ WIDEO' : 'DODAJ WIDEO'}
                 <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
               </label>
@@ -258,7 +258,7 @@ export default function DashboardSettings() {
               <img src={form.about_image_url} alt="" className="w-full max-h-40 mb-3 object-cover" style={{ filter: 'brightness(0.6)' }} />
             )}
             <div className="flex gap-3 items-center flex-wrap">
-              <label className="btn-ghost-parchment inline-block cursor-pointer text-center" style={{ fontSize: '10px', padding: '10px 20px' }}>
+              <label className="inline-block cursor-pointer text-center" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 20px', background: 'transparent', border: `0.5px solid ${t.text}`, color: t.text, borderRadius: 'var(--radius)' }}>
                 {uploading ? 'PRZESYŁANIE...' : 'ZMIEŃ ZDJĘCIE'}
                 <input type="file" accept="image/*" onChange={async (e) => {
                   const file = e.target.files[0];
@@ -430,7 +430,7 @@ export default function DashboardSettings() {
               <img src={form.site_logo_url} alt="Logo" className="max-h-20 mb-3 object-contain" />
             )}
             <div className="flex gap-3 items-center flex-wrap">
-              <label className="btn-ghost-parchment inline-block cursor-pointer text-center" style={{ fontSize: '10px', padding: '10px 20px' }}>
+              <label className="inline-block cursor-pointer text-center" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 20px', background: 'transparent', border: `0.5px solid ${t.text}`, color: t.text, borderRadius: 'var(--radius)' }}>
                 {uploading ? 'PRZESYŁANIE...' : form.site_logo_url ? 'ZMIEŃ LOGO' : 'DODAJ LOGO'}
                 <input type="file" accept="image/*" onChange={async (e) => {
                   const file = e.target.files[0];
@@ -461,7 +461,7 @@ export default function DashboardSettings() {
               <img src={form.app_icon_url} alt="Ikona" className="w-20 h-20 mb-3 object-contain border border-solid" style={{ borderColor: t.border }} />
             )}
             <div className="flex gap-3 items-center flex-wrap">
-              <label className="btn-ghost-parchment inline-block cursor-pointer text-center" style={{ fontSize: '10px', padding: '10px 20px' }}>
+              <label className="inline-block cursor-pointer text-center" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 20px', background: 'transparent', border: `0.5px solid ${t.text}`, color: t.text, borderRadius: 'var(--radius)' }}>
                 {uploading ? 'PRZESYŁANIE...' : form.app_icon_url ? 'ZMIEŃ IKONĘ' : 'DODAJ IKONĘ'}
                 <input type="file" accept="image/*" onChange={async (e) => {
                   const file = e.target.files[0];
