@@ -14,7 +14,7 @@ import SettlementModal from '@/components/dashboard/SettlementModal';
 import { openHealthFormQRPage } from '@/lib/qrPage';
 import AvailabilityEditModal from '@/components/dashboard/AvailabilityEditModal';
 import ReferenceImagesUpload from '@/components/dashboard/ReferenceImagesUpload';
-import { getAvailabilityForDay } from '@/components/dashboard/ArtistScheduleEditor';
+import { exceptionCoversDate, getDayWindow, dayWindowLabel } from '@/lib/availability';
 import { findTimeOffConflict, findDoubleBookingConflict } from '@/lib/bookingConflicts';
 import BookingConflictModal from '@/components/booking/BookingConflictModal';
 import { recomputeClientTotalSessions } from '@/lib/clientStats';
@@ -621,22 +621,11 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
     .sort((a, b) => (a.session_time || '').localeCompare(b.session_time || ''));
 
   // Get availability badge for a day: 'free' | 'block' | null
+  // (zakresowy rekord pokrywa cały okres od date do end_date)
   const getAvailBadge = (day) => {
     const dateStr = format(day, 'yyyy-MM-dd');
     const exceptions = (availabilityRecords || []).filter(r => r.type === 'exception');
-    const match = exceptions.find(r => {
-      if (!r.date || r.date > dateStr) return false;
-      if (r.repeat_until && r.repeat_until !== 'indefinite' && r.repeat_until < dateStr) return false;
-      if (!r.repeat || r.repeat === 'none') return r.date === dateStr;
-      const start = parseISO(r.date);
-      const target = parseISO(dateStr);
-      const diff = Math.round((target - start) / 86400000);
-      if (diff < 0) return false;
-      if (r.repeat === 'weekly') return diff % 7 === 0;
-      if (r.repeat === 'biweekly') return diff % 14 === 0;
-      if (r.repeat === 'monthly') return start.getDate() === target.getDate();
-      return false;
-    });
+    const match = exceptions.find(r => exceptionCoversDate(r, dateStr));
     if (!match) return null;
     return { type: match.is_available ? 'free' : 'block', record: match };
   };
@@ -672,7 +661,8 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
           const avail = getAvailBadge(day);
           const regularDayOff = isRegularDayOff(day);
           const isBlocked = avail && avail.type === 'block';
-          const isFullDayOff = isBlocked && !avail.record.start_time && !avail.record.end_time;
+          const fullDayWindow = isBlocked ? getDayWindow(avail.record, format(day, 'yyyy-MM-dd')) : null;
+          const isFullDayOff = isBlocked && (!fullDayWindow || (fullDayWindow.start === null && fullDayWindow.end === null));
           return (
             <button key={day.toISOString()} onClick={() => onDayClick(day)}
               style={{
@@ -717,20 +707,11 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
           if (!avail) return null;
           const isRecurring = avail.record.repeat && avail.record.repeat !== 'none';
           const color = avail.type === 'free' ? '#16a34a' : 'var(--brand)';
-          const timeStr = avail.record.start_time && avail.record.end_time ? `${avail.record.start_time}–${avail.record.end_time}` : 'Cały dzień';
+          const timeStr = dayWindowLabel(avail.record, dateStr) || 'Cały dzień';
           return (
             <button
               onClick={() => {
-                const r = avail.record;
-                const related = (availabilityRecords || []).filter(x =>
-                  x.type === 'exception' &&
-                  (x.note || '') === (r.note || '') &&
-                  (x.start_time || '') === (r.start_time || '') &&
-                  (x.end_time || '') === (r.end_time || '') &&
-                  (x.repeat || 'none') === (r.repeat || 'none') &&
-                  x.is_available === r.is_available
-                );
-                onAvailabilityClick({ record: r, dateStr, allRecords: related.length > 0 ? related : [r] });
+                onAvailabilityClick({ record: avail.record, dateStr, allRecords: [avail.record] });
               }}
               className="flex items-center gap-2 w-full mb-3 px-3 py-2 text-left"
               style={{ border: `0.5px solid ${color}40`, background: `${color}08`, cursor: 'pointer' }}
@@ -780,22 +761,10 @@ function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, o
   const dateStr = format(selectedDate, 'yyyy-MM-dd');
   const dayBk = bookings.filter(b => b.session_date === dateStr).sort((a, b) => (a.session_time || '').localeCompare(b.session_time || ''));
 
-  // Find availability record for this day
+  // Find availability record for this day (zakresowy rekord pokrywa cały okres)
   const availRecord = (() => {
     const exceptions = (availabilityRecords || []).filter(r => r.type === 'exception');
-    return exceptions.find(r => {
-      if (!r.date || r.date > dateStr) return false;
-      if (r.repeat_until && r.repeat_until !== 'indefinite' && r.repeat_until < dateStr) return false;
-      if (!r.repeat || r.repeat === 'none') return r.date === dateStr;
-      const start = parseISO(r.date);
-      const target = parseISO(dateStr);
-      const diff = Math.round((target - start) / 86400000);
-      if (diff < 0) return false;
-      if (r.repeat === 'weekly') return diff % 7 === 0;
-      if (r.repeat === 'biweekly') return diff % 14 === 0;
-      if (r.repeat === 'monthly') return start.getDate() === target.getDate();
-      return false;
-    }) || null;
+    return exceptions.find(r => exceptionCoversDate(r, dateStr)) || null;
   })();
 
   // Compute unavailable ranges (hours outside working schedule)
@@ -810,11 +779,15 @@ function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, o
     let workStart = recurring ? toMin(recurring.start_time) : null;
     let workEnd = recurring ? toMin(recurring.end_time) : null;
 
-    if (availRecord) {
+    // Zakresowy wpis: godziny graniczne obowiązują pierwszego/ostatniego dnia,
+    // dni środkowe są całodniowe (getDayWindow zwraca wtedy otwarte brzegi).
+    const window = availRecord ? getDayWindow(availRecord, dateStr) : null;
+    if (window) {
       if (availRecord.is_available) {
-        workStart = toMin(availRecord.start_time);
-        workEnd = toMin(availRecord.end_time);
-      } else if (!availRecord.start_time || !availRecord.end_time) {
+        // dyspozycja: otwarty brzeg = dostępny przez cały widok dnia
+        workStart = window.start === null ? DAY_START_MIN : window.start;
+        workEnd = window.end === null ? DAY_END_MIN : window.end;
+      } else if (window.start === null && window.end === null) {
         workStart = null;
         workEnd = null;
       }
@@ -827,10 +800,10 @@ function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, o
       if (workEnd < DAY_END_MIN) ranges.push({ start: workEnd, end: DAY_END_MIN });
     }
 
-    if (availRecord && !availRecord.is_available && availRecord.start_time && availRecord.end_time) {
-      const blockStart = toMin(availRecord.start_time);
-      const blockEnd = toMin(availRecord.end_time);
-      if (blockStart !== null && blockEnd !== null) ranges.push({ start: blockStart, end: blockEnd });
+    if (window && !availRecord.is_available && !(window.start === null && window.end === null)) {
+      const blockStart = Math.max(DAY_START_MIN, window.start === null ? DAY_START_MIN : window.start);
+      const blockEnd = Math.min(DAY_END_MIN, window.end === null ? DAY_END_MIN : window.end);
+      if (blockEnd > blockStart) ranges.push({ start: blockStart, end: blockEnd });
     }
 
     return ranges;
@@ -913,12 +886,14 @@ function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, o
               </>
             )}
             {/* Availability tile in timeline */}
-            {availRecord && availRecord.start_time && availRecord.end_time && (() => {
+            {availRecord && (() => {
+              const w = getDayWindow(availRecord, dateStr);
+              if (!w || w.start === null || w.end === null) return null;
               const color = availRecord.is_available ? '#16a34a' : 'var(--brand)';
               const label = availRecord.is_available ? 'Dyspozycja' : 'Blokada';
               const isRecurring = availRecord.repeat && availRecord.repeat !== 'none';
-              const startMin = toMin(availRecord.start_time);
-              const endMin = toMin(availRecord.end_time);
+              const startMin = w.start;
+              const endMin = w.end;
               const top = Math.max(0, (startMin - DAY_START_H * 60)) * PX_PER_MIN;
               const height = Math.max(20, (endMin - startMin) * PX_PER_MIN);
               return (
@@ -926,22 +901,14 @@ function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, o
                   key="avail-tile"
                   onClick={(e) => {
                     e.stopPropagation();
-                    const related = (availabilityRecords || []).filter(x =>
-                      x.type === 'exception' &&
-                      (x.note || '') === (availRecord.note || '') &&
-                      (x.start_time || '') === (availRecord.start_time || '') &&
-                      (x.end_time || '') === (availRecord.end_time || '') &&
-                      (x.repeat || 'none') === (availRecord.repeat || 'none') &&
-                      x.is_available === availRecord.is_available
-                    );
-                    onAvailabilityClick?.({ record: availRecord, dateStr, allRecords: related.length > 0 ? related : [availRecord] });
+                    onAvailabilityClick?.({ record: availRecord, dateStr, allRecords: [availRecord] });
                   }}
                   style={{ position: 'absolute', top: `${top}px`, height: `${height}px`, left: '4px', right: '4px', background: `${color}12`, borderLeft: `2px solid ${color}80`, borderTop: `0.5px solid ${color}40`, borderRight: `0.5px solid ${color}40`, borderBottom: `0.5px solid ${color}40`, cursor: 'pointer', padding: '3px 6px', zIndex: 0, display: 'flex', alignItems: 'flex-start', gap: '4px' }}
                   onMouseEnter={e => e.currentTarget.style.background = `${color}20`}
                   onMouseLeave={e => e.currentTarget.style.background = `${color}12`}
                 >
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color, letterSpacing: '0.06em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {label} {availRecord.start_time}–{availRecord.end_time}
+                    {label} {String(Math.floor(startMin / 60)).padStart(2, '0')}:{String(startMin % 60).padStart(2, '0')}–{String(Math.floor(endMin / 60)).padStart(2, '0')}:{String(endMin % 60).padStart(2, '0')}
                   </span>
                   {isRecurring && <RefreshCw size={8} color={color} style={{ opacity: 0.7, flexShrink: 0 }} />}
                 </div>
@@ -1014,31 +981,15 @@ export default function ArtistSchedule() {
   }, [artist?.id]);
 
   // Find the availability record that applies to a given date string
+  // (zakresowy rekord pokrywa cały okres od date do end_date)
   const getAvailabilityRecordForDate = useCallback((dateStr) => {
     const exceptions = availabilityRecords.filter(r => r.type === 'exception');
-    // First: exact single-day match (no repeat)
-    const exact = exceptions.find(r => r.date === dateStr && (!r.repeat || r.repeat === 'none'));
+    // First: exact single-day match (no repeat, no range)
+    const exact = exceptions.find(r => r.date === dateStr && (!r.repeat || r.repeat === 'none') && (!r.end_date || r.end_date <= r.date));
     if (exact) return exact;
-    // Then: recurring that matches
-    const recurring = exceptions.find(r => r.repeat && r.repeat !== 'none' && matchesRepeatOnDate(r, dateStr));
-    return recurring || null;
+    // Then: any record covering this day (range or recurring occurrence)
+    return exceptions.find(r => exceptionCoversDate(r, dateStr)) || null;
   }, [availabilityRecords]);
-
-  function matchesRepeatOnDate(ex, dateStr) {
-    if (!ex.date || ex.date > dateStr) return false;
-    if (ex.repeat_until && ex.repeat_until !== 'indefinite' && ex.repeat_until < dateStr) return false;
-    const start = parseISO(ex.date);
-    const target = parseISO(dateStr);
-    const diffDays = Math.round((target - start) / 86400000);
-    if (diffDays < 0) return false;
-    if (ex.repeat === 'weekly') return diffDays % 7 === 0;
-    if (ex.repeat === 'biweekly') return diffDays % 14 === 0;
-    if (ex.repeat === 'monthly') {
-      return start.getDate() === target.getDate() &&
-        (target.getFullYear() - start.getFullYear()) * 12 + (target.getMonth() - start.getMonth()) >= 0;
-    }
-    return false;
-  }
 
   const t = theme === 'light'
     ? { title: '#111111', muted: 'rgba(0,0,0,0.4)', cardBg: '#FFFFFF', cardBorder: '#E5E5E5', text: '#111111', rowBorder: '#E5E5E5', rowHover: 'rgba(0,0,0,0.03)' }
@@ -1216,7 +1167,7 @@ export default function ArtistSchedule() {
             if (!record) return null;
             const color = record.is_available ? '#16a34a' : 'var(--brand)';
             const label = record.is_available ? 'Dyspozycja' : 'Wolne';
-            const timeStr = record.start_time && record.end_time ? `${record.start_time}–${record.end_time}` : 'Cały dzień';
+            const timeStr = ex ? (dayWindowLabel(ex, dateStr) || 'Cały dzień') : (record.start_time && record.end_time ? `${record.start_time}–${record.end_time}` : 'Cały dzień');
             return (
               <div className="flex items-center gap-2 mb-3 px-3 py-2" style={{ border: `0.5px solid ${color}40`, background: `${color}08`, borderRadius: 'var(--radius)' }}>
                 <div style={{ width: '6px', height: '6px', borderRadius: '1px', background: color, flexShrink: 0 }} />

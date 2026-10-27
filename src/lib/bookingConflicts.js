@@ -1,30 +1,15 @@
 // Shared booking conflict detection utilities
+import { exceptionCoversDate, getDayWindow, dayWindowLabel, timeToMin } from './availability';
 
-export function timeToMin(t) {
-  if (!t) return null;
-  const parts = t.split(':').map(Number);
-  if (parts.some(isNaN)) return null;
-  return parts[0] * 60 + (parts[1] || 0);
-}
-
-function matchesRepeatOnDate(ex, dateStr) {
-  if (!ex.date || ex.date > dateStr) return false;
-  if (ex.repeat_until && ex.repeat_until !== 'indefinite' && ex.repeat_until < dateStr) return false;
-  const start = new Date(ex.date + 'T12:00:00');
-  const target = new Date(dateStr + 'T12:00:00');
-  const diffDays = Math.round((target - start) / 86400000);
-  if (diffDays < 0) return false;
-  if (ex.repeat === 'weekly') return diffDays % 7 === 0;
-  if (ex.repeat === 'biweekly') return diffDays % 14 === 0;
-  if (ex.repeat === 'monthly') return start.getDate() === target.getDate();
-  return false;
-}
+export { timeToMin };
 
 export function getExceptionForDate(records, dateStr) {
   const exceptions = (records || []).filter(r => r.type === 'exception');
-  const exact = exceptions.find(r => r.date === dateStr && (!r.repeat || r.repeat === 'none'));
+  // First: exact single-day match (no repeat, no range) — dzień ma własny wpis
+  const exact = exceptions.find(r => r.date === dateStr && (!r.repeat || r.repeat === 'none') && (!r.end_date || r.end_date <= r.date));
   if (exact) return exact;
-  return exceptions.find(r => r.repeat && r.repeat !== 'none' && matchesRepeatOnDate(r, dateStr)) || null;
+  // Then: any record covering this day — zakres (date..end_date) albo wystąpienie cyklu
+  return exceptions.find(r => exceptionCoversDate(r, dateStr)) || null;
 }
 
 // Determine whether an artist is off (unavailable) on a given date.
@@ -37,7 +22,7 @@ export function isArtistOffOnDate(records, artistId, dateStr) {
     return {
       off: ex.is_available === false,
       note: ex.note || '',
-      timeRange: ex.start_time ? `${ex.start_time}–${ex.end_time}` : null,
+      timeRange: ex.start_time && ex.end_time ? (dayWindowLabel(ex, dateStr) || `${ex.start_time}–${ex.end_time}`) : null,
       isException: true,
     };
   }
@@ -68,12 +53,9 @@ export function getArtistsOffForDate(records, artists, artistFilter, dateStr) {
     .filter(x => x.off);
 }
 
-function minToLabel(min) {
-  if (min == null) return '';
-  return `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
-}
-
-// Check if session overlaps a time-off block (is_available: false) — recurring or exception.
+// Check if session overlaps a time-off block (is_available: false) — recurring, single-day or range.
+// Zakresowa blokada: pierwszego dnia blokuje od start_time do końca dnia,
+// ostatniego — od początku dnia do end_time, dni środkowe — całodniowo.
 export function findTimeOffConflict(records, dateStr, startTime, endTime) {
   const sessionStart = timeToMin(startTime);
   if (sessionStart === null) return null;
@@ -97,15 +79,16 @@ export function findTimeOffConflict(records, dateStr, startTime, endTime) {
     }
   }
 
-  // Exception block
+  // Exception block (single-day or range)
   const ex = getExceptionForDate(records, dateStr);
   if (ex && ex.is_available === false) {
-    const blockStart = ex.start_time ? timeToMin(ex.start_time) : 0;
-    const blockEnd = ex.end_time ? timeToMin(ex.end_time) : 24 * 60;
+    const w = getDayWindow(ex, dateStr);
+    const blockStart = w && w.start !== null ? w.start : 0;
+    const blockEnd = w && w.end !== null ? w.end : 24 * 60;
     if (sessionStart < blockEnd && sessionEnd > blockStart) {
       return {
         type: 'time_off',
-        timeRange: ex.start_time ? `${ex.start_time}–${ex.end_time}` : 'cały dzień',
+        timeRange: w && w.start !== null && w.end !== null ? dayWindowLabel(ex, dateStr) : 'cały dzień',
         note: ex.note || 'Wolne w tym dniu',
       };
     }

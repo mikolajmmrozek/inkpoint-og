@@ -12,7 +12,7 @@
         "recurring",
         "exception"
       ],
-      "description": "recurring = sta\u0142y grafik tygodniowy, exception = blokada/wyj\u0105tek na konkretny dzie\u0144"
+      "description": "recurring = sta\u0142y grafik tygodniowy, exception = blokada/wyj\u0105tek na konkretny dzie\u0144 lub zakres"
     },
     "day_of_week": {
       "type": "number",
@@ -21,7 +21,12 @@
     "date": {
       "type": "string",
       "format": "date",
-      "description": "Data startowa wpisu (dla exception: konkretny dzie\u0144 lub start powtarzania)"
+      "description": "Pierwszy dzie\u0144 wpisu (dla exception: start zakresu lub konkretny dzie\u0144)"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Ostatni dzie\u0144 zakresu (dla jednorazowego exception). Brak lub r\u00f3wna date = pojedynczy dzie\u0144. Godziny graniczne (start_time/end_time) obowi\u0105zuj\u0105 pierwszego i ostatniego dnia zakresu; dni \u015brodkowe s\u0105 ca\u0142odniowe. Rekordy cykliczne (repeat \u2260 none) s\u0105 jednodniowe \u2014 bez end_date."
     },
     "start_time": {
       "type": "string",

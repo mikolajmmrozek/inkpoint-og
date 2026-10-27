@@ -54,8 +54,8 @@ const ENTITIES = {
   ArtistAvailability: {
     ops: { read: true, create: true, update: true, delete: true },
     required: ['artist_id', 'type', 'is_available'],
-    fields: ['artist_id', 'type', 'day_of_week', 'date', 'start_time', 'end_time', 'is_available', 'note', 'repeat', 'repeat_until'],
-    filter: ['artist_id', 'type', 'day_of_week', 'date', 'is_available'],
+    fields: ['artist_id', 'type', 'day_of_week', 'date', 'end_date', 'start_time', 'end_time', 'is_available', 'note', 'repeat', 'repeat_until'],
+    filter: ['artist_id', 'type', 'day_of_week', 'date', 'end_date', 'is_available'],
     sensitive: [],
   },
   SiteSettings: {

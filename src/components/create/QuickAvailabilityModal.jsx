@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import { generateDates } from '@/components/dashboard/AvailabilityEditModal';
 
 const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
 const MINUTE_OPTIONS = ['00', '15', '30', '45'];
@@ -69,17 +68,17 @@ export default function QuickAvailabilityModal({ prefill, role, onClose, onSaved
         ? { start_time: undefined, end_time: undefined }
         : { start_time: startTime || undefined, end_time: endTime || undefined };
       if (dateMode === 'range') {
-        const dates = generateDates(dateFrom, dateTo, 'none', '', false);
-        const records = dates.map((d) => ({
+        // jeden rekord na cały zakres (end_date = ostatni dzień)
+        await base44.entities.ArtistAvailability.create({
           artist_id: artistId,
           type: 'exception',
-          date: d,
+          date: dateFrom,
+          end_date: dateTo > dateFrom ? dateTo : undefined,
           is_available: mode === 'avail',
           note: note || undefined,
           repeat: 'none',
           ...timeProps,
-        }));
-        await base44.entities.ArtistAvailability.bulkCreate(records);
+        });
       } else {
         await base44.entities.ArtistAvailability.create({
           artist_id: artistId,
@@ -232,6 +231,11 @@ export default function QuickAvailabilityModal({ prefill, role, onClose, onSaved
                   </div>
                 </div>
               </div>
+            )}
+            {!allDay && dateMode === 'range' && (
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '6px' }}>
+                Godziny obowiązują pierwszego i ostatniego dnia zakresu — dni pomiędzy są całodniowe.
+              </p>
             )}
           </div>
 

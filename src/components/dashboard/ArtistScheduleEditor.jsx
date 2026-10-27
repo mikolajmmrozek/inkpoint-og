@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Plus, Trash2, Edit2, X, RefreshCw, ChevronDown } from 'lucide-react';
-import { format, parseISO, addDays, addWeeks, addMonths, eachDayOfInterval } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import AvailabilityEditModal from '@/components/dashboard/AvailabilityEditModal';
+import { generateDates, exceptionCoversDate, getDayWindow, nextDateStr } from '@/lib/availability';
 
 const DAYS = [
   { label: 'Pn', value: 1 },
@@ -72,32 +73,8 @@ function getGroupDates(records) {
   return records.map(r => r.date).filter(Boolean).sort();
 }
 
-// Generate expected dates from a repeat pattern
-function generateDates(dateFrom, dateTo, repeat, repeatUntil, repeatIndefinite) {
-  const start = parseISO(dateFrom);
-  const endLimit = repeatIndefinite
-    ? addMonths(new Date(), 24) // 2 years ahead as practical limit
-    : (repeatUntil ? parseISO(repeatUntil) : (dateTo ? parseISO(dateTo) : start));
-
-  if (!repeat || repeat === 'none') {
-    // Range: all days from date_from to date_to
-    if (dateTo && dateTo > dateFrom) {
-      return eachDayOfInterval({ start, end: parseISO(dateTo) }).map(d => format(d, 'yyyy-MM-dd'));
-    }
-    return [dateFrom];
-  }
-
-  const dates = [];
-  let cur = start;
-  while (cur <= endLimit) {
-    dates.push(format(cur, 'yyyy-MM-dd'));
-    if (repeat === 'weekly') cur = addWeeks(cur, 1);
-    else if (repeat === 'biweekly') cur = addWeeks(cur, 2);
-    else if (repeat === 'monthly') cur = addMonths(cur, 1);
-    else break;
-  }
-  return dates;
-}
+// generateDates pochodzi z @/lib/availability (model zakresowy: jednorazowy
+// zakres to JEDEN rekord z end_date — funkcja zwraca daty tylko dla cykli).
 
 // TimeDropdown — godziny i minuty osobno jako natywne selecty
 function TimeDropdown({ value, onChange, border, text }) {
@@ -143,8 +120,13 @@ function ExceptionRow({ group, color, border, muted, text, onView, onEdit, onDel
   const isGrouped = count > 1;
   const repeatLabel = formatRepeatLabel(ex);
 
+  const isRange = !!(ex.end_date && ex.end_date > ex.date && (!ex.repeat || ex.repeat === 'none'));
   let dateStr = ex.date || '';
-  try { dateStr = format(parseISO(ex.date), 'd MMM yyyy', { locale: pl }); } catch {}
+  try {
+    dateStr = isRange
+      ? `${format(parseISO(ex.date), 'd MMM', { locale: pl })} – ${format(parseISO(ex.end_date), 'd MMM yyyy', { locale: pl })}`
+      : format(parseISO(ex.date), 'd MMM yyyy', { locale: pl });
+  } catch {}
 
   return (
     <div className="cursor-pointer" style={{ border: `0.5px solid ${color}33`, background: `${color}06`, borderRadius: 'var(--radius)' }}
@@ -193,7 +175,6 @@ export default function ArtistScheduleEditor({ artistId, t }) {
   const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [entry, setEntry] = useState(EMPTY_ENTRY);
-  const [editingGroup, setEditingGroup] = useState(null); // group being edited
   const [viewModal, setViewModal] = useState(null); // { record, dateStr, startInEdit }
   const theme = t?.bg?.includes('FFF') || t?.bg === '#FFFFFF' ? 'light' : 'dark';
 
@@ -249,91 +230,89 @@ export default function ArtistScheduleEditor({ artistId, t }) {
     setSaving(false);
   };
 
-  // Group exceptions by fingerprint: same note + start_time + end_time + repeat
+  // Grupowanie wyjątków: cykle po odcisku (notatka + godziny + powtarzanie),
+  // jednorazowe — dodatkowo tylko sąsiadujące daty; rekord zakresowy = osobny wpis.
   function groupExceptions(list) {
-    const groupMap = new Map();
+    const groups = [];
+    const cycleMap = new Map();
+    const singles = [];
     for (const ex of list) {
-      const key = `${ex.note || ''}|${ex.start_time || ''}|${ex.end_time || ''}|${ex.repeat || 'none'}|${ex.is_available}`;
-      if (!groupMap.has(key)) {
-        groupMap.set(key, { representative: ex, allRecords: [], count: 0 });
+      if (ex.repeat && ex.repeat !== 'none') {
+        const key = `${ex.note || ''}|${ex.start_time || ''}|${ex.end_time || ''}|${ex.repeat}|${ex.repeat_until || ''}|${ex.is_available}`;
+        if (!cycleMap.has(key)) cycleMap.set(key, { representative: ex, allRecords: [], count: 0 });
+        const g = cycleMap.get(key);
+        g.allRecords.push(ex);
+        g.count++;
+      } else if (ex.end_date && ex.end_date > ex.date) {
+        groups.push({ representative: ex, allRecords: [ex], count: 1 });
+      } else {
+        singles.push(ex);
       }
-      const g = groupMap.get(key);
-      g.allRecords.push(ex);
-      g.count++;
     }
-    return Array.from(groupMap.values());
+    // jednorazowe: łącz w grupy tylko sąsiadujące dni o identycznym odcisku
+    singles.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+    let run = [];
+    let runKey = null;
+    const flush = () => {
+      if (run.length > 0) groups.push({ representative: run[0], allRecords: run, count: run.length });
+      run = [];
+    };
+    for (const ex of singles) {
+      const key = `${ex.artist_id}|${ex.note || ''}|${ex.start_time || ''}|${ex.end_time || ''}|${ex.is_available}`;
+      const continues = runKey === key && run.length > 0 && nextDateStr(run[run.length - 1].date) === ex.date;
+      if (continues) run.push(ex);
+      else { flush(); run = [ex]; runKey = key; }
+    }
+    flush();
+    return Array.from(cycleMap.values()).concat(groups);
   }
 
   const saveEntry = async () => {
     setSaving(true);
-    const isAvailable = entry.kind === 'free';
-    const allDay = entry.timeMode === 'allday';
-    const effectiveUntil = entry.repeat_indefinite ? 'indefinite' : (entry.repeat_until || undefined);
-    const dates = generateDates(entry.date_from, entry.date_to, entry.repeat, entry.repeat_until, entry.repeat_indefinite);
-
-    await Promise.all(dates.map(date =>
-      base44.entities.ArtistAvailability.create({
-        artist_id: artistId,
-        type: 'exception',
-        date,
-        is_available: isAvailable,
-        start_time: allDay ? null : entry.start_time,
-        end_time: allDay ? null : entry.end_time,
-        note: entry.note || undefined,
-        repeat: entry.repeat !== 'none' ? entry.repeat : 'none',
-        repeat_until: entry.repeat !== 'none' ? effectiveUntil : undefined,
-      })
-    ));
-
-    await reload();
-    setShowForm(false);
-    setEditingGroup(null);
-    setEntry(EMPTY_ENTRY);
-    setSaving(false);
-  };
-
-  const saveEditGroup = async () => {
-    setSaving(true);
-    const isAvailable = entry.kind === 'free';
-    const allDay = entry.timeMode === 'allday';
-    const newDates = new Set(generateDates(entry.date_from, entry.date_to, entry.repeat, entry.repeat_until, entry.repeat_indefinite));
-    const oldRecords = editingGroup.allRecords;
-    const oldDates = new Set(oldRecords.map(r => r.date));
-
-    // Dates to remove (in old but not new)
-    const toDelete = oldRecords.filter(r => !newDates.has(r.date));
-    // Dates to update (in both)
-    const toUpdate = oldRecords.filter(r => newDates.has(r.date));
-    // Dates to add (in new but not old)
-    const toAdd = [...newDates].filter(d => !oldDates.has(d));
-
-    const effectiveUntil = entry.repeat_indefinite ? 'indefinite' : (entry.repeat_until || undefined);
-    const updateData = {
-      is_available: isAvailable,
-      start_time: allDay ? null : entry.start_time,
-      end_time: allDay ? null : entry.end_time,
-      note: entry.note || undefined,
-      repeat: entry.repeat !== 'none' ? entry.repeat : 'none',
-      repeat_until: entry.repeat !== 'none' ? effectiveUntil : undefined,
-    };
-
-    // Wykonuj partiami po 5 żeby nie przekroczyć rate limit
-    const allOps = [
-      ...toDelete.map(r => () => base44.entities.ArtistAvailability.delete(r.id).catch(() => null)),
-      ...toUpdate.map(r => () => base44.entities.ArtistAvailability.update(r.id, { ...updateData, date: r.date }).catch(() => null)),
-      ...toAdd.map(date => () => base44.entities.ArtistAvailability.create({ artist_id: artistId, type: 'exception', date, ...updateData })),
-    ];
-    const BATCH = 5;
-    for (let i = 0; i < allOps.length; i += BATCH) {
-      await Promise.all(allOps.slice(i, i + BATCH).map(fn => fn()));
-      if (i + BATCH < allOps.length) await new Promise(res => setTimeout(res, 1200));
+    try {
+      const isAvailable = entry.kind === 'free';
+      const allDay = entry.timeMode === 'allday';
+      const timeProps = allDay ? { start_time: undefined, end_time: undefined } : { start_time: entry.start_time, end_time: entry.end_time };
+      if (entry.repeat !== 'none') {
+        // cykl — rekord na wystąpienie (model cykli bez zmian)
+        const effectiveUntil = entry.repeat_indefinite ? 'indefinite' : (entry.repeat_until || undefined);
+        const dates = generateDates(entry.date_from, entry.date_to, entry.repeat, entry.repeat_until, entry.repeat_indefinite);
+        const BATCH = 5;
+        for (let i = 0; i < dates.length; i += BATCH) {
+          await Promise.all(dates.slice(i, i + BATCH).map(date =>
+            base44.entities.ArtistAvailability.create({
+              artist_id: artistId,
+              type: 'exception',
+              date,
+              is_available: isAvailable,
+              note: entry.note || undefined,
+              repeat: entry.repeat,
+              repeat_until: effectiveUntil,
+              ...timeProps,
+            })
+          ));
+          if (i + BATCH < dates.length) await new Promise(res => setTimeout(res, 800));
+        }
+      } else {
+        // jeden rekord na cały zakres (end_date = ostatni dzień)
+        const to = entry.dateMode === 'range' && entry.date_to > entry.date_from ? entry.date_to : undefined;
+        await base44.entities.ArtistAvailability.create({
+          artist_id: artistId,
+          type: 'exception',
+          date: entry.date_from,
+          ...(to ? { end_date: to } : {}),
+          is_available: isAvailable,
+          note: entry.note || undefined,
+          repeat: 'none',
+          ...timeProps,
+        });
+      }
+      await reload();
+      setShowForm(false);
+      setEntry(EMPTY_ENTRY);
+    } finally {
+      setSaving(false);
     }
-
-    await reload();
-    setShowForm(false);
-    setEditingGroup(null);
-    setEntry(EMPTY_ENTRY);
-    setSaving(false);
   };
 
   const deleteGroup = async (group) => {
@@ -347,29 +326,8 @@ export default function ArtistScheduleEditor({ artistId, t }) {
     setViewModal({ record: ex, allRecords: group.allRecords, dateStr, startInEdit });
   };
 
-  const openEditGroup = (group) => {
-    const ex = group.representative;
-    const dates = group.allRecords.map(r => r.date).filter(Boolean).sort();
-    setEditingGroup(group);
-    setEntry({
-      kind: ex.is_available ? 'free' : 'block',
-      timeMode: ex.start_time && ex.end_time ? 'hours' : 'allday',
-      dateMode: dates.length > 1 ? 'range' : 'single',
-      date_from: dates[0] || ex.date || TODAY,
-      date_to: dates[dates.length - 1] || ex.date || TODAY,
-      start_time: ex.start_time || '09:00',
-      end_time: ex.end_time || '18:00',
-      repeat: ex.repeat || 'none',
-      repeat_indefinite: ex.repeat_until === 'indefinite',
-      repeat_until: ex.repeat_until === 'indefinite' ? '' : (ex.repeat_until || ''),
-      note: ex.note || '',
-    });
-    setShowForm(true);
-  };
-
   const cancelForm = () => {
     setShowForm(false);
-    setEditingGroup(null);
     setEntry(EMPTY_ENTRY);
   };
 
@@ -445,7 +403,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
             DODAJ WOLNE
           </p>
           {!showForm && (
-            <button onClick={() => { setShowForm(true); setEditingGroup(null); setEntry(EMPTY_ENTRY); }} style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${border}`, color: muted, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', borderRadius: 'var(--radius)' }}>
+            <button onClick={() => { setShowForm(true); setEntry(EMPTY_ENTRY); }} style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', border: `0.5px solid ${border}`, color: muted, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', borderRadius: 'var(--radius)' }}>
               <Plus size={10} /> DODAJ
             </button>
           )}
@@ -456,7 +414,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
           <div className="mb-4 p-4 space-y-4" style={{ border: `0.5px solid rgb(var(--brand-rgb) /0.25)`, background: 'rgb(var(--brand-rgb) /0.02)', borderRadius: 'var(--radius)' }}>
             <div className="flex items-center justify-between">
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-                {editingGroup ? `EDYTUJ WPIS (×${editingGroup.count})` : 'NOWY WPIS'}
+                NOWY WPIS
               </p>
               <button onClick={cancelForm} style={{ color: muted, background: 'none', border: 'none', cursor: 'pointer' }}><X size={13} /></button>
             </div>
@@ -510,6 +468,11 @@ export default function ArtistScheduleEditor({ artistId, t }) {
                 </div>
               </div>
             )}
+            {entry.timeMode === 'hours' && entry.dateMode === 'range' && (
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', color: muted, letterSpacing: '0.06em' }}>
+                Godziny obowiązują pierwszego i ostatniego dnia zakresu — dni pomiędzy są całodniowe.
+              </p>
+            )}
 
             {/* Repeat */}
             <div>
@@ -549,22 +512,14 @@ export default function ArtistScheduleEditor({ artistId, t }) {
               <input {...inp(entry.note, e => setEntry(n => ({ ...n, note: e.target.value })))} placeholder="np. urlop, choroba..." />
             </div>
 
-            {editingGroup && (
-              <div style={{ padding: '8px 10px', background: 'rgb(var(--brand-rgb) /0.04)', border: '0.5px solid rgb(var(--brand-rgb) /0.2)', borderRadius: 'var(--radius)' }}>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', color: 'var(--brand)', letterSpacing: '0.1em' }}>
-                  Zmiana zakresu dat: wpisy poza nowym zakresem zostaną usunięte, nowe daty zostaną dodane.
-                </p>
-              </div>
-            )}
-
             <div className="flex gap-3 pt-1">
               <button
-                onClick={editingGroup ? saveEditGroup : saveEntry}
+                onClick={saveEntry}
                 disabled={saving}
                 className="btn-oxblood"
                 style={{ fontSize: '9px', padding: '8px 18px' }}
               >
-                {saving ? 'ZAPISUJĘ...' : editingGroup ? 'ZAPISZ ZMIANY' : 'ZAPISZ'}
+                {saving ? 'ZAPISUJĘ...' : 'ZAPISZ'}
               </button>
               <button onClick={cancelForm} style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', border: `0.5px solid ${border}`, color: muted, background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}>ANULUJ</button>
             </div>
@@ -616,36 +571,23 @@ export default function ArtistScheduleEditor({ artistId, t }) {
   );
 }
 
-function matchesRepeat(ex, dateStr) {
-  if (!ex.date || ex.date > dateStr) return false;
-  if (ex.repeat_until && ex.repeat_until !== 'indefinite' && ex.repeat_until < dateStr) return false;
-  if (!ex.repeat || ex.repeat === 'none') return ex.date === dateStr;
-
-  const start = parseISO(ex.date);
-  const target = parseISO(dateStr);
-  const diffDays = Math.round((target - start) / 86400000);
-  if (diffDays < 0) return false;
-
-  if (ex.repeat === 'weekly') return diffDays % 7 === 0;
-  if (ex.repeat === 'biweekly') return diffDays % 14 === 0;
-  if (ex.repeat === 'monthly') {
-    return start.getDate() === target.getDate() && (
-      (target.getFullYear() - start.getFullYear()) * 12 + (target.getMonth() - start.getMonth()) >= 0
-    );
-  }
-  return false;
-}
-
 export function getAvailabilityForDay(availabilityRecords, artistId, dateStr) {
   const dow = new Date(dateStr + 'T12:00:00').getDay();
-  const artistRecords = availabilityRecords.filter(r => r.artist_id === artistId);
+  const artistRecords = (availabilityRecords || []).filter(r => r.artist_id === artistId);
 
-  const exception = artistRecords.find(r => r.type === 'exception' && matchesRepeat(r, dateStr));
+  // Zakresowy wpis pokrywa cały okres; godziny graniczne obowiązują
+  // pierwszego i ostatniego dnia, dni środkowe są całodniowe (domyślne 09–18).
+  const exception = artistRecords.find(r => r.type === 'exception' && exceptionCoversDate(r, dateStr));
   if (exception) {
+    const w = getDayWindow(exception, dateStr) || { start: null, end: null };
+    const minToTime = (m, fallback) => {
+      if (m === null || m === undefined) return fallback;
+      return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+    };
     return {
       isWorkday: exception.is_available,
-      start_time: exception.start_time || '09:00',
-      end_time: exception.end_time || '18:00',
+      start_time: minToTime(w.start, '09:00'),
+      end_time: minToTime(w.end, '18:00'),
       isException: true,
     };
   }

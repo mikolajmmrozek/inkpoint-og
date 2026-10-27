@@ -2,33 +2,9 @@ import { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { X, RefreshCw, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { format, parseISO, addWeeks, addMonths, eachDayOfInterval } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { pl } from 'date-fns/locale';
-
-export function generateDates(dateFrom, dateTo, repeat, repeatUntil, repeatIndefinite) {
-  const start = parseISO(dateFrom);
-  const endLimit = repeatIndefinite
-    ? addMonths(new Date(), 24)
-    : (repeatUntil ? parseISO(repeatUntil) : (dateTo ? parseISO(dateTo) : start));
-
-  if (!repeat || repeat === 'none') {
-    if (dateTo && dateTo > dateFrom) {
-      return eachDayOfInterval({ start, end: parseISO(dateTo) }).map(d => format(d, 'yyyy-MM-dd'));
-    }
-    return [dateFrom];
-  }
-
-  const dates = [];
-  let cur = start;
-  while (cur <= endLimit) {
-    dates.push(format(cur, 'yyyy-MM-dd'));
-    if (repeat === 'weekly') cur = addWeeks(cur, 1);
-    else if (repeat === 'biweekly') cur = addWeeks(cur, 2);
-    else if (repeat === 'monthly') cur = addMonths(cur, 1);
-    else break;
-  }
-  return dates;
-}
+import { generateDates, isRangeRecord, dayWindowLabel } from '@/lib/availability';
 
 const REPEAT_LABELS = { weekly: 'Co tydzień', biweekly: 'Co 2 tygodnie', monthly: 'Co miesiąc' };
 const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
@@ -40,6 +16,7 @@ function TimeDropdown({ value, onChange, border, text, theme }) {
   const m = MINUTE_OPTIONS.includes(parts[1]) ? parts[1] : '00';
   const setH = (newH) => onChange(`${newH}:${m}`);
   const setM = (newM) => onChange(`${h}:${newM}`);
+
   const selectStyle = {
     background: theme === 'light' ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.06)',
     border: `0.5px solid ${border}`, color: text,
@@ -69,45 +46,56 @@ function Row({ label, value, color, t }) {
 }
 
 // steps: 'view' | 'confirm_edit' | 'edit' | 'confirm_delete_scope' | 'confirm_delete'
+// Edycja używa tego samego formularza co tworzenie (ArtistScheduleEditor) — wszystkie pola edytowalne.
+// Jednorazowy wpis (pojedynczy dzień lub zakres) zapisuje się jako JEDEN rekord (date + end_date).
 export default function AvailabilityEditModal({ record, allRecords, dateStr, theme, onClose, onSaved, startInEdit = false }) {
   const t = theme === 'light'
     ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', inputBorder: '#CCCCCC' }
     : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', inputBorder: '#262626' };
 
   const isRecurring = !!(record.repeat && record.repeat !== 'none');
+  const isRange = isRangeRecord(record);
   const groupRecords = allRecords && allRecords.length > 0 ? allRecords : [record];
+  const clickedDate = dateStr || record.date || '';
 
-  const initialStep = startInEdit
-    ? (isRecurring ? 'confirm_edit' : 'edit')
-    : 'view';
-  const initialScope = startInEdit && !isRecurring ? 'cycle' : null;
+  // Grupa starych (przed migracją) sąsiadujących wpisów = przyszły zakres
+  const groupDates = groupRecords.map(r => r.date).filter(Boolean).sort();
+  const groupIsRun = !isRecurring && groupDates.length > 1;
+  const rangeFrom = isRange ? record.date : (groupIsRun ? groupDates[0] : (record.date || clickedDate));
+  const rangeTo = isRange ? record.end_date : (groupIsRun ? groupDates[groupDates.length - 1] : (record.date || clickedDate));
 
-  const [step, setStep] = useState(initialStep);
-  const [editScope, setEditScope] = useState(initialScope);
+  const [step, setStep] = useState(startInEdit ? (isRecurring ? 'confirm_edit' : 'edit') : 'view');
+  const [editScope, setEditScope] = useState(startInEdit && !isRecurring ? 'cycle' : null);
   const [deleteScope, setDeleteScope] = useState(null); // 'occurrence' | 'cycle'
   const [saving, setSaving] = useState(false);
 
   const [form, setForm] = useState({
     kind: record.is_available ? 'free' : 'block',
+    dateMode: isRange || groupIsRun ? 'range' : 'single',
+    date_from: rangeFrom,
+    date_to: rangeTo,
     timeMode: record.start_time && record.end_time ? 'hours' : 'allday',
     start_time: record.start_time || '09:00',
     end_time: record.end_time || '18:00',
-    note: record.note || '',
     repeat: record.repeat || 'none',
     repeat_until: record.repeat_until === 'indefinite' ? '' : (record.repeat_until || ''),
     repeat_indefinite: record.repeat_until === 'indefinite',
-    date: dateStr || record.date || '',
+    note: record.note || '',
   });
 
   let dateDisplay = '';
-  try { dateDisplay = format(parseISO(dateStr || record.date), 'd MMMM yyyy (EEEE)', { locale: pl }); } catch {}
+  try { dateDisplay = format(parseISO(clickedDate), 'd MMMM yyyy (EEEE)', { locale: pl }); } catch {}
+  let rangeDisplay = '';
+  if (isRange || groupIsRun) {
+    try { rangeDisplay = `${format(parseISO(rangeFrom), 'd MMM yyyy', { locale: pl })} – ${format(parseISO(rangeTo), 'd MMM yyyy', { locale: pl })}`; } catch {}
+  }
   let repeatDisplay = '';
   if (isRecurring) {
     const label = REPEAT_LABELS[record.repeat] || record.repeat;
     const until = record.repeat_until === 'indefinite' || !record.repeat_until ? 'do odwołania' : `do ${record.repeat_until}`;
     repeatDisplay = `${label} · ${until}`;
   }
-  const timeDisplay = record.start_time && record.end_time ? `${record.start_time}–${record.end_time}` : 'Cały dzień';
+  const timeDisplay = dayWindowLabel(record, clickedDate) || 'Cały dzień';
   const typeLabel = record.is_available ? 'Dyspozycja (dostępny)' : 'Blokada (niedostępny)';
   const typeColor = record.is_available ? '#16a34a' : 'var(--brand)';
 
@@ -122,49 +110,76 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
   );
 
   const handleSave = async () => {
+    if (editScope !== 'occurrence' && !form.date_from) { alert('Wybierz datę.'); return; }
+    if (editScope !== 'occurrence' && form.dateMode === 'range' && form.date_to && form.date_to < form.date_from) { alert('Data „do" musi być po dacie „od".'); return; }
     setSaving(true);
     try {
       const isAvail = form.kind === 'free';
       const allDay = form.timeMode === 'allday';
-      const effectiveUntil = form.repeat_indefinite ? 'indefinite' : (form.repeat_until || undefined);
+      const timeData = { start_time: allDay ? null : form.start_time, end_time: allDay ? null : form.end_time };
 
       if (editScope === 'occurrence') {
-        // Utwórz osobny wyjątek dla tego konkretnego dnia
+        // Osobny wyjątek tylko dla tego dnia (cykle — model bez zmian)
         await base44.entities.ArtistAvailability.create({
           artist_id: record.artist_id,
           type: 'exception',
-          date: dateStr || record.date,
+          date: clickedDate,
           is_available: isAvail,
-          start_time: allDay ? null : form.start_time,
-          end_time: allDay ? null : form.end_time,
+          ...timeData,
           note: form.note || undefined,
           repeat: 'none',
         });
-      } else {
-        // Edytuj cały cykl
-        const newDates = new Set(generateDates(form.date || record.date, null, form.repeat, form.repeat_until, form.repeat_indefinite));
-        const oldDates = new Set(groupRecords.map(r => r.date));
-        const updateData = {
+        onSaved();
+        return;
+      }
+
+      if (form.repeat === 'none') {
+        // Jeden rekord na cały zakres (date + end_date) — grupa starych wpisów scala się w jeden
+        const to = form.dateMode === 'range' && form.date_to > form.date_from ? form.date_to : null;
+        const data = {
+          date: form.date_from,
+          end_date: to,
           is_available: isAvail,
-          start_time: allDay ? null : form.start_time,
-          end_time: allDay ? null : form.end_time,
+          ...timeData,
           note: form.note || undefined,
-          repeat: form.repeat !== 'none' ? form.repeat : 'none',
-          repeat_until: form.repeat !== 'none' ? effectiveUntil : undefined,
+          repeat: 'none',
+          repeat_until: null,
         };
-        const toDelete = groupRecords.filter(r => !newDates.has(r.date));
-        const toUpdate = groupRecords.filter(r => newDates.has(r.date));
-        const toAdd = [...newDates].filter(d => !oldDates.has(d));
-        const allOps = [
-          ...toDelete.map(r => () => base44.entities.ArtistAvailability.delete(r.id).catch(() => null)),
-          ...toUpdate.map(r => () => base44.entities.ArtistAvailability.update(r.id, { ...updateData, date: r.date }).catch(() => null)),
-          ...toAdd.map(date => () => base44.entities.ArtistAvailability.create({ artist_id: record.artist_id, type: 'exception', date, ...updateData }).catch(() => null)),
-        ];
-        const BATCH = 15;
-        for (let i = 0; i < allOps.length; i += BATCH) {
-          await Promise.all(allOps.slice(i, i + BATCH).map(fn => fn()));
-          if (i + BATCH < allOps.length) await new Promise(res => setTimeout(res, 1200));
+        const [first, ...rest] = groupRecords;
+        await base44.entities.ArtistAvailability.update(first.id, data);
+        const BATCH = 5;
+        for (let i = 0; i < rest.length; i += BATCH) {
+          await Promise.all(rest.slice(i, i + BATCH).map(r => base44.entities.ArtistAvailability.delete(r.id).catch(() => null)));
+          if (i + BATCH < rest.length) await new Promise(res => setTimeout(res, 800));
         }
+        onSaved();
+        return;
+      }
+
+      // Cykl — rekord na wystąpienie (model cykli bez zmian)
+      const effectiveUntil = form.repeat_indefinite ? 'indefinite' : (form.repeat_until || undefined);
+      const newDates = new Set(generateDates(form.date_from, form.dateMode === 'range' ? form.date_to : null, form.repeat, form.repeat_until, form.repeat_indefinite));
+      const oldDates = new Set(groupRecords.map(r => r.date));
+      const updateData = {
+        is_available: isAvail,
+        ...timeData,
+        note: form.note || undefined,
+        repeat: form.repeat,
+        repeat_until: effectiveUntil,
+        end_date: null,
+      };
+      const toDelete = groupRecords.filter(r => !newDates.has(r.date));
+      const toUpdate = groupRecords.filter(r => newDates.has(r.date));
+      const toAdd = [...newDates].filter(d => !oldDates.has(d));
+      const allOps = [
+        ...toDelete.map(r => () => base44.entities.ArtistAvailability.delete(r.id).catch(() => null)),
+        ...toUpdate.map(r => () => base44.entities.ArtistAvailability.update(r.id, { ...updateData, date: r.date }).catch(() => null)),
+        ...toAdd.map(date => () => base44.entities.ArtistAvailability.create({ artist_id: record.artist_id, type: 'exception', date, ...updateData }).catch(() => null)),
+      ];
+      const BATCH = 15;
+      for (let i = 0; i < allOps.length; i += BATCH) {
+        await Promise.all(allOps.slice(i, i + BATCH).map(fn => fn()));
+        if (i + BATCH < allOps.length) await new Promise(res => setTimeout(res, 1200));
       }
       onSaved();
     } finally {
@@ -176,10 +191,10 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
     setSaving(true);
     try {
       if (deleteScope === 'occurrence') {
-        const exactRecord = groupRecords.find(r => r.date === (dateStr || record.date)) || record;
+        const exactRecord = groupRecords.find(r => r.date === clickedDate) || record;
         await base44.entities.ArtistAvailability.delete(exactRecord.id).catch(() => null);
       } else {
-        // Usuń cały cykl sekwencyjnie po 5 z opóźnieniem
+        // Usuń cały cykl / cały zakres — sekwencyjnie partiami
         const BATCH = 5;
         for (let i = 0; i < groupRecords.length; i += BATCH) {
           const batch = groupRecords.slice(i, i + BATCH);
@@ -194,8 +209,8 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
   };
 
   const cyclePreview = (() => {
-    if (editScope !== 'cycle' || step !== 'edit') return null;
-    const newDates = new Set(generateDates(form.date || record.date, null, form.repeat, form.repeat_until, form.repeat_indefinite));
+    if (step !== 'edit' || editScope !== 'cycle' || !isRecurring) return null;
+    const newDates = new Set(generateDates(form.date_from, form.dateMode === 'range' ? form.date_to : null, form.repeat, form.repeat_until, form.repeat_indefinite));
     const oldDates = new Set(groupRecords.map(r => r.date));
     return {
       total: newDates.size,
@@ -253,7 +268,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                 </div>
               )}
               <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '16px' }} className="space-y-3">
-                <Row label="DATA" value={dateDisplay} color={typeColor} t={t} />
+                <Row label="DATA" value={rangeDisplay || dateDisplay} color={typeColor} t={t} />
                 <Row label="CZAS" value={timeDisplay} color={typeColor} t={t} />
                 {record.note && <Row label="NOTATKA" value={record.note} color={typeColor} t={t} />}
               </div>
@@ -329,7 +344,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                   </p>
                   <p style={{ fontSize: '13px', color: t.text, lineHeight: 1.5 }}>
                     {deleteScope === 'cycle' || !isRecurring
-                      ? `Usunięcie obejmie ${isRecurring ? `cały cykl (${groupRecords.length} ${groupRecords.length === 1 ? 'wpis' : groupRecords.length < 5 ? 'wpisy' : 'wpisów'})` : 'to wydarzenie'}. Tej operacji nie można cofnąć.`
+                      ? `Usunięcie obejmie ${isRecurring ? `cały cykl (${groupRecords.length} ${groupRecords.length === 1 ? 'wpis' : groupRecords.length < 5 ? 'wpisy' : 'wpisów'})` : groupRecords.length > 1 ? `wszystkie ${groupRecords.length} wpisy tego zakresu` : 'to wydarzenie'}. Tej operacji nie można cofnąć.`
                       : `Zostanie usunięty tylko wpis z dnia ${dateDisplay}.`
                     }
                   </p>
@@ -348,7 +363,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
             </div>
           )}
 
-          {/* ── EDIT FORM ── */}
+          {/* ── EDIT FORM (identyczny układ co formularz tworzenia) ── */}
           {step === 'edit' && (
             <div className="space-y-4">
               {editScope === 'occurrence' && (
@@ -356,7 +371,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.1em' }}>EDYTUJESZ TYLKO: {dateDisplay}</p>
                 </div>
               )}
-              {editScope === 'cycle' && (
+              {editScope === 'cycle' && isRecurring && (
                 <div style={{ padding: '10px 12px', background: 'rgba(22,163,74,0.05)', border: '0.5px solid rgba(22,163,74,0.25)', borderRadius: 'var(--radius)' }}>
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>EDYTUJESZ CAŁY CYKL</p>
                   {cyclePreview && (
@@ -371,27 +386,44 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                 </div>
               )}
 
+              {/* TYP */}
               <div>
                 {lbl('TYP')}
                 <div className="flex gap-2">
-                  <SegBtn active={form.kind === 'block'} onClick={() => setForm(f => ({ ...f, kind: 'block' }))}>Blokada</SegBtn>
-                  <SegBtn active={form.kind === 'free'} onClick={() => setForm(f => ({ ...f, kind: 'free' }))}>Dyspozycja</SegBtn>
+                  <SegBtn active={form.kind === 'block'} onClick={() => setForm(f => ({ ...f, kind: 'block' }))}>Blokada (niedostępny)</SegBtn>
+                  <SegBtn active={form.kind === 'free'} onClick={() => setForm(f => ({ ...f, kind: 'free' }))}>Dyspozycja (dostępny)</SegBtn>
                 </div>
               </div>
 
-              {editScope === 'cycle' && (
+              {/* ZAKRES DAT — poza wystąpieniem cyklu */}
+              {editScope !== 'occurrence' && (
                 <div>
-                  {lbl('DATA STARTU')}
-                  <input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
-                    style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '8px 0', fontSize: '13px', width: '100%', outline: 'none', fontFamily: 'var(--font-body)', colorScheme: theme === 'light' ? 'light' : 'dark' }} />
+                  {lbl('ZAKRES DAT')}
+                  <div className="flex gap-2">
+                    <SegBtn active={form.dateMode === 'single'} onClick={() => setForm(f => ({ ...f, dateMode: 'single', date_to: f.date_from }))}>Jeden dzień</SegBtn>
+                    <SegBtn active={form.dateMode === 'range'} onClick={() => setForm(f => ({ ...f, dateMode: 'range' }))}>Zakres (od–do)</SegBtn>
+                  </div>
+                  <div className={form.dateMode === 'range' ? 'grid grid-cols-2 gap-4 mt-2' : 'mt-2'}>
+                    <div>{lbl('OD')}
+                      <input type="date" value={form.date_from} onChange={e => setForm(f => ({ ...f, date_from: e.target.value }))}
+                        style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '8px 0', fontSize: '13px', width: '100%', outline: 'none', fontFamily: 'var(--font-body)', colorScheme: theme === 'light' ? 'light' : 'dark' }} />
+                    </div>
+                    {form.dateMode === 'range' && (
+                      <div>{lbl('DO')}
+                        <input type="date" value={form.date_to} min={form.date_from || undefined} onChange={e => setForm(f => ({ ...f, date_to: e.target.value }))}
+                          style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '8px 0', fontSize: '13px', width: '100%', outline: 'none', fontFamily: 'var(--font-body)', colorScheme: theme === 'light' ? 'light' : 'dark' }} />
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
+              {/* CZAS */}
               <div>
                 {lbl('CZAS')}
                 <div className="flex gap-2 mb-3">
                   <SegBtn active={form.timeMode === 'allday'} onClick={() => setForm(f => ({ ...f, timeMode: 'allday' }))}>Cały dzień</SegBtn>
-                  <SegBtn active={form.timeMode === 'hours'} onClick={() => setForm(f => ({ ...f, timeMode: 'hours' }))}>Godziny</SegBtn>
+                  <SegBtn active={form.timeMode === 'hours'} onClick={() => setForm(f => ({ ...f, timeMode: 'hours' }))}>Godziny (od–do)</SegBtn>
                 </div>
                 {form.timeMode === 'hours' && (
                   <div className="grid grid-cols-2 gap-3">
@@ -399,21 +431,25 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                     <div>{lbl('DO')}<TimeDropdown value={form.end_time} onChange={v => setForm(f => ({ ...f, end_time: v }))} border={t.inputBorder} text={t.text} theme={theme} /></div>
                   </div>
                 )}
+                {form.timeMode === 'hours' && form.dateMode === 'range' && editScope !== 'occurrence' && (
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', color: t.muted, letterSpacing: '0.06em', marginTop: '6px' }}>
+                    Godziny obowiązują pierwszego i ostatniego dnia zakresu — dni pomiędzy są całodniowe.
+                  </p>
+                )}
               </div>
 
-              {editScope === 'cycle' && (
-                <>
-                  <div>
-                    {lbl('POWTARZANIE')}
-                    <div className="flex gap-1 flex-wrap">
-                      {[['none', 'Brak'], ['weekly', 'Co tydzień'], ['biweekly', 'Co 2 tyg.'], ['monthly', 'Co miesiąc']].map(([val, label]) => (
-                        <SegBtn key={val} active={form.repeat === val} onClick={() => setForm(f => ({ ...f, repeat: val }))}>{label}</SegBtn>
-                      ))}
-                    </div>
+              {/* POWTARZANIE — poza wystąpieniem cyklu */}
+              {editScope !== 'occurrence' && (
+                <div>
+                  {lbl('POWTARZANIE')}
+                  <div className="flex gap-1 flex-wrap">
+                    {[['none', 'Brak'], ['weekly', 'Co tydzień'], ['biweekly', 'Co 2 tyg.'], ['monthly', 'Co miesiąc']].map(([val, label]) => (
+                      <SegBtn key={val} active={form.repeat === val} onClick={() => setForm(f => ({ ...f, repeat: val }))}>{label}</SegBtn>
+                    ))}
                   </div>
                   {form.repeat !== 'none' && (
-                    <div>
-                      {lbl('ZAKOŃCZENIE')}
+                    <div className="mt-2">
+                      {lbl('ZAKOŃCZENIE POWTARZANIA')}
                       <div className="flex items-center gap-3">
                         <input type="date" value={form.repeat_until}
                           onChange={e => setForm(f => ({ ...f, repeat_until: e.target.value, repeat_indefinite: false }))}
@@ -426,9 +462,10 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                       </div>
                     </div>
                   )}
-                </>
+                </div>
               )}
 
+              {/* NOTATKA */}
               <div>
                 {lbl('NOTATKA')}
                 <input type="text" value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} placeholder="np. urlop..."
@@ -437,7 +474,7 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
 
               <div className="flex gap-3 pt-2" style={{ borderTop: `0.5px solid ${t.border}` }}>
                 <button onClick={handleSave} disabled={saving} className="btn-oxblood flex-1" style={{ fontSize: '9px' }}>
-                  {saving ? 'ZAPISUJĘ...' : 'ZAPISZ'}
+                  {saving ? 'ZAPISUJĘ...' : 'ZAPISZ ZMIANY'}
                 </button>
                 <button onClick={() => setStep(isRecurring ? 'confirm_edit' : 'view')}
                   style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 12px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}>

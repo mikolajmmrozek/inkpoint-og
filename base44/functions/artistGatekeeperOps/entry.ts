@@ -29,7 +29,7 @@ const FILTERS: Record<string, string[]> = {
   HealthForm: ['booking_id', 'client_email', 'is_draft', 'is_read', 'procedure_type', 'form_number'],
   GuardianConsentForm: ['booking_id', 'guardian_name'],
   BookingAuditLog: ['booking_id', 'session_id', 'action', 'actor_type', 'client_name'],
-  ArtistAvailability: ['type', 'day_of_week', 'date', 'is_available'],
+  ArtistAvailability: ['type', 'day_of_week', 'date', 'end_date', 'is_available'],
   Service: ['name', 'category', 'is_active'],
   Artist: [],
   CalendarImportDraft: ['status', 'session_date', 'gcal_event_id'],
