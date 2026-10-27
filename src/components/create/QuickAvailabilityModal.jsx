@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { nextDateStr } from '@/lib/availability';
 
 const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
 const MINUTE_OPTIONS = ['00', '15', '30', '45'];
@@ -182,7 +183,7 @@ export default function QuickAvailabilityModal({ prefill, role, onClose, onSaved
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   {label('Od *')}
-                  <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} style={inputStyle} />
+                  <input type="date" value={dateFrom} onChange={(e) => { const v = e.target.value; setDateFrom(v); if (v && dateTo <= v) setDateTo(nextDateStr(v)); }} style={inputStyle} />
                 </div>
                 <div>
                   {label('Do *')}

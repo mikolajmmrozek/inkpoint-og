@@ -433,7 +433,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
               {lbl('ZAKRES DAT')}
               <div className="flex gap-2">
                 <SegBtn active={entry.dateMode === 'single'} onClick={() => setEntry(e => ({ ...e, dateMode: 'single', date_to: e.date_from }))}>Jeden dzień</SegBtn>
-                <SegBtn active={entry.dateMode === 'range'} onClick={() => setEntry(e => ({ ...e, dateMode: 'range' }))}>Zakres (od–do)</SegBtn>
+                <SegBtn active={entry.dateMode === 'range'} onClick={() => setEntry(e => ({ ...e, dateMode: 'range', ...(e.date_from && e.date_to <= e.date_from ? { date_to: nextDateStr(e.date_from) } : {}) }))}>Zakres (od–do)</SegBtn>
               </div>
             </div>
 
@@ -442,7 +442,7 @@ export default function ArtistScheduleEditor({ artistId, t }) {
               <div>{lbl('DATA')}<input {...inp(entry.date_from, e => setEntry(n => ({ ...n, date_from: e.target.value, date_to: e.target.value })), 'date')} /></div>
             ) : (
               <div className="grid grid-cols-2 gap-4">
-                <div>{lbl('OD')}<input {...inp(entry.date_from, e => setEntry(n => ({ ...n, date_from: e.target.value })), 'date')} /></div>
+                <div>{lbl('OD')}<input {...inp(entry.date_from, e => setEntry(n => ({ ...n, date_from: e.target.value, ...(e.target.value && n.date_to <= e.target.value ? { date_to: nextDateStr(e.target.value) } : {}) })), 'date')} /></div>
                 <div>{lbl('DO')}<input {...inp(entry.date_to, e => setEntry(n => ({ ...n, date_to: e.target.value })), 'date')} /></div>
               </div>
             )}

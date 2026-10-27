@@ -4,7 +4,7 @@ import { X, RefreshCw, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, parseISO } from 'date-fns';
 import { pl } from 'date-fns/locale';
-import { generateDates, isRangeRecord, dayWindowLabel } from '@/lib/availability';
+import { generateDates, isRangeRecord, dayWindowLabel, nextDateStr } from '@/lib/availability';
 
 const REPEAT_LABELS = { weekly: 'Co tydzień', biweekly: 'Co 2 tygodnie', monthly: 'Co miesiąc' };
 const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
@@ -401,11 +401,11 @@ export default function AvailabilityEditModal({ record, allRecords, dateStr, the
                   {lbl('ZAKRES DAT')}
                   <div className="flex gap-2">
                     <SegBtn active={form.dateMode === 'single'} onClick={() => setForm(f => ({ ...f, dateMode: 'single', date_to: f.date_from }))}>Jeden dzień</SegBtn>
-                    <SegBtn active={form.dateMode === 'range'} onClick={() => setForm(f => ({ ...f, dateMode: 'range' }))}>Zakres (od–do)</SegBtn>
+                    <SegBtn active={form.dateMode === 'range'} onClick={() => setForm(f => ({ ...f, dateMode: 'range', ...(f.date_from && f.date_to <= f.date_from ? { date_to: nextDateStr(f.date_from) } : {}) }))}>Zakres (od–do)</SegBtn>
                   </div>
                   <div className={form.dateMode === 'range' ? 'grid grid-cols-2 gap-4 mt-2' : 'mt-2'}>
                     <div>{lbl('OD')}
-                      <input type="date" value={form.date_from} onChange={e => setForm(f => ({ ...f, date_from: e.target.value }))}
+                      <input type="date" value={form.date_from} onChange={e => { const v = e.target.value; setForm(f => ({ ...f, date_from: v, ...(v && f.date_to <= v ? { date_to: nextDateStr(v) } : {}) })); }}
                         style={{ background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.inputBorder}`, color: t.text, padding: '8px 0', fontSize: '13px', width: '100%', outline: 'none', fontFamily: 'var(--font-body)', colorScheme: theme === 'light' ? 'light' : 'dark' }} />
                     </div>
                     {form.dateMode === 'range' && (
