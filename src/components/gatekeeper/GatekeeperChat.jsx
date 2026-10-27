@@ -138,18 +138,18 @@ export default function GatekeeperChat({ theme = 'dark', onClose, agentName = 'G
     }
   };
 
-  const send = async (text) => {
+  const send = async (text, voice) => {
     const base = (text ?? input).trim();
-    if ((!base && !attachment) || !conversation) return;
-    const content = attachment ? `${base}\n\n[Załącznik: ${attachment.url}]` : base;
-    setAttachment(null);
+    const content = voice?.content ?? (attachment ? `${base}\n\n[Załącznik: ${attachment.url}]` : base);
+    if (!content.trim() || !conversation) return;
+    if (!voice) setAttachment(null);
     const isFirstMessage = !messages.some(m => m.role === 'user');
     setInput('');
     setError(null);
     setMessages(prev => [...prev, { role: 'user', content }]);
     if (isFirstMessage) {
       // Rozmowa dostaje automatyczną nazwę z pierwszej wiadomości użytkownika
-      const autoNameSrc = (base || 'Załącznik').replace(/\s+/g, ' ');
+      const autoNameSrc = (voice ? 'Wiadomość głosowa' : (base || 'Załącznik')).replace(/\s+/g, ' ');
       const autoName = autoNameSrc.slice(0, 42) + (autoNameSrc.length > 42 ? '…' : '');
       setConversations(prev => prev.map(c => c.id === conversation.id
         ? { ...c, metadata: { ...(c.metadata || {}), name: autoName } }
@@ -168,6 +168,12 @@ export default function GatekeeperChat({ theme = 'dark', onClose, agentName = 'G
     } catch {
       setError('Nie udało się wysłać wiadomości. Spróbuj ponownie.');
     }
+  };
+
+  // Wiadomość głosowa (jak na WhatsApp): nagranie analizuje się automatycznie
+  // i trafia prosto do rozmowy razem z transkrypcją — bez ręcznego wysyłania
+  const sendVoice = ({ url, transcript }) => {
+    send(null, { content: `[Wiadomość głosowa](${url})${transcript ? `\n\n${transcript}` : ''}` });
   };
 
   const retry = async () => {
@@ -358,8 +364,7 @@ export default function GatekeeperChat({ theme = 'dark', onClose, agentName = 'G
               t={t}
               disabled={loading || !!error || isResponding || uploading}
               onStateChange={setVoiceState}
-              onTranscript={text => setInput(prev => prev ? `${prev} ${text}` : text)}
-              onError={setError}
+              onVoice={sendVoice}
             />
             {voiceState === 'idle' && (<>
             <textarea

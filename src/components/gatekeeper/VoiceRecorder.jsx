@@ -12,11 +12,13 @@ const micPermission = async () => {
   } catch { return null; }
 };
 
-// Wiadomość głosowa: nagrywanie → prywatny magazyn → rozpoznanie mowy (Whisper)
-// → transkrypcja trafia do pola czatu, można ją doprecyzować przed wysłaniem.
-// Uprawnienie mikrofonu jest sprawdzane PRZED nagrywaniem; problemy pokazuje
+// Wiadomość głosowa jak na WhatsApp: nagraj → kończysz → analiza (rozpoznanie mowy)
+// odbywa się automatycznie i nagranie z transkrypcją leci prosto do rozmowy —
+// bez wklejania tekstu i ręcznego wysyłania. Transkrypcję czyta Gatekeeper,
+// a w czacie widać bąbelek z odtwarzaczem.
+// Uprawnienie mikrofonu sprawdzamy PRZED nagrywaniem; problemy pokazuje
 // lokalny pasek podpowiedzi z przyciskiem ponownej próby (nie blokuje czatu).
-export default function VoiceRecorder({ t, disabled, onStateChange, onTranscript, onError }) {
+export default function VoiceRecorder({ t, disabled, onStateChange, onVoice }) {
   const [state, setState] = useState('idle'); // idle | recording | processing
   const [seconds, setSeconds] = useState(0);
   const [hint, setHint] = useState(null);
@@ -37,6 +39,7 @@ export default function VoiceRecorder({ t, disabled, onStateChange, onTranscript
 
   useEffect(() => () => cleanup(), []);
 
+  // Po zakończeniu nagrania: upload + automatyczne rozpoznanie mowy + wysyłka
   const handleStop = async () => {
     const cancelled = cancelledRef.current;
     cleanup();
@@ -45,24 +48,23 @@ export default function VoiceRecorder({ t, disabled, onStateChange, onTranscript
     const chunks = chunksRef.current;
     chunksRef.current = [];
     if (!chunks.length) {
-      onError?.('Nie udało się nagrać dźwięku. Spróbuj ponownie.');
+      setHint('Nie udało się nagrać dźwięku. Spróbuj ponownie.');
       return setPhase('idle');
     }
     const type = chunks[0].type || 'audio/webm';
     const blob = new Blob(chunks, { type });
     try {
       const ext = type.includes('mp4') ? 'm4a' : type.includes('ogg') ? 'ogg' : 'webm';
-      const { file_uri } = await base44.integrations.Core.UploadPrivateFile({ file: new File([blob], `wiadomosc-glosowa.${ext}`, { type }) });
-      const { signed_url } = await base44.integrations.Core.CreateFileSignedUrl({ file_uri, expires_in: 600 });
-      const res = await base44.integrations.Core.TranscribeAudio({ audio_url: signed_url });
-      const text = String(typeof res === 'string' ? res : (res?.transcript || res?.text || '')).trim();
-      if (!text) {
-        onError?.('Nie rozpoznano mowy w nagraniu. Spróbuj ponownie.');
+      const { file_url } = await base44.integrations.Core.UploadPublicFile({ file: new File([blob], `wiadomosc-glosowa.${ext}`, { type }) });
+      const res = await base44.integrations.Core.TranscribeAudio({ audio_url: file_url });
+      const transcript = String(typeof res === 'string' ? res : (res?.transcript || res?.text || '')).trim();
+      if (!transcript) {
+        setHint('Nie rozpoznano mowy w nagraniu. Spróbuj ponownie.');
         return setPhase('idle');
       }
-      onTranscript?.(text);
+      onVoice?.({ url: file_url, transcript });
     } catch {
-      onError?.('Nie udało się przetworzyć nagrania. Spróbuj ponownie.');
+      setHint('Nie udało się przetworzyć nagrania. Spróbuj ponownie.');
     }
     setPhase('idle');
   };
@@ -168,7 +170,7 @@ export default function VoiceRecorder({ t, disabled, onStateChange, onTranscript
           <span className="animate-pulse" style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444', flexShrink: 0 }} />
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: t.text, flexShrink: 0 }}>{fmt(seconds)}</span>
           <span style={{ fontSize: '11px', color: t.muted, flex: 1 }}>Rejestruję...</span>
-          <button onClick={stop} title="Zakończ i rozpoznaj" aria-label="Zakończ nagranie" style={{ background: 'var(--brand)', color: 'var(--btn-text, #F5F0EB)', border: 'none', borderRadius: 'var(--radius)', padding: '6px', cursor: 'pointer', display: 'flex', flexShrink: 0 }}>
+          <button onClick={stop} title="Zakończ i wyślij" aria-label="Zakończ i wyślij" style={{ background: 'var(--brand)', color: 'var(--btn-text, #F5F0EB)', border: 'none', borderRadius: 'var(--radius)', padding: '6px', cursor: 'pointer', display: 'flex', flexShrink: 0 }}>
             <Square size={11} />
           </button>
           <button onClick={cancel} title="Anuluj nagranie" aria-label="Anuluj nagranie" style={{ background: 'transparent', color: t.muted, border: 'none', cursor: 'pointer', padding: '6px', display: 'flex', flexShrink: 0 }}>
@@ -178,7 +180,7 @@ export default function VoiceRecorder({ t, disabled, onStateChange, onTranscript
       ) : (
         <>
           <Loader2 size={13} className="animate-spin" style={{ color: 'var(--brand)', flexShrink: 0 }} />
-          <span style={{ fontSize: '11px', color: t.muted, flex: 1 }}>Rozpoznaję mowę...</span>
+          <span style={{ fontSize: '11px', color: t.muted, flex: 1 }}>Analizuję nagranie...</span>
         </>
       )}
     </div>
