@@ -59,14 +59,17 @@ export default function VoiceRecorder({ t, disabled, onStateChange, onVoice }) {
     const blob = new Blob(chunks, { type });
     try {
       const ext = type.includes('mp4') ? 'm4a' : type.includes('ogg') ? 'ogg' : 'webm';
-      const { file_url } = await base44.integrations.Core.UploadPublicFile({ file: new File([blob], `wiadomosc-glosowa.${ext}`, { type }) });
-      const res = await base44.integrations.Core.TranscribeAudio({ audio_url: file_url });
+      // Nagranie trafia do prywatnego magazynu — bez publicznego adresu.
+      // Do rozpoznania mowy pobieramy krótkotrwały, podpisany link.
+      const { file_uri } = await base44.integrations.Core.UploadPrivateFile({ file: new File([blob], `wiadomosc-glosowa.${ext}`, { type }) });
+      const { signed_url } = await base44.integrations.Core.CreateFileSignedUrl({ file_uri, expires_in: 900 });
+      const res = await base44.integrations.Core.TranscribeAudio({ audio_url: signed_url });
       const transcript = String(typeof res === 'string' ? res : (res?.transcript || res?.text || '')).trim();
       if (!transcript) {
         setHint('Nie rozpoznano mowy w nagraniu. Spróbuj ponownie.');
         return setPhase('idle');
       }
-      onVoice?.({ url: file_url, transcript, duration: recorded > 0 ? fmt(recorded) : '' });
+      onVoice?.({ url: file_uri, transcript, duration: recorded > 0 ? fmt(recorded) : '' });
     } catch {
       setHint('Nie udało się przetworzyć nagrania. Spróbuj ponownie.');
     }

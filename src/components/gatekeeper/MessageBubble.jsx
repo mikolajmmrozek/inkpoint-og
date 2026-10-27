@@ -8,7 +8,8 @@ import VoicePlayer from './VoicePlayer';
 const IMAGE_URL_RE = /\.(png|jpe?g|gif|webp|svg|bmp)(\?[^)\s]*)?$/i;
 const PDF_URL_RE = /\.pdf(\?[^)\s]*)?$/i;
 const AUTOLINK_RE = /(^|[\s>])(https?:\/\/[^\s<>()\[\]]+)/g;
-const VOICE_RE = /^\[Wiadomość głosowa\]\((https?:\/\/[^\s)]+)\)(?: \[(\d{1,2}:\d{2})\])?([\s\S]*)$/;
+// Dopasowuje zarówno stare publiczne adresy (http…), jak i nowe prywatne identyfikatory plików
+const VOICE_RE = /^\[Wiadomość głosowa\]\(([^\s)]+)\)(?: \[(\d{1,2}:\d{2})\])?([\s\S]*)$/;
 
 // Gołe adresy URL w treści zamieniamy na linki markdown
 // (adresy już osadzone w [nazwa](adres) nie są poprzedzone spacją — nie zostaną podwójnie opakowane).

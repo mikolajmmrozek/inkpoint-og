@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Play, Pause, Loader2 } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 
 const fmt = (s) => {
   if (s == null || !isFinite(s)) return '0:00';
@@ -13,10 +14,12 @@ const parseDuration = (d) => {
   return m ? Number(m[1]) * 60 + Number(m[2]) : null;
 };
 
-// Player wiadomości głosowej w motywie aplikacji (magenta/biały) — zamiast szarego,
-// systemowego elementu audio. Nagrania webm z MediaRecorder często nie mają
-// metadanych długości (duration = Infinity, stąd "0:00") — wtedy długość wyznaczamy
-// skokiem na koniec strumienia, a zapasowo używamy długości zapisanej przy nagrywaniu.
+// Player wiadomości głosowej w motywie aplikacji (magenta/biały).
+// Nagrania żyją w prywatnym magazynie — bez publicznego adresu; player sam generuje
+// świeży, podpisany link do odsłuchu (stare wiadomości z http nadal działają bez zmian).
+// Nagrania webm z MediaRecorder często nie mają metadanych długości (duration = Infinity,
+// stąd "0:00") — wtedy długość wyznaczamy skokiem na koniec strumienia, a zapasowo
+// używamy długości zapisanej przy nagrywaniu.
 export default function VoicePlayer({ src, t, fallbackDuration }) {
   const fallback = parseDuration(fallbackDuration);
   const audioRef = useRef(null);
@@ -27,9 +30,9 @@ export default function VoicePlayer({ src, t, fallbackDuration }) {
   const [error, setError] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     const audio = new Audio();
     audio.preload = 'auto';
-    audio.src = src;
     audioRef.current = audio;
 
     const finishDuration = (d) => {
@@ -60,11 +63,32 @@ export default function VoicePlayer({ src, t, fallbackDuration }) {
     audio.addEventListener('ended', onEnded);
     audio.addEventListener('error', onError);
 
-    // Bezpiecznik: gdy metadane nie nadejdą, odblokuj player po 3 s (długość zapasowa)
-    const timeout = setTimeout(() => setLoading(false), 3000);
+    const attach = (url) => {
+      if (cancelled) return;
+      audio.src = url;
+      audio.load();
+    };
+    const fail = () => {
+      if (cancelled) return;
+      setLoading(false);
+      setError(true);
+    };
+
+    // Bezpiecznik: gdy dane nie nadejdą, odblokuj player (długość zapasowa)
+    const safety = setTimeout(() => setLoading(false), 4000);
+
+    if (/^https?:\/\//.test(src)) {
+      attach(src);
+    } else {
+      // Nagranie z prywatnego magazynu — podpisany link tylko do odsłuchu
+      base44.integrations.Core.CreateFileSignedUrl({ file_uri: src, expires_in: 3600 })
+        .then((res) => (res?.signed_url ? attach(res.signed_url) : fail()))
+        .catch(fail);
+    }
 
     return () => {
-      clearTimeout(timeout);
+      cancelled = true;
+      clearTimeout(safety);
       audio.pause();
       audio.removeAttribute('src');
       audio.load();
@@ -121,7 +145,7 @@ export default function VoicePlayer({ src, t, fallbackDuration }) {
         </div>
       </div>
       <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.05em', color: error ? '#ef4444' : textColor, flexShrink: 0 }}>
-        {error ? 'Błąd odtwarzania' : `${fmt(time)} / ${total ? fmt(total) : '--:--'}`}
+        {error ? 'Nagranie niedostępne' : `${fmt(time)} / ${total ? fmt(total) : '--:--'}`}
       </span>
     </div>
   );
