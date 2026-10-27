@@ -28,6 +28,7 @@ export default function VoiceRecorder({ t, disabled, onStateChange, onVoice }) {
   const streamRef = useRef(null);
   const timerRef = useRef(null);
   const cancelledRef = useRef(false);
+  const durationRef = useRef(0);
 
   const setPhase = (phase) => { setState(phase); onStateChange?.(phase); };
 
@@ -43,6 +44,8 @@ export default function VoiceRecorder({ t, disabled, onStateChange, onVoice }) {
   // Po zakończeniu nagrania: upload + automatyczne rozpoznanie mowy + wysyłka
   const handleStop = async () => {
     const cancelled = cancelledRef.current;
+    const recorded = durationRef.current;
+    durationRef.current = 0;
     cleanup();
     setSeconds(0);
     if (cancelled) return setPhase('idle');
@@ -63,7 +66,7 @@ export default function VoiceRecorder({ t, disabled, onStateChange, onVoice }) {
         setHint('Nie rozpoznano mowy w nagraniu. Spróbuj ponownie.');
         return setPhase('idle');
       }
-      onVoice?.({ url: file_url, transcript });
+      onVoice?.({ url: file_url, transcript, duration: recorded > 0 ? fmt(recorded) : '' });
     } catch {
       setHint('Nie udało się przetworzyć nagrania. Spróbuj ponownie.');
     }
@@ -98,13 +101,14 @@ export default function VoiceRecorder({ t, disabled, onStateChange, onVoice }) {
       const rec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
       chunksRef.current = [];
       cancelledRef.current = false;
+      durationRef.current = 0;
       rec.ondataavailable = e => { if (e.data?.size) chunksRef.current.push(e.data); };
       rec.onstop = handleStop;
       rec.start(500);
       recRef.current = rec;
       setSeconds(0);
       setPaused(false);
-      timerRef.current = setInterval(() => setSeconds(s => s + 1), 1000);
+      timerRef.current = setInterval(() => { durationRef.current += 1; setSeconds(s => s + 1); }, 1000);
       setPhase('recording');
     } catch (e) {
       cleanup();
@@ -134,7 +138,7 @@ export default function VoiceRecorder({ t, disabled, onStateChange, onVoice }) {
       if (rec.state === 'paused') {
         rec.resume();
         setPaused(false);
-        timerRef.current = setInterval(() => setSeconds(s => s + 1), 1000);
+        timerRef.current = setInterval(() => { durationRef.current += 1; setSeconds(s => s + 1); }, 1000);
       } else if (rec.state === 'recording') {
         rec.pause();
         clearInterval(timerRef.current);

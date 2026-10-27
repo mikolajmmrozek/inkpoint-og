@@ -3,11 +3,12 @@ import { Bot } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Lightbox from '@/components/ui/Lightbox';
 import FilePreviewModal from '@/components/panel/FilePreviewModal';
+import VoicePlayer from './VoicePlayer';
 
 const IMAGE_URL_RE = /\.(png|jpe?g|gif|webp|svg|bmp)(\?[^)\s]*)?$/i;
 const PDF_URL_RE = /\.pdf(\?[^)\s]*)?$/i;
 const AUTOLINK_RE = /(^|[\s>])(https?:\/\/[^\s<>()\[\]]+)/g;
-const VOICE_RE = /^\[Wiadomość głosowa\]\((https?:\/\/[^\s)]+)\)([\s\S]*)$/;
+const VOICE_RE = /^\[Wiadomość głosowa\]\((https?:\/\/[^\s)]+)\)(?: \[(\d{1,2}:\d{2})\])?([\s\S]*)$/;
 
 // Gołe adresy URL w treści zamieniamy na linki markdown
 // (adresy już osadzone w [nazwa](adres) nie są poprzedzone spacją — nie zostaną podwójnie opakowane).
@@ -76,7 +77,7 @@ export default function MessageBubble({ message, t }) {
       <div className="flex gap-2 mb-3" style={{ justifyContent: 'flex-end' }}>
         <div style={{ maxWidth: '82%' }}>
           <div className="px-3 py-2" style={{ background: 'rgb(var(--brand-rgb) / 0.12)', border: '0.5px solid rgb(var(--brand-rgb) / 0.3)', borderRadius: 'var(--radius)' }}>
-            <audio src={voice[1]} controls preload="metadata" style={{ height: '36px', maxWidth: '240px', display: 'block' }} />
+            <VoicePlayer src={voice[1]} t={t} fallbackDuration={voice[2] || null} />
           </div>
         </div>
       </div>

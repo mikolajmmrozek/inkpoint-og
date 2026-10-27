@@ -172,8 +172,8 @@ export default function GatekeeperChat({ theme = 'dark', onClose, agentName = 'G
 
   // Wiadomość głosowa (jak na WhatsApp): nagranie analizuje się automatycznie
   // i trafia prosto do rozmowy razem z transkrypcją — bez ręcznego wysyłania
-  const sendVoice = ({ url, transcript }) => {
-    send(null, { content: `[Wiadomość głosowa](${url})${transcript ? `\n\n${transcript}` : ''}` });
+  const sendVoice = ({ url, transcript, duration }) => {
+    send(null, { content: `[Wiadomość głosowa](${url})${duration ? ` [${duration}]` : ''}${transcript ? `\n\n${transcript}` : ''}` });
   };
 
   const retry = async () => {
