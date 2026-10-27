@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { TOKEN_TTL_MS, signToken, verifyToken } from '../../shared/gatekeeperConfirm.ts';
-import { builtinFields, maskRecord, pick, genSessionId, HEALTH_FORM_MASK, HEALTH_FORM_MASK_PATTERN } from '../../shared/gatekeeperData.ts';
+import { builtinFields, maskRecord, pick, genSessionId, asList, HEALTH_FORM_MASK, HEALTH_FORM_MASK_PATTERN } from '../../shared/gatekeeperData.ts';
 
 // ─────────────────────────────────────────────────────────────────────────
 // artistGatekeeperOps — narzędzie Gatekeepera artysty.
@@ -20,7 +20,7 @@ const BOOKING_SENSITIVE_FIELDS = [
   'session_date', 'session_time', 'session_end_time', 'session_duration',
   'status', 'deposit_amount', 'final_amount', 'payment_breakdown', 'is_settled',
 ];
-const BOOKING_CREATE_FIELDS = ['session_id', ...BOOKING_REGULAR_FIELDS, ...BOOKING_SENSITIVE_FIELDS.filter(f => f !== 'status')];
+const BOOKING_CREATE_FIELDS = ['session_id', 'gcal_event_id', ...BOOKING_REGULAR_FIELDS, ...BOOKING_SENSITIVE_FIELDS.filter(f => f !== 'status')];
 const BOOKING_UPDATE_FIELDS = [...BOOKING_REGULAR_FIELDS, ...BOOKING_SENSITIVE_FIELDS];
 
 const FILTERS: Record<string, string[]> = {
@@ -32,6 +32,7 @@ const FILTERS: Record<string, string[]> = {
   ArtistAvailability: ['type', 'day_of_week', 'date', 'is_available'],
   Service: ['name', 'category', 'is_active'],
   Artist: [],
+  CalendarImportDraft: ['status', 'session_date', 'gcal_event_id'],
 };
 
 function notFound(entityName: string) {
@@ -146,6 +147,14 @@ export default async function (req: Request): Promise<Response> {
           let out = (Array.isArray(res) ? res : (res?.items || []));
           if (filters.name) out = out.filter(s => (s.name || '').toLowerCase().includes(String(filters.name).toLowerCase()));
           items = out.slice(0, limit);
+        } else if (entityName === 'CalendarImportDraft') {
+          // Szkice importu z kalendarza własnych sesji — odczyt przez service role z serwerowym zawężeniem
+          const query: any = { artist_id: artistId };
+          if (filters.status) query.status = filters.status;
+          if (filters.session_date) query.session_date = filters.session_date;
+          if (filters.gcal_event_id) query.gcal_event_id = filters.gcal_event_id;
+          const res: any = await base44.asServiceRole.entities.CalendarImportDraft.filter(query, { sort: rawSort, limit });
+          items = (Array.isArray(res) ? res : (res?.items || [])).slice(0, limit);
         } else if (entityName === 'Artist') {
           items = [artist];
         }
@@ -191,6 +200,11 @@ export default async function (req: Request): Promise<Response> {
       if (entityName === 'Service') {
         record = await base44.entities.Service.get(body.id).catch(() => null);
         if (!record) return notFound(entityName);
+        return Response.json({ entity: entityName, record });
+      }
+      if (entityName === 'CalendarImportDraft') {
+        record = await base44.asServiceRole.entities.CalendarImportDraft.get(body.id).catch(() => null);
+        if (!record || record.artist_id !== artistId) return notFound(entityName);
         return Response.json({ entity: entityName, record });
       }
       if (entityName === 'Artist') {
@@ -251,6 +265,17 @@ export default async function (req: Request): Promise<Response> {
       payload.last_editor_role = 'user';
 
       const created = await base44.entities.Booking.create(payload);
+      // Rezerwacja powiązana z wydarzeniem kalendarza zamyka otwarte szkice importu
+      if (payload.gcal_event_id) {
+        const draftsRes = await base44.asServiceRole.entities.CalendarImportDraft
+          .filter({ artist_id: artistId, gcal_event_id: payload.gcal_event_id, status: 'open' }, { limit: 50 })
+          .catch(() => []);
+        for (const d of asList(draftsRes)) {
+          await base44.asServiceRole.entities.CalendarImportDraft
+            .update(d.id, { status: 'imported', imported_booking_id: created.id })
+            .catch(() => {});
+        }
+      }
       return Response.json({
         status: 'executed', entity: 'Booking', action, record: created,
         note: 'Nowa rezerwacja uruchamia automatycznie powiadomienia studia, konwersację z klientem i synchronizację z Google Calendar. Status sesji to confirmed — artysta sam potwierdza swoje sesje.',

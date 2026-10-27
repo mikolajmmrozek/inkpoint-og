@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { TOKEN_TTL_MS, signToken, verifyToken } from '../../shared/gatekeeperConfirm.ts';
-import { builtinFields, maskRecord, pick, genSessionId } from '../../shared/gatekeeperData.ts';
+import { builtinFields, maskRecord, pick, genSessionId, asList } from '../../shared/gatekeeperData.ts';
 
 // ─────────────────────────────────────────────────────────────────────────
 // gatekeeperOps — narzędzie Gatekeepera do zarządzania danymi Dashboard.
@@ -18,7 +18,7 @@ const ENTITIES = {
   Booking: {
     ops: { read: true, create: true, update: true, delete: true },
     required: ['client_name', 'client_email', 'session_date'],
-    fields: ['session_id', 'service_id', 'service_name', 'client_name', 'client_email', 'client_phone', 'artist_id', 'artist_name', 'session_date', 'session_time', 'session_end_time', 'session_duration', 'tattoo_description', 'tattoo_placement', 'reference_images', 'estimated_price', 'deposit_paid', 'deposit_amount', 'final_amount', 'payment_breakdown', 'is_settled', 'status', 'health_form_completed', 'notes', 'admin_notes', 'source', 'last_editor', 'form_reminder_hidden'],
+    fields: ['session_id', 'service_id', 'service_name', 'client_name', 'client_email', 'client_phone', 'artist_id', 'artist_name', 'session_date', 'session_time', 'session_end_time', 'session_duration', 'tattoo_description', 'tattoo_placement', 'reference_images', 'estimated_price', 'deposit_paid', 'deposit_amount', 'final_amount', 'payment_breakdown', 'is_settled', 'status', 'health_form_completed', 'notes', 'admin_notes', 'source', 'gcal_event_id', 'last_editor', 'form_reminder_hidden'],
     filter: ['session_id', 'client_name', 'client_email', 'client_phone', 'artist_id', 'artist_name', 'session_date', 'status', 'is_settled', 'health_form_completed'],
     sensitive: ['deposit_amount', 'final_amount', 'payment_breakdown', 'is_settled', 'status'],
   },
@@ -186,6 +186,14 @@ const ENTITIES = {
     required: [],
     fields: ['booking_id', 'session_id', 'client_name', 'artist_name', 'action', 'actor_type', 'actor_name', 'changed_fields', 'changes', 'summary'],
     filter: ['booking_id', 'session_id', 'action', 'actor_type', 'client_name'],
+    sensitive: [],
+  },
+  CalendarImportDraft: {
+    // Szkice sesji zaimportowanych z kalendarza (bez e-maila klienta) — odczyt i zamykanie
+    ops: { read: true, update: true, delete: true },
+    required: [],
+    fields: ['status', 'imported_booking_id'],
+    filter: ['artist_id', 'gcal_event_id', 'status', 'session_date'],
     sensitive: [],
   },
 };
@@ -370,6 +378,17 @@ export default async function (req: Request): Promise<Response> {
         payload.last_editor_role = user.role;
       }
       const created = await ent.create(payload);
+      // Rezerwacja powiązana z wydarzeniem kalendarza zamyka otwarte szkice importu
+      if (entityName === 'Booking' && payload.gcal_event_id) {
+        const draftsRes = await base44.asServiceRole.entities.CalendarImportDraft
+          .filter({ gcal_event_id: payload.gcal_event_id, status: 'open' }, { limit: 50 })
+          .catch(() => []);
+        for (const d of asList(draftsRes)) {
+          await base44.asServiceRole.entities.CalendarImportDraft
+            .update(d.id, { status: 'imported', imported_booking_id: created.id })
+            .catch(() => {});
+        }
+      }
       return Response.json({ status: 'executed', entity: entityName, action, record: created });
     }
 

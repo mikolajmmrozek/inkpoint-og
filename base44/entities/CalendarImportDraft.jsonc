@@ -1,0 +1,124 @@
+{
+  "name": "CalendarImportDraft",
+  "type": "object",
+  "properties": {
+    "artist_id": {
+      "type": "string",
+      "description": "ID artysty, kt\u00f3rego kalendarza dotyczy szkic"
+    },
+    "artist_name": {
+      "type": "string",
+      "description": "Nazwa artysty (cache)"
+    },
+    "gcal_event_id": {
+      "type": "string",
+      "description": "ID wydarzenia w Google Calendar, z kt\u00f3rego powsta\u0142 szkic"
+    },
+    "event_title": {
+      "type": "string",
+      "description": "Tytu\u0142 wydarzenia z kalendarza"
+    },
+    "session_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data sesji z wydarzenia"
+    },
+    "session_time": {
+      "type": "string",
+      "description": "Godzina rozpocz\u0119cia (HH:MM)"
+    },
+    "session_end_time": {
+      "type": "string",
+      "description": "Godzina zako\u0144czenia (HH:MM)"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Imi\u0119 i nazwisko klienta (je\u015bli odczytane z wydarzenia)"
+    },
+    "client_email": {
+      "type": "string",
+      "description": "E-mail klienta (je\u015bli obecny w wydarzeniu)"
+    },
+    "client_phone": {
+      "type": "string",
+      "description": "Telefon klienta (je\u015bli obecny w wydarzeniu)"
+    },
+    "service_name": {
+      "type": "string",
+      "description": "Nazwa us\u0142ugi (je\u015bli odczytana z wydarzenia)"
+    },
+    "tattoo_description": {
+      "type": "string",
+      "description": "Opis tatua\u017cu (je\u015bli obecny w wydarzeniu)"
+    },
+    "missing_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Lista brakuj\u0105cych danych wymaganych do utworzenia rezerwacji (np. client_email)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "imported",
+        "discarded"
+      ],
+      "default": "open",
+      "description": "open = do uzupe\u0142nienia, imported = przeniesiona do rezerwacji, discarded = odrzucony"
+    },
+    "imported_booking_id": {
+      "type": "string",
+      "description": "ID utworzonej rezerwacji po zaimportowaniu szkicu"
+    }
+  },
+  "required": [
+    "artist_id",
+    "gcal_event_id",
+    "session_date"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
