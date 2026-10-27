@@ -5,7 +5,7 @@ import { pl } from 'date-fns/locale';
 import { getArtistsOffForDate } from '@/lib/bookingConflicts';
 import { resolveBookingHealthStatus } from '@/lib/healthFormStatus';
 import HealthFormBadge from '@/components/booking/HealthFormBadge';
-import AvailabilityDayBanner from '@/components/booking/AvailabilityDayBanner';
+import AvailabilityDayBanner, { AvailabilityBannerFrame } from '@/components/booking/AvailabilityDayBanner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { getThumbnailUrl } from '@/lib/thumbnail';
 
@@ -143,17 +143,21 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
             Sesje — {format(effectiveSelectedDate, 'EEEE, d MMMM', { locale: pl }).toUpperCase()}
           </p>
           {selectedDayOff.length > 0 && (
-            <div className="mb-3 space-y-1">
-              {selectedDayOff.map((o, i) => (
-                <AvailabilityDayBanner
-                  key={i}
-                  color="var(--brand)"
-                  label={`WOLNE · ${o.artist.name}${o.timeRange ? ` · ${o.timeRange}` : ' · cały dzień'}`}
-                  note={o.note}
-                  recurring={!!(o.record && o.record.repeat && o.record.repeat !== 'none')}
-                  onClick={o.isException && o.record && onAvailabilityClick ? () => onAvailabilityClick({ record: o.record, dateStr: selectedDateStr }) : undefined}
-                />
-              ))}
+            <div className="mb-3">
+              <AvailabilityBannerFrame>
+                {selectedDayOff.map((o, i) => (
+                  <div key={i} style={i < selectedDayOff.length - 1 ? { borderBottom: '0.5px solid rgb(var(--brand-rgb) /0.15)' } : undefined}>
+                    <AvailabilityDayBanner
+                      inFrame
+                      color="var(--brand)"
+                      label={`WOLNE · ${o.artist.name}${o.timeRange ? ` · ${o.timeRange}` : ' · cały dzień'}`}
+                      note={o.note}
+                      recurring={!!(o.record && o.record.repeat && o.record.repeat !== 'none')}
+                      onClick={o.isException && o.record && onAvailabilityClick ? () => onAvailabilityClick({ record: o.record, dateStr: selectedDateStr }) : undefined}
+                    />
+                  </div>
+                ))}
+              </AvailabilityBannerFrame>
             </div>
           )}
           {selectedDayBookings.length === 0 && !searchQuery.trim() ? (

@@ -13,7 +13,7 @@ import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModa
 import SettlementModal from '@/components/dashboard/SettlementModal';
 import { openHealthFormQRPage } from '@/lib/qrPage';
 import AvailabilityEditModal from '@/components/dashboard/AvailabilityEditModal';
-import AvailabilityDayBanner from '@/components/booking/AvailabilityDayBanner';
+import AvailabilityDayBanner, { AvailabilityBannerFrame } from '@/components/booking/AvailabilityDayBanner';
 import ReferenceImagesUpload from '@/components/dashboard/ReferenceImagesUpload';
 import { exceptionCoversDate, getDayWindow, dayWindowLabel } from '@/lib/availability';
 import { findTimeOffConflict, findDoubleBookingConflict } from '@/lib/bookingConflicts';
@@ -711,13 +711,16 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
           const timeStr = dayWindowLabel(avail.record, dateStr) || 'Cały dzień';
           return (
             <div className="mb-3">
-              <AvailabilityDayBanner
-                color={color}
-                label={`${avail.type === 'free' ? 'Dyspozycja' : 'Blokada'} · ${timeStr}`}
-                note={avail.record.note}
-                recurring={isRecurring}
-                onClick={() => onAvailabilityClick({ record: avail.record, dateStr, allRecords: [avail.record] })}
-              />
+              <AvailabilityBannerFrame>
+                <AvailabilityDayBanner
+                  inFrame
+                  color={color}
+                  label={`${avail.type === 'free' ? 'Dyspozycja' : 'Blokada'} · ${timeStr}`}
+                  note={avail.record.note}
+                  recurring={isRecurring}
+                  onClick={() => onAvailabilityClick({ record: avail.record, dateStr, allRecords: [avail.record] })}
+                />
+              </AvailabilityBannerFrame>
             </div>
           );
         })()}
@@ -1166,12 +1169,15 @@ export default function ArtistSchedule() {
             const timeStr = ex ? (dayWindowLabel(ex, dateStr) || 'Cały dzień') : (record.start_time && record.end_time ? `${record.start_time}–${record.end_time}` : 'Cały dzień');
             return (
               <div className="mb-3">
-                <AvailabilityDayBanner
-                  color={color}
-                  label={`${label} · ${timeStr}`}
-                  note={record.note}
-                  onClick={ex ? () => setSelectedAvailability({ record: ex, dateStr, allRecords: [ex] }) : undefined}
-                />
+                <AvailabilityBannerFrame>
+                  <AvailabilityDayBanner
+                    inFrame
+                    color={color}
+                    label={`${label} · ${timeStr}`}
+                    note={record.note}
+                    onClick={ex ? () => setSelectedAvailability({ record: ex, dateStr, allRecords: [ex] }) : undefined}
+                  />
+                </AvailabilityBannerFrame>
               </div>
             );
           })()}
