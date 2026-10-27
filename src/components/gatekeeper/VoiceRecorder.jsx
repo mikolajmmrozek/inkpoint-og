@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Mic, MicOff, Square, X, Loader2, RotateCcw } from 'lucide-react';
+import { Mic, MicOff, Send, Pause, Play, Trash2, Loader2, RotateCcw } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 const fmt = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
@@ -21,6 +21,7 @@ const micPermission = async () => {
 export default function VoiceRecorder({ t, disabled, onStateChange, onVoice }) {
   const [state, setState] = useState('idle'); // idle | recording | processing
   const [seconds, setSeconds] = useState(0);
+  const [paused, setPaused] = useState(false);
   const [hint, setHint] = useState(null);
   const recRef = useRef(null);
   const chunksRef = useRef([]);
@@ -83,9 +84,9 @@ export default function VoiceRecorder({ t, disabled, onStateChange, onVoice }) {
       return setHint('Mikrofon jest zablokowany dla tej strony. Kliknij ikonę zamka / ustawień obok adresu, zezwól na mikrofon, odśwież stronę i spróbuj ponownie.');
     }
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-      });
+      // Zwykłe audio bez filtrów DSP (echo/noise/AGC) — te filtry nieustannie
+      // obciążały procesor i muliły podgląd nagrania, a do wiadomości głosowej nie są potrzebne
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       // Weryfikacja: mikrofon musi zwracać aktywną ścieżkę audio, inaczej nagranie byłoby puste
       const track = stream.getAudioTracks?.()[0];
       if (!track || track.readyState !== 'live' || track.enabled === false) {
@@ -99,9 +100,10 @@ export default function VoiceRecorder({ t, disabled, onStateChange, onVoice }) {
       cancelledRef.current = false;
       rec.ondataavailable = e => { if (e.data?.size) chunksRef.current.push(e.data); };
       rec.onstop = handleStop;
-      rec.start(250);
+      rec.start(500);
       recRef.current = rec;
       setSeconds(0);
+      setPaused(false);
       timerRef.current = setInterval(() => setSeconds(s => s + 1), 1000);
       setPhase('recording');
     } catch (e) {
@@ -122,6 +124,23 @@ export default function VoiceRecorder({ t, disabled, onStateChange, onVoice }) {
     clearInterval(timerRef.current);
     setPhase('processing');
     try { rec.stop(); } catch { cleanup(); setPhase('idle'); }
+  };
+
+  // Pauza jak na WhatsApp: wstrzymuje i wznawia nagrywanie (timer też stoi)
+  const togglePause = () => {
+    const rec = recRef.current;
+    if (!rec) return;
+    try {
+      if (rec.state === 'paused') {
+        rec.resume();
+        setPaused(false);
+        timerRef.current = setInterval(() => setSeconds(s => s + 1), 1000);
+      } else if (rec.state === 'recording') {
+        rec.pause();
+        clearInterval(timerRef.current);
+        setPaused(true);
+      }
+    } catch { /* przeglądarka bez wsparcia pauzy — nagrywanie trwa dalej */ }
   };
 
   const cancel = () => {
@@ -167,14 +186,17 @@ export default function VoiceRecorder({ t, disabled, onStateChange, onVoice }) {
     <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px', border: '0.5px solid var(--brand)', background: 'rgb(var(--brand-rgb) / 0.08)', borderRadius: 'var(--radius)' }}>
       {state === 'recording' ? (
         <>
-          <span className="animate-pulse" style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444', flexShrink: 0 }} />
+          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444', flexShrink: 0, opacity: paused ? 0.35 : 1 }} />
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: t.text, flexShrink: 0 }}>{fmt(seconds)}</span>
-          <span style={{ fontSize: '11px', color: t.muted, flex: 1 }}>Rejestruję...</span>
-          <button onClick={stop} title="Zakończ i wyślij" aria-label="Zakończ i wyślij" style={{ background: 'var(--brand)', color: 'var(--btn-text, #F5F0EB)', border: 'none', borderRadius: 'var(--radius)', padding: '6px', cursor: 'pointer', display: 'flex', flexShrink: 0 }}>
-            <Square size={11} />
+          <span style={{ fontSize: '11px', color: t.muted, flex: 1 }}>{paused ? 'Pauza' : 'Rejestruję...'}</span>
+          <button onClick={cancel} title="Usuń nagranie" aria-label="Usuń nagranie" style={{ background: 'transparent', color: '#ef4444', border: 'none', cursor: 'pointer', padding: '6px', display: 'flex', flexShrink: 0 }}>
+            <Trash2 size={14} />
           </button>
-          <button onClick={cancel} title="Anuluj nagranie" aria-label="Anuluj nagranie" style={{ background: 'transparent', color: t.muted, border: 'none', cursor: 'pointer', padding: '6px', display: 'flex', flexShrink: 0 }}>
-            <X size={14} />
+          <button onClick={togglePause} title={paused ? 'Wznów' : 'Pauza'} aria-label={paused ? 'Wznów nagrywanie' : 'Wstrzymaj nagrywanie'} style={{ background: 'transparent', color: t.text, border: 'none', cursor: 'pointer', padding: '6px', display: 'flex', flexShrink: 0 }}>
+            {paused ? <Play size={12} /> : <Pause size={12} />}
+          </button>
+          <button onClick={stop} title="Wyślij" aria-label="Wyślij nagranie" style={{ background: 'var(--brand)', color: 'var(--btn-text, #F5F0EB)', border: 'none', borderRadius: '50%', padding: '7px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Send size={12} />
           </button>
         </>
       ) : (
