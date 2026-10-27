@@ -269,3 +269,14 @@ export function categorizeArtist(events: any[], bookings: any[]) {
 
   return { ignored_all_day, missing: missingClean, mismatch, conflict, bookings_without_event };
 }
+
+// Deterministyczne ID wydarzenia Google Calendar z ID rezerwacji (SHA-256 → znaki base32hex).
+// Równoległe synchronizacje tej samej rezerwacji generują ten sam ID — druga próba
+// utworzenia zwraca 409 (Already exists), więc duplikaty nie powstają.
+export async function deterministicEventId(bookingId: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(bookingId)));
+  let hex = '';
+  const bytes = new Uint8Array(digest);
+  for (let i = 0; i < bytes.length; i++) hex += bytes[i].toString(16).padStart(2, '0');
+  return 'b44' + hex.slice(0, 29);
+}

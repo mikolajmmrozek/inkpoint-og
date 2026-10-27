@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { deterministicEventId } from '../../shared/calendarSyncCore.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -125,12 +126,27 @@ Deno.serve(async (req) => {
       return { deleted_from: deletedFrom, errors };
     }
 
+    // ── Helper: offset strefy Europe/Warsaw dla danego dnia (+01:00 zimą, +02:00 latem) ──
+    function warsawOffset(dateStr) {
+      const y = Number(dateStr.slice(0, 4));
+      const lastSunday = (monthIdx) => {
+        const d = new Date(Date.UTC(y, monthIdx + 1, 0)); // ostatni dzień miesiąca
+        d.setUTCDate(d.getUTCDate() - d.getUTCDay());
+        return d.getTime();
+      };
+      const t = Date.parse(dateStr + 'T12:00:00Z');
+      const dstStart = lastSunday(2); // ostatnia niedziela marca
+      const dstEnd = lastSunday(9);   // ostatnia niedziela października
+      return (t >= dstStart && t < dstEnd) ? '+02:00' : '+01:00';
+    }
+
     // ── Helper: search a single calendar for an event matching by client name + date ──
     async function findEventByContent(calendarId, bk, headers) {
       if (!bk.session_date || !calendarId) return null;
       const dateStr = bk.session_date;
-      const timeMin = `${dateStr}T00:00:00+02:00`;
-      const timeMax = `${dateStr}T23:59:59+02:00`;
+      const tzOffset = warsawOffset(dateStr);
+      const timeMin = `${dateStr}T00:00:00${tzOffset}`;
+      const timeMax = `${dateStr}T23:59:59${tzOffset}`;
       const clientName = (bk.client_name || '').toLowerCase().trim();
       if (!clientName) return null;
       try {
@@ -152,14 +168,15 @@ Deno.serve(async (req) => {
     }
 
     // ── Helper: search ALL artists' calendars (or exclude current) for events matching by date+client, delete orphans ──
-    async function cleanupOrphanedByContent(bk, headers, includeCurrentArtist = false) {
+    async function cleanupOrphanedByContent(bk, headers, includeCurrentArtist = false, keepEventId = null) {
       if (!bk.session_date) return { deleted_from: [], errors: [] };
       const allArtists = await base44.asServiceRole.entities.Artist.list();
       const deletedFrom = [];
       const errors = [];
       const dateStr = bk.session_date;
-      const timeMin = `${dateStr}T00:00:00+02:00`;
-      const timeMax = `${dateStr}T23:59:59+02:00`;
+      const tzOffset = warsawOffset(dateStr);
+      const timeMin = `${dateStr}T00:00:00${tzOffset}`;
+      const timeMax = `${dateStr}T23:59:59${tzOffset}`;
       const clientName = (bk.client_name || '').toLowerCase().trim();
       for (const a of allArtists) {
         if (!includeCurrentArtist && a.id === bk.artist_id) continue;
@@ -173,11 +190,16 @@ Deno.serve(async (req) => {
           const listData = await listRes.json();
           const events = listData.items || [];
           for (const ev of events) {
+            if (keepEventId && ev.id === keepEventId) continue;
             const summary = (ev.summary || '').toLowerCase();
             const description = (ev.description || '').toLowerCase();
             const matchesClient = clientName && (summary.includes(clientName) || description.includes(clientName));
             const matchesId = bk.gcal_event_id && ev.id === bk.gcal_event_id;
-            if (matchesClient || matchesId) {
+            // Trafienie treści to za mało — usuwaj tylko prawdziwe kopie (ten sam dzień i godzina startu),
+            // żeby nie usuwać innej sesji tego samego klienta z tego samego dnia.
+            const evStartDT = ev.start && ev.start.dateTime ? ev.start.dateTime : null;
+            const sameSlot = evStartDT && evStartDT.slice(0, 10) === bk.session_date && evStartDT.slice(11, 16) === bk.session_time;
+            if (matchesId || (matchesClient && sameSlot)) {
               const delRes = await fetch(
                 `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(a.gcal_calendar_id)}/events/${encodeURIComponent(ev.id)}`,
                 { method: 'DELETE', headers }
@@ -290,31 +312,51 @@ Deno.serve(async (req) => {
         }
       }
 
-      // ── Step 3: If still not updated, create new event ──
+      // ── Step 3: If still not updated, create new event (deterministic ID — no duplicates) ──
       let action = 'updated';
       if (!updatedEventId) {
         action = 'created';
+        // Deterministyczne ID (SHA-256 z ID rezerwacji): równoległe/powtórzone synchronizacje
+        // nigdy nie tworzą duplikatu — drugie utworzenie zwraca 409 i doprowadza
+        // istniejące wydarzenie do aktualności.
+        const detId = await deterministicEventId(bk.id);
         const res = await fetch(
           `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`,
-          { method: 'POST', headers, body: JSON.stringify(eventBody) }
+          { method: 'POST', headers, body: JSON.stringify({ ...eventBody, id: detId }) }
         );
-        if (res.ok) {
+        if (res.status === 409) {
+          const updRes = await fetch(
+            `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(detId)}`,
+            { method: 'PUT', headers, body: JSON.stringify(eventBody) }
+          );
+          if (updRes.ok) {
+            updatedEventId = detId;
+            action = 'updated';
+          } else {
+            const errBody = await updRes.text().catch(() => '');
+            throw new Error(`Update after 409 failed: ${updRes.status} ${errBody.slice(0, 200)}`);
+          }
+        } else if (res.ok) {
           const data = await res.json();
           if (data.id) {
             updatedEventId = data.id;
-            await base44.asServiceRole.entities.Booking.update(bk.id, { gcal_event_id: data.id });
           }
         } else {
           const errBody = await res.text().catch(() => '');
           throw new Error(`Create failed: ${res.status} ${errBody.slice(0, 200)}`);
         }
+        if (updatedEventId) {
+          await base44.asServiceRole.entities.Booking.update(bk.id, { gcal_event_id: updatedEventId });
+        }
       }
 
-      // ── Step 4: Clean up ALL other artists' calendars (by ID + by content) ──
+      // ── Step 4: Clean up stray copies in ALL calendars (by ID + by content) ──
+      // Własny kalendarz też jest sprawdzany — usuwane są tylko kopie (ten sam dzień
+      // i godzina), zsynchronizowane wydarzenie (updatedEventId) zostaje.
       const idCleanup = bk.gcal_event_id
         ? await cleanupOrphanedEvent(bk.gcal_event_id, bk.artist_id, headers)
         : { deleted_from: [], errors: [] };
-      const contentCleanup = await cleanupOrphanedByContent(bk, headers, false);
+      const contentCleanup = await cleanupOrphanedByContent(bk, headers, true, updatedEventId);
       const combined = {
         deleted_from: [...(idCleanup.deleted_from || []), ...(contentCleanup.deleted_from || [])],
         errors: [...(idCleanup.errors || []), ...(contentCleanup.errors || [])],
