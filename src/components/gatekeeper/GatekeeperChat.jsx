@@ -129,8 +129,9 @@ export default function GatekeeperChat({ theme = 'dark', onClose, agentName = 'G
     setUploading(true);
     setError(null);
     try {
-      const res = await base44.integrations.Core.UploadPublicFile({ file });
-      setAttachment({ name: file.name || 'plik', url: res?.file_url });
+      // Załącznik trafia do prywatnego magazynu — bez publicznego adresu
+      const res = await base44.integrations.Core.UploadPrivateFile({ file });
+      setAttachment({ name: file.name || 'plik', url: res?.file_uri });
     } catch {
       setError('Nie udało się przesłać pliku. Spróbuj ponownie.');
     } finally {

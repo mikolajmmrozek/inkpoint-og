@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { resolveFileUrls } from '../../shared/gatekeeperFiles.ts';
 
 // ─────────────────────────────────────────────────────────────────────────
 // gatekeeperFileRead — narzędzie Gatekeepera do odczytu treści plików:
@@ -24,12 +25,13 @@ export default async function (req: Request): Promise<Response> {
       : body.file_url
         ? [body.file_url]
         : [];
-    const file_urls = [...new Set(raw.map(String))]
-      .filter((u: string) => /^https?:\/\//i.test(u));
+    // Załączniki z prywatnego magazynu (file_uri) są podpisywane na serwerze —
+    // pliki nie mają publicznych adresów.
+    const file_urls = await resolveFileUrls(base44, raw, MAX_FILES);
     const question = String(body.question || '').trim();
 
     if (file_urls.length === 0) {
-      return Response.json({ error: 'Podaj file_url lub file_urls (adresy https plików do odczytania)' }, { status: 400 });
+      return Response.json({ error: 'Podaj file_url lub file_urls (adresy lub identyfikatory plików do odczytania)' }, { status: 400 });
     }
     if (file_urls.length > MAX_FILES) {
       return Response.json({ error: `Maksymalnie ${MAX_FILES} plików na jedno wywołanie` }, { status: 400 });

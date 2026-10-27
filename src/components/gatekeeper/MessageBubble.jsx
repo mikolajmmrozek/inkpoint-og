@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Bot } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { base44 } from '@/api/base44Client';
 import Lightbox from '@/components/ui/Lightbox';
 import FilePreviewModal from '@/components/panel/FilePreviewModal';
 import VoicePlayer from './VoicePlayer';
@@ -15,6 +16,22 @@ const VOICE_RE = /^\[Wiadomość głosowa\]\(([^\s)]+)\)(?: \[(\d{1,2}:\d{2})\])
 // (adresy już osadzone w [nazwa](adres) nie są poprzedzone spacją — nie zostaną podwójnie opakowane).
 const autolinkUrls = (text) => String(text).replace(AUTOLINK_RE, (m, pre, url) => `${pre}[${url}](${url})`);
 
+// Zdjęcie osadzone w odpowiedzi asystenta — prywatne identyfikatory plików
+// (z prywatnego magazynu) rozwiązujemy do podpisanego adresu przed wyświetleniem.
+function PrivateImage({ src, style, onClick }) {
+  const [url, setUrl] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    if (/^https?:\/\//.test(src)) { setUrl(src); return; }
+    base44.integrations.Core.CreateFileSignedUrl({ file_uri: src, expires_in: 3600 })
+      .then((res) => { if (!cancelled && res?.signed_url) setUrl(res.signed_url); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [src]);
+  if (!url) return null;
+  return <img src={url} alt="" style={style} onClick={() => onClick?.(url)} />;
+}
+
 function markdownComponents(t, openImage, openPdf) {
   const imgStyle = {
     maxWidth: '100%',
@@ -28,14 +45,14 @@ function markdownComponents(t, openImage, openPdf) {
   return {
     a: ({ href, children }) => {
       if (IMAGE_URL_RE.test(href)) {
-        return <img src={href} alt="" style={{ ...imgStyle, cursor: 'zoom-in' }} onClick={() => openImage(href)} />;
+        return <PrivateImage src={href} style={{ ...imgStyle, cursor: 'zoom-in' }} onClick={openImage} />;
       }
       if (PDF_URL_RE.test(href)) {
         return <a href={href} onClick={e => { e.preventDefault(); openPdf(href); }} style={{ color: 'var(--brand)', cursor: 'pointer' }}>{children}</a>;
       }
       return <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--brand)' }}>{children}</a>;
     },
-    img: ({ src, alt }) => <img src={src} alt={alt || ''} style={{ ...imgStyle, cursor: 'zoom-in' }} onClick={() => openImage(src)} />,
+    img: ({ src, alt }) => <PrivateImage src={src} style={{ ...imgStyle, cursor: 'zoom-in' }} onClick={openImage} />,
   };
 }
 
@@ -58,9 +75,10 @@ export default function MessageBubble({ message, t }) {
     return [...urls];
   })();
 
+  // src może być podpisanym adresem (zdjęcie z prywatnego magazynu) — wtedy galeria to jedno zdjęcie
   const openImage = (src) => {
     const idx = messageImages.indexOf(src);
-    setLightbox({ images: messageImages, index: idx >= 0 ? idx : 0 });
+    setLightbox(idx >= 0 ? { images: messageImages, index: idx } : { images: [src], index: 0 });
   };
   const openPdf = (url) => setPdfPreview({
     url,
