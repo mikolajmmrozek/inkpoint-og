@@ -5,6 +5,7 @@ import { base44 } from '@/api/base44Client';
 import ChatThread from './ChatThread';
 import ChatHistoryPanel, { convTitle } from './ChatHistoryPanel';
 import GatekeeperMemoryPanel from './GatekeeperMemoryPanel';
+import VoiceRecorder from './VoiceRecorder';
 
 const SUGGESTIONS = [
   'Co potrafisz? Opisz swoje funkcje',
@@ -33,6 +34,7 @@ export default function GatekeeperChat({ theme = 'dark', onClose, agentName = 'G
   const [attachment, setAttachment] = useState(null); // { name, url } — media przesłane przez admina
   const [uploading, setUploading] = useState(false);
   const [view, setView] = useState('chat'); // 'chat' | 'history' | 'memory'
+  const [voiceState, setVoiceState] = useState('idle'); // idle | recording | processing
   const convRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -352,6 +354,14 @@ export default function GatekeeperChat({ theme = 'dark', onClose, agentName = 'G
                 {uploading ? <Loader2 size={15} className="animate-spin" /> : <Paperclip size={15} />}
               </button>
             )}
+            <VoiceRecorder
+              t={t}
+              disabled={loading || !!error || isResponding || uploading}
+              onStateChange={setVoiceState}
+              onTranscript={text => setInput(prev => prev ? `${prev} ${text}` : text)}
+              onError={setError}
+            />
+            {voiceState === 'idle' && (<>
             <textarea
               value={input}
               onChange={e => setInput(e.target.value)}
@@ -368,6 +378,7 @@ export default function GatekeeperChat({ theme = 'dark', onClose, agentName = 'G
             >
               <Send size={15} />
             </button>
+            </>)}
           </div>
         </div>}
       </motion.div>

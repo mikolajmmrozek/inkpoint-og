@@ -98,7 +98,7 @@ function MemoryEntry({ entry, isOwner, t, theme, onRestored, onDeleted }) {
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: v.is_current !== false ? 'var(--brand)' : t.muted, flexShrink: 0, minWidth: '24px', paddingTop: '2px' }}>v{v.version}</span>
                   <p style={{ fontSize: '11px', color: t.text, lineHeight: 1.45, flex: 1 }}>{v.content}</p>
                   <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', color: t.muted }}>{fmtDate(v.updated_date || v.created_date)}</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', color: t.muted }}>{v.author_name ? `${v.author_name} · ` : ''}{fmtDate(v.updated_date || v.created_date)}</span>
                     {v.is_current === false && (
                       <button onClick={() => restore(v.id)} disabled={busy} title={`Przywróć wersję v${v.version}`} style={{ background: 'none', border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)', cursor: busy ? 'default' : 'pointer', color: 'var(--brand)', padding: '2px 6px', fontFamily: 'var(--font-mono)', fontSize: '7px', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '3px', opacity: busy ? 0.4 : 1 }}>
                         <RotateCcw size={9} /> PRZYWRÓĆ

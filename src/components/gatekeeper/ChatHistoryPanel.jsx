@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import { pl } from 'date-fns/locale';
-import { Plus, MessageSquare, Pencil, Trash2, Check, X } from 'lucide-react';
+import { Plus, MessageSquare, Pencil, Trash2, Check, X, Search } from 'lucide-react';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 
 // Tytuł rozmowy: nadana nazwa, a inaczej pierwszy komunikat użytkownika
@@ -18,6 +18,24 @@ export default function ChatHistoryPanel({ t, conversations, activeId, onSelect,
   const [editingId, setEditingId] = useState(null);
   const [editName, setEditName] = useState('');
   const [deleteId, setDeleteId] = useState(null);
+  const [query, setQuery] = useState('');
+
+  const q = query.trim().toLowerCase();
+  // Szukamy po nazwie rozmowy ORAZ po treści wiadomości wewnątrz (z fragmentem trafienia)
+  const results = q
+    ? conversations.map(c => {
+        if (convTitle(c).toLowerCase().includes(q)) return { conv: c, snippet: null };
+        for (const m of c.messages || []) {
+          const raw = String(m.content || '').replace(/\s+/g, ' ').trim();
+          const idx = raw.toLowerCase().indexOf(q);
+          if (idx >= 0) {
+            const start = Math.max(0, idx - 30);
+            return { conv: c, snippet: (start > 0 ? '…' : '') + raw.slice(start, start + 72) + '…' };
+          }
+        }
+        return null;
+      }).filter(Boolean)
+    : conversations.map(c => ({ conv: c, snippet: null }));
 
   const iconBtn = {
     background: 'none', border: 'none', cursor: 'pointer', color: t.muted,
@@ -50,15 +68,35 @@ export default function ChatHistoryPanel({ t, conversations, activeId, onSelect,
         <Plus size={12} /> Nowa rozmowa
       </button>
 
+      <div className="flex items-center gap-2" style={{ border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)', padding: '7px 10px', background: 'rgba(128,128,128,0.05)' }}>
+        <Search size={12} color={t.muted} />
+        <input
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          placeholder="Szukaj w rozmowach..."
+          style={{ flex: 1, minWidth: 0, background: 'transparent', border: 'none', color: t.text, fontSize: '11px', outline: 'none', fontFamily: 'var(--font-body)' }}
+        />
+        {query && (
+          <button onClick={() => setQuery('')} aria-label="Wyczyść wyszukiwanie" style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: 0, display: 'flex' }}>
+            <X size={11} />
+          </button>
+        )}
+      </div>
+
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginTop: '4px' }}>
-        Historia ({conversations.length})
+        Historia ({results.length}{q && results.length !== conversations.length ? `/${conversations.length}` : ''})
       </p>
 
       {conversations.length === 0 && (
         <p style={{ fontSize: '12px', color: t.muted, padding: '8px 2px' }}>Brak zapisanych rozmów.</p>
       )}
 
-      {conversations.map(c => {
+      {q && results.length === 0 && (
+        <p style={{ fontSize: '12px', color: t.muted, padding: '8px 2px' }}>Brak rozmów pasujących do frazy „{query.trim()}".</p>
+      )}
+
+      {results.map(r => {
+        const c = r.conv;
         const active = c.id === activeId;
         const editing = editingId === c.id;
         let when = '';
@@ -101,6 +139,11 @@ export default function ChatHistoryPanel({ t, conversations, activeId, onSelect,
               <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '2px' }}>
                 {when} · {(c.messages || []).length} wiadomości
               </span>
+              {r.snippet && (
+                <span style={{ display: 'block', fontSize: '10.5px', color: t.muted, marginTop: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {r.snippet}
+                </span>
+              )}
             </span>
             {!editing && (
               <span style={{ display: 'flex', gap: '2px', flexShrink: 0 }} onClick={e => e.stopPropagation()}>
