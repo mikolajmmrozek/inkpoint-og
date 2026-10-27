@@ -52,6 +52,8 @@ export function exceptionCoversDate(ex, dateStr) {
   if (!ex || !ex.date || ex.date > dateStr) return false;
   if (ex.repeat && ex.repeat !== 'none') return matchesRepeatOnDate(ex, dateStr);
   if (ex.end_date && ex.end_date < dateStr) return false;
+  // Jednorazowy wpis bez end_date to pojedynczy dzień — nie pokrywa kolejnych dat.
+  if (!ex.end_date && ex.date !== dateStr) return false;
   return true;
 }
 
