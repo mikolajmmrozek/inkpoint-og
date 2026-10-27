@@ -641,6 +641,16 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
     return { type: match.is_available ? 'free' : 'block', record: match };
   };
 
+  // Zwykły dzień wolny: brak jawnego wpisu artysty (wyjątku) oraz brak
+  // grafiku cyklicznego na ten dzień tygodnia (albo cyklicznie wolny).
+  // Jawny wpis dyspozycji/blokady artysty jest nadrzędny — wtedy dzień nie jest szary.
+  const isRegularDayOff = (day) => {
+    if (getAvailBadge(day)) return false;
+    const recurring = (availabilityRecords || []).find(r => r.type === 'recurring' && r.day_of_week === getDay(day));
+    return !recurring || recurring.is_available === false;
+  };
+  const offNumColor = theme === 'light' ? 'rgba(0,0,0,0.45)' : '#8f8f8f';
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
@@ -660,6 +670,7 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
           const isSelected = isSameDay(day, selectedDate);
           const isToday = isSameDay(day, today);
           const avail = getAvailBadge(day);
+          const regularDayOff = isRegularDayOff(day);
           const isBlocked = avail && avail.type === 'block';
           const isFullDayOff = isBlocked && !avail.record.start_time && !avail.record.end_time;
           return (
@@ -679,7 +690,7 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
               {avail && avail.type === 'free' && (
                 <div style={{ position: 'absolute', top: '2px', right: '2px', width: '5px', height: '5px', borderRadius: '1px', background: '#16a34a', opacity: 0.7 }} />
               )}
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: isSelected ? 'var(--brand)' : isToday ? 'var(--brand)' : isSameMonth(day, viewMonth) ? t.text : t.muted, fontWeight: isSelected ? 700 : isToday ? 600 : 400 }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: isSelected ? 'var(--brand)' : isToday ? 'var(--brand)' : regularDayOff ? offNumColor : isSameMonth(day, viewMonth) ? t.text : t.muted, fontWeight: isSelected ? 700 : isToday ? 600 : 400 }}>
                 {format(day, 'd')}
               </span>
               <div className="flex gap-0.5 mt-1 flex-wrap justify-center">
