@@ -15,6 +15,7 @@ import TodayOverview from '@/components/dashboard/TodayOverview';
 import { openHealthFormQRPage } from '@/lib/qrPage';
 import ClientSearch from '@/components/dashboard/ClientSearch';
 import ArtistSessionRow from '@/components/artist/ArtistSessionRow';
+import ReferenceImagesGallery from '@/components/booking/ReferenceImagesGallery';
 import { buildHealthFormStatusMap } from '@/lib/healthFormStatus';
 import { pluralSesji } from '@/utils';
 
@@ -308,6 +309,14 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, user, onC
                 </div>
               ))}
             </div>
+
+            {/* Reference images gallery */}
+            {form.reference_images && form.reference_images.length > 0 && (
+              <div className="pt-2" style={{ borderTop: `0.5px solid ${t.border}` }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>ZDJĘCIA REFERENCYJNE ({form.reference_images.length})</p>
+                <ReferenceImagesGallery images={form.reference_images} theme={theme} t={theme === 'light' ? { border: '#E5E5E5' } : { border: '#262626' }} />
+              </div>
+            )}
 
           </div>
         )}
