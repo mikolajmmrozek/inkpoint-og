@@ -194,7 +194,7 @@ async function deliverVoucherEmail(base44: any, p: any, to: string) {
     const loginLink = siteUrl;
     const panelLink = `${siteUrl}/panel`;
     const contactRows = buildContactRows(contact);
-    const subject = p.type === 'voucher' ? 'Twój voucher od Roman Tattoo' : 'Twój kod zniżkowy od Roman Tattoo';
+    const subject = p.type === 'voucher' ? 'Twój voucher od ROMANS TATTOO' : 'Twój kod zniżkowy od ROMANS TATTOO';
     const htmlBody = buildVoucherEmailHtml(p, link, loginLink, panelLink, contact, hasAccount, contactRows);
     const textBody = buildVoucherEmailText(p, link, loginLink, panelLink, contact, hasAccount);
 
