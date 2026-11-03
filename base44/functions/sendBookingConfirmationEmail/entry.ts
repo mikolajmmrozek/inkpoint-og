@@ -2,6 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import {
   APP_URL, buildAppUrl, sectionStyle, h3Style, pStyle, mutedStyle, linkStyle, buttonStyle,
   detailRow, clientFirstName, fmtDate, buildContactRows, sendViaGmail,
+  getStudioName, withStudioName,
 } from '../../shared/bookingEmail.ts';
 
 export default async function(req: Request): Promise<Response> {
@@ -287,7 +288,8 @@ export default async function(req: Request): Promise<Response> {
     const subject = isPendingMode
       ? `Otrzymaliśmy Twoje zgłoszenie rezerwacji — ${dateStr}`
       : `Twoja rezerwacja jest potwierdzona — ${dateStr}`;
-    const fromName = 'Romans Tattoo';
+    const studioName = await getStudioName(base44);
+    const fromName = studioName;
     const fromEmail = 'tattoo.wolsztyn@gmail.com';
     const toEmail = booking.client_email;
 
@@ -323,7 +325,12 @@ export default async function(req: Request): Promise<Response> {
       `Dziękujemy za zaufanie!`,
     ].filter(Boolean).join('\n').trim();
 
-    await sendViaGmail(accessToken, fromName, fromEmail, toEmail, subject, textBody, htmlBody);
+    await sendViaGmail(
+      accessToken, fromName, fromEmail, toEmail,
+      withStudioName(subject, studioName),
+      withStudioName(textBody, studioName),
+      withStudioName(htmlBody, studioName),
+    );
 
     return Response.json({ success: true, message: 'Email sent via Gmail', hasAccount });
   } catch (error) {

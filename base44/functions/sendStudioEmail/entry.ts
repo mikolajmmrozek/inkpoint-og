@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.57';
-import { sendViaGmail } from '../../shared/bookingEmail.ts';
+import { sendViaGmail, getStudioName, withStudioName } from '../../shared/bookingEmail.ts';
 
 // Wysyłka maili ze studia przez zsynchronizowane konto Gmail (tattoo.wolsztyn@gmail.com).
 // Zastąpiło Resend. Przyjmuje: { to, subject, body } — body to zwykły tekst lub HTML.
@@ -35,8 +35,14 @@ export default async function (req: Request): Promise<Response> {
     const htmlBody = isHtml ? body : textToHtml(body);
     const textBody = isHtml ? body.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, ' ') : body;
 
+    const studioName = await getStudioName(base44);
     const { accessToken } = await base44.asServiceRole.connectors.getConnection('gmail');
-    await sendViaGmail(accessToken, 'Romans Tattoo', 'tattoo.wolsztyn@gmail.com', to, subject, textBody, htmlBody);
+    await sendViaGmail(
+      accessToken, studioName, 'tattoo.wolsztyn@gmail.com', to,
+      withStudioName(subject, studioName),
+      withStudioName(textBody, studioName),
+      withStudioName(htmlBody, studioName),
+    );
     return Response.json({ success: true });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

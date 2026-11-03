@@ -2,6 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import {
   APP_URL, buildAppUrl, sectionStyle, h3Style, pStyle, mutedStyle, buttonStyle,
   detailRow, clientFirstName, fmtDate, buildContactRows, sendViaGmail,
+  getStudioName, withStudioName,
 } from '../../shared/bookingEmail.ts';
 
 /**
@@ -277,7 +278,13 @@ ${studioNote ? `<tr><td style="padding:16px 32px 0 32px;"><p style="margin:0;fon
 <tr><td style="padding:0 32px 28px 32px;"><p style="margin:0;color:#b0b0b0;font-size:11px;">Otrzymujesz tę wiadomość, ponieważ studio odpowiedziało na Twoją prośbę o zmianę terminu w Romans Tattoo.</p></td></tr>
 </table></td></tr></table></body></html>`;
 
-        await sendViaGmail(accessToken, 'Romans Tattoo', 'tattoo.wolsztyn@gmail.com', cr.client_email, subject, textBody, htmlBody);
+        const studioName = await getStudioName(base44);
+        await sendViaGmail(
+          accessToken, studioName, 'tattoo.wolsztyn@gmail.com', cr.client_email,
+          withStudioName(subject, studioName),
+          withStudioName(textBody, studioName),
+          withStudioName(htmlBody, studioName),
+        );
       } catch (e) { console.error('Proposal email failed:', e?.message || e); }
 
       return Response.json({ success: true, status: 'studio_proposed' });
@@ -479,5 +486,11 @@ async function sendChangeRequestEmail(base44: any, opts: {
 </body>
 </html>`;
 
-  await sendViaGmail(accessToken, 'Romans Tattoo', 'tattoo.wolsztyn@gmail.com', cr.client_email, subject, textBody, htmlBody);
+  const studioName = await getStudioName(base44);
+  await sendViaGmail(
+    accessToken, studioName, 'tattoo.wolsztyn@gmail.com', cr.client_email,
+    withStudioName(subject, studioName),
+    withStudioName(textBody, studioName),
+    withStudioName(htmlBody, studioName),
+  );
 }

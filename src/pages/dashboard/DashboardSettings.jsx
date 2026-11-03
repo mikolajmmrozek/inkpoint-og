@@ -52,6 +52,7 @@ const DEFAULTS = {
   },
   branding: {
     key: 'branding',
+    studio_name: 'ROMANS TATTOO',
     site_logo_url: '',
     app_icon_url: '',
     app_description: 'Romans Tattoo — Studio tatuażu i piercingu w Wolsztynie',
@@ -420,6 +421,17 @@ export default function DashboardSettings() {
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '24px' }}>
             BRANDING I WYGLĄD
           </p>
+
+          {/* Nazwa studia — używana w mailach, voucherach i dokumentach */}
+          <div className="mb-8">
+            <label className="block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              Nazwa studia
+            </label>
+            <input {...inp('studio_name')} placeholder="ROMANS TATTOO" />
+            <p className="mt-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>
+              Używana we wszystkich mailach automatycznych, voucherach i dokumentach
+            </p>
+          </div>
 
           {/* Logo */}
           <div className="mb-8">

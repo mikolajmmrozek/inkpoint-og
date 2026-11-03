@@ -150,7 +150,7 @@ async function buildDoc(promo, settings) {
   // --- Left sidebar ---
   setFill(doc, brand);
   doc.rect(0, 0, SIDEBAR_W, PAGE_H, 'F');
-  const studioName = (settings?.app_description || 'ROMANS TATTOO').toUpperCase();
+  const studioName = (settings?.studio_name || 'ROMANS TATTOO').toUpperCase();
   doc.setFont(displayFamily, 'normal');
   doc.setFontSize(7.5 * PT);
   setText(doc, '#FFFFFF');

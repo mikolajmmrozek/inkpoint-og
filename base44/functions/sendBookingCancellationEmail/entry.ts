@@ -2,6 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import {
   APP_URL, buildAppUrl, sectionStyle, h3Style, pStyle, mutedStyle, buttonStyle,
   detailRow, clientFirstName, fmtDate, buildContactRows, sendViaGmail,
+  getStudioName, withStudioName,
 } from '../../shared/bookingEmail.ts';
 
 export default async function(req: Request): Promise<Response> {
@@ -153,7 +154,8 @@ export default async function(req: Request): Promise<Response> {
     const { accessToken } = await base44.asServiceRole.connectors.getConnection('gmail');
 
     const subject = `Twoja rezerwacja została anulowana — ${dateStr}`;
-    const fromName = 'Romans Tattoo';
+    const studioName = await getStudioName(base44);
+    const fromName = studioName;
     const fromEmail = 'tattoo.wolsztyn@gmail.com';
     const toEmail = booking.client_email;
 
@@ -185,7 +187,12 @@ export default async function(req: Request): Promise<Response> {
       `W razie pytań prosimy o kontakt ze studiem.`,
     ].filter(Boolean).join('\n').trim();
 
-    await sendViaGmail(accessToken, fromName, fromEmail, toEmail, subject, textBody, htmlBody);
+    await sendViaGmail(
+      accessToken, fromName, fromEmail, toEmail,
+      withStudioName(subject, studioName),
+      withStudioName(textBody, studioName),
+      withStudioName(htmlBody, studioName),
+    );
 
     return Response.json({ success: true, message: 'Cancellation email sent via Gmail' });
   } catch (error) {

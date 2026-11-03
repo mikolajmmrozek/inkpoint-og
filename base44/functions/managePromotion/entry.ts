@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
-import { sendViaGmail, sectionStyle, h3Style, pStyle, mutedStyle, buttonStyle, detailRow, buildContactRows } from '../../shared/bookingEmail.ts';
+import { sendViaGmail, sectionStyle, h3Style, pStyle, mutedStyle, buttonStyle, detailRow, buildContactRows, getStudioName, withStudioName } from '../../shared/bookingEmail.ts';
 import { buildVoucherPdfBase64 } from '../../shared/voucherPdf.ts';
 
 const CHARSET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -12,7 +12,6 @@ function genCode(len = 8) {
   return s;
 }
 
-const FROM_NAME = 'Romans Tattoo';
 const FROM_EMAIL = 'tattoo.wolsztyn@gmail.com';
 
 // Dane kontaktowe studia + informacja, czy odbiorca ma już konto w aplikacji.
@@ -21,6 +20,11 @@ async function loadEmailContext(base44: any, to: string) {
   try {
     const settings = await base44.asServiceRole.entities.SiteSettings.filter({ key: 'contact' });
     if (settings.length > 0) contact = settings[0];
+  } catch (_) {}
+  // Nazwa studia z ustawień strony (Branding → Nazwa studia) — także na PDF vouchera.
+  try {
+    const branding = await base44.asServiceRole.entities.SiteSettings.filter({ key: 'branding' });
+    if (branding.length > 0) contact = { ...contact, studio_name: branding[0].studio_name };
   } catch (_) {}
   let hasAccount = false;
   if (to) {
@@ -207,8 +211,15 @@ async function deliverVoucherEmail(base44: any, p: any, to: string) {
       } catch (_) { /* brak załącznika zamiast błędu wysyłki */ }
     }
 
+    const studioName = await getStudioName(base44);
     const { accessToken } = await base44.asServiceRole.connectors.getConnection('gmail');
-    await sendViaGmail(accessToken, FROM_NAME, FROM_EMAIL, to, subject, textBody, htmlBody, attachments);
+    await sendViaGmail(
+      accessToken, studioName, FROM_EMAIL, to,
+      withStudioName(subject, studioName),
+      withStudioName(textBody, studioName),
+      withStudioName(htmlBody, studioName),
+      attachments,
+    );
     return { success: true, attachment: attachments.length > 0 };
   } catch (e: any) {
     return { error: e.message };

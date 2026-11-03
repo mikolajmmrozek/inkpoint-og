@@ -3,6 +3,29 @@
 
 export const APP_URL = 'https://romanstattoo.base44.app';
 
+// ── Nazwa studia — jedno źródło prawdy ───────────────────────────────────────
+// Pochodzi z Ustawień strony (zakładka Branding → „Nazwa studia”), nie z kodu.
+// Każdy mail, voucher i dokument bierze nazwę stąd, więc zmiana nazwy firmy
+// wymaga wyłącznie edycji w ustawieniach.
+export const FALLBACK_STUDIO_NAME = 'ROMANS TATTOO';
+
+export async function getStudioName(base44: any): Promise<string> {
+  try {
+    const rows = await base44.asServiceRole.entities.SiteSettings.filter({ key: 'branding' });
+    const name = String(rows?.[0]?.studio_name || '').trim();
+    if (name) return name;
+  } catch (_) { /* brak ustawień — zostaje nazwa domyślna */ }
+  return FALLBACK_STUDIO_NAME;
+}
+
+/** Podstawia nazwę studia w gotowej treści (temat, HTML, tekst). */
+export function withStudioName(content: string, studioName: string): string {
+  if (!content) return content;
+  return content
+    .replaceAll('Romans Tattoo', studioName)
+    .replaceAll('ROMANS TATTOO', studioName.toUpperCase());
+}
+
 /** Normalize a base URL (strip trailing slashes) and join a path safely.
  *  Prevents double-slash links (e.g. //panel/sessions) when the configured
  *  APP_URL secret ends with a trailing slash. */

@@ -41,7 +41,8 @@ export default function Voucher() {
         if (cancelled) return;
         const contact = allSettings.find(s => s.key === 'contact') || {};
         const theme = allSettings.find(s => s.key === 'theme') || {};
-        setSettings({ ...theme, ...contact, primary_color: theme.primary_color || contact.primary_color });
+        const branding = allSettings.find(s => s.key === 'branding') || {};
+        setSettings({ ...theme, ...contact, studio_name: branding.studio_name, primary_color: theme.primary_color || contact.primary_color });
         const found = promos.find(p => p.type === 'voucher');
         if (!found) {
           // Voucher może istnieć, ale być niewidoczny bez zalogowania (RLS: tylko przypisany klient lub admin).
@@ -67,7 +68,7 @@ export default function Voucher() {
           } catch { /* ignore */ }
         }
         const amt = found.value || 0;
-        const studio = contact.app_description || theme.app_description || 'Studio';
+        const studio = branding.studio_name || 'ROMANS TATTOO';
         document.title = `Voucher ${amt} PLN — ${studio}`;
         setLoading(false);
       } catch {
@@ -140,7 +141,7 @@ export default function Voucher() {
     return <MessageScreen title="Voucher został już wykorzystany" desc="Ten voucher został zrealizowany i nie jest już dostępny online. W razie pytań skontaktuj się ze studium." />;
   }
 
-  const studioName = (settings?.app_description || 'ROMANS TATTOO').toUpperCase();
+  const studioName = (settings?.studio_name || 'ROMANS TATTOO').toUpperCase();
   const street = settings?.contact_address_street;
   const city = settings?.contact_address_city;
   const phone = settings?.contact_phone;

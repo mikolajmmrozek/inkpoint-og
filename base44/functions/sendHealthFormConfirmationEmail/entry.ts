@@ -2,6 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import {
   APP_URL, buildAppUrl, sectionStyle, h3Style, pStyle, mutedStyle, buttonStyle,
   detailRow, clientFirstName, fmtDate, fmtPrice, buildContactRows, sendViaGmail,
+  getStudioName, withStudioName,
 } from '../../shared/bookingEmail.ts';
 
 export default async function(req: Request): Promise<Response> {
@@ -202,7 +203,8 @@ export default async function(req: Request): Promise<Response> {
     const { accessToken } = await base44.asServiceRole.connectors.getConnection('gmail');
 
     const subject = `Potwierdzenie ankiety zdrowotnej — Romans Tattoo`;
-    const fromName = 'Romans Tattoo';
+    const studioName = await getStudioName(base44);
+    const fromName = studioName;
     const fromEmail = 'tattoo.wolsztyn@gmail.com';
 
     // Plain-text alternative
@@ -240,7 +242,12 @@ export default async function(req: Request): Promise<Response> {
       `Do zobaczenia w studiu!`,
     ].filter(Boolean).join('\n').trim();
 
-    await sendViaGmail(accessToken, fromName, fromEmail, toEmail, subject, textBody, htmlBody);
+    await sendViaGmail(
+      accessToken, fromName, fromEmail, toEmail,
+      withStudioName(subject, studioName),
+      withStudioName(textBody, studioName),
+      withStudioName(htmlBody, studioName),
+    );
 
     return Response.json({ success: true, message: 'Health form confirmation email sent via Gmail', to: toEmail, hasAccount, hasBooking: !!booking });
   } catch (error) {
