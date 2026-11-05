@@ -107,35 +107,16 @@ export default function Shop() {
             </Link>
           </div>
 
-          {/* Kolekcje automatyczne */}
+          {/* Kolekcje — automatyczne i ręczne w jednym rzędzie */}
           <div className="py-6" style={{ borderBottom: '0.5px solid hsl(var(--border))' }}>
-            <p className="text-micro" style={{ fontSize: '9px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.18em', marginBottom: '12px' }}>AUTOMATYCZNE</p>
-            <ShopAutoCollections active={activeAuto} onSelect={changeAuto} />
+            <ShopAutoCollections
+              active={activeAuto}
+              onSelect={changeAuto}
+              collections={collections}
+              activeCollection={activeCollection}
+              onSelectCollection={changeCollection}
+            />
           </div>
-
-          {/* Kolekcje */}
-          {collections.length > 0 && (
-            <div className="py-6" style={{ borderBottom: '0.5px solid hsl(var(--border))' }}>
-              <p className="text-micro" style={{ fontSize: '9px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.18em', marginBottom: '12px' }}>KOLEKCJE</p>
-              <div className="flex gap-3 overflow-x-auto pb-1">
-                {collections.map(c => {
-                  const active = activeCollection === c.id;
-                  return (
-                    <button
-                      key={c.id}
-                      onClick={() => changeCollection(active ? '' : c.id)}
-                      className="relative shrink-0 overflow-hidden transition-all duration-500"
-                      style={{ width: '190px', height: '110px', border: `0.5px solid ${active ? 'var(--brand)' : 'hsl(var(--border))'}`, borderRadius: 'var(--radius)' }}
-                    >
-                      {c.image_url && <img src={c.image_url} alt="" className="absolute inset-0 w-full h-full object-cover media-darken-soft" />}
-                      <span className="absolute inset-0" style={{ background: active ? 'rgba(0,0,0,0.35)' : 'rgba(0,0,0,0.45)' }} />
-                      <span className="absolute bottom-3 left-3 right-3 text-left" style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', letterSpacing: '0.05em', color: '#F5F0EB', lineHeight: 1.1 }}>{c.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
 
           {/* Filtry */}
           <div className="py-6" style={{ borderBottom: '0.5px solid hsl(var(--border))' }}>
