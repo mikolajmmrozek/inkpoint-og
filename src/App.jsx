@@ -20,6 +20,14 @@ import HealthFormQR from './pages/HealthFormQR';
 import TermsAndConditions from './pages/TermsAndConditions';
 import FAQ from './pages/FAQ';
 import Instructions from './pages/Instructions';
+import Shop from './pages/Shop';
+import ShopProduct from './pages/ShopProduct';
+import ShopCart from './pages/ShopCart';
+import ShopCheckout from './pages/ShopCheckout';
+import CartProvider from './components/shop/CartProvider';
+import DashboardShop from './pages/dashboard/DashboardShop';
+import ClientOrders from './pages/client/ClientOrders';
+import ClientShopAccount from './pages/client/ClientShopAccount';
 
 // Dashboard
 import Dashboard from './pages/dashboard/Dashboard';
@@ -82,6 +90,7 @@ const AuthenticatedApp = () => {
   }
 
   return (
+    <CartProvider>
     <Routes>
       {/* Public routes */}
       <Route path="/" element={<Home />} />
@@ -96,6 +105,10 @@ const AuthenticatedApp = () => {
       <Route path="/terms" element={<TermsAndConditions />} />
       <Route path="/faq" element={<FAQ />} />
       <Route path="/instructions" element={<Instructions />} />
+      <Route path="/sklep" element={<Shop />} />
+      <Route path="/sklep/produkt/:slug" element={<ShopProduct />} />
+      <Route path="/sklep/koszyk" element={<ShopCart />} />
+      <Route path="/sklep/zamowienie" element={<ShopCheckout />} />
       <Route path="/feedback" element={<FeedbackSurvey />} />
       <Route path="/voucher/:code" element={<Voucher />} />
       <Route path="/change-request" element={<ChangeRequest />} />
@@ -118,6 +131,7 @@ const AuthenticatedApp = () => {
         <Route path="feedback" element={<DashboardFeedback />} />
         <Route path="services" element={<DashboardServices />} />
         <Route path="promotions" element={<DashboardPromotions />} />
+        <Route path="shop" element={<DashboardShop />} />
         <Route path="users" element={<DashboardUsers />} />
         <Route path="agent-activity" element={<DashboardAgentActivity />} />
         <Route path="notifications" element={<NotificationsPage />} />
@@ -140,6 +154,8 @@ const AuthenticatedApp = () => {
         <Route path="sessions" element={<ClientSessions />} />
         <Route path="health-forms" element={<ClientHealthForms />} />
         <Route path="vouchers" element={<ClientVouchers />} />
+        <Route path="orders" element={<ClientOrders />} />
+        <Route path="shop-account" element={<ClientShopAccount />} />
         <Route path="profile" element={<ClientProfile />} />
         <Route path="messages" element={<ClientMessages />} />
         <Route path="notifications" element={<NotificationsPage />} />
@@ -147,6 +163,7 @@ const AuthenticatedApp = () => {
 
       <Route path="*" element={<PageNotFound />} />
     </Routes>
+    </CartProvider>
   );
 };
 

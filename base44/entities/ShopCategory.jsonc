@@ -1,0 +1,50 @@
+{
+  "name": "ShopCategory",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nazwa kategorii"
+    },
+    "slug": {
+      "type": "string",
+      "description": "Identyfikator w adresie URL"
+    },
+    "description": {
+      "type": "string"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "order": {
+      "type": "number",
+      "default": 999,
+      "description": "Kolejno\u015b\u0107 wy\u015bwietlania (mniejsza = wcze\u015bniej)"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "name": "ShopSettings",
+  "type": "object",
+  "properties": {
+    "key": {
+      "type": "string",
+      "default": "default"
+    },
+    "shipping_cost": {
+      "type": "number",
+      "default": 0,
+      "description": "Koszt dostawy w PLN (0 = darmowa)"
+    },
+    "free_shipping_from": {
+      "type": "number",
+      "default": 0,
+      "description": "Darmowa dostawa od kwoty (0 = wy\u0142\u0105czone)"
+    },
+    "shipping_note": {
+      "type": "string",
+      "description": "Kr\u00f3tka informacja o dostawie widoczna w sklepie"
+    },
+    "contact_email": {
+      "type": "string",
+      "description": "Adres kontaktowy sklepu"
+    },
+    "is_open": {
+      "type": "boolean",
+      "default": true,
+      "description": "Czy sklep przyjmuje zam\u00f3wienia"
+    }
+  },
+  "required": [
+    "key"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

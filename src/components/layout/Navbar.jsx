@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { User, X } from 'lucide-react';
+import { User, X, ShoppingBag } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
+import { useCart } from '@/components/shop/CartProvider';
 
 export default function Navbar() {
   const { user, isAuthenticated } = useAuth();
@@ -11,6 +12,12 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [artist, setArtist] = useState(null);
   const location = useLocation();
+  const { count: cartCount } = useCart();
+
+  const handleCartClick = () => {
+    if (isAuthenticated) navigate('/sklep/koszyk');
+    else base44.auth.redirectToLogin(window.location.href);
+  };
 
   const displayName = user?.display_name || user?.full_name || artist?.name || '';
   const initials = (displayName.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('') || (user?.email?.[0] || 'U')).toUpperCase();
@@ -47,6 +54,7 @@ export default function Navbar() {
   const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/artists', label: 'Artyści' },
+  { href: '/sklep', label: 'Sklep' },
   { href: '/blog', label: 'Blog' },
   { href: '/faq', label: 'FAQ' },
   { href: '/contact', label: 'Kontakt' }];
@@ -86,6 +94,29 @@ export default function Navbar() {
 
           {/* Book CTA */}
           <div className="hidden lg:flex items-center gap-4">
+            <button
+              onClick={handleCartClick}
+              aria-label="Koszyk"
+              title="Koszyk"
+              className="relative flex items-center justify-center transition-all duration-300"
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '9999px',
+                border: '0.5px solid rgb(var(--brand-rgb) /0.4)',
+                background: 'rgb(var(--brand-rgb) /0.04)',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--brand)'; e.currentTarget.style.background = 'rgb(var(--brand-rgb) /0.1)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgb(var(--brand-rgb) /0.4)'; e.currentTarget.style.background = 'rgb(var(--brand-rgb) /0.04)'; }}
+            >
+              <ShoppingBag size={15} color="var(--brand)" />
+              {cartCount > 0 && (
+                <span style={{ position: 'absolute', top: '-4px', right: '-4px', minWidth: '17px', height: '17px', borderRadius: '9999px', background: 'var(--brand)', color: 'var(--btn-text)', fontFamily: 'var(--font-mono)', fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>
+                  {cartCount}
+                </span>
+              )}
+            </button>
             <button
               onClick={handleAccountClick}
               className="flex items-center overflow-hidden transition-all duration-500 ease-out group"

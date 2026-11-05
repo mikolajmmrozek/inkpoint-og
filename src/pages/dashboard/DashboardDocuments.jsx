@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
 import { Plus, Trash2, X, Pencil, FileText, Eye, Printer, Share2, Globe } from 'lucide-react';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
+import ShopDocumentsSection from '@/components/dashboard/shop/ShopDocumentsSection';
 
 const LANG_OPTIONS = [
   { code: 'pl', label: '🇵🇱 Polski' },
@@ -496,6 +497,8 @@ export default function DashboardDocuments() {
               />
             </div>
           </div>
+
+          <ShopDocumentsSection />
         </div>
       )}
 

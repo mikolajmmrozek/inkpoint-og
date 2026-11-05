@@ -20,6 +20,10 @@
       "format": "date",
       "description": "Last update date"
     },
+    "file_url": {
+      "type": "string",
+      "description": "Adres pliku PDF dokumentu (opcjonalne, np. gotowy formularz do pobrania)"
+    },
     "translations": {
       "type": "object",
       "description": "Cached translations keyed by language code, e.g. { en: { title, content }, de: { title, content } }"
