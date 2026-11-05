@@ -108,19 +108,6 @@ export default function Shop() {
           {/* Filtry */}
           <div className="py-6" style={{ borderBottom: '0.5px solid hsl(var(--border))' }}>
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => setFiltersOpen(o => !o)}
-                className="text-micro shrink-0 flex items-center gap-2"
-                style={{
-                  fontSize: '10px', letterSpacing: '0.14em', padding: '9px 16px',
-                  border: `0.5px solid ${filtersOpen || activeCategory ? 'var(--brand)' : 'hsl(var(--border))'}`,
-                  color: filtersOpen || activeCategory ? 'var(--brand)' : 'hsl(var(--muted-foreground))',
-                  background: filtersOpen || activeCategory ? 'rgb(var(--brand-rgb) / 0.08)' : 'transparent',
-                  borderRadius: 'var(--radius)',
-                }}
-              >
-                <SlidersHorizontal size={11} /> FILTRY
-              </button>
               <input
                 value={query}
                 onChange={e => setQuery(e.target.value)}
@@ -130,49 +117,63 @@ export default function Shop() {
                 onFocus={e => { e.target.style.borderBottomColor = 'var(--brand)'; }}
                 onBlur={e => { e.target.style.borderBottomColor = 'hsl(var(--border))'; }}
               />
+              <button
+                onClick={() => setFiltersOpen(o => !o)}
+                className="text-micro shrink-0 flex items-center gap-2"
+                style={{
+                  fontSize: '10px', letterSpacing: '0.14em', padding: '9px 16px',
+                  border: `0.5px solid ${filtersOpen ? 'var(--brand)' : 'hsl(var(--border))'}`,
+                  color: filtersOpen ? 'var(--brand)' : 'hsl(var(--muted-foreground))',
+                  background: filtersOpen ? 'rgb(var(--brand-rgb) / 0.08)' : 'transparent',
+                  borderRadius: 'var(--radius)',
+                }}
+              >
+                <SlidersHorizontal size={11} /> FILTRY
+              </button>
             </div>
 
+            {/* Kategorie */}
+            <div className="flex flex-wrap gap-2 pt-5">
+              <button
+                onClick={() => changeCategory('')}
+                className="text-micro"
+                style={{
+                  fontSize: '10px', letterSpacing: '0.14em', padding: '8px 16px',
+                  border: `0.5px solid ${!activeCategory ? 'var(--brand)' : 'hsl(var(--border))'}`,
+                  color: !activeCategory ? 'var(--brand)' : 'hsl(var(--muted-foreground))',
+                  background: !activeCategory ? 'rgb(var(--brand-rgb) / 0.08)' : 'transparent',
+                  borderRadius: 'var(--radius)',
+                }}
+              >WSZYSTKO</button>
+              {categories.map(cat => {
+                const active = activeCategory === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => changeCategory(active ? '' : cat.id)}
+                    className="text-micro"
+                    style={{
+                      fontSize: '10px', letterSpacing: '0.14em', padding: '8px 16px',
+                      border: `0.5px solid ${active ? 'var(--brand)' : 'hsl(var(--border))'}`,
+                      color: active ? 'var(--brand)' : 'hsl(var(--muted-foreground))',
+                      background: active ? 'rgb(var(--brand-rgb) / 0.08)' : 'transparent',
+                      borderRadius: 'var(--radius)',
+                    }}
+                  >{(cat.name || '').toUpperCase()}</button>
+                );
+              })}
+            </div>
+
+            {/* Filtry wariantów — rozwijane przyciskiem FILTRY */}
             {filtersOpen && (
-              <div className="flex flex-wrap gap-2 pt-4">
-                <button
-                  onClick={() => changeCategory('')}
-                  className="text-micro"
-                  style={{
-                    fontSize: '10px', letterSpacing: '0.14em', padding: '8px 16px',
-                    border: `0.5px solid ${!activeCategory ? 'var(--brand)' : 'hsl(var(--border))'}`,
-                    color: !activeCategory ? 'var(--brand)' : 'hsl(var(--muted-foreground))',
-                    background: !activeCategory ? 'rgb(var(--brand-rgb) / 0.08)' : 'transparent',
-                    borderRadius: 'var(--radius)',
-                  }}
-                >WSZYSTKO</button>
-                {categories.map(cat => {
-                  const active = activeCategory === cat.id;
-                  return (
-                    <button
-                      key={cat.id}
-                      onClick={() => changeCategory(active ? '' : cat.id)}
-                      className="text-micro"
-                      style={{
-                        fontSize: '10px', letterSpacing: '0.14em', padding: '8px 16px',
-                        border: `0.5px solid ${active ? 'var(--brand)' : 'hsl(var(--border))'}`,
-                        color: active ? 'var(--brand)' : 'hsl(var(--muted-foreground))',
-                        background: active ? 'rgb(var(--brand-rgb) / 0.08)' : 'transparent',
-                        borderRadius: 'var(--radius)',
-                      }}
-                    >{(cat.name || '').toUpperCase()}</button>
-                  );
-                })}
-              </div>
+              <ShopVariantFilters
+                facets={facets}
+                selected={variantFilters}
+                onToggle={toggleFilter}
+                onClear={() => setVariantFilters({})}
+              />
             )}
           </div>
-
-          {/* Filtry wariantów */}
-          <ShopVariantFilters
-            facets={facets}
-            selected={variantFilters}
-            onToggle={toggleFilter}
-            onClear={() => setVariantFilters({})}
-          />
 
           {collection && (
             <div className="flex items-center gap-3 pt-6">
