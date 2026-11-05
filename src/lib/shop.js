@@ -45,7 +45,7 @@ export const priceSliderOf = (product) => {
   return {
     min: min > 0 ? min : 100,
     max: max > min ? max : (min > 0 ? min + 100 : 2000),
-    step: step > 0 ? step : 50,
+    step: step > 0 ? step : 10,
   };
 };
 

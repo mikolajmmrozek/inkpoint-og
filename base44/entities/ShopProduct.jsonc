@@ -57,7 +57,7 @@
     },
     "slider_step": {
       "type": "number",
-      "default": 50,
+      "default": 10,
       "description": "Skok suwaka w PLN (tylko dla pricing_mode = slider)"
     },
     "is_voucher": {

@@ -70,7 +70,7 @@ export default async function (req) {
         if (product.pricing_mode === 'slider' || product.is_voucher) {
           const min = Number(product.slider_min) > 0 ? Number(product.slider_min) : 100;
           const max = Number(product.slider_max) > min ? Number(product.slider_max) : 2000;
-          const step = Number(product.slider_step) > 0 ? Number(product.slider_step) : 50;
+          const step = Number(product.slider_step) > 0 ? Number(product.slider_step) : 10;
           const match = /^kwota:(\d+)$/.exec(String(raw.variant_key || ''));
           const chosen = match ? parseInt(match[1], 10) : 0;
           if (!match || chosen < min || chosen > max || (chosen - min) % step !== 0) {

@@ -52,6 +52,16 @@
       "type": "number",
       "description": "Cena maksymalna (je\u015bli price_type = range)"
     },
+    "description_optional": {
+      "type": "boolean",
+      "default": false,
+      "description": "True = pole 'Opis projektu' w rezerwacji online jest nieobowi\u0105zkowe (np. piercing, konsultacja)"
+    },
+    "placement_optional": {
+      "type": "boolean",
+      "default": false,
+      "description": "True = pole 'Miejsce na ciele' w rezerwacji online jest nieobowi\u0105zkowe (np. piercing, konsultacja)"
+    },
     "artist_ids": {
       "type": "array",
       "items": {

@@ -35,6 +35,7 @@ export default function Booking() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [step, setStep] = useState(0);
+  const [maxStep, setMaxStep] = useState(0);
   const [artists, setArtists] = useState([]);
   const [services, setServices] = useState([]);
   const [artistsLoading, setArtistsLoading] = useState(true);
@@ -60,6 +61,7 @@ export default function Booking() {
           setIsLoggedIn(true);
           setData(d => ({ ...d, client_first_name: user.full_name?.split(' ')[0] || '', client_last_name: user.full_name?.split(' ').slice(1).join(' ') || '', client_email: user.email || '' }));
           setStep(preselectedArtistId ? 2 : 1);
+          setMaxStep(preselectedArtistId ? 2 : 1);
         } else {
           setIsLoggedIn(false);
           setStep(0);
@@ -127,11 +129,15 @@ export default function Booking() {
     });
   };
 
+  const selectedService = services.find(s => s.id === data.service_id) || null;
+  const placementOptional = selectedService?.placement_optional === true;
+  const descriptionOptional = selectedService?.description_optional === true;
+
   const canNext = () => {
     if (step === 0) return !!(data.client_first_name && data.client_last_name && data.client_email);
     if (step === 1) return !!data.artist_id;
     if (step === 2) return !!data.service_id;
-    if (step === 3) return !!(data.tattoo_description && data.tattoo_placement);
+    if (step === 3) return !!((data.tattoo_description || descriptionOptional) && (data.tattoo_placement || placementOptional));
     if (step === 4) return !!(data.session_date && data.session_time);
     return true;
   };
@@ -139,12 +145,23 @@ export default function Booking() {
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
   const handleNext = () => {
-    setStep(s => s + 1);
+    const next = Math.min(5, step + 1);
+    setStep(next);
+    setMaxStep(m => Math.max(m, next));
     setTimeout(scrollToTop, 50);
   };
 
+  const firstStep = isLoggedIn ? 1 : 0;
+
   const handleBack = () => {
-    setStep(s => s - 1);
+    setStep(s => Math.max(firstStep, s - 1));
+    setTimeout(scrollToTop, 50);
+  };
+
+  const goToStep = (i) => {
+    if (i > maxStep) return;
+    if (i === 0 && isLoggedIn) return;
+    setStep(i);
     setTimeout(scrollToTop, 50);
   };
 
@@ -219,25 +236,59 @@ export default function Booking() {
           </h1>
         </motion.div>
 
-        {/* Progress bar */}
+        {/* Progress bar — kliknij krok, żeby do niego wrócić */}
         <div className="mb-12">
           <div className="flex items-center gap-0 mb-4">
             {STEPS.map((s, i) => (
               <div key={s} className="flex items-center flex-1">
-                <div className="w-2 h-2 rounded-full flex-shrink-0 transition-all duration-500" style={{ background: i <= step ? 'var(--brand)' : 'hsl(var(--border))' }} />
+                <button
+                  type="button"
+                  onClick={() => goToStep(i)}
+                  title={i > maxStep ? 'Uzupełnij wcześniejsze kroki' : s}
+                  style={{ background: 'none', border: 'none', padding: 0, width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: i > maxStep ? 'not-allowed' : 'pointer' }}
+                >
+                  <span
+                    className="rounded-full block transition-all duration-500"
+                    style={{
+                      width: i === step ? '10px' : '6px',
+                      height: i === step ? '10px' : '6px',
+                      background: i <= maxStep ? 'var(--brand)' : 'hsl(var(--border))',
+                      opacity: i > maxStep ? 0.6 : 1,
+                    }}
+                  />
+                </button>
                 {i < STEPS.length - 1 && (
                   <div className="flex-1 h-px transition-all duration-700" style={{ background: i < step ? 'var(--brand)' : 'hsl(var(--border))', height: '0.5px' }} />
                 )}
               </div>
             ))}
           </div>
-          <div className="flex justify-between flex-wrap">
+          <div className="flex justify-between flex-wrap gap-2">
             {STEPS.map((s, i) => (
-              <p key={s} style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: i === step ? 'var(--brand)' : 'rgb(var(--foreground-rgb) / 0.25)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              <button
+                key={s}
+                type="button"
+                onClick={() => goToStep(i)}
+                disabled={i > maxStep}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '9px',
+                  color: i === step ? 'var(--brand)' : i <= maxStep ? 'rgb(var(--foreground-rgb) / 0.55)' : 'rgb(var(--foreground-rgb) / 0.25)',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  cursor: i > maxStep ? 'not-allowed' : 'pointer',
+                }}
+              >
                 {s}
-              </p>
+              </button>
             ))}
           </div>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'rgb(var(--foreground-rgb) / 0.25)', letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '10px' }}>
+            Możesz wrócić do wcześniejszego kroku, klikając jego nazwę
+          </p>
         </div>
 
         {/* Step content */}
@@ -372,15 +423,15 @@ export default function Booking() {
               <div className="space-y-8">
                 <div>
                   <label className="text-micro block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgb(var(--foreground-rgb) / 0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-                    Miejsce na ciele *
+                    Miejsce na ciele {placementOptional ? '(opcjonalne)' : '*'}
                   </label>
-                  <input required style={inputStyle} value={data.tattoo_placement} onChange={e => update('tattoo_placement', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = 'hsl(var(--border))'} />
+                  <input required={!placementOptional} style={inputStyle} value={data.tattoo_placement} onChange={e => update('tattoo_placement', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = 'hsl(var(--border))'} />
                 </div>
                 <div>
                   <label className="text-micro block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgb(var(--foreground-rgb) / 0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-                    Opis projektu / pomysłu *
+                    Opis projektu / pomysłu {descriptionOptional ? '(opcjonalne)' : '*'}
                   </label>
-                  <textarea required rows={4} style={{ ...inputStyle, resize: 'none' }} value={data.tattoo_description} onChange={e => update('tattoo_description', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = 'hsl(var(--border))'} />
+                  <textarea required={!descriptionOptional} rows={4} style={{ ...inputStyle, resize: 'none' }} value={data.tattoo_description} onChange={e => update('tattoo_description', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = 'hsl(var(--border))'} />
                 </div>
                 <div>
                   <label className="text-micro block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgb(var(--foreground-rgb) / 0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
@@ -445,8 +496,8 @@ export default function Booking() {
                   ['Email', data.client_email],
                   ['Telefon', data.client_phone || '—'],
                   ['Termin', `${data.session_date} o ${data.session_time}`],
-                  ['Miejsce na ciele', data.tattoo_placement],
-                  ['Opis', data.tattoo_description],
+                  ['Miejsce na ciele', data.tattoo_placement || '—'],
+                  ['Opis', data.tattoo_description || '—'],
                 ].map(([label, value]) => (
                   <div key={label} className="flex gap-4 pb-4" style={{ borderBottom: '0.5px solid hsl(var(--border))' }}>
                     <p className="w-36 flex-shrink-0" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase', paddingTop: '2px' }}>
@@ -462,7 +513,7 @@ export default function Booking() {
 
         {/* Navigation */}
         <div className="flex justify-between mt-12 pt-8" style={{ borderTop: '0.5px solid hsl(var(--border))' }}>
-          {step > 0 ? (
+          {step > firstStep ? (
             <button onClick={handleBack} className="btn-ghost-parchment">
               WSTECZ
             </button>

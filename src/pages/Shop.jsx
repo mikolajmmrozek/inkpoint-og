@@ -107,9 +107,9 @@ export default function Shop() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 pb-8" style={{ borderBottom: '0.5px solid hsl(var(--border))' }}>
             <div>
-              <p className="text-micro" style={{ fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.22em', marginBottom: '10px' }}>SKLEP STUDIA</p>
+              <p className="text-micro" style={{ fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.22em', marginBottom: '10px' }}>ROMANS TATTOO</p>
               <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.6rem, 7vw, 5rem)', lineHeight: 0.92, letterSpacing: '0.02em' }}>
-                RZECZY<br /><span style={{ color: 'var(--brand)', fontSize: '0.55em', letterSpacing: '0.08em' }}>Z NASZEGO ŚWIATA</span>
+                SKLEP<br /><span style={{ color: 'var(--brand)', fontSize: '0.55em', letterSpacing: '0.08em' }}>ODKRYJ NASZĄ OFERTĘ</span>
               </h1>
             </div>
             <Link to="/sklep/koszyk" className="btn-ghost-parchment flex items-center gap-2 self-start md:self-auto" style={{ padding: '11px 20px' }}>

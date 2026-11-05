@@ -31,6 +31,8 @@ const EMPTY_FORM = {
   artist_ids: [],
   hidden_from_clients: [],
   members_only: false,
+  description_optional: false,
+  placement_optional: false,
   min_advance_booking: { unit: 'minutes', value: 0 },
   is_active: true,
   order: 999,
@@ -625,6 +627,30 @@ export default function DashboardServices() {
                       </div>
                       Tylko dla zalogowanych
                     </button>
+                  </div>
+
+                  {/* Optional booking fields */}
+                  <div style={{ paddingTop: '10px' }}>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '10px' }}>Pola w rezerwacji online</p>
+                    <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                      {[
+                        ['description_optional', 'Opis projektu nieobowiązkowy'],
+                        ['placement_optional', 'Miejsce na ciele nieobowiązkowe'],
+                      ].map(([key, text]) => (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => set(key, !form[key])}
+                          className="flex items-center gap-2"
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form[key] ? '#16a34a' : t.muted }}
+                        >
+                          <div style={{ width: '12px', height: '12px', border: `0.5px solid ${form[key] ? '#16a34a' : t.border}`, background: form[key] ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {form[key] && <span style={{ color: '#fff', fontSize: '8px' }}>✓</span>}
+                          </div>
+                          {text}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   {/* Min advance booking */}

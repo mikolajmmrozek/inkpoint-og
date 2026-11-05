@@ -23,7 +23,7 @@ export default function ShopProductEditor({ product, categories, collections, on
     pricing_mode: 'fixed',
     slider_min: 100,
     slider_max: 2000,
-    slider_step: 50,
+    slider_step: 10,
     shipping_form_ids: [],
     unlimited_stock: false,
     stock: 0,
@@ -193,7 +193,7 @@ export default function ShopProductEditor({ product, categories, collections, on
                 <div className="grid grid-cols-3 gap-4">
                   <div><label style={labelStyle(t)}>Kwota od (PLN)</label><input type="number" value={form.slider_min ?? 100} onChange={e => set('slider_min', e.target.value)} style={inputStyle(t)} /></div>
                   <div><label style={labelStyle(t)}>Kwota do (PLN)</label><input type="number" value={form.slider_max ?? 2000} onChange={e => set('slider_max', e.target.value)} style={inputStyle(t)} /></div>
-                  <div><label style={labelStyle(t)}>Skok (PLN)</label><input type="number" value={form.slider_step ?? 50} onChange={e => set('slider_step', e.target.value)} style={inputStyle(t)} /></div>
+                  <div><label style={labelStyle(t)}>Skok (PLN)</label><input type="number" value={form.slider_step ?? 10} onChange={e => set('slider_step', e.target.value)} style={inputStyle(t)} /></div>
                 </div>
                 <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '6px', lineHeight: 1.7 }}>
                   Klient wybiera kwotę suwakiem w tym zakresie — warianty nie są używane, stan magazynowy nie obowiązuje.
