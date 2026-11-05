@@ -36,10 +36,34 @@
       "type": "number",
       "description": "Cena przekre\u015blona (opcjonalnie)"
     },
+    "pricing_mode": {
+      "type": "string",
+      "enum": [
+        "fixed",
+        "slider"
+      ],
+      "default": "fixed",
+      "description": "fixed = sta\u0142a cena i warianty; slider = klient wybiera kwot\u0119 suwakiem (zakres i skok poni\u017cej)"
+    },
+    "slider_min": {
+      "type": "number",
+      "default": 100,
+      "description": "Najni\u017csza kwota suwaka w PLN (tylko dla pricing_mode = slider)"
+    },
+    "slider_max": {
+      "type": "number",
+      "default": 2000,
+      "description": "Najwy\u017csza kwota suwaka w PLN (tylko dla pricing_mode = slider)"
+    },
+    "slider_step": {
+      "type": "number",
+      "default": 50,
+      "description": "Skok suwaka w PLN (tylko dla pricing_mode = slider)"
+    },
     "is_voucher": {
       "type": "boolean",
       "default": false,
-      "description": "Produkt typu voucher \u2014 klient wybiera kwot\u0119 suwakiem (100\u20132000 z\u0142, co 50 z\u0142) i tyle p\u0142aci"
+      "description": "Znacznik starszych produkt\u00f3w voucher \u2014 r\u00f3wnowa\u017cny pricing_mode = slider"
     },
     "stock": {
       "type": "number",
@@ -51,14 +75,21 @@
       "default": false,
       "description": "True = przy braku towaru pokazujemy 'Wkr\u00f3tce dost\u0119pne' (\u017c\u00f3\u0142ty), False = 'Wyprzedane' (szary)"
     },
+    "shipping_form_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Formy wysy\u0142ki przypisane do produktu (ID z listy ShippingForm)"
+    },
     "shipping_cost": {
       "type": "number",
       "default": 0,
-      "description": "Koszt dostawy tego produktu w PLN (0 = darmowa dostawa) \u2014 u\u017cywany, gdy produkt nie ma opcji dostawy"
+      "description": "Koszt dostawy tego produktu w PLN (0 = darmowa) \u2014 u\u017cywany, gdy produkt nie ma przypisanych form wysy\u0142ki"
     },
     "shipping_info": {
       "type": "string",
-      "description": "Kr\u00f3tka informacja o wysy\u0142ce i pakowaniu tego produktu, np. 'Wysy\u0142ka 24\u201348 h' lub 'Wysy\u0142ka e-mail \u2014 natychmiast'"
+      "description": "Kr\u00f3tka informacja o wysy\u0142ce i pakowaniu tego produktu, np. 'Wysy\u0142ka 24\u201348 h' lub 'Pakowanie 50 z\u0142 \u00b7 odbi\u00f3r w studio'"
     },
     "shipping_options": {
       "type": "array",
@@ -76,7 +107,7 @@
           }
         }
       },
-      "description": "Opcje dostawy wybierane jako przyciski na stronie produktu"
+      "description": "Starsze opcje dostawy wpisywane w produkcie \u2014 u\u017cywane tylko, gdy produkt nie ma przypisanych form wysy\u0142ki"
     },
     "image_url": {
       "type": "string",

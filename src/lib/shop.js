@@ -35,8 +35,22 @@ export const variantsOf = (product) => (Array.isArray(product?.variants) ? produ
 
 // Dostępna liczba sztuk: suma wariantów albo stan produktu.
 // null = produkt nie ma prowadzonego stanu (sprzedawany bez limitu).
+// Sposób ceny: 'fixed' = stała cena i warianty, 'slider' = klient wybiera kwotę
+export const pricingModeOf = (product) => (product?.pricing_mode === 'slider' || product?.is_voucher ? 'slider' : 'fixed');
+
+export const priceSliderOf = (product) => {
+  const min = Number(product?.slider_min);
+  const max = Number(product?.slider_max);
+  const step = Number(product?.slider_step);
+  return {
+    min: min > 0 ? min : 100,
+    max: max > min ? max : (min > 0 ? min + 100 : 2000),
+    step: step > 0 ? step : 50,
+  };
+};
+
 export const productStock = (product) => {
-  if (product?.is_voucher) return null;
+  if (pricingModeOf(product) === 'slider') return null;
   const variants = variantsOf(product).filter(v => v.is_active !== false);
   if (variants.length > 0) return variants.reduce((sum, v) => sum + (Number(v.stock) || 0), 0);
   return typeof product?.stock === 'number' ? product.stock : null;
@@ -65,10 +79,30 @@ export const productShipping = (product) => ({
   info: (product?.shipping_info || '').trim(),
 });
 
-export const shippingOptionsOf = (product) =>
-  (Array.isArray(product?.shipping_options) ? product.shipping_options : [])
+// Opcje dostawy produktu: formy wysyłki przypisane do produktu (z listy ShippingForm),
+// a gdy ich brak — starsze opcje wpisane w produkcie. Forma z opcją zagraniczną
+// dokłada swoje warianty ceny (np. „Paczkomat · Europa").
+export const shippingOptionsOf = (product, forms = []) => {
+  const picked = Array.isArray(product?.shipping_form_ids) ? product.shipping_form_ids : [];
+  const byId = new Map((forms || []).map(f => [f.id, f]));
+  const selected = picked.map(id => byId.get(id)).filter(Boolean);
+
+  if (selected.length > 0) {
+    return selected.flatMap(form => {
+      const base = [{ name: form.name, cost: Number(form.cost) || 0, international: false }];
+      const foreign = form.international
+        ? (form.international_variants || [])
+          .filter(v => (v?.label || '').trim())
+          .map(v => ({ name: `${form.name} · ${v.label.trim()}`, cost: Number(v.cost) || 0, international: true }))
+        : [];
+      return [...base, ...foreign];
+    });
+  }
+
+  return (Array.isArray(product?.shipping_options) ? product.shipping_options : [])
     .filter(o => (o?.name || '').trim())
     .map(o => ({ name: o.name.trim(), cost: Number(o.cost) || 0 }));
+};
 
 // Dostawa koszyka: najwyższy koszt dostawy wśród pozycji (jedna przesyłka),
 // a gdy pozycje nie mają własnej dostawy — koszt z ustawień sklepu.

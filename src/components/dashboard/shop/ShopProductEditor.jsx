@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useTheme } from '@/pages/dashboard/Dashboard';
 import { Plus, X, Trash2, Upload, RefreshCw, Check } from 'lucide-react';
 import { shopTheme, mono, display, inputStyle, labelStyle } from './shopTheme';
-import { slugify } from '@/lib/shop';
+import { slugify, money } from '@/lib/shop';
 
 const ALLOWED_IMG = ['image/jpeg', 'image/png', 'image/webp'];
 
@@ -20,6 +20,11 @@ export default function ShopProductEditor({ product, categories, collections, on
     collection_ids: [],
     price: 0,
     compare_at_price: 0,
+    pricing_mode: 'fixed',
+    slider_min: 100,
+    slider_max: 2000,
+    slider_step: 50,
+    shipping_form_ids: [],
     stock: 0,
     restock: false,
     shipping_cost: 0,
@@ -37,12 +42,15 @@ export default function ShopProductEditor({ product, categories, collections, on
   const [axesText, setAxesText] = useState(() => (product?.variant_axes || []).map(a => ({ name: a.name, values: (a.values || []).join(', ') })));
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [forms, setForms] = useState([]);
+
+  useEffect(() => {
+    base44.entities.ShippingForm.filter({ is_active: true }, 'order', 100)
+      .then(setForms)
+      .catch(() => setForms([]));
+  }, []);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
-
-  const addShippingOption = () => set('shipping_options', [...(form.shipping_options || []), { name: '', cost: 0 }]);
-  const setShippingOption = (i, field, value) =>
-    set('shipping_options', (form.shipping_options || []).map((o, idx) => idx === i ? { ...o, [field]: value } : o));
 
   const buildVariants = (axes, existing, basePrice, explicit = []) => {
     const clean = explicit.filter(a => (a.name || '').trim() && (a.values || '').split(',').map(v => v.trim()).filter(Boolean).length);
@@ -102,18 +110,21 @@ export default function ShopProductEditor({ product, categories, collections, on
         collection_ids: form.collection_ids || [],
         price: Number(form.price) || 0,
         compare_at_price: Number(form.compare_at_price) || 0,
+        pricing_mode: form.pricing_mode === 'slider' ? 'slider' : 'fixed',
+        slider_min: Math.max(0, Number(form.slider_min) || 0),
+        slider_max: Math.max(0, Number(form.slider_max) || 0),
+        slider_step: Math.max(0, Number(form.slider_step) || 0),
         stock: Math.max(0, Number(form.stock) || 0),
         restock: !!form.restock,
+        shipping_form_ids: form.shipping_form_ids || [],
         shipping_cost: Math.max(0, Number(form.shipping_cost) || 0),
         shipping_info: form.shipping_info || '',
-        shipping_options: (form.shipping_options || [])
-          .map(o => ({ name: (o.name || '').trim(), cost: Math.max(0, Number(o.cost) || 0) }))
-          .filter(o => o.name),
+        shipping_options: [],
         image_url: form.image_url || '',
         images: form.images || [],
         variant_axes: form.variant_axes || [],
         variants: form.variants || [],
-        is_voucher: !!form.is_voucher,
+        is_voucher: form.pricing_mode === 'slider',
         is_active: form.is_active !== false,
         is_featured: !!form.is_featured,
         order: Number(form.order) || 999,
@@ -153,12 +164,44 @@ export default function ShopProductEditor({ product, categories, collections, on
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div><label style={labelStyle(t)}>Cena (PLN) *</label><input type="number" value={form.price} onChange={e => set('price', e.target.value)} style={inputStyle(t)} /></div>
+                <div><label style={labelStyle(t)}>{form.pricing_mode === 'slider' ? 'Cena od (PLN) *' : 'Cena (PLN) *'}</label><input type="number" value={form.price} onChange={e => set('price', e.target.value)} style={inputStyle(t)} /></div>
                 <div><label style={labelStyle(t)}>Cena przekreślona</label><input type="number" value={form.compare_at_price} onChange={e => set('compare_at_price', e.target.value)} style={inputStyle(t)} /></div>
               </div>
             </div>
             <div><label style={labelStyle(t)}>Krótki opis</label><input value={form.short_description} onChange={e => set('short_description', e.target.value)} style={inputStyle(t)} /></div>
             <div><label style={labelStyle(t)}>Opis</label><textarea rows={4} value={form.description} onChange={e => set('description', e.target.value)} style={{ ...inputStyle(t), resize: 'vertical', border: `0.5px solid ${t.border}`, padding: '10px', borderRadius: 'var(--radius)' }} /></div>
+          </div>
+
+          {/* Sposób ceny */}
+          <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
+            <p style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: '12px' }}>SPOSÓB CENY</p>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {[{ id: 'fixed', label: 'Stała cena + warianty' }, { id: 'slider', label: 'Suwak — klient wybiera kwotę' }].map(m => {
+                const active = (form.pricing_mode || 'fixed') === m.id;
+                return (
+                  <button key={m.id} onClick={() => set('pricing_mode', m.id)}
+                    style={{ border: `0.5px solid ${active ? 'var(--brand)' : t.border}`, color: active ? 'var(--brand)' : t.muted, background: active ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
+                    {m.label}
+                  </button>
+                );
+              })}
+            </div>
+            {form.pricing_mode === 'slider' ? (
+              <>
+                <div className="grid grid-cols-3 gap-4">
+                  <div><label style={labelStyle(t)}>Kwota od (PLN)</label><input type="number" value={form.slider_min ?? 100} onChange={e => set('slider_min', e.target.value)} style={inputStyle(t)} /></div>
+                  <div><label style={labelStyle(t)}>Kwota do (PLN)</label><input type="number" value={form.slider_max ?? 2000} onChange={e => set('slider_max', e.target.value)} style={inputStyle(t)} /></div>
+                  <div><label style={labelStyle(t)}>Skok (PLN)</label><input type="number" value={form.slider_step ?? 50} onChange={e => set('slider_step', e.target.value)} style={inputStyle(t)} /></div>
+                </div>
+                <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '6px', lineHeight: 1.7 }}>
+                  Klient wybiera kwotę suwakiem w tym zakresie — warianty nie są używane, stan magazynowy nie obowiązuje.
+                </p>
+              </>
+            ) : (
+              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', lineHeight: 1.7 }}>
+                Cena stała; rozmiary, kolory i ich stany ustawiasz jako warianty poniżej.
+              </p>
+            )}
           </div>
 
           {/* Kolekcje */}
@@ -207,7 +250,8 @@ export default function ShopProductEditor({ product, categories, collections, on
             )}
           </div>
 
-          {/* Warianty */}
+          {/* Warianty — tylko przy stałej cenie */}
+          {form.pricing_mode !== 'slider' && (
           <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
             <div className="flex items-center justify-between mb-3">
               <p style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', textTransform: 'uppercase' }}>WARIANTY</p>
@@ -251,6 +295,7 @@ export default function ShopProductEditor({ product, categories, collections, on
               </div>
             )}
           </div>
+          )}
 
           {/* Stan i dostawa */}
           <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
@@ -278,26 +323,28 @@ export default function ShopProductEditor({ product, categories, collections, on
               <input value={form.shipping_info || ''} onChange={e => set('shipping_info', e.target.value)} placeholder="np. Wysyłka 24–48 h / odbiór w studio" style={inputStyle(t)} />
             </div>
             <div className="mt-6">
-              <div className="flex items-center justify-between mb-2">
-                <p style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', textTransform: 'uppercase' }}>OPCJE DOSTAWY</p>
-                <button onClick={addShippingOption} className="flex items-center gap-1.5" style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer' }}>
-                  <Plus size={11} /> DODAJ OPCJĘ
-                </button>
-              </div>
-              {(form.shipping_options || []).length === 0 ? (
+              <p style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: '8px' }}>FORMY WYSYŁKI</p>
+              {forms.length === 0 ? (
                 <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', lineHeight: 1.7 }}>
-                  Brak opcji — obowiązuje jeden koszt dostawy powyżej. Dodaj opcje (np. Paczkomat, kurier, odbiór w studio), aby klient wybierał je przyciskami na stronie produktu.
+                  Brak form wysyłki. Dodaj je w zakładce Sklep → Wysyłka, aby przypisywać je do produktów.
                 </p>
               ) : (
-                <div className="space-y-3">
-                  {(form.shipping_options || []).map((o, i) => (
-                    <div key={i} className="flex items-end gap-3">
-                      <div className="flex-1"><label style={labelStyle(t)}>Nazwa opcji</label><input value={o.name} onChange={e => setShippingOption(i, 'name', e.target.value)} placeholder="np. Paczkomat InPost" style={inputStyle(t)} /></div>
-                      <div style={{ width: '120px' }}><label style={labelStyle(t)}>Koszt (PLN)</label><input type="number" value={o.cost ?? 0} onChange={e => setShippingOption(i, 'cost', e.target.value)} style={inputStyle(t)} /></div>
-                      <button onClick={() => set('shipping_options', (form.shipping_options || []).filter((_, idx) => idx !== i))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: '10px 4px' }}><Trash2 size={13} /></button>
-                    </div>
-                  ))}
-                </div>
+                <>
+                  <div className="flex flex-wrap gap-2">
+                    {forms.map(f => {
+                      const active = (form.shipping_form_ids || []).includes(f.id);
+                      return (
+                        <button key={f.id} onClick={() => set('shipping_form_ids', active ? (form.shipping_form_ids || []).filter(id => id !== f.id) : [...(form.shipping_form_ids || []), f.id])}
+                          style={{ border: `0.5px solid ${active ? 'var(--brand)' : t.border}`, color: active ? 'var(--brand)' : t.muted, background: active ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', ...mono, fontSize: '9px', letterSpacing: '0.08em', padding: '6px 11px', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
+                          {f.name} · {Number(f.cost) > 0 ? money(f.cost) : 'gratis'}{f.international ? ' + zagranica' : ''}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '8px', lineHeight: 1.7 }}>
+                    Wybrane formy klient zobaczy jako przyciski dostawy. Listę i ceny form (także zagraniczne) edytujesz w zakładce Wysyłka.
+                  </p>
+                </>
               )}
             </div>
             <button onClick={() => set('restock', !form.restock)} style={{ marginTop: '16px', background: 'none', border: 'none', cursor: 'pointer', ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.restock ? '#f59e0b' : t.muted, display: 'flex', alignItems: 'center', gap: '7px' }}>
@@ -315,10 +362,6 @@ export default function ShopProductEditor({ product, categories, collections, on
             <button onClick={() => set('is_featured', !form.is_featured)} style={{ background: 'none', border: 'none', cursor: 'pointer', ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.is_featured ? '#16a34a' : t.muted, display: 'flex', alignItems: 'center', gap: '7px' }}>
               <span style={{ width: '12px', height: '12px', border: `0.5px solid ${form.is_featured ? '#16a34a' : t.border}`, background: form.is_featured ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{form.is_featured && <Check size={9} color="#fff" />}</span>
               Polecany
-            </button>
-            <button onClick={() => set('is_voucher', !form.is_voucher)} style={{ background: 'none', border: 'none', cursor: 'pointer', ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.is_voucher ? '#16a34a' : t.muted, display: 'flex', alignItems: 'center', gap: '7px' }}>
-              <span style={{ width: '12px', height: '12px', border: `0.5px solid ${form.is_voucher ? '#16a34a' : t.border}`, background: form.is_voucher ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{form.is_voucher && <Check size={9} color="#fff" />}</span>
-              Voucher — klient wybiera kwotę
             </button>
             <div style={{ width: '90px' }}><label style={labelStyle(t)}>Kolejność</label><input type="number" value={form.order} onChange={e => set('order', e.target.value)} style={inputStyle(t)} /></div>
           </div>

@@ -4,10 +4,10 @@ import { ChevronLeft, Check, ShoppingBag } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import PageLayout from '@/components/layout/PageLayout';
 import VariantPicker from '@/components/shop/VariantPicker';
-import VoucherAmountPicker from '@/components/shop/VoucherAmountPicker';
+import PriceSliderPicker from '@/components/shop/PriceSliderPicker';
 import { useCart } from '@/components/shop/CartProvider';
 import { useAuth } from '@/lib/AuthContext';
-import { money, variantsOf, priceRange, availability, productStock, productShipping, shippingOptionsOf } from '@/lib/shop';
+import { money, variantsOf, priceRange, availability, productStock, productShipping, shippingOptionsOf, pricingModeOf, priceSliderOf } from '@/lib/shop';
 
 export default function ShopProduct() {
   const { slug } = useParams();
@@ -22,19 +22,25 @@ export default function ShopProduct() {
   const [activeImage, setActiveImage] = useState('');
   const [shipOption, setShipOption] = useState(null);
   const [amount, setAmount] = useState(100);
+  const [forms, setForms] = useState([]);
   const [error, setError] = useState('');
 
   useEffect(() => {
     setLoading(true);
-    base44.entities.ShopProduct.filter({ slug }).catch(() => [])
-      .then(list => {
+    Promise.all([
+      base44.entities.ShopProduct.filter({ slug }).catch(() => []),
+      base44.entities.ShippingForm.filter({ is_active: true }, 'order', 100).catch(() => []),
+    ])
+      .then(([list, formList]) => {
         const found = list[0] || null;
+        setForms(formList);
         setProduct(found);
         if (found) {
           setActiveImage(found.image_url || '');
-          const list = variantsOf(found).filter(v => v.is_active !== false);
-          setVariant(list.find(v => (Number(v.stock) || 0) > 0) || list[0] || null);
-          setShipOption(shippingOptionsOf(found)[0] || null);
+          const vList = variantsOf(found).filter(v => v.is_active !== false);
+          setVariant(vList.find(v => (Number(v.stock) || 0) > 0) || vList[0] || null);
+          setShipOption(shippingOptionsOf(found, formList)[0] || null);
+          setAmount(priceSliderOf(found).min);
         }
       })
       .finally(() => setLoading(false));
@@ -43,7 +49,7 @@ export default function ShopProduct() {
   const handleAdd = async () => {
     setError('');
     if (!isAuthenticated) { base44.auth.redirectToLogin(window.location.href); return; }
-    if (product.is_voucher) {
+    if (pricingModeOf(product) === 'slider') {
       const chosen = {
         key: `kwota:${amount}`,
         options: [{ name: 'Kwota', value: `${amount} zł` }],
@@ -80,13 +86,14 @@ export default function ShopProduct() {
     );
   }
 
-  const isVoucher = !!product.is_voucher;
+  const isSlider = pricingModeOf(product) === 'slider';
+  const slider = priceSliderOf(product);
   const variants = variantsOf(product).filter(v => v.is_active !== false);
   const avail = availability(product);
-  const canBuy = isVoucher || avail.state === 'in_stock';
-  const stock = isVoucher ? 99 : (variant ? Number(variant.stock) || 0 : (productStock(product) ?? 99));
+  const canBuy = isSlider || avail.state === 'in_stock';
+  const stock = isSlider ? 99 : (variant ? Number(variant.stock) || 0 : (productStock(product) ?? 99));
   const ship = productShipping(product);
-  const shipOptions = shippingOptionsOf(product);
+  const shipOptions = shippingOptionsOf(product, forms);
   const price = variant?.price || product.price;
   const range = priceRange(product);
   const images = [product.image_url, ...(product.images || [])].filter(Boolean);
@@ -127,7 +134,7 @@ export default function ShopProduct() {
 
               <div className="flex items-baseline gap-3 mt-4 pb-6" style={{ borderBottom: '0.5px solid hsl(var(--border))' }}>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '18px', color: 'hsl(var(--foreground))', letterSpacing: '0.03em' }}>
-                  {isVoucher ? money(amount) : variants.length > 1 && range.min !== range.max ? `od ${money(range.min)}` : money(price)}
+                  {isSlider ? money(amount) : variants.length > 1 && range.min !== range.max ? `od ${money(range.min)}` : money(price)}
                 </p>
                 {product.compare_at_price > 0 && product.compare_at_price > price && (
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'hsl(var(--muted-foreground))', textDecoration: 'line-through' }}>{money(product.compare_at_price)}</p>
@@ -155,8 +162,8 @@ export default function ShopProduct() {
                       {avail.state === 'soon' ? 'Trwa uzupełnianie stanu — ten produkt wróci do sprzedaży.' : 'Ten produkt nie jest już dostępny.'}
                     </p>
                   </div>
-                ) : isVoucher ? (
-                  <VoucherAmountPicker amount={amount} onChange={setAmount} />
+                ) : isSlider ? (
+                  <PriceSliderPicker amount={amount} onChange={setAmount} {...slider} />
                 ) : (
                   <VariantPicker
                     product={{ ...product, variants }}

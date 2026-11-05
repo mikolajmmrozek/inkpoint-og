@@ -1,0 +1,72 @@
+{
+  "name": "ShippingForm",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nazwa formy wysy\u0142ki, np. Paczkomat InPost, Kurier DPD, Odbi\u00f3r w studio"
+    },
+    "info": {
+      "type": "string",
+      "description": "Kr\u00f3tka informacja o pakowaniu i czasie dostawy, np. Pakowanie 50 z\u0142 \u00b7 odbi\u00f3r w studio"
+    },
+    "cost": {
+      "type": "number",
+      "default": 0,
+      "description": "Koszt krajowy w PLN (0 = darmowa)"
+    },
+    "international": {
+      "type": "boolean",
+      "default": false,
+      "description": "True = forma dost\u0119pna tak\u017ce za granic\u0105 (wtedy obowi\u0105zuj\u0105 warianty ceny zagranicznej)"
+    },
+    "international_variants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "Nazwa strefy, np. Europa, \u015awiat"
+          },
+          "cost": {
+            "type": "number",
+            "default": 0,
+            "description": "Koszt tej strefy w PLN"
+          }
+        }
+      },
+      "description": "Warianty ceny zagranicznej \u2014 u\u017cywane tylko gdy international = true"
+    },
+    "order": {
+      "type": "number",
+      "default": 999,
+      "description": "Kolejno\u015b\u0107 wy\u015bwietlania (mniejsza = wcze\u015bniej)"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -29,6 +29,32 @@ export default async function (req) {
       const byId = {};
       products.forEach((p) => { byId[p.id] = p; });
 
+      // Formy wysyłki przypisane do produktów (wspólna lista z dashboardu)
+      const formIds = [...new Set(products.flatMap((p) => (Array.isArray(p.shipping_form_ids) ? p.shipping_form_ids : [])))];
+      const forms = formIds.length > 0
+        ? await base44.asServiceRole.entities.ShippingForm.filter({ id: { $in: formIds } }).catch(() => [])
+        : [];
+      const formsById = new Map(forms.map((f) => [f.id, f]));
+
+      function shipOptionsFor(product) {
+        const picked = Array.isArray(product.shipping_form_ids) ? product.shipping_form_ids : [];
+        const selected = picked.map((id) => formsById.get(id)).filter(Boolean);
+        if (selected.length > 0) {
+          return selected.flatMap((form) => {
+            const base = [{ name: form.name, cost: Number(form.cost) || 0 }];
+            const foreign = form.international
+              ? (form.international_variants || [])
+                .filter((v) => (v?.label || '').trim())
+                .map((v) => ({ name: `${form.name} · ${v.label.trim()}`, cost: Number(v.cost) || 0 }))
+              : [];
+            return [...base, ...foreign];
+          });
+        }
+        return (Array.isArray(product.shipping_options) ? product.shipping_options : [])
+          .filter((o) => (o.name || '').trim())
+          .map((o) => ({ name: o.name, cost: Number(o.cost) || 0 }));
+      }
+
       let subtotal = 0;
       const items = [];
       const stockUpdates = {};
@@ -40,17 +66,19 @@ export default async function (req) {
         }
         const qty = Math.min(99, Math.max(1, parseInt(raw.quantity, 10) || 1));
 
-        // Voucher — klient wybiera kwotę; cena pochodzi z klucza „kwota:150"
-        if (product.is_voucher) {
+        // Suwak ceny — klient wybiera kwotę; cena pochodzi z klucza „kwota:150"
+        if (product.pricing_mode === 'slider' || product.is_voucher) {
+          const min = Number(product.slider_min) > 0 ? Number(product.slider_min) : 100;
+          const max = Number(product.slider_max) > min ? Number(product.slider_max) : 2000;
+          const step = Number(product.slider_step) > 0 ? Number(product.slider_step) : 50;
           const match = /^kwota:(\d+)$/.exec(String(raw.variant_key || ''));
           const chosen = match ? parseInt(match[1], 10) : 0;
-          if (!match || chosen < 100 || chosen > 2000 || chosen % 50 !== 0) {
-            return Response.json({ error: 'Wybierz kwotę vouchera: od 100 zł do 2000 zł, co 50 zł.' }, { status: 400 });
+          if (!match || chosen < min || chosen > max || (chosen - min) % step !== 0) {
+            return Response.json({ error: `Wybierz kwotę: od ${min} zł do ${max} zł, co ${step} zł.` }, { status: 400 });
           }
           subtotal = round2(subtotal + chosen * qty);
 
-          const voucherShipOptions = (Array.isArray(product.shipping_options) ? product.shipping_options : [])
-            .filter((o) => (o.name || '').trim());
+          const voucherShipOptions = shipOptionsFor(product);
           const chosenVoucherShip = voucherShipOptions.find((o) => o.name === raw.shipping_option) || voucherShipOptions[0] || null;
           const voucherShip = chosenVoucherShip
             ? Number(chosenVoucherShip.cost) || 0
@@ -95,8 +123,7 @@ export default async function (req) {
         subtotal = round2(subtotal + unitPrice * qty);
 
         // Opcja dostawy wybrana dla tej pozycji (produkt może mieć kilka)
-        const shipOptions = (Array.isArray(product.shipping_options) ? product.shipping_options : [])
-          .filter((o) => (o.name || '').trim());
+        const shipOptions = shipOptionsFor(product);
         const chosenShip = shipOptions.find((o) => o.name === raw.shipping_option) || shipOptions[0] || null;
         const itemShip = chosenShip
           ? Number(chosenShip.cost) || 0
