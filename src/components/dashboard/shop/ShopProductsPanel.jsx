@@ -13,6 +13,7 @@ export default function ShopProductsPanel() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [collections, setCollections] = useState([]);
+  const [forms, setForms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null);
   const [deleteFor, setDeleteFor] = useState(null);
@@ -25,7 +26,8 @@ export default function ShopProductsPanel() {
       base44.entities.ShopProduct.list('order', 300).catch(() => []),
       base44.entities.ShopCategory.list('order', 100).catch(() => []),
       base44.entities.ShopCollection.list('order', 100).catch(() => []),
-    ]).then(([p, c, col]) => { setProducts(p); setCategories(c); setCollections(col); }).finally(() => setLoading(false));
+      base44.entities.ShippingForm.list('order', 100).catch(() => []),
+    ]).then(([p, c, col, f]) => { setProducts(p); setCategories(c); setCollections(col); setForms(f); }).finally(() => setLoading(false));
   };
 
   useEffect(() => { load(); }, []);
@@ -71,6 +73,11 @@ export default function ShopProductsPanel() {
             const hasVariants = variants.length > 0;
             const open = openStocks.includes(p.id);
             const stockColor = avail.state === 'sold_out' ? '#9ca3af' : avail.state === 'soon' ? '#f59e0b' : t.muted;
+            const shippingDetails = [
+              ...forms.filter(f => (p.shipping_form_ids || []).includes(f.id)).map(f => `${f.name} · ${Number(f.cost) > 0 ? money(f.cost) : 'gratis'}`),
+              ...((p.shipping_info || '').trim() ? [p.shipping_info.trim()] : []),
+            ];
+            const hasDetails = hasVariants || shippingDetails.length > 0;
             return (
               <div key={p.id} style={{ borderBottom: i < filtered.length - 1 ? `0.5px solid ${t.border}` : 'none', opacity: p.is_active === false ? 0.55 : 1 }}>
               <div className="grid grid-cols-12 gap-3 px-4 py-3 items-center">
@@ -103,9 +110,12 @@ export default function ShopProductsPanel() {
                   )}
                 </div>
                 <div className="col-span-2 md:col-span-2">
-                  <p style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>
-                    {Number(p.shipping_cost) > 0 ? `DOSTAWA ${money(p.shipping_cost)}` : 'DOSTAWA GRATIS'}
-                  </p>
+                  <button onClick={() => hasDetails && toggleStocks(p.id)} style={{ background: 'none', border: 'none', cursor: hasDetails ? 'pointer' : 'default', padding: 0, display: 'flex', alignItems: 'center', gap: '3px', textAlign: 'left' }} title="Pokaż szczegóły dostawy">
+                    <span style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>
+                      {Number(p.shipping_cost) > 0 ? `DOSTAWA ${money(p.shipping_cost)}` : 'DOSTAWA GRATIS'}
+                    </span>
+                    {hasDetails && (open ? <ChevronDown size={11} color={t.muted} /> : <ChevronRight size={11} color={t.muted} />)}
+                  </button>
                 </div>
                 <div className="col-span-3 md:col-span-2 flex items-center gap-1.5 justify-end">
                   <button onClick={() => toggleActive(p)} title="Włącz/wyłącz" style={{ background: 'none', border: 'none', cursor: 'pointer', color: p.is_active === false ? t.muted : '#16a34a', padding: '4px' }}><Power size={13} /></button>
@@ -113,20 +123,27 @@ export default function ShopProductsPanel() {
                   <button onClick={() => setDeleteFor(p)} title="Usuń" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--brand)', padding: '4px' }}><Trash2 size={13} /></button>
                 </div>
               </div>
-              {hasVariants && open && (
-                <div className="grid grid-cols-12 gap-3 px-4 pb-3">
-                  <div className="col-span-12 flex flex-wrap gap-2">
-                    {variants.map(v => {
+              {hasDetails && open && (
+                <div className="grid grid-cols-12 gap-3 px-4 pb-4">
+                  <div className="hidden md:block md:col-span-4" />
+                  <div className="hidden md:block md:col-span-2" />
+                  <div className="col-span-6 md:col-span-2 flex flex-col gap-1">
+                    {hasVariants && variants.map(v => {
                       const label = (v.options || []).map(o => o.value).join(' / ') || v.key;
                       const qty = Number(v.stock) || 0;
-                      const color = qty > 0 ? t.text : '#9ca3af';
                       return (
-                        <span key={v.key} style={{ ...mono, fontSize: '9px', letterSpacing: '0.06em', padding: '5px 9px', border: `0.5px solid ${t.border}`, color, borderRadius: 'var(--radius)', background: qty > 0 ? 'transparent' : 'rgba(148,163,184,0.08)' }}>
-                          {label}: {qty > 0 ? `${qty} szt.` : '0 szt.'}
+                        <span key={v.key} style={{ ...mono, fontSize: '9px', letterSpacing: '0.06em', color: qty > 0 ? t.text : '#9ca3af' }}>
+                          {label}: {qty} szt.
                         </span>
                       );
                     })}
                   </div>
+                  <div className="col-span-6 md:col-span-2 flex flex-col gap-1">
+                    {shippingDetails.map((txt, idx) => (
+                      <span key={idx} style={{ ...mono, fontSize: '9px', letterSpacing: '0.06em', color: t.muted }}>{txt}</span>
+                    ))}
+                  </div>
+                  <div className="hidden md:block md:col-span-2" />
                 </div>
               )}
               </div>
