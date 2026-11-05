@@ -39,6 +39,38 @@ export default async function (req) {
           return Response.json({ error: 'Produkt niedostępny. Odśwież koszyk.' }, { status: 400 });
         }
         const qty = Math.min(99, Math.max(1, parseInt(raw.quantity, 10) || 1));
+
+        // Voucher — klient wybiera kwotę; cena pochodzi z klucza „kwota:150"
+        if (product.is_voucher) {
+          const match = /^kwota:(\d+)$/.exec(String(raw.variant_key || ''));
+          const chosen = match ? parseInt(match[1], 10) : 0;
+          if (!match || chosen < 100 || chosen > 2000 || chosen % 50 !== 0) {
+            return Response.json({ error: 'Wybierz kwotę vouchera: od 100 zł do 2000 zł, co 50 zł.' }, { status: 400 });
+          }
+          subtotal = round2(subtotal + chosen * qty);
+
+          const voucherShipOptions = (Array.isArray(product.shipping_options) ? product.shipping_options : [])
+            .filter((o) => (o.name || '').trim());
+          const chosenVoucherShip = voucherShipOptions.find((o) => o.name === raw.shipping_option) || voucherShipOptions[0] || null;
+          const voucherShip = chosenVoucherShip
+            ? Number(chosenVoucherShip.cost) || 0
+            : (typeof product.shipping_cost === 'number' ? Number(product.shipping_cost) || 0 : null);
+
+          items.push({
+            product_id: product.id,
+            product_name: product.name,
+            slug: product.slug || '',
+            image_url: product.image_url || '',
+            variant_key: `kwota:${chosen}`,
+            variant_label: `Kwota: ${chosen} zł`,
+            unit_price: chosen,
+            quantity: qty,
+            shipping_option: chosenVoucherShip ? chosenVoucherShip.name : '',
+            ...(typeof voucherShip === 'number' ? { shipping_cost: voucherShip } : {}),
+          });
+          continue;
+        }
+
         const variants = Array.isArray(product.variants) ? product.variants : [];
         const variant = variants.find((v) => v.key === raw.variant_key) || null;
 

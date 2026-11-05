@@ -113,6 +113,7 @@ export default function ShopProductEditor({ product, categories, collections, on
         images: form.images || [],
         variant_axes: form.variant_axes || [],
         variants: form.variants || [],
+        is_voucher: !!form.is_voucher,
         is_active: form.is_active !== false,
         is_featured: !!form.is_featured,
         order: Number(form.order) || 999,
@@ -314,6 +315,10 @@ export default function ShopProductEditor({ product, categories, collections, on
             <button onClick={() => set('is_featured', !form.is_featured)} style={{ background: 'none', border: 'none', cursor: 'pointer', ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.is_featured ? '#16a34a' : t.muted, display: 'flex', alignItems: 'center', gap: '7px' }}>
               <span style={{ width: '12px', height: '12px', border: `0.5px solid ${form.is_featured ? '#16a34a' : t.border}`, background: form.is_featured ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{form.is_featured && <Check size={9} color="#fff" />}</span>
               Polecany
+            </button>
+            <button onClick={() => set('is_voucher', !form.is_voucher)} style={{ background: 'none', border: 'none', cursor: 'pointer', ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.is_voucher ? '#16a34a' : t.muted, display: 'flex', alignItems: 'center', gap: '7px' }}>
+              <span style={{ width: '12px', height: '12px', border: `0.5px solid ${form.is_voucher ? '#16a34a' : t.border}`, background: form.is_voucher ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{form.is_voucher && <Check size={9} color="#fff" />}</span>
+              Voucher — klient wybiera kwotę
             </button>
             <div style={{ width: '90px' }}><label style={labelStyle(t)}>Kolejność</label><input type="number" value={form.order} onChange={e => set('order', e.target.value)} style={inputStyle(t)} /></div>
           </div>

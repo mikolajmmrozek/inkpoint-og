@@ -4,6 +4,7 @@ import { ChevronLeft, Check, ShoppingBag } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import PageLayout from '@/components/layout/PageLayout';
 import VariantPicker from '@/components/shop/VariantPicker';
+import VoucherAmountPicker from '@/components/shop/VoucherAmountPicker';
 import { useCart } from '@/components/shop/CartProvider';
 import { useAuth } from '@/lib/AuthContext';
 import { money, variantsOf, priceRange, availability, productStock, productShipping, shippingOptionsOf } from '@/lib/shop';
@@ -20,6 +21,7 @@ export default function ShopProduct() {
   const [added, setAdded] = useState(false);
   const [activeImage, setActiveImage] = useState('');
   const [shipOption, setShipOption] = useState(null);
+  const [amount, setAmount] = useState(100);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -41,6 +43,20 @@ export default function ShopProduct() {
   const handleAdd = async () => {
     setError('');
     if (!isAuthenticated) { base44.auth.redirectToLogin(window.location.href); return; }
+    if (product.is_voucher) {
+      const chosen = {
+        key: `kwota:${amount}`,
+        options: [{ name: 'Kwota', value: `${amount} zł` }],
+        price: amount,
+        stock: 99,
+      };
+      const voucherOk = await add(product, chosen, quantity, shipOption);
+      if (voucherOk) {
+        setAdded(true);
+        setTimeout(() => setAdded(false), 2200);
+      }
+      return;
+    }
     if (variant && (Number(variant.stock) || 0) <= 0) { setError('Ten wariant jest wyprzedany — wybierz inny.'); return; }
     const ok = await add(product, variant, quantity, shipOption);
     if (ok) {
@@ -64,10 +80,11 @@ export default function ShopProduct() {
     );
   }
 
+  const isVoucher = !!product.is_voucher;
   const variants = variantsOf(product).filter(v => v.is_active !== false);
   const avail = availability(product);
-  const canBuy = avail.state === 'in_stock';
-  const stock = variant ? Number(variant.stock) || 0 : (productStock(product) ?? 99);
+  const canBuy = isVoucher || avail.state === 'in_stock';
+  const stock = isVoucher ? 99 : (variant ? Number(variant.stock) || 0 : (productStock(product) ?? 99));
   const ship = productShipping(product);
   const shipOptions = shippingOptionsOf(product);
   const price = variant?.price || product.price;
@@ -110,7 +127,7 @@ export default function ShopProduct() {
 
               <div className="flex items-baseline gap-3 mt-4 pb-6" style={{ borderBottom: '0.5px solid hsl(var(--border))' }}>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '18px', color: 'hsl(var(--foreground))', letterSpacing: '0.03em' }}>
-                  {variants.length > 1 && range.min !== range.max ? `od ${money(range.min)}` : money(price)}
+                  {isVoucher ? money(amount) : variants.length > 1 && range.min !== range.max ? `od ${money(range.min)}` : money(price)}
                 </p>
                 {product.compare_at_price > 0 && product.compare_at_price > price && (
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'hsl(var(--muted-foreground))', textDecoration: 'line-through' }}>{money(product.compare_at_price)}</p>
@@ -138,6 +155,8 @@ export default function ShopProduct() {
                       {avail.state === 'soon' ? 'Trwa uzupełnianie stanu — ten produkt wróci do sprzedaży.' : 'Ten produkt nie jest już dostępny.'}
                     </p>
                   </div>
+                ) : isVoucher ? (
+                  <VoucherAmountPicker amount={amount} onChange={setAmount} />
                 ) : (
                   <VariantPicker
                     product={{ ...product, variants }}

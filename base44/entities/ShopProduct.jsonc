@@ -36,6 +36,11 @@
       "type": "number",
       "description": "Cena przekre\u015blona (opcjonalnie)"
     },
+    "is_voucher": {
+      "type": "boolean",
+      "default": false,
+      "description": "Produkt typu voucher \u2014 klient wybiera kwot\u0119 suwakiem (100\u20132000 z\u0142, co 50 z\u0142) i tyle p\u0142aci"
+    },
     "stock": {
       "type": "number",
       "default": 0,

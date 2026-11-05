@@ -36,6 +36,7 @@ export const variantsOf = (product) => (Array.isArray(product?.variants) ? produ
 // Dostępna liczba sztuk: suma wariantów albo stan produktu.
 // null = produkt nie ma prowadzonego stanu (sprzedawany bez limitu).
 export const productStock = (product) => {
+  if (product?.is_voucher) return null;
   const variants = variantsOf(product).filter(v => v.is_active !== false);
   if (variants.length > 0) return variants.reduce((sum, v) => sum + (Number(v.stock) || 0), 0);
   return typeof product?.stock === 'number' ? product.stock : null;
