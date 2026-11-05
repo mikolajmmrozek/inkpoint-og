@@ -20,6 +20,10 @@ export default function ShopProductEditor({ product, categories, collections, on
     collection_ids: [],
     price: 0,
     compare_at_price: 0,
+    stock: 0,
+    restock: false,
+    shipping_cost: 0,
+    shipping_info: '',
     image_url: '',
     images: [],
     variant_axes: [],
@@ -93,6 +97,10 @@ export default function ShopProductEditor({ product, categories, collections, on
         collection_ids: form.collection_ids || [],
         price: Number(form.price) || 0,
         compare_at_price: Number(form.compare_at_price) || 0,
+        stock: Math.max(0, Number(form.stock) || 0),
+        restock: !!form.restock,
+        shipping_cost: Math.max(0, Number(form.shipping_cost) || 0),
+        shipping_info: form.shipping_info || '',
         image_url: form.image_url || '',
         images: form.images || [],
         variant_axes: form.variant_axes || [],
@@ -233,6 +241,37 @@ export default function ShopProductEditor({ product, categories, collections, on
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Stan i dostawa */}
+          <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
+            <p style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: '14px' }}>STAN I DOSTAWA</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label style={labelStyle(t)}>Stan magazynowy (szt.)</label>
+                <input type="number" value={form.stock ?? 0} onChange={e => set('stock', e.target.value)} style={inputStyle(t)} />
+                <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px', lineHeight: 1.6 }}>
+                  {(form.variants || []).length > 0
+                    ? 'Produkt ma warianty — stan ustawiasz przy każdym wariancie.'
+                    : 'Liczba dostępnych sztuk. 0 = wyprzedane.'}
+                </p>
+              </div>
+              <div>
+                <label style={labelStyle(t)}>Koszt dostawy (PLN)</label>
+                <input type="number" value={form.shipping_cost ?? 0} onChange={e => set('shipping_cost', e.target.value)} style={inputStyle(t)} />
+                <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px', lineHeight: 1.6 }}>
+                  0 = darmowa dostawa tego produktu. W koszyku liczy się najwyższy koszt.
+                </p>
+              </div>
+            </div>
+            <div className="mt-4">
+              <label style={labelStyle(t)}>Informacja o dostawie</label>
+              <input value={form.shipping_info || ''} onChange={e => set('shipping_info', e.target.value)} placeholder="np. Wysyłka 24–48 h / odbiór w studio" style={inputStyle(t)} />
+            </div>
+            <button onClick={() => set('restock', !form.restock)} style={{ marginTop: '16px', background: 'none', border: 'none', cursor: 'pointer', ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.restock ? '#f59e0b' : t.muted, display: 'flex', alignItems: 'center', gap: '7px' }}>
+              <span style={{ width: '12px', height: '12px', border: `0.5px solid ${form.restock ? '#f59e0b' : t.border}`, background: form.restock ? '#f59e0b' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{form.restock && <Check size={9} color="#fff" />}</span>
+              Wkrótce dostępne (zamiast „Wyprzedane")
+            </button>
           </div>
 
           {/* Ustawienia */}

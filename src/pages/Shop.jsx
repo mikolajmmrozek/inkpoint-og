@@ -4,9 +4,10 @@ import { ShoppingBag, ArrowLeft } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import PageLayout from '@/components/layout/PageLayout';
 import ShopProductCard from '@/components/shop/ShopProductCard';
+import ShopVariantFilters from '@/components/shop/ShopVariantFilters';
 import ShopDocuments from '@/components/shop/ShopDocuments';
 import { useCart } from '@/components/shop/CartProvider';
-import { isSoldOut } from '@/lib/shop';
+import { variantsOf } from '@/lib/shop';
 
 export default function Shop() {
   const { count } = useCart();
@@ -17,6 +18,7 @@ export default function Shop() {
   const [activeCategory, setActiveCategory] = useState('');
   const [activeCollection, setActiveCollection] = useState('');
   const [query, setQuery] = useState('');
+  const [variantFilters, setVariantFilters] = useState({});
 
   useEffect(() => {
     Promise.all([
@@ -39,16 +41,29 @@ export default function Shop() {
     list = list.filter(p => (p.name || '').toLowerCase().includes(q) || (p.short_description || '').toLowerCase().includes(q));
   }
 
-  const cards = list.map(p => ({
-    id: p.id,
-    slug: p.slug || p.id,
-    name: p.name,
-    price: p.price,
-    category_name: p.category_name,
-    image_url: p.image_url,
-    sold_out: isSoldOut(p),
-    is_new: p.created_date ? (Date.now() - new Date(p.created_date).getTime()) < 1000 * 60 * 60 * 24 * 30 : false,
-  }));
+  // Opcje filtrów budowane z wariantów produktów w aktualnym widoku
+  const facetMap = {};
+  list.forEach(p => variantsOf(p).forEach(v => (v.options || []).forEach(o => {
+    if (!o?.name || !o?.value) return;
+    (facetMap[o.name] = facetMap[o.name] || new Set()).add(o.value);
+  })));
+  const facets = Object.entries(facetMap).map(([name, values]) => ({ name, values: [...values].sort((a, b) => a.localeCompare(b, 'pl')) }));
+
+  Object.entries(variantFilters).forEach(([axis, values]) => {
+    if (!values || values.length === 0) return;
+    list = list.filter(p => variantsOf(p).some(v => (v.options || []).some(o => o.name === axis && values.includes(o.value))));
+  });
+
+  const toggleFilter = (axis, value) => {
+    setVariantFilters(prev => {
+      const current = prev[axis] || [];
+      const next = current.includes(value) ? current.filter(v => v !== value) : [...current, value];
+      return { ...prev, [axis]: next };
+    });
+  };
+
+  const changeCategory = (id) => { setActiveCategory(id); setVariantFilters({}); };
+  const changeCollection = (id) => { setActiveCollection(id); setActiveCategory(''); setVariantFilters({}); };
 
   return (
     <PageLayout>
@@ -76,7 +91,7 @@ export default function Shop() {
                   return (
                     <button
                       key={c.id}
-                      onClick={() => { setActiveCollection(active ? '' : c.id); setActiveCategory(''); }}
+                      onClick={() => changeCollection(active ? '' : c.id)}
                       className="relative shrink-0 overflow-hidden transition-all duration-500"
                       style={{ width: '190px', height: '110px', border: `0.5px solid ${active ? 'var(--brand)' : 'hsl(var(--border))'}`, borderRadius: 'var(--radius)' }}
                     >
@@ -94,7 +109,7 @@ export default function Shop() {
           <div className="flex flex-wrap items-center justify-between gap-4 py-6" style={{ borderBottom: '0.5px solid hsl(var(--border))' }}>
             <div className="flex flex-wrap gap-2">
               <button
-                onClick={() => { setActiveCategory(''); }}
+                onClick={() => changeCategory('')}
                 className="text-micro"
                 style={{
                   fontSize: '10px', letterSpacing: '0.14em', padding: '8px 16px',
@@ -109,7 +124,7 @@ export default function Shop() {
                 return (
                   <button
                     key={cat.id}
-                    onClick={() => setActiveCategory(active ? '' : cat.id)}
+                    onClick={() => changeCategory(active ? '' : cat.id)}
                     className="text-micro"
                     style={{
                       fontSize: '10px', letterSpacing: '0.14em', padding: '8px 16px',
@@ -132,10 +147,18 @@ export default function Shop() {
             />
           </div>
 
+          {/* Filtry wariantów */}
+          <ShopVariantFilters
+            facets={facets}
+            selected={variantFilters}
+            onToggle={toggleFilter}
+            onClear={() => setVariantFilters({})}
+          />
+
           {collection && (
             <div className="flex items-center gap-3 pt-6">
               <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', letterSpacing: '0.04em', color: 'hsl(var(--foreground))' }}>{collection.name}</p>
-              <button onClick={() => setActiveCollection('')} className="text-micro" style={{ fontSize: '9px', color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer', letterSpacing: '0.1em', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <button onClick={() => changeCollection('')} className="text-micro" style={{ fontSize: '9px', color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer', letterSpacing: '0.1em', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <ArrowLeft size={11} /> WSZYSTKIE
               </button>
             </div>
@@ -143,7 +166,7 @@ export default function Shop() {
 
           {loading ? (
             <div className="py-24 flex justify-center"><div className="w-8 h-px animate-pulse" style={{ background: 'var(--brand)' }} /></div>
-          ) : cards.length === 0 ? (
+          ) : list.length === 0 ? (
             <div className="py-24 text-center mt-10" style={{ border: '0.5px solid hsl(var(--border))', borderRadius: 'var(--radius)' }}>
               <ShoppingBag size={26} style={{ color: 'hsl(var(--muted-foreground))', margin: '0 auto 14px' }} />
               <p className="text-micro" style={{ fontSize: '10px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.14em' }}>
@@ -152,7 +175,7 @@ export default function Shop() {
             </div>
           ) : (
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mt-10">
-              {cards.map(p => <ShopProductCard key={p.id} product={p} />)}
+              {list.map(p => <ShopProductCard key={p.id} product={p} />)}
             </div>
           )}
 

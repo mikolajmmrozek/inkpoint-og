@@ -2,7 +2,6 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 const round2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
 const nowIso = () => new Date().toISOString();
-const moneyLabel = (n) => `${round2(n).toFixed(2).replace('.', ',')} zł`;
 
 function variantLabelOf(v) {
   if (!v) return 'Standard';
@@ -32,7 +31,7 @@ export default async function (req) {
 
       let subtotal = 0;
       const items = [];
-      const productUpdates = [];
+      const stockUpdates = {};
 
       for (const raw of rawItems) {
         const product = byId[raw.product_id];
@@ -41,7 +40,7 @@ export default async function (req) {
         }
         const qty = Math.min(99, Math.max(1, parseInt(raw.quantity, 10) || 1));
         const variants = Array.isArray(product.variants) ? product.variants : [];
-        const variant = variants.find((v) => v.key === raw.variant_key) || (variants.length === 0 ? null : null);
+        const variant = variants.find((v) => v.key === raw.variant_key) || null;
 
         if (variants.length > 0 && !variant) {
           return Response.json({ error: `Wybierz wariant produktu „${product.name}".` }, { status: 400 });
@@ -52,6 +51,11 @@ export default async function (req) {
         if (variant && (Number(variant.stock) || 0) < qty) {
           return Response.json({
             error: `Brak wystarczającej ilości: ${product.name} (${variantLabelOf(variant)}). Dostępne: ${Number(variant.stock) || 0} szt.`,
+          }, { status: 400 });
+        }
+        if (!variant && typeof product.stock === 'number' && product.stock < qty) {
+          return Response.json({
+            error: `Brak wystarczającej ilości: ${product.name}. Dostępne: ${Math.max(0, product.stock)} szt.`,
           }, { status: 400 });
         }
 
@@ -68,11 +72,17 @@ export default async function (req) {
           quantity: qty,
         });
 
+        // Stany magazynowe — wariant albo produkt bez wariantów
         if (variant) {
-          const nextVariants = variants.map((v) =>
+          const entry = stockUpdates[product.id] || { id: product.id, variants: variants.map((v) => ({ ...v })) };
+          entry.variants = entry.variants.map((v) =>
             v.key === variant.key ? { ...v, stock: Math.max(0, (Number(v.stock) || 0) - qty) } : v
           );
-          productUpdates.push({ id: product.id, variants: nextVariants });
+          stockUpdates[product.id] = entry;
+        } else if (typeof product.stock === 'number') {
+          const entry = stockUpdates[product.id] || { id: product.id, stock: product.stock };
+          entry.stock = Math.max(0, (Number(entry.stock) || 0) - qty);
+          stockUpdates[product.id] = entry;
         }
       }
 
@@ -152,7 +162,14 @@ export default async function (req) {
       const settings = settingsList[0] || {};
       const payable = Math.max(0, round2(subtotal - discountAmount - voucherAmount));
       const freeFrom = Number(settings.free_shipping_from) || 0;
-      let shippingCost = Number(settings.shipping_cost) || 0;
+
+      // Dostawa liczona per produkt — w koszyku obowiązuje najwyższy koszt
+      // (jedna przesyłka). Gdy produkty nie mają własnej dostawy, z ustawień.
+      const orderedProducts = items.map((it) => byId[it.product_id]).filter(Boolean);
+      const hasPerProduct = orderedProducts.some((p) => typeof p.shipping_cost === 'number');
+      let shippingCost = hasPerProduct
+        ? orderedProducts.reduce((max, p) => Math.max(max, Number(p.shipping_cost) || 0), 0)
+        : (Number(settings.shipping_cost) || 0);
       if (shippingCost > 0 && freeFrom > 0 && payable >= freeFrom) shippingCost = 0;
 
       const total = round2(payable + shippingCost);
@@ -183,8 +200,13 @@ export default async function (req) {
       });
 
       // Stany magazynowe
-      for (const upd of productUpdates) {
-        await base44.asServiceRole.entities.ShopProduct.update(upd.id, { variants: upd.variants });
+      for (const upd of Object.values(stockUpdates)) {
+        const patch = {};
+        if (Array.isArray(upd.variants)) patch.variants = upd.variants;
+        if (typeof upd.stock === 'number') patch.stock = upd.stock;
+        if (Object.keys(patch).length > 0) {
+          await base44.asServiceRole.entities.ShopProduct.update(upd.id, patch);
+        }
       }
 
       // Saldo vouchera
@@ -220,9 +242,21 @@ export default async function (req) {
       // Przywrócenie stanów magazynowych
       for (const it of order.items || []) {
         const product = await base44.asServiceRole.entities.ShopProduct.get(it.product_id).catch(() => null);
-        if (!product || !Array.isArray(product.variants)) continue;
-        const nextVariants = product.variants.map((v) =>
-          v.key === it.variant_key ? { ...v, stock: (Number(v.stock) || 0) + (Number(it.quantity) || 0) } : v
+        if (!product) continue;
+        const qty = Number(it.quantity) || 0;
+        const variants = Array.isArray(product.variants) ? product.variants : [];
+
+        if (variants.length === 0) {
+          if (typeof product.stock === 'number') {
+            await base44.asServiceRole.entities.ShopProduct.update(product.id, {
+              stock: (Number(product.stock) || 0) + qty,
+            });
+          }
+          continue;
+        }
+
+        const nextVariants = variants.map((v) =>
+          v.key === it.variant_key ? { ...v, stock: (Number(v.stock) || 0) + qty } : v
         );
         await base44.asServiceRole.entities.ShopProduct.update(product.id, { variants: nextVariants });
       }

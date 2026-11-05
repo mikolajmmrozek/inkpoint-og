@@ -60,6 +60,8 @@ export default function CartProvider({ children }) {
         variant_label: variant ? (variant.options || []).map(o => `${o.name}: ${o.value}`).join(' · ') || 'Standard' : 'Standard',
         unit_price: Number(variant?.price) || Number(product.price) || 0,
         quantity,
+        shipping_cost: Number(product.shipping_cost) || 0,
+        shipping_info: product.shipping_info || '',
       }];
     await persist(next);
     return true;

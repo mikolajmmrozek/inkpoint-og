@@ -33,14 +33,44 @@ export const variantLabel = (variant) => {
 
 export const variantsOf = (product) => (Array.isArray(product?.variants) ? product.variants : []);
 
-export const isSoldOut = (product) => {
-  const variants = variantsOf(product);
-  if (variants.length === 0) return false;
-  return variants.every(v => v.is_active === false || (Number(v.stock) || 0) <= 0);
+// Dostępna liczba sztuk: suma wariantów albo stan produktu.
+// null = produkt nie ma prowadzonego stanu (sprzedawany bez limitu).
+export const productStock = (product) => {
+  const variants = variantsOf(product).filter(v => v.is_active !== false);
+  if (variants.length > 0) return variants.reduce((sum, v) => sum + (Number(v.stock) || 0), 0);
+  return typeof product?.stock === 'number' ? product.stock : null;
 };
 
-export const totalStock = (product) =>
-  variantsOf(product).reduce((sum, v) => sum + (v.is_active === false ? 0 : Number(v.stock) || 0), 0);
+export const AVAILABILITY = {
+  in_stock: { label: 'DOSTĘPNE', color: '#16a34a' },
+  soon: { label: 'WKRÓTCE DOSTĘPNE', color: '#f59e0b' },
+  sold_out: { label: 'WYPRZEDANE', color: '#9ca3af' },
+};
+
+// state: in_stock | soon (restock) | sold_out
+export const availability = (product) => {
+  const stock = productStock(product);
+  if (stock === null) return { state: 'in_stock', stock: null };
+  if (stock > 0) return { state: 'in_stock', stock };
+  return product?.restock ? { state: 'soon', stock: 0 } : { state: 'sold_out', stock: 0 };
+};
+
+export const isSoldOut = (product) => availability(product).state === 'sold_out';
+export const canBuy = (product) => availability(product).state === 'in_stock';
+export const totalStock = (product) => productStock(product) ?? 0;
+
+export const productShipping = (product) => ({
+  cost: Number(product?.shipping_cost) || 0,
+  info: (product?.shipping_info || '').trim(),
+});
+
+// Dostawa koszyka: najwyższy koszt dostawy wśród pozycji (jedna przesyłka),
+// a gdy pozycje nie mają własnej dostawy — koszt z ustawień sklepu.
+export const cartShipping = (items, settings = {}) => {
+  const withOwn = (items || []).filter(i => typeof i.shipping_cost === 'number');
+  if (withOwn.length === 0) return Number(settings.shipping_cost) || 0;
+  return withOwn.reduce((max, i) => Math.max(max, Number(i.shipping_cost) || 0), 0);
+};
 
 export const priceRange = (product) => {
   const variants = variantsOf(product).filter(v => v.is_active !== false);

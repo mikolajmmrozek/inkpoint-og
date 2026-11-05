@@ -1,13 +1,18 @@
 import { Link } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
-
-const money = (n) => `${Number(n || 0).toLocaleString('pl-PL')} PLN`;
+import { money, availability, productShipping } from '@/lib/shop';
 
 export default function ShopProductCard({ product }) {
-  const soldOut = product.sold_out;
+  const avail = availability(product);
+  const ship = productShipping(product);
+  const soldOut = avail.state === 'sold_out';
+  const soon = avail.state === 'soon';
+  const isNew = product.created_date ? (Date.now() - new Date(product.created_date).getTime()) < 1000 * 60 * 60 * 24 * 30 : false;
+  const shippingText = [ship.info, ship.cost > 0 ? `Dostawa ${money(ship.cost)}` : ''].filter(Boolean).join(' · ');
+
   return (
     <Link
-      to={`/sklep/produkt/${product.slug}`}
+      to={`/sklep/produkt/${product.slug || product.id}`}
       className="group block overflow-hidden transition-all duration-500"
       style={{ border: '0.5px solid hsl(var(--border))', borderRadius: 'var(--radius)', background: 'hsl(var(--card))' }}
       onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgb(var(--brand-rgb) / 0.55)'; }}
@@ -27,12 +32,23 @@ export default function ShopProductCard({ product }) {
             <span className="text-micro" style={{ fontSize: '9px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.2em' }}>BRAK ZDJĘCIA</span>
           </div>
         )}
-        {soldOut && (
-          <span className="absolute top-3 left-3 text-micro" style={{ background: 'hsl(var(--background))', border: '0.5px solid hsl(var(--border))', color: 'hsl(var(--muted-foreground))', padding: '4px 8px', fontSize: '9px', letterSpacing: '0.15em', borderRadius: 'var(--radius)' }}>
-            WYPRZEDANE
+        {(soldOut || soon) && (
+          <span
+            className="absolute top-3 left-3 text-micro"
+            style={{
+              background: 'hsl(var(--background))',
+              border: `0.5px solid ${soon ? 'rgba(245,158,11,0.55)' : 'hsl(var(--border))'}`,
+              color: soon ? '#f59e0b' : 'hsl(var(--muted-foreground))',
+              padding: '4px 8px',
+              fontSize: '9px',
+              letterSpacing: '0.15em',
+              borderRadius: 'var(--radius)',
+            }}
+          >
+            {soon ? 'WKRÓTCE DOSTĘPNE' : 'WYPRZEDANE'}
           </span>
         )}
-        {product.is_new && !soldOut && (
+        {isNew && !soldOut && !soon && (
           <span className="absolute top-3 left-3 text-micro" style={{ background: 'var(--brand)', color: 'var(--btn-text)', padding: '4px 8px', fontSize: '9px', letterSpacing: '0.15em', borderRadius: 'var(--radius)' }}>
             NOWOŚĆ
           </span>
@@ -49,6 +65,11 @@ export default function ShopProductCard({ product }) {
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'hsl(var(--foreground))', marginTop: '8px', letterSpacing: '0.04em' }}>
           {money(product.price)}
         </p>
+        {shippingText && (
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'hsl(var(--muted-foreground))', marginTop: '6px', letterSpacing: '0.06em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {shippingText}
+          </p>
+        )}
       </div>
     </Link>
   );

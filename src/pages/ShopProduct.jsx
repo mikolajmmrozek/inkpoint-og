@@ -6,7 +6,7 @@ import PageLayout from '@/components/layout/PageLayout';
 import VariantPicker from '@/components/shop/VariantPicker';
 import { useCart } from '@/components/shop/CartProvider';
 import { useAuth } from '@/lib/AuthContext';
-import { money, variantsOf, priceRange } from '@/lib/shop';
+import { money, variantsOf, priceRange, availability, productStock, productShipping } from '@/lib/shop';
 
 export default function ShopProduct() {
   const { slug } = useParams();
@@ -29,8 +29,8 @@ export default function ShopProduct() {
         setProduct(found);
         if (found) {
           setActiveImage(found.image_url || '');
-          const variants = variantsOf(found).filter(v => v.is_active !== false);
-          setVariant(variants[0] || null);
+          const list = variantsOf(found).filter(v => v.is_active !== false);
+          setVariant(list.find(v => (Number(v.stock) || 0) > 0) || list[0] || null);
         }
       })
       .finally(() => setLoading(false));
@@ -39,6 +39,7 @@ export default function ShopProduct() {
   const handleAdd = async () => {
     setError('');
     if (!isAuthenticated) { base44.auth.redirectToLogin(window.location.href); return; }
+    if (variant && (Number(variant.stock) || 0) <= 0) { setError('Ten wariant jest wyprzedany — wybierz inny.'); return; }
     const ok = await add(product, variant, quantity);
     if (ok) {
       setAdded(true);
@@ -62,8 +63,10 @@ export default function ShopProduct() {
   }
 
   const variants = variantsOf(product).filter(v => v.is_active !== false);
-  const stock = variant ? Number(variant.stock) || 0 : 99;
-  const soldOut = variants.length > 0 && variants.every(v => (Number(v.stock) || 0) <= 0);
+  const avail = availability(product);
+  const canBuy = avail.state === 'in_stock';
+  const stock = variant ? Number(variant.stock) || 0 : (productStock(product) ?? 99);
+  const ship = productShipping(product);
   const price = variant?.price || product.price;
   const range = priceRange(product);
   const images = [product.image_url, ...(product.images || [])].filter(Boolean);
@@ -116,8 +119,22 @@ export default function ShopProduct() {
               )}
 
               <div className="mt-8">
-                {soldOut ? (
-                  <p className="text-micro" style={{ fontSize: '10px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.14em' }}>PRODUKT CHWILOWO NIEDOSTĘPNY</p>
+                {!canBuy ? (
+                  <div
+                    className="p-4"
+                    style={{
+                      border: `0.5px solid ${avail.state === 'soon' ? 'rgba(245,158,11,0.5)' : 'hsl(var(--border))'}`,
+                      background: avail.state === 'soon' ? 'rgba(245,158,11,0.06)' : 'transparent',
+                      borderRadius: 'var(--radius)',
+                    }}
+                  >
+                    <p className="text-micro" style={{ fontSize: '10px', color: avail.state === 'soon' ? '#f59e0b' : 'hsl(var(--muted-foreground))', letterSpacing: '0.14em' }}>
+                      {avail.state === 'soon' ? 'WKRÓTCE DOSTĘPNE' : 'WYPRZEDANE'}
+                    </p>
+                    <p style={{ fontSize: '12px', color: 'hsl(var(--muted-foreground))', marginTop: '6px', lineHeight: 1.6 }}>
+                      {avail.state === 'soon' ? 'Trwa uzupełnianie stanu — ten produkt wróci do sprzedaży.' : 'Ten produkt nie jest już dostępny.'}
+                    </p>
+                  </div>
                 ) : (
                   <VariantPicker
                     product={{ ...product, variants }}
@@ -130,19 +147,30 @@ export default function ShopProduct() {
                 )}
               </div>
 
-              {!soldOut && (
+              {canBuy && (
                 <button onClick={handleAdd} className="btn-oxblood w-full mt-8 flex items-center justify-center gap-2" style={{ padding: '15px' }}>
                   {added ? <><Check size={14} /> DODANO DO KOSZYKA</> : <><ShoppingBag size={14} /> DODAJ DO KOSZYKA</>}
                 </button>
               )}
-              {!isAuthenticated && !soldOut && (
+              {error && (
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#f59e0b', letterSpacing: '0.06em', marginTop: '10px', textAlign: 'center' }}>{error}</p>
+              )}
+              {!isAuthenticated && canBuy && (
                 <p className="text-micro" style={{ fontSize: '9px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.08em', marginTop: '10px', textAlign: 'center' }}>
                   DO KOSZYKA I ZAMÓWIENIA POTRZEBNE JEST KONTO KLIENTA
                 </p>
               )}
 
+              <div className="mt-8 pt-6" style={{ borderTop: '0.5px solid hsl(var(--border))' }}>
+                <p className="text-micro" style={{ fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', marginBottom: '8px' }}>DOSTAWA</p>
+                {ship.info && <p style={{ color: 'hsl(var(--foreground))', fontSize: '13px', lineHeight: 1.6 }}>{ship.info}</p>}
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.06em', marginTop: ship.info ? '4px' : 0 }}>
+                  Koszt dostawy: {ship.cost > 0 ? money(ship.cost) : 'gratis'}
+                </p>
+              </div>
+
               {product.description && (
-                <div className="mt-10 pt-6" style={{ borderTop: '0.5px solid hsl(var(--border))' }}>
+                <div className="mt-8 pt-6" style={{ borderTop: '0.5px solid hsl(var(--border))' }}>
                   <p className="text-micro" style={{ fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', marginBottom: '10px' }}>OPIS</p>
                   <p style={{ color: 'hsl(var(--foreground))', fontSize: '13px', lineHeight: 1.85, whiteSpace: 'pre-wrap' }}>{product.description}</p>
                 </div>

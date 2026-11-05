@@ -36,6 +36,25 @@
       "type": "number",
       "description": "Cena przekre\u015blona (opcjonalnie)"
     },
+    "stock": {
+      "type": "number",
+      "default": 0,
+      "description": "Stan magazynowy produktu bez wariant\u00f3w (liczba dost\u0119pnych sztuk)"
+    },
+    "restock": {
+      "type": "boolean",
+      "default": false,
+      "description": "True = przy braku towaru pokazujemy 'Wkr\u00f3tce dost\u0119pne' (\u017c\u00f3\u0142ty), False = 'Wyprzedane' (szary)"
+    },
+    "shipping_cost": {
+      "type": "number",
+      "default": 0,
+      "description": "Koszt dostawy tego produktu w PLN (0 = darmowa dostawa)"
+    },
+    "shipping_info": {
+      "type": "string",
+      "description": "Kr\u00f3tka informacja o dostawie tego produktu, np. 'Wysy\u0142ka 24\u201348 h' lub 'Wysy\u0142ka e-mail \u2014 natychmiast'"
+    },
     "image_url": {
       "type": "string",
       "description": "Zdj\u0119cie g\u0142\u00f3wne"

@@ -6,7 +6,7 @@ import PageLayout from '@/components/layout/PageLayout';
 import AddressFields from '@/components/shop/AddressFields';
 import { useCart } from '@/components/shop/CartProvider';
 import { useAuth } from '@/lib/AuthContext';
-import { money } from '@/lib/shop';
+import { money, cartShipping } from '@/lib/shop';
 
 const t = { border: 'hsl(var(--border))', text: 'hsl(var(--foreground))', muted: 'hsl(var(--muted-foreground))' };
 
@@ -72,9 +72,10 @@ export default function ShopCheckout() {
     : 0;
   const payable = Math.max(0, subtotal - discountAmount - voucherAmount);
   const freeFrom = Number(settings.free_shipping_from) || 0;
-  const baseShipping = Number(settings.shipping_cost) || 0;
+  const baseShipping = cartShipping(items, settings);
   const shippingCost = baseShipping > 0 && freeFrom > 0 && payable >= freeFrom ? 0 : baseShipping;
   const total = payable + shippingCost;
+  const shippingNotes = [...new Set(items.map(i => i.shipping_info).filter(Boolean))];
 
   const handleSubmit = async () => {
     setError('');
@@ -306,6 +307,11 @@ export default function ShopCheckout() {
                 {discountAmount > 0 && <div className="flex justify-between"><span>Zniżka {discountCode}</span><span style={{ color: '#16a34a' }}>−{money(discountAmount)}</span></div>}
                 {voucherAmount > 0 && <div className="flex justify-between"><span>Voucher {voucherCode}</span><span style={{ color: '#16a34a' }}>−{money(voucherAmount)}</span></div>}
                 <div className="flex justify-between"><span>Dostawa</span><span style={{ color: 'hsl(var(--foreground))' }}>{shippingCost === 0 ? 'Gratis' : money(shippingCost)}</span></div>
+                {shippingNotes.length > 0 && (
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'hsl(var(--muted-foreground))', lineHeight: 1.6, paddingTop: '4px' }}>
+                    {shippingNotes.join(' · ')}
+                  </p>
+                )}
               </div>
               <div className="flex justify-between items-baseline mt-4 pt-4" style={{ borderTop: '0.5px solid hsl(var(--border))', fontFamily: 'var(--font-mono)' }}>
                 <span style={{ fontSize: '10px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.1em' }}>RAZEM</span>

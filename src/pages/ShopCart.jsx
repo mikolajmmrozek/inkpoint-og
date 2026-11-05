@@ -5,7 +5,7 @@ import { base44 } from '@/api/base44Client';
 import PageLayout from '@/components/layout/PageLayout';
 import { useCart } from '@/components/shop/CartProvider';
 import { useAuth } from '@/lib/AuthContext';
-import { money } from '@/lib/shop';
+import { money, cartShipping } from '@/lib/shop';
 
 export default function ShopCart() {
   const { user, isAuthenticated, isLoadingAuth } = useAuth();
@@ -18,7 +18,7 @@ export default function ShopCart() {
 
   const subtotal = items.reduce((sum, i) => sum + (Number(i.unit_price) || 0) * (Number(i.quantity) || 0), 0);
   const freeFrom = Number(settings?.free_shipping_from) || 0;
-  const baseShipping = Number(settings?.shipping_cost) || 0;
+  const baseShipping = cartShipping(items, settings || {});
   const shipping = subtotal === 0 ? 0 : (baseShipping > 0 && freeFrom > 0 && subtotal >= freeFrom ? 0 : baseShipping);
   const total = subtotal + shipping;
 
@@ -69,6 +69,9 @@ export default function ShopCart() {
                     <div className="flex-1 min-w-0">
                       <Link to={`/sklep/produkt/${item.slug}`} style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', letterSpacing: '0.03em', color: 'hsl(var(--foreground))', lineHeight: 1.1 }}>{item.product_name}</Link>
                       <p className="text-micro" style={{ fontSize: '9px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.08em', marginTop: '5px' }}>{item.variant_label}</p>
+                      {item.shipping_info && (
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.06em', marginTop: '3px' }}>{item.shipping_info}</p>
+                      )}
                       <div className="flex items-center justify-between gap-4 mt-3">
                         <div className="inline-flex items-center" style={{ border: '0.5px solid hsl(var(--border))', borderRadius: 'var(--radius)' }}>
                           <button onClick={() => setQty(item.product_id, item.variant_key, item.quantity - 1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--foreground))', padding: '7px 10px' }}><Minus size={12} /></button>
