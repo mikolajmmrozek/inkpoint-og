@@ -6,10 +6,13 @@ import PageLayout from '@/components/layout/PageLayout';
 import { useCart } from '@/components/shop/CartProvider';
 import { useAuth } from '@/lib/AuthContext';
 import { money, cartShipping } from '@/lib/shop';
+import ShopUnavailable from '@/components/shop/ShopUnavailable';
+import useShopVisibility from '@/hooks/useShopVisibility';
 
 export default function ShopCart() {
   const { user, isAuthenticated, isLoadingAuth } = useAuth();
   const { items, setQty, remove, loading } = useCart();
+  const { visible: shopVisible, loading: shopLoading } = useShopVisibility();
   const [settings, setSettings] = useState(null);
 
   useEffect(() => {
@@ -21,6 +24,8 @@ export default function ShopCart() {
   const baseShipping = cartShipping(items, settings || {});
   const shipping = subtotal === 0 ? 0 : (baseShipping > 0 && freeFrom > 0 && subtotal >= freeFrom ? 0 : baseShipping);
   const total = subtotal + shipping;
+
+  if (!shopLoading && !shopVisible) return <ShopUnavailable />;
 
   if (isLoadingAuth) {
     return <PageLayout><div className="pt-40 pb-24 flex justify-center"><div className="w-8 h-px animate-pulse" style={{ background: 'var(--brand)' }} /></div></PageLayout>;

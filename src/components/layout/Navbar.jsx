@@ -4,6 +4,7 @@ import { User, X, ShoppingBag } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { useCart } from '@/components/shop/CartProvider';
+import useShopVisibility from '@/hooks/useShopVisibility';
 
 export default function Navbar() {
   const { user, isAuthenticated } = useAuth();
@@ -13,6 +14,7 @@ export default function Navbar() {
   const [artist, setArtist] = useState(null);
   const location = useLocation();
   const { count: cartCount } = useCart();
+  const { visible: shopVisible } = useShopVisibility();
 
   const handleCartClick = () => {
     if (isAuthenticated) navigate('/sklep/koszyk');
@@ -57,7 +59,7 @@ export default function Navbar() {
   { href: '/sklep', label: 'Sklep' },
   { href: '/blog', label: 'Blog' },
   { href: '/faq', label: 'FAQ' },
-  { href: '/contact', label: 'Kontakt' }];
+  { href: '/contact', label: 'Kontakt' }].filter(link => link.href !== '/sklep' || shopVisible);
 
 
   return (
@@ -94,7 +96,7 @@ export default function Navbar() {
 
           {/* Book CTA */}
           <div className="hidden lg:flex items-center gap-4">
-            <button
+            {shopVisible && <button
               onClick={handleCartClick}
               aria-label="Koszyk"
               title="Koszyk"
@@ -116,7 +118,7 @@ export default function Navbar() {
                   {cartCount}
                 </span>
               )}
-            </button>
+            </button>}
             <button
               onClick={handleAccountClick}
               className="flex items-center overflow-hidden transition-all duration-500 ease-out group"

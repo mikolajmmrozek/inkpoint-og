@@ -6,6 +6,11 @@
       "type": "string",
       "default": "default"
     },
+    "is_visible": {
+      "type": "boolean",
+      "default": true,
+      "description": "True = sklep opublikowany: zak\u0142adka Sklep i koszyk widoczne na stronie. False = sklep ukryty (historia zam\u00f3wie\u0144 i reklamacje w panelu klienta nadal dzia\u0142aj\u0105)."
+    },
     "shipping_cost": {
       "type": "number",
       "default": 0,

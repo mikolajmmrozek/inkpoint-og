@@ -9,11 +9,14 @@ import ShopAutoCollections from '@/components/shop/ShopAutoCollections';
 import ShopSortBar, { sortProducts } from '@/components/shop/ShopSortBar';
 import { useCart } from '@/components/shop/CartProvider';
 import { variantsOf } from '@/lib/shop';
+import ShopUnavailable from '@/components/shop/ShopUnavailable';
+import useShopVisibility from '@/hooks/useShopVisibility';
 
 const AUTO_LABELS = { new: 'Nowości', best: 'Bestsellery', featured: 'Polecane' };
 
 export default function Shop() {
   const { count } = useCart();
+  const { visible: shopVisible, loading: shopLoading } = useShopVisibility();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [collections, setCollections] = useState([]);
@@ -95,9 +98,11 @@ export default function Shop() {
   const changeCollection = (id) => { setActiveCollection(id); setActiveAuto(''); setActiveCategory(''); setVariantFilters({}); };
   const changeAuto = (key) => { setActiveAuto(key); setActiveCollection(''); setActiveCategory(''); setVariantFilters({}); };
 
+  if (!shopLoading && !shopVisible) return <ShopUnavailable />;
+
   return (
     <PageLayout>
-      <div className="pt-32 md:pt-40 pb-24 px-6 md:px-16">
+      <div className="pt-32 md:pt-40 px-6 md:px-16 pb-24">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 pb-8" style={{ borderBottom: '0.5px solid hsl(var(--border))' }}>
             <div>

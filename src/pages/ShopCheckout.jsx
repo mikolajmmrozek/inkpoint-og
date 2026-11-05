@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Check, Loader2, Tag, Gift, ChevronLeft } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import PageLayout from '@/components/layout/PageLayout';
+import ShopUnavailable from '@/components/shop/ShopUnavailable';
+import useShopVisibility from '@/hooks/useShopVisibility';
 import AddressFields from '@/components/shop/AddressFields';
 import { useCart } from '@/components/shop/CartProvider';
 import { useAuth } from '@/lib/AuthContext';
@@ -18,6 +20,7 @@ export default function ShopCheckout() {
   const { user, isAuthenticated, isLoadingAuth } = useAuth();
   const navigate = useNavigate();
   const { items, clear, loading } = useCart();
+  const { visible: shopVisible, loading: shopLoading } = useShopVisibility();
 
   const [settings, setSettings] = useState({});
   const [addresses, setAddresses] = useState([]);
@@ -113,6 +116,8 @@ export default function ShopCheckout() {
       setSaving(false);
     }
   };
+
+  if (!shopLoading && !shopVisible) return <ShopUnavailable />;
 
   if (isLoadingAuth) {
     return <PageLayout><div className="pt-40 pb-24 flex justify-center"><div className="w-8 h-px animate-pulse" style={{ background: 'var(--brand)' }} /></div></PageLayout>;
