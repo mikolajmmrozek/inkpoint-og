@@ -5,8 +5,11 @@ import { base44 } from '@/api/base44Client';
 import PageLayout from '@/components/layout/PageLayout';
 import ShopProductCard from '@/components/shop/ShopProductCard';
 import ShopVariantFilters from '@/components/shop/ShopVariantFilters';
+import ShopAutoCollections from '@/components/shop/ShopAutoCollections';
 import { useCart } from '@/components/shop/CartProvider';
 import { variantsOf } from '@/lib/shop';
+
+const AUTO_LABELS = { new: 'Nowości', best: 'Bestsellery', featured: 'Polecane' };
 
 export default function Shop() {
   const { count } = useCart();
@@ -16,6 +19,8 @@ export default function Shop() {
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('');
   const [activeCollection, setActiveCollection] = useState('');
+  const [activeAuto, setActiveAuto] = useState('');
+  const [soldMap, setSoldMap] = useState({});
   const [query, setQuery] = useState('');
   const [variantFilters, setVariantFilters] = useState({});
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -32,8 +37,28 @@ export default function Shop() {
     }).finally(() => setLoading(false));
   }, []);
 
+  // Bestsellery — ranking z realnych zamówień (agregacja po stronie serwera)
+  useEffect(() => {
+    base44.functions.invoke('getShopBestsellers', {})
+      .then(res => {
+        const map = {};
+        (res?.data?.ranking || []).forEach(r => { map[r.product_id] = Number(r.quantity) || 0; });
+        setSoldMap(map);
+      })
+      .catch(() => setSoldMap({}));
+  }, []);
+
   const collection = collections.find(c => c.id === activeCollection);
   let list = products;
+  if (activeAuto === 'new') {
+    list = [...list]
+      .sort((a, b) => new Date(b.created_date).getTime() - new Date(a.created_date).getTime())
+      .slice(0, 5);
+  } else if (activeAuto === 'best') {
+    list = [...list].sort((a, b) => (soldMap[b.id] || 0) - (soldMap[a.id] || 0));
+  } else if (activeAuto === 'featured') {
+    list = list.filter(p => p.is_featured);
+  }
   if (activeCollection) list = list.filter(p => (p.collection_ids || []).includes(activeCollection) || (collection?.product_ids || []).includes(p.id));
   if (activeCategory) list = list.filter(p => p.category_id === activeCategory);
   if (query.trim()) {
@@ -63,7 +88,8 @@ export default function Shop() {
   };
 
   const changeCategory = (id) => { setActiveCategory(id); setVariantFilters({}); };
-  const changeCollection = (id) => { setActiveCollection(id); setActiveCategory(''); setVariantFilters({}); };
+  const changeCollection = (id) => { setActiveCollection(id); setActiveAuto(''); setActiveCategory(''); setVariantFilters({}); };
+  const changeAuto = (key) => { setActiveAuto(key); setActiveCollection(''); setActiveCategory(''); setVariantFilters({}); };
 
   return (
     <PageLayout>
@@ -79,6 +105,12 @@ export default function Shop() {
             <Link to="/sklep/koszyk" className="btn-ghost-parchment flex items-center gap-2 self-start md:self-auto" style={{ padding: '11px 20px' }}>
               <ShoppingBag size={13} /> KOSZYK {count > 0 ? `(${count})` : ''}
             </Link>
+          </div>
+
+          {/* Kolekcje automatyczne */}
+          <div className="py-6" style={{ borderBottom: '0.5px solid hsl(var(--border))' }}>
+            <p className="text-micro" style={{ fontSize: '9px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.18em', marginBottom: '12px' }}>AUTOMATYCZNE</p>
+            <ShopAutoCollections active={activeAuto} onSelect={changeAuto} />
           </div>
 
           {/* Kolekcje */}
@@ -175,9 +207,9 @@ export default function Shop() {
             )}
           </div>
 
-          {collection && (
+          {(collection || activeAuto) && (
             <div className="flex items-center gap-3 pt-6">
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', letterSpacing: '0.04em', color: 'hsl(var(--foreground))' }}>{collection.name}</p>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', letterSpacing: '0.04em', color: 'hsl(var(--foreground))' }}>{collection ? collection.name : AUTO_LABELS[activeAuto]}</p>
               <button onClick={() => changeCollection('')} className="text-micro" style={{ fontSize: '9px', color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer', letterSpacing: '0.1em', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <ArrowLeft size={11} /> WSZYSTKIE
               </button>
@@ -190,7 +222,9 @@ export default function Shop() {
             <div className="py-24 text-center mt-10" style={{ border: '0.5px solid hsl(var(--border))', borderRadius: 'var(--radius)' }}>
               <ShoppingBag size={26} style={{ color: 'hsl(var(--muted-foreground))', margin: '0 auto 14px' }} />
               <p className="text-micro" style={{ fontSize: '10px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.14em' }}>
-                {products.length === 0 ? 'SKLEP JEST W PRZYGOTOWANIU' : 'BRAK PRODUKTÓW W TYM WIDOKU'}
+                {products.length === 0
+                  ? 'SKLEP JEST W PRZYGOTOWANIU'
+                  : activeAuto === 'featured' ? 'BRAK WYRÓŻNIONYCH PRODUKTÓW' : 'BRAK PRODUKTÓW W TYM WIDOKU'}
               </p>
             </div>
           ) : (
