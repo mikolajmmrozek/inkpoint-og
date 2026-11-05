@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from '@/pages/dashboard/Dashboard';
-import { Plus, Pencil, Trash2, Package, Power } from 'lucide-react';
+import { Plus, Pencil, Trash2, Package, Power, ChevronDown, ChevronRight } from 'lucide-react';
 import { money, availability } from '@/lib/shop';
 import { shopTheme, mono, display } from './shopTheme';
 import ShopProductEditor from './ShopProductEditor';
@@ -17,6 +17,8 @@ export default function ShopProductsPanel() {
   const [editing, setEditing] = useState(null);
   const [deleteFor, setDeleteFor] = useState(null);
   const [search, setSearch] = useState('');
+  const [openStocks, setOpenStocks] = useState([]);
+  const toggleStocks = (id) => setOpenStocks(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
 
   const load = () => {
     Promise.all([
@@ -65,8 +67,13 @@ export default function ShopProductsPanel() {
         <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
           {filtered.map((p, i) => {
             const avail = availability(p);
+            const variants = Array.isArray(p.variants) ? p.variants : [];
+            const hasVariants = variants.length > 0;
+            const open = openStocks.includes(p.id);
+            const stockColor = avail.state === 'sold_out' ? '#9ca3af' : avail.state === 'soon' ? '#f59e0b' : t.muted;
             return (
-              <div key={p.id} className="grid grid-cols-12 gap-3 px-4 py-3 items-center" style={{ borderBottom: i < filtered.length - 1 ? `0.5px solid ${t.border}` : 'none', opacity: p.is_active === false ? 0.55 : 1 }}>
+              <div key={p.id} style={{ borderBottom: i < filtered.length - 1 ? `0.5px solid ${t.border}` : 'none', opacity: p.is_active === false ? 0.55 : 1 }}>
+              <div className="grid grid-cols-12 gap-3 px-4 py-3 items-center">
                 <div className="col-span-6 md:col-span-4 flex items-center gap-3 min-w-0">
                   <div style={{ width: '42px', height: '52px', overflow: 'hidden', border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)', flexShrink: 0, background: t.panel }}>
                     {p.image_url && <img src={p.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
@@ -80,9 +87,18 @@ export default function ShopProductsPanel() {
                   <p style={{ ...mono, fontSize: '12px', color: 'var(--brand)' }}>{money(p.price)}</p>
                 </div>
                 <div className="col-span-2 md:col-span-2">
-                  <p style={{ ...mono, fontSize: '9px', color: avail.state === 'sold_out' ? '#9ca3af' : avail.state === 'soon' ? '#f59e0b' : t.muted, letterSpacing: '0.06em' }}>
-                    {avail.state === 'in_stock' ? `${avail.stock ?? '∞'} szt.` : avail.state === 'soon' ? 'WKRÓTCE' : 'WYPRZEDANE'}
-                  </p>
+                  {hasVariants ? (
+                    <button onClick={() => toggleStocks(p.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '3px', textAlign: 'left' }} title="Pokaż stany wariantów">
+                      <span style={{ ...mono, fontSize: '9px', color: stockColor, letterSpacing: '0.06em' }}>
+                        {avail.state === 'in_stock' ? `${avail.stock ?? 0} szt.` : avail.state === 'soon' ? 'WKRÓTCE' : 'WYPRZEDANE'}
+                      </span>
+                      {open ? <ChevronDown size={11} color={t.muted} /> : <ChevronRight size={11} color={t.muted} />}
+                    </button>
+                  ) : (
+                    <p style={{ ...mono, fontSize: '9px', color: stockColor, letterSpacing: '0.06em' }}>
+                      {p.unlimited_stock ? '∞ BEZ LIMITU' : avail.state === 'in_stock' ? `${avail.stock ?? 0} szt.` : avail.state === 'soon' ? 'WKRÓTCE' : 'WYPRZEDANE'}
+                    </p>
+                  )}
                 </div>
                 <div className="col-span-2 md:col-span-2">
                   <p style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>
@@ -94,6 +110,23 @@ export default function ShopProductsPanel() {
                   <button onClick={() => setEditing(p)} title="Edytuj" style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: '4px' }}><Pencil size={13} /></button>
                   <button onClick={() => setDeleteFor(p)} title="Usuń" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--brand)', padding: '4px' }}><Trash2 size={13} /></button>
                 </div>
+              </div>
+              {hasVariants && open && (
+                <div className="grid grid-cols-12 gap-3 px-4 pb-3">
+                  <div className="col-span-12 flex flex-wrap gap-2">
+                    {variants.map(v => {
+                      const label = (v.options || []).map(o => o.value).join(' / ') || v.key;
+                      const qty = Number(v.stock) || 0;
+                      const color = qty > 0 ? t.text : '#9ca3af';
+                      return (
+                        <span key={v.key} style={{ ...mono, fontSize: '9px', letterSpacing: '0.06em', padding: '5px 9px', border: `0.5px solid ${t.border}`, color, borderRadius: 'var(--radius)', background: qty > 0 ? 'transparent' : 'rgba(148,163,184,0.08)' }}>
+                          {label}: {qty > 0 ? `${qty} szt.` : '0 szt.'}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
               </div>
             );
           })}
