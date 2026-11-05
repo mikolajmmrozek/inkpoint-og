@@ -80,14 +80,16 @@ export default function ShopProductsPanel() {
                   </div>
                   <div className="min-w-0">
                     <p style={{ fontSize: '13px', color: t.title, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</p>
-                    <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>{p.category_name || 'BEZ KATEGORII'} · KOLEJNOŚĆ {p.order ?? 999}</p>
+                    <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>{p.category_name || 'BEZ KATEGORII'}</p>
                   </div>
                 </div>
                 <div className="col-span-3 md:col-span-2">
                   <p style={{ ...mono, fontSize: '12px', color: 'var(--brand)' }}>{money(p.price)}</p>
                 </div>
                 <div className="col-span-2 md:col-span-2">
-                  {hasVariants ? (
+                  {p.unlimited_stock ? (
+                    <p style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>∞ BEZ LIMITU</p>
+                  ) : hasVariants ? (
                     <button onClick={() => toggleStocks(p.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '3px', textAlign: 'left' }} title="Pokaż stany wariantów">
                       <span style={{ ...mono, fontSize: '9px', color: stockColor, letterSpacing: '0.06em' }}>
                         {avail.state === 'in_stock' ? `${avail.stock ?? 0} szt.` : avail.state === 'soon' ? 'WKRÓTCE' : 'WYPRZEDANE'}
@@ -96,7 +98,7 @@ export default function ShopProductsPanel() {
                     </button>
                   ) : (
                     <p style={{ ...mono, fontSize: '9px', color: stockColor, letterSpacing: '0.06em' }}>
-                      {p.unlimited_stock ? '∞ BEZ LIMITU' : avail.state === 'in_stock' ? `${avail.stock ?? 0} szt.` : avail.state === 'soon' ? 'WKRÓTCE' : 'WYPRZEDANE'}
+                      {avail.state === 'in_stock' ? `${avail.stock ?? 0} szt.` : avail.state === 'soon' ? 'WKRÓTCE' : 'WYPRZEDANE'}
                     </p>
                   )}
                 </div>

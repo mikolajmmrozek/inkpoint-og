@@ -6,6 +6,7 @@ import PageLayout from '@/components/layout/PageLayout';
 import ShopProductCard from '@/components/shop/ShopProductCard';
 import ShopVariantFilters from '@/components/shop/ShopVariantFilters';
 import ShopAutoCollections from '@/components/shop/ShopAutoCollections';
+import ShopSortBar, { sortProducts } from '@/components/shop/ShopSortBar';
 import { useCart } from '@/components/shop/CartProvider';
 import { variantsOf } from '@/lib/shop';
 
@@ -24,6 +25,7 @@ export default function Shop() {
   const [query, setQuery] = useState('');
   const [variantFilters, setVariantFilters] = useState({});
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [sort, setSort] = useState('');
 
   useEffect(() => {
     Promise.all([
@@ -78,6 +80,8 @@ export default function Shop() {
     if (!values || values.length === 0) return;
     list = list.filter(p => variantsOf(p).some(v => (v.options || []).some(o => o.name === axis && values.includes(o.value))));
   });
+
+  if (sort) list = sortProducts(list, sort, soldMap);
 
   const toggleFilter = (axis, value) => {
     setVariantFilters(prev => {
@@ -143,6 +147,10 @@ export default function Shop() {
               >
                 <SlidersHorizontal size={11} /> FILTRY
               </button>
+            </div>
+
+            <div className="flex justify-end pt-5">
+              <ShopSortBar value={sort} onChange={setSort} />
             </div>
 
             {/* Kategorie */}
