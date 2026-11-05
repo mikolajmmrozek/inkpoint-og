@@ -61,6 +61,15 @@ export default async function (req) {
 
         const unitPrice = round2(variant && variant.price ? variant.price : product.price);
         subtotal = round2(subtotal + unitPrice * qty);
+
+        // Opcja dostawy wybrana dla tej pozycji (produkt może mieć kilka)
+        const shipOptions = (Array.isArray(product.shipping_options) ? product.shipping_options : [])
+          .filter((o) => (o.name || '').trim());
+        const chosenShip = shipOptions.find((o) => o.name === raw.shipping_option) || shipOptions[0] || null;
+        const itemShip = chosenShip
+          ? Number(chosenShip.cost) || 0
+          : (typeof product.shipping_cost === 'number' ? Number(product.shipping_cost) || 0 : null);
+
         items.push({
           product_id: product.id,
           product_name: product.name,
@@ -70,6 +79,8 @@ export default async function (req) {
           variant_label: variant ? variantLabelOf(variant) : 'Standard',
           unit_price: unitPrice,
           quantity: qty,
+          shipping_option: chosenShip ? chosenShip.name : '',
+          ...(typeof itemShip === 'number' ? { shipping_cost: itemShip } : {}),
         });
 
         // Stany magazynowe — wariant albo produkt bez wariantów
@@ -163,12 +174,14 @@ export default async function (req) {
       const payable = Math.max(0, round2(subtotal - discountAmount - voucherAmount));
       const freeFrom = Number(settings.free_shipping_from) || 0;
 
-      // Dostawa liczona per produkt — w koszyku obowiązuje najwyższy koszt
-      // (jedna przesyłka). Gdy produkty nie mają własnej dostawy, z ustawień.
-      const orderedProducts = items.map((it) => byId[it.product_id]).filter(Boolean);
-      const hasPerProduct = orderedProducts.some((p) => typeof p.shipping_cost === 'number');
-      let shippingCost = hasPerProduct
-        ? orderedProducts.reduce((max, p) => Math.max(max, Number(p.shipping_cost) || 0), 0)
+      // Dostawa liczona per pozycja — wybrana opcja dostawy albo koszt produktu;
+      // w koszyku obowiązuje najwyższy koszt (jedna przesyłka). Gdy pozycje nie
+      // mają własnej dostawy — koszt z ustawień sklepu.
+      const itemShips = items
+        .map((it) => (typeof it.shipping_cost === 'number' ? Number(it.shipping_cost) || 0 : null))
+        .filter((v) => v !== null);
+      let shippingCost = itemShips.length > 0
+        ? Math.max(...itemShips)
         : (Number(settings.shipping_cost) || 0);
       if (shippingCost > 0 && freeFrom > 0 && payable >= freeFrom) shippingCost = 0;
 

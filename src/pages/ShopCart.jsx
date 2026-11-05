@@ -69,8 +69,10 @@ export default function ShopCart() {
                     <div className="flex-1 min-w-0">
                       <Link to={`/sklep/produkt/${item.slug}`} style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', letterSpacing: '0.03em', color: 'hsl(var(--foreground))', lineHeight: 1.1 }}>{item.product_name}</Link>
                       <p className="text-micro" style={{ fontSize: '9px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.08em', marginTop: '5px' }}>{item.variant_label}</p>
-                      {item.shipping_info && (
-                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.06em', marginTop: '3px' }}>{item.shipping_info}</p>
+                      {(item.shipping_option || item.shipping_info) && (
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.06em', marginTop: '3px' }}>
+                          {[item.shipping_option, item.shipping_info].filter(Boolean).join(' · ')}
+                        </p>
                       )}
                       <div className="flex items-center justify-between gap-4 mt-3">
                         <div className="inline-flex items-center" style={{ border: '0.5px solid hsl(var(--border))', borderRadius: 'var(--radius)' }}>

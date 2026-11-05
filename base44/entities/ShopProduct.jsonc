@@ -49,11 +49,29 @@
     "shipping_cost": {
       "type": "number",
       "default": 0,
-      "description": "Koszt dostawy tego produktu w PLN (0 = darmowa dostawa)"
+      "description": "Koszt dostawy tego produktu w PLN (0 = darmowa dostawa) \u2014 u\u017cywany, gdy produkt nie ma opcji dostawy"
     },
     "shipping_info": {
       "type": "string",
-      "description": "Kr\u00f3tka informacja o dostawie tego produktu, np. 'Wysy\u0142ka 24\u201348 h' lub 'Wysy\u0142ka e-mail \u2014 natychmiast'"
+      "description": "Kr\u00f3tka informacja o wysy\u0142ce i pakowaniu tego produktu, np. 'Wysy\u0142ka 24\u201348 h' lub 'Wysy\u0142ka e-mail \u2014 natychmiast'"
+    },
+    "shipping_options": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Nazwa opcji dostawy, np. Paczkomat InPost"
+          },
+          "cost": {
+            "type": "number",
+            "default": 0,
+            "description": "Koszt tej opcji w PLN (0 = darmowa)"
+          }
+        }
+      },
+      "description": "Opcje dostawy wybierane jako przyciski na stronie produktu"
     },
     "image_url": {
       "type": "string",

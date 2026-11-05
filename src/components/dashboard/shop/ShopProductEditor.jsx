@@ -24,6 +24,7 @@ export default function ShopProductEditor({ product, categories, collections, on
     restock: false,
     shipping_cost: 0,
     shipping_info: '',
+    shipping_options: [],
     image_url: '',
     images: [],
     variant_axes: [],
@@ -38,6 +39,10 @@ export default function ShopProductEditor({ product, categories, collections, on
   const [uploading, setUploading] = useState(false);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const addShippingOption = () => set('shipping_options', [...(form.shipping_options || []), { name: '', cost: 0 }]);
+  const setShippingOption = (i, field, value) =>
+    set('shipping_options', (form.shipping_options || []).map((o, idx) => idx === i ? { ...o, [field]: value } : o));
 
   const buildVariants = (axes, existing, basePrice, explicit = []) => {
     const clean = explicit.filter(a => (a.name || '').trim() && (a.values || '').split(',').map(v => v.trim()).filter(Boolean).length);
@@ -101,6 +106,9 @@ export default function ShopProductEditor({ product, categories, collections, on
         restock: !!form.restock,
         shipping_cost: Math.max(0, Number(form.shipping_cost) || 0),
         shipping_info: form.shipping_info || '',
+        shipping_options: (form.shipping_options || [])
+          .map(o => ({ name: (o.name || '').trim(), cost: Math.max(0, Number(o.cost) || 0) }))
+          .filter(o => o.name),
         image_url: form.image_url || '',
         images: form.images || [],
         variant_axes: form.variant_axes || [],
@@ -265,8 +273,31 @@ export default function ShopProductEditor({ product, categories, collections, on
               </div>
             </div>
             <div className="mt-4">
-              <label style={labelStyle(t)}>Informacja o dostawie</label>
+              <label style={labelStyle(t)}>Wysyłka i pakowanie</label>
               <input value={form.shipping_info || ''} onChange={e => set('shipping_info', e.target.value)} placeholder="np. Wysyłka 24–48 h / odbiór w studio" style={inputStyle(t)} />
+            </div>
+            <div className="mt-6">
+              <div className="flex items-center justify-between mb-2">
+                <p style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', textTransform: 'uppercase' }}>OPCJE DOSTAWY</p>
+                <button onClick={addShippingOption} className="flex items-center gap-1.5" style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer' }}>
+                  <Plus size={11} /> DODAJ OPCJĘ
+                </button>
+              </div>
+              {(form.shipping_options || []).length === 0 ? (
+                <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', lineHeight: 1.7 }}>
+                  Brak opcji — obowiązuje jeden koszt dostawy powyżej. Dodaj opcje (np. Paczkomat, kurier, odbiór w studio), aby klient wybierał je przyciskami na stronie produktu.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {(form.shipping_options || []).map((o, i) => (
+                    <div key={i} className="flex items-end gap-3">
+                      <div className="flex-1"><label style={labelStyle(t)}>Nazwa opcji</label><input value={o.name} onChange={e => setShippingOption(i, 'name', e.target.value)} placeholder="np. Paczkomat InPost" style={inputStyle(t)} /></div>
+                      <div style={{ width: '120px' }}><label style={labelStyle(t)}>Koszt (PLN)</label><input type="number" value={o.cost ?? 0} onChange={e => setShippingOption(i, 'cost', e.target.value)} style={inputStyle(t)} /></div>
+                      <button onClick={() => set('shipping_options', (form.shipping_options || []).filter((_, idx) => idx !== i))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: '10px 4px' }}><Trash2 size={13} /></button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             <button onClick={() => set('restock', !form.restock)} style={{ marginTop: '16px', background: 'none', border: 'none', cursor: 'pointer', ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.restock ? '#f59e0b' : t.muted, display: 'flex', alignItems: 'center', gap: '7px' }}>
               <span style={{ width: '12px', height: '12px', border: `0.5px solid ${form.restock ? '#f59e0b' : t.border}`, background: form.restock ? '#f59e0b' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{form.restock && <Check size={9} color="#fff" />}</span>

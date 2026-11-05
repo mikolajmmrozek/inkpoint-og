@@ -43,6 +43,14 @@
           },
           "quantity": {
             "type": "number"
+          },
+          "shipping_option": {
+            "type": "string",
+            "description": "Wybrana opcja dostawy dla tej pozycji"
+          },
+          "shipping_cost": {
+            "type": "number",
+            "description": "Koszt wybranej opcji dostawy dla tej pozycji"
           }
         }
       }

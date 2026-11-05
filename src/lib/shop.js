@@ -64,6 +64,11 @@ export const productShipping = (product) => ({
   info: (product?.shipping_info || '').trim(),
 });
 
+export const shippingOptionsOf = (product) =>
+  (Array.isArray(product?.shipping_options) ? product.shipping_options : [])
+    .filter(o => (o?.name || '').trim())
+    .map(o => ({ name: o.name.trim(), cost: Number(o.cost) || 0 }));
+
 // Dostawa koszyka: najwyższy koszt dostawy wśród pozycji (jedna przesyłka),
 // a gdy pozycje nie mają własnej dostawy — koszt z ustawień sklepu.
 export const cartShipping = (items, settings = {}) => {

@@ -75,7 +75,7 @@ export default function ShopCheckout() {
   const baseShipping = cartShipping(items, settings);
   const shippingCost = baseShipping > 0 && freeFrom > 0 && payable >= freeFrom ? 0 : baseShipping;
   const total = payable + shippingCost;
-  const shippingNotes = [...new Set(items.map(i => i.shipping_info).filter(Boolean))];
+  const shippingNotes = [...new Set(items.map(i => [i.shipping_option, i.shipping_info].filter(Boolean).join(' · ')).filter(Boolean))];
 
   const handleSubmit = async () => {
     setError('');
@@ -87,7 +87,7 @@ export default function ShopCheckout() {
     try {
       const res = await base44.functions.invoke('manageShopOrder', {
         action: 'create',
-        items: items.map(i => ({ product_id: i.product_id, variant_key: i.variant_key, quantity: i.quantity })),
+        items: items.map(i => ({ product_id: i.product_id, variant_key: i.variant_key, quantity: i.quantity, shipping_option: i.shipping_option || '' })),
         shipping_address: { ...shipping, email: user.email },
         billing_address: sameBilling ? { ...shipping, email: user.email } : { ...billing, email: user.email },
         invoice_details: wantInvoice ? invoice : {},

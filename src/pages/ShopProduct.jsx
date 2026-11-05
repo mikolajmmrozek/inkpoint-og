@@ -6,7 +6,7 @@ import PageLayout from '@/components/layout/PageLayout';
 import VariantPicker from '@/components/shop/VariantPicker';
 import { useCart } from '@/components/shop/CartProvider';
 import { useAuth } from '@/lib/AuthContext';
-import { money, variantsOf, priceRange, availability, productStock, productShipping } from '@/lib/shop';
+import { money, variantsOf, priceRange, availability, productStock, productShipping, shippingOptionsOf } from '@/lib/shop';
 
 export default function ShopProduct() {
   const { slug } = useParams();
@@ -19,6 +19,7 @@ export default function ShopProduct() {
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const [activeImage, setActiveImage] = useState('');
+  const [shipOption, setShipOption] = useState(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -31,6 +32,7 @@ export default function ShopProduct() {
           setActiveImage(found.image_url || '');
           const list = variantsOf(found).filter(v => v.is_active !== false);
           setVariant(list.find(v => (Number(v.stock) || 0) > 0) || list[0] || null);
+          setShipOption(shippingOptionsOf(found)[0] || null);
         }
       })
       .finally(() => setLoading(false));
@@ -40,7 +42,7 @@ export default function ShopProduct() {
     setError('');
     if (!isAuthenticated) { base44.auth.redirectToLogin(window.location.href); return; }
     if (variant && (Number(variant.stock) || 0) <= 0) { setError('Ten wariant jest wyprzedany — wybierz inny.'); return; }
-    const ok = await add(product, variant, quantity);
+    const ok = await add(product, variant, quantity, shipOption);
     if (ok) {
       setAdded(true);
       setTimeout(() => setAdded(false), 2200);
@@ -67,6 +69,7 @@ export default function ShopProduct() {
   const canBuy = avail.state === 'in_stock';
   const stock = variant ? Number(variant.stock) || 0 : (productStock(product) ?? 99);
   const ship = productShipping(product);
+  const shipOptions = shippingOptionsOf(product);
   const price = variant?.price || product.price;
   const range = priceRange(product);
   const images = [product.image_url, ...(product.images || [])].filter(Boolean);
@@ -162,11 +165,43 @@ export default function ShopProduct() {
               )}
 
               <div className="mt-8 pt-6" style={{ borderTop: '0.5px solid hsl(var(--border))' }}>
-                <p className="text-micro" style={{ fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', marginBottom: '8px' }}>DOSTAWA</p>
+                <p className="text-micro" style={{ fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', marginBottom: '8px' }}>WYSYŁKA I PAKOWANIE</p>
                 {ship.info && <p style={{ color: 'hsl(var(--foreground))', fontSize: '13px', lineHeight: 1.6 }}>{ship.info}</p>}
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.06em', marginTop: ship.info ? '4px' : 0 }}>
-                  Koszt dostawy: {ship.cost > 0 ? money(ship.cost) : 'gratis'}
-                </p>
+                {shipOptions.length > 0 ? (
+                  <>
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {shipOptions.map(o => {
+                        const active = (shipOption?.name || '') === o.name;
+                        return (
+                          <button
+                            key={o.name}
+                            onClick={() => setShipOption(o)}
+                            className="text-micro"
+                            style={{
+                              fontSize: '9px',
+                              letterSpacing: '0.08em',
+                              padding: '8px 12px',
+                              border: `0.5px solid ${active ? 'var(--brand)' : 'hsl(var(--border))'}`,
+                              color: active ? 'var(--brand)' : 'hsl(var(--foreground))',
+                              background: active ? 'rgb(var(--brand-rgb) / 0.08)' : 'transparent',
+                              borderRadius: 'var(--radius)',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            {o.name} · {o.cost > 0 ? money(o.cost) : 'gratis'}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.06em', marginTop: '10px' }}>
+                      Koszt dostawy: {Number(shipOption?.cost) > 0 ? money(shipOption.cost) : 'gratis'}
+                    </p>
+                  </>
+                ) : (
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.06em', marginTop: ship.info ? '4px' : 0 }}>
+                    Koszt dostawy: {ship.cost > 0 ? money(ship.cost) : 'gratis'}
+                  </p>
+                )}
               </div>
 
               {product.description && (

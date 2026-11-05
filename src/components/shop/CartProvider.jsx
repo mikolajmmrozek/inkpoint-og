@@ -43,13 +43,15 @@ export default function CartProvider({ children }) {
     setItems(nextItems);
   }, [cartId, user?.email]);
 
-  const add = useCallback(async (product, variant, quantity = 1) => {
+  const add = useCallback(async (product, variant, quantity = 1, shippingOption = null) => {
     if (!isAuthenticated) return false;
     const key = variant?.key || '';
+    const shippingCost = shippingOption ? Number(shippingOption.cost) || 0 : Number(product.shipping_cost) || 0;
+    const shippingName = shippingOption?.name || '';
     const existing = items.find(i => i.product_id === product.id && (i.variant_key || '') === key);
     const next = existing
       ? items.map(i => i === existing
-        ? { ...i, quantity: Math.min(99, Number(i.quantity) + quantity) }
+        ? { ...i, quantity: Math.min(99, Number(i.quantity) + quantity), shipping_option: shippingName, shipping_cost: shippingCost }
         : i)
       : [...items, {
         product_id: product.id,
@@ -60,7 +62,8 @@ export default function CartProvider({ children }) {
         variant_label: variant ? (variant.options || []).map(o => `${o.name}: ${o.value}`).join(' · ') || 'Standard' : 'Standard',
         unit_price: Number(variant?.price) || Number(product.price) || 0,
         quantity,
-        shipping_cost: Number(product.shipping_cost) || 0,
+        shipping_option: shippingName,
+        shipping_cost: shippingCost,
         shipping_info: product.shipping_info || '',
       }];
     await persist(next);

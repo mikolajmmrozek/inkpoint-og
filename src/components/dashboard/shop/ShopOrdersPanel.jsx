@@ -184,7 +184,7 @@ export default function ShopOrdersPanel() {
                   <div key={idx} className="flex items-center justify-between gap-3 p-3" style={{ borderBottom: idx < selected.items.length - 1 ? `0.5px solid ${t.border}` : 'none' }}>
                     <div className="min-w-0">
                       <p style={{ fontSize: '12px', color: t.text }}>{i.product_name}</p>
-                      <p style={{ ...mono, fontSize: '8px', color: t.muted }}>{i.variant_label} · {i.quantity} szt.</p>
+                      <p style={{ ...mono, fontSize: '8px', color: t.muted }}>{i.variant_label}{i.shipping_option ? ` · ${i.shipping_option}` : ''} · {i.quantity} szt.</p>
                     </div>
                     <p style={{ ...mono, fontSize: '11px', color: t.text }}>{money(i.unit_price * i.quantity)}</p>
                   </div>
