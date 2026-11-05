@@ -113,7 +113,7 @@ export default async function (req) {
             error: `Brak wystarczającej ilości: ${product.name} (${variantLabelOf(variant)}). Dostępne: ${Number(variant.stock) || 0} szt.`,
           }, { status: 400 });
         }
-        if (!variant && typeof product.stock === 'number' && product.stock < qty) {
+        if (!variant && !product.unlimited_stock && typeof product.stock === 'number' && product.stock < qty) {
           return Response.json({
             error: `Brak wystarczającej ilości: ${product.name}. Dostępne: ${Math.max(0, product.stock)} szt.`,
           }, { status: 400 });
@@ -149,7 +149,7 @@ export default async function (req) {
             v.key === variant.key ? { ...v, stock: Math.max(0, (Number(v.stock) || 0) - qty) } : v
           );
           stockUpdates[product.id] = entry;
-        } else if (typeof product.stock === 'number') {
+        } else if (typeof product.stock === 'number' && !product.unlimited_stock) {
           const entry = stockUpdates[product.id] || { id: product.id, stock: product.stock };
           entry.stock = Math.max(0, (Number(entry.stock) || 0) - qty);
           stockUpdates[product.id] = entry;
@@ -319,7 +319,7 @@ export default async function (req) {
         const variants = Array.isArray(product.variants) ? product.variants : [];
 
         if (variants.length === 0) {
-          if (typeof product.stock === 'number') {
+          if (typeof product.stock === 'number' && !product.unlimited_stock) {
             await base44.asServiceRole.entities.ShopProduct.update(product.id, {
               stock: (Number(product.stock) || 0) + qty,
             });

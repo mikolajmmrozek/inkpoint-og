@@ -25,6 +25,7 @@ export default function ShopProductEditor({ product, categories, collections, on
     slider_max: 2000,
     slider_step: 50,
     shipping_form_ids: [],
+    unlimited_stock: false,
     stock: 0,
     restock: false,
     shipping_cost: 0,
@@ -114,6 +115,7 @@ export default function ShopProductEditor({ product, categories, collections, on
         slider_min: Math.max(0, Number(form.slider_min) || 0),
         slider_max: Math.max(0, Number(form.slider_max) || 0),
         slider_step: Math.max(0, Number(form.slider_step) || 0),
+        unlimited_stock: !!form.unlimited_stock,
         stock: Math.max(0, Number(form.stock) || 0),
         restock: !!form.restock,
         shipping_form_ids: form.shipping_form_ids || [],
@@ -303,11 +305,13 @@ export default function ShopProductEditor({ product, categories, collections, on
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label style={labelStyle(t)}>Stan magazynowy (szt.)</label>
-                <input type="number" value={form.stock ?? 0} onChange={e => set('stock', e.target.value)} style={inputStyle(t)} />
+                <input type="number" value={form.stock ?? 0} onChange={e => set('stock', e.target.value)} disabled={!!form.unlimited_stock} style={{ ...inputStyle(t), opacity: form.unlimited_stock ? 0.45 : 1 }} />
                 <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px', lineHeight: 1.6 }}>
-                  {(form.variants || []).length > 0
-                    ? 'Produkt ma warianty — stan ustawiasz przy każdym wariancie.'
-                    : 'Liczba dostępnych sztuk. 0 = wyprzedane.'}
+                  {form.unlimited_stock
+                    ? 'Produkt nielimitowany — stan nie jest pilnowany.'
+                    : (form.variants || []).length > 0
+                      ? 'Produkt ma warianty — stan ustawiasz przy każdym wariancie.'
+                      : 'Liczba dostępnych sztuk. 0 = wyprzedane.'}
                 </p>
               </div>
               <div>
@@ -347,6 +351,10 @@ export default function ShopProductEditor({ product, categories, collections, on
                 </>
               )}
             </div>
+            <button onClick={() => set('unlimited_stock', !form.unlimited_stock)} style={{ marginTop: '16px', background: 'none', border: 'none', cursor: 'pointer', ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.unlimited_stock ? '#16a34a' : t.muted, display: 'flex', alignItems: 'center', gap: '7px' }}>
+              <span style={{ width: '12px', height: '12px', border: `0.5px solid ${form.unlimited_stock ? '#16a34a' : t.border}`, background: form.unlimited_stock ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{form.unlimited_stock && <Check size={9} color="#fff" />}</span>
+              Bez stanu magazynowego (nielimitowany)
+            </button>
             <button onClick={() => set('restock', !form.restock)} style={{ marginTop: '16px', background: 'none', border: 'none', cursor: 'pointer', ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.restock ? '#f59e0b' : t.muted, display: 'flex', alignItems: 'center', gap: '7px' }}>
               <span style={{ width: '12px', height: '12px', border: `0.5px solid ${form.restock ? '#f59e0b' : t.border}`, background: form.restock ? '#f59e0b' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{form.restock && <Check size={9} color="#fff" />}</span>
               Wkrótce dostępne (zamiast „Wyprzedane")

@@ -65,6 +65,11 @@
       "default": false,
       "description": "Znacznik starszych produkt\u00f3w voucher \u2014 r\u00f3wnowa\u017cny pricing_mode = slider"
     },
+    "unlimited_stock": {
+      "type": "boolean",
+      "default": false,
+      "description": "True = produkt bez stanu magazynowego (nielimitowany) \u2014 nie pilnuje sztuk, sprzeda\u017c nadal liczy si\u0119 w statystykach"
+    },
     "stock": {
       "type": "number",
       "default": 0,
