@@ -6,6 +6,26 @@
       "type": "string",
       "description": "Unique key"
     },
+    "show_blog": {
+      "type": "boolean",
+      "default": true,
+      "description": "True = blog widoczny w nawigacji i na stronie"
+    },
+    "show_faq": {
+      "type": "boolean",
+      "default": true,
+      "description": "True = FAQ widoczne w nawigacji i na stronie"
+    },
+    "show_shop": {
+      "type": "boolean",
+      "default": true,
+      "description": "True = sklep i koszyk widoczne na stronie"
+    },
+    "show_booking": {
+      "type": "boolean",
+      "default": true,
+      "description": "True = rezerwacja wizyt online jest dost\u0119pna"
+    },
     "studio_name": {
       "type": "string",
       "description": "Nazwa firmy/studia u\u017cywana w mailach automatycznych, voucherach i dokumentach \u2014 jedno \u017ar\u00f3d\u0142o prawdy, edytowalne w Ustawieniach strony (Branding)."

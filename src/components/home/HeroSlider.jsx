@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import useSiteContent from '@/hooks/useSiteContent';
 
 const optimizeUrl = (url) => {
   if (!url) return url;
@@ -13,6 +14,7 @@ const optimizeUrl = (url) => {
 };
 
 export default function HeroSlider() {
+  const { content } = useSiteContent();
   const [slides, setSlides] = useState([]);
   const [current, setCurrent] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -118,9 +120,11 @@ export default function HeroSlider() {
               <Link to={`/artists/${slide?.slug || slide?.id || ''}`} className="btn-oxblood">
                 Zobacz Portfolio
               </Link>
-              <Link to="/booking" className="btn-ghost-parchment">
-                Umów Sesję
-              </Link>
+              {content.show_booking !== false && (
+                <Link to="/booking" className="btn-ghost-parchment">
+                  Umów Sesję
+                </Link>
+              )}
             </div>
           </motion.div>
         </AnimatePresence>

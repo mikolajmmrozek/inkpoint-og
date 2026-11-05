@@ -1,7 +1,9 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import useSiteContent from '@/hooks/useSiteContent';
 
 export default function HomeCTA() {
+  const { content } = useSiteContent();
   return (
     <section className="py-16 px-8 md:px-16 relative overflow-hidden">
       {/* Fuchsia gradient background */}
@@ -32,9 +34,11 @@ export default function HomeCTA() {
             Umów się na bezpłatną konsultację. Porozmawiamy o Twoim pomyśle, dobierzemy artystę i ustalimy termin.
           </p>
           <div className="mt-12 flex gap-4 justify-center flex-wrap">
-            <Link to="/booking" className="btn-oxblood animate-pulse-oxblood">
-              Umów Sesję
-            </Link>
+            {content.show_booking !== false && (
+              <Link to="/booking" className="btn-oxblood animate-pulse-oxblood">
+                Umów Sesję
+              </Link>
+            )}
             <Link to="/contact" className="btn-ghost-parchment">
               Zapytaj o wycenę
             </Link>

@@ -6,7 +6,6 @@ import ShopProductsPanel from '@/components/dashboard/shop/ShopProductsPanel';
 import ShopCatalogPanel from '@/components/dashboard/shop/ShopCatalogPanel';
 import ShopReturnsPanel from '@/components/dashboard/shop/ShopReturnsPanel';
 import ShopShippingPanel from '@/components/dashboard/shop/ShopShippingPanel';
-import ShopVisibilityToggle from '@/components/dashboard/shop/ShopVisibilityToggle';
 import { shopTheme, mono } from '@/components/dashboard/shop/shopTheme';
 
 const TABS = [
@@ -24,7 +23,6 @@ export default function DashboardShop() {
 
   return (
     <div>
-      <ShopVisibilityToggle />
       <div className="flex flex-wrap gap-2 mb-8">
         {TABS.map(tb => {
           const Icon = tb.icon;

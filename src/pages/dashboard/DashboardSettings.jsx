@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
 import { X } from 'lucide-react';
 import ThemeSettings from '@/components/dashboard/ThemeSettings';
+import SiteContentSettings from '@/components/dashboard/SiteContentSettings';
 
 const inputStyle = {
   background: 'transparent',
@@ -128,10 +129,10 @@ export default function DashboardSettings() {
     <div>
       {/* Tabs */}
       <div className="flex gap-2 mb-6 flex-wrap">
-        {['hero', 'about', 'contact', 'branding', 'theme'].map(tab => (
+        {['content', 'hero', 'about', 'contact', 'branding', 'theme'].map(tab => (
           <button
             key={tab}
-            onClick={() => tab === 'theme' ? setActiveTab('theme') : loadTab(tab)}
+            onClick={() => tab === 'theme' || tab === 'content' ? setActiveTab(tab) : loadTab(tab)}
             style={{
               fontFamily: 'var(--font-mono)',
               fontSize: '10px',
@@ -144,13 +145,15 @@ export default function DashboardSettings() {
               cursor: 'pointer',
             }}
           >
-            {tab === 'hero' ? 'Strona Główna — Hero' : tab === 'about' ? 'Strona Główna — O Studiu' : tab === 'contact' ? 'Strona Kontaktu' : tab === 'branding' ? 'Branding' : 'Motyw i Czcionki'}
+            {tab === 'content' ? 'Zawartość strony' : tab === 'hero' ? 'Strona Główna — Hero' : tab === 'about' ? 'Strona Główna — O Studiu' : tab === 'contact' ? 'Strona Kontaktu' : tab === 'branding' ? 'Branding' : 'Motyw i Czcionki'}
           </button>
         ))}
       </div>
 
       {activeTab === 'theme' ? (
         <ThemeSettings t={t} />
+      ) : activeTab === 'content' ? (
+        <SiteContentSettings t={t} />
       ) : (
       <div className="max-w-2xl space-y-10" style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '40px', borderRadius: 'var(--radius)' }}>
         {activeTab === 'hero' && (

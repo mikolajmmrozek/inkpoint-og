@@ -4,7 +4,7 @@ import { User, X, ShoppingBag } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { useCart } from '@/components/shop/CartProvider';
-import useShopVisibility from '@/hooks/useShopVisibility';
+import useSiteContent from '@/hooks/useSiteContent';
 
 export default function Navbar() {
   const { user, isAuthenticated } = useAuth();
@@ -14,7 +14,9 @@ export default function Navbar() {
   const [artist, setArtist] = useState(null);
   const location = useLocation();
   const { count: cartCount } = useCart();
-  const { visible: shopVisible } = useShopVisibility();
+  const { content } = useSiteContent();
+  const shopVisible = content.show_shop;
+  const bookingVisible = content.show_booking;
 
   const handleCartClick = () => {
     if (isAuthenticated) navigate('/sklep/koszyk');
@@ -56,10 +58,10 @@ export default function Navbar() {
   const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/artists', label: 'Artyści' },
-  { href: '/sklep', label: 'Sklep' },
-  { href: '/blog', label: 'Blog' },
-  { href: '/faq', label: 'FAQ' },
-  { href: '/contact', label: 'Kontakt' }].filter(link => link.href !== '/sklep' || shopVisible);
+  { href: '/sklep', label: 'Sklep', show: content.show_shop },
+  { href: '/blog', label: 'Blog', show: content.show_blog },
+  { href: '/faq', label: 'FAQ', show: content.show_faq },
+  { href: '/contact', label: 'Kontakt' }].filter(link => link.show !== false);
 
 
   return (
@@ -181,9 +183,11 @@ export default function Navbar() {
                 {isAuthenticated ? (displayName || 'MOJE KONTO') : 'ZALOGUJ SIĘ'}
               </span>
             </button>
-            <Link to="/booking" className="btn-oxblood animate-pulse-oxblood" style={{ padding: '11px 26px', fontSize: '13px' }}>
-              Umów Sesję
-            </Link>
+            {bookingVisible && (
+              <Link to="/booking" className="btn-oxblood animate-pulse-oxblood" style={{ padding: '11px 26px', fontSize: '13px' }}>
+                Umów Sesję
+              </Link>
+            )}
           </div>
 
           {/* Mobile hamburger */}
@@ -270,9 +274,11 @@ export default function Navbar() {
               {isAuthenticated ? (displayName || 'MOJE KONTO') : 'ZALOGUJ SIĘ'}
             </span>
           </button>
-          <Link to="/booking" className="btn-oxblood flex items-center justify-center w-full" style={{ height: '48px', borderRadius: '9999px', fontSize: '11px', letterSpacing: '0.08em' }}>
-            Umów Sesję
-          </Link>
+          {bookingVisible && (
+            <Link to="/booking" className="btn-oxblood flex items-center justify-center w-full" style={{ height: '48px', borderRadius: '9999px', fontSize: '11px', letterSpacing: '0.08em' }}>
+              Umów Sesję
+            </Link>
+          )}
         </div>
 
         {/* Nav links */}

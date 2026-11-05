@@ -7,12 +7,13 @@ import { useCart } from '@/components/shop/CartProvider';
 import { useAuth } from '@/lib/AuthContext';
 import { money, cartShipping } from '@/lib/shop';
 import ShopUnavailable from '@/components/shop/ShopUnavailable';
-import useShopVisibility from '@/hooks/useShopVisibility';
+import useSiteContent from '@/hooks/useSiteContent';
 
 export default function ShopCart() {
   const { user, isAuthenticated, isLoadingAuth } = useAuth();
   const { items, setQty, remove, loading } = useCart();
-  const { visible: shopVisible, loading: shopLoading } = useShopVisibility();
+  const { content, loading: shopLoading } = useSiteContent();
+  const shopVisible = content.show_shop;
   const [settings, setSettings] = useState(null);
 
   useEffect(() => {

@@ -10,13 +10,14 @@ import ShopSortBar, { sortProducts } from '@/components/shop/ShopSortBar';
 import { useCart } from '@/components/shop/CartProvider';
 import { variantsOf } from '@/lib/shop';
 import ShopUnavailable from '@/components/shop/ShopUnavailable';
-import useShopVisibility from '@/hooks/useShopVisibility';
+import useSiteContent from '@/hooks/useSiteContent';
 
 const AUTO_LABELS = { new: 'Nowości', best: 'Bestsellery', featured: 'Polecane' };
 
 export default function Shop() {
   const { count } = useCart();
-  const { visible: shopVisible, loading: shopLoading } = useShopVisibility();
+  const { content, loading: shopLoading } = useSiteContent();
+  const shopVisible = content.show_shop;
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [collections, setCollections] = useState([]);

@@ -4,7 +4,7 @@ import { Check, Loader2, Tag, Gift, ChevronLeft } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import PageLayout from '@/components/layout/PageLayout';
 import ShopUnavailable from '@/components/shop/ShopUnavailable';
-import useShopVisibility from '@/hooks/useShopVisibility';
+import useSiteContent from '@/hooks/useSiteContent';
 import AddressFields from '@/components/shop/AddressFields';
 import { useCart } from '@/components/shop/CartProvider';
 import { useAuth } from '@/lib/AuthContext';
@@ -20,7 +20,8 @@ export default function ShopCheckout() {
   const { user, isAuthenticated, isLoadingAuth } = useAuth();
   const navigate = useNavigate();
   const { items, clear, loading } = useCart();
-  const { visible: shopVisible, loading: shopLoading } = useShopVisibility();
+  const { content, loading: shopLoading } = useSiteContent();
+  const shopVisible = content.show_shop;
 
   const [settings, setSettings] = useState({});
   const [addresses, setAddresses] = useState([]);

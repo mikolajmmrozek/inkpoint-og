@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
+import useSiteContent from '@/hooks/useSiteContent';
 
 const DEFAULTS = {
   hero_tagline: 'ROMANS\nTATTOO',
@@ -10,6 +11,7 @@ const DEFAULTS = {
 };
 
 export default function StudioHero() {
+  const { content } = useSiteContent();
   const [settings, setSettings] = useState(DEFAULTS);
 
   useEffect(() => {
@@ -110,9 +112,11 @@ export default function StudioHero() {
             transition={{ delay: 1.1, duration: 0.8 }}
             className="flex gap-4 flex-wrap pb-2"
           >
-            <Link to="/booking" className="btn-oxblood animate-pulse-oxblood">
-              Umów Sesję
-            </Link>
+            {content.show_booking !== false && (
+              <Link to="/booking" className="btn-oxblood animate-pulse-oxblood">
+                Umów Sesję
+              </Link>
+            )}
             <Link to="/artists" className="btn-ghost-parchment">
               Poznaj Artystów
             </Link>

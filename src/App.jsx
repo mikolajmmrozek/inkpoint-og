@@ -68,6 +68,7 @@ import Voucher from './pages/Voucher';
 import ChangeRequest from './pages/ChangeRequest';
 
 import ScrollToTop from './components/ScrollToTop';
+import ContentGate from './components/ContentGate';
 
 const AuthenticatedApp = () => {
   const { isLoadingPublicSettings, isLoadingAuth, authError, navigateToLogin } = useAuth();
@@ -96,14 +97,14 @@ const AuthenticatedApp = () => {
       <Route path="/" element={<Home />} />
       <Route path="/artists" element={<Artists />} />
       <Route path="/artists/:slug" element={<ArtistProfile />} />
-      <Route path="/blog" element={<Blog />} />
+      <Route path="/blog" element={<ContentGate flag="show_blog" title="Blog jest chwilowo ukryty" message="Wróć do nas wkrótce — nowe wpisy już się piszą."><Blog /></ContentGate>} />
       <Route path="/blog/:id" element={<BlogPost />} />
       <Route path="/contact" element={<Contact />} />
-      <Route path="/booking" element={<Booking />} />
+      <Route path="/booking" element={<ContentGate flag="show_booking" title="Rezerwacja wizyt jest wstrzymana" message="Nie przyjmujemy teraz rezerwacji online. Napisz do nas przez stronę kontaktu — wrócimy z terminem."><Booking /></ContentGate>} />
       <Route path="/health-form" element={<HealthFormPage />} />
       <Route path="/health-form-qr" element={<HealthFormQR />} />
       <Route path="/terms" element={<TermsAndConditions />} />
-      <Route path="/faq" element={<FAQ />} />
+      <Route path="/faq" element={<ContentGate flag="show_faq" title="FAQ jest chwilowo ukryte" message="Sekcja najczęstszych pytań jest w przygotowaniu. Napisz do nas, jeśli potrzebujesz odpowiedzi."><FAQ /></ContentGate>} />
       <Route path="/instructions" element={<Instructions />} />
       <Route path="/sklep" element={<Shop />} />
       <Route path="/sklep/produkt/:slug" element={<ShopProduct />} />

@@ -4,7 +4,7 @@ import { ChevronLeft, Check, ShoppingBag } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import PageLayout from '@/components/layout/PageLayout';
 import ShopUnavailable from '@/components/shop/ShopUnavailable';
-import useShopVisibility from '@/hooks/useShopVisibility';
+import useSiteContent from '@/hooks/useSiteContent';
 import VariantPicker from '@/components/shop/VariantPicker';
 import PriceSliderPicker from '@/components/shop/PriceSliderPicker';
 import { useCart } from '@/components/shop/CartProvider';
@@ -16,7 +16,8 @@ export default function ShopProduct() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const { add } = useCart();
-  const { visible: shopVisible, loading: shopLoading } = useShopVisibility();
+  const { content, loading: shopLoading } = useSiteContent();
+  const shopVisible = content.show_shop;
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [variant, setVariant] = useState(null);
