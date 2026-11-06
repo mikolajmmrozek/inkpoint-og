@@ -25,6 +25,11 @@ const SKIP_PREFILL_FIELDS = new Set([
 
 const STEPS = ['personal', 'medical', 'procedure', 'declaration', 'consents', 'signature'];
 
+// Zapas lokalny na wypadek błędu przeglądarki — pozwala wrócić do tego samego
+// kroku ankiety nawet gdy zapis w bazie jeszcze nie powstał.
+const AUTOSAVE_KEY = 'healthFormAutosave';
+const AUTOSAVE_TTL = 12 * 60 * 60 * 1000;
+
 // Build blank form state from a template
 function buildInitialState(tpl) {
   const state = {};
@@ -244,6 +249,15 @@ export default function HealthFormPage() {
     const bookingId = params.get('booking_id');
     const editFormId = params.get('edit_form_id');
 
+    // Wznowienie po błędzie: dane z ostatniej chwili zapisane w przeglądarce
+    let autosave = null;
+    if (!editFormId) {
+      try {
+        const saved = JSON.parse(localStorage.getItem(AUTOSAVE_KEY) || 'null');
+        if (saved?.form && Date.now() - (saved.savedAt || 0) < AUTOSAVE_TTL) autosave = saved;
+      } catch (_) {}
+    }
+
     const load = async () => {
       let latestTemplate = {};
       try {
@@ -307,11 +321,37 @@ export default function HealthFormPage() {
         } catch (_) {}
       }
 
+      // Wznów dokładnie tam, gdzie przerwano (błąd przeglądarki / odświeżenie)
+      if (!editFormId && autosave?.form) {
+        setForm(f => ({ ...f, ...autosave.form }));
+        if (autosave.guardian) setGuardian(g => ({ ...g, ...autosave.guardian }));
+        if (autosave.lang) setLang(autosave.lang);
+        if (autosave.step) setStepRaw(autosave.step);
+        setDraftBanner(true);
+      }
+
       setLoading(false);
     };
 
     load();
   }, []);
+
+  // Zapas lokalny: bieżący krok i odpowiedzi, żeby błąd lub odświeżenie
+  // nie zmuszało klienta do wypełniania ankiety od nowa.
+  useEffect(() => {
+    if (loading || submitted || step === 'lang-select') return;
+    const timer = setTimeout(() => {
+      try {
+        const { client_signature, ...rest } = form;
+        localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({ savedAt: Date.now(), step, lang, form: rest, guardian }));
+      } catch (_) {}
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [form, guardian, step, lang, loading, submitted]);
+
+  const clearAutosave = () => {
+    try { localStorage.removeItem(AUTOSAVE_KEY); } catch (_) {}
+  };
 
   // Prefill from previous visit — copies ALL non-excluded fields dynamically
   const handleEmailPrefill = async () => {
@@ -369,6 +409,7 @@ export default function HealthFormPage() {
     setDraftId(draft.id);
     setDraftBanner(true);
     setFoundDraft(null);
+    clearAutosave();
     setStep('personal');
   };
 
@@ -376,6 +417,7 @@ export default function HealthFormPage() {
   const discardDraft = async (draft) => {
     await base44.entities.HealthForm.delete(draft.id).catch(() => {});
     setFoundDraft(null);
+    clearAutosave();
     setStep('personal');
   };
 
@@ -484,6 +526,7 @@ export default function HealthFormPage() {
       } catch (e) { warnings.push('zapis danych klienta'); }
 
       // Form is saved — show success even if secondary ops had issues
+      clearAutosave();
       setSubmitted(true);
     } catch (err) {
       console.error('Health form submit error:', err);
@@ -513,6 +556,7 @@ export default function HealthFormPage() {
       }
 
       await upsertClient(form);
+      clearAutosave();
       setSubmitted(true);
     } catch (err) {
       setSubmitError('Wystąpił błąd podczas zapisywania. Spróbuj ponownie.');

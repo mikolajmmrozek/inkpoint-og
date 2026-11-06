@@ -41,26 +41,27 @@ export default function DatePickerCustom({ value, onChange, showErrors, t, textP
           value={value || ''}
           max={localToday}
           onChange={e => onChange(e.target.value || '')}
-          onFocus={() => { if (!value) onChange('2000-01-01'); }}
           className="block h-[1.6em] w-full min-w-0 max-w-full box-border border-0 bg-transparent p-0 m-0 font-body text-base leading-[1.6] text-inherit outline-none"
         />
-        {!hasValue && (
-          <span
-            aria-hidden="true"
-            style={{
-              position: 'absolute',
-              left: '14px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: '#A9A9A9',
-              fontSize: '16px',
-              fontFamily: 'var(--font-body)',
-              pointerEvents: 'none',
-            }}
-          >
-            1 sty 2000
-          </span>
-        )}
+        {/* Podpowiedź jest zawsze w drzewie i tylko wygaszana — usuwanie węzła
+            w trakcie otwierania natywnego kalendarza powodowało błąd renderowania. */}
+        <span
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            left: '14px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            color: '#A9A9A9',
+            fontSize: '16px',
+            fontFamily: 'var(--font-body)',
+            pointerEvents: 'none',
+            opacity: hasValue ? 0 : 1,
+            transition: 'opacity 0.15s',
+          }}
+        >
+          dd.mm.rrrr
+        </span>
       </div>
     </div>
   );

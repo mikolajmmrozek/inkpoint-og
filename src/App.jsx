@@ -16,6 +16,7 @@ import BlogPost from './pages/BlogPost';
 import Contact from './pages/Contact';
 import Booking from './pages/Booking';
 import HealthFormPage from './pages/HealthFormPage';
+import HealthFormErrorBoundary from './components/health-form/HealthFormErrorBoundary';
 import HealthFormQR from './pages/HealthFormQR';
 import TermsAndConditions from './pages/TermsAndConditions';
 import FAQ from './pages/FAQ';
@@ -101,7 +102,7 @@ const AuthenticatedApp = () => {
       <Route path="/blog/:id" element={<BlogPost />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/booking" element={<ContentGate flag="show_booking" title="Rezerwacja wizyt jest wstrzymana" message="Nie przyjmujemy teraz rezerwacji online. Napisz do nas przez stronę kontaktu — wrócimy z terminem."><Booking /></ContentGate>} />
-      <Route path="/health-form" element={<HealthFormPage />} />
+      <Route path="/health-form" element={<HealthFormErrorBoundary><HealthFormPage /></HealthFormErrorBoundary>} />
       <Route path="/health-form-qr" element={<HealthFormQR />} />
       <Route path="/terms" element={<TermsAndConditions />} />
       <Route path="/faq" element={<ContentGate flag="show_faq" title="FAQ jest chwilowo ukryte" message="Sekcja najczęstszych pytań jest w przygotowaniu. Napisz do nas, jeśli potrzebujesz odpowiedzi."><FAQ /></ContentGate>} />
