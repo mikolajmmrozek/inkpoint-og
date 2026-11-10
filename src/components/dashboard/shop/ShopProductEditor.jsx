@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from '@/pages/dashboard/Dashboard';
-import { Plus, X, Trash2, Upload, RefreshCw, Check } from 'lucide-react';
+import { Plus, X, Trash2, Upload, RefreshCw, Check, ChevronDown, ChevronRight } from 'lucide-react';
 import { shopTheme, mono, display, inputStyle, labelStyle } from './shopTheme';
 import ShopMultipacksEditor from './ShopMultipacksEditor';
-import ShopVariantPacksEditor from './ShopVariantPacksEditor';
 import { slugify, money } from '@/lib/shop';
 
 const ALLOWED_IMG = ['image/jpeg', 'image/png', 'image/webp'];
@@ -67,6 +66,7 @@ export default function ShopProductEditor({ product, categories, collections, on
     return base;
   });
   const [axesText, setAxesText] = useState(() => (product?.variant_axes || []).map(a => ({ name: a.name, values: (a.values || []).join(', ') })));
+  const [packsKey, setPacksKey] = useState(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [forms, setForms] = useState([]);
@@ -383,34 +383,50 @@ export default function ShopProductEditor({ product, categories, collections, on
                   <span className="col-span-2" style={labelStyle(t)}>Stan</span>
                   <span className="col-span-3" style={labelStyle(t)}>SKU</span>
                 </div>
-                {(form.variants || []).map(v => (
-                  <div key={v.key} className="grid grid-cols-12 gap-2 px-3 py-2 items-center" style={{ borderBottom: `0.5px solid ${t.border}` }}>
-                    <span className="col-span-5" style={{ fontSize: '11px', color: t.text }}>{(v.options || []).map(o => o.value).join(' / ') || v.key}</span>
-                    <input className="col-span-2" type="number" value={v.price ?? ''} onChange={e => updateVariant(v.key, 'price', e.target.value)} style={{ ...inputStyle(t), fontSize: '12px' }} />
-                    <input className="col-span-2" type="number" value={v.stock ?? 0} onChange={e => updateVariant(v.key, 'stock', e.target.value)} style={{ ...inputStyle(t), fontSize: '12px' }} />
-                    <input className="col-span-3" value={v.sku || ''} onChange={e => updateVariant(v.key, 'sku', e.target.value)} style={{ ...inputStyle(t), fontSize: '12px' }} />
-                  </div>
-                ))}
+                {(form.variants || []).map(v => {
+                  const packs = Array.isArray(v.multipacks) ? v.multipacks : [];
+                  const open = packsKey === v.key;
+                  return (
+                    <div key={v.key} style={{ borderBottom: `0.5px solid ${t.border}` }}>
+                      <div className="grid grid-cols-12 gap-2 px-3 py-2 items-center">
+                        <button onClick={() => setPacksKey(open ? null : v.key)} className="col-span-5 flex items-center gap-1.5 min-w-0" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }} title="Wielosztuki tego wariantu">
+                          {open ? <ChevronDown size={11} color="var(--brand)" className="shrink-0" /> : <ChevronRight size={11} color={t.muted} className="shrink-0" />}
+                          <span style={{ fontSize: '11px', color: open ? 'var(--brand)' : t.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {(v.options || []).map(o => o.value).join(' / ') || v.key}
+                          </span>
+                          <span style={{ ...mono, fontSize: '8px', color: open ? 'var(--brand)' : t.muted, letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>
+                            {packs.length === 0 ? '· brak wielosztuk' : `· ${packs.length} ${packs.length === 1 ? 'pakiet' : 'pakiety'}`}
+                          </span>
+                        </button>
+                        <input className="col-span-2" type="number" value={v.price ?? ''} onChange={e => updateVariant(v.key, 'price', e.target.value)} style={{ ...inputStyle(t), fontSize: '12px' }} />
+                        <input className="col-span-2" type="number" value={v.stock ?? 0} onChange={e => updateVariant(v.key, 'stock', e.target.value)} style={{ ...inputStyle(t), fontSize: '12px' }} />
+                        <input className="col-span-3" value={v.sku || ''} onChange={e => updateVariant(v.key, 'sku', e.target.value)} style={{ ...inputStyle(t), fontSize: '12px' }} />
+                      </div>
+                      {open && (
+                        <div className="px-3 pb-3">
+                          <ShopMultipacksEditor
+                            theme={theme}
+                            packs={packs}
+                            onChange={(next) => updateVariant(v.key, 'multipacks', next)}
+                            basePrice={Number(v.price) || 0}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
           )}
 
-          {form.pricing_mode !== 'slider' && (
-            (form.variants || []).length > 0 ? (
-              <ShopVariantPacksEditor
-                theme={theme}
-                variants={form.variants}
-                onChangeVariantPacks={(key, list) => set('variants', (form.variants || []).map(v => (v.key === key ? { ...v, multipacks: list } : v)))}
-              />
-            ) : (
-              <ShopMultipacksEditor
-                theme={theme}
-                packs={form.multipacks || []}
-                onChange={(list) => set('multipacks', list)}
-                basePrice={Number(form.price) || 0}
-              />
-            )
+          {form.pricing_mode !== 'slider' && (form.variants || []).length === 0 && (
+            <ShopMultipacksEditor
+              theme={theme}
+              packs={form.multipacks || []}
+              onChange={(list) => set('multipacks', list)}
+              basePrice={Number(form.price) || 0}
+            />
           )}
 
           {/* Stan i dostawa */}
