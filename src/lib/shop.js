@@ -87,21 +87,42 @@ export const shippingOptionsOf = (product, forms = []) => {
   const byId = new Map((forms || []).map(f => [f.id, f]));
   const selected = picked.map(id => byId.get(id)).filter(Boolean);
 
-  if (selected.length > 0) {
-    return selected.flatMap(form => {
-      const base = [{ name: form.name, cost: Number(form.cost) || 0, international: false }];
+  const options = selected.length > 0
+    ? selected.flatMap(form => {
+      const base = [{ name: form.name, cost: Number(form.cost) || 0, delivery_time: form.delivery_time || '', international: false, pickup: false }];
       const foreign = form.international
         ? (form.international_variants || [])
           .filter(v => (v?.label || '').trim())
-          .map(v => ({ name: `${form.name} · ${v.label.trim()}`, cost: Number(v.cost) || 0, international: true }))
+          .map(v => ({ name: `${form.name} · ${v.label.trim()}`, cost: Number(v.cost) || 0, delivery_time: v.delivery_time || form.delivery_time || '', international: true, pickup: false }))
         : [];
       return [...base, ...foreign];
-    });
-  }
+    })
+    : (Array.isArray(product?.shipping_options) ? product.shipping_options : [])
+      .filter(o => (o?.name || '').trim())
+      .map(o => ({ name: o.name.trim(), cost: Number(o.cost) || 0, delivery_time: '', international: false, pickup: false }));
 
-  return (Array.isArray(product?.shipping_options) ? product.shipping_options : [])
-    .filter(o => (o?.name || '').trim())
-    .map(o => ({ name: o.name.trim(), cost: Number(o.cost) || 0 }));
+  if (product?.pickup_in_studio) {
+    options.push({ name: 'Odbiór w studio', cost: 0, delivery_time: '', international: false, pickup: true });
+  }
+  return options;
+};
+
+// Podsumowanie dostawy: jedna forma — jej cena i czas; kilka form — „od <najniższa>”.
+export const shippingSummary = (product, forms = []) => {
+  const options = shippingOptionsOf(product, forms);
+  if (options.length === 0) {
+    const legacy = Number(product?.shipping_cost) || 0;
+    return { cost: legacy, text: legacy > 0 ? money(legacy) : 'gratis', delivery: '', freePickup: false };
+  }
+  const min = Math.min(...options.map(o => Number(o.cost) || 0));
+  return {
+    cost: min,
+    text: options.length === 1
+      ? (min > 0 ? money(min) : 'gratis')
+      : min > 0 ? `od ${money(min)}` : 'darmowa dostawa',
+    delivery: options.length === 1 ? (options[0].delivery_time || '') : '',
+    freePickup: options.some(o => o.pickup),
+  };
 };
 
 // Dostawa koszyka: najwyższy koszt dostawy wśród pozycji (jedna przesyłka),

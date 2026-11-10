@@ -31,8 +31,7 @@ export default function ShopProductEditor({ product, categories, collections, on
     unlimited_stock: false,
     stock: 0,
     restock: false,
-    shipping_cost: 0,
-    shipping_info: '',
+    pickup_in_studio: false,
     shipping_options: [],
     image_url: '',
     images: [],
@@ -147,8 +146,7 @@ export default function ShopProductEditor({ product, categories, collections, on
         stock: Math.max(0, Number(form.stock) || 0),
         restock: !!form.restock,
         shipping_form_ids: form.shipping_form_ids || [],
-        shipping_cost: Math.max(0, Number(form.shipping_cost) || 0),
-        shipping_info: form.shipping_info || '',
+        pickup_in_studio: !!form.pickup_in_studio,
         shipping_options: [],
         image_url: form.image_url || '',
         images: form.images || [],
@@ -381,17 +379,6 @@ export default function ShopProductEditor({ product, categories, collections, on
                       : 'Liczba dostępnych sztuk. 0 = wyprzedane.'}
                 </p>
               </div>
-              <div>
-                <label style={labelStyle(t)}>Koszt dostawy (PLN)</label>
-                <input type="number" value={form.shipping_cost ?? 0} onChange={e => set('shipping_cost', e.target.value)} style={inputStyle(t)} />
-                <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px', lineHeight: 1.6 }}>
-                  0 = darmowa dostawa tego produktu. W koszyku liczy się najwyższy koszt.
-                </p>
-              </div>
-            </div>
-            <div className="mt-4">
-              <label style={labelStyle(t)}>Wysyłka i pakowanie</label>
-              <input value={form.shipping_info || ''} onChange={e => set('shipping_info', e.target.value)} placeholder="np. Wysyłka 24–48 h / odbiór w studio" style={inputStyle(t)} />
             </div>
             <div className="mt-6">
               <p style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: '8px' }}>FORMY WYSYŁKI</p>
@@ -407,16 +394,20 @@ export default function ShopProductEditor({ product, categories, collections, on
                       return (
                         <button key={f.id} onClick={() => set('shipping_form_ids', active ? (form.shipping_form_ids || []).filter(id => id !== f.id) : [...(form.shipping_form_ids || []), f.id])}
                           style={{ border: `0.5px solid ${active ? 'var(--brand)' : t.border}`, color: active ? 'var(--brand)' : t.muted, background: active ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', ...mono, fontSize: '9px', letterSpacing: '0.08em', padding: '6px 11px', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
-                          {f.name} · {Number(f.cost) > 0 ? money(f.cost) : 'gratis'}{f.international ? ' + zagranica' : ''}
+                          {f.name} · {Number(f.cost) > 0 ? money(f.cost) : 'gratis'}{f.delivery_time ? ` · ${f.delivery_time}` : ''}{f.international ? ' + zagranica' : ''}
                         </button>
                       );
                     })}
                   </div>
                   <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '8px', lineHeight: 1.7 }}>
-                    Wybrane formy klient zobaczy jako przyciski dostawy. Listę i ceny form (także zagraniczne) edytujesz w zakładce Wysyłka.
+                    Koszt i czas dostawy pochodzą z formy wysyłki. Listę form (także zagraniczne) edytujesz w zakładce Wysyłka.
                   </p>
                 </>
               )}
+              <button onClick={() => set('pickup_in_studio', !form.pickup_in_studio)} style={{ marginTop: '14px', background: 'none', border: 'none', cursor: 'pointer', ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.pickup_in_studio ? '#16a34a' : t.muted, display: 'flex', alignItems: 'center', gap: '7px' }}>
+                <span style={{ width: '12px', height: '12px', border: `0.5px solid ${form.pickup_in_studio ? '#16a34a' : t.border}`, background: form.pickup_in_studio ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{form.pickup_in_studio && <Check size={9} color="#fff" />}</span>
+                Bezpłatny odbiór w studio
+              </button>
             </div>
             <button onClick={() => set('unlimited_stock', !form.unlimited_stock)} style={{ marginTop: '16px', background: 'none', border: 'none', cursor: 'pointer', ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.unlimited_stock ? '#16a34a' : t.muted, display: 'flex', alignItems: 'center', gap: '7px' }}>
               <span style={{ width: '12px', height: '12px', border: `0.5px solid ${form.unlimited_stock ? '#16a34a' : t.border}`, background: form.unlimited_stock ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{form.unlimited_stock && <Check size={9} color="#fff" />}</span>

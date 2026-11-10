@@ -39,7 +39,7 @@ export default function ShopShippingPanel() {
     <div>
       <div className="flex flex-wrap gap-3 items-center justify-between mb-6">
         <p style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.1em', lineHeight: 1.8, maxWidth: '520px' }}>
-          LISTA FORM WYSYŁKI — PRZYPISUJESZ JE DO PRODUKTÓW. FORMA MOŻE MIEĆ OPCJĘ ZAGRANICZNĄ Z WŁASNYMI WARIANTAMI CENY.
+          LISTA FORM WYSYŁKI — PRZYPISUJESZ JE DO PRODUKTÓW. CZAS DOSTAWY NALEŻY DO FORMY. FORMA MOŻE MIEĆ OPCJĘ ZAGRANICZNĄ Z WŁASNĄ CENĄ I CZASEM DOSTAWY.
         </p>
         <button onClick={() => setEditing({})} className="flex items-center gap-2 btn-oxblood" style={{ padding: '8px 16px' }}>
           <Plus size={13} /> NOWA FORMA
@@ -63,8 +63,8 @@ export default function ShopShippingPanel() {
                   <div className="min-w-0">
                     <p style={{ fontSize: '13px', color: t.title }}>{f.name}</p>
                     <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '3px' }}>
-                      KRAJ: {Number(f.cost) > 0 ? money(f.cost) : 'GRATIS'}
-                      {f.international ? ` · ZAGRANICA: ${variants.length > 0 ? variants.map(v => `${v.label} ${money(v.cost)}`).join(' · ') : 'BRAK STREF'}` : ''}
+                      KRAJ: {Number(f.cost) > 0 ? money(f.cost) : 'GRATIS'}{f.delivery_time ? ` · ${f.delivery_time}` : ''}
+                      {f.international ? ` · ZAGRANICA: ${variants.length > 0 ? variants.map(v => `${v.label} ${money(v.cost)}${v.delivery_time ? ` (${v.delivery_time})` : ''}`).join(' · ') : 'BRAK STREF'}` : ''}
                     </p>
                     {f.info && <p style={{ fontSize: '11px', color: t.muted, marginTop: '4px' }}>{f.info}</p>}
                   </div>

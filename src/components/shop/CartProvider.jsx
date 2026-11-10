@@ -46,12 +46,13 @@ export default function CartProvider({ children }) {
   const add = useCallback(async (product, variant, quantity = 1, shippingOption = null) => {
     if (!isAuthenticated) return false;
     const key = variant?.key || '';
-    const shippingCost = shippingOption ? Number(shippingOption.cost) || 0 : Number(product.shipping_cost) || 0;
+    const shippingCost = Number(shippingOption?.cost) || 0;
     const shippingName = shippingOption?.name || '';
+    const shippingTime = shippingOption?.delivery_time || '';
     const existing = items.find(i => i.product_id === product.id && (i.variant_key || '') === key);
     const next = existing
       ? items.map(i => i === existing
-        ? { ...i, quantity: Math.min(99, Number(i.quantity) + quantity), shipping_option: shippingName, shipping_cost: shippingCost }
+        ? { ...i, quantity: Math.min(99, Number(i.quantity) + quantity), shipping_option: shippingName, shipping_cost: shippingCost, shipping_info: shippingTime }
         : i)
       : [...items, {
         product_id: product.id,
@@ -64,7 +65,7 @@ export default function CartProvider({ children }) {
         quantity,
         shipping_option: shippingName,
         shipping_cost: shippingCost,
-        shipping_info: product.shipping_info || '',
+        shipping_info: shippingTime,
       }];
     await persist(next);
     return true;

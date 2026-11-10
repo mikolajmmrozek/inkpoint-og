@@ -4,11 +4,15 @@
   "properties": {
     "name": {
       "type": "string",
-      "description": "Nazwa formy wysy\u0142ki, np. Paczkomat InPost, Kurier DPD, Odbi\u00f3r w studio"
+      "description": "Nazwa formy wysy\u0142ki, np. Paczkomat InPost, Kurier DPD"
     },
     "info": {
       "type": "string",
-      "description": "Kr\u00f3tka informacja o pakowaniu i czasie dostawy, np. Pakowanie 50 z\u0142 \u00b7 odbi\u00f3r w studio"
+      "description": "Dodatkowa informacja o pakowaniu, np. Pakowanie w kopert\u0119"
+    },
+    "delivery_time": {
+      "type": "string",
+      "description": "Czas dostawy krajowej, np. 1\u20133 dni robocze \u2014 przypisany do formy wysy\u0142ki, nie do produktu"
     },
     "cost": {
       "type": "number",
@@ -33,6 +37,10 @@
             "type": "number",
             "default": 0,
             "description": "Koszt tej strefy w PLN"
+          },
+          "delivery_time": {
+            "type": "string",
+            "description": "Czas dostawy dla tej strefy, np. 5\u201310 dni roboczych (pusty = czas krajowy)"
           }
         }
       },

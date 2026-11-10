@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from '@/pages/dashboard/Dashboard';
 import { Plus, Pencil, Trash2, Package, Power, ChevronDown, ChevronRight } from 'lucide-react';
-import { money, availability } from '@/lib/shop';
+import { money, availability, shippingSummary } from '@/lib/shop';
 import { shopTheme, mono, display } from './shopTheme';
 import ShopProductEditor from './ShopProductEditor';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
@@ -73,9 +73,10 @@ export default function ShopProductsPanel() {
             const hasVariants = variants.length > 0;
             const open = openStocks.includes(p.id);
             const stockColor = avail.state === 'sold_out' ? '#9ca3af' : avail.state === 'soon' ? '#f59e0b' : t.muted;
+            const shipSummary = shippingSummary(p, forms);
             const shippingDetails = [
-              ...forms.filter(f => (p.shipping_form_ids || []).includes(f.id)).map(f => `${f.name} · ${Number(f.cost) > 0 ? money(f.cost) : 'gratis'}`),
-              ...((p.shipping_info || '').trim() ? [p.shipping_info.trim()] : []),
+              ...forms.filter(f => (p.shipping_form_ids || []).includes(f.id)).map(f => `${f.name} · ${Number(f.cost) > 0 ? money(f.cost) : 'gratis'}${f.delivery_time ? ` · ${f.delivery_time}` : ''}`),
+              ...(p.pickup_in_studio ? ['Odbiór w studio · gratis'] : []),
             ];
             const hasDetails = hasVariants || shippingDetails.length > 0;
             return (
@@ -112,7 +113,7 @@ export default function ShopProductsPanel() {
                 <div className="col-span-2 md:col-span-2">
                   <button onClick={() => hasDetails && toggleStocks(p.id)} style={{ background: 'none', border: 'none', cursor: hasDetails ? 'pointer' : 'default', padding: 0, display: 'flex', alignItems: 'center', gap: '3px', textAlign: 'left' }} title="Pokaż szczegóły dostawy">
                     <span style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>
-                      {Number(p.shipping_cost) > 0 ? `DOSTAWA ${money(p.shipping_cost)}` : 'DOSTAWA GRATIS'}
+                      {shipSummary.cost > 0 ? `DOSTAWA ${shipSummary.text.toUpperCase()}` : 'DOSTAWA GRATIS'}
                     </span>
                     {hasDetails && (open ? <ChevronDown size={11} color={t.muted} /> : <ChevronRight size={11} color={t.muted} />)}
                   </button>

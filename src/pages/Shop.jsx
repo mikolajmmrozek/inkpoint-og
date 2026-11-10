@@ -58,6 +58,7 @@ export default function Shop() {
   const [variantFilters, setVariantFilters] = useState({});
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [sort, setSort] = useState('');
+  const [shippingForms, setShippingForms] = useState([]);
   const [piercingPlacements, setPiercingPlacements] = useState([]);
   const [piercingTypes, setPiercingTypes] = useState([]);
   const [clothingTypes, setClothingTypes] = useState([]);
@@ -67,10 +68,12 @@ export default function Shop() {
       base44.entities.ShopCategory.filter({ is_active: true }, 'order', 100).catch(() => []),
       base44.entities.ShopCollection.filter({ is_active: true }, 'order', 100).catch(() => []),
       base44.entities.ShopProduct.filter({ is_active: true }, 'order', 300).catch(() => []),
-    ]).then(([cats, cols, prods]) => {
+      base44.entities.ShippingForm.filter({ is_active: true }, 'order', 100).catch(() => []),
+    ]).then(([cats, cols, prods, formList]) => {
       setCategories(cats);
       setCollections(cols);
       setProducts(prods);
+      setShippingForms(formList);
     }).finally(() => setLoading(false));
   }, []);
 
@@ -300,7 +303,7 @@ export default function Shop() {
             </div>
           ) : (
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mt-10">
-              {list.map(p => <ShopProductCard key={p.id} product={p} />)}
+              {list.map(p => <ShopProductCard key={p.id} product={p} forms={shippingForms} />)}
             </div>
           )}
 

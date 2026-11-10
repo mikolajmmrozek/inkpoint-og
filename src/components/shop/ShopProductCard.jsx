@@ -1,14 +1,14 @@
 import { Link } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
-import { money, availability, productShipping } from '@/lib/shop';
+import { money, availability, shippingSummary } from '@/lib/shop';
 
-export default function ShopProductCard({ product }) {
+export default function ShopProductCard({ product, forms = [] }) {
   const avail = availability(product);
-  const ship = productShipping(product);
+  const ship = shippingSummary(product, forms);
   const soldOut = avail.state === 'sold_out';
   const soon = avail.state === 'soon';
   const isNew = product.created_date ? (Date.now() - new Date(product.created_date).getTime()) < 1000 * 60 * 60 * 24 * 30 : false;
-  const shippingText = [ship.info, ship.cost > 0 ? `Dostawa ${money(ship.cost)}` : ''].filter(Boolean).join(' · ');
+  const shippingText = [ship.cost > 0 ? `Dostawa ${ship.text}` : ship.freePickup ? 'Darmowa dostawa / odbiór w studio' : 'Dostawa gratis', ship.delivery].filter(Boolean).join(' · ');
 
   return (
     <Link

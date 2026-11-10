@@ -9,7 +9,7 @@ import VariantPicker from '@/components/shop/VariantPicker';
 import PriceSliderPicker from '@/components/shop/PriceSliderPicker';
 import { useCart } from '@/components/shop/CartProvider';
 import { useAuth } from '@/lib/AuthContext';
-import { money, variantsOf, priceRange, availability, productStock, productShipping, shippingOptionsOf, pricingModeOf, priceSliderOf } from '@/lib/shop';
+import { money, variantsOf, priceRange, availability, productStock, shippingSummary, shippingOptionsOf, pricingModeOf, priceSliderOf } from '@/lib/shop';
 
 export default function ShopProduct() {
   const { slug } = useParams();
@@ -98,7 +98,7 @@ export default function ShopProduct() {
   const avail = availability(product);
   const canBuy = isSlider || avail.state === 'in_stock';
   const stock = isSlider ? 99 : (variant ? Number(variant.stock) || 0 : (productStock(product) ?? 99));
-  const ship = productShipping(product);
+  const ship = shippingSummary(product, forms);
   const shipOptions = shippingOptionsOf(product, forms);
   const price = variant?.price || product.price;
   const range = priceRange(product);
@@ -198,9 +198,20 @@ export default function ShopProduct() {
 
               <div className="mt-8 pt-6" style={{ borderTop: '0.5px solid hsl(var(--border))' }}>
                 <p className="text-micro" style={{ fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', marginBottom: '8px' }}>WYSYŁKA I PAKOWANIE</p>
-                {ship.info && <p style={{ color: 'hsl(var(--foreground))', fontSize: '13px', lineHeight: 1.6 }}>{ship.info}</p>}
-                {shipOptions.length > 0 ? (
+                {shipOptions.length === 0 ? (
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.06em' }}>
+                    Koszt dostawy: {ship.cost > 0 ? money(ship.cost) : 'gratis'}
+                  </p>
+                ) : shipOptions.length === 1 ? (
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.06em' }}>
+                    {shipOptions[0].name} · {Number(shipOptions[0].cost) > 0 ? money(shipOptions[0].cost) : 'gratis'}
+                    {shipOptions[0].delivery_time ? ` · ${shipOptions[0].delivery_time}` : ''}
+                  </p>
+                ) : (
                   <>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.06em' }}>
+                      {ship.cost > 0 ? `Dostawa od ${money(ship.cost)}` : 'Darmowa dostawa lub odbiór w studio'}
+                    </p>
                     <div className="flex flex-wrap gap-2 mt-3">
                       {shipOptions.map(o => {
                         const active = (shipOption?.name || '') === o.name;
@@ -226,13 +237,10 @@ export default function ShopProduct() {
                       })}
                     </div>
                     <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.06em', marginTop: '10px' }}>
-                      Koszt dostawy: {Number(shipOption?.cost) > 0 ? money(shipOption.cost) : 'gratis'}
+                      Wybrano: {shipOption?.name || '—'} · {Number(shipOption?.cost) > 0 ? money(shipOption.cost) : 'gratis'}
+                      {shipOption?.delivery_time ? ` · ${shipOption.delivery_time}` : ''}
                     </p>
                   </>
-                ) : (
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.06em', marginTop: ship.info ? '4px' : 0 }}>
-                    Koszt dostawy: {ship.cost > 0 ? money(ship.cost) : 'gratis'}
-                  </p>
                 )}
               </div>
 

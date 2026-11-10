@@ -8,12 +8,16 @@ import ShopProductCard from '@/components/shop/ShopProductCard';
 export default function HomeShopCarousel() {
   const { content } = useSiteContent();
   const [products, setProducts] = useState([]);
+  const [shippingForms, setShippingForms] = useState([]);
 
   useEffect(() => {
     if (!content.show_shop) return;
     base44.entities.ShopProduct.filter({ is_active: true }, '-created_date', 60)
       .then(list => setProducts(list))
       .catch(() => setProducts([]));
+    base44.entities.ShippingForm.filter({ is_active: true }, 'order', 100)
+      .then(list => setShippingForms(list))
+      .catch(() => setShippingForms([]));
   }, [content.show_shop]);
 
   if (!content.show_shop) return null;
@@ -46,7 +50,7 @@ export default function HomeShopCarousel() {
       <div className="flex gap-4 px-8 md:px-16 overflow-x-auto pb-4" style={{ scrollbarWidth: 'none' }}>
         {list.map(p => (
           <div key={p.id} className="flex-shrink-0" style={{ width: '250px' }}>
-            <ShopProductCard product={p} />
+            <ShopProductCard product={p} forms={shippingForms} />
           </div>
         ))}
       </div>

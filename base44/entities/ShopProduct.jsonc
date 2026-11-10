@@ -106,16 +106,21 @@
       "items": {
         "type": "string"
       },
-      "description": "Formy wysy\u0142ki przypisane do produktu (ID z listy ShippingForm)"
+      "description": "Formy wysy\u0142ki przypisane do produktu (ID z listy ShippingForm) \u2014 koszt i czas dostawy pochodz\u0105 z formy"
+    },
+    "pickup_in_studio": {
+      "type": "boolean",
+      "default": false,
+      "description": "True = bezp\u0142atny odbi\u00f3r w studio dost\u0119pny dla tego produktu (dodatkowa opcja dostawy, koszt 0)"
     },
     "shipping_cost": {
       "type": "number",
       "default": 0,
-      "description": "Koszt dostawy tego produktu w PLN (0 = darmowa) \u2014 u\u017cywany, gdy produkt nie ma przypisanych form wysy\u0142ki"
+      "description": "Historyczny koszt dostawy produktu \u2014 u\u017cywany tylko, gdy produkt nie ma przypisanych form wysy\u0142ki"
     },
     "shipping_info": {
       "type": "string",
-      "description": "Kr\u00f3tka informacja o wysy\u0142ce i pakowaniu tego produktu, np. 'Wysy\u0142ka 24\u201348 h' lub 'Pakowanie 50 z\u0142 \u00b7 odbi\u00f3r w studio'"
+      "description": "Historyczna informacja o wysy\u0142ce \u2014 czas dostawy jest teraz przypisany do formy wysy\u0142ki"
     },
     "shipping_options": {
       "type": "array",
