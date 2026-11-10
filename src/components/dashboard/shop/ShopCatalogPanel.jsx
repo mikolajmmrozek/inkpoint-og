@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from '@/pages/dashboard/Dashboard';
-import { Plus, Pencil, Trash2, X, Check, Upload, FolderOpen, Layers, Settings2, Sparkles } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Check, Upload, FolderOpen, Layers, Settings2, Sparkles, Package } from 'lucide-react';
 import { slugify } from '@/lib/shop';
 import { shopTheme, mono, display, inputStyle, labelStyle } from './shopTheme';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 import ShopPiercingPanel from './ShopPiercingPanel';
+import ShopCatalogProductPicker from './ShopCatalogProductPicker';
 
 const TABS = [
   { id: 'categories', label: 'Kategorie', icon: FolderOpen },
@@ -28,6 +29,7 @@ export default function ShopCatalogPanel() {
   const [saving, setSaving] = useState(false);
   const [deleteFor, setDeleteFor] = useState(null);
   const [settingsSaved, setSettingsSaved] = useState(false);
+  const [expandedId, setExpandedId] = useState(null);
 
   const load = () => {
     Promise.all([
@@ -91,6 +93,29 @@ export default function ShopCatalogPanel() {
     const entity = kind === 'categories' ? base44.entities.ShopCategory : base44.entities.ShopCollection;
     await entity.delete(id);
     setDeleteFor(null);
+    load();
+  };
+
+  const isMemberOf = (item, kind, p) => kind === 'categories'
+    ? p.category_id === item.id
+    : (p.collection_ids || []).includes(item.id) || (item.product_ids || []).includes(p.id);
+
+  const toggleProduct = async (item, kind, p) => {
+    const member = isMemberOf(item, kind, p);
+    if (kind === 'categories') {
+      await base44.entities.ShopProduct.update(p.id, {
+        category_id: member ? '' : item.id,
+        category_name: member ? '' : item.name,
+      });
+    } else {
+      const ids = p.collection_ids || [];
+      await base44.entities.ShopProduct.update(p.id, {
+        collection_ids: member ? ids.filter(id => id !== item.id) : [...ids, item.id],
+      });
+      if (member && (item.product_ids || []).includes(p.id)) {
+        await base44.entities.ShopCollection.update(item.id, { product_ids: (item.product_ids || []).filter(id => id !== p.id) });
+      }
+    }
     load();
   };
 
@@ -168,28 +193,51 @@ export default function ShopCatalogPanel() {
             <p style={{ ...mono, fontSize: '10px', color: t.muted, letterSpacing: '0.1em', padding: '30px 0' }}>BRAK WPISÓW</p>
           )}
           {list.map(item => {
-            const count = tab === 'categories'
-              ? products.filter(p => p.category_id === item.id).length
-              : products.filter(p => (p.collection_ids || []).includes(item.id) || (item.product_ids || []).includes(p.id)).length;
+            const isMember = (p) => isMemberOf(item, tab, p);
+            const count = products.filter(isMember).length;
+            const open = expandedId === item.id;
             return (
-              <div key={item.id} className="flex items-center justify-between gap-4 p-4" style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)', opacity: item.is_active === false ? 0.6 : 1 }}>
-                <div className="flex items-center gap-3 min-w-0">
-                  {item.image_url ? (
-                    <img src={item.image_url} alt="" style={{ width: '44px', height: '44px', objectFit: 'cover', border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)' }} />
-                  ) : (
-                    <div style={{ width: '44px', height: '44px', border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <FolderOpen size={14} color={t.muted} />
+              <div key={item.id} style={{ border: `0.5px solid ${open ? 'var(--brand)' : t.border}`, background: t.bg, borderRadius: 'var(--radius)', opacity: item.is_active === false ? 0.6 : 1 }}>
+                <div className="flex items-center justify-between gap-4 p-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    {item.image_url ? (
+                      <img src={item.image_url} alt="" style={{ width: '44px', height: '44px', objectFit: 'cover', border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)' }} />
+                    ) : (
+                      <div style={{ width: '44px', height: '44px', border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <FolderOpen size={14} color={t.muted} />
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p style={{ ...display, fontSize: '1.15rem', color: t.title, letterSpacing: '0.03em', lineHeight: 1.1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</p>
+                      <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '3px' }}>{count} produktów · /{item.slug}</p>
                     </div>
-                  )}
-                  <div className="min-w-0">
-                    <p style={{ ...display, fontSize: '1.15rem', color: t.title, letterSpacing: '0.03em', lineHeight: 1.1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</p>
-                    <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '3px' }}>{count} produktów · /{item.slug}</p>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      onClick={() => setExpandedId(open ? null : item.id)}
+                      title={tab === 'categories' ? 'Produkty w kategorii' : 'Produkty w kolekcji'}
+                      className="flex items-center gap-1"
+                      style={{ background: 'none', border: `0.5px solid ${open ? 'var(--brand)' : 'transparent'}`, borderRadius: 'var(--radius)', cursor: 'pointer', color: open ? 'var(--brand)' : t.muted, padding: '4px 6px', ...mono, fontSize: '8px', letterSpacing: '0.06em' }}
+                    >
+                      <Package size={13} /> {count}
+                    </button>
+                    <button onClick={() => openEdit(tab, item)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: '4px' }}><Pencil size={13} /></button>
+                    <button onClick={() => setDeleteFor({ kind: tab, item })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--brand)', padding: '4px' }}><Trash2 size={13} /></button>
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <button onClick={() => openEdit(tab, item)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: '4px' }}><Pencil size={13} /></button>
-                  <button onClick={() => setDeleteFor({ kind: tab, item })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--brand)', padding: '4px' }}><Trash2 size={13} /></button>
-                </div>
+                {open && (
+                  <div style={{ borderTop: `0.5px solid ${t.border}`, padding: '12px 16px 14px' }}>
+                    <p style={{ ...mono, fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: '8px' }}>
+                      {tab === 'categories' ? 'PRODUKTY W KATEGORII' : 'PRODUKTY W KOLEKCJI'}
+                    </p>
+                    <ShopCatalogProductPicker
+                      products={products}
+                      isMember={isMember}
+                      onToggle={(p) => toggleProduct(item, tab, p)}
+                      t={t}
+                    />
+                  </div>
+                )}
               </div>
             );
           })}
