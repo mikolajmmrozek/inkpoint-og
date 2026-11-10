@@ -29,6 +29,26 @@ export default function DashboardShop() {
 
   return (
     <div>
+      <div className="flex justify-end mb-3">
+        <a
+          href="/sklep"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          style={{
+            border: '0.5px solid var(--brand)',
+            color: 'var(--brand)',
+            background: 'rgb(var(--brand-rgb) /0.06)',
+            ...mono, fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase',
+            padding: '9px 18px', borderRadius: 'var(--radius)',
+            whiteSpace: 'nowrap',
+          }}
+          title="Otwórz sklep w nowej karcie"
+        >
+          <ExternalLink size={12} /> Zobacz sklep
+        </a>
+      </div>
+
       <div className="flex flex-wrap items-center gap-2 mb-8">
         {TABS.map(tb => {
           const Icon = tb.icon;
@@ -46,24 +66,6 @@ export default function DashboardShop() {
             </button>
           );
         })}
-
-        <a
-          href="/sklep"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 ml-auto hover:opacity-80 transition-opacity"
-          style={{
-            border: '0.5px solid var(--brand)',
-            color: 'var(--brand)',
-            background: 'rgb(var(--brand-rgb) /0.06)',
-            ...mono, fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase',
-            padding: '9px 18px', borderRadius: 'var(--radius)',
-            whiteSpace: 'nowrap',
-          }}
-          title="Otwórz sklep w nowej karcie"
-        >
-          <ExternalLink size={12} /> Zobacz sklep
-        </a>
       </div>
 
       {tab === 'orders' && <ShopOrdersPanel />}
