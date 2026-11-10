@@ -12,6 +12,7 @@ import LangDropdown from '@/components/health-form/LangDropdown';
 import SignatureCanvas from '@/components/health-form/SignatureCanvas';
 import { compactSignatures, generateFormNumber } from '@/lib/signature';
 import { trackAction } from '@/lib/diagnosticTracker';
+import { autoLinkHealthForm } from '@/lib/healthFormLinking';
 
 // Fields that should NEVER be copied from a previous form
 const SKIP_PREFILL_FIELDS = new Set([
@@ -491,6 +492,15 @@ export default function HealthFormPage() {
       //    The form itself is already saved, which is what matters most.
       const warnings = [];
 
+      // Automatyczne powiązanie z sesją: ankieta z ogólnego linku trafia do
+      // rezerwacji po e-mailu/telefonie lub nazwisku i dacie sesji.
+      if (!form.booking_id && savedForm?.id) {
+        try {
+          const linkedId = await autoLinkHealthForm(savedForm.id, formData);
+          if (linkedId) setForm(f => ({ ...f, booking_id: linkedId }));
+        } catch (e) { warnings.push('powiązanie z sesją'); }
+      }
+
       if (isMinor) {
         const guardianBody = guardian.body_placement || form.body_placement || '';
         let guardianForm;
@@ -545,10 +555,17 @@ export default function HealthFormPage() {
       const formData = await compactSignatures({ ...form, client_name: fullName, is_update_only: true, is_minor: isMinor, is_draft: false });
       if (!draftId && !formData.form_number) formData.form_number = generateFormNumber();
 
+      let savedForm;
       if (draftId) {
-        await base44.entities.HealthForm.update(draftId, formData);
+        savedForm = await base44.entities.HealthForm.update(draftId, formData);
+        if (!savedForm?.id) savedForm = { id: draftId };
       } else {
-        await base44.entities.HealthForm.create(formData);
+        savedForm = await base44.entities.HealthForm.create(formData);
+      }
+
+      if (!form.booking_id && savedForm?.id) {
+        const linkedId = await autoLinkHealthForm(savedForm.id, formData).catch(() => '');
+        if (linkedId) setForm(f => ({ ...f, booking_id: linkedId }));
       }
 
       if (booking) {

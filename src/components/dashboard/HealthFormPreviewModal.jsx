@@ -180,7 +180,7 @@ export default function HealthFormPreviewModal({ bookingId, healthFormId, client
 
               {/* Procedure questions — only flagged */}
               {template?.procedure_questions?.length > 0 && (() => {
-                const flagged = template.procedure_questions.filter(q => form[q.field_key] === true || form[`${q.field_key}_desc`]);
+                const flagged = template.procedure_questions.filter(q => form[q.field_key] === true);
                 if (flagged.length === 0) return null;
                 return (
                   <>

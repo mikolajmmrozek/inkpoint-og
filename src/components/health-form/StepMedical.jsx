@@ -4,13 +4,18 @@ function YesNoRow({ label, fieldKey, descKey, form, setField, t, inputStyle, lan
   const translatedLabel = useTranslatedText(label, lang);
   const val = form[fieldKey];
   const isError = showErrors && required && (val === null || val === undefined);
+  // "NIE" usuwa wcześniej wpisany opis — odpowiedź negatywna nie trafia do podsumowania
+  const choose = (v) => {
+    setField(fieldKey, v);
+    if (v === false && descKey) setField(descKey, '');
+  };
   return (
     <div className="py-3" style={{ borderBottom: `0.5px solid ${borderColor}` }}>
       <div className="flex items-center justify-between gap-4">
         <p style={{ color: textPrimary, fontSize: '16px', lineHeight: 1.4, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{translatedLabel}{required && <span style={{ color: 'var(--brand)' }}> *</span>}</p>
         <div className="flex gap-2 flex-shrink-0">
           {[true, false].map(v => (
-            <button type="button" key={String(v)} onClick={() => setField(fieldKey, v)}
+            <button type="button" key={String(v)} onClick={() => choose(v)}
               style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${val === v ? (v ? 'var(--brand)' : '#16a34a') : isError ? 'var(--brand)' : borderColor}`, color: val === v ? (v ? 'var(--brand)' : '#16a34a') : textMuted, background: 'rgba(255,255,255,0.06)', cursor: 'pointer' }}>
               {v ? t.yes : t.no}
             </button>

@@ -100,7 +100,7 @@ export default function Artists() {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.15, duration: 0.7 }}
               >
-                <Link to={`/artists/${artist.slug || artist.id}`} className="group block">
+                <div className="group block">
                   <div className="relative overflow-hidden aspect-[3/4]" style={{ borderRadius: 'var(--radius)' }}>
                     <img
                       src={getThumbnailUrl(artist.photo_url || 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91', 400, 65)}
@@ -124,9 +124,9 @@ export default function Artists() {
                         {artist.bio}
                       </p>
                       <div className="mt-4 flex items-center justify-between">
-                        <p className="text-micro group-hover:text-oxblood transition-colors" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgb(var(--foreground-rgb) / 0.4)', letterSpacing: '0.15em' }}>
+                        <Link to={`/artists/${artist.slug || artist.id}`} className="text-micro group-hover:text-oxblood transition-colors" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgb(var(--foreground-rgb) / 0.4)', letterSpacing: '0.15em' }}>
                           PORTFOLIO →
-                        </p>
+                        </Link>
                         {artist.instagram && (
                           <a
                             href={artist.instagram}
@@ -141,7 +141,7 @@ export default function Artists() {
                       </div>
                     </div>
                   </div>
-                </Link>
+                </div>
               </motion.div>
             ))}
           </div>

@@ -2,6 +2,11 @@ import { useTranslatedText } from '@/hooks/useTranslatedText';
 
 function ProcedureRow({ q, form, setField, t, inputStyle, showErrors, lang, textPrimary, textMuted, borderColor }) {
   const translatedLabel = useTranslatedText(q.label, lang);
+  // "NIE" usuwa wcześniej wpisany opis — odpowiedź negatywna nie trafia do podsumowania
+  const choose = (v) => {
+    setField(q.field_key, v);
+    if (v === false) setField(`${q.field_key}_desc`, '');
+  };
   return (
     <div className="py-3" style={{ borderBottom: `0.5px solid ${borderColor}` }}>
       <div className="flex items-center justify-between gap-4">
@@ -10,7 +15,7 @@ function ProcedureRow({ q, form, setField, t, inputStyle, showErrors, lang, text
         </p>
         <div className="flex gap-2 flex-shrink-0">
           {[true, false].map(v => (
-            <button type="button" key={String(v)} onClick={() => setField(q.field_key, v)}
+            <button type="button" key={String(v)} onClick={() => choose(v)}
               style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '8px 16px', border: `0.5px solid ${form[q.field_key] === v ? (v ? 'var(--brand)' : '#16a34a') : (showErrors && q.required && (form[q.field_key] === undefined || form[q.field_key] === null) ? 'var(--brand)' : borderColor)}`, color: form[q.field_key] === v ? (v ? 'var(--brand)' : '#16a34a') : textMuted, background: 'rgba(255,255,255,0.06)', cursor: 'pointer' }}>
               {v ? t.yes : t.no}
             </button>
