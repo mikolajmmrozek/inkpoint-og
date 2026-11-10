@@ -43,7 +43,7 @@ export default function ShopCatalogPanel() {
   const openNew = (kind) => {
     setEditing({ kind, id: null });
     setForm(kind === 'categories'
-      ? { name: '', slug: '', description: '', image_url: '', order: 999, is_active: true, filter_group: 'none' }
+      ? { name: '', slug: '', description: '', image_url: '', order: 999, is_active: true, filter_group: 'none', commission_type: 'inherit', commission_value: 0 }
       : { name: '', slug: '', description: '', image_url: '', order: 999, is_active: true, product_ids: [] });
   };
 
@@ -70,7 +70,11 @@ export default function ShopCatalogPanel() {
         order: Number(form.order) || 999,
         is_active: form.is_active !== false,
         ...(editing.kind === 'collections' ? { product_ids: form.product_ids || [] } : {}),
-        ...(editing.kind === 'categories' ? { filter_group: form.filter_group === 'piercing' ? 'piercing' : 'none' } : {}),
+        ...(editing.kind === 'categories' ? {
+          filter_group: ['piercing', 'clothing'].includes(form.filter_group) ? form.filter_group : 'none',
+          commission_type: ['none', 'percent', 'amount'].includes(form.commission_type) ? form.commission_type : 'inherit',
+          commission_value: Math.max(0, Number(form.commission_value) || 0),
+        } : {}),
       };
       const entity = editing.kind === 'categories' ? base44.entities.ShopCategory : base44.entities.ShopCollection;
       if (editing.id) await entity.update(editing.id, payload);
@@ -219,6 +223,38 @@ export default function ShopCatalogPanel() {
                   </select>
                   <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px', lineHeight: 1.6 }}>
                     Opcje filtrów edytujesz w zakładce „Filtry”. Produktom w tej kategorii przypiszesz je w edycji produktu.
+                  </p>
+                </div>
+              )}
+              {editing.kind === 'categories' && (
+                <div>
+                  <label style={labelStyle(t)}>Prowizja pracownika od produktów tej kategorii</label>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {[
+                      { id: 'inherit', label: 'Jak w sklepie' },
+                      { id: 'none', label: 'Brak' },
+                      { id: 'percent', label: 'Procent' },
+                      { id: 'amount', label: 'Kwota / szt.' },
+                    ].map(m => {
+                      const active = (form.commission_type || 'inherit') === m.id;
+                      return (
+                        <button key={m.id} onClick={() => setForm(f => ({ ...f, commission_type: m.id }))}
+                          style={{ border: `0.5px solid ${active ? 'var(--brand)' : t.border}`, color: active ? 'var(--brand)' : t.muted, background: active ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', ...mono, fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 11px', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
+                          {m.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {['percent', 'amount'].includes(form.commission_type) && (
+                    <div style={{ width: '160px' }}>
+                      <input type="number" min="0" value={form.commission_value ?? 0} onChange={e => setForm(f => ({ ...f, commission_value: e.target.value }))} style={inputStyle(t)} />
+                      <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px', lineHeight: 1.6 }}>
+                        {form.commission_type === 'percent' ? 'Procent od sprzedaży produktów tej kategorii.' : 'Kwota w PLN od każdej sprzedanej sztuki.'}
+                      </p>
+                    </div>
+                  )}
+                  <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '6px', lineHeight: 1.6 }}>
+                    Stawka obowiązuje wszystkich pracowników. „Jak w sklepie” bierze wspólną stawkę z Ustawień sklepu.
                   </p>
                 </div>
               )}

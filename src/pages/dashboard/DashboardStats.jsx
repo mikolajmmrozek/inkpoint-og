@@ -2,10 +2,13 @@ import { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, Legend } from 'recharts';
-import { TrendingUp, Users, Calendar, DollarSign, BarChart2, Wallet, ChevronLeft, ChevronRight } from 'lucide-react';
+import { TrendingUp, Users, Calendar, DollarSign, BarChart2, Wallet, ChevronLeft, ChevronRight, Scissors, ShoppingBag } from 'lucide-react';
 import { format, addDays, addWeeks, startOfWeek } from 'date-fns';
 import { pl } from 'date-fns/locale';
+import { useSearchParams } from 'react-router-dom';
 import TodaySettlementView from '@/components/dashboard/TodaySettlementView';
+import StatsServicesView from '@/components/dashboard/stats/StatsServicesView';
+import StatsShopView from '@/components/dashboard/stats/StatsShopView';
 
 const MONTHS_PL = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
 const MONTHS_FULL = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
@@ -38,6 +41,8 @@ export default function DashboardStats() {
   const [breakdownView, setBreakdownView] = useState('monthly'); // 'monthly' | 'daily'
   const [pageView, setPageView] = useState('stats'); // 'stats' | 'today'
   const [paymentWeekStart, setPaymentWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const [searchParams] = useSearchParams();
+  const [scope, setScope] = useState(() => (['services', 'shop'].includes(searchParams.get('view')) ? searchParams.get('view') : 'studio'));
 
   useEffect(() => {
     base44.entities.Artist.list().then(a => {
@@ -266,6 +271,25 @@ export default function DashboardStats() {
   return (
     <div>
       <ViewToggle />
+
+      {/* Zakres: całe studio / usługi / sklep */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {[
+          { id: 'studio', label: 'Całe studio', icon: BarChart2 },
+          { id: 'services', label: 'Usługi', icon: Scissors },
+          { id: 'shop', label: 'Sklep', icon: ShoppingBag },
+        ].map(s => {
+          const Icon = s.icon;
+          const active = scope === s.id;
+          return (
+            <button key={s.id} onClick={() => setScope(s.id)} className="flex items-center gap-2"
+              style={{ ...mono, fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '9px 16px', border: `0.5px solid ${active ? 'var(--brand)' : t.border}`, color: active ? 'var(--brand)' : t.muted, background: active ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
+              <Icon size={12} /> {s.label}
+            </button>
+          );
+        })}
+      </div>
+
       {/* Filters */}
       <div className="mb-4 flex items-center gap-3 flex-wrap">
           {/* Year */}
@@ -301,6 +325,10 @@ export default function DashboardStats() {
         <div className="flex items-center justify-center py-20">
           <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
         </div>
+      ) : scope === 'services' ? (
+        <StatsServicesView t={t} filtered={filtered} MONTHS_FULL={MONTHS_FULL} selectedYear={selectedYear} />
+      ) : scope === 'shop' ? (
+        <StatsShopView t={t} shopOrders={shopOrders} filtered={filtered} shopTotals={shopTotals} />
       ) : (
         <>
           {/* KPI row */}

@@ -30,6 +30,7 @@ import DashboardShop from './pages/dashboard/DashboardShop';
 import ClientOrders from './pages/client/ClientOrders';
 import ClientShopAccount from './pages/client/ClientShopAccount';
 import ClientQuickAdd from './pages/ClientQuickAdd';
+import ClientQuickAddQr from './pages/ClientQuickAddQr';
 
 // Dashboard
 import Dashboard from './pages/dashboard/Dashboard';
@@ -116,6 +117,7 @@ const AuthenticatedApp = () => {
       <Route path="/voucher/:code" element={<Voucher />} />
       <Route path="/change-request" element={<ChangeRequest />} />
       <Route path="/nowy-klient" element={<ClientQuickAdd />} />
+      <Route path="/nowy-klient-qr" element={<ClientQuickAddQr />} />
 
       {/* Dashboard (admin only) */}
       <Route path="/dashboard" element={<Dashboard />}>

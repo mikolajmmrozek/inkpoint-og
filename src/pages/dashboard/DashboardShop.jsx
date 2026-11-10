@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTheme } from './Dashboard';
-import { ShoppingBag, Package, Layers, RotateCcw, Truck, SlidersHorizontal, Settings2, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ShoppingBag, Package, Layers, RotateCcw, Truck, SlidersHorizontal, Settings2, ExternalLink, BarChart2 } from 'lucide-react';
 import ShopOrdersPanel from '@/components/dashboard/shop/ShopOrdersPanel';
 import ShopProductsPanel from '@/components/dashboard/shop/ShopProductsPanel';
 import ShopCatalogPanel from '@/components/dashboard/shop/ShopCatalogPanel';
@@ -47,6 +48,21 @@ export default function DashboardShop() {
         >
           <ExternalLink size={12} /> Zobacz sklep
         </a>
+
+        <Link
+          to="/dashboard/stats?view=shop"
+          className="flex items-center gap-2 hover:opacity-90 transition-opacity"
+          style={{
+            border: `0.5px solid ${t.border}`,
+            color: t.muted,
+            ...mono, fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase',
+            padding: '9px 18px', borderRadius: 'var(--radius)',
+            whiteSpace: 'nowrap', textDecoration: 'none',
+          }}
+          title="Statystyki sklepu — produkty, przychód i prowizje"
+        >
+          <BarChart2 size={12} /> Statystyki sklepu
+        </Link>
 
         {TABS.map(tb => {
           const Icon = tb.icon;

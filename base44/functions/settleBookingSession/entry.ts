@@ -80,16 +80,35 @@ export default async function (req) {
       })
       .filter(Boolean);
 
-    // ---------- 3. Prowizja: jedna wspólna stawka dla wszystkich ----------
+    // ---------- 3. Prowizja: wspólna stawka, nadpisywana per kategoria sklepu ----------
     const settingsList = await base44.asServiceRole.entities.ShopSettings.filter({ key: 'default' });
     const settings = settingsList[0] || {};
     const commissionType = settings.product_commission_type || 'none';
     const commissionValue = num(settings.product_commission_value, 0);
     const productsTotal = round2(soldProducts.reduce((s, p) => s + p.price * p.qty, 0));
-    const productsCount = soldProducts.reduce((s, p) => s + p.qty, 0);
+
+    const categoryIds = [...new Set(catalog.map((p) => p.category_id).filter(Boolean))];
+    const categories = categoryIds.length
+      ? await base44.asServiceRole.entities.ShopCategory.filter({ id: { $in: categoryIds } }).catch(() => [])
+      : [];
+    const categoryById = new Map(categories.map((c) => [c.id, c]));
+
+    const ruleFor = (product) => {
+      const category = categoryById.get(product.category_id);
+      const type = category?.commission_type;
+      if (type && type !== 'inherit') return { type, value: num(category.commission_value, 0) };
+      return { type: commissionType, value: commissionValue };
+    };
+
     let commission = 0;
-    if (commissionType === 'percent') commission = round2(productsTotal * commissionValue / 100);
-    else if (commissionType === 'amount') commission = round2(productsCount * commissionValue);
+    soldProducts.forEach((item) => {
+      const product = catalogById.get(item.product_id);
+      if (!product) return;
+      const rule = ruleFor(product);
+      if (rule.type === 'percent') commission += item.price * item.qty * rule.value / 100;
+      else if (rule.type === 'amount') commission += item.qty * rule.value;
+    });
+    commission = round2(commission);
 
     // ---------- 4. Magazyn: korygujemy tylko RÓŻNICĘ względem poprzedniego zapisu ----------
     const cancelInventory = body.cancel_inventory === true;

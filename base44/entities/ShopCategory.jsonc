@@ -31,6 +31,22 @@
       "default": "none",
       "description": "Zestaw filtr\u00f3w dla kategorii: none = brak dodatkowych filtr\u00f3w, piercing = filtry miejsca i rodzaju przek\u0142ucia, clothing = filtry rodzaju ubrania"
     },
+    "commission_type": {
+      "type": "string",
+      "enum": [
+        "inherit",
+        "none",
+        "percent",
+        "amount"
+      ],
+      "default": "inherit",
+      "description": "Prowizja pracownika dla produkt\u00f3w tej kategorii: inherit = wsp\u00f3lna stawka ze sklepu, none = brak prowizji, percent = procent od sprzeda\u017cy, amount = sta\u0142a kwota od sztuki"
+    },
+    "commission_value": {
+      "type": "number",
+      "default": 0,
+      "description": "Warto\u015b\u0107 prowizji dla tej kategorii: procent (commission_type = percent) albo kwota PLN od sztuki (amount)"
+    },
     "is_active": {
       "type": "boolean",
       "default": true
