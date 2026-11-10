@@ -82,7 +82,7 @@ export default function ShopProductsPanel() {
             return (
               <div key={p.id} style={{ borderBottom: i < filtered.length - 1 ? `0.5px solid ${t.border}` : 'none', opacity: p.is_active === false ? 0.55 : 1 }}>
               <div className="grid grid-cols-12 gap-3 px-4 py-3 items-center">
-                <div className="col-span-6 md:col-span-4 flex items-center gap-3 min-w-0">
+                <div onClick={() => setEditing(p)} className="col-span-6 md:col-span-4 flex items-center gap-3 min-w-0" style={{ cursor: 'pointer' }} title="Edytuj produkt">
                   <div style={{ width: '42px', height: '52px', overflow: 'hidden', border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)', flexShrink: 0, background: t.panel }}>
                     {p.image_url && <img src={p.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                   </div>

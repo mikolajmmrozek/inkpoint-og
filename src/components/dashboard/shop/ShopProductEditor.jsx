@@ -104,7 +104,7 @@ export default function ShopProductEditor({ product, categories, collections, on
   const setAxis = (i, field, value) => updateAxes(axesText.map((a, idx) => idx === i ? { ...a, [field]: value } : a));
 
   const updateVariant = (key, field, value) => {
-    setForm(f => ({ ...f, variants: (f.variants || []).map(v => v.key === key ? { ...v, [field]: field === 'price' || field === 'stock' ? Number(value) || 0 : value } : v) }));
+    setForm(f => ({ ...f, variants: (f.variants || []).map(v => v.key === key ? { ...v, [field]: value } : v) }));
   };
 
   const upload = async (file, target) => {
@@ -151,7 +151,7 @@ export default function ShopProductEditor({ product, categories, collections, on
         image_url: form.image_url || '',
         images: form.images || [],
         variant_axes: form.variant_axes || [],
-        variants: form.variants || [],
+        variants: (form.variants || []).map(v => ({ ...v, price: Number(v.price) || 0, stock: Number(v.stock) || 0 })),
         is_voucher: form.pricing_mode === 'slider',
         is_active: form.is_active !== false,
         is_featured: !!form.is_featured,
