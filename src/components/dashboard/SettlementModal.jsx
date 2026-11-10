@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { X, Plus, Trash2, Check, Loader2, RotateCcw } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
@@ -58,6 +58,16 @@ export default function SettlementModal({ booking, user, onClose, onSettled, t, 
   const paymentsSum = r2(payments.reduce((s, p) => s + (Number(p.amount) || 0), 0));
   const isValid = finalNum >= 0 && paymentsSum === remainder && (remainder === 0 || payments.every(p => p.method && (Number(p.amount) || 0) > 0));
   const diff = r2(paymentsSum - remainder);
+
+  // Dodanie lub usunięcie pozycji podnosi/obniża finałną kwotę o tę różnicę,
+  // żeby kwota usługi pozostała nienaruszona.
+  const prevItemsSum = useRef(productsTotal + extrasTotal);
+  useEffect(() => {
+    const sum = productsTotal + extrasTotal;
+    const delta = r2(sum - prevItemsSum.current);
+    prevItemsSum.current = sum;
+    if (delta !== 0) setFinalAmount(prev => String(r2((Number(prev) || 0) + delta)));
+  }, [productsTotal, extrasTotal]);
 
   const itemsCount = products.reduce((s, p) => s + (Number(p.qty) || 0), 0);
   const commissionType = settings?.product_commission_type || 'none';

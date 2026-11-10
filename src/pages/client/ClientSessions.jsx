@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useOutletContext, Link } from 'react-router-dom';
+import { useOutletContext, Link, useSearchParams } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
@@ -60,6 +60,19 @@ export default function ClientSessions() {
   }).sort((a, b) => (b.session_date || '').localeCompare(a.session_date || ''));
 
   const displayed = tab === 'upcoming' ? upcoming : past;
+
+  // Deep link z powiadomienia: otwiera właściwą sesję klienta (tylko jego własną — lista jest już zawężona do user.email).
+  const [searchParams] = useSearchParams();
+  const pendingBookingId = searchParams.get('booking_id');
+  useEffect(() => {
+    if (!pendingBookingId || bookings.length === 0) return;
+    const found = bookings.find(b => b.id === pendingBookingId);
+    if (!found) return;
+    setPreviewBooking(found);
+    const d = found.session_date ? parseISO(found.session_date) : null;
+    const now = new Date();
+    setTab(d && (isAfter(d, now) || isToday(d)) ? 'upcoming' : 'past');
+  }, [pendingBookingId, bookings]);
 
   return (
     <div>

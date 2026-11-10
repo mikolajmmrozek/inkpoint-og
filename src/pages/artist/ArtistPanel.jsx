@@ -250,6 +250,9 @@ export default function ArtistPanel() {
               <div className="hidden lg:block">
                 <NotificationBell userEmail={user.email} theme={theme} onClick={() => setNotifOpen(true)} />
               </div>
+              <span className="hidden md:block" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: textColor, letterSpacing: '0.08em', textTransform: 'uppercase', maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {artist?.name || user.full_name || user.email}
+              </span>
               <Link to="/artist/profile" title="Mój profil">
                 {artist?.photo_url ? (
                   <img src={artist.photo_url} alt={artist.name} style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover', border: `0.5px solid ${border}` }} />
