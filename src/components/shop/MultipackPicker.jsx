@@ -1,10 +1,9 @@
-import { money, multipacksOf, packPrice, packLabel } from '@/lib/shop';
+import { money, packPrice, packLabel } from '@/lib/shop';
 
 // Wybór zestawu: pojedyncza sztuka albo wielosztuka (pakiet).
-// Pakiety korzystają ze wspólnego stanu — niedostępne, gdy brakuje sztuk.
-export default function MultipackPicker({ product, basePrice, pack, onSelect, availableUnits }) {
-  const packs = multipacksOf(product);
-  if (packs.length === 0) return null;
+// Pakiety pochodzą z wybranego wariantu — niedostępne, gdy brakuje sztuk.
+export default function MultipackPicker({ packs, basePrice, pack, onSelect, availableUnits }) {
+  if (!packs || packs.length === 0) return null;
 
   const options = [
     { units: 1, label: '1 szt.', price: Number(basePrice) || 0, pack: null },

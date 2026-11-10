@@ -109,7 +109,7 @@ export default function ShopProduct() {
   const shipOptions = shippingOptionsOf(product, forms);
   const price = variant?.price || product.price;
   const range = priceRange(product);
-  const packs = multipacksOf(product);
+  const packs = multipacksOf(product, variant);
   const unitsPerPack = pack ? Number(pack.units) || 1 : 1;
   const unitPrice = isSlider ? Number(amount) || 0 : (pack ? packPrice(price, pack) : Number(price) || 0);
   const total = unitPrice * (Number(quantity) || 1);
@@ -186,7 +186,7 @@ export default function ShopProduct() {
                   <VariantPicker
                     product={{ ...product, variants }}
                     variant={variant}
-                    onSelect={(v) => { setVariant(v); setQuantity(1); }}
+                    onSelect={(v) => { setVariant(v); setPack(null); setQuantity(1); }}
                     quantity={quantity}
                     onQuantity={setQuantity}
                     stock={pack ? maxPacks : stock}
@@ -196,7 +196,7 @@ export default function ShopProduct() {
 
               {canBuy && !isSlider && packs.length > 0 && (
                 <MultipackPicker
-                  product={product}
+                  packs={packs}
                   basePrice={Number(price) || 0}
                   pack={pack}
                   onSelect={(p) => { setPack(p); setQuantity(1); }}

@@ -4,15 +4,27 @@ import { useTheme } from '@/pages/dashboard/Dashboard';
 import { Plus, X, Trash2, Upload, RefreshCw, Check } from 'lucide-react';
 import { shopTheme, mono, display, inputStyle, labelStyle } from './shopTheme';
 import ShopMultipacksEditor from './ShopMultipacksEditor';
+import ShopVariantPacksEditor from './ShopVariantPacksEditor';
 import { slugify, money } from '@/lib/shop';
 
 const ALLOWED_IMG = ['image/jpeg', 'image/png', 'image/webp'];
+
+const cleanPacks = (list) => (Array.isArray(list) ? list : [])
+  .filter(m => Number(m.units) > 1)
+  .map(m => ({
+    units: Number(m.units) || 2,
+    label: (m.label || '').trim(),
+    pricing: m.pricing === 'manual' ? 'manual' : 'percent',
+    price: Math.max(0, Number(m.price) || 0),
+    discount_percent: Math.min(100, Math.max(0, Number(m.discount_percent) || 0)),
+  }));
 
 export default function ShopProductEditor({ product, categories, collections, onClose, onSaved }) {
   const { theme } = useTheme();
   const t = shopTheme(theme);
 
-  const [form, setForm] = useState(() => ({
+  const [form, setForm] = useState(() => {
+    const base = {
     name: '',
     slug: '',
     short_description: '',
@@ -43,7 +55,17 @@ export default function ShopProductEditor({ product, categories, collections, on
     is_featured: false,
     order: 999,
     ...(product || {}),
-  }));
+    };
+    // Pakiety są teraz per wariant — stare pakiety produktu kopiujemy do wariantów.
+    if (Array.isArray(base.variants) && base.variants.length) {
+      const legacy = Array.isArray(base.multipacks) ? base.multipacks : [];
+      base.variants = base.variants.map(v => ({
+        ...v,
+        multipacks: Array.isArray(v.multipacks) && v.multipacks.length ? v.multipacks : legacy.map(m => ({ ...m })),
+      }));
+    }
+    return base;
+  });
   const [axesText, setAxesText] = useState(() => (product?.variant_axes || []).map(a => ({ name: a.name, values: (a.values || []).join(', ') })));
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -127,6 +149,7 @@ export default function ShopProductEditor({ product, categories, collections, on
     setSaving(true);
     try {
       const category = categories.find(c => c.id === form.category_id);
+      const hasVariants = (form.variants || []).length > 0;
       const payload = {
         name: form.name.trim(),
         slug: (form.slug || slugify(form.name)).trim(),
@@ -153,16 +176,14 @@ export default function ShopProductEditor({ product, categories, collections, on
         image_url: form.image_url || '',
         images: form.images || [],
         variant_axes: form.variant_axes || [],
-        variants: (form.variants || []).map(v => ({ ...v, price: Number(v.price) || 0, stock: Number(v.stock) || 0 })),
-        multipacks: (form.multipacks || [])
-          .filter(m => Number(m.units) > 1)
-          .map(m => ({
-            units: Number(m.units) || 2,
-            label: (m.label || '').trim(),
-            pricing: m.pricing === 'manual' ? 'manual' : 'percent',
-            price: Math.max(0, Number(m.price) || 0),
-            discount_percent: Math.min(100, Math.max(0, Number(m.discount_percent) || 0)),
-          })),
+        variants: (form.variants || []).map(v => ({
+          ...v,
+          price: Number(v.price) || 0,
+          stock: Number(v.stock) || 0,
+          multipacks: cleanPacks(v.multipacks),
+        })),
+        // Pakiety przy produkcie dotyczą tylko produktów bez wariantów.
+        multipacks: hasVariants ? [] : cleanPacks(form.multipacks),
         is_voucher: form.pricing_mode === 'slider',
         is_active: form.is_active !== false,
         is_featured: !!form.is_featured,
@@ -376,12 +397,20 @@ export default function ShopProductEditor({ product, categories, collections, on
           )}
 
           {form.pricing_mode !== 'slider' && (
-            <ShopMultipacksEditor
-              theme={theme}
-              packs={form.multipacks || []}
-              onChange={(list) => set('multipacks', list)}
-              basePrice={Number(form.price) || 0}
-            />
+            (form.variants || []).length > 0 ? (
+              <ShopVariantPacksEditor
+                theme={theme}
+                variants={form.variants}
+                onChangeVariantPacks={(key, list) => set('variants', (form.variants || []).map(v => (v.key === key ? { ...v, multipacks: list } : v)))}
+              />
+            ) : (
+              <ShopMultipacksEditor
+                theme={theme}
+                packs={form.multipacks || []}
+                onChange={(list) => set('multipacks', list)}
+                basePrice={Number(form.price) || 0}
+              />
+            )
           )}
 
           {/* Stan i dostawa */}

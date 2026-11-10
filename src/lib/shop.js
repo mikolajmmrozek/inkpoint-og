@@ -143,8 +143,14 @@ export const priceRange = (product) => {
 // ── Wielosztuki (pakiety) ───────────────────────────────────────────────────
 // Opcjonalne pakiety na produkcie (np. 2 szt. w komplecie). Korzystają ze wspólnego
 // stanu magazynowego — pakiet zjada tyle sztuk, ile ma w środku.
-export const multipacksOf = (product) =>
-  (Array.isArray(product?.multipacks) ? product.multipacks : []).filter(p => Number(p?.units) > 1);
+// Pakiety są przypisane do wariantu (każdy wariant ma własne wielosztuki);
+// produkty bez wariantów korzystają z listy przy produkcie.
+export const multipacksOf = (product, variant = null) => {
+  const variantPacks = Array.isArray(variant?.multipacks) ? variant.multipacks : [];
+  const productPacks = Array.isArray(product?.multipacks) ? product.multipacks : [];
+  const source = variantPacks.length > 0 ? variantPacks : (variant ? [] : productPacks);
+  return source.filter(p => Number(p?.units) > 1);
+};
 
 export const packLabel = (pack) => {
   const units = Number(pack?.units) || 1;

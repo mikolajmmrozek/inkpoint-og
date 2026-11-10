@@ -11,11 +11,14 @@ function variantLabelOf(v) {
 }
 
 // Wielosztuka wybrana przez klienta — szukamy pakietu po liczbie sztuk.
-function packOf(product, units) {
+// Pakiety przypisane są do wariantu; produkty bez wariantów mają listę przy produkcie.
+function packOf(product, variant, units) {
   const wanted = Number(units) || 1;
   if (wanted <= 1) return null;
-  const packs = Array.isArray(product.multipacks) ? product.multipacks : [];
-  return packs.find((m) => Number(m.units) === wanted) || null;
+  const variantPacks = Array.isArray(variant?.multipacks) ? variant.multipacks : [];
+  const productPacks = Array.isArray(product?.multipacks) ? product.multipacks : [];
+  const source = variantPacks.length > 0 ? variantPacks : (variant ? [] : productPacks);
+  return source.find((m) => Number(m.units) === wanted) || null;
 }
 
 function packLabelOf(pack) {
@@ -123,7 +126,7 @@ export default async function (req) {
 
         const variants = Array.isArray(product.variants) ? product.variants : [];
         const variant = variants.find((v) => v.key === raw.variant_key) || null;
-        const pack = packOf(product, raw.units);
+        const pack = packOf(product, variant, raw.units);
         const unitsPerPack = pack ? Number(pack.units) : 1;
         const needed = qty * unitsPerPack;
 
