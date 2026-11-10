@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useTheme } from '@/pages/dashboard/Dashboard';
 import { Plus, X, Trash2, Upload, RefreshCw, Check } from 'lucide-react';
 import { shopTheme, mono, display, inputStyle, labelStyle } from './shopTheme';
+import ShopMultipacksEditor from './ShopMultipacksEditor';
 import { slugify, money } from '@/lib/shop';
 
 const ALLOWED_IMG = ['image/jpeg', 'image/png', 'image/webp'];
@@ -37,6 +38,7 @@ export default function ShopProductEditor({ product, categories, collections, on
     images: [],
     variant_axes: [],
     variants: [],
+    multipacks: [],
     is_active: true,
     is_featured: false,
     order: 999,
@@ -152,6 +154,15 @@ export default function ShopProductEditor({ product, categories, collections, on
         images: form.images || [],
         variant_axes: form.variant_axes || [],
         variants: (form.variants || []).map(v => ({ ...v, price: Number(v.price) || 0, stock: Number(v.stock) || 0 })),
+        multipacks: (form.multipacks || [])
+          .filter(m => Number(m.units) > 1)
+          .map(m => ({
+            units: Number(m.units) || 2,
+            label: (m.label || '').trim(),
+            pricing: m.pricing === 'manual' ? 'manual' : 'percent',
+            price: Math.max(0, Number(m.price) || 0),
+            discount_percent: Math.min(100, Math.max(0, Number(m.discount_percent) || 0)),
+          })),
         is_voucher: form.pricing_mode === 'slider',
         is_active: form.is_active !== false,
         is_featured: !!form.is_featured,
@@ -362,6 +373,15 @@ export default function ShopProductEditor({ product, categories, collections, on
               </div>
             )}
           </div>
+          )}
+
+          {form.pricing_mode !== 'slider' && (
+            <ShopMultipacksEditor
+              theme={theme}
+              packs={form.multipacks || []}
+              onChange={(list) => set('multipacks', list)}
+              basePrice={Number(form.price) || 0}
+            />
           )}
 
           {/* Stan i dostawa */}

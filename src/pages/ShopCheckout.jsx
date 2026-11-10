@@ -91,7 +91,7 @@ export default function ShopCheckout() {
     try {
       const res = await base44.functions.invoke('manageShopOrder', {
         action: 'create',
-        items: items.map(i => ({ product_id: i.product_id, variant_key: i.variant_key, quantity: i.quantity, shipping_option: i.shipping_option || '' })),
+        items: items.map(i => ({ product_id: i.product_id, variant_key: i.variant_key, quantity: i.quantity, units: Number(i.units) || 1, shipping_option: i.shipping_option || '' })),
         shipping_address: { ...shipping, email: user.email },
         billing_address: sameBilling ? { ...shipping, email: user.email } : { ...billing, email: user.email },
         invoice_details: wantInvoice ? invoice : {},

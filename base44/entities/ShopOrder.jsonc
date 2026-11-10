@@ -44,6 +44,11 @@
           "quantity": {
             "type": "number"
           },
+          "units": {
+            "type": "number",
+            "default": 1,
+            "description": "Liczba sztuk w jednym pakiecie (wielosztuka) \u2014 1 = pojedyncza sztuka. Quantity = liczba pakiet\u00f3w."
+          },
           "shipping_option": {
             "type": "string",
             "description": "Wybrana opcja dostawy dla tej pozycji"

@@ -10,6 +10,28 @@ function variantLabelOf(v) {
   return opts.map((o) => `${o.name}: ${o.value}`).join(' · ');
 }
 
+// Wielosztuka wybrana przez klienta — szukamy pakietu po liczbie sztuk.
+function packOf(product, units) {
+  const wanted = Number(units) || 1;
+  if (wanted <= 1) return null;
+  const packs = Array.isArray(product.multipacks) ? product.multipacks : [];
+  return packs.find((m) => Number(m.units) === wanted) || null;
+}
+
+function packLabelOf(pack) {
+  const units = Number(pack?.units) || 1;
+  return (pack?.label || '').trim() || `${units} szt. w komplecie`;
+}
+
+// Cena pakietu: procent zniżki od ceny sztuki × liczba sztuk albo kwota ręczna.
+function packPriceOf(basePrice, pack) {
+  if (!pack) return round2(basePrice);
+  if (pack.pricing === 'manual') return round2(Math.max(0, Number(pack.price) || 0));
+  const units = Number(pack.units) || 1;
+  const discount = Math.min(100, Math.max(0, Number(pack.discount_percent) || 0));
+  return round2((Number(basePrice) || 0) * units * (1 - discount / 100));
+}
+
 export default async function (req) {
   try {
     const base44 = createClientFromRequest(req);
@@ -101,6 +123,9 @@ export default async function (req) {
 
         const variants = Array.isArray(product.variants) ? product.variants : [];
         const variant = variants.find((v) => v.key === raw.variant_key) || null;
+        const pack = packOf(product, raw.units);
+        const unitsPerPack = pack ? Number(pack.units) : 1;
+        const needed = qty * unitsPerPack;
 
         if (variants.length > 0 && !variant) {
           return Response.json({ error: `Wybierz wariant produktu „${product.name}".` }, { status: 400 });
@@ -108,18 +133,19 @@ export default async function (req) {
         if (variant && variant.is_active === false) {
           return Response.json({ error: `Wariant „${variantLabelOf(variant)}" jest niedostępny.` }, { status: 400 });
         }
-        if (variant && (Number(variant.stock) || 0) < qty) {
+        if (variant && (Number(variant.stock) || 0) < needed) {
           return Response.json({
             error: `Brak wystarczającej ilości: ${product.name} (${variantLabelOf(variant)}). Dostępne: ${Number(variant.stock) || 0} szt.`,
           }, { status: 400 });
         }
-        if (!variant && !product.unlimited_stock && typeof product.stock === 'number' && product.stock < qty) {
+        if (!variant && !product.unlimited_stock && typeof product.stock === 'number' && product.stock < needed) {
           return Response.json({
             error: `Brak wystarczającej ilości: ${product.name}. Dostępne: ${Math.max(0, product.stock)} szt.`,
           }, { status: 400 });
         }
 
-        const unitPrice = round2(variant && variant.price ? variant.price : product.price);
+        const baseUnitPrice = round2(variant && variant.price ? variant.price : product.price);
+        const unitPrice = pack ? packPriceOf(baseUnitPrice, pack) : baseUnitPrice;
         subtotal = round2(subtotal + unitPrice * qty);
 
         // Opcja dostawy wybrana dla tej pozycji (produkt może mieć kilka)
@@ -135,9 +161,10 @@ export default async function (req) {
           slug: product.slug || '',
           image_url: product.image_url || '',
           variant_key: variant ? variant.key : '',
-          variant_label: variant ? variantLabelOf(variant) : 'Standard',
+          variant_label: [variant ? variantLabelOf(variant) : 'Standard', pack ? packLabelOf(pack) : ''].filter(Boolean).join(' · '),
           unit_price: unitPrice,
           quantity: qty,
+          units: unitsPerPack,
           shipping_option: chosenShip ? chosenShip.name : '',
           ...(typeof itemShip === 'number' ? { shipping_cost: itemShip } : {}),
         });
@@ -146,12 +173,12 @@ export default async function (req) {
         if (variant) {
           const entry = stockUpdates[product.id] || { id: product.id, variants: variants.map((v) => ({ ...v })) };
           entry.variants = entry.variants.map((v) =>
-            v.key === variant.key ? { ...v, stock: Math.max(0, (Number(v.stock) || 0) - qty) } : v
+            v.key === variant.key ? { ...v, stock: Math.max(0, (Number(v.stock) || 0) - needed) } : v
           );
           stockUpdates[product.id] = entry;
         } else if (typeof product.stock === 'number' && !product.unlimited_stock) {
           const entry = stockUpdates[product.id] || { id: product.id, stock: product.stock };
-          entry.stock = Math.max(0, (Number(entry.stock) || 0) - qty);
+          entry.stock = Math.max(0, (Number(entry.stock) || 0) - needed);
           stockUpdates[product.id] = entry;
         }
       }
@@ -315,7 +342,7 @@ export default async function (req) {
       for (const it of order.items || []) {
         const product = await base44.asServiceRole.entities.ShopProduct.get(it.product_id).catch(() => null);
         if (!product) continue;
-        const qty = Number(it.quantity) || 0;
+        const qty = (Number(it.quantity) || 0) * (Number(it.units) || 1);
         const variants = Array.isArray(product.variants) ? product.variants : [];
 
         if (variants.length === 0) {

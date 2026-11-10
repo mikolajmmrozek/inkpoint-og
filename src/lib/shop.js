@@ -140,6 +140,30 @@ export const priceRange = (product) => {
   return { min: Math.min(...prices), max: Math.max(...prices) };
 };
 
+// ── Wielosztuki (pakiety) ───────────────────────────────────────────────────
+// Opcjonalne pakiety na produkcie (np. 2 szt. w komplecie). Korzystają ze wspólnego
+// stanu magazynowego — pakiet zjada tyle sztuk, ile ma w środku.
+export const multipacksOf = (product) =>
+  (Array.isArray(product?.multipacks) ? product.multipacks : []).filter(p => Number(p?.units) > 1);
+
+export const packLabel = (pack) => {
+  const units = Number(pack?.units) || 1;
+  return (pack?.label || '').trim() || `${units} szt. w komplecie`;
+};
+
+// Cena pakietu liczona od ceny wybranej sztuki (wariantu lub ceny produktu):
+// percent = cena × sztuki minus zniżka, manual = kwota wpisana ręcznie.
+export const packPrice = (basePrice, pack) => {
+  if (!pack) return Number(basePrice) || 0;
+  const units = Number(pack.units) || 1;
+  if (pack.pricing === 'manual') return Math.max(0, Number(pack.price) || 0);
+  const discount = Math.min(100, Math.max(0, Number(pack.discount_percent) || 0));
+  const raw = (Number(basePrice) || 0) * units * (1 - discount / 100);
+  return Math.round(raw * 100) / 100;
+};
+
+export const packUnits = (pack) => (pack ? Math.max(2, Number(pack.units) || 2) : 1);
+
 // Cena produktu do wyświetlenia: gdy są warianty — zawsze „od najtańszego wariantu”,
 // gdy wariantów brak — cena nadrzędna produktu.
 export const displayPrice = (product) => {

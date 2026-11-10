@@ -1,9 +1,15 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
+import { variantLabel, packLabel, packPrice, packUnits } from '@/lib/shop';
 
 const CartContext = createContext(null);
 export const useCart = () => useContext(CartContext) || { items: [], count: 0, add: async () => {}, setQty: async () => {}, remove: async () => {}, clear: async () => {}, loading: false };
+
+const lineMatch = (item, ref) =>
+  item.product_id === ref.product_id
+  && (item.variant_key || '') === (ref.variant_key || '')
+  && (Number(item.units) || 1) === (Number(ref.units) || 1);
 
 export default function CartProvider({ children }) {
   const { user, isAuthenticated } = useAuth();
@@ -43,25 +49,31 @@ export default function CartProvider({ children }) {
     setItems(nextItems);
   }, [cartId, user?.email]);
 
-  const add = useCallback(async (product, variant, quantity = 1, shippingOption = null) => {
+  // pack = wybrany pakiet wielosztuki (null = pojedyncza sztuka)
+  const add = useCallback(async (product, variant, quantity = 1, shippingOption = null, pack = null) => {
     if (!isAuthenticated) return false;
-    const key = variant?.key || '';
+    const units = packUnits(pack);
+    const basePrice = Number(variant?.price) || Number(product.price) || 0;
+    const ref = {
+      product_id: product.id,
+      variant_key: variant?.key || '',
+      units,
+    };
     const shippingCost = Number(shippingOption?.cost) || 0;
     const shippingName = shippingOption?.name || '';
     const shippingTime = shippingOption?.delivery_time || '';
-    const existing = items.find(i => i.product_id === product.id && (i.variant_key || '') === key);
+    const existing = items.find(i => lineMatch(i, ref));
     const next = existing
       ? items.map(i => i === existing
         ? { ...i, quantity: Math.min(99, Number(i.quantity) + quantity), shipping_option: shippingName, shipping_cost: shippingCost, shipping_info: shippingTime }
         : i)
       : [...items, {
-        product_id: product.id,
+        ...ref,
         product_name: product.name,
         slug: product.slug || '',
         image_url: product.image_url || '',
-        variant_key: key,
-        variant_label: variant ? (variant.options || []).map(o => `${o.name}: ${o.value}`).join(' · ') || 'Standard' : 'Standard',
-        unit_price: Number(variant?.price) || Number(product.price) || 0,
+        variant_label: [variantLabel(variant), pack ? packLabel(pack) : ''].filter(Boolean).join(' · '),
+        unit_price: pack ? packPrice(basePrice, pack) : basePrice,
         quantity,
         shipping_option: shippingName,
         shipping_cost: shippingCost,
@@ -71,21 +83,21 @@ export default function CartProvider({ children }) {
     return true;
   }, [items, persist, isAuthenticated]);
 
-  const setQty = useCallback(async (product_id, variant_key, quantity) => {
+  const setQty = useCallback(async (ref, quantity) => {
     const q = Math.max(0, Math.min(99, quantity));
     const next = q === 0
-      ? items.filter(i => !(i.product_id === product_id && (i.variant_key || '') === (variant_key || '')))
-      : items.map(i => (i.product_id === product_id && (i.variant_key || '') === (variant_key || '')) ? { ...i, quantity: q } : i);
+      ? items.filter(i => !lineMatch(i, ref))
+      : items.map(i => lineMatch(i, ref) ? { ...i, quantity: q } : i);
     await persist(next);
   }, [items, persist]);
 
-  const remove = useCallback(async (product_id, variant_key) => {
-    await persist(items.filter(i => !(i.product_id === product_id && (i.variant_key || '') === (variant_key || ''))));
+  const remove = useCallback(async (ref) => {
+    await persist(items.filter(i => !lineMatch(i, ref)));
   }, [items, persist]);
 
   const clear = useCallback(async () => { await persist([]); }, [persist]);
 
-  const count = items.reduce((sum, i) => sum + (Number(i.quantity) || 0), 0);
+  const count = items.reduce((sum, i) => sum + (Number(i.quantity) || 0) * (Number(i.units) || 1), 0);
 
   return (
     <CartContext.Provider value={{ items, count, loading, add, setQty, remove, clear, reload: load }}>

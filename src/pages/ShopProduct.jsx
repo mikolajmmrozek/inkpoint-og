@@ -7,9 +7,10 @@ import ShopUnavailable from '@/components/shop/ShopUnavailable';
 import useSiteContent from '@/hooks/useSiteContent';
 import VariantPicker from '@/components/shop/VariantPicker';
 import PriceSliderPicker from '@/components/shop/PriceSliderPicker';
+import MultipackPicker from '@/components/shop/MultipackPicker';
 import { useCart } from '@/components/shop/CartProvider';
 import { useAuth } from '@/lib/AuthContext';
-import { money, variantsOf, priceRange, availability, productStock, shippingSummary, shippingOptionsOf, pricingModeOf, priceSliderOf } from '@/lib/shop';
+import { money, variantsOf, priceRange, availability, productStock, shippingSummary, shippingOptionsOf, pricingModeOf, priceSliderOf, multipacksOf, packPrice, packLabel } from '@/lib/shop';
 
 export default function ShopProduct() {
   const { slug } = useParams();
@@ -21,6 +22,7 @@ export default function ShopProduct() {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [variant, setVariant] = useState(null);
+  const [pack, setPack] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const [activeImage, setActiveImage] = useState('');
@@ -43,6 +45,7 @@ export default function ShopProduct() {
           setActiveImage(found.image_url || '');
           const vList = variantsOf(found).filter(v => v.is_active !== false);
           setVariant(vList.find(v => (Number(v.stock) || 0) > 0) || vList[0] || null);
+          setPack(null);
           setShipOption(shippingOptionsOf(found, formList)[0] || null);
           setAmount(priceSliderOf(found).min);
         }
@@ -67,8 +70,12 @@ export default function ShopProduct() {
       }
       return;
     }
-    if (variant && (Number(variant.stock) || 0) <= 0) { setError('Ten wariant jest wyprzedany — wybierz inny.'); return; }
-    const ok = await add(product, variant, quantity, shipOption);
+    const units = pack ? Number(pack.units) || 1 : 1;
+    const availableUnits = variant ? (Number(variant.stock) || 0) : (productStock(product) ?? 99);
+    const needed = units * quantity;
+    if (availableUnits <= 0) { setError('Ten wariant jest wyprzedany — wybierz inny.'); return; }
+    if (needed > availableUnits) { setError(`Brak wystarczającej ilości — dostępne ${availableUnits} szt.`); return; }
+    const ok = await add(product, variant, quantity, shipOption, pack);
     if (ok) {
       setAdded(true);
       setTimeout(() => setAdded(false), 2200);
@@ -102,8 +109,11 @@ export default function ShopProduct() {
   const shipOptions = shippingOptionsOf(product, forms);
   const price = variant?.price || product.price;
   const range = priceRange(product);
-  const unitPrice = isSlider ? Number(amount) || 0 : Number(price) || 0;
+  const packs = multipacksOf(product);
+  const unitsPerPack = pack ? Number(pack.units) || 1 : 1;
+  const unitPrice = isSlider ? Number(amount) || 0 : (pack ? packPrice(price, pack) : Number(price) || 0);
   const total = unitPrice * (Number(quantity) || 1);
+  const maxPacks = Math.max(1, Math.floor(stock / unitsPerPack));
   const images = [product.image_url, ...(product.images || [])].filter(Boolean);
 
   return (
@@ -179,10 +189,20 @@ export default function ShopProduct() {
                     onSelect={(v) => { setVariant(v); setQuantity(1); }}
                     quantity={quantity}
                     onQuantity={setQuantity}
-                    stock={stock}
+                    stock={pack ? maxPacks : stock}
                   />
                 )}
               </div>
+
+              {canBuy && !isSlider && packs.length > 0 && (
+                <MultipackPicker
+                  product={product}
+                  basePrice={Number(price) || 0}
+                  pack={pack}
+                  onSelect={(p) => { setPack(p); setQuantity(1); }}
+                  availableUnits={stock}
+                />
+              )}
 
               {canBuy && (
                 <>
@@ -190,7 +210,11 @@ export default function ShopProduct() {
                     <div>
                       <p className="text-micro" style={{ fontSize: '9px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.16em' }}>RAZEM</p>
                       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.04em', marginTop: '5px' }}>
-                        {isSlider ? 'wybrana kwota vouchera' : `${quantity} szt. × ${money(unitPrice)}`}
+                        {isSlider
+                          ? 'wybrana kwota vouchera'
+                          : pack
+                            ? `${packLabel(pack)} · ${quantity} × ${money(unitPrice)}`
+                            : `${quantity} szt. × ${money(unitPrice)}`}
                       </p>
                     </div>
                     <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.4rem', lineHeight: 1, color: 'hsl(var(--foreground))', letterSpacing: '0.02em' }}>{money(total)}</p>

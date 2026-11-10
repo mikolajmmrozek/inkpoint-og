@@ -68,7 +68,7 @@ export default function ShopCart() {
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8 items-start">
               <div style={{ border: '0.5px solid hsl(var(--border))', borderRadius: 'var(--radius)' }}>
                 {items.map((item, i) => (
-                  <div key={`${item.product_id}-${item.variant_key}`} className="flex gap-4 p-4" style={{ borderBottom: i < items.length - 1 ? '0.5px solid hsl(var(--border))' : 'none' }}>
+                  <div key={`${item.product_id}-${item.variant_key}-${item.units || 1}`} className="flex gap-4 p-4" style={{ borderBottom: i < items.length - 1 ? '0.5px solid hsl(var(--border))' : 'none' }}>
                     <Link to={`/sklep/produkt/${item.slug}`} className="shrink-0 overflow-hidden" style={{ width: '76px', height: '94px', borderRadius: 'var(--radius)', background: 'rgba(255,255,255,0.03)' }}>
                       {item.image_url && <img src={item.image_url} alt="" className="w-full h-full object-cover" />}
                     </Link>
@@ -82,14 +82,14 @@ export default function ShopCart() {
                       )}
                       <div className="flex items-center justify-between gap-4 mt-3">
                         <div className="inline-flex items-center" style={{ border: '0.5px solid hsl(var(--border))', borderRadius: 'var(--radius)' }}>
-                          <button onClick={() => setQty(item.product_id, item.variant_key, item.quantity - 1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--foreground))', padding: '7px 10px' }}><Minus size={12} /></button>
+                          <button onClick={() => setQty(item, item.quantity - 1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--foreground))', padding: '7px 10px' }}><Minus size={12} /></button>
                           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', minWidth: '26px', textAlign: 'center' }}>{item.quantity}</span>
-                          <button onClick={() => setQty(item.product_id, item.variant_key, item.quantity + 1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--foreground))', padding: '7px 10px' }}><Plus size={12} /></button>
+                          <button onClick={() => setQty(item, item.quantity + 1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--foreground))', padding: '7px 10px' }}><Plus size={12} /></button>
                         </div>
                         <p style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'hsl(var(--foreground))' }}>{money(item.unit_price * item.quantity)}</p>
                       </div>
                     </div>
-                    <button onClick={() => remove(item.product_id, item.variant_key)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--muted-foreground))', alignSelf: 'flex-start', padding: '4px' }}>
+                    <button onClick={() => remove(item)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--muted-foreground))', alignSelf: 'flex-start', padding: '4px' }}>
                       <X size={14} />
                     </button>
                   </div>

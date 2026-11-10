@@ -209,6 +209,43 @@
         }
       }
     },
+    "multipacks": {
+      "type": "array",
+      "description": "Wielosztuki (pakiety) \u2014 opcjonalne. Korzystaj\u0105 ze wsp\u00f3lnego stanu magazynowego: pakiet zjada tyle sztuk, ile ma w \u015brodku. Cena pakietu liczona od ceny wybranego wariantu \u2014 r\u0119cznie lub procentem zni\u017cki.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "units": {
+            "type": "number",
+            "default": 2,
+            "description": "Liczba sztuk w pakiecie (np. 2 = dwa kolczyki w komplecie)"
+          },
+          "label": {
+            "type": "string",
+            "description": "Nazwa pakietu widoczna dla klienta, np. '2 szt. w komplecie'. Puste = '<liczba> szt. w komplecie'"
+          },
+          "pricing": {
+            "type": "string",
+            "enum": [
+              "percent",
+              "manual"
+            ],
+            "default": "percent",
+            "description": "percent = cena wariantu \u00d7 liczba sztuk minus zni\u017cka procentowa, manual = kwota wpisana r\u0119cznie"
+          },
+          "price": {
+            "type": "number",
+            "default": 0,
+            "description": "Cena pakietu w PLN (tylko dla pricing = manual)"
+          },
+          "discount_percent": {
+            "type": "number",
+            "default": 0,
+            "description": "Zni\u017cka procentowa na pakiet (tylko dla pricing = percent)"
+          }
+        }
+      }
+    },
     "is_active": {
       "type": "boolean",
       "default": true
