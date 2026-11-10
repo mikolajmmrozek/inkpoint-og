@@ -140,6 +140,15 @@ export const priceRange = (product) => {
   return { min: Math.min(...prices), max: Math.max(...prices) };
 };
 
+// Cena produktu do wyświetlenia: gdy są warianty — zawsze „od najtańszego wariantu”,
+// gdy wariantów brak — cena nadrzędna produktu.
+export const displayPrice = (product) => {
+  const range = priceRange(product);
+  const hasVariants = variantsOf(product).filter(v => v.is_active !== false).length > 0;
+  if (hasVariants) return { from: true, min: range.min, max: range.max, text: `od ${money(range.min)}` };
+  return { from: false, min: Number(product?.price) || 0, max: Number(product?.price) || 0, text: money(product?.price) };
+};
+
 export const slugify = (text) =>
   (text || '')
     .toLowerCase()

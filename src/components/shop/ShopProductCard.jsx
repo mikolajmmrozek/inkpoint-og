@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
-import { money, availability, shippingSummary } from '@/lib/shop';
+import { availability, shippingSummary, displayPrice } from '@/lib/shop';
 
 export default function ShopProductCard({ product, forms = [] }) {
   const avail = availability(product);
+  const price = displayPrice(product);
   const ship = shippingSummary(product, forms);
   const soldOut = avail.state === 'sold_out';
   const soon = avail.state === 'soon';
@@ -63,7 +64,7 @@ export default function ShopProductCard({ product, forms = [] }) {
           <ArrowUpRight size={14} className="shrink-0 mt-1 transition-transform duration-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" style={{ color: 'var(--brand)' }} />
         </div>
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'hsl(var(--foreground))', marginTop: '8px', letterSpacing: '0.04em' }}>
-          {money(product.price)}
+          {price.text}
         </p>
         {shippingText && (
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'hsl(var(--muted-foreground))', marginTop: '6px', letterSpacing: '0.06em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

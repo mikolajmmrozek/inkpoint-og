@@ -102,6 +102,8 @@ export default function ShopProduct() {
   const shipOptions = shippingOptionsOf(product, forms);
   const price = variant?.price || product.price;
   const range = priceRange(product);
+  const unitPrice = isSlider ? Number(amount) || 0 : Number(price) || 0;
+  const total = unitPrice * (Number(quantity) || 1);
   const images = [product.image_url, ...(product.images || [])].filter(Boolean);
 
   return (
@@ -140,7 +142,7 @@ export default function ShopProduct() {
 
               <div className="flex items-baseline gap-3 mt-4 pb-6" style={{ borderBottom: '0.5px solid hsl(var(--border))' }}>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '18px', color: 'hsl(var(--foreground))', letterSpacing: '0.03em' }}>
-                  {isSlider ? money(amount) : variants.length > 1 && range.min !== range.max ? `od ${money(range.min)}` : money(price)}
+                  {isSlider ? money(amount) : variants.length > 0 ? `od ${money(range.min)}` : money(product.price)}
                 </p>
                 {product.compare_at_price > 0 && product.compare_at_price > price && (
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'hsl(var(--muted-foreground))', textDecoration: 'line-through' }}>{money(product.compare_at_price)}</p>
@@ -183,9 +185,20 @@ export default function ShopProduct() {
               </div>
 
               {canBuy && (
-                <button onClick={handleAdd} className="btn-oxblood w-full mt-8 flex items-center justify-center gap-2" style={{ padding: '15px' }}>
-                  {added ? <><Check size={14} /> DODANO DO KOSZYKA</> : <><ShoppingBag size={14} /> DODAJ DO KOSZYKA</>}
-                </button>
+                <>
+                  <div className="mt-8 flex items-end justify-between gap-4">
+                    <div>
+                      <p className="text-micro" style={{ fontSize: '9px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.16em' }}>RAZEM</p>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.04em', marginTop: '5px' }}>
+                        {isSlider ? 'wybrana kwota vouchera' : `${quantity} szt. × ${money(unitPrice)}`}
+                      </p>
+                    </div>
+                    <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.4rem', lineHeight: 1, color: 'hsl(var(--foreground))', letterSpacing: '0.02em' }}>{money(total)}</p>
+                  </div>
+                  <button onClick={handleAdd} className="btn-oxblood w-full mt-4 flex items-center justify-center gap-2" style={{ padding: '15px' }}>
+                    {added ? <><Check size={14} /> DODANO DO KOSZYKA</> : <><ShoppingBag size={14} /> DODAJ DO KOSZYKA</>}
+                  </button>
+                </>
               )}
               {error && (
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#f59e0b', letterSpacing: '0.06em', marginTop: '10px', textAlign: 'center' }}>{error}</p>
