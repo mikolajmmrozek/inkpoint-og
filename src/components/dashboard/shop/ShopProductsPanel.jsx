@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from '@/pages/dashboard/Dashboard';
-import { Plus, Pencil, Trash2, Package, Power, ChevronDown, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Plus, Pencil, Trash2, Package, Power, ChevronDown, ChevronRight, ArrowUpRight } from 'lucide-react';
 import { money, availability, shippingSummary } from '@/lib/shop';
 import { shopTheme, mono, display } from './shopTheme';
 import ShopProductEditor from './ShopProductEditor';
@@ -119,6 +120,10 @@ export default function ShopProductsPanel() {
                   </button>
                 </div>
                 <div className="col-span-3 md:col-span-2 flex items-center gap-1.5 justify-end">
+                  <Link to={`/sklep/produkt/${p.slug || p.id}`} target="_blank" rel="noopener noreferrer" title="Otwórz stronę produktu w sklepie"
+                    style={{ width: '24px', height: '24px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: `0.5px solid ${t.border}`, color: t.muted, borderRadius: 'var(--radius)', textDecoration: 'none' }}>
+                    <ArrowUpRight size={12} />
+                  </Link>
                   <button onClick={() => toggleActive(p)} title="Włącz/wyłącz" style={{ background: 'none', border: 'none', cursor: 'pointer', color: p.is_active === false ? t.muted : '#16a34a', padding: '4px' }}><Power size={13} /></button>
                   <button onClick={() => setEditing(p)} title="Edytuj" style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: '4px' }}><Pencil size={13} /></button>
                   <button onClick={() => setDeleteFor(p)} title="Usuń" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--brand)', padding: '4px' }}><Trash2 size={13} /></button>
