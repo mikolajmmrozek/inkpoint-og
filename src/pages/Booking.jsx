@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import PageLayout from '../components/layout/PageLayout';
 import SessionDatePicker from '@/components/booking/SessionDatePicker';
+import { resolveBookingFields } from '@/lib/bookingFields';
 import { Check, Upload, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -38,6 +39,7 @@ export default function Booking() {
   const [maxStep, setMaxStep] = useState(0);
   const [artists, setArtists] = useState([]);
   const [services, setServices] = useState([]);
+  const [fieldConfigs, setFieldConfigs] = useState([]);
   const [artistsLoading, setArtistsLoading] = useState(true);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -48,6 +50,7 @@ export default function Booking() {
     artist_id: preselectedArtistId, artist_name: preselectedArtistName,
     service_id: '', service_name: '',
     tattoo_description: '', tattoo_placement: '',
+    preferred_budget: '',
     session_date: '', session_time: '',
     notes: '',
     reference_images: [],
@@ -79,10 +82,12 @@ export default function Booking() {
     Promise.all([
       base44.entities.Artist.filter({ is_active: true }).catch(() => PLACEHOLDER_ARTISTS),
       base44.entities.Service.filter({ is_active: true }).catch(() => []),
+      base44.entities.BookingFieldConfig.list().catch(() => []),
     ])
-      .then(([resArtists, resServices]) => {
+      .then(([resArtists, resServices, resFields]) => {
         setArtists(resArtists.length > 0 ? resArtists : PLACEHOLDER_ARTISTS);
         setServices(resServices);
+        setFieldConfigs(resFields);
       })
       .finally(() => setArtistsLoading(false));
   }, []);
@@ -130,14 +135,21 @@ export default function Booking() {
   };
 
   const selectedService = services.find(s => s.id === data.service_id) || null;
-  const placementOptional = selectedService?.placement_optional === true;
-  const descriptionOptional = selectedService?.description_optional === true;
+  const fields = resolveBookingFields(selectedService, fieldConfigs);
+  const isRequired = (key) => fields[key].visible && fields[key].required;
+  const isVisible = (key) => fields[key].visible;
 
   const canNext = () => {
     if (step === 0) return !!(data.client_first_name && data.client_last_name && data.client_email);
     if (step === 1) return !!data.artist_id;
     if (step === 2) return !!data.service_id;
-    if (step === 3) return !!((data.tattoo_description || descriptionOptional) && (data.tattoo_placement || placementOptional));
+    if (step === 3) {
+      const ok = (key, value) => !isRequired(key) || !!String(value || '').trim();
+      return ok('placement', data.tattoo_placement)
+        && ok('description', data.tattoo_description)
+        && ok('notes', data.notes)
+        && ok('budget', data.preferred_budget);
+    }
     if (step === 4) return !!(data.session_date && data.session_time);
     return true;
   };
@@ -178,7 +190,8 @@ export default function Booking() {
       }
     } catch (e) {}
     const fullName = `${data.client_first_name} ${data.client_last_name}`.trim();
-    const bookingData = { ...data, client_name: fullName, status: 'pending', health_form_completed: false, source: 'online_form' };
+    const budget = data.preferred_budget === '' ? undefined : Number(data.preferred_budget);
+    const bookingData = { ...data, preferred_budget: Number.isFinite(budget) ? budget : undefined, client_name: fullName, status: 'pending', health_form_completed: false, source: 'online_form' };
     delete bookingData.client_first_name;
     delete bookingData.client_last_name;
     try {
@@ -360,6 +373,7 @@ export default function Booking() {
                     style={{
                       border: data.artist_id === artist.id ? '0.5px solid var(--brand)' : '0.5px solid hsl(var(--border))',
                       background: data.artist_id === artist.id ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent',
+                      borderRadius: 'var(--radius)',
                     }}
                   >
                     <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 600, color: 'hsl(var(--foreground))' }}>
@@ -396,6 +410,7 @@ export default function Booking() {
                       style={{
                         border: data.service_id === service.id ? '0.5px solid var(--brand)' : '0.5px solid hsl(var(--border))',
                         background: data.service_id === service.id ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent',
+                        borderRadius: 'var(--radius)',
                       }}
                     >
                       <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 600, color: 'hsl(var(--foreground))' }}>
@@ -421,25 +436,41 @@ export default function Booking() {
             {/* Step 3: Details */}
             {step === 3 && (
               <div className="space-y-8">
-                <div>
+                <div style={{ display: isVisible('placement') ? 'block' : 'none' }}>
                   <label className="text-micro block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgb(var(--foreground-rgb) / 0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-                    Miejsce na ciele {placementOptional ? '(opcjonalne)' : '*'}
+                    Miejsce na ciele {isRequired('placement') ? '*' : '(opcjonalne)'}
                   </label>
-                  <input required={!placementOptional} style={inputStyle} value={data.tattoo_placement} onChange={e => update('tattoo_placement', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = 'hsl(var(--border))'} />
+                  <input required={isRequired('placement')} style={inputStyle} value={data.tattoo_placement} onChange={e => update('tattoo_placement', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = 'hsl(var(--border))'} />
                 </div>
-                <div>
+                <div style={{ display: isVisible('description') ? 'block' : 'none' }}>
                   <label className="text-micro block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgb(var(--foreground-rgb) / 0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-                    Opis projektu / pomysłu {descriptionOptional ? '(opcjonalne)' : '*'}
+                    Opis projektu / pomysłu {isRequired('description') ? '*' : '(opcjonalne)'}
                   </label>
-                  <textarea required={!descriptionOptional} rows={4} style={{ ...inputStyle, resize: 'none' }} value={data.tattoo_description} onChange={e => update('tattoo_description', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = 'hsl(var(--border))'} />
+                  <textarea required={isRequired('description')} rows={4} style={{ ...inputStyle, resize: 'none' }} value={data.tattoo_description} onChange={e => update('tattoo_description', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = 'hsl(var(--border))'} />
                 </div>
-                <div>
+                <div style={{ display: isVisible('budget') ? 'block' : 'none' }}>
                   <label className="text-micro block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgb(var(--foreground-rgb) / 0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-                    Dodatkowe uwagi
+                    Preferowany budżet (PLN) {isRequired('budget') ? '*' : '(opcjonalnie)'}
                   </label>
-                  <textarea rows={2} style={{ ...inputStyle, resize: 'none' }} value={data.notes} onChange={e => update('notes', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = 'hsl(var(--border))'} />
+                  <input
+                    type="number"
+                    min="0"
+                    step="50"
+                    required={isRequired('budget')}
+                    style={inputStyle}
+                    value={data.preferred_budget}
+                    onChange={e => update('preferred_budget', e.target.value)}
+                    onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'}
+                    onBlur={e => e.target.style.borderBottomColor = 'hsl(var(--border))'}
+                  />
                 </div>
-                <div>
+                <div style={{ display: isVisible('notes') ? 'block' : 'none' }}>
+                  <label className="text-micro block mb-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgb(var(--foreground-rgb) / 0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                    Dodatkowe uwagi {isRequired('notes') ? '*' : '(opcjonalne)'}
+                  </label>
+                  <textarea required={isRequired('notes')} rows={2} style={{ ...inputStyle, resize: 'none' }} value={data.notes} onChange={e => update('notes', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = 'hsl(var(--border))'} />
+                </div>
+                <div style={{ display: isVisible('references') ? 'block' : 'none' }}>
                   <label className="text-micro block mb-3" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgb(var(--foreground-rgb) / 0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                     Przeslij nam swoje pomysly / inspiracje ({data.reference_images.length}/10)
                   </label>

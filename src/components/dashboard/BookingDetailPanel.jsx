@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trash2, Edit, Copy, Check, ExternalLink, Mail, FileText, Loader2, Save, Download, ChevronLeft, ChevronRight, Wallet, Phone, User, Calendar, Clock, MapPin, FileSignature, MessageSquare, CreditCard, QrCode } from 'lucide-react';
+import { X, Trash2, Edit, Copy, Check, ExternalLink, Mail, FileText, Loader2, Save, Download, ChevronLeft, ChevronRight, Wallet, Phone, User, Calendar, Clock, MapPin, FileSignature, MessageSquare, CreditCard, QrCode, Ban, RotateCcw } from 'lucide-react';
 import { openHealthFormQRPage } from '@/lib/qrPage';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import HealthFormPreviewModal from './HealthFormPreviewModal';
 import SettlementModal from './SettlementModal';
+import BookingSettlementSummary from './BookingSettlementSummary';
 import ClientQuickViewModal from './ClientQuickViewModal';
 
 const PAYMENT_METHOD_LABELS = { cash: 'Gotówka', card: 'Karta', voucher: 'Voucher' };
@@ -45,8 +46,27 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
   const [sendingEmail, setSendingEmail] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [currentBooking, setCurrentBooking] = useState(booking);
+  const [noShowBusy, setNoShowBusy] = useState(false);
 
   useEffect(() => { setCurrentBooking(booking); }, [booking]);
+
+  const toggleNoShow = async () => {
+    setNoShowBusy(true);
+    try {
+      const revert = currentBooking.no_show === true;
+      const res = await base44.functions.invoke('markClientNoShow', { booking_id: currentBooking.id, revert });
+      if (!res.data?.error) {
+        setCurrentBooking((b) => ({
+          ...b,
+          no_show: !revert,
+          no_show_by_name: revert ? '' : (user?.full_name || user?.email || ''),
+          no_show_at: revert ? '' : new Date().toISOString(),
+        }));
+      }
+    } finally {
+      setNoShowBusy(false);
+    }
+  };
 
   const handleSettled = (updated) => {
     setCurrentBooking(updated);
@@ -313,44 +333,36 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
         )}
 
         {/* Settlement summary */}
-        {currentBooking.is_settled && currentBooking.payment_breakdown && (
-          <div className="mb-5 p-3" style={{ border: '0.5px solid rgba(22,163,74,0.3)', background: 'rgba(22,163,74,0.04)', borderRadius: 'var(--radius)' }}>
-            <div className="flex items-center gap-2 mb-3">
-              <Check size={11} color="#16a34a" />
-              <p style={{ ...mono, fontSize: '8px', color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-                ROZLICZONO
-              </p>
-            </div>
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>FINAŁNA KWOTA</span>
-                <span style={{ ...mono, fontSize: '12px', color: t.title, fontWeight: 600 }}>{Number(currentBooking.final_amount || 0).toLocaleString('pl-PL')} PLN</span>
-              </div>
-              {Number(currentBooking.deposit_amount || 0) > 0 && (
-                <div className="flex items-center justify-between">
-                  <span style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>ZALICZKA</span>
-                  <span style={{ ...mono, fontSize: '12px', color: t.muted }}>{Number(currentBooking.deposit_amount).toLocaleString('pl-PL')} PLN</span>
-                </div>
-              )}
-              <div className="pt-2" style={{ borderTop: '0.5px solid rgba(22,163,74,0.2)' }}>
-                {currentBooking.payment_breakdown.map((p, i) => (
-                  <div key={i} className="flex items-center justify-between py-1">
-                    <div className="flex items-center gap-2">
-                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: PAYMENT_METHOD_COLORS[p.method] || t.muted }} />
-                      <span style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{PAYMENT_METHOD_LABELS[p.method] || p.method}</span>
-                    </div>
-                    <span style={{ ...mono, fontSize: '12px', color: t.title }}>{Number(p.amount || 0).toLocaleString('pl-PL')} PLN</span>
-                  </div>
-                ))}
-              </div>
-              {currentBooking.settled_by_name && (
-                <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '6px', paddingTop: '6px', borderTop: '0.5px solid rgba(22,163,74,0.15)' }}>
-                  ROZLICZYŁ: {currentBooking.settled_by_name}{currentBooking.settled_date ? ` · ${new Date(currentBooking.settled_date).toLocaleDateString('pl-PL')}` : ''}
-                </p>
-              )}
-            </div>
+        {currentBooking.is_settled && (
+          <div className="mb-5">
+            <BookingSettlementSummary booking={currentBooking} t={t} />
           </div>
         )}
+
+        {/* No-show */}
+        <div className="mb-5">
+          <p style={{ ...mono, fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>NIEOBECNOŚĆ</p>
+          <button
+            onClick={toggleNoShow}
+            disabled={noShowBusy}
+            className="w-full flex items-center justify-center gap-2 py-2"
+            style={{
+              border: `0.5px solid ${currentBooking.no_show ? '#ef4444' : t.border}`,
+              color: currentBooking.no_show ? '#ef4444' : t.muted,
+              background: currentBooking.no_show ? 'rgba(239,68,68,0.05)' : 'transparent',
+              ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase',
+              cursor: 'pointer', opacity: noShowBusy ? 0.6 : 1, borderRadius: 'var(--radius)',
+            }}
+          >
+            {noShowBusy ? <Loader2 size={11} className="animate-spin" /> : currentBooking.no_show ? <RotateCcw size={11} /> : <Ban size={11} />}
+            {currentBooking.no_show ? 'COFNIJ OZNACZENIE NIEOBECNOŚCI' : 'OZNACZ KLIENTA JAKO NIEOBECNEGO'}
+          </button>
+          {currentBooking.no_show && (
+            <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '6px', lineHeight: 1.6 }}>
+              Zapisane w historii klienta{currentBooking.no_show_by_name ? ` · ${currentBooking.no_show_by_name}` : ''}
+            </p>
+          )}
+        </div>
 
         {/* Session details */}
         <div className="mb-5">

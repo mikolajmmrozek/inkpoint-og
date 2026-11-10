@@ -33,6 +33,8 @@ export default function ShopSettingsPanel() {
         product_note: settings.product_note || '',
         contact_email: settings.contact_email || '',
         is_open: settings.is_open !== false,
+        product_commission_type: settings.product_commission_type || 'none',
+        product_commission_value: Math.max(0, Number(settings.product_commission_value) || 0),
       };
       if (settings.id) await base44.entities.ShopSettings.update(settings.id, payload);
       else await base44.entities.ShopSettings.create(payload);
@@ -79,6 +81,32 @@ export default function ShopSettingsPanel() {
         </div>
 
         <div><label style={labelStyle(t)}>E-mail kontaktowy sklepu</label><input value={settings.contact_email || ''} onChange={e => set('contact_email', e.target.value)} style={inputStyle(t)} /></div>
+
+        <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '16px' }}>
+          <label style={labelStyle(t)}>Prowizja pracownika od produktów</label>
+          <div className="flex gap-2 mb-3">
+            {[{ id: 'none', label: 'Brak' }, { id: 'percent', label: 'Procent' }, { id: 'amount', label: 'Kwota / szt.' }].map(m => {
+              const active = (settings.product_commission_type || 'none') === m.id;
+              return (
+                <button key={m.id} onClick={() => set('product_commission_type', m.id)}
+                  style={{ border: `0.5px solid ${active ? 'var(--brand)' : t.border}`, color: active ? 'var(--brand)' : t.muted, background: active ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', ...mono, fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 11px', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
+                  {m.label}
+                </button>
+              );
+            })}
+          </div>
+          {settings.product_commission_type && settings.product_commission_type !== 'none' && (
+            <div style={{ width: '160px' }}>
+              <input type="number" min="0" value={settings.product_commission_value ?? 0} onChange={e => set('product_commission_value', e.target.value)} style={inputStyle(t)} />
+              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px', lineHeight: 1.7 }}>
+                {settings.product_commission_type === 'percent' ? 'Procent od sprzedaży produktów w rozliczeniu.' : 'Kwota w PLN od każdej sprzedanej sztuki.'}
+              </p>
+            </div>
+          )}
+          <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '6px', lineHeight: 1.7 }}>
+            Jedna wspólna stawka dla wszystkich pracowników. Naliczana przy rozliczeniu sesji.
+          </p>
+        </div>
 
         <button onClick={() => set('is_open', settings.is_open === false)} style={{ background: 'none', border: 'none', cursor: 'pointer', ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: settings.is_open !== false ? '#16a34a' : t.muted, display: 'flex', alignItems: 'center', gap: '7px' }}>
           <span style={{ width: '12px', height: '12px', border: `0.5px solid ${settings.is_open !== false ? '#16a34a' : t.border}`, background: settings.is_open !== false ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{settings.is_open !== false && <Check size={9} color="#fff" />}</span>

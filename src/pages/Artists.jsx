@@ -127,17 +127,7 @@ export default function Artists() {
                         <Link to={`/artists/${artist.slug || artist.id}`} className="text-micro group-hover:text-oxblood transition-colors" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgb(var(--foreground-rgb) / 0.4)', letterSpacing: '0.15em' }}>
                           PORTFOLIO →
                         </Link>
-                        {artist.instagram && (
-                          <a
-                            href={artist.instagram}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={e => e.stopPropagation()}
-                            style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase' }}
-                          >
-                            IG ↗
-                          </a>
-                        )}
+
                       </div>
                     </div>
                   </div>

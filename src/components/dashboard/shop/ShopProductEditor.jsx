@@ -34,6 +34,7 @@ export default function ShopProductEditor({ product, categories, collections, on
     clothing_types: [],
     collection_ids: [],
     price: 0,
+    cost: 0,
     discount_type: 'none',
     discount_value: 0,
     pricing_mode: 'fixed',
@@ -170,6 +171,7 @@ export default function ShopProductEditor({ product, categories, collections, on
         clothing_types: filterGroup === 'clothing' ? (form.clothing_types || []) : [],
         collection_ids: form.collection_ids || [],
         price: Number(form.pricing_mode === 'slider' ? form.slider_min : form.price) || 0,
+        cost: Math.max(0, Number(form.cost) || 0),
         discount_type: form.discount_type === 'amount' || form.discount_type === 'percent' ? form.discount_type : 'none',
         discount_value: Math.max(0, Number(form.discount_value) || 0),
         pricing_mode: form.pricing_mode === 'slider' ? 'slider' : 'fixed',
@@ -285,9 +287,18 @@ export default function ShopProductEditor({ product, categories, collections, on
                 </>
               ) : (
                 <>
-                  <div style={{ maxWidth: '220px' }}>
-                    <label style={labelStyle(t)}>Cena (PLN) *</label>
-                    <input type="number" value={form.price} onChange={e => set('price', e.target.value)} style={inputStyle(t)} />
+                  <div className="flex flex-wrap gap-4">
+                    <div style={{ maxWidth: '220px' }}>
+                      <label style={labelStyle(t)}>Cena (PLN) *</label>
+                      <input type="number" value={form.price} onChange={e => set('price', e.target.value)} style={inputStyle(t)} />
+                    </div>
+                    <div style={{ maxWidth: '220px' }}>
+                      <label style={labelStyle(t)}>Koszt zakupu (PLN)</label>
+                      <input type="number" min="0" value={form.cost ?? 0} onChange={e => set('cost', e.target.value)} style={inputStyle(t)} />
+                      <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px', lineHeight: 1.6 }}>
+                        Tylko do wyliczenia zysku w statystykach. 0 = koszt nieznany.
+                      </p>
+                    </div>
                   </div>
                   <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '6px', lineHeight: 1.7 }}>
                     Cena stała. Rozmiary, kolory i ich stany ustawiasz jako warianty poniżej.

@@ -6,6 +6,9 @@ import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 import { AnimatePresence } from 'framer-motion';
 import BookingModal from '@/components/dashboard/BookingModal';
 import StatsTile from '@/components/dashboard/StatsTile';
+import BookingFieldsEditor from '@/components/dashboard/BookingFieldsEditor';
+import CategoryFieldsModal from '@/components/dashboard/CategoryFieldsModal';
+import { normalizeBookingFields } from '@/lib/bookingFields';
 
 const inputStyle = {
   background: 'transparent',
@@ -36,6 +39,8 @@ const EMPTY_FORM = {
   min_advance_booking: { unit: 'minutes', value: 0 },
   is_active: true,
   order: 999,
+  booking_fields_use_category: true,
+  booking_fields_override: {},
 };
 
 export default function DashboardServices() {
@@ -53,6 +58,7 @@ export default function DashboardServices() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [bookingService, setBookingService] = useState(null); // service to book
   const [deleteConfirm, setDeleteConfirm] = useState(null); // service to delete
+  const [showCategoryFields, setShowCategoryFields] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [filterArtist, setFilterArtist] = useState('');
@@ -81,7 +87,15 @@ export default function DashboardServices() {
     const minAdvanceBooking = s.min_advance_booking && typeof s.min_advance_booking === 'object' 
       ? { ...EMPTY_FORM.min_advance_booking, ...s.min_advance_booking }
       : { ...EMPTY_FORM.min_advance_booking };
-    setForm({ ...EMPTY_FORM, ...s, artist_ids: s.artist_ids || [], hidden_from_clients: s.hidden_from_clients || [], min_advance_booking: minAdvanceBooking });
+    setForm({
+      ...EMPTY_FORM,
+      ...s,
+      artist_ids: s.artist_ids || [],
+      hidden_from_clients: s.hidden_from_clients || [],
+      min_advance_booking: minAdvanceBooking,
+      booking_fields_use_category: s.booking_fields_use_category !== false,
+      booking_fields_override: normalizeBookingFields(s.booking_fields_override || {}),
+    });
     setEditing(s); 
   };
   const closeModal = () => setEditing(null);
@@ -171,7 +185,10 @@ export default function DashboardServices() {
         ].map(s => (
           <StatsTile key={s.label} label={s.label} value={s.value} t={t} />
         ))}
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          <button onClick={() => setShowCategoryFields(true)} style={{ padding: '8px 14px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', borderRadius: 'var(--radius)' }}>
+            POLA KATEGORII
+          </button>
           <button onClick={openNew} className="flex items-center gap-2 btn-oxblood" style={{ padding: '8px 16px' }}>
             <Plus size={13} /> NOWA USŁUGA
           </button>
@@ -358,6 +375,13 @@ export default function DashboardServices() {
           ))}
         </div>
       )}
+
+      <CategoryFieldsModal
+        open={showCategoryFields}
+        onClose={() => setShowCategoryFields(false)}
+        t={{ ...t, modalBg: t.modalBg }}
+        onSaved={() => load()}
+      />
 
       <ConfirmDeleteDialog
         open={!!deleteConfirm}
@@ -594,6 +618,42 @@ export default function DashboardServices() {
                     <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.06em' }}>Najpierw dodaj artystów powyżej.</p>
                   )}
                 </div>
+              </div>
+
+              {/* Pola rezerwacji — dziedziczenie z kategorii lub własne */}
+              <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px' }}>POLA REZERWACJI</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginBottom: '12px', lineHeight: 1.7 }}>
+                  Domyślnie usługa dziedziczy ustawienia kategorii. Nadpisanie działa tylko dla tej usługi.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => set('booking_fields_use_category', !form.booking_fields_use_category)}
+                  className="flex items-center gap-2 mb-3"
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.booking_fields_use_category ? '#16a34a' : t.muted }}
+                >
+                  <div style={{ width: '12px', height: '12px', border: `0.5px solid ${form.booking_fields_use_category ? '#16a34a' : t.border}`, background: form.booking_fields_use_category ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {form.booking_fields_use_category && <span style={{ color: '#fff', fontSize: '8px' }}>✓</span>}
+                  </div>
+                  Dziedzicz ustawienia z kategorii
+                </button>
+
+                {!form.booking_fields_use_category && (
+                  <>
+                    <BookingFieldsEditor
+                      value={form.booking_fields_override}
+                      onChange={(next) => set('booking_fields_override', next)}
+                      t={t}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => { set('booking_fields_use_category', true); set('booking_fields_override', {}); }}
+                      style={{ marginTop: '12px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--brand)' }}
+                    >
+                      PRZYWRÓĆ USTAWIENIA KATEGORII
+                    </button>
+                  </>
+                )}
               </div>
 
               {/* Settings */}

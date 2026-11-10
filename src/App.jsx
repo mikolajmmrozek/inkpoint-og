@@ -29,6 +29,7 @@ import CartProvider from './components/shop/CartProvider';
 import DashboardShop from './pages/dashboard/DashboardShop';
 import ClientOrders from './pages/client/ClientOrders';
 import ClientShopAccount from './pages/client/ClientShopAccount';
+import ClientQuickAdd from './pages/ClientQuickAdd';
 
 // Dashboard
 import Dashboard from './pages/dashboard/Dashboard';
@@ -114,6 +115,7 @@ const AuthenticatedApp = () => {
       <Route path="/feedback" element={<FeedbackSurvey />} />
       <Route path="/voucher/:code" element={<Voucher />} />
       <Route path="/change-request" element={<ChangeRequest />} />
+      <Route path="/nowy-klient" element={<ClientQuickAdd />} />
 
       {/* Dashboard (admin only) */}
       <Route path="/dashboard" element={<Dashboard />}>

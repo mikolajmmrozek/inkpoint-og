@@ -275,9 +275,14 @@ export default function Dashboard() {
                <div className="hidden lg:block">
                  <NotificationBell userEmail={user.email} theme={theme} onClick={() => setNotifOpen(true)} />
                </div>
-               <Link to="/dashboard" title="Profil studia">
-                 <StudioAvatar studio={studioProfile} theme={theme} size={38} />
-               </Link>
+               <div className="flex items-center gap-2">
+                 <span className="hidden md:block" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: textColor, letterSpacing: '0.08em', textTransform: 'uppercase', maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                   {user.full_name || user.email}
+                 </span>
+                 <Link to="/dashboard" title="Profil studia">
+                   <StudioAvatar studio={studioProfile} theme={theme} size={38} />
+                 </Link>
+               </div>
              </div>
           </div>
 

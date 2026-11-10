@@ -30,6 +30,7 @@ export default function DashboardStats() {
 
   const [bookings, setBookings] = useState([]);
   const [artists, setArtists] = useState([]);
+  const [shopOrders, setShopOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedArtistId, setSelectedArtistId] = useState('all');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -42,6 +43,7 @@ export default function DashboardStats() {
     base44.entities.Artist.list().then(a => {
       setArtists(a.filter(x => x.is_visible !== false));
     });
+    base44.entities.ShopOrder.list('-created_date', 300).then(setShopOrders).catch(() => setShopOrders([]));
     setTimeout(() => {
       base44.entities.Booking.list('-session_date', 300)
         .then(setBookings)
@@ -98,6 +100,41 @@ export default function DashboardStats() {
       sessions: acc.sessions + s.sessions,
     }), { revenue: 0, artistEarnings: 0, studioEarnings: 0, sessions: 0 });
   }, [artistStats, selectedArtistId]);
+
+  // Sklep, produkty w rozliczeniach, prowizje i zysk (tylko tam, gdzie koszt jest znany)
+  const shopTotals = useMemo(() => {
+    const orders = shopOrders.filter(o => o.status !== 'cancelled');
+    const shopRevenue = orders.reduce((s, o) => s + Number(o.total || 0), 0);
+    const onlineUnits = orders.reduce((s, o) => s + (o.items || []).reduce((x, i) => x + Number(i.quantity || 0) * Number(i.units || 1), 0), 0);
+
+    const sessionProducts = filtered.flatMap(b => (b.sold_products || []).map(p => ({ ...p, bookingId: b.id })));
+    const productsRevenue = filtered.reduce((s, b) => s + Number(b.products_total || 0), 0);
+    const productsCount = sessionProducts.reduce((s, p) => s + Number(p.qty || 0), 0);
+    const extrasRevenue = filtered.reduce((s, b) => s + Number(b.services_total || 0), 0);
+    const commission = filtered.reduce((s, b) => s + Number(b.products_commission || 0), 0);
+
+    const knownCost = sessionProducts.filter(p => p.cost_known);
+    const unknownCount = sessionProducts.length - knownCost.length;
+    const profit = knownCost.reduce((s, p) => s + (Number(p.price || 0) - Number(p.cost || 0)) * Number(p.qty || 0), 0);
+
+    return {
+      ordersCount: orders.length,
+      shopRevenue,
+      onlineUnits,
+      productsRevenue,
+      productsCount,
+      extrasRevenue,
+      commission,
+      profit,
+      unknownCount,
+    };
+  }, [shopOrders, filtered]);
+
+  // Przychód samych usług (bez produktów i usług dodatkowych dopisanych w rozliczeniu)
+  const serviceRevenue = useMemo(
+    () => Math.max(0, totals.revenue - shopTotals.productsRevenue - shopTotals.extrasRevenue),
+    [totals.revenue, shopTotals.productsRevenue, shopTotals.extrasRevenue]
+  );
 
   // Monthly chart data — stacked by payment method
   const monthlyData = useMemo(() => {
@@ -272,6 +309,32 @@ export default function DashboardStats() {
             <KPICard label="Zarobki artystów" value={`${totals.artistEarnings.toLocaleString('pl-PL')} PLN`} sub={totals.revenue ? `${Math.round(totals.artistEarnings / totals.revenue * 100)}% całości` : ''} />
             <KPICard label="Zarobki studia" value={`${totals.studioEarnings.toLocaleString('pl-PL')} PLN`} sub={totals.revenue ? `${Math.round(totals.studioEarnings / totals.revenue * 100)}% całości` : ''} />
             <KPICard label="Sesji" value={totals.sessions} />
+          </div>
+
+          {/* Sklep, produkty w sesjach, prowizje, zysk */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+            <KPICard
+              label="Przychód sklepu online"
+              value={`${shopTotals.shopRevenue.toLocaleString('pl-PL')} PLN`}
+              sub={`${shopTotals.ordersCount} zamówień · ${shopTotals.onlineUnits} szt.`}
+            />
+            <KPICard
+              label="Przychód usług"
+              value={`${serviceRevenue.toLocaleString('pl-PL')} PLN`}
+              sub={`${totals.sessions} sesji`}
+            />
+            <KPICard
+              label="Produkty i usługi dodatkowe"
+              value={`${(shopTotals.productsRevenue + shopTotals.extrasRevenue).toLocaleString('pl-PL')} PLN`}
+              sub={`${shopTotals.productsCount} szt. · prowizje ${shopTotals.commission.toLocaleString('pl-PL')} PLN`}
+            />
+            <KPICard
+              label="Zysk z produktów (znany koszt)"
+              value={`${shopTotals.profit.toLocaleString('pl-PL')} PLN`}
+              sub={shopTotals.unknownCount > 0
+                ? `bez ${shopTotals.unknownCount} poz. o nieznanym koszcie`
+                : 'wszystkie koszty znane'}
+            />
           </div>
 
           {/* Monthly chart — stacked by payment method */}

@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { bookingUpdate, bookingDelete } from '@/lib/bookingAudit';
 import { useTheme } from './Dashboard';
-import { Search, Edit2, Trash2, X, Plus, ChevronDown, ChevronUp, CalendarPlus, Merge, Loader2, UserPlus, Check, Ban } from 'lucide-react';
+import { Search, Edit2, Trash2, X, Plus, ChevronDown, ChevronUp, CalendarPlus, Merge, Loader2, UserPlus, Check, Ban, QrCode } from 'lucide-react';
+import ClientQrShare from '@/components/dashboard/ClientQrShare';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 import BookingModal from '@/components/dashboard/BookingModal';
 import { format } from 'date-fns';
@@ -52,6 +53,7 @@ export default function DashboardClients() {
   const [merging, setMerging] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null); // client to delete
   const [users, setUsers] = useState([]);
+  const [showQr, setShowQr] = useState(false);
   const [inviteStatus, setInviteStatus] = useState({}); // { [clientId]: 'inviting' | 'invited' | 'error' }
 
   const { registerClientsRefresh } = useCreateMenu();
@@ -270,7 +272,10 @@ export default function DashboardClients() {
         ].map(s => (
           <StatsTile key={s.label} label={s.label} value={s.value} active={clientFilter === s.filter} onClick={() => setClientFilter(clientFilter === s.filter ? 'all' : s.filter)} t={t} />
         ))}
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          <button onClick={() => setShowQr(true)} className="flex items-center gap-2" style={{ padding: '8px 14px', border: `0.5px solid ${t.border}`, color: t.muted, background: 'transparent', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', borderRadius: 'var(--radius)' }} title="Kod QR do formularza nowego klienta">
+            <QrCode size={13} /> QR
+          </button>
           <button onClick={openNew} className="flex items-center gap-2 btn-oxblood" style={{ padding: '8px 16px' }}>
             <Plus size={13} /> NOWY KLIENT
           </button>
@@ -627,6 +632,8 @@ export default function DashboardClients() {
           </div>
         </div>
       )}
+
+      <ClientQrShare open={showQr} onClose={() => setShowQr(false)} t={t} />
 
       <ConfirmDeleteDialog
         open={!!deleteConfirm}

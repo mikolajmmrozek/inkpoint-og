@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import PageLayout from '../components/layout/PageLayout';
 import Lightbox from '../components/ui/Lightbox';
+import PostImageMasonry from '@/components/blog/PostImageMasonry';
 import { format } from 'date-fns';
 import { pl } from 'date-fns/locale';
 
@@ -191,53 +192,19 @@ export default function BlogPost() {
             )}
           </div>
 
-          {/* Desktop: 2-col layout if media exists, else full width text */}
-          {(post.video_url || sidebarImages.length > 0) ? (
-            <div className="lg:grid lg:grid-cols-5 lg:gap-12">
-              {/* Text — 3 cols */}
-              <div className="lg:col-span-3">
-                <div style={{ color: 'rgb(var(--foreground-rgb) / 0.75)', fontSize: '16px', lineHeight: 2, whiteSpace: 'pre-wrap' }}>
-                  {post.content || post.excerpt}
-                </div>
-              </div>
+          {/* Treść wpisu */}
+          <div style={{ color: 'rgb(var(--foreground-rgb) / 0.75)', fontSize: '16px', lineHeight: 2, whiteSpace: 'pre-wrap', maxWidth: '760px' }}>
+            {post.content || post.excerpt}
+          </div>
 
-              {/* Media sidebar — 2 cols */}
-              <div className="lg:col-span-2 mt-10 lg:mt-0 space-y-4">
-                {post.video_url && (
-                  <video src={post.video_url} controls className="w-full" style={{ background: 'hsl(var(--background))' }} />
-                )}
-                {sidebarImages.length > 0 && (
-                  <div className="space-y-3">
-                    {sidebarImages.map((img, i) => (
-                      <div key={i} className="cursor-pointer overflow-hidden group" style={{ borderRadius: 'var(--radius)' }} onClick={() => setLightboxIndex(i)}>
-                        <img
-                          src={img?.url || img}
-                          alt={img?.caption || ''}
-                          className="w-full object-cover transition-transform duration-700 group-hover:scale-105 media-border"
-                          style={{ filter: 'brightness(0.85) contrast(1.05)' }}
-                        />
-                        {img?.caption && (
-                          <p className="mt-1" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'rgb(var(--foreground-rgb) / 0.3)', letterSpacing: '0.08em' }}>
-                            {img.caption}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div style={{ color: 'rgb(var(--foreground-rgb) / 0.75)', fontSize: '16px', lineHeight: 2, whiteSpace: 'pre-wrap', maxWidth: '680px' }}>
-              {post.content || post.excerpt}
-            </div>
+          {/* Wideo pod treścią */}
+          {post.video_url && (
+            <video src={post.video_url} controls className="w-full mt-10" style={{ background: 'hsl(var(--background))', borderRadius: 'var(--radius)' }} />
           )}
 
-          {/* Mosaic gallery below on mobile / when many images */}
-          {allImages.length > 2 && (
-            <div className="lg:hidden mt-10">
-              <ImageMosaic images={allImages} onOpen={setLightboxIndex} />
-            </div>
+          {/* Zdjęcia po treści — mozaika inspirowana Pinterestem */}
+          {sidebarImages.length > 0 && (
+            <PostImageMasonry images={sidebarImages} onOpen={setLightboxIndex} />
           )}
         </motion.div>
       </div>
