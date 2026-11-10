@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from '@/pages/dashboard/Dashboard';
-import { Plus, Pencil, Trash2, X, Check, Upload, FolderOpen, Layers, Settings2, Package } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Check, Upload, FolderOpen, Layers, Package } from 'lucide-react';
 import { slugify } from '@/lib/shop';
 import { shopTheme, mono, display, inputStyle, labelStyle } from './shopTheme';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
@@ -10,7 +10,6 @@ import ShopCatalogProductPicker from './ShopCatalogProductPicker';
 const TABS = [
   { id: 'categories', label: 'Kategorie', icon: FolderOpen },
   { id: 'collections', label: 'Kolekcje', icon: Layers },
-  { id: 'settings', label: 'Ustawienia', icon: Settings2 },
 ];
 
 export default function ShopCatalogPanel() {
@@ -20,13 +19,11 @@ export default function ShopCatalogPanel() {
   const [categories, setCategories] = useState([]);
   const [collections, setCollections] = useState([]);
   const [products, setProducts] = useState([]);
-  const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null); // { kind, data }
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
   const [deleteFor, setDeleteFor] = useState(null);
-  const [settingsSaved, setSettingsSaved] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
 
   const load = () => {
@@ -34,12 +31,10 @@ export default function ShopCatalogPanel() {
       base44.entities.ShopCategory.list('order', 100).catch(() => []),
       base44.entities.ShopCollection.list('order', 100).catch(() => []),
       base44.entities.ShopProduct.list('order', 300).catch(() => []),
-      base44.entities.ShopSettings.filter({ key: 'default' }).catch(() => []),
-    ]).then(([c, col, p, s]) => {
+    ]).then(([c, col, p]) => {
       setCategories(c);
       setCollections(col);
       setProducts(p);
-      setSettings(s[0] || { key: 'default', shipping_cost: 0, free_shipping_from: 0, shipping_note: '', contact_email: '', is_open: true });
     }).finally(() => setLoading(false));
   };
 
@@ -117,27 +112,6 @@ export default function ShopCatalogPanel() {
     load();
   };
 
-  const saveSettings = async () => {
-    setSaving(true);
-    try {
-      const payload = {
-        key: 'default',
-        shipping_cost: Number(settings.shipping_cost) || 0,
-        free_shipping_from: Number(settings.free_shipping_from) || 0,
-        shipping_note: settings.shipping_note || '',
-        contact_email: settings.contact_email || '',
-        is_open: settings.is_open !== false,
-      };
-      if (settings.id) await base44.entities.ShopSettings.update(settings.id, payload);
-      else await base44.entities.ShopSettings.create(payload);
-      setSettingsSaved(true);
-      setTimeout(() => setSettingsSaved(false), 2000);
-      load();
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const list = tab === 'categories' ? categories : collections;
 
   if (loading) return <div className="flex justify-center py-20"><div className="w-8 h-px animate-pulse" style={{ background: 'var(--brand)' }} /></div>;
@@ -164,26 +138,7 @@ export default function ShopCatalogPanel() {
         )}
       </div>
 
-      {tab === 'settings' ? (
-        <div className="max-w-lg p-6" style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
-          <p style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: '18px' }}>USTAWIENIA SKLEPU</p>
-          <div className="space-y-5">
-            <div className="grid grid-cols-2 gap-4">
-              <div><label style={labelStyle(t)}>Koszt dostawy (zł)</label><input type="number" value={settings.shipping_cost ?? 0} onChange={e => setSettings(s => ({ ...s, shipping_cost: e.target.value }))} style={inputStyle(t)} /></div>
-              <div><label style={labelStyle(t)}>Darmowa dostawa od (zł)</label><input type="number" value={settings.free_shipping_from ?? 0} onChange={e => setSettings(s => ({ ...s, free_shipping_from: e.target.value }))} style={inputStyle(t)} /></div>
-            </div>
-            <div><label style={labelStyle(t)}>Informacja o dostawie</label><input value={settings.shipping_note || ''} onChange={e => setSettings(s => ({ ...s, shipping_note: e.target.value }))} placeholder="np. Wysyłka w 3-5 dni roboczych" style={inputStyle(t)} /></div>
-            <div><label style={labelStyle(t)}>E-mail kontaktowy sklepu</label><input value={settings.contact_email || ''} onChange={e => setSettings(s => ({ ...s, contact_email: e.target.value }))} style={inputStyle(t)} /></div>
-            <button onClick={() => setSettings(s => ({ ...s, is_open: s.is_open === false }))} style={{ background: 'none', border: 'none', cursor: 'pointer', ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: settings.is_open !== false ? '#16a34a' : t.muted, display: 'flex', alignItems: 'center', gap: '7px' }}>
-              <span style={{ width: '12px', height: '12px', border: `0.5px solid ${settings.is_open !== false ? '#16a34a' : t.border}`, background: settings.is_open !== false ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{settings.is_open !== false && <Check size={9} color="#fff" />}</span>
-              Sklep przyjmuje zamówienia
-            </button>
-            <button onClick={saveSettings} disabled={saving} className="btn-oxblood flex items-center gap-2" style={{ padding: '10px 18px' }}>
-              {settingsSaved ? <><Check size={12} /> ZAPISANO</> : 'ZAPISZ USTAWIENIA'}
-            </button>
-          </div>
-        </div>
-      ) : (
+      {tab !== 'settings' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {list.length === 0 && (
             <p style={{ ...mono, fontSize: '10px', color: t.muted, letterSpacing: '0.1em', padding: '30px 0' }}>BRAK WPISÓW</p>

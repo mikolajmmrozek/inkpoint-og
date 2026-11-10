@@ -3,9 +3,11 @@ import { useOutletContext, Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Package, X, RotateCcw, Check } from 'lucide-react';
 import { money, ORDER_STATUS, PAYMENT_STATUS, RETURN_STATUS, formatDate } from '@/lib/shop';
+import useShopSettings from '@/hooks/useShopSettings';
 
 export default function ClientOrders() {
   const { user, theme } = useOutletContext();
+  useShopSettings();
   const t = theme === 'light'
     ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.6)', panelBg: '#FAFAFA' }
     : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.7)', panelBg: '#141414' };

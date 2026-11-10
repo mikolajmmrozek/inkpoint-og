@@ -10,6 +10,7 @@ import CheckoutShippingPicker from '@/components/shop/CheckoutShippingPicker';
 import { useCart } from '@/components/shop/CartProvider';
 import { useAuth } from '@/lib/AuthContext';
 import { money, optionShippingCost, shippingOptionsForItems } from '@/lib/shop';
+import useShopSettings from '@/hooks/useShopSettings';
 
 const t = { border: 'hsl(var(--border))', text: 'hsl(var(--foreground))', muted: 'hsl(var(--muted-foreground))' };
 
@@ -23,8 +24,8 @@ export default function ShopCheckout() {
   const { items, clear, loading } = useCart();
   const { content, loading: shopLoading } = useSiteContent();
   const shopVisible = content.show_shop;
+  useShopSettings();
 
-  const [settings, setSettings] = useState({});
   const [addresses, setAddresses] = useState([]);
   const [promos, setPromos] = useState([]);
   const [shipping, setShipping] = useState({ country: 'Polska', first_name: '', last_name: '', phone: '' });
@@ -44,7 +45,6 @@ export default function ShopCheckout() {
 
   useEffect(() => {
     if (!user?.email) return;
-    base44.entities.ShopSettings.filter({ key: 'default' }).then(l => setSettings(l[0] || {})).catch(() => {});
     base44.entities.ShopAddress.filter({ user_email: user.email }, '-created_date', 50).then(setAddresses).catch(() => {});
     base44.entities.Promotion.filter({}, '-created_date', 200).then(setPromos).catch(() => {});
     const [first, ...rest] = (user.full_name || '').split(' ');
@@ -91,12 +91,8 @@ export default function ShopCheckout() {
 
   // Koszt dostawy zależy od metody wybranej przy kasie i progu „gratis od”
   // liczonego od kwoty zamówienia po rabatach.
-  const shopFreeFrom = Number(settings.free_shipping_from) || 0;
-  const fallbackShipping = Number(settings.shipping_cost) || 0;
   const selectedShip = shipOptions.find(o => o.name === shipName) || shipOptions[0] || null;
-  const shippingCost = selectedShip
-    ? optionShippingCost(selectedShip, payable, shopFreeFrom)
-    : (fallbackShipping > 0 && shopFreeFrom > 0 && payable >= shopFreeFrom ? 0 : fallbackShipping);
+  const shippingCost = selectedShip ? optionShippingCost(selectedShip, payable, 0) : 0;
   const total = payable + shippingCost;
 
   const handleSubmit = async () => {
@@ -240,7 +236,6 @@ export default function ShopCheckout() {
                     selected={selectedShip}
                     onSelect={o => setShipName(o.name)}
                     payable={payable}
-                    shopFreeFrom={shopFreeFrom}
                   />
                 )}
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.06em', marginTop: '10px', lineHeight: 1.8 }}>

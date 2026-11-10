@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { useTheme } from './Dashboard';
-import { ShoppingBag, Package, Layers, RotateCcw, Truck, SlidersHorizontal } from 'lucide-react';
+import { ShoppingBag, Package, Layers, RotateCcw, Truck, SlidersHorizontal, Settings2 } from 'lucide-react';
 import ShopOrdersPanel from '@/components/dashboard/shop/ShopOrdersPanel';
 import ShopProductsPanel from '@/components/dashboard/shop/ShopProductsPanel';
 import ShopCatalogPanel from '@/components/dashboard/shop/ShopCatalogPanel';
 import ShopFiltersPanel from '@/components/dashboard/shop/ShopFiltersPanel';
 import ShopReturnsPanel from '@/components/dashboard/shop/ShopReturnsPanel';
 import ShopShippingPanel from '@/components/dashboard/shop/ShopShippingPanel';
+import ShopSettingsPanel from '@/components/dashboard/shop/ShopSettingsPanel';
 import { shopTheme, mono } from '@/components/dashboard/shop/shopTheme';
+import useShopSettings from '@/hooks/useShopSettings';
 
 const TABS = [
   { id: 'orders', label: 'Zamówienia', icon: ShoppingBag },
@@ -16,11 +18,13 @@ const TABS = [
   { id: 'filters', label: 'Filtry', icon: SlidersHorizontal },
   { id: 'shipping', label: 'Wysyłka', icon: Truck },
   { id: 'returns', label: 'Zwroty', icon: RotateCcw },
+  { id: 'settings', label: 'Ustawienia', icon: Settings2 },
 ];
 
 export default function DashboardShop() {
   const { theme } = useTheme();
   const t = shopTheme(theme);
+  useShopSettings();
   const [tab, setTab] = useState('orders');
 
   return (
@@ -50,6 +54,7 @@ export default function DashboardShop() {
       {tab === 'filters' && <ShopFiltersPanel />}
       {tab === 'shipping' && <ShopShippingPanel />}
       {tab === 'returns' && <ShopReturnsPanel />}
+      {tab === 'settings' && <ShopSettingsPanel />}
     </div>
   );
 }

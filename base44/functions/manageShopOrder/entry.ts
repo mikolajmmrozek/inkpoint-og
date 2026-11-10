@@ -257,8 +257,6 @@ export default async function (req) {
       // ── Dostawa ──────────────────────────────────────────────────────────
       // Metoda wybrana przy kasie. Próg „gratis od" liczymy od kwoty zamówienia
       // po rabatach i voucherze — progu formy, a gdy go nie ma, progu sklepu.
-      const settingsList = await base44.asServiceRole.entities.ShopSettings.filter({ key: 'default' });
-      const settings = settingsList[0] || {};
       const payable = Math.max(0, round2(subtotal - discountAmount - voucherAmount));
 
       const optionPool = [
@@ -266,11 +264,8 @@ export default async function (req) {
       ].sort((a, b) => (Number(a.cost) || 0) - (Number(b.cost) || 0));
 
       const chosenShip = optionPool.find((o) => o.name === body.shipping_option) || optionPool[0] || null;
-      const shopFreeFrom = Number(settings.free_shipping_from) || 0;
-      const shippingFreeFrom = chosenShip && Number(chosenShip.free_from) > 0 ? Number(chosenShip.free_from) : shopFreeFrom;
-      let shippingCost = chosenShip
-        ? Number(chosenShip.cost) || 0
-        : (Number(settings.shipping_cost) || 0);
+      const shippingFreeFrom = chosenShip ? Number(chosenShip.free_from) || 0 : 0;
+      let shippingCost = chosenShip ? Number(chosenShip.cost) || 0 : 0;
       if (shippingCost > 0 && shippingFreeFrom > 0 && payable >= shippingFreeFrom) shippingCost = 0;
 
       const shippingName = chosenShip ? chosenShip.name : (body.shipping_option || '');

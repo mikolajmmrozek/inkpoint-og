@@ -5,6 +5,7 @@ import PageLayout from '@/components/layout/PageLayout';
 import { useCart } from '@/components/shop/CartProvider';
 import { useAuth } from '@/lib/AuthContext';
 import { money } from '@/lib/shop';
+import useShopSettings from '@/hooks/useShopSettings';
 import ShopUnavailable from '@/components/shop/ShopUnavailable';
 import useSiteContent from '@/hooks/useSiteContent';
 
@@ -13,6 +14,7 @@ export default function ShopCart() {
   const { items, setQty, remove, loading } = useCart();
   const { content, loading: shopLoading } = useSiteContent();
   const shopVisible = content.show_shop;
+  useShopSettings();
 
   const subtotal = items.reduce((sum, i) => sum + (Number(i.unit_price) || 0) * (Number(i.quantity) || 0), 0);
   const total = subtotal;

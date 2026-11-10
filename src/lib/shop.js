@@ -1,5 +1,16 @@
-export const money = (n) =>
-  `${Number(n || 0).toLocaleString('pl-PL', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} zł`;
+// Waluta sklepu — jedna dla wszystkich cen wpisanych ręcznie (produkty i wysyłka).
+let shopCurrency = (typeof localStorage !== 'undefined' && localStorage.getItem('shopCurrency')) || 'PLN';
+
+export const setShopCurrency = (code) => {
+  const next = String(code || 'PLN').trim().toUpperCase() || 'PLN';
+  shopCurrency = next;
+  if (typeof localStorage !== 'undefined') localStorage.setItem('shopCurrency', next);
+};
+
+export const getShopCurrency = () => shopCurrency;
+
+export const money = (n, code) =>
+  `${Number(n || 0).toLocaleString('pl-PL', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${code || shopCurrency}`;
 
 export const ORDER_STATUS = {
   pending: { label: 'Nowe', color: 'var(--brand)' },
@@ -68,6 +79,13 @@ export const availability = (product) => {
   if (stock === null) return { state: 'in_stock', stock: null };
   if (stock > 0) return { state: 'in_stock', stock };
   return product?.restock ? { state: 'soon', stock: 0 } : { state: 'sold_out', stock: 0 };
+};
+
+// Nowość: produkt młodszy niż ustawiona liczba dni (domyślnie 30).
+export const isNewProduct = (product, days = 30) => {
+  const limit = Number(days);
+  if (!product?.created_date || !(limit > 0)) return false;
+  return Date.now() - new Date(product.created_date).getTime() < limit * 24 * 60 * 60 * 1000;
 };
 
 export const isSoldOut = (product) => availability(product).state === 'sold_out';

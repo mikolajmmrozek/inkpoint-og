@@ -9,6 +9,8 @@ import VariantPicker from '@/components/shop/VariantPicker';
 import PriceSliderPicker from '@/components/shop/PriceSliderPicker';
 import MultipackPicker from '@/components/shop/MultipackPicker';
 import ProductShippingList from '@/components/shop/ProductShippingList';
+import ProductBadges from '@/components/shop/ProductBadges';
+import useShopSettings from '@/hooks/useShopSettings';
 import { useCart } from '@/components/shop/CartProvider';
 import { useAuth } from '@/lib/AuthContext';
 import { money, variantsOf, availability, productStock, shippingOptionsOf, pricingModeOf, priceSliderOf, multipacksOf, packPrice, packLabel, unitPrice, hasDiscount, displayPrice } from '@/lib/shop';
@@ -20,6 +22,7 @@ export default function ShopProduct() {
   const { add } = useCart();
   const { content, loading: shopLoading } = useSiteContent();
   const shopVisible = content.show_shop;
+  const shopSettings = useShopSettings();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [variant, setVariant] = useState(null);
@@ -127,10 +130,11 @@ export default function ShopProduct() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
             {/* Zdjęcia */}
             <div>
-              <div className="overflow-hidden" style={{ aspectRatio: '4 / 5', border: '0.5px solid hsl(var(--border))', borderRadius: 'var(--radius)', background: 'rgba(255,255,255,0.03)' }}>
+              <div className="relative overflow-hidden" style={{ aspectRatio: '4 / 5', border: '0.5px solid hsl(var(--border))', borderRadius: 'var(--radius)', background: 'rgba(255,255,255,0.03)' }}>
                 {activeImage
                   ? <img src={activeImage} alt={product.name} className="w-full h-full object-cover" />
                   : <div className="w-full h-full flex items-center justify-center"><span className="text-micro" style={{ fontSize: '9px', color: 'hsl(var(--muted-foreground))' }}>BRAK ZDJĘCIA</span></div>}
+                <ProductBadges product={product} newDays={shopSettings.new_badge_days ?? 30} detailed />
               </div>
               {images.length > 1 && (
                 <div className="flex gap-2 mt-3">
@@ -234,6 +238,12 @@ export default function ShopProduct() {
               )}
 
               <ProductShippingList options={shipOptions} legacyCost={Number(product.shipping_cost) || 0} />
+
+              {shopSettings.product_note && (
+                <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '11px', lineHeight: 1.8, marginTop: '14px' }}>
+                  {shopSettings.product_note}
+                </p>
+              )}
 
               {product.description && (
                 <div className="mt-8 pt-6" style={{ borderTop: '0.5px solid hsl(var(--border))' }}>

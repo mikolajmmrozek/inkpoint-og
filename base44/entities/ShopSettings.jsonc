@@ -6,19 +6,19 @@
       "type": "string",
       "default": "default"
     },
-    "shipping_cost": {
-      "type": "number",
-      "default": 0,
-      "description": "Koszt dostawy w PLN (0 = darmowa)"
-    },
-    "free_shipping_from": {
-      "type": "number",
-      "default": 0,
-      "description": "Darmowa dostawa od kwoty (0 = wy\u0142\u0105czone)"
-    },
-    "shipping_note": {
+    "currency": {
       "type": "string",
-      "description": "Kr\u00f3tka informacja o dostawie widoczna w sklepie"
+      "default": "PLN",
+      "description": "Waluta sklepu (np. PLN, EUR) \u2014 dotyczy wszystkich cen wpisanych r\u0119cznie w sklepie: produkt\u00f3w, wariant\u00f3w, wielosztuk i form wysy\u0142ki."
+    },
+    "new_badge_days": {
+      "type": "number",
+      "default": 30,
+      "description": "Ile dni od dodania produktu pokazywa\u0107 znaczek \u201eNowo\u015b\u0107\u201d (0 = nigdy)"
+    },
+    "product_note": {
+      "type": "string",
+      "description": "Informacja og\u00f3lna wy\u015bwietlana przy ka\u017cdym produkcie w sklepie (ta sama dla wszystkich)"
     },
     "contact_email": {
       "type": "string",

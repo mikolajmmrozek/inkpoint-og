@@ -1,14 +1,15 @@
 import { Link } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
 import { availability, shippingSummary, displayPrice, money } from '@/lib/shop';
+import ProductBadges from '@/components/shop/ProductBadges';
+import useShopSettings from '@/hooks/useShopSettings';
 
 export default function ShopProductCard({ product, forms = [] }) {
+  const { new_badge_days } = useShopSettings();
   const avail = availability(product);
   const price = displayPrice(product);
   const ship = shippingSummary(product, forms);
   const soldOut = avail.state === 'sold_out';
-  const soon = avail.state === 'soon';
-  const isNew = product.created_date ? (Date.now() - new Date(product.created_date).getTime()) < 1000 * 60 * 60 * 24 * 30 : false;
   const shippingText = [ship.cost > 0 ? `Dostawa ${ship.text}` : ship.freePickup ? 'Darmowa dostawa / odbiór w studio' : 'Dostawa gratis', ship.delivery].filter(Boolean).join(' · ');
 
   return (
@@ -33,27 +34,7 @@ export default function ShopProductCard({ product, forms = [] }) {
             <span className="text-micro" style={{ fontSize: '9px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.2em' }}>BRAK ZDJĘCIA</span>
           </div>
         )}
-        {(soldOut || soon) && (
-          <span
-            className="absolute top-3 left-3 text-micro"
-            style={{
-              background: 'hsl(var(--background))',
-              border: `0.5px solid ${soon ? 'rgba(245,158,11,0.55)' : 'hsl(var(--border))'}`,
-              color: soon ? '#f59e0b' : 'hsl(var(--muted-foreground))',
-              padding: '4px 8px',
-              fontSize: '9px',
-              letterSpacing: '0.15em',
-              borderRadius: 'var(--radius)',
-            }}
-          >
-            {soon ? 'WKRÓTCE DOSTĘPNE' : 'WYPRZEDANE'}
-          </span>
-        )}
-        {isNew && !soldOut && !soon && (
-          <span className="absolute top-3 left-3 text-micro" style={{ background: 'var(--brand)', color: 'var(--btn-text)', padding: '4px 8px', fontSize: '9px', letterSpacing: '0.15em', borderRadius: 'var(--radius)' }}>
-            NOWOŚĆ
-          </span>
-        )}
+        <ProductBadges product={product} newDays={new_badge_days ?? 30} />
       </div>
       <div className="p-4">
         {product.category_name && (
