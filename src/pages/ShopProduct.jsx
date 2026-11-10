@@ -11,7 +11,7 @@ import MultipackPicker from '@/components/shop/MultipackPicker';
 import ProductShippingList from '@/components/shop/ProductShippingList';
 import { useCart } from '@/components/shop/CartProvider';
 import { useAuth } from '@/lib/AuthContext';
-import { money, variantsOf, priceRange, availability, productStock, shippingOptionsOf, pricingModeOf, priceSliderOf, multipacksOf, packPrice, packLabel, unitPrice, listPrice, hasDiscount } from '@/lib/shop';
+import { money, variantsOf, availability, productStock, shippingOptionsOf, pricingModeOf, priceSliderOf, multipacksOf, packPrice, packLabel, unitPrice, hasDiscount, displayPrice } from '@/lib/shop';
 
 export default function ShopProduct() {
   const { slug } = useParams();
@@ -105,9 +105,10 @@ export default function ShopProduct() {
   const canBuy = isSlider || avail.state === 'in_stock';
   const stock = isSlider ? 99 : (variant ? Number(variant.stock) || 0 : (productStock(product) ?? 99));
   const shipOptions = shippingOptionsOf(product, forms);
-  const price = listPrice(product, variant);
   const netPrice = unitPrice(product, variant);
-  const range = priceRange(product);
+  // Cena na górze zawsze od najtańszego wariantu (i jego cena przed zniżką) —
+  // nie zmienia się przy przełączaniu wariantów.
+  const headline = displayPrice(product);
   const packs = multipacksOf(product, variant);
   const unitsPerPack = pack ? Number(pack.units) || 1 : 1;
   const linePrice = isSlider ? Number(amount) || 0 : (pack ? packPrice(netPrice, pack) : netPrice);
@@ -151,10 +152,10 @@ export default function ShopProduct() {
 
               <div className="flex items-baseline gap-3 mt-4 pb-6" style={{ borderBottom: '0.5px solid hsl(var(--border))' }}>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '18px', color: !isSlider && hasDiscount(product) ? '#16a34a' : 'hsl(var(--foreground))', letterSpacing: '0.03em' }}>
-                  {isSlider ? money(amount) : variants.length > 0 ? `od ${money(range.min)}` : money(netPrice)}
+                  {isSlider ? money(amount) : variants.length > 0 ? `od ${money(headline.min)}` : money(netPrice)}
                 </p>
-                {!isSlider && hasDiscount(product) && price > netPrice && (
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'hsl(var(--muted-foreground))', textDecoration: 'line-through' }}>{money(price)}</p>
+                {!isSlider && hasDiscount(product) && headline.was > headline.min && (
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'hsl(var(--muted-foreground))', textDecoration: 'line-through' }}>{money(headline.was)}</p>
                 )}
               </div>
 
