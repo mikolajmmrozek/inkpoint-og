@@ -63,8 +63,8 @@ export default function ShopShippingPanel() {
                   <div className="min-w-0">
                     <p style={{ fontSize: '13px', color: t.title }}>{f.name}</p>
                     <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '3px' }}>
-                      KRAJ: {Number(f.cost) > 0 ? money(f.cost) : 'GRATIS'}{f.delivery_time ? ` · ${f.delivery_time}` : ''}
-                      {f.international ? ` · ZAGRANICA: ${variants.length > 0 ? variants.map(v => `${v.label} ${money(v.cost)}${v.delivery_time ? ` (${v.delivery_time})` : ''}`).join(' · ') : 'BRAK STREF'}` : ''}
+                      KRAJ: {Number(f.cost) > 0 ? money(f.cost) : 'GRATIS'}{Number(f.free_from) > 0 ? ` · GRATIS OD ${money(f.free_from)}` : ''}{f.delivery_time ? ` · ${f.delivery_time}` : ''}
+                      {f.international ? ` · ZAGRANICA: ${variants.length > 0 ? variants.map(v => `${v.label} ${money(v.cost)}${Number(v.free_from) > 0 ? ` (gratis od ${money(v.free_from)})` : ''}${v.delivery_time ? ` (${v.delivery_time})` : ''}`).join(' · ') : 'BRAK STREF'}` : ''}
                     </p>
                     {f.info && <p style={{ fontSize: '11px', color: t.muted, marginTop: '4px' }}>{f.info}</p>}
                   </div>

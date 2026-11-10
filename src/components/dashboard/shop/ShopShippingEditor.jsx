@@ -35,9 +35,10 @@ export default function ShopShippingEditor({ shippingForm, onClose, onSaved }) {
         delivery_time: (form.delivery_time || '').trim(),
         cost: Math.max(0, Number(form.cost) || 0),
         international: !!form.international,
+        free_from: Math.max(0, Number(form.free_from) || 0),
         international_variants: form.international
           ? (form.international_variants || [])
-            .map(v => ({ label: (v.label || '').trim(), cost: Math.max(0, Number(v.cost) || 0), delivery_time: (v.delivery_time || '').trim() }))
+            .map(v => ({ label: (v.label || '').trim(), cost: Math.max(0, Number(v.cost) || 0), free_from: Math.max(0, Number(v.free_from) || 0), delivery_time: (v.delivery_time || '').trim() }))
             .filter(v => v.label)
           : [],
         order: Number(form.order) || 999,
@@ -64,10 +65,14 @@ export default function ShopShippingEditor({ shippingForm, onClose, onSaved }) {
 
         <div className="p-6 space-y-6">
           <div><label style={labelStyle(t)}>Nazwa *</label><input value={form.name} onChange={e => set('name', e.target.value)} placeholder="np. Paczkomat InPost" style={inputStyle(t)} /></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div><label style={labelStyle(t)}>Czas dostawy (kraj)</label><input value={form.delivery_time || ''} onChange={e => set('delivery_time', e.target.value)} placeholder="np. 1–3 dni robocze" style={inputStyle(t)} /></div>
             <div><label style={labelStyle(t)}>Koszt krajowy (PLN)</label><input type="number" value={form.cost ?? 0} onChange={e => set('cost', e.target.value)} style={inputStyle(t)} /></div>
+            <div><label style={labelStyle(t)}>Gratis od (PLN)</label><input type="number" value={form.free_from ?? 0} onChange={e => set('free_from', e.target.value)} style={inputStyle(t)} /></div>
           </div>
+          <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', lineHeight: 1.8 }}>
+            „Gratis od" to minimalna kwota zamówienia po rabatach, przy której ta forma jest bezpłatna w kasie. 0 = zawsze płatna.
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div><label style={labelStyle(t)}>Informacja dodatkowa</label><input value={form.info || ''} onChange={e => set('info', e.target.value)} placeholder="np. Pakowanie w karton" style={inputStyle(t)} /></div>
             <div><label style={labelStyle(t)}>Kolejność</label><input type="number" value={form.order ?? 999} onChange={e => set('order', e.target.value)} style={inputStyle(t)} /></div>
@@ -97,6 +102,7 @@ export default function ShopShippingEditor({ shippingForm, onClose, onSaved }) {
                       <div key={i} className="flex items-end gap-3">
                         <div className="flex-1"><label style={labelStyle(t)}>Strefa</label><input value={v.label || ''} onChange={e => setVariant(i, 'label', e.target.value)} placeholder="np. Europa" style={inputStyle(t)} /></div>
                         <div style={{ width: '120px' }}><label style={labelStyle(t)}>Koszt (PLN)</label><input type="number" value={v.cost ?? 0} onChange={e => setVariant(i, 'cost', e.target.value)} style={inputStyle(t)} /></div>
+                        <div style={{ width: '110px' }}><label style={labelStyle(t)}>Gratis od</label><input type="number" value={v.free_from ?? 0} onChange={e => setVariant(i, 'free_from', e.target.value)} style={inputStyle(t)} /></div>
                         <div style={{ width: '150px' }}><label style={labelStyle(t)}>Czas dostawy</label><input value={v.delivery_time || ''} onChange={e => setVariant(i, 'delivery_time', e.target.value)} placeholder="np. 5–10 dni" style={inputStyle(t)} /></div>
                         <button onClick={() => set('international_variants', (form.international_variants || []).filter((_, idx) => idx !== i))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted, padding: '10px 4px' }}><Trash2 size={13} /></button>
                       </div>

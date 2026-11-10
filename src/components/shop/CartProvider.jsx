@@ -49,8 +49,9 @@ export default function CartProvider({ children }) {
     setItems(nextItems);
   }, [cartId, user?.email]);
 
-  // pack = wybrany pakiet wielosztuki (null = pojedyncza sztuka)
-  const add = useCallback(async (product, variant, quantity = 1, shippingOption = null, pack = null) => {
+  // pack = wybrany pakiet wielosztuki (null = pojedyncza sztuka).
+  // Metodę dostawy klient wybiera dopiero przy składaniu zamówienia.
+  const add = useCallback(async (product, variant, quantity = 1, pack = null) => {
     if (!isAuthenticated) return false;
     const units = packUnits(pack);
     const basePrice = unitPrice(product, variant);
@@ -59,13 +60,10 @@ export default function CartProvider({ children }) {
       variant_key: variant?.key || '',
       units,
     };
-    const shippingCost = Number(shippingOption?.cost) || 0;
-    const shippingName = shippingOption?.name || '';
-    const shippingTime = shippingOption?.delivery_time || '';
     const existing = items.find(i => lineMatch(i, ref));
     const next = existing
       ? items.map(i => i === existing
-        ? { ...i, quantity: Math.min(99, Number(i.quantity) + quantity), shipping_option: shippingName, shipping_cost: shippingCost, shipping_info: shippingTime }
+        ? { ...i, quantity: Math.min(99, Number(i.quantity) + quantity) }
         : i)
       : [...items, {
         ...ref,
@@ -75,9 +73,6 @@ export default function CartProvider({ children }) {
         variant_label: [variantLabel(variant), pack ? packLabel(pack) : ''].filter(Boolean).join(' · '),
         unit_price: pack ? packPrice(basePrice, pack) : basePrice,
         quantity,
-        shipping_option: shippingName,
-        shipping_cost: shippingCost,
-        shipping_info: shippingTime,
       }];
     await persist(next);
     return true;

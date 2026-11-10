@@ -19,6 +19,11 @@
       "default": 0,
       "description": "Koszt krajowy w PLN (0 = darmowa)"
     },
+    "free_from": {
+      "type": "number",
+      "default": 0,
+      "description": "Gratis od: minimalna kwota zam\u00f3wienia po rabatach, przy kt\u00f3rej ta forma wysy\u0142ki jest bezp\u0142atna (0 = zawsze p\u0142atna)"
+    },
     "international": {
       "type": "boolean",
       "default": false,
@@ -37,6 +42,11 @@
             "type": "number",
             "default": 0,
             "description": "Koszt tej strefy w PLN"
+          },
+          "free_from": {
+            "type": "number",
+            "default": 0,
+            "description": "Gratis od: minimalna kwota zam\u00f3wienia po rabatach dla tej strefy (0 = zawsze p\u0142atna)"
           },
           "delivery_time": {
             "type": "string",

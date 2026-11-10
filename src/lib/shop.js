@@ -89,22 +89,41 @@ export const shippingOptionsOf = (product, forms = []) => {
 
   const options = selected.length > 0
     ? selected.flatMap(form => {
-      const base = [{ name: form.name, cost: Number(form.cost) || 0, delivery_time: form.delivery_time || '', international: false, pickup: false }];
+      const freeFrom = Number(form.free_from) || 0;
+      const base = [{ name: form.name, cost: Number(form.cost) || 0, free_from: freeFrom, delivery_time: form.delivery_time || '', international: false, pickup: false }];
       const foreign = form.international
         ? (form.international_variants || [])
           .filter(v => (v?.label || '').trim())
-          .map(v => ({ name: `${form.name} · ${v.label.trim()}`, cost: Number(v.cost) || 0, delivery_time: v.delivery_time || form.delivery_time || '', international: true, pickup: false }))
+          .map(v => ({ name: `${form.name} · ${v.label.trim()}`, cost: Number(v.cost) || 0, free_from: Number(v.free_from) || 0, delivery_time: v.delivery_time || form.delivery_time || '', international: true, pickup: false }))
         : [];
       return [...base, ...foreign];
     })
     : (Array.isArray(product?.shipping_options) ? product.shipping_options : [])
       .filter(o => (o?.name || '').trim())
-      .map(o => ({ name: o.name.trim(), cost: Number(o.cost) || 0, delivery_time: '', international: false, pickup: false }));
+      .map(o => ({ name: o.name.trim(), cost: Number(o.cost) || 0, free_from: 0, delivery_time: '', international: false, pickup: false }));
 
   if (product?.pickup_in_studio) {
-    options.push({ name: 'Odbiór w studio', cost: 0, delivery_time: '', international: false, pickup: true });
+    options.push({ name: 'Odbiór w studio', cost: 0, free_from: 0, delivery_time: '', international: false, pickup: true });
   }
   return options;
+};
+
+// Koszt wybranej metody dostawy po rabatach: bezpłatna od progu formy (free_from),
+// a gdy forma progu nie ma — od progu ustawionego w sklepie.
+export const optionShippingCost = (option, payable, shopFreeFrom = 0) => {
+  const cost = Math.max(0, Number(option?.cost) || 0);
+  if (option?.pickup || cost === 0) return 0;
+  const freeFrom = Number(option?.free_from) > 0 ? Number(option.free_from) : (Number(shopFreeFrom) || 0);
+  return freeFrom > 0 && (Number(payable) || 0) >= freeFrom ? 0 : cost;
+};
+
+// Wspólna lista metod dostawy dla koszyka — suma opcji wszystkich produktów w koszyku.
+export const shippingOptionsForItems = (products = [], forms = []) => {
+  const byName = new Map();
+  (products || []).forEach(p => shippingOptionsOf(p, forms).forEach(o => {
+    if (!byName.has(o.name)) byName.set(o.name, o);
+  }));
+  return [...byName.values()].sort((a, b) => (a.pickup ? 1 : 0) - (b.pickup ? 1 : 0) || (a.cost || 0) - (b.cost || 0));
 };
 
 // Podsumowanie dostawy: jedna forma — jej cena i czas; kilka form — „od <najniższa>”.
@@ -114,23 +133,18 @@ export const shippingSummary = (product, forms = []) => {
     const legacy = Number(product?.shipping_cost) || 0;
     return { cost: legacy, text: legacy > 0 ? money(legacy) : 'gratis', delivery: '', freePickup: false };
   }
-  const min = Math.min(...options.map(o => Number(o.cost) || 0));
+  const paid = options.filter(o => !o.pickup);
+  const freePickup = options.some(o => o.pickup);
+  if (paid.length === 0) return { cost: 0, text: 'bezpłatnie w studio', delivery: '', freePickup: true };
+  const min = Math.min(...paid.map(o => Number(o.cost) || 0));
   return {
     cost: min,
-    text: options.length === 1
+    text: paid.length === 1
       ? (min > 0 ? money(min) : 'gratis')
       : min > 0 ? `od ${money(min)}` : 'darmowa dostawa',
-    delivery: options.length === 1 ? (options[0].delivery_time || '') : '',
-    freePickup: options.some(o => o.pickup),
+    delivery: paid.length === 1 ? (paid[0].delivery_time || '') : '',
+    freePickup,
   };
-};
-
-// Dostawa koszyka: najwyższy koszt dostawy wśród pozycji (jedna przesyłka),
-// a gdy pozycje nie mają własnej dostawy — koszt z ustawień sklepu.
-export const cartShipping = (items, settings = {}) => {
-  const withOwn = (items || []).filter(i => typeof i.shipping_cost === 'number');
-  if (withOwn.length === 0) return Number(settings.shipping_cost) || 0;
-  return withOwn.reduce((max, i) => Math.max(max, Number(i.shipping_cost) || 0), 0);
 };
 
 // ── Zniżka sklepowa ────────────────────────────────────────────────────────

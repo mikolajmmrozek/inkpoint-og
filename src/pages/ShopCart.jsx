@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Minus, Plus, X, ShoppingBag, ArrowRight } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import PageLayout from '@/components/layout/PageLayout';
 import { useCart } from '@/components/shop/CartProvider';
 import { useAuth } from '@/lib/AuthContext';
-import { money, cartShipping } from '@/lib/shop';
+import { money } from '@/lib/shop';
 import ShopUnavailable from '@/components/shop/ShopUnavailable';
 import useSiteContent from '@/hooks/useSiteContent';
 
@@ -14,17 +13,9 @@ export default function ShopCart() {
   const { items, setQty, remove, loading } = useCart();
   const { content, loading: shopLoading } = useSiteContent();
   const shopVisible = content.show_shop;
-  const [settings, setSettings] = useState(null);
-
-  useEffect(() => {
-    base44.entities.ShopSettings.filter({ key: 'default' }).then(list => setSettings(list[0] || {})).catch(() => setSettings({}));
-  }, []);
 
   const subtotal = items.reduce((sum, i) => sum + (Number(i.unit_price) || 0) * (Number(i.quantity) || 0), 0);
-  const freeFrom = Number(settings?.free_shipping_from) || 0;
-  const baseShipping = cartShipping(items, settings || {});
-  const shipping = subtotal === 0 ? 0 : (baseShipping > 0 && freeFrom > 0 && subtotal >= freeFrom ? 0 : baseShipping);
-  const total = subtotal + shipping;
+  const total = subtotal;
 
   if (!shopLoading && !shopVisible) return <ShopUnavailable />;
 
@@ -75,11 +66,6 @@ export default function ShopCart() {
                     <div className="flex-1 min-w-0">
                       <Link to={`/sklep/produkt/${item.slug}`} style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', letterSpacing: '0.03em', color: 'hsl(var(--foreground))', lineHeight: 1.1 }}>{item.product_name}</Link>
                       <p className="text-micro" style={{ fontSize: '9px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.08em', marginTop: '5px' }}>{item.variant_label}</p>
-                      {(item.shipping_option || item.shipping_info) && (
-                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.06em', marginTop: '3px' }}>
-                          {[item.shipping_option, item.shipping_info].filter(Boolean).join(' · ')}
-                        </p>
-                      )}
                       <div className="flex items-center justify-between gap-4 mt-3">
                         <div className="inline-flex items-center" style={{ border: '0.5px solid hsl(var(--border))', borderRadius: 'var(--radius)' }}>
                           <button onClick={() => setQty(item, item.quantity - 1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--foreground))', padding: '7px 10px' }}><Minus size={12} /></button>
@@ -100,10 +86,7 @@ export default function ShopCart() {
                 <p className="text-micro" style={{ fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', marginBottom: '16px' }}>PODSUMOWANIE</p>
                 <div className="space-y-2.5" style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'hsl(var(--muted-foreground))' }}>
                   <div className="flex justify-between"><span>Produkty</span><span style={{ color: 'hsl(var(--foreground))' }}>{money(subtotal)}</span></div>
-                  <div className="flex justify-between"><span>Dostawa</span><span style={{ color: 'hsl(var(--foreground))' }}>{shipping === 0 ? 'Gratis' : money(shipping)}</span></div>
-                  {freeFrom > 0 && subtotal < freeFrom && (
-                    <p style={{ fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.06em' }}>Darmowa dostawa od {money(freeFrom)}</p>
-                  )}
+                  <div className="flex justify-between gap-4"><span>Dostawa</span><span style={{ color: 'hsl(var(--muted-foreground))', textAlign: 'right' }}>wybierzesz w kolejnym kroku</span></div>
                 </div>
                 <div className="flex justify-between items-baseline mt-4 pt-4" style={{ borderTop: '0.5px solid hsl(var(--border))', fontFamily: 'var(--font-mono)' }}>
                   <span style={{ fontSize: '10px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.1em' }}>RAZEM</span>
@@ -113,7 +96,7 @@ export default function ShopCart() {
                   DO KASY <ArrowRight size={13} />
                 </Link>
                 <p className="text-micro" style={{ fontSize: '8px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.06em', marginTop: '12px', lineHeight: 1.7 }}>
-                  Płatność ustalimy po potwierdzeniu zamówienia. Kody zniżkowe i vouchery możesz wykorzystać w kolejnym kroku.
+                  Koszt dostawy doliczymy po wyborze metody przy składaniu zamówienia. Kody zniżkowe i vouchery możesz wykorzystać w kolejnym kroku.
                 </p>
               </div>
             </div>

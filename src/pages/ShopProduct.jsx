@@ -8,9 +8,10 @@ import useSiteContent from '@/hooks/useSiteContent';
 import VariantPicker from '@/components/shop/VariantPicker';
 import PriceSliderPicker from '@/components/shop/PriceSliderPicker';
 import MultipackPicker from '@/components/shop/MultipackPicker';
+import ProductShippingList from '@/components/shop/ProductShippingList';
 import { useCart } from '@/components/shop/CartProvider';
 import { useAuth } from '@/lib/AuthContext';
-import { money, variantsOf, priceRange, availability, productStock, shippingSummary, shippingOptionsOf, pricingModeOf, priceSliderOf, multipacksOf, packPrice, packLabel, unitPrice, listPrice, hasDiscount } from '@/lib/shop';
+import { money, variantsOf, priceRange, availability, productStock, shippingOptionsOf, pricingModeOf, priceSliderOf, multipacksOf, packPrice, packLabel, unitPrice, listPrice, hasDiscount } from '@/lib/shop';
 
 export default function ShopProduct() {
   const { slug } = useParams();
@@ -26,7 +27,6 @@ export default function ShopProduct() {
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const [activeImage, setActiveImage] = useState('');
-  const [shipOption, setShipOption] = useState(null);
   const [amount, setAmount] = useState(100);
   const [forms, setForms] = useState([]);
   const [error, setError] = useState('');
@@ -46,7 +46,6 @@ export default function ShopProduct() {
           const vList = variantsOf(found).filter(v => v.is_active !== false);
           setVariant(vList.find(v => (Number(v.stock) || 0) > 0) || vList[0] || null);
           setPack(null);
-          setShipOption(shippingOptionsOf(found, formList)[0] || null);
           setAmount(priceSliderOf(found).min);
         }
       })
@@ -63,7 +62,7 @@ export default function ShopProduct() {
         price: amount,
         stock: 99,
       };
-      const voucherOk = await add(product, chosen, quantity, shipOption);
+      const voucherOk = await add(product, chosen, quantity);
       if (voucherOk) {
         setAdded(true);
         setTimeout(() => setAdded(false), 2200);
@@ -75,7 +74,7 @@ export default function ShopProduct() {
     const needed = units * quantity;
     if (availableUnits <= 0) { setError('Ten wariant jest wyprzedany — wybierz inny.'); return; }
     if (needed > availableUnits) { setError(`Brak wystarczającej ilości — dostępne ${availableUnits} szt.`); return; }
-    const ok = await add(product, variant, quantity, shipOption, pack);
+    const ok = await add(product, variant, quantity, pack);
     if (ok) {
       setAdded(true);
       setTimeout(() => setAdded(false), 2200);
@@ -105,7 +104,6 @@ export default function ShopProduct() {
   const avail = availability(product);
   const canBuy = isSlider || avail.state === 'in_stock';
   const stock = isSlider ? 99 : (variant ? Number(variant.stock) || 0 : (productStock(product) ?? 99));
-  const ship = shippingSummary(product, forms);
   const shipOptions = shippingOptionsOf(product, forms);
   const price = listPrice(product, variant);
   const netPrice = unitPrice(product, variant);
@@ -234,53 +232,7 @@ export default function ShopProduct() {
                 </p>
               )}
 
-              <div className="mt-8 pt-6" style={{ borderTop: '0.5px solid hsl(var(--border))' }}>
-                <p className="text-micro" style={{ fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', marginBottom: '8px' }}>WYSYŁKA I PAKOWANIE</p>
-                {shipOptions.length === 0 ? (
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.06em' }}>
-                    Koszt dostawy: {ship.cost > 0 ? money(ship.cost) : 'gratis'}
-                  </p>
-                ) : shipOptions.length === 1 ? (
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.06em' }}>
-                    {shipOptions[0].name} · {Number(shipOptions[0].cost) > 0 ? money(shipOptions[0].cost) : 'gratis'}
-                    {shipOptions[0].delivery_time ? ` · ${shipOptions[0].delivery_time}` : ''}
-                  </p>
-                ) : (
-                  <>
-                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.06em' }}>
-                      {ship.cost > 0 ? `Dostawa od ${money(ship.cost)}` : 'Darmowa dostawa lub odbiór w studio'}
-                    </p>
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {shipOptions.map(o => {
-                        const active = (shipOption?.name || '') === o.name;
-                        return (
-                          <button
-                            key={o.name}
-                            onClick={() => setShipOption(o)}
-                            className="text-micro"
-                            style={{
-                              fontSize: '9px',
-                              letterSpacing: '0.08em',
-                              padding: '8px 12px',
-                              border: `0.5px solid ${active ? 'var(--brand)' : 'hsl(var(--border))'}`,
-                              color: active ? 'var(--brand)' : 'hsl(var(--foreground))',
-                              background: active ? 'rgb(var(--brand-rgb) / 0.08)' : 'transparent',
-                              borderRadius: 'var(--radius)',
-                              cursor: 'pointer',
-                            }}
-                          >
-                            {o.name} · {o.cost > 0 ? money(o.cost) : 'gratis'}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.06em', marginTop: '10px' }}>
-                      Wybrano: {shipOption?.name || '—'} · {Number(shipOption?.cost) > 0 ? money(shipOption.cost) : 'gratis'}
-                      {shipOption?.delivery_time ? ` · ${shipOption.delivery_time}` : ''}
-                    </p>
-                  </>
-                )}
-              </div>
+              <ProductShippingList options={shipOptions} legacyCost={Number(product.shipping_cost) || 0} />
 
               {product.description && (
                 <div className="mt-8 pt-6" style={{ borderTop: '0.5px solid hsl(var(--border))' }}>

@@ -6,9 +6,10 @@ import PageLayout from '@/components/layout/PageLayout';
 import ShopUnavailable from '@/components/shop/ShopUnavailable';
 import useSiteContent from '@/hooks/useSiteContent';
 import AddressFields from '@/components/shop/AddressFields';
+import CheckoutShippingPicker from '@/components/shop/CheckoutShippingPicker';
 import { useCart } from '@/components/shop/CartProvider';
 import { useAuth } from '@/lib/AuthContext';
-import { money, cartShipping } from '@/lib/shop';
+import { money, optionShippingCost, shippingOptionsForItems } from '@/lib/shop';
 
 const t = { border: 'hsl(var(--border))', text: 'hsl(var(--foreground))', muted: 'hsl(var(--muted-foreground))' };
 
@@ -35,6 +36,8 @@ export default function ShopCheckout() {
   const [discountCode, setDiscountCode] = useState('');
   const [voucherCode, setVoucherCode] = useState('');
   const [saveAddress, setSaveAddress] = useState(true);
+  const [shipOptions, setShipOptions] = useState([]);
+  const [shipName, setShipName] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [placed, setPlaced] = useState(null);
@@ -51,6 +54,16 @@ export default function ShopCheckout() {
   useEffect(() => {
     if (sameBilling) setBilling({ ...shipping });
   }, [shipping, sameBilling]);
+
+  // Metody dostawy dostępne dla produktów w koszyku (wspólna lista z form wysyłki).
+  const productIds = [...new Set(items.map(i => i.product_id).filter(Boolean))].sort().join(',');
+  useEffect(() => {
+    if (!productIds) { setShipOptions([]); return; }
+    Promise.all([
+      base44.entities.ShopProduct.filter({ id: { $in: productIds.split(',') } }).catch(() => []),
+      base44.entities.ShippingForm.filter({ is_active: true }, 'order', 100).catch(() => []),
+    ]).then(([products, forms]) => setShipOptions(shippingOptionsForItems(products, forms)));
+  }, [productIds]);
 
   const now = Date.now();
   const validDiscounts = promos.filter(p => p.type === 'discount'
@@ -75,11 +88,16 @@ export default function ShopCheckout() {
     ? Math.min(Number(appliedVoucher.balance ?? appliedVoucher.value) || 0, Math.max(0, subtotal - discountAmount))
     : 0;
   const payable = Math.max(0, subtotal - discountAmount - voucherAmount);
-  const freeFrom = Number(settings.free_shipping_from) || 0;
-  const baseShipping = cartShipping(items, settings);
-  const shippingCost = baseShipping > 0 && freeFrom > 0 && payable >= freeFrom ? 0 : baseShipping;
+
+  // Koszt dostawy zależy od metody wybranej przy kasie i progu „gratis od”
+  // liczonego od kwoty zamówienia po rabatach.
+  const shopFreeFrom = Number(settings.free_shipping_from) || 0;
+  const fallbackShipping = Number(settings.shipping_cost) || 0;
+  const selectedShip = shipOptions.find(o => o.name === shipName) || shipOptions[0] || null;
+  const shippingCost = selectedShip
+    ? optionShippingCost(selectedShip, payable, shopFreeFrom)
+    : (fallbackShipping > 0 && shopFreeFrom > 0 && payable >= shopFreeFrom ? 0 : fallbackShipping);
   const total = payable + shippingCost;
-  const shippingNotes = [...new Set(items.map(i => [i.shipping_option, i.shipping_info].filter(Boolean).join(' · ')).filter(Boolean))];
 
   const handleSubmit = async () => {
     setError('');
@@ -91,7 +109,8 @@ export default function ShopCheckout() {
     try {
       const res = await base44.functions.invoke('manageShopOrder', {
         action: 'create',
-        items: items.map(i => ({ product_id: i.product_id, variant_key: i.variant_key, quantity: i.quantity, units: Number(i.units) || 1, shipping_option: i.shipping_option || '' })),
+        items: items.map(i => ({ product_id: i.product_id, variant_key: i.variant_key, quantity: i.quantity, units: Number(i.units) || 1 })),
+        shipping_option: selectedShip?.name || '',
         shipping_address: { ...shipping, email: user.email },
         billing_address: sameBilling ? { ...shipping, email: user.email } : { ...billing, email: user.email },
         invoice_details: wantInvoice ? invoice : {},
@@ -208,6 +227,27 @@ export default function ShopCheckout() {
                 <AddressFields value={shipping} onChange={setShipping} t={t} fields="shipping" />
               </div>
 
+              {/* Metoda dostawy */}
+              <div className="pt-8" style={{ borderTop: '0.5px solid hsl(var(--border))' }}>
+                <p className="text-micro" style={{ fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', marginBottom: '14px' }}>METODA DOSTAWY</p>
+                {shipOptions.length === 0 ? (
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.06em', lineHeight: 1.7 }}>
+                    Koszt dostawy: {shippingCost === 0 ? 'bezpłatnie' : money(shippingCost)}
+                  </p>
+                ) : (
+                  <CheckoutShippingPicker
+                    options={shipOptions}
+                    selected={selectedShip}
+                    onSelect={o => setShipName(o.name)}
+                    payable={payable}
+                    shopFreeFrom={shopFreeFrom}
+                  />
+                )}
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.06em', marginTop: '10px', lineHeight: 1.8 }}>
+                  Koszt dostawy liczymy od kwoty zamówienia po rabatach — metoda z progiem „gratis od" jest bezpłatna po jego osiągnięciu.
+                </p>
+              </div>
+
               {/* Rozliczenie */}
               <div className="pt-8" style={{ borderTop: '0.5px solid hsl(var(--border))' }}>
                 <p className="text-micro" style={{ fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', marginBottom: '14px' }}>ADRES ROZLICZENIOWY</p>
@@ -312,10 +352,10 @@ export default function ShopCheckout() {
                 <div className="flex justify-between"><span>Produkty</span><span style={{ color: 'hsl(var(--foreground))' }}>{money(subtotal)}</span></div>
                 {discountAmount > 0 && <div className="flex justify-between"><span>Zniżka {discountCode}</span><span style={{ color: '#16a34a' }}>−{money(discountAmount)}</span></div>}
                 {voucherAmount > 0 && <div className="flex justify-between"><span>Voucher {voucherCode}</span><span style={{ color: '#16a34a' }}>−{money(voucherAmount)}</span></div>}
-                <div className="flex justify-between"><span>Dostawa</span><span style={{ color: 'hsl(var(--foreground))' }}>{shippingCost === 0 ? 'Gratis' : money(shippingCost)}</span></div>
-                {shippingNotes.length > 0 && (
+                <div className="flex justify-between"><span>Dostawa</span><span style={{ color: 'hsl(var(--foreground))' }}>{shippingCost === 0 ? 'Bezpłatnie' : money(shippingCost)}</span></div>
+                {selectedShip && (
                   <p style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'hsl(var(--muted-foreground))', lineHeight: 1.6, paddingTop: '4px' }}>
-                    {shippingNotes.join(' · ')}
+                    {[selectedShip.name, selectedShip.delivery_time].filter(Boolean).join(' · ')}
                   </p>
                 )}
               </div>

@@ -71,23 +71,26 @@ export default async function (req) {
         : [];
       const formsById = new Map(forms.map((f) => [f.id, f]));
 
+      // Metody dostawy produktu: formy wysyłki z progiem „gratis od" (free_from)
+      // oraz bezpłatny odbiór w studio, gdy produkt go oferuje.
       function shipOptionsFor(product) {
         const picked = Array.isArray(product.shipping_form_ids) ? product.shipping_form_ids : [];
         const selected = picked.map((id) => formsById.get(id)).filter(Boolean);
-        if (selected.length > 0) {
-          return selected.flatMap((form) => {
-            const base = [{ name: form.name, cost: Number(form.cost) || 0 }];
+        const options = selected.length > 0
+          ? selected.flatMap((form) => {
+            const base = [{ name: form.name, cost: Number(form.cost) || 0, free_from: Number(form.free_from) || 0 }];
             const foreign = form.international
               ? (form.international_variants || [])
                 .filter((v) => (v?.label || '').trim())
-                .map((v) => ({ name: `${form.name} · ${v.label.trim()}`, cost: Number(v.cost) || 0 }))
+                .map((v) => ({ name: `${form.name} · ${v.label.trim()}`, cost: Number(v.cost) || 0, free_from: Number(v.free_from) || 0 }))
               : [];
             return [...base, ...foreign];
-          });
-        }
-        return (Array.isArray(product.shipping_options) ? product.shipping_options : [])
-          .filter((o) => (o.name || '').trim())
-          .map((o) => ({ name: o.name, cost: Number(o.cost) || 0 }));
+          })
+          : (Array.isArray(product.shipping_options) ? product.shipping_options : [])
+            .filter((o) => (o.name || '').trim())
+            .map((o) => ({ name: o.name, cost: Number(o.cost) || 0, free_from: 0 }));
+        if (product.pickup_in_studio) options.push({ name: 'Odbiór w studio', cost: 0, free_from: 0 });
+        return options;
       }
 
       let subtotal = 0;
@@ -113,12 +116,6 @@ export default async function (req) {
           }
           subtotal = round2(subtotal + chosen * qty);
 
-          const voucherShipOptions = shipOptionsFor(product);
-          const chosenVoucherShip = voucherShipOptions.find((o) => o.name === raw.shipping_option) || voucherShipOptions[0] || null;
-          const voucherShip = chosenVoucherShip
-            ? Number(chosenVoucherShip.cost) || 0
-            : (typeof product.shipping_cost === 'number' ? Number(product.shipping_cost) || 0 : null);
-
           items.push({
             product_id: product.id,
             product_name: product.name,
@@ -128,8 +125,7 @@ export default async function (req) {
             variant_label: `Kwota: ${chosen} zł`,
             unit_price: chosen,
             quantity: qty,
-            shipping_option: chosenVoucherShip ? chosenVoucherShip.name : '',
-            ...(typeof voucherShip === 'number' ? { shipping_cost: voucherShip } : {}),
+            units: 1,
           });
           continue;
         }
@@ -161,13 +157,6 @@ export default async function (req) {
         const unitPrice = pack ? packPriceOf(baseUnitPrice, pack) : baseUnitPrice;
         subtotal = round2(subtotal + unitPrice * qty);
 
-        // Opcja dostawy wybrana dla tej pozycji (produkt może mieć kilka)
-        const shipOptions = shipOptionsFor(product);
-        const chosenShip = shipOptions.find((o) => o.name === raw.shipping_option) || shipOptions[0] || null;
-        const itemShip = chosenShip
-          ? Number(chosenShip.cost) || 0
-          : (typeof product.shipping_cost === 'number' ? Number(product.shipping_cost) || 0 : null);
-
         items.push({
           product_id: product.id,
           product_name: product.name,
@@ -178,8 +167,6 @@ export default async function (req) {
           unit_price: unitPrice,
           quantity: qty,
           units: unitsPerPack,
-          shipping_option: chosenShip ? chosenShip.name : '',
-          ...(typeof itemShip === 'number' ? { shipping_cost: itemShip } : {}),
         });
 
         // Stany magazynowe — wariant albo produkt bez wariantów
@@ -268,21 +255,26 @@ export default async function (req) {
       }
 
       // ── Dostawa ──────────────────────────────────────────────────────────
+      // Metoda wybrana przy kasie. Próg „gratis od" liczymy od kwoty zamówienia
+      // po rabatach i voucherze — progu formy, a gdy go nie ma, progu sklepu.
       const settingsList = await base44.asServiceRole.entities.ShopSettings.filter({ key: 'default' });
       const settings = settingsList[0] || {};
       const payable = Math.max(0, round2(subtotal - discountAmount - voucherAmount));
-      const freeFrom = Number(settings.free_shipping_from) || 0;
 
-      // Dostawa liczona per pozycja — wybrana opcja dostawy albo koszt produktu;
-      // w koszyku obowiązuje najwyższy koszt (jedna przesyłka). Gdy pozycje nie
-      // mają własnej dostawy — koszt z ustawień sklepu.
-      const itemShips = items
-        .map((it) => (typeof it.shipping_cost === 'number' ? Number(it.shipping_cost) || 0 : null))
-        .filter((v) => v !== null);
-      let shippingCost = itemShips.length > 0
-        ? Math.max(...itemShips)
+      const optionPool = [
+        ...new Map(products.flatMap((p) => shipOptionsFor(p)).map((o) => [o.name, o])).values(),
+      ].sort((a, b) => (Number(a.cost) || 0) - (Number(b.cost) || 0));
+
+      const chosenShip = optionPool.find((o) => o.name === body.shipping_option) || optionPool[0] || null;
+      const shopFreeFrom = Number(settings.free_shipping_from) || 0;
+      const shippingFreeFrom = chosenShip && Number(chosenShip.free_from) > 0 ? Number(chosenShip.free_from) : shopFreeFrom;
+      let shippingCost = chosenShip
+        ? Number(chosenShip.cost) || 0
         : (Number(settings.shipping_cost) || 0);
-      if (shippingCost > 0 && freeFrom > 0 && payable >= freeFrom) shippingCost = 0;
+      if (shippingCost > 0 && shippingFreeFrom > 0 && payable >= shippingFreeFrom) shippingCost = 0;
+
+      const shippingName = chosenShip ? chosenShip.name : (body.shipping_option || '');
+      items.forEach((it) => { it.shipping_option = shippingName; });
 
       const total = round2(payable + shippingCost);
       const orderNumber = `ZAM-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
