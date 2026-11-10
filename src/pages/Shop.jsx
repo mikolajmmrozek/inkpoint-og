@@ -60,6 +60,7 @@ export default function Shop() {
   const [sort, setSort] = useState('');
   const [piercingPlacements, setPiercingPlacements] = useState([]);
   const [piercingTypes, setPiercingTypes] = useState([]);
+  const [clothingTypes, setClothingTypes] = useState([]);
 
   useEffect(() => {
     Promise.all([
@@ -109,9 +110,12 @@ export default function Shop() {
   const uniqueValues = (field) => [...new Set(categoryProducts.flatMap(p => p[field] || []))].sort((a, b) => a.localeCompare(b, 'pl'));
   const placementOptions = uniqueValues('piercing_placements');
   const typeOptions = uniqueValues('piercing_types');
+  const showClothingFilters = activeCategoryObj?.filter_group === 'clothing';
+  const clothingOptions = uniqueValues('clothing_types');
 
   if (piercingPlacements.length) list = list.filter(p => (p.piercing_placements || []).some(v => piercingPlacements.includes(v)));
   if (piercingTypes.length) list = list.filter(p => (p.piercing_types || []).some(v => piercingTypes.includes(v)));
+  if (clothingTypes.length) list = list.filter(p => (p.clothing_types || []).some(v => clothingTypes.includes(v)));
 
   // Opcje filtrów budowane z wariantów produktów w aktualnym widoku
   const facetMap = {};
@@ -136,7 +140,7 @@ export default function Shop() {
     });
   };
 
-  const resetPiercing = () => { setPiercingPlacements([]); setPiercingTypes([]); };
+  const resetPiercing = () => { setPiercingPlacements([]); setPiercingTypes([]); setClothingTypes([]); };
   const changeCategory = (id) => { setActiveCategory(id); setVariantFilters({}); resetPiercing(); };
   const changeCollection = (id) => { setActiveCollection(id); setActiveAuto(''); setActiveCategory(''); setVariantFilters({}); resetPiercing(); };
   const changeAuto = (key) => { setActiveAuto(key); setActiveCollection(''); setActiveCategory(''); setVariantFilters({}); resetPiercing(); };
@@ -247,6 +251,18 @@ export default function Shop() {
                   options={typeOptions}
                   selected={piercingTypes}
                   onToggle={v => setPiercingTypes(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v])}
+                />
+              </div>
+            )}
+
+            {/* Filtry ubrań — tylko w kategoriach z filtrami ubrań */}
+            {showClothingFilters && clothingOptions.length > 0 && (
+              <div className="pt-5">
+                <FilterChips
+                  label="RODZAJ UBRANIA"
+                  options={clothingOptions}
+                  selected={clothingTypes}
+                  onToggle={v => setClothingTypes(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v])}
                 />
               </div>
             )}

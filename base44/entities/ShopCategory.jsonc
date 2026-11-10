@@ -25,10 +25,11 @@
       "type": "string",
       "enum": [
         "none",
-        "piercing"
+        "piercing",
+        "clothing"
       ],
       "default": "none",
-      "description": "Zestaw filtr\u00f3w dla kategorii: none = brak dodatkowych filtr\u00f3w, piercing = filtry miejsca i rodzaju przek\u0142ucia"
+      "description": "Zestaw filtr\u00f3w dla kategorii: none = brak dodatkowych filtr\u00f3w, piercing = filtry miejsca i rodzaju przek\u0142ucia, clothing = filtry rodzaju ubrania"
     },
     "is_active": {
       "type": "boolean",

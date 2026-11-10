@@ -5,17 +5,31 @@ import { Plus, Pencil, Trash2, Check, X } from 'lucide-react';
 import { shopTheme, mono, display, inputStyle, labelStyle } from './shopTheme';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 
-const KINDS = [
-  { id: 'placement', label: 'MIEJSCE PRZEKŁUCIA', hint: 'np. Ucho, Nos, Pępek, Sutki', placeholder: 'np. Ucho' },
-  { id: 'type', label: 'RODZAJ PRZEKŁUCIA', hint: 'np. Lobe, Helix, Septum', placeholder: 'np. Lobe' },
+const GROUPS = [
+  {
+    id: 'piercing',
+    label: 'Przekłucia',
+    facets: [
+      { id: 'placement', label: 'MIEJSCE PRZEKŁUCIA', hint: 'np. Ucho, Nos, Pępek, Sutki', placeholder: 'np. Ucho' },
+      { id: 'type', label: 'RODZAJ PRZEKŁUCIA', hint: 'np. Lobe, Helix, Septum', placeholder: 'np. Lobe' },
+    ],
+  },
+  {
+    id: 'clothing',
+    label: 'Ubrania',
+    facets: [
+      { id: 'category', label: 'RODZAJ UBRANIA', hint: 'np. Spodnie, Koszulki, Bluzy, Bluzy z kapturem, Akcesoria', placeholder: 'np. Koszulki' },
+    ],
+  },
 ];
 
-export default function ShopPiercingPanel() {
+export default function ShopFiltersPanel() {
   const { theme } = useTheme();
   const t = shopTheme(theme);
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [drafts, setDrafts] = useState({ placement: '', type: '' });
+  const [group, setGroup] = useState('piercing');
+  const [drafts, setDrafts] = useState({});
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState('');
   const [deleteFor, setDeleteFor] = useState(null);
@@ -27,11 +41,13 @@ export default function ShopPiercingPanel() {
 
   useEffect(() => { load(); }, []);
 
-  const add = async (kind) => {
-    const name = (drafts[kind] || '').trim();
+  const groupOf = (o) => (o.filter_group === 'clothing' ? 'clothing' : 'piercing');
+
+  const add = async (facetId) => {
+    const name = (drafts[facetId] || '').trim();
     if (!name) { alert('Podaj nazwę.'); return; }
-    await base44.entities.ShopPiercingOption.create({ kind, name, order: 999, is_active: true });
-    setDrafts(d => ({ ...d, [kind]: '' }));
+    await base44.entities.ShopPiercingOption.create({ filter_group: group, kind: facetId, name, order: 999, is_active: true });
+    setDrafts(d => ({ ...d, [facetId]: '' }));
     load();
   };
 
@@ -57,32 +73,46 @@ export default function ShopPiercingPanel() {
 
   if (loading) return <div className="flex justify-center py-20"><div className="w-8 h-px animate-pulse" style={{ background: 'var(--brand)' }} /></div>;
 
+  const activeGroup = GROUPS.find(g => g.id === group);
+
   return (
     <div>
-      <p style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: '6px' }}>PARAMETRY PRZEKŁUĆ</p>
+      <div className="flex flex-wrap gap-2 mb-5">
+        {GROUPS.map(g => {
+          const active = group === g.id;
+          return (
+            <button key={g.id} onClick={() => setGroup(g.id)}
+              style={{ border: `0.5px solid ${active ? 'var(--brand)' : t.border}`, color: active ? 'var(--brand)' : t.muted, background: active ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
+              {g.label}
+            </button>
+          );
+        })}
+      </div>
+
+      <p style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: '6px' }}>PARAMETRY FILTRÓW — {activeGroup.label.toUpperCase()}</p>
       <p style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.06em', lineHeight: 1.8, marginBottom: '22px' }}>
-        Te opcje pojawiają się przy dodawaniu i edycji produktu oraz jako filtry w sklepie — tylko w kategoriach, którym w edycji kategorii ustawisz filtry „przekłucia”.
+        Te opcje pojawiają się przy dodawaniu i edycji produktu oraz jako filtry w sklepie — tylko w kategoriach, którym w edycji kategorii ustawisz odpowiednią grupę filtrów.
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {KINDS.map(kind => {
-          const items = options.filter(o => o.kind === kind.id);
+      <div className={`grid grid-cols-1 ${activeGroup.facets.length > 1 ? 'md:grid-cols-2' : ''} gap-6`}>
+        {activeGroup.facets.map(facet => {
+          const items = options.filter(o => groupOf(o) === group && o.kind === facet.id);
           return (
-            <div key={kind.id} className="p-5" style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
-              <p style={{ ...display, fontSize: '1.25rem', color: t.title, letterSpacing: '0.04em', lineHeight: 1.1 }}>{kind.label}</p>
-              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px', marginBottom: '16px' }}>{kind.hint}</p>
+            <div key={facet.id} className="p-5" style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
+              <p style={{ ...display, fontSize: '1.25rem', color: t.title, letterSpacing: '0.04em', lineHeight: 1.1 }}>{facet.label}</p>
+              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px', marginBottom: '16px' }}>{facet.hint}</p>
 
               <div className="flex items-end gap-2 mb-5">
                 <div className="flex-1">
                   <input
-                    value={drafts[kind.id]}
-                    onChange={e => setDrafts(d => ({ ...d, [kind.id]: e.target.value }))}
-                    onKeyDown={e => { if (e.key === 'Enter') add(kind.id); }}
-                    placeholder={kind.placeholder}
+                    value={drafts[facet.id] || ''}
+                    onChange={e => setDrafts(d => ({ ...d, [facet.id]: e.target.value }))}
+                    onKeyDown={e => { if (e.key === 'Enter') add(facet.id); }}
+                    placeholder={facet.placeholder}
                     style={inputStyle(t)}
                   />
                 </div>
-                <button onClick={() => add(kind.id)} className="btn-oxblood flex items-center gap-1.5" style={{ padding: '8px 12px', flexShrink: 0 }}>
+                <button onClick={() => add(facet.id)} className="btn-oxblood flex items-center gap-1.5" style={{ padding: '8px 12px', flexShrink: 0 }}>
                   <Plus size={12} /> DODAJ
                 </button>
               </div>

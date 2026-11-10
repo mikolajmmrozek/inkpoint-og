@@ -2,13 +2,23 @@
   "name": "ShopPiercingOption",
   "type": "object",
   "properties": {
+    "filter_group": {
+      "type": "string",
+      "enum": [
+        "piercing",
+        "clothing"
+      ],
+      "default": "piercing",
+      "description": "Grupa filtr\u00f3w: piercing = przek\u0142ucia (miejsce i rodzaj), clothing = ubrania (rodzaj ubrania)"
+    },
     "kind": {
       "type": "string",
       "enum": [
         "placement",
-        "type"
+        "type",
+        "category"
       ],
-      "description": "placement = miejsce przek\u0142ucia (np. Ucho, Nos, P\u0119pek), type = rodzaj przek\u0142ucia (np. Lobe, Helix, Septum)"
+      "description": "placement = miejsce przek\u0142ucia (np. Ucho, Nos), type = rodzaj przek\u0142ucia (np. Lobe, Helix), category = rodzaj ubrania (np. Koszulki, Bluzy z kapturem)"
     },
     "name": {
       "type": "string",

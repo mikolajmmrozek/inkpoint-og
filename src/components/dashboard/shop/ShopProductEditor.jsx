@@ -19,6 +19,7 @@ export default function ShopProductEditor({ product, categories, collections, on
     category_id: '',
     piercing_placements: [],
     piercing_types: [],
+    clothing_types: [],
     collection_ids: [],
     price: 0,
     compare_at_price: 0,
@@ -61,6 +62,12 @@ export default function ShopProductEditor({ product, categories, collections, on
 
   const selectedCategory = categories.find(c => c.id === form.category_id);
   const showPiercing = selectedCategory?.filter_group === 'piercing';
+  const filterGroup = selectedCategory?.filter_group;
+  const filterFields = filterGroup === 'piercing'
+    ? [{ id: 'placement', field: 'piercing_placements', label: 'MIEJSCE PRZEKŁUCIA' }, { id: 'type', field: 'piercing_types', label: 'RODZAJ PRZEKŁUCIA' }]
+    : filterGroup === 'clothing'
+      ? [{ id: 'category', field: 'clothing_types', label: 'RODZAJ UBRANIA' }]
+      : [];
   const togglePick = (field, value) => set(field, (form[field] || []).includes(value) ? form[field].filter(v => v !== value) : [...(form[field] || []), value]);
 
   const buildVariants = (axes, existing, basePrice, explicit = []) => {
@@ -120,6 +127,7 @@ export default function ShopProductEditor({ product, categories, collections, on
         category_name: category?.name || '',
         piercing_placements: showPiercing ? (form.piercing_placements || []) : [],
         piercing_types: showPiercing ? (form.piercing_types || []) : [],
+        clothing_types: filterGroup === 'clothing' ? (form.clothing_types || []) : [],
         collection_ids: form.collection_ids || [],
         price: Number(form.price) || 0,
         compare_at_price: Number(form.compare_at_price) || 0,
@@ -236,24 +244,21 @@ export default function ShopProductEditor({ product, categories, collections, on
             </div>
           )}
 
-          {/* Filtry przekłuć — tylko dla kategorii z filtrami przekłuć */}
-          {showPiercing && (
+          {/* Filtry produktu — zależne od grupy filtrów kategorii */}
+          {filterFields.length > 0 && (
             <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
-              <p style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: '6px' }}>PRZEKŁUCIA</p>
+              <p style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: '6px' }}>FILTRY PRODUKTU</p>
               <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', lineHeight: 1.7 }}>
-                Zaznaczone wartości staną się filtrami w sklepie dla kategorii „{selectedCategory.name}”. Listę opcji edytujesz w Sklep → Katalog → Przekłucia.
+                Zaznaczone wartości staną się filtrami w sklepie dla kategorii „{selectedCategory.name}”. Listę opcji edytujesz w Sklep → Filtry.
               </p>
-              {[
-                { id: 'placement', field: 'piercing_placements', label: 'MIEJSCE PRZEKŁUCIA' },
-                { id: 'type', field: 'piercing_types', label: 'RODZAJ PRZEKŁUCIA' },
-              ].map(group => {
-                const items = piercingOptions.filter(o => o.kind === group.id);
+              {filterFields.map(group => {
+                const items = piercingOptions.filter(o => o.kind === group.id && (o.filter_group || 'piercing') === filterGroup);
                 return (
                   <div key={group.id} className="mt-4">
                     <label style={labelStyle(t)}>{group.label}</label>
                     {items.length === 0 ? (
                       <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', lineHeight: 1.7 }}>
-                        Brak opcji — dodaj je w Sklep → Katalog → Przekłucia.
+                        Brak opcji — dodaj je w Sklep → Filtry.
                       </p>
                     ) : (
                       <div className="flex flex-wrap gap-2">

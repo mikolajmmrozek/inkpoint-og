@@ -1,17 +1,15 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from '@/pages/dashboard/Dashboard';
-import { Plus, Pencil, Trash2, X, Check, Upload, FolderOpen, Layers, Settings2, Sparkles, Package } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Check, Upload, FolderOpen, Layers, Settings2, Package } from 'lucide-react';
 import { slugify } from '@/lib/shop';
 import { shopTheme, mono, display, inputStyle, labelStyle } from './shopTheme';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
-import ShopPiercingPanel from './ShopPiercingPanel';
 import ShopCatalogProductPicker from './ShopCatalogProductPicker';
 
 const TABS = [
   { id: 'categories', label: 'Kategorie', icon: FolderOpen },
   { id: 'collections', label: 'Kolekcje', icon: Layers },
-  { id: 'piercing', label: 'Przekłucia', icon: Sparkles },
   { id: 'settings', label: 'Ustawienia', icon: Settings2 },
 ];
 
@@ -159,16 +157,14 @@ export default function ShopCatalogPanel() {
             );
           })}
         </div>
-        {tab !== 'settings' && tab !== 'piercing' && (
+        {tab !== 'settings' && (
           <button onClick={() => openNew(tab)} className="flex items-center gap-2 btn-oxblood" style={{ padding: '8px 16px' }}>
             <Plus size={13} /> {tab === 'categories' ? 'NOWA KATEGORIA' : 'NOWA KOLEKCJA'}
           </button>
         )}
       </div>
 
-      {tab === 'piercing' ? (
-        <ShopPiercingPanel />
-      ) : tab === 'settings' ? (
+      {tab === 'settings' ? (
         <div className="max-w-lg p-6" style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
           <p style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: '18px' }}>USTAWIENIA SKLEPU</p>
           <div className="space-y-5">
@@ -264,9 +260,10 @@ export default function ShopCatalogPanel() {
                   <select value={form.filter_group || 'none'} onChange={e => setForm(f => ({ ...f, filter_group: e.target.value }))} style={{ ...inputStyle(t), colorScheme: theme === 'light' ? 'light' : 'dark' }}>
                     <option value="none">Brak dodatkowych filtrów</option>
                     <option value="piercing">Przekłucia — miejsce i rodzaj</option>
+                    <option value="clothing">Ubrania — rodzaj ubrania</option>
                   </select>
                   <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px', lineHeight: 1.6 }}>
-                    Opcje filtrów edytujesz w zakładce „Przekłucia”. Produktom w tej kategorii przypiszesz je w edycji produktu.
+                    Opcje filtrów edytujesz w zakładce „Filtry”. Produktom w tej kategorii przypiszesz je w edycji produktu.
                   </p>
                 </div>
               )}

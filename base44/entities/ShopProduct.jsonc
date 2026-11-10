@@ -27,14 +27,21 @@
       "items": {
         "type": "string"
       },
-      "description": "Miejsca przek\u0142ucia przypisane do produktu (np. Ucho, Nos) \u2014 u\u017cywane w filtrach kategorii z grupy 'piercing'"
+      "description": "Miejsca przek\u0142ucia przypisane do produktu (np. Ucho, Nos) \u2014 u\u017cywane w filtrach kategorii z grup\u0105 'piercing'"
     },
     "piercing_types": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "Rodzaje przek\u0142ucia przypisane do produktu (np. Lobe, Helix) \u2014 u\u017cywane w filtrach kategorii z grupy 'piercing'"
+      "description": "Rodzaje przek\u0142ucia przypisane do produktu (np. Lobe, Helix) \u2014 u\u017cywane w filtrach kategorii z grup\u0105 'piercing'"
+    },
+    "clothing_types": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Rodzaje ubrania przypisane do produktu (np. Spodnie, Koszulki, Bluzy z kapturem) \u2014 u\u017cywane w filtrach kategorii z grup\u0105 'clothing'"
     },
     "collection_ids": {
       "type": "array",
