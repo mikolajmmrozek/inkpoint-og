@@ -8,9 +8,10 @@ import ShopVariantFilters from '@/components/shop/ShopVariantFilters';
 import ShopAutoCollections from '@/components/shop/ShopAutoCollections';
 import ShopSortBar, { sortProducts } from '@/components/shop/ShopSortBar';
 import { useCart } from '@/components/shop/CartProvider';
-import { variantsOf } from '@/lib/shop';
+import { variantsOf, isNewProduct } from '@/lib/shop';
 import ShopUnavailable from '@/components/shop/ShopUnavailable';
 import useSiteContent from '@/hooks/useSiteContent';
+import useShopSettings from '@/hooks/useShopSettings';
 
 const AUTO_LABELS = { new: 'Nowości', best: 'Bestsellery', featured: 'Polecane' };
 
@@ -45,6 +46,7 @@ function FilterChips({ label, options, selected, onToggle }) {
 export default function Shop() {
   const { count } = useCart();
   const { content, loading: shopLoading } = useSiteContent();
+  const shopSettings = useShopSettings();
   const shopVisible = content.show_shop;
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -91,9 +93,10 @@ export default function Shop() {
   const collection = collections.find(c => c.id === activeCollection);
   let list = products;
   if (activeAuto === 'new') {
-    list = [...list]
-      .sort((a, b) => new Date(b.created_date).getTime() - new Date(a.created_date).getTime())
-      .slice(0, 5);
+    const newDays = Number(shopSettings.new_badge_days) || 30;
+    list = list
+      .filter(p => isNewProduct(p, newDays))
+      .sort((a, b) => new Date(b.created_date).getTime() - new Date(a.created_date).getTime());
   } else if (activeAuto === 'best') {
     list = [...list].sort((a, b) => (soldMap[b.id] || 0) - (soldMap[a.id] || 0));
   } else if (activeAuto === 'featured') {

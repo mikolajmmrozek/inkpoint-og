@@ -1,7 +1,7 @@
 import { Sparkles, Flame, Star } from 'lucide-react';
 
 const AUTO = [
-  { key: 'new', label: 'Nowości', sub: '5 najnowszych', Icon: Sparkles },
+  { key: 'new', label: 'Nowości', sub: 'Ostatnio dodane', Icon: Sparkles },
   { key: 'best', label: 'Bestsellery', sub: 'Najczęściej zamawiane', Icon: Flame },
   { key: 'featured', label: 'Polecane', sub: 'Wybór studia', Icon: Star },
 ];
@@ -49,7 +49,10 @@ export default function ShopAutoCollections({ active, onSelect, collections = []
           >
             {c.image_url && <img src={c.image_url} alt="" className="absolute inset-0 w-full h-full object-cover media-darken-soft" />}
             <span className="absolute inset-0" style={{ background: isActive ? 'rgba(0,0,0,0.35)' : 'rgba(0,0,0,0.45)' }} />
-            <span className="absolute bottom-3 left-3 right-3 text-left" style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', letterSpacing: '0.05em', color: '#F5F0EB', lineHeight: 1.1 }}>{c.name}</span>
+            <span className="absolute bottom-3 left-3 right-3 text-left">
+              <span style={{ display: 'block', fontFamily: 'var(--font-display)', fontSize: '1.05rem', letterSpacing: '0.05em', color: '#F5F0EB', lineHeight: 1.15, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.name}</span>
+              <span style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(245,240,235,0.75)', lineHeight: 1.45, marginTop: '4px', minHeight: '2.9em' }}>{c.description || ''}</span>
+            </span>
           </button>
         );
       })}
