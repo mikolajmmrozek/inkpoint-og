@@ -1,0 +1,66 @@
+{
+  "name": "StockMovement",
+  "type": "object",
+  "properties": {
+    "product_id": {
+      "type": "string",
+      "description": "ID produktu, kt\u00f3rego dotyczy ruch magazynowy"
+    },
+    "product_name": {
+      "type": "string",
+      "description": "Nazwa produktu (cache dla historii)"
+    },
+    "variant_key": {
+      "type": "string",
+      "description": "Klucz wariantu (puste = stan produktu bez wariant\u00f3w)"
+    },
+    "delta": {
+      "type": "number",
+      "description": "Zmiana stanu: warto\u015b\u0107 ujemna = sprzeda\u017c, dodatnia = korekta lub zwrot"
+    },
+    "reason": {
+      "type": "string",
+      "enum": [
+        "settlement",
+        "settlement_edit",
+        "settlement_cancel"
+      ],
+      "description": "settlement = pierwsze rozliczenie, settlement_edit = korekta r\u00f3\u017cnicy przy edycji, settlement_cancel = przywr\u00f3cenie stanu po anulowaniu"
+    },
+    "booking_id": {
+      "type": "string",
+      "description": "ID sesji, w ramach kt\u00f3rej zmieniono stan"
+    },
+    "booking_session_id": {
+      "type": "string",
+      "description": "Numer sesji (cache)"
+    },
+    "actor_name": {
+      "type": "string",
+      "description": "Osoba, kt\u00f3ra wykona\u0142a operacj\u0119"
+    },
+    "actor_id": {
+      "type": "string",
+      "description": "ID osoby wykonuj\u0105cej operacj\u0119"
+    }
+  },
+  "required": [
+    "product_id",
+    "delta",
+    "reason"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": false,
+    "delete": false
+  }
+}

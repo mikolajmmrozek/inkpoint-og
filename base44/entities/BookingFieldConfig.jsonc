@@ -1,0 +1,40 @@
+{
+  "name": "BookingFieldConfig",
+  "type": "object",
+  "properties": {
+    "category": {
+      "type": "string",
+      "enum": [
+        "tattoo",
+        "piercing",
+        "studio"
+      ],
+      "description": "Kategoria us\u0142ug \u2014 ustawienia domy\u015blne p\u00f3l formularza rezerwacji dla wszystkich us\u0142ug tej kategorii"
+    },
+    "fields": {
+      "type": "object",
+      "description": "Konfiguracja p\u00f3l rezerwacji: { placement|description|notes|references|budget: { visible, required } }. Brak wpisu = pole widoczne i nieobowi\u0105zkowe."
+    }
+  },
+  "required": [
+    "category"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -28,6 +28,21 @@
       "type": "boolean",
       "default": true,
       "description": "Czy sklep przyjmuje zam\u00f3wienia"
+    },
+    "product_commission_type": {
+      "type": "string",
+      "enum": [
+        "none",
+        "percent",
+        "amount"
+      ],
+      "default": "none",
+      "description": "Wsp\u00f3lna prowizja pracownika od sprzeda\u017cy produkt\u00f3w: none = brak, percent = procent od sprzeda\u017cy, amount = sta\u0142a kwota od sztuki"
+    },
+    "product_commission_value": {
+      "type": "number",
+      "default": 0,
+      "description": "Warto\u015b\u0107 prowizji produktowej: procent (product_commission_type = percent) albo kwota PLN od sztuki (amount)"
     }
   },
   "required": [

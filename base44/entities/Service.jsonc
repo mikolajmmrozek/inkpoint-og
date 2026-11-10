@@ -62,6 +62,15 @@
       "default": false,
       "description": "True = pole 'Miejsce na ciele' w rezerwacji online jest nieobowi\u0105zkowe (np. piercing, konsultacja)"
     },
+    "booking_fields_use_category": {
+      "type": "boolean",
+      "default": true,
+      "description": "True = us\u0142uga dziedziczy konfiguracj\u0119 p\u00f3l rezerwacji z kategorii; False = u\u017cywa w\u0142asnego nadpisania"
+    },
+    "booking_fields_override": {
+      "type": "object",
+      "description": "Nadpisanie p\u00f3l rezerwacji dla tej us\u0142ugi: { placement|description|notes|references|budget: { visible, required } }. U\u017cywane tylko gdy booking_fields_use_category = false."
+    },
     "artist_ids": {
       "type": "array",
       "items": {

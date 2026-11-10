@@ -51,6 +51,10 @@
     "tattoo_placement": {
       "type": "string"
     },
+    "preferred_budget": {
+      "type": "number",
+      "description": "Preferowany bud\u017cet klienta (PLN) \u2014 pole opcjonalne, konfigurowane per kategoria/us\u0142uga"
+    },
     "reference_images": {
       "type": "array",
       "items": {
@@ -93,6 +97,108 @@
         }
       },
       "description": "Podzia\u0142 p\u0142atno\u015bci wg metody (got\u00f3wka/karta/voucher)"
+    },
+    "sold_products": {
+      "type": "array",
+      "description": "Produkty sprzedane w ramach tego rozliczenia \u2014 podstawa korekty magazynu przy edycji i anulowaniu",
+      "items": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "variant_key": {
+            "type": "string"
+          },
+          "variant_label": {
+            "type": "string"
+          },
+          "qty": {
+            "type": "number"
+          },
+          "unit_price": {
+            "type": "number",
+            "description": "Cena bie\u017c\u0105ca z katalogu w chwili rozliczenia"
+          },
+          "price": {
+            "type": "number",
+            "description": "Cena ko\u0144cowa po rabacie, faktycznie naliczona"
+          },
+          "cost": {
+            "type": "number",
+            "description": "Koszt zakupu sztuki w chwili rozliczenia; brak = koszt nieznany"
+          },
+          "cost_known": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
+    },
+    "additional_services": {
+      "type": "array",
+      "description": "Us\u0142ugi dodatkowe wykonane w ramach tej samej sesji \u2014 bez osobnego terminu, konfliktu i powiadomienia",
+      "items": {
+        "type": "object",
+        "properties": {
+          "service_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number"
+          },
+          "artist_id": {
+            "type": "string"
+          },
+          "artist_name": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "products_total": {
+      "type": "number",
+      "default": 0,
+      "description": "Suma sprzedanych produkt\u00f3w (po rabacie)"
+    },
+    "services_total": {
+      "type": "number",
+      "default": 0,
+      "description": "Suma us\u0142ug dodatkowych"
+    },
+    "products_commission": {
+      "type": "number",
+      "default": 0,
+      "description": "Naliczona prowizja pracownika od sprzedanych produkt\u00f3w, wg wsp\u00f3lnej stawki ze Sklepu"
+    },
+    "stock_applied": {
+      "type": "boolean",
+      "default": false,
+      "description": "True = magazyn zosta\u0142 ju\u017c obci\u0105\u017cony za t\u0119 sesj\u0119 (chroni przed podw\u00f3jnym odj\u0119ciem)"
+    },
+    "no_show": {
+      "type": "boolean",
+      "default": false,
+      "description": "True = klient nie przyszed\u0142 na sesj\u0119 (mo\u017cna cofn\u0105\u0107)"
+    },
+    "no_show_at": {
+      "type": "string",
+      "description": "Kiedy oznaczono nieobecno\u015b\u0107 (ISO)"
+    },
+    "no_show_by_id": {
+      "type": "string"
+    },
+    "no_show_by_name": {
+      "type": "string"
     },
     "is_settled": {
       "type": "boolean",

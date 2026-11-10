@@ -70,6 +70,67 @@
         "email"
       ],
       "description": "Dostawca logowania: google = logowanie przez Google OAuth, email = e-mail/has\u0142o"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "qr_form",
+        "dashboard",
+        "booking",
+        "panel"
+      ],
+      "description": "Sk\u0105d powsta\u0142 profil klienta: qr_form = formularz QR, dashboard = r\u0119cznie z panelu, booking = rezerwacja online, panel = konto klienta"
+    },
+    "no_show_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Liczba aktywnych (niecofni\u0119tych) nieobecno\u015bci klienta \u2014 licznik historyczny"
+    },
+    "no_show_events": {
+      "type": "array",
+      "description": "Historia nieobecno\u015bci: kto i kiedy oznaczy\u0142, powi\u0105zana sesja oraz informacja o cofni\u0119ciu",
+      "items": {
+        "type": "object",
+        "properties": {
+          "booking_id": {
+            "type": "string",
+            "description": "ID sesji, kt\u00f3rej dotyczy nieobecno\u015b\u0107"
+          },
+          "session_id": {
+            "type": "string",
+            "description": "Numer sesji (cache)"
+          },
+          "date": {
+            "type": "string",
+            "description": "Data sesji, na kt\u00f3r\u0105 klient nie przyszed\u0142"
+          },
+          "marked_at": {
+            "type": "string",
+            "description": "Data i godzina oznaczenia (ISO)"
+          },
+          "marked_by_id": {
+            "type": "string",
+            "description": "ID osoby oznaczaj\u0105cej"
+          },
+          "marked_by_name": {
+            "type": "string",
+            "description": "Imi\u0119/nazwa osoby oznaczaj\u0105cej"
+          },
+          "reverted": {
+            "type": "boolean",
+            "default": false,
+            "description": "True = oznaczenie cofni\u0119te (nie liczy si\u0119 do licznika)"
+          },
+          "reverted_at": {
+            "type": "string",
+            "description": "Data cofni\u0119cia (ISO)"
+          },
+          "reverted_by_name": {
+            "type": "string",
+            "description": "Kto cofn\u0105\u0142 oznaczenie"
+          }
+        }
+      }
     }
   },
   "required": [
