@@ -53,6 +53,10 @@
       "type": "number",
       "description": "Cena bazowa w PLN \u2014 u\u017cywana tylko dla produkt\u00f3w bez wariant\u00f3w"
     },
+    "cost": {
+      "type": "number",
+      "description": "Koszt zakupu sztuki w PLN \u2014 u\u017cywany wy\u0142\u0105cznie do wyliczenia zysku przy rozliczeniu sesji. Brak warto\u015bci = zysk nie jest liczony dla tego produktu."
+    },
     "discount_type": {
       "type": "string",
       "enum": [
