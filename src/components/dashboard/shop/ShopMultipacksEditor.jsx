@@ -42,6 +42,7 @@ export default function ShopMultipacksEditor({ theme, packs, onChange, basePrice
       <div className="space-y-4">
         {list.map((p, i) => {
           const preview = packPrice(basePrice, p);
+          const units = Math.max(1, Number(p.units) || 1);
           return (
             <div key={i} className="p-3" style={{ border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)' }}>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 items-end">
@@ -73,7 +74,8 @@ export default function ShopMultipacksEditor({ theme, packs, onChange, basePrice
                 )}
                 <span style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.06em' }}>
                   CENA PAKIETU: <span style={{ color: t.text }}>{money(preview)}</span>
-                  {basePrice > 0 ? ` (pojedynczo ${money(basePrice)})` : ''}
+                  {preview > 0 ? ` (${money(preview / units)} / szt.)` : ''}
+                  {basePrice > 0 ? ` · pojedynczo ${money(basePrice)}` : ''}
                 </span>
               </div>
             </div>

@@ -26,6 +26,16 @@ function packLabelOf(pack) {
   return (pack?.label || '').trim() || `${units} szt. w komplecie`;
 }
 
+// Zniżka sklepowa produktu (ustawiana w panelu) — kwotowa albo procentowa.
+function applyProductDiscount(product, price) {
+  const base = Number(price) || 0;
+  const value = Math.max(0, Number(product?.discount_value) || 0);
+  const type = product?.discount_type === 'percent' || product?.discount_type === 'amount' ? product.discount_type : 'none';
+  if (value <= 0 || type === 'none') return round2(base);
+  if (type === 'percent') return round2(base * (1 - Math.min(100, value) / 100));
+  return round2(Math.max(0, base - value));
+}
+
 // Cena pakietu: procent zniżki od ceny sztuki × liczba sztuk albo kwota ręczna.
 function packPriceOf(basePrice, pack) {
   if (!pack) return round2(basePrice);
@@ -147,7 +157,7 @@ export default async function (req) {
           }, { status: 400 });
         }
 
-        const baseUnitPrice = round2(variant && variant.price ? variant.price : product.price);
+        const baseUnitPrice = applyProductDiscount(product, variant && variant.price ? variant.price : product.price);
         const unitPrice = pack ? packPriceOf(baseUnitPrice, pack) : baseUnitPrice;
         subtotal = round2(subtotal + unitPrice * qty);
 

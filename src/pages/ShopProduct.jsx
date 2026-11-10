@@ -10,7 +10,7 @@ import PriceSliderPicker from '@/components/shop/PriceSliderPicker';
 import MultipackPicker from '@/components/shop/MultipackPicker';
 import { useCart } from '@/components/shop/CartProvider';
 import { useAuth } from '@/lib/AuthContext';
-import { money, variantsOf, priceRange, availability, productStock, shippingSummary, shippingOptionsOf, pricingModeOf, priceSliderOf, multipacksOf, packPrice, packLabel } from '@/lib/shop';
+import { money, variantsOf, priceRange, availability, productStock, shippingSummary, shippingOptionsOf, pricingModeOf, priceSliderOf, multipacksOf, packPrice, packLabel, unitPrice, listPrice, hasDiscount } from '@/lib/shop';
 
 export default function ShopProduct() {
   const { slug } = useParams();
@@ -107,12 +107,13 @@ export default function ShopProduct() {
   const stock = isSlider ? 99 : (variant ? Number(variant.stock) || 0 : (productStock(product) ?? 99));
   const ship = shippingSummary(product, forms);
   const shipOptions = shippingOptionsOf(product, forms);
-  const price = variant?.price || product.price;
+  const price = listPrice(product, variant);
+  const netPrice = unitPrice(product, variant);
   const range = priceRange(product);
   const packs = multipacksOf(product, variant);
   const unitsPerPack = pack ? Number(pack.units) || 1 : 1;
-  const unitPrice = isSlider ? Number(amount) || 0 : (pack ? packPrice(price, pack) : Number(price) || 0);
-  const total = unitPrice * (Number(quantity) || 1);
+  const linePrice = isSlider ? Number(amount) || 0 : (pack ? packPrice(netPrice, pack) : netPrice);
+  const total = linePrice * (Number(quantity) || 1);
   const maxPacks = Math.max(1, Math.floor(stock / unitsPerPack));
   const images = [product.image_url, ...(product.images || [])].filter(Boolean);
 
@@ -151,11 +152,11 @@ export default function ShopProduct() {
               <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 4.5vw, 3.2rem)', lineHeight: 0.98, letterSpacing: '0.02em' }}>{product.name}</h1>
 
               <div className="flex items-baseline gap-3 mt-4 pb-6" style={{ borderBottom: '0.5px solid hsl(var(--border))' }}>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '18px', color: 'hsl(var(--foreground))', letterSpacing: '0.03em' }}>
-                  {isSlider ? money(amount) : variants.length > 0 ? `od ${money(range.min)}` : money(product.price)}
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '18px', color: !isSlider && hasDiscount(product) ? '#16a34a' : 'hsl(var(--foreground))', letterSpacing: '0.03em' }}>
+                  {isSlider ? money(amount) : variants.length > 0 ? `od ${money(range.min)}` : money(netPrice)}
                 </p>
-                {product.compare_at_price > 0 && product.compare_at_price > price && (
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'hsl(var(--muted-foreground))', textDecoration: 'line-through' }}>{money(product.compare_at_price)}</p>
+                {!isSlider && hasDiscount(product) && price > netPrice && (
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'hsl(var(--muted-foreground))', textDecoration: 'line-through' }}>{money(price)}</p>
                 )}
               </div>
 
@@ -197,7 +198,7 @@ export default function ShopProduct() {
               {canBuy && !isSlider && packs.length > 0 && (
                 <MultipackPicker
                   packs={packs}
-                  basePrice={Number(price) || 0}
+                  basePrice={netPrice}
                   pack={pack}
                   onSelect={(p) => { setPack(p); setQuantity(1); }}
                   availableUnits={stock}
@@ -213,8 +214,8 @@ export default function ShopProduct() {
                         {isSlider
                           ? 'wybrana kwota vouchera'
                           : pack
-                            ? `${packLabel(pack)} · ${quantity} × ${money(unitPrice)}`
-                            : `${quantity} szt. × ${money(unitPrice)}`}
+                            ? `${packLabel(pack)} · ${quantity} × ${money(linePrice)}`
+                            : `${quantity} szt. × ${money(linePrice)}`}
                       </p>
                     </div>
                     <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.4rem', lineHeight: 1, color: 'hsl(var(--foreground))', letterSpacing: '0.02em' }}>{money(total)}</p>

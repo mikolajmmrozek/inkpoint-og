@@ -51,11 +51,22 @@
     },
     "price": {
       "type": "number",
-      "description": "Cena bazowa w PLN"
+      "description": "Cena bazowa w PLN \u2014 u\u017cywana tylko dla produkt\u00f3w bez wariant\u00f3w"
     },
-    "compare_at_price": {
+    "discount_type": {
+      "type": "string",
+      "enum": [
+        "none",
+        "amount",
+        "percent"
+      ],
+      "default": "none",
+      "description": "Zni\u017cka sklepowa ustawiana w panelu: none = brak, amount = kwota w PLN, percent = procent od ceny"
+    },
+    "discount_value": {
       "type": "number",
-      "description": "Cena przekre\u015blona (opcjonalnie)"
+      "default": 0,
+      "description": "Warto\u015b\u0107 zni\u017cki: kwota w PLN (discount_type = amount) albo procent (discount_type = percent). Obni\u017ca cen\u0119 produktu, wariant\u00f3w i wielosztuk oraz cen\u0119 w koszyku."
     },
     "pricing_mode": {
       "type": "string",
@@ -89,7 +100,7 @@
     "unlimited_stock": {
       "type": "boolean",
       "default": false,
-      "description": "True = produkt bez stanu magazynowego (nielimitowany) \u2014 nie pilnuje sztuk, sprzeda\u017c nadal liczy si\u0119 w statystykach"
+      "description": "True = produkt bez stanu magazynowego (nielimitowany) \u2014 dotyczy produkt\u00f3w bez wariant\u00f3w"
     },
     "stock": {
       "type": "number",

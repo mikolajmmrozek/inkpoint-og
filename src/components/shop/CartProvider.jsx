@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
-import { variantLabel, packLabel, packPrice, packUnits } from '@/lib/shop';
+import { variantLabel, packLabel, packPrice, packUnits, unitPrice } from '@/lib/shop';
 
 const CartContext = createContext(null);
 export const useCart = () => useContext(CartContext) || { items: [], count: 0, add: async () => {}, setQty: async () => {}, remove: async () => {}, clear: async () => {}, loading: false };
@@ -53,7 +53,7 @@ export default function CartProvider({ children }) {
   const add = useCallback(async (product, variant, quantity = 1, shippingOption = null, pack = null) => {
     if (!isAuthenticated) return false;
     const units = packUnits(pack);
-    const basePrice = Number(variant?.price) || Number(product.price) || 0;
+    const basePrice = unitPrice(product, variant);
     const ref = {
       product_id: product.id,
       variant_key: variant?.key || '',

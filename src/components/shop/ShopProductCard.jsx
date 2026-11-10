@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
-import { availability, shippingSummary, displayPrice } from '@/lib/shop';
+import { availability, shippingSummary, displayPrice, money } from '@/lib/shop';
 
 export default function ShopProductCard({ product, forms = [] }) {
   const avail = availability(product);
@@ -63,9 +63,16 @@ export default function ShopProductCard({ product, forms = [] }) {
           <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', letterSpacing: '0.03em', color: 'hsl(var(--foreground))', lineHeight: 1.1 }}>{product.name}</h3>
           <ArrowUpRight size={14} className="shrink-0 mt-1 transition-transform duration-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" style={{ color: 'var(--brand)' }} />
         </div>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'hsl(var(--foreground))', marginTop: '8px', letterSpacing: '0.04em' }}>
-          {price.text}
-        </p>
+        <div className="flex items-baseline gap-2" style={{ marginTop: '8px' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: price.was > 0 ? '#16a34a' : 'hsl(var(--foreground))', letterSpacing: '0.04em' }}>
+            {price.text}
+          </p>
+          {price.was > 0 && (
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'hsl(var(--muted-foreground))', textDecoration: 'line-through', letterSpacing: '0.04em' }}>
+              {money(price.was)}
+            </p>
+          )}
+        </div>
         {shippingText && (
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'hsl(var(--muted-foreground))', marginTop: '6px', letterSpacing: '0.06em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {shippingText}

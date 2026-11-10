@@ -133,10 +133,44 @@ export const cartShipping = (items, settings = {}) => {
   return withOwn.reduce((max, i) => Math.max(max, Number(i.shipping_cost) || 0), 0);
 };
 
+// ── Zniżka sklepowa ────────────────────────────────────────────────────────
+// Admin obniża cenę produktu kwotowo (np. 10 zł) albo procentowo (np. 10%).
+// Zniżka działa na cenę sztuki (produktu lub wariantu), więc obniża też
+// wielosztuki, koszyk i zamówienie.
+export const discountOf = (product) => {
+  const value = Math.max(0, Number(product?.discount_value) || 0);
+  const type = product?.discount_type === 'percent' || product?.discount_type === 'amount'
+    ? product.discount_type
+    : 'none';
+  return type === 'none' || value <= 0 ? { type: 'none', value: 0 } : { type, value };
+};
+
+export const hasDiscount = (product) => discountOf(product).type !== 'none';
+
+export const applyDiscount = (price, product) => {
+  const base = Number(price) || 0;
+  const { type, value } = discountOf(product);
+  if (type === 'percent') return Math.round(base * (1 - Math.min(100, value) / 100) * 100) / 100;
+  if (type === 'amount') return Math.max(0, Math.round((base - value) * 100) / 100);
+  return base;
+};
+
+// Cena katalogowa jednej sztuki (wariant albo cena główna) — przed zniżką.
+export const listPrice = (product, variant = null) => {
+  const raw = variant && Number(variant.price) > 0 ? Number(variant.price) : Number(product?.price) || 0;
+  return raw;
+};
+
+// Cena jednej sztuki po zniżce sklepowej.
+export const unitPrice = (product, variant = null) => applyDiscount(listPrice(product, variant), product);
+
 export const priceRange = (product) => {
   const variants = variantsOf(product).filter(v => v.is_active !== false);
-  if (variants.length === 0) return { min: product.price, max: product.price };
-  const prices = variants.map(v => Number(v.price) || Number(product.price) || 0);
+  if (variants.length === 0) {
+    const own = unitPrice(product);
+    return { min: own, max: own };
+  }
+  const prices = variants.map(v => unitPrice(product, v));
   return { min: Math.min(...prices), max: Math.max(...prices) };
 };
 
@@ -174,9 +208,20 @@ export const packUnits = (pack) => (pack ? Math.max(2, Number(pack.units) || 2) 
 // gdy wariantów brak — cena nadrzędna produktu.
 export const displayPrice = (product) => {
   const range = priceRange(product);
-  const hasVariants = variantsOf(product).filter(v => v.is_active !== false).length > 0;
-  if (hasVariants) return { from: true, min: range.min, max: range.max, text: `od ${money(range.min)}` };
-  return { from: false, min: Number(product?.price) || 0, max: Number(product?.price) || 0, text: money(product?.price) };
+  const variants = variantsOf(product).filter(v => v.is_active !== false);
+  const hasVariants = variants.length > 0;
+  const was = !hasDiscount(product)
+    ? 0
+    : hasVariants
+      ? Math.min(...variants.map(v => listPrice(product, v)))
+      : listPrice(product);
+  return {
+    from: hasVariants,
+    min: range.min,
+    max: range.max,
+    was,
+    text: hasVariants ? `od ${money(range.min)}` : money(range.min),
+  };
 };
 
 export const slugify = (text) =>
