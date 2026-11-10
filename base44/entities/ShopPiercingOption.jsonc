@@ -1,0 +1,49 @@
+{
+  "name": "ShopPiercingOption",
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": [
+        "placement",
+        "type"
+      ],
+      "description": "placement = miejsce przek\u0142ucia (np. Ucho, Nos, P\u0119pek), type = rodzaj przek\u0142ucia (np. Lobe, Helix, Septum)"
+    },
+    "name": {
+      "type": "string",
+      "description": "Nazwa opcji widoczna w filtrach i przy produkcie"
+    },
+    "order": {
+      "type": "number",
+      "default": 999,
+      "description": "Kolejno\u015b\u0107 wy\u015bwietlania (mniejsza = wcze\u015bniej)"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "kind",
+    "name"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

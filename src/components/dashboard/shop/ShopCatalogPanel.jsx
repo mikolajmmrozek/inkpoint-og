@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from '@/pages/dashboard/Dashboard';
-import { Plus, Pencil, Trash2, X, Check, Upload, FolderOpen, Layers, Settings2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Check, Upload, FolderOpen, Layers, Settings2, Sparkles } from 'lucide-react';
 import { slugify } from '@/lib/shop';
 import { shopTheme, mono, display, inputStyle, labelStyle } from './shopTheme';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
+import ShopPiercingPanel from './ShopPiercingPanel';
 
 const TABS = [
   { id: 'categories', label: 'Kategorie', icon: FolderOpen },
   { id: 'collections', label: 'Kolekcje', icon: Layers },
+  { id: 'piercing', label: 'Przekłucia', icon: Sparkles },
   { id: 'settings', label: 'Ustawienia', icon: Settings2 },
 ];
 
@@ -46,7 +48,7 @@ export default function ShopCatalogPanel() {
   const openNew = (kind) => {
     setEditing({ kind, id: null });
     setForm(kind === 'categories'
-      ? { name: '', slug: '', description: '', image_url: '', order: 999, is_active: true }
+      ? { name: '', slug: '', description: '', image_url: '', order: 999, is_active: true, filter_group: 'none' }
       : { name: '', slug: '', description: '', image_url: '', order: 999, is_active: true, product_ids: [] });
   };
 
@@ -73,6 +75,7 @@ export default function ShopCatalogPanel() {
         order: Number(form.order) || 999,
         is_active: form.is_active !== false,
         ...(editing.kind === 'collections' ? { product_ids: form.product_ids || [] } : {}),
+        ...(editing.kind === 'categories' ? { filter_group: form.filter_group === 'piercing' ? 'piercing' : 'none' } : {}),
       };
       const entity = editing.kind === 'categories' ? base44.entities.ShopCategory : base44.entities.ShopCollection;
       if (editing.id) await entity.update(editing.id, payload);
@@ -131,14 +134,16 @@ export default function ShopCatalogPanel() {
             );
           })}
         </div>
-        {tab !== 'settings' && (
+        {tab !== 'settings' && tab !== 'piercing' && (
           <button onClick={() => openNew(tab)} className="flex items-center gap-2 btn-oxblood" style={{ padding: '8px 16px' }}>
             <Plus size={13} /> {tab === 'categories' ? 'NOWA KATEGORIA' : 'NOWA KOLEKCJA'}
           </button>
         )}
       </div>
 
-      {tab === 'settings' ? (
+      {tab === 'piercing' ? (
+        <ShopPiercingPanel />
+      ) : tab === 'settings' ? (
         <div className="max-w-lg p-6" style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
           <p style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: '18px' }}>USTAWIENIA SKLEPU</p>
           <div className="space-y-5">
@@ -205,6 +210,18 @@ export default function ShopCatalogPanel() {
               <div><label style={labelStyle(t)}>Nazwa *</label><input value={form.name || ''} onChange={e => setForm(f => ({ ...f, name: e.target.value, slug: f.slug || slugify(e.target.value) }))} style={inputStyle(t)} /></div>
               <div><label style={labelStyle(t)}>Adres URL (slug)</label><input value={form.slug || ''} onChange={e => setForm(f => ({ ...f, slug: slugify(e.target.value) }))} style={inputStyle(t)} /></div>
               <div><label style={labelStyle(t)}>Opis</label><textarea rows={2} value={form.description || ''} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} style={{ ...inputStyle(t), resize: 'vertical', border: `0.5px solid ${t.border}`, padding: '10px', borderRadius: 'var(--radius)' }} /></div>
+              {editing.kind === 'categories' && (
+                <div>
+                  <label style={labelStyle(t)}>Filtry kategorii</label>
+                  <select value={form.filter_group || 'none'} onChange={e => setForm(f => ({ ...f, filter_group: e.target.value }))} style={{ ...inputStyle(t), colorScheme: theme === 'light' ? 'light' : 'dark' }}>
+                    <option value="none">Brak dodatkowych filtrów</option>
+                    <option value="piercing">Przekłucia — miejsce i rodzaj</option>
+                  </select>
+                  <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px', lineHeight: 1.6 }}>
+                    Opcje filtrów edytujesz w zakładce „Przekłucia”. Produktom w tej kategorii przypiszesz je w edycji produktu.
+                  </p>
+                </div>
+              )}
               <div className="flex items-center gap-4">
                 {form.image_url && <img src={form.image_url} alt="" style={{ width: '60px', height: '60px', objectFit: 'cover', border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)' }} />}
                 <label style={{ ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '9px 14px', border: `0.5px solid ${t.border}`, color: t.text, cursor: 'pointer', borderRadius: 'var(--radius)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>

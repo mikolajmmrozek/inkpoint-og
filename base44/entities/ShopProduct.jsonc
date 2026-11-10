@@ -22,6 +22,20 @@
       "type": "string",
       "description": "Nazwa kategorii (cache dla list)"
     },
+    "piercing_placements": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Miejsca przek\u0142ucia przypisane do produktu (np. Ucho, Nos) \u2014 u\u017cywane w filtrach kategorii z grupy 'piercing'"
+    },
+    "piercing_types": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Rodzaje przek\u0142ucia przypisane do produktu (np. Lobe, Helix) \u2014 u\u017cywane w filtrach kategorii z grupy 'piercing'"
+    },
     "collection_ids": {
       "type": "array",
       "items": {

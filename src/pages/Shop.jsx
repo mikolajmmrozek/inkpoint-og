@@ -14,6 +14,34 @@ import useSiteContent from '@/hooks/useSiteContent';
 
 const AUTO_LABELS = { new: 'Nowości', best: 'Bestsellery', featured: 'Polecane' };
 
+function FilterChips({ label, options, selected, onToggle }) {
+  if (options.length === 0) return null;
+  return (
+    <div>
+      <p className="text-micro" style={{ fontSize: '9px', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.16em', marginBottom: '8px' }}>{label}</p>
+      <div className="flex flex-wrap gap-2">
+        {options.map(o => {
+          const active = selected.includes(o);
+          return (
+            <button
+              key={o}
+              onClick={() => onToggle(o)}
+              className="text-micro"
+              style={{
+                fontSize: '10px', letterSpacing: '0.12em', padding: '7px 14px',
+                border: `0.5px solid ${active ? 'var(--brand)' : 'hsl(var(--border))'}`,
+                color: active ? 'var(--brand)' : 'hsl(var(--muted-foreground))',
+                background: active ? 'rgb(var(--brand-rgb) / 0.08)' : 'transparent',
+                borderRadius: 'var(--radius)', textTransform: 'uppercase',
+              }}
+            >{o}</button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function Shop() {
   const { count } = useCart();
   const { content, loading: shopLoading } = useSiteContent();
@@ -30,6 +58,8 @@ export default function Shop() {
   const [variantFilters, setVariantFilters] = useState({});
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [sort, setSort] = useState('');
+  const [piercingPlacements, setPiercingPlacements] = useState([]);
+  const [piercingTypes, setPiercingTypes] = useState([]);
 
   useEffect(() => {
     Promise.all([
@@ -72,6 +102,17 @@ export default function Shop() {
     list = list.filter(p => (p.name || '').toLowerCase().includes(q) || (p.short_description || '').toLowerCase().includes(q));
   }
 
+  // Filtry przekłuć — tylko dla kategorii z włączoną grupą filtrów „przekłucia”
+  const activeCategoryObj = categories.find(c => c.id === activeCategory);
+  const showPiercingFilters = activeCategoryObj?.filter_group === 'piercing';
+  const categoryProducts = activeCategory ? products.filter(p => p.category_id === activeCategory) : [];
+  const uniqueValues = (field) => [...new Set(categoryProducts.flatMap(p => p[field] || []))].sort((a, b) => a.localeCompare(b, 'pl'));
+  const placementOptions = uniqueValues('piercing_placements');
+  const typeOptions = uniqueValues('piercing_types');
+
+  if (piercingPlacements.length) list = list.filter(p => (p.piercing_placements || []).some(v => piercingPlacements.includes(v)));
+  if (piercingTypes.length) list = list.filter(p => (p.piercing_types || []).some(v => piercingTypes.includes(v)));
+
   // Opcje filtrów budowane z wariantów produktów w aktualnym widoku
   const facetMap = {};
   list.forEach(p => variantsOf(p).forEach(v => (v.options || []).forEach(o => {
@@ -95,9 +136,10 @@ export default function Shop() {
     });
   };
 
-  const changeCategory = (id) => { setActiveCategory(id); setVariantFilters({}); };
-  const changeCollection = (id) => { setActiveCollection(id); setActiveAuto(''); setActiveCategory(''); setVariantFilters({}); };
-  const changeAuto = (key) => { setActiveAuto(key); setActiveCollection(''); setActiveCategory(''); setVariantFilters({}); };
+  const resetPiercing = () => { setPiercingPlacements([]); setPiercingTypes([]); };
+  const changeCategory = (id) => { setActiveCategory(id); setVariantFilters({}); resetPiercing(); };
+  const changeCollection = (id) => { setActiveCollection(id); setActiveAuto(''); setActiveCategory(''); setVariantFilters({}); resetPiercing(); };
+  const changeAuto = (key) => { setActiveAuto(key); setActiveCollection(''); setActiveCategory(''); setVariantFilters({}); resetPiercing(); };
 
   if (!shopLoading && !shopVisible) return <ShopUnavailable />;
 
@@ -190,6 +232,24 @@ export default function Shop() {
                 );
               })}
             </div>
+
+            {/* Filtry przekłuć — tylko w kategoriach z filtrami przekłuć */}
+            {showPiercingFilters && (placementOptions.length > 0 || typeOptions.length > 0) && (
+              <div className="pt-5 space-y-4">
+                <FilterChips
+                  label="MIEJSCE PRZEKŁUCIA"
+                  options={placementOptions}
+                  selected={piercingPlacements}
+                  onToggle={v => setPiercingPlacements(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v])}
+                />
+                <FilterChips
+                  label="RODZAJ PRZEKŁUCIA"
+                  options={typeOptions}
+                  selected={piercingTypes}
+                  onToggle={v => setPiercingTypes(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v])}
+                />
+              </div>
+            )}
 
             {/* Filtry wariantów — rozwijane przyciskiem FILTRY */}
             {filtersOpen && (

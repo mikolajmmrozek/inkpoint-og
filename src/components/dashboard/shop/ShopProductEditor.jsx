@@ -17,6 +17,8 @@ export default function ShopProductEditor({ product, categories, collections, on
     short_description: '',
     description: '',
     category_id: '',
+    piercing_placements: [],
+    piercing_types: [],
     collection_ids: [],
     price: 0,
     compare_at_price: 0,
@@ -44,14 +46,22 @@ export default function ShopProductEditor({ product, categories, collections, on
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [forms, setForms] = useState([]);
+  const [piercingOptions, setPiercingOptions] = useState([]);
 
   useEffect(() => {
     base44.entities.ShippingForm.filter({ is_active: true }, 'order', 100)
       .then(setForms)
       .catch(() => setForms([]));
+    base44.entities.ShopPiercingOption.filter({ is_active: true }, 'order', 300)
+      .then(setPiercingOptions)
+      .catch(() => setPiercingOptions([]));
   }, []);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const selectedCategory = categories.find(c => c.id === form.category_id);
+  const showPiercing = selectedCategory?.filter_group === 'piercing';
+  const togglePick = (field, value) => set(field, (form[field] || []).includes(value) ? form[field].filter(v => v !== value) : [...(form[field] || []), value]);
 
   const buildVariants = (axes, existing, basePrice, explicit = []) => {
     const clean = explicit.filter(a => (a.name || '').trim() && (a.values || '').split(',').map(v => v.trim()).filter(Boolean).length);
@@ -108,6 +118,8 @@ export default function ShopProductEditor({ product, categories, collections, on
         description: form.description || '',
         category_id: form.category_id || '',
         category_name: category?.name || '',
+        piercing_placements: showPiercing ? (form.piercing_placements || []) : [],
+        piercing_types: showPiercing ? (form.piercing_types || []) : [],
         collection_ids: form.collection_ids || [],
         price: Number(form.price) || 0,
         compare_at_price: Number(form.compare_at_price) || 0,
@@ -221,6 +233,44 @@ export default function ShopProductEditor({ product, categories, collections, on
                   );
                 })}
               </div>
+            </div>
+          )}
+
+          {/* Filtry przekłuć — tylko dla kategorii z filtrami przekłuć */}
+          {showPiercing && (
+            <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
+              <p style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: '6px' }}>PRZEKŁUCIA</p>
+              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', lineHeight: 1.7 }}>
+                Zaznaczone wartości staną się filtrami w sklepie dla kategorii „{selectedCategory.name}”. Listę opcji edytujesz w Sklep → Katalog → Przekłucia.
+              </p>
+              {[
+                { id: 'placement', field: 'piercing_placements', label: 'MIEJSCE PRZEKŁUCIA' },
+                { id: 'type', field: 'piercing_types', label: 'RODZAJ PRZEKŁUCIA' },
+              ].map(group => {
+                const items = piercingOptions.filter(o => o.kind === group.id);
+                return (
+                  <div key={group.id} className="mt-4">
+                    <label style={labelStyle(t)}>{group.label}</label>
+                    {items.length === 0 ? (
+                      <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', lineHeight: 1.7 }}>
+                        Brak opcji — dodaj je w Sklep → Katalog → Przekłucia.
+                      </p>
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {items.map(o => {
+                          const active = (form[group.field] || []).includes(o.name);
+                          return (
+                            <button key={o.id} onClick={() => togglePick(group.field, o.name)}
+                              style={{ border: `0.5px solid ${active ? 'var(--brand)' : t.border}`, color: active ? 'var(--brand)' : t.muted, background: active ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', ...mono, fontSize: '9px', letterSpacing: '0.08em', padding: '6px 11px', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
+                              {o.name}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
 
