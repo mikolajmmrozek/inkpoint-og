@@ -95,7 +95,9 @@ export default function ShopProductEditor({ product, categories, collections, on
   const togglePick = (field, value) => set(field, (form[field] || []).includes(value) ? form[field].filter(v => v !== value) : [...(form[field] || []), value]);
 
   // Cena i stan są albo przy wariancie, albo przy produkcie — nigdy w dwóch miejscach.
-  const hasVariants = (form.variants || []).length > 0;
+  // Suwak (voucher) nie używa wariantów — stare, zapisane warianty nie mogą blokować zmiany ceny.
+  const isSlider = (form.pricing_mode || 'fixed') === 'slider';
+  const hasVariants = !isSlider && (form.variants || []).length > 0;
   const variantPrices = (form.variants || []).filter(v => v.is_active !== false).map(v => Number(v.price) || 0);
   const previewBase = variantPrices.length > 0 ? Math.min(...variantPrices) : Number(form.price) || 0;
   const previewNet = applyDiscount(previewBase, form);
@@ -484,6 +486,10 @@ export default function ShopProductEditor({ product, categories, collections, on
                 {hasVariants ? (
                   <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', lineHeight: 1.7 }}>
                     Produkt ma warianty — stan magazynowy ustawiasz przy każdym wariancie. Suma sztuk wariantów jest stanem produktu.
+                  </p>
+                ) : isSlider ? (
+                  <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', lineHeight: 1.7 }}>
+                    Cena od–do (suwak) — stan magazynowy nie obowiązuje.
                   </p>
                 ) : (
                   <>

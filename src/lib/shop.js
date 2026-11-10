@@ -62,6 +62,7 @@ export const priceSliderOf = (product) => {
 
 export const productStock = (product) => {
   if (product?.unlimited_stock) return null;
+  if (pricingModeOf(product) === 'slider') return null;
   const variants = variantsOf(product).filter(v => v.is_active !== false);
   if (variants.length > 0) return variants.reduce((sum, v) => sum + (Number(v.stock) || 0), 0);
   return typeof product?.stock === 'number' ? product.stock : null;
