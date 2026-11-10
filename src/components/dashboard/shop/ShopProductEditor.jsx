@@ -70,6 +70,14 @@ export default function ShopProductEditor({ product, categories, collections, on
       : [];
   const togglePick = (field, value) => set(field, (form[field] || []).includes(value) ? form[field].filter(v => v !== value) : [...(form[field] || []), value]);
 
+  const chipStyle = (active) => ({
+    border: `0.5px solid ${active ? 'var(--brand)' : t.border}`,
+    color: active ? 'var(--brand)' : t.muted,
+    background: active ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent',
+    ...mono, fontSize: '9px', letterSpacing: '0.08em', padding: '6px 11px',
+    cursor: 'pointer', borderRadius: 'var(--radius)', textTransform: 'uppercase',
+  });
+
   const buildVariants = (axes, existing, basePrice, explicit = []) => {
     const clean = explicit.filter(a => (a.name || '').trim() && (a.values || '').split(',').map(v => v.trim()).filter(Boolean).length);
     if (clean.length === 0) return [];
@@ -129,7 +137,7 @@ export default function ShopProductEditor({ product, categories, collections, on
         piercing_types: showPiercing ? (form.piercing_types || []) : [],
         clothing_types: filterGroup === 'clothing' ? (form.clothing_types || []) : [],
         collection_ids: form.collection_ids || [],
-        price: Number(form.price) || 0,
+        price: Number(form.pricing_mode === 'slider' ? form.slider_min : form.price) || 0,
         compare_at_price: Number(form.compare_at_price) || 0,
         pricing_mode: form.pricing_mode === 'slider' ? 'slider' : 'fixed',
         slider_min: Math.max(0, Number(form.slider_min) || 0),
@@ -177,72 +185,76 @@ export default function ShopProductEditor({ product, categories, collections, on
               <div><label style={labelStyle(t)}>Nazwa *</label><input value={form.name} onChange={e => { set('name', e.target.value); if (!product?.id) set('slug', slugify(e.target.value)); }} style={inputStyle(t)} /></div>
               <div><label style={labelStyle(t)}>Adres URL (slug)</label><input value={form.slug} onChange={e => set('slug', slugify(e.target.value))} style={inputStyle(t)} /></div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label style={labelStyle(t)}>Kategoria</label>
-                <select value={form.category_id} onChange={e => set('category_id', e.target.value)} style={{ ...inputStyle(t), colorScheme: theme === 'light' ? 'light' : 'dark' }}>
-                  <option value="">Brak</option>
-                  {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div><label style={labelStyle(t)}>{form.pricing_mode === 'slider' ? 'Cena od (PLN) *' : 'Cena (PLN) *'}</label><input type="number" value={form.price} onChange={e => set('price', e.target.value)} style={inputStyle(t)} /></div>
-                <div><label style={labelStyle(t)}>Cena przekreślona</label><input type="number" value={form.compare_at_price} onChange={e => set('compare_at_price', e.target.value)} style={inputStyle(t)} /></div>
+            {/* Kategoria — przyciski */}
+            <div>
+              <label style={labelStyle(t)}>Kategoria</label>
+              <div className="flex flex-wrap gap-2">
+                <button onClick={() => set('category_id', '')} style={chipStyle(!form.category_id)}>Brak</button>
+                {categories.map(c => (
+                  <button key={c.id} onClick={() => set('category_id', c.id)} style={chipStyle(form.category_id === c.id)}>{c.name}</button>
+                ))}
               </div>
             </div>
+
+            {/* Kolekcje — pod kategorią */}
+            {collections.length > 0 && (
+              <div>
+                <label style={labelStyle(t)}>Kolekcje</label>
+                <div className="flex flex-wrap gap-2">
+                  {collections.map(c => (
+                    <button key={c.id} onClick={() => set('collection_ids', (form.collection_ids || []).includes(c.id) ? (form.collection_ids || []).filter(id => id !== c.id) : [...(form.collection_ids || []), c.id])}
+                      style={chipStyle((form.collection_ids || []).includes(c.id))}>
+                      {c.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Cena — stała lub od–do */}
+            <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <p style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', textTransform: 'uppercase' }}>CENA</p>
+                <div className="flex flex-wrap gap-2">
+                  {[{ id: 'fixed', label: 'Stała' }, { id: 'slider', label: 'Od–do (suwak)' }].map(m => {
+                    const active = (form.pricing_mode || 'fixed') === m.id;
+                    return (
+                      <button key={m.id} onClick={() => set('pricing_mode', m.id)}
+                        style={{ border: `0.5px solid ${active ? 'var(--brand)' : t.border}`, color: active ? 'var(--brand)' : t.muted, background: active ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '7px 13px', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
+                        {m.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              {form.pricing_mode === 'slider' ? (
+                <>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div><label style={labelStyle(t)}>Od (PLN) *</label><input type="number" value={form.slider_min ?? 100} onChange={e => set('slider_min', e.target.value)} style={inputStyle(t)} /></div>
+                    <div><label style={labelStyle(t)}>Do (PLN)</label><input type="number" value={form.slider_max ?? 2000} onChange={e => set('slider_max', e.target.value)} style={inputStyle(t)} /></div>
+                    <div><label style={labelStyle(t)}>Skok (PLN)</label><input type="number" value={form.slider_step ?? 10} onChange={e => set('slider_step', e.target.value)} style={inputStyle(t)} /></div>
+                    <div><label style={labelStyle(t)}>Cena przekreślona</label><input type="number" value={form.compare_at_price} onChange={e => set('compare_at_price', e.target.value)} style={inputStyle(t)} /></div>
+                  </div>
+                  <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '6px', lineHeight: 1.7 }}>
+                    Klient wybiera kwotę suwakiem w zakresie od–do — warianty nie są używane, stan magazynowy nie obowiązuje.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div><label style={labelStyle(t)}>Cena (PLN) *</label><input type="number" value={form.price} onChange={e => set('price', e.target.value)} style={inputStyle(t)} /></div>
+                    <div><label style={labelStyle(t)}>Cena przekreślona</label><input type="number" value={form.compare_at_price} onChange={e => set('compare_at_price', e.target.value)} style={inputStyle(t)} /></div>
+                  </div>
+                  <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '6px', lineHeight: 1.7 }}>
+                    Cena stała; rozmiary, kolory i ich stany ustawiasz jako warianty poniżej.
+                  </p>
+                </>
+              )}
+            </div>
+
             <div><label style={labelStyle(t)}>Krótki opis</label><input value={form.short_description} onChange={e => set('short_description', e.target.value)} style={inputStyle(t)} /></div>
             <div><label style={labelStyle(t)}>Opis</label><textarea rows={4} value={form.description} onChange={e => set('description', e.target.value)} style={{ ...inputStyle(t), resize: 'vertical', border: `0.5px solid ${t.border}`, padding: '10px', borderRadius: 'var(--radius)' }} /></div>
           </div>
-
-          {/* Sposób ceny */}
-          <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '20px' }}>
-            <p style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: '12px' }}>SPOSÓB CENY</p>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {[{ id: 'fixed', label: 'Stała cena + warianty' }, { id: 'slider', label: 'Suwak — klient wybiera kwotę' }].map(m => {
-                const active = (form.pricing_mode || 'fixed') === m.id;
-                return (
-                  <button key={m.id} onClick={() => set('pricing_mode', m.id)}
-                    style={{ border: `0.5px solid ${active ? 'var(--brand)' : t.border}`, color: active ? 'var(--brand)' : t.muted, background: active ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
-                    {m.label}
-                  </button>
-                );
-              })}
-            </div>
-            {form.pricing_mode === 'slider' ? (
-              <>
-                <div className="grid grid-cols-3 gap-4">
-                  <div><label style={labelStyle(t)}>Kwota od (PLN)</label><input type="number" value={form.slider_min ?? 100} onChange={e => set('slider_min', e.target.value)} style={inputStyle(t)} /></div>
-                  <div><label style={labelStyle(t)}>Kwota do (PLN)</label><input type="number" value={form.slider_max ?? 2000} onChange={e => set('slider_max', e.target.value)} style={inputStyle(t)} /></div>
-                  <div><label style={labelStyle(t)}>Skok (PLN)</label><input type="number" value={form.slider_step ?? 10} onChange={e => set('slider_step', e.target.value)} style={inputStyle(t)} /></div>
-                </div>
-                <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '6px', lineHeight: 1.7 }}>
-                  Klient wybiera kwotę suwakiem w tym zakresie — warianty nie są używane, stan magazynowy nie obowiązuje.
-                </p>
-              </>
-            ) : (
-              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', lineHeight: 1.7 }}>
-                Cena stała; rozmiary, kolory i ich stany ustawiasz jako warianty poniżej.
-              </p>
-            )}
-          </div>
-
-          {/* Kolekcje */}
-          {collections.length > 0 && (
-            <div>
-              <p style={{ ...labelStyle(t) }}>KOLEKCJE</p>
-              <div className="flex flex-wrap gap-2">
-                {collections.map(c => {
-                  const active = (form.collection_ids || []).includes(c.id);
-                  return (
-                    <button key={c.id} onClick={() => set('collection_ids', active ? (form.collection_ids || []).filter(id => id !== c.id) : [...(form.collection_ids || []), c.id])}
-                      style={{ border: `0.5px solid ${active ? 'var(--brand)' : t.border}`, color: active ? 'var(--brand)' : t.muted, background: active ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent', ...mono, fontSize: '9px', letterSpacing: '0.08em', padding: '6px 11px', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
-                      {c.name}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
 
           {/* Filtry produktu — zależne od grupy filtrów kategorii */}
           {filterFields.length > 0 && (
