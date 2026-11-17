@@ -19,7 +19,7 @@ import ReferenceImagesGallery from '@/components/booking/ReferenceImagesGallery'
 import { buildHealthFormStatusMap } from '@/lib/healthFormStatus';
 import { pluralSesji } from '@/utils';
 import TrendBadge from '@/components/stats/TrendBadge';
-import { comparePeriods, monthBounds, rollingTrend, serviceRevenue } from '@/lib/trends';
+import { comparePeriods, monthBounds, pctChange, serviceRevenue, upcomingMonthBounds } from '@/lib/trends';
 
 const PAYMENT_METHOD_LABELS = { cash: 'Gotówka', card: 'Karta', voucher: 'Voucher' };
 const PAYMENT_METHOD_COLORS = { cash: '#16a34a', card: '#2563eb', voucher: '#f59e0b' };
@@ -539,8 +539,18 @@ export default function ArtistHome() {
     amountOf: (b) => serviceRevenue(b) * (cut / 100),
   });
 
+  // Nadchodzące: reszta tego miesiąca vs ten sam zakres dni w zeszłym miesiącu.
+  const upcomingTrend = (() => {
+    const bounds = upcomingMonthBounds(now.getFullYear(), now.getMonth(), now);
+    const count = (range) => bookings.filter(b =>
+      b.session_date && b.session_date >= range.start && b.session_date <= range.end &&
+      (b.status === 'pending' || b.status === 'confirmed')
+    ).length;
+    return pctChange(count(bounds.current), count(bounds.previous));
+  })();
+
   const KPI = [
-    { label: 'Nadchodzące sesje', value: upcoming.length, trend: rollingTrend(bookings, b => b.status === 'pending' || b.status === 'confirmed'), icon: Calendar, link: '/artist/schedule' },
+    { label: 'Nadchodzące sesje', value: upcoming.length, trend: upcomingTrend, icon: Calendar, link: '/artist/schedule' },
     { label: 'Sesje w tym miesiącu', value: thisMonth.length, trend: monthTrend.sessions, icon: TrendingUp, link: '/artist/stats' },
     { label: 'Mój zarobek (mies.)', value: `${Math.round(revenue)} zł`, sub: `Prognoza: +${forecast} zł`, trend: monthTrend.revenue, icon: Clock, link: '/artist/stats' },
   ];
@@ -599,7 +609,7 @@ export default function ArtistHome() {
               <Link to={kpi.link} className="block p-6 h-full relative" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
                 <div className="flex items-start justify-between gap-2 mb-4">
                   <Icon size={16} color="var(--brand)" />
-                  {kpi.trend && !loading && <TrendBadge change={kpi.trend} t={t} size="8px" note="m/m" />}
+                  {kpi.trend && !loading && <TrendBadge change={kpi.trend} t={t} size="11px" />}
                 </div>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 400, color: t.value, lineHeight: 1, letterSpacing: '0.04em' }}>
                   {loading ? '—' : kpi.value}

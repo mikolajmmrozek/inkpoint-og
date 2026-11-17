@@ -10,7 +10,9 @@ export const serviceRevenue = (b) => Math.max(0, sessionAmount(b) - (Number(b.pr
 export function pctChange(current, previous) {
   const cur = Number(current) || 0;
   const prev = Number(previous) || 0;
-  if (prev <= 0) return { pct: null, dir: 'flat', current: cur, previous: prev };
+  if (prev <= 0) return cur > 0
+    ? { pct: null, dir: 'up', current: cur, previous: prev, isNew: true }
+    : { pct: null, dir: 'flat', current: cur, previous: prev };
   const pct = Math.round(((cur - prev) / prev) * 100);
   return { pct, dir: pct > 0 ? 'up' : pct < 0 ? 'down' : 'flat', current: cur, previous: prev };
 }
@@ -43,6 +45,21 @@ export function yearBounds(year, now = new Date()) {
     isCurrent,
     current: { start: `${year}-01-01`, end: endCur },
     previous: { start: `${year - 1}-01-01`, end: `${year - 1}${endCur.slice(4)}` },
+  };
+}
+
+// Nadchodzące: od dziś do końca miesiąca vs ten sam zakres dni w poprzednim miesiącu.
+export function upcomingMonthBounds(year, month, now = new Date()) {
+  const isCurrent = year === now.getFullYear() && month === now.getMonth();
+  const lastPrevDay = new Date(year, month, 0).getDate();
+  const startDay = isCurrent ? now.getDate() : 1;
+  return {
+    isCurrent,
+    current: { start: iso(new Date(year, month, startDay)), end: iso(new Date(year, month + 1, 0)) },
+    previous: {
+      start: iso(new Date(year, month - 1, Math.min(startDay, lastPrevDay))),
+      end: iso(new Date(year, month, 0)),
+    },
   };
 }
 

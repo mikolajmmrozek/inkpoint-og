@@ -250,7 +250,7 @@ export default function DashboardStats() {
       <p style={{ ...display, fontSize: '2.2rem', color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>{value}</p>
       <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '6px' }}>{label}</p>
       {sub && <p style={{ ...mono, fontSize: '9px', color: t.fuchsia, marginTop: '4px' }}>{sub}</p>}
-      {trend && <TrendBadge change={trend} t={t} size="7px" note={trendNote} />}
+      {trend && <TrendBadge change={trend} t={t} size="11px" note={trendNote} />}
     </div>
   );
 
@@ -503,7 +503,7 @@ export default function DashboardStats() {
                     <p className="col-span-1" style={{ ...mono, fontSize: '11px', color: t.muted }}>{row.sessions}</p>
                     <div className="col-span-3">
                       <p style={{ ...mono, fontSize: '11px', color: t.text }}>{row.revenue.toLocaleString('pl-PL')} PLN</p>
-                      {row.trend && <TrendBadge change={row.trend} t={t} size="7px" note="usługi m/m" />}
+                      {row.trend && <TrendBadge change={row.trend} t={t} size="10px" note="zeszły miesiąc" />}
                     </div>
                     <p className="col-span-3" style={{ ...mono, fontSize: '11px', color: '#16a34a', fontWeight: 600 }}>{row.artistEarnings.toLocaleString('pl-PL')} PLN</p>
                     <p className="col-span-2" style={{ ...mono, fontSize: '11px', color: t.fuchsia, fontWeight: 600 }}>{row.studioEarnings.toLocaleString('pl-PL')} PLN</p>
