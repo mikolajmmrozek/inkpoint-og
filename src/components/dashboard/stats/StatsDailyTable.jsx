@@ -30,7 +30,7 @@ export default function StatsDailyTable({ t, title, rows, firstLabel, countLabel
             <p className="col-span-2" style={{ ...mono, fontSize: '11px', color: t.muted }}>{row.count}</p>
             <div className="col-span-4">
               <p className="text-right" style={{ ...mono, fontSize: '11px', color: t.fuchsia, fontWeight: 600 }}>{money(row.revenue)}</p>
-              {row.trend && <TrendBadge change={row.trend} t={t} size="10px" align="right" />}
+              {row.trend && <TrendBadge change={row.trend} t={t} align="right" />}
             </div>
           </div>
         ))}

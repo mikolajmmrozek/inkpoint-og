@@ -609,7 +609,7 @@ export default function ArtistHome() {
               <Link to={kpi.link} className="block p-6 h-full relative" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
                 <div className="flex items-start justify-between gap-2 mb-4">
                   <Icon size={16} color="var(--brand)" />
-                  {kpi.trend && !loading && <TrendBadge change={kpi.trend} t={t} size="11px" />}
+                  {kpi.trend && !loading && <TrendBadge change={kpi.trend} t={t} />}
                 </div>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 400, color: t.value, lineHeight: 1, letterSpacing: '0.04em' }}>
                   {loading ? '—' : kpi.value}

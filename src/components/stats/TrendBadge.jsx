@@ -1,28 +1,21 @@
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
-// Wskaźnik zmiany: zielony wzrost, magenta spadek, neutralny brak porównania.
-export default function TrendBadge({ change, note = 'zeszły miesiąc', t, size = '10px', align }) {
+// Wskaźnik zmiany: zielony wzrost, magenta spadek. Brak danych = brak wskaźnika.
+export default function TrendBadge({ change, note = 'zeszły miesiąc', t, align }) {
   if (!change) return null;
+  if (change.pct == null && !change.isNew) return null;
 
   const style = {
     fontFamily: 'var(--font-mono)',
-    fontSize: size,
-    fontWeight: 600,
-    letterSpacing: '0.06em',
+    fontSize: '8px',
+    fontWeight: 400,
+    letterSpacing: '0.1em',
     textTransform: 'uppercase',
-    marginTop: '6px',
+    marginTop: '5px',
     lineHeight: 1.4,
     justifyContent: align === 'right' ? 'flex-end' : 'flex-start',
     flexWrap: 'wrap',
   };
-
-  if (change.pct == null && !change.isNew) {
-    return (
-      <p className="flex items-center gap-1" style={{ ...style, color: t.muted, fontWeight: 500 }}>
-        {note ? 'brak danych z zeszłego miesiąca' : 'brak danych'}
-      </p>
-    );
-  }
 
   const up = change.isNew || change.dir === 'up';
   const Icon = up ? TrendingUp : change.dir === 'down' ? TrendingDown : Minus;
@@ -30,9 +23,9 @@ export default function TrendBadge({ change, note = 'zeszły miesiąc', t, size 
 
   return (
     <p className="flex items-center gap-1" style={{ ...style, color }}>
-      <Icon size={13} />
+      <Icon size={10} />
       <span>{change.isNew ? 'nowe' : `${change.pct > 0 ? '+' : ''}${change.pct}%`}</span>
-      {note && <span style={{ color: t.muted, fontWeight: 500 }}>· {note}</span>}
+      {note && <span style={{ color: t.muted }}>· {note}</span>}
     </p>
   );
 }

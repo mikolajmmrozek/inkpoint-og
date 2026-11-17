@@ -178,7 +178,7 @@ export default function StatsServicesView({ t, filtered, selectedYear, bookings 
       <p style={{ ...display, fontSize: '2.2rem', color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>{value}</p>
       <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '6px' }}>{label}</p>
       {sub && <p style={{ ...mono, fontSize: '9px', color: t.fuchsia, marginTop: '4px' }}>{sub}</p>}
-      {trend && <TrendBadge change={trend} t={t} size="11px" note="rok do roku" />}
+      {trend && <TrendBadge change={trend} t={t} note="rok do roku" />}
     </div>
   );
 

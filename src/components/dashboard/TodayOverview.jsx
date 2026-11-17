@@ -113,7 +113,7 @@ export default function TodayOverview({ bookings, t, theme, onBookingUpdate, art
               </div>
               <p style={{ ...display, fontSize: '2rem', color: t.value, lineHeight: 1, letterSpacing: '0.03em' }}>{monthSessionsCount}</p>
               <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '5px' }}>jeszcze zaplanowanych: {monthUpcomingCount}</p>
-              <TrendBadge change={monthTrend.sessions} t={t} size="11px" />
+              <TrendBadge change={monthTrend.sessions} t={t} />
             </Link>
             <div className="p-4" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
               <div className="flex items-center gap-1.5 mb-2">
@@ -122,7 +122,7 @@ export default function TodayOverview({ bookings, t, theme, onBookingUpdate, art
               </div>
               <p style={{ ...display, fontSize: '2rem', color: 'var(--brand)', lineHeight: 1, letterSpacing: '0.03em' }}>{formatCompact(monthSettledStudio)} <span style={{ ...mono, fontSize: '11px', color: t.muted }}>PLN</span></p>
               <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '5px' }}>jeszcze do zarobienia: {formatCompact(monthUpcomingStudio)} PLN</p>
-              <TrendBadge change={monthTrend.revenue} t={t} size="11px" />
+              <TrendBadge change={monthTrend.revenue} t={t} />
             </div>
           </div>
         </div>
