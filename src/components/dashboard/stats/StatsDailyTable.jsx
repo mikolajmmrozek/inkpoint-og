@@ -1,4 +1,5 @@
 import { money } from '@/lib/shop';
+import TrendBadge from '@/components/stats/TrendBadge';
 
 // Tabela okresowa: pierwsza kolumna (dzień / miesiąc / artysta) + liczby + przychód,
 // z sumą na dole.
@@ -27,7 +28,10 @@ export default function StatsDailyTable({ t, title, rows, firstLabel, countLabel
           <div key={`${row.label}-${i}`} className="grid grid-cols-12 px-4 py-3 items-center" style={{ borderBottom: `0.5px solid ${t.border}` }}>
             <p className="col-span-6" style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>{row.label}</p>
             <p className="col-span-2" style={{ ...mono, fontSize: '11px', color: t.muted }}>{row.count}</p>
-            <p className="col-span-4 text-right" style={{ ...mono, fontSize: '11px', color: t.fuchsia, fontWeight: 600 }}>{money(row.revenue)}</p>
+            <div className="col-span-4">
+              <p className="text-right" style={{ ...mono, fontSize: '11px', color: t.fuchsia, fontWeight: 600 }}>{money(row.revenue)}</p>
+              {row.trend && <TrendBadge change={row.trend} t={t} size="7px" note="m/m" align="right" />}
+            </div>
           </div>
         ))}
 

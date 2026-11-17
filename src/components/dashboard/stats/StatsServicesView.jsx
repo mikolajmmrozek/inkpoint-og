@@ -7,6 +7,8 @@ import { MONTHS_PL, MONTHS_FULL, monthIndex, dayOfMonth, dayLabel } from '@/lib/
 import StatsPaymentChart from './StatsPaymentChart';
 import StatsDailyTable from './StatsDailyTable';
 import StatsPeriodPicker from './StatsPeriodPicker';
+import TrendBadge from '@/components/stats/TrendBadge';
+import { pctChange, yearBounds } from '@/lib/trends';
 
 const CATEGORY_LABELS = { tattoo: 'Tattoo', studio: 'Studio', piercing: 'Piercing' };
 const CATEGORY_TABS = [
@@ -22,7 +24,7 @@ const mainServiceRevenue = (b) => Math.max(
   sessionAmount(b) - (Number(b.products_total) || 0) - (Number(b.services_total) || 0)
 );
 
-export default function StatsServicesView({ t, filtered, selectedYear }) {
+export default function StatsServicesView({ t, filtered, selectedYear, bookings = [], artistId = 'all' }) {
   const mono = { fontFamily: 'var(--font-mono)' };
   const display = { fontFamily: 'var(--font-display)', fontWeight: 400 };
 
@@ -37,9 +39,9 @@ export default function StatsServicesView({ t, filtered, selectedYear }) {
   }, []);
 
   // Wszystkie wykonania usług: usługa główna sesji + każda usługa dopisana w rozliczeniu.
-  const executions = useMemo(() => {
+  const buildExecutions = (list) => {
     const rows = [];
-    filtered.forEach(b => {
+    list.forEach(b => {
       const svcCategory = serviceCategories.get(b.service_id) || b.additional_services?.[0]?.category || 'studio';
       rows.push({
         booking: b,
@@ -62,7 +64,19 @@ export default function StatsServicesView({ t, filtered, selectedYear }) {
       });
     });
     return rows;
-  }, [filtered, serviceCategories]);
+  };
+
+  const executions = useMemo(() => buildExecutions(filtered), [filtered, serviceCategories]);
+
+  // Poprzedni rok — do porównania rok do roku (ten sam zakres dni).
+  const prevExecutions = useMemo(() => {
+    const bounds = yearBounds(selectedYear);
+    const list = bookings.filter(b =>
+      b.session_date && b.session_date >= bounds.previous.start && b.session_date <= bounds.previous.end &&
+      b.status === 'completed' && (artistId === 'all' || b.artist_id === artistId)
+    );
+    return buildExecutions(list);
+  }, [bookings, artistId, selectedYear, serviceCategories]);
 
   const categoryCounts = useMemo(() => {
     const counts = { all: executions.length };
@@ -74,6 +88,18 @@ export default function StatsServicesView({ t, filtered, selectedYear }) {
     () => (category === 'all' ? executions : executions.filter(e => e.category === category)),
     [executions, category]
   );
+
+  // Rok do roku: wykonania i przychód usług w wybranej kategorii.
+  const yoy = useMemo(() => {
+    const prev = category === 'all' ? prevExecutions : prevExecutions.filter(e => e.category === category);
+    return {
+      executions: pctChange(scoped.length, prev.length),
+      revenue: pctChange(
+        scoped.reduce((s, e) => s + e.revenue, 0),
+        prev.reduce((s, e) => s + e.revenue, 0)
+      ),
+    };
+  }, [scoped, prevExecutions, category]);
 
   const totals = useMemo(() => {
     const revenue = scoped.reduce((s, e) => s + e.revenue, 0);
@@ -136,18 +162,23 @@ export default function StatsServicesView({ t, filtered, selectedYear }) {
     return [...map.values()].sort((a, b) => b.revenue - a.revenue);
   }, [monthExecutions]);
 
-  const monthlyRows = useMemo(() => MONTHS_PL
-    .map((name, mi) => {
+  const monthlyRows = useMemo(() => {
+    const all = MONTHS_PL.map((name, mi) => {
       const rows = scoped.filter(e => monthIndex(e.date) === mi);
       return { label: MONTHS_FULL[mi], count: rows.length, revenue: rows.reduce((s, e) => s + e.revenue, 0) };
-    })
-    .filter(r => r.count > 0), [scoped]);
+    });
+    // Miesiąc do miesiąca.
+    return all
+      .map((row, i) => ({ ...row, trend: i > 0 ? pctChange(row.revenue, all[i - 1].revenue) : null }))
+      .filter(r => r.count > 0);
+  }, [scoped]);
 
-  const KPICard = ({ label, value, sub }) => (
+  const KPICard = ({ label, value, sub, trend }) => (
     <div className="p-5" style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
       <p style={{ ...display, fontSize: '2.2rem', color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>{value}</p>
       <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '6px' }}>{label}</p>
       {sub && <p style={{ ...mono, fontSize: '9px', color: t.fuchsia, marginTop: '4px' }}>{sub}</p>}
+      {trend && <TrendBadge change={trend} t={t} size="7px" note="rok do roku" />}
     </div>
   );
 
@@ -173,8 +204,8 @@ export default function StatsServicesView({ t, filtered, selectedYear }) {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
-        <KPICard label={`Wykonania · ${CATEGORY_TABS.find(c => c.id === category)?.label}`} value={totals.executions} sub={`${services.length} rodzajów`} />
-        <KPICard label="Przychód usług" value={money(totals.revenue)} sub={`${totals.sessions} sesji`} />
+        <KPICard label={`Wykonania · ${CATEGORY_TABS.find(c => c.id === category)?.label}`} value={totals.executions} sub={`${services.length} rodzajów`} trend={yoy.executions} />
+        <KPICard label="Przychód usług" value={money(totals.revenue)} sub={`${totals.sessions} sesji`} trend={yoy.revenue} />
         <KPICard label="Sesje" value={totals.sessions} />
         <KPICard label="Średnia za wykonanie" value={money(totals.avg)} />
       </div>

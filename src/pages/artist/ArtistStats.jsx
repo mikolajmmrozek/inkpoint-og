@@ -4,6 +4,8 @@ import { base44 } from '@/api/base44Client';
 import { sessionAmount } from '@/lib/settlement';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import TrendBadge from '@/components/stats/TrendBadge';
+import { comparePeriods, monthBounds, pctChange, serviceRevenue, yearBounds } from '@/lib/trends';
 
 const MONTHS_PL = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
 const MONTHS_FULL = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
@@ -80,6 +82,23 @@ export default function ArtistStats() {
   const monthEarned = monthCompleted.reduce((s, b) => s + Math.round(sessionAmount(b) * cut / 100), 0);
   const monthToEarn = monthRemaining.reduce((s, b) => s + Math.round(sessionAmount(b) * cut / 100), 0);
 
+  // Rok do roku (sesje zakończone i mój zarobek z samych usług).
+  const yoy = useMemo(() => {
+    const bounds = yearBounds(year);
+    const pick = (range) => bookings.filter(b =>
+      b.session_date && b.session_date >= range.start && b.session_date <= range.end && b.status === 'completed'
+    );
+    const cur = pick(bounds.current);
+    const prev = pick(bounds.previous);
+    const share = (rows) => rows.reduce((s, b) => s + Math.round(serviceRevenue(b) * cut / 100), 0);
+    return { sessions: pctChange(cur.length, prev.length), earning: pctChange(share(cur), share(prev)) };
+  }, [bookings, year, cut]);
+
+  // Miesiąc do miesiąca dla wybranego miesiąca.
+  const monthTrend = comparePeriods(bookings, monthBounds(year, selectedMonth), {
+    amountOf: (b) => serviceRevenue(b) * (cut / 100),
+  });
+
   return (
     <div>
       {/* Year selector */}
@@ -95,13 +114,14 @@ export default function ArtistStats() {
       {/* KPI row */}
       <div className="grid grid-cols-3 gap-4 mb-8">
         {[
-          { label: 'Sesji', value: totalSessions },
+          { label: 'Sesji', value: totalSessions, trend: yoy.sessions },
           { label: 'Łączna kwota', value: `${totalRevenue} zł` },
-          { label: `Mój zarobek (${cut}%)`, value: `${totalEarning} zł` },
+          { label: `Mój zarobek (${cut}%)`, value: `${totalEarning} zł`, trend: yoy.earning },
         ].map(kpi => (
           <div key={kpi.label} className="p-5" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
             <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.2rem', color: t.text, lineHeight: 1, letterSpacing: '0.04em' }}>{loading ? '—' : kpi.value}</p>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '4px' }}>{kpi.label}</p>
+            {kpi.trend && !loading && <TrendBadge change={kpi.trend} t={t} size="7px" note="rok do roku" />}
           </div>
         ))}
       </div>
@@ -144,6 +164,7 @@ export default function ArtistStats() {
           <div className="p-4" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
             <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: '#16a34a', lineHeight: 1, letterSpacing: '0.04em' }}>{monthDone}</p>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px' }}>Zrobione</p>
+            <TrendBadge change={monthTrend.sessions} t={t} size="7px" />
           </div>
           <div className="p-4" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
             <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: '#f59e0b', lineHeight: 1, letterSpacing: '0.04em' }}>{monthLeft}</p>
@@ -152,6 +173,7 @@ export default function ArtistStats() {
           <div className="p-4" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
             <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: '#16a34a', lineHeight: 1, letterSpacing: '0.04em' }}>{monthEarned} <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted }}>zł</span></p>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px' }}>Zarobione</p>
+            <TrendBadge change={monthTrend.revenue} t={t} size="7px" />
           </div>
           <div className="p-4" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
             <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: 'var(--brand)', lineHeight: 1, letterSpacing: '0.04em' }}>{monthToEarn} <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted }}>zł</span></p>

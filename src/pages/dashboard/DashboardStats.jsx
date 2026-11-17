@@ -11,6 +11,8 @@ import StatsServicesView from '@/components/dashboard/stats/StatsServicesView';
 import StatsShopView from '@/components/dashboard/stats/StatsShopView';
 import { sessionAmount } from '@/lib/settlement';
 import { PAYMENT_COLORS, PAYMENT_LABELS, sumMethod } from '@/lib/statsPayments';
+import TrendBadge from '@/components/stats/TrendBadge';
+import { pctChange, serviceRevenue, yearBounds } from '@/lib/trends';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 
 const MONTHS_PL = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
@@ -131,10 +133,29 @@ export default function DashboardStats() {
   }, [shopOrders, filtered]);
 
   // Przychód usług (usługa główna + usługi dopisane w rozliczeniu) — bez produktów
-  const serviceRevenue = useMemo(
+  const servicesRevenue = useMemo(
     () => Math.max(0, totals.revenue - shopTotals.productsRevenue),
     [totals.revenue, shopTotals.productsRevenue]
   );
+
+  // Rok do roku: sesje i przychód z samych usług (bieżący rok od 1 stycznia do dziś).
+  const yoy = useMemo(() => {
+    const bounds = yearBounds(selectedYear);
+    const pick = (range) => bookings.filter(b =>
+      b.session_date && b.session_date >= range.start && b.session_date <= range.end &&
+      b.status === 'completed' && sessionAmount(b) > 0 &&
+      (selectedArtistId === 'all' || b.artist_id === selectedArtistId)
+    );
+    const cur = pick(bounds.current);
+    const prev = pick(bounds.previous);
+    return {
+      sessions: pctChange(cur.length, prev.length),
+      revenue: pctChange(
+        cur.reduce((s, b) => s + serviceRevenue(b), 0),
+        prev.reduce((s, b) => s + serviceRevenue(b), 0)
+      ),
+    };
+  }, [bookings, selectedYear, selectedArtistId]);
 
   // Monthly chart data — stacked by payment method
   const monthlyData = useMemo(() => {
@@ -177,7 +198,7 @@ export default function DashboardStats() {
 
   // Monthly breakdown table (per artist per month)
   const monthlyBreakdown = useMemo(() => {
-    return MONTHS_PL.map((name, mi) => {
+    const rows = MONTHS_PL.map((name, mi) => {
       const mb = filtered.filter(b => b.session_date && new Date(b.session_date).getMonth() === mi);
       const revenue = mb.reduce((s, b) => s + sessionAmount(b), 0);
       // artist cut weighted
@@ -187,8 +208,11 @@ export default function DashboardStats() {
         return s + Math.round(sessionAmount(b) * cut / 100);
       }, 0);
       const studioEarnings = revenue - artistEarnings;
-      return { name, fullName: MONTHS_FULL[mi], revenue, artistEarnings, studioEarnings, sessions: mb.length, mi };
+      const services = mb.reduce((s, b) => s + serviceRevenue(b), 0);
+      return { name, fullName: MONTHS_FULL[mi], revenue, artistEarnings, studioEarnings, services, sessions: mb.length, mi };
     });
+    // Porównanie miesiąc do miesiąca (przychód z usług).
+    return rows.map((row, i) => ({ ...row, trend: i > 0 ? pctChange(row.services, rows[i - 1].services) : null }));
   }, [filtered, artistMap]);
 
   // Daily breakdown for selected month
@@ -221,11 +245,12 @@ export default function DashboardStats() {
   const mono = { fontFamily: 'var(--font-mono)' };
   const display = { fontFamily: 'var(--font-display)', fontWeight: 400 };
 
-  const KPICard = ({ label, value, sub }) => (
+  const KPICard = ({ label, value, sub, trend, trendNote }) => (
     <div className="p-5" style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
       <p style={{ ...display, fontSize: '2.2rem', color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>{value}</p>
       <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '6px' }}>{label}</p>
       {sub && <p style={{ ...mono, fontSize: '9px', color: t.fuchsia, marginTop: '4px' }}>{sub}</p>}
+      {trend && <TrendBadge change={trend} t={t} size="7px" note={trendNote} />}
     </div>
   );
 
@@ -321,7 +346,7 @@ export default function DashboardStats() {
           <div className="w-8 h-px animate-pulse" style={{ background: t.fuchsia }} />
         </div>
       ) : scope === 'services' ? (
-        <StatsServicesView t={t} filtered={filtered} MONTHS_FULL={MONTHS_FULL} selectedYear={selectedYear} />
+        <StatsServicesView t={t} filtered={filtered} MONTHS_FULL={MONTHS_FULL} selectedYear={selectedYear} bookings={bookings} artistId={selectedArtistId} />
       ) : scope === 'shop' ? (
         <StatsShopView t={t} shopOrders={shopOrders} filtered={filtered} shopTotals={shopTotals} selectedYear={selectedYear} />
       ) : (
@@ -331,7 +356,7 @@ export default function DashboardStats() {
             <KPICard label="Łączny przychód" value={`${totals.revenue.toLocaleString('pl-PL')} PLN`} />
             <KPICard label="Zarobki artystów" value={`${totals.artistEarnings.toLocaleString('pl-PL')} PLN`} sub={totals.revenue ? `${Math.round(totals.artistEarnings / totals.revenue * 100)}% całości` : ''} />
             <KPICard label="Zarobki studia" value={`${totals.studioEarnings.toLocaleString('pl-PL')} PLN`} sub={totals.revenue ? `${Math.round(totals.studioEarnings / totals.revenue * 100)}% całości` : ''} />
-            <KPICard label="Sesji" value={totals.sessions} />
+            <KPICard label="Sesji" value={totals.sessions} trend={yoy.sessions} trendNote="rok do roku" />
           </div>
 
           {/* Sklep, produkty w sesjach, prowizje, zysk */}
@@ -343,8 +368,10 @@ export default function DashboardStats() {
             />
             <KPICard
               label="Przychód usług"
-              value={`${serviceRevenue.toLocaleString('pl-PL')} PLN`}
+              value={`${servicesRevenue.toLocaleString('pl-PL')} PLN`}
               sub={`${totals.sessions} sesji`}
+              trend={yoy.revenue}
+              trendNote="rok do roku"
             />
             <KPICard
               label="Produkty w sesjach"
@@ -474,7 +501,10 @@ export default function DashboardStats() {
                   <div key={row.mi} className="grid grid-cols-12 px-4 py-3 items-center" style={{ borderBottom: `0.5px solid ${t.border}` }}>
                     <p className="col-span-3" style={{ color: t.text, fontSize: '13px', fontWeight: 500 }}>{row.fullName}</p>
                     <p className="col-span-1" style={{ ...mono, fontSize: '11px', color: t.muted }}>{row.sessions}</p>
-                    <p className="col-span-3" style={{ ...mono, fontSize: '11px', color: t.text }}>{row.revenue.toLocaleString('pl-PL')} PLN</p>
+                    <div className="col-span-3">
+                      <p style={{ ...mono, fontSize: '11px', color: t.text }}>{row.revenue.toLocaleString('pl-PL')} PLN</p>
+                      {row.trend && <TrendBadge change={row.trend} t={t} size="7px" note="usługi m/m" />}
+                    </div>
                     <p className="col-span-3" style={{ ...mono, fontSize: '11px', color: '#16a34a', fontWeight: 600 }}>{row.artistEarnings.toLocaleString('pl-PL')} PLN</p>
                     <p className="col-span-2" style={{ ...mono, fontSize: '11px', color: t.fuchsia, fontWeight: 600 }}>{row.studioEarnings.toLocaleString('pl-PL')} PLN</p>
                   </div>

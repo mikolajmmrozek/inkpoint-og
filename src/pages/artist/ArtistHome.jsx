@@ -18,6 +18,8 @@ import ArtistSessionRow from '@/components/artist/ArtistSessionRow';
 import ReferenceImagesGallery from '@/components/booking/ReferenceImagesGallery';
 import { buildHealthFormStatusMap } from '@/lib/healthFormStatus';
 import { pluralSesji } from '@/utils';
+import TrendBadge from '@/components/stats/TrendBadge';
+import { comparePeriods, monthBounds, serviceRevenue } from '@/lib/trends';
 
 const PAYMENT_METHOD_LABELS = { cash: 'Gotówka', card: 'Karta', voucher: 'Voucher' };
 const PAYMENT_METHOD_COLORS = { cash: '#16a34a', card: '#2563eb', voucher: '#f59e0b' };
@@ -500,7 +502,7 @@ export default function ArtistHome() {
 
   useEffect(() => {
     if (!artist?.id) return;
-    base44.entities.Booking.filter({ artist_id: artist.id }, '-session_date', 100)
+    base44.entities.Booking.filter({ artist_id: artist.id }, '-session_date', 300)
       .then(setBookings)
       .finally(() => setLoading(false));
     setTimeout(() => {
@@ -516,7 +518,7 @@ export default function ArtistHome() {
   // Realtime — nadchodzące sesje i statystyki odświeżają się na żywo
   useRealtimeSync('Booking', () => {
     if (!artist?.id) return;
-    base44.entities.Booking.filter({ artist_id: artist.id }, '-session_date', 100).then(setBookings);
+    base44.entities.Booking.filter({ artist_id: artist.id }, '-session_date', 300).then(setBookings);
   }, [artist?.id]);
 
   const now = new Date();
@@ -532,10 +534,15 @@ export default function ArtistHome() {
   const projected = bookedThisMonth.reduce((sum, b) => sum + (b.estimated_price || 0), 0) * cut / 100;
   const forecast = Math.round(projected - revenue);
 
+  // Porównanie z poprzednim miesiącem: sesje i mój zarobek z samych usług.
+  const monthTrend = comparePeriods(bookings, monthBounds(now.getFullYear(), now.getMonth(), now), {
+    amountOf: (b) => serviceRevenue(b) * (cut / 100),
+  });
+
   const KPI = [
     { label: 'Nadchodzące sesje', value: upcoming.length, icon: Calendar, link: '/artist/schedule' },
-    { label: 'Sesje w tym miesiącu', value: thisMonth.length, icon: TrendingUp, link: '/artist/stats' },
-    { label: 'Mój zarobek (mies.)', value: `${Math.round(revenue)} zł`, sub: `Prognoza: +${forecast} zł`, icon: Clock, link: '/artist/stats' },
+    { label: 'Sesje w tym miesiącu', value: thisMonth.length, trend: monthTrend.sessions, icon: TrendingUp, link: '/artist/stats' },
+    { label: 'Mój zarobek (mies.)', value: `${Math.round(revenue)} zł`, sub: `Prognoza: +${forecast} zł`, trend: monthTrend.revenue, icon: Clock, link: '/artist/stats' },
   ];
 
   // All active sessions sorted ascending, max 10 upcoming
@@ -561,7 +568,7 @@ export default function ArtistHome() {
 
   const handleSettled = (updated) => {
     setSettlingBooking(null);
-    base44.entities.Booking.filter({ artist_id: artist.id }, '-session_date', 100).then(setBookings);
+    base44.entities.Booking.filter({ artist_id: artist.id }, '-session_date', 300).then(setBookings);
     if (updated?.id) {
       base44.functions.invoke('manageGoogleCalendar', { action: 'sync_one', booking_id: updated.id }).catch(() => {});
     }
@@ -597,6 +604,7 @@ export default function ArtistHome() {
                 {kpi.sub && !loading && (
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.06em', marginTop: '6px' }}>{kpi.sub}</p>
                 )}
+                {kpi.trend && !loading && <TrendBadge change={kpi.trend} t={t} size="8px" />}
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px' }}>{kpi.label}</p>
               </Link>
             </motion.div>
@@ -697,7 +705,7 @@ export default function ArtistHome() {
             user={user}
             onClose={() => setSelectedBooking(null)}
             onSaved={() => {
-              base44.entities.Booking.filter({ artist_id: artist.id }, '-session_date', 100).then(setBookings);
+              base44.entities.Booking.filter({ artist_id: artist.id }, '-session_date', 300).then(setBookings);
               setSelectedBooking(null);
             }}
           />

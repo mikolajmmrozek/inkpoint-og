@@ -4,6 +4,8 @@ import { Wallet, TrendingUp, Check, Clock, ArrowRight, Calendar } from 'lucide-r
 import { useAuth } from '@/lib/AuthContext';
 import SettlementModal from './SettlementModal';
 import { formatCompact } from '@/lib/formatNumber';
+import TrendBadge from '@/components/stats/TrendBadge';
+import { comparePeriods, monthBounds, serviceRevenue } from '@/lib/trends';
 
 const STATUS_COLORS = { pending: '#FF007F', confirmed: '#16a34a', completed: '#2563eb', cancelled: '#9ca3af' };
 const PAYMENT_COLORS = { cash: '#16a34a', card: '#2563eb', voucher: '#f59e0b' };
@@ -76,6 +78,11 @@ export default function TodayOverview({ bookings, t, theme, onBookingUpdate, art
     return s + Math.round((amt - artistShare(b, amt)) * 100) / 100;
   }, 0);
 
+  // Porównanie z poprzednim miesiącem: sesje i zarobek studia z samych usług.
+  const monthTrend = comparePeriods(bookings, monthBounds(monthDate.getFullYear(), monthDate.getMonth()), {
+    amountOf: (b) => serviceRevenue(b) * (1 - getCut(b) / 100),
+  });
+
   const handleSettled = (updated) => {
     setSettlingBooking(null);
     if (onBookingUpdate) onBookingUpdate(updated);
@@ -106,6 +113,7 @@ export default function TodayOverview({ bookings, t, theme, onBookingUpdate, art
               </div>
               <p style={{ ...display, fontSize: '2rem', color: t.value, lineHeight: 1, letterSpacing: '0.03em' }}>{monthSessionsCount}</p>
               <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '5px' }}>jeszcze zaplanowanych: {monthUpcomingCount}</p>
+              <TrendBadge change={monthTrend.sessions} t={t} size="7px" />
             </Link>
             <div className="p-4" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
               <div className="flex items-center gap-1.5 mb-2">
@@ -114,6 +122,7 @@ export default function TodayOverview({ bookings, t, theme, onBookingUpdate, art
               </div>
               <p style={{ ...display, fontSize: '2rem', color: 'var(--brand)', lineHeight: 1, letterSpacing: '0.03em' }}>{formatCompact(monthSettledStudio)} <span style={{ ...mono, fontSize: '11px', color: t.muted }}>PLN</span></p>
               <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '5px' }}>jeszcze do zarobienia: {formatCompact(monthUpcomingStudio)} PLN</p>
+              <TrendBadge change={monthTrend.revenue} t={t} size="7px" />
             </div>
           </div>
         </div>
