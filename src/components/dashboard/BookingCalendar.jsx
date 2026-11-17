@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameDay, isSameMonth, addMonths, subMonths } from 'date-fns';
 import { pl } from 'date-fns/locale';
@@ -21,6 +21,12 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
   const isMobile = useIsMobile();
   const today = new Date();
   const effectiveSelectedDate = selectedDate || today;
+
+  // Gdy wybrany dzień wypada w innym miesiącu (np. deep-link z powiadomienia),
+  // przeskakujemy kalendarzem na ten miesiąc, żeby dzień był od razu widoczny.
+  useEffect(() => {
+    if (selectedDate && !isSameMonth(selectedDate, viewMonth)) setViewMonth(selectedDate);
+  }, [selectedDate]);
 
   const days = eachDayOfInterval({ start: startOfMonth(viewMonth), end: endOfMonth(viewMonth) });
   const startPad = (getDay(startOfMonth(viewMonth)) + 6) % 7; // Monday start

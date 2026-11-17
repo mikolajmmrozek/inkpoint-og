@@ -9,6 +9,8 @@ import { useSearchParams } from 'react-router-dom';
 import TodaySettlementView from '@/components/dashboard/TodaySettlementView';
 import StatsServicesView from '@/components/dashboard/stats/StatsServicesView';
 import StatsShopView from '@/components/dashboard/stats/StatsShopView';
+import { sessionAmount } from '@/lib/settlement';
+import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 
 const MONTHS_PL = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
 const MONTHS_FULL = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
@@ -22,7 +24,7 @@ const sumMethod = (b, method) => {
   if (b.payment_breakdown && b.payment_breakdown.length > 0) {
     return b.payment_breakdown.filter(p => p.method === method).reduce((s, p) => s + Number(p.amount || 0), 0);
   }
-  return method === 'cash' ? Number(b.estimated_price || 0) : 0;
+  return method === 'cash' ? sessionAmount(b) : 0;
 };
 
 export default function DashboardStats() {
@@ -43,6 +45,10 @@ export default function DashboardStats() {
   const [paymentWeekStart, setPaymentWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [searchParams] = useSearchParams();
   const [scope, setScope] = useState(() => (['services', 'shop'].includes(searchParams.get('view')) ? searchParams.get('view') : 'studio'));
+  const [reloadKey, setReloadKey] = useState(0);
+
+  // Rozliczenie / zmiana kwoty sesji od razu odświeża statystyki.
+  useRealtimeSync('Booking', () => setReloadKey(k => k + 1));
 
   useEffect(() => {
     base44.entities.Artist.list().then(a => {
@@ -54,7 +60,7 @@ export default function DashboardStats() {
         .then(setBookings)
         .finally(() => setLoading(false));
     }, 400);
-  }, []);
+  }, [reloadKey]);
 
   // Build artist map: id -> artist (with cut)
   const artistMap = useMemo(() => {
@@ -65,7 +71,7 @@ export default function DashboardStats() {
 
   // Completed bookings with price (only completed status)
   const paid = useMemo(() =>
-    bookings.filter(b => b.estimated_price && b.status === 'completed'),
+    bookings.filter(b => sessionAmount(b) > 0 && b.status === 'completed'),
     [bookings]
   );
 
@@ -85,7 +91,7 @@ export default function DashboardStats() {
   const artistStats = useMemo(() => {
     return artists.map(a => {
       const ab = paidYear.filter(b => b.artist_id === a.id);
-      const totalRevenue = ab.reduce((s, b) => s + Number(b.estimated_price || 0), 0);
+      const totalRevenue = ab.reduce((s, b) => s + sessionAmount(b), 0);
       const cut = a.artist_cut_percent != null ? a.artist_cut_percent : 60;
       const artistEarnings = Math.round(totalRevenue * cut / 100);
       const studioEarnings = totalRevenue - artistEarnings;
@@ -184,12 +190,12 @@ export default function DashboardStats() {
   const monthlyBreakdown = useMemo(() => {
     return MONTHS_PL.map((name, mi) => {
       const mb = filtered.filter(b => b.session_date && new Date(b.session_date).getMonth() === mi);
-      const revenue = mb.reduce((s, b) => s + Number(b.estimated_price || 0), 0);
+      const revenue = mb.reduce((s, b) => s + sessionAmount(b), 0);
       // artist cut weighted
       const artistEarnings = mb.reduce((s, b) => {
         const a = artistMap[b.artist_id];
         const cut = a?.artist_cut_percent ?? 60;
-        return s + Math.round(Number(b.estimated_price || 0) * cut / 100);
+        return s + Math.round(sessionAmount(b) * cut / 100);
       }, 0);
       const studioEarnings = revenue - artistEarnings;
       return { name, fullName: MONTHS_FULL[mi], revenue, artistEarnings, studioEarnings, sessions: mb.length, mi };
@@ -206,11 +212,11 @@ export default function DashboardStats() {
         const d = new Date(b.session_date);
         return d.getMonth() === selectedMonth && d.getDate() === day;
       });
-      const revenue = db.reduce((s, b) => s + Number(b.estimated_price || 0), 0);
+      const revenue = db.reduce((s, b) => s + sessionAmount(b), 0);
       const artistEarnings = db.reduce((s, b) => {
         const a = artistMap[b.artist_id];
         const cut = a?.artist_cut_percent ?? 60;
-        return s + Math.round(Number(b.estimated_price || 0) * cut / 100);
+        return s + Math.round(sessionAmount(b) * cut / 100);
       }, 0);
       const studioEarnings = revenue - artistEarnings;
       return { day, revenue, artistEarnings, studioEarnings, sessions: db.length, bookings: db };
@@ -503,12 +509,12 @@ export default function DashboardStats() {
                       <div key={b.id} className="grid grid-cols-12 px-4 py-1.5 items-center" style={{ background: 'rgb(var(--brand-rgb) /0.02)', borderTop: `0.5px solid ${t.border}` }}>
                         <p className="col-span-3" style={{ ...mono, fontSize: '9px', color: t.muted, paddingLeft: '16px' }}>↳ {b.client_name}</p>
                         <p className="col-span-1" />
-                        <p className="col-span-3" style={{ ...mono, fontSize: '9px', color: t.muted }}>{Number(b.estimated_price || 0).toLocaleString('pl-PL')} PLN · {b.artist_name}</p>
+                        <p className="col-span-3" style={{ ...mono, fontSize: '9px', color: t.muted }}>{sessionAmount(b).toLocaleString('pl-PL')} PLN · {b.artist_name}</p>
                         <p className="col-span-3" style={{ ...mono, fontSize: '9px', color: 'rgba(22,163,74,0.7)' }}>
-                          {Math.round(Number(b.estimated_price || 0) * ((artistMap[b.artist_id]?.artist_cut_percent ?? 60) / 100)).toLocaleString('pl-PL')} PLN
+                          {Math.round(sessionAmount(b) * ((artistMap[b.artist_id]?.artist_cut_percent ?? 60) / 100)).toLocaleString('pl-PL')} PLN
                         </p>
                         <p className="col-span-2" style={{ ...mono, fontSize: '9px', color: 'rgb(var(--brand-rgb) /0.6)' }}>
-                          {(Number(b.estimated_price || 0) - Math.round(Number(b.estimated_price || 0) * ((artistMap[b.artist_id]?.artist_cut_percent ?? 60) / 100))).toLocaleString('pl-PL')} PLN
+                          {(sessionAmount(b) - Math.round(sessionAmount(b) * ((artistMap[b.artist_id]?.artist_cut_percent ?? 60) / 100))).toLocaleString('pl-PL')} PLN
                         </p>
                       </div>
                     ))}

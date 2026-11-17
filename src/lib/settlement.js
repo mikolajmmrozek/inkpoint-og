@@ -11,6 +11,15 @@ export const discountOf = (base, type, value) => {
 
 export const afterDiscount = (base, type, value) => r2(Math.max(0, (Number(base) || 0) - discountOf(base, type, value)));
 
+// Kwota sesji używana w statystykach: rozliczona sesja liczy kwotę finalną,
+// nierozliczona — cenę orientacyjną z rezerwacji.
+export const sessionAmount = (booking) => {
+  if (!booking) return 0;
+  const final = Number(booking.final_amount);
+  if (booking.is_settled && Number.isFinite(final)) return final;
+  return Number(booking.estimated_price) || 0;
+};
+
 // Category rule wins over the shop-wide default ('inherit' falls back).
 export const resolveCommission = (settings, category) => {
   const cType = category?.commission_type;

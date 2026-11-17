@@ -279,6 +279,9 @@ export default function DashboardBookings() {
     if (!pendingBookingId) return;
     const found = bookings.find(b => b.id === pendingBookingId);
     if (found) {
+      // Powiadomienie prowadzi zawsze do widoku miesiąca z podświetlonym dniem sesji.
+      setToSettleMode(false);
+      setViewMode('calendar');
       if (found.session_date) setSelectedDate(new Date(found.session_date));
       setSelected(found);
     }
@@ -775,7 +778,7 @@ export default function DashboardBookings() {
                 booking={selected}
                 theme={theme}
                 onClose={() => setSelected(null)}
-                onStatusChange={updateStatus}
+                onStatusChange={(id, status) => { updateStatus(id, status); if (status === 'completed') refreshBookings(); }}
                 onDelete={deleteBooking}
                 onEdit={() => handleEdit(selected)}
               />

@@ -1033,7 +1033,13 @@ export default function ArtistSchedule() {
     if (!pendingBookingId) return;
     const found = bookings.find(b => b.id === pendingBookingId);
     if (found) {
-      if (found.session_date) setSelectedDate(new Date(found.session_date));
+      // Powiadomienie prowadzi do widoku miesiąca z podświetlonym dniem sesji.
+      if (found.session_date) {
+        const day = new Date(found.session_date);
+        setSelectedDate(day);
+        setViewMonth(day);
+      }
+      setViewMode('month');
       setSelectedBooking(found);
     }
   }, [loading, bookings, pendingBookingId]);

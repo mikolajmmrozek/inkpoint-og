@@ -43,12 +43,13 @@ export default function SettlementModal({ booking, user, onClose, onSettled, t, 
   // Cena wyjściowa sesji = oryginalna cena podana w rezerwacji, a przy edycji
   // rozliczenia kwota usługi bez produktów i usług dodatkowych.
   const [serviceBase, setServiceBase] = useState(() => {
-    const original = r2(booking?.estimated_price);
-    if (original > 0) return original;
+    // Przy edycji rozliczenia bazą jest kwota usługi z zapisanej kwoty finalnej
+    // (bez produktów i usług dodatkowych), żeby ponowny zapis nie dublował pozycji.
     if (isEditing && booking?.final_amount != null) {
       return r2(Number(booking.final_amount) - storedProductsTotal - storedExtrasTotal);
     }
-    return '';
+    const original = r2(booking?.estimated_price);
+    return original > 0 ? original : '';
   });
   const [sessionDiscount, setSessionDiscount] = useState({ type: 'none', value: 0 });
   const [showSessionDiscount, setShowSessionDiscount] = useState(false);

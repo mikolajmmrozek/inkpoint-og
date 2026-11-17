@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import { sessionAmount } from '@/lib/settlement';
+import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const MONTHS_PL = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
@@ -18,12 +20,17 @@ export default function ArtistStats() {
     ? { title: '#111111', muted: 'rgba(0,0,0,0.4)', cardBg: '#FFFFFF', cardBorder: '#E5E5E5', text: '#111111', rowBorder: '#E5E5E5' }
     : { title: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', cardBg: 'rgba(255,255,255,0.04)', cardBorder: '#262626', text: '#F5F0EB', rowBorder: '#262626' };
 
+  const [reloadKey, setReloadKey] = useState(0);
+
+  // Zmiana kwoty finalnej / rozliczenie od razu odświeża statystyki.
+  useRealtimeSync('Booking', () => setReloadKey(k => k + 1), [artist?.id]);
+
   useEffect(() => {
     if (!artist?.id) return;
     base44.entities.Booking.filter({ artist_id: artist.id }, '-session_date', 200)
       .then(setBookings)
       .finally(() => setLoading(false));
-  }, [artist?.id]);
+  }, [artist?.id, reloadKey]);
 
   const cut = artist?.artist_cut_percent || 60;
 
@@ -32,7 +39,7 @@ export default function ArtistStats() {
       const month = String(idx + 1).padStart(2, '0');
       const prefix = `${year}-${month}`;
       const completed = bookings.filter(b => b.session_date?.startsWith(prefix) && b.status === 'completed');
-      const revenue = completed.reduce((sum, b) => sum + (b.estimated_price || 0), 0);
+      const revenue = completed.reduce((sum, b) => sum + sessionAmount(b), 0);
       const myEarning = Math.round(revenue * cut / 100);
       return { label, sessions: completed.length, revenue, myEarning };
     });
@@ -50,7 +57,7 @@ export default function ArtistStats() {
     return Object.entries(grouped)
       .sort(([dateA], [dateB]) => dateB.localeCompare(dateA))
       .map(([date, items]) => {
-        const revenue = items.reduce((sum, b) => sum + (b.estimated_price || 0), 0);
+        const revenue = items.reduce((sum, b) => sum + sessionAmount(b), 0);
         const myEarning = Math.round(revenue * cut / 100);
         return { date, sessions: items.length, revenue, myEarning };
       });
@@ -70,8 +77,8 @@ export default function ArtistStats() {
   const monthSessions = monthBookings.length;
   const monthDone = monthCompleted.length;
   const monthLeft = monthRemaining.length;
-  const monthEarned = monthCompleted.reduce((s, b) => s + Math.round((b.estimated_price || 0) * cut / 100), 0);
-  const monthToEarn = monthRemaining.reduce((s, b) => s + Math.round((b.estimated_price || 0) * cut / 100), 0);
+  const monthEarned = monthCompleted.reduce((s, b) => s + Math.round(sessionAmount(b) * cut / 100), 0);
+  const monthToEarn = monthRemaining.reduce((s, b) => s + Math.round(sessionAmount(b) * cut / 100), 0);
 
   return (
     <div>
