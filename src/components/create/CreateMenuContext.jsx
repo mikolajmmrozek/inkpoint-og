@@ -5,7 +5,6 @@ import { toast } from '@/components/ui/use-toast';
 import CreateMenuFAB from './CreateMenuFAB';
 import BookingModal from '@/components/dashboard/BookingModal';
 import QuickAvailabilityModal from './QuickAvailabilityModal';
-import QuickClientModal from './QuickClientModal';
 import QuickPromotionModal from './QuickPromotionModal';
 import { openHealthFormQRPage } from '@/lib/qrPage';
 import GatekeeperChat from '@/components/gatekeeper/GatekeeperChat';
@@ -48,7 +47,8 @@ export function CreateMenuProvider({ children, role, theme, selfArtistId }) {
     setAvailPrefill(pre);
     setAction('availability');
   }, [role, selfArtistId]);
-  const newClient = useCallback(() => setAction('client'), []);
+  // Nowy klient: zamiast okna wpisywania otwieramy stronę z kodem QR formularza.
+  const newClient = useCallback(() => { navigate('/nowy-klient-qr'); }, [navigate]);
   const newPromotion = useCallback(() => setAction('promotion'), []);
   const newHealthForm = useCallback(() => {
     openHealthFormQRPage(`${window.location.origin}/health-form`);
@@ -72,12 +72,6 @@ export function CreateMenuProvider({ children, role, theme, selfArtistId }) {
     closeAll();
     toast({ title: 'Dyspozycja dodana' });
     await runRefresh('availability');
-  };
-
-  const handleClientSaved = async (clientName) => {
-    closeAll();
-    toast({ title: 'Klient dodany', description: clientName });
-    await runRefresh('clients');
   };
 
   const handlePromotionSaved = async () => {
@@ -121,16 +115,6 @@ export function CreateMenuProvider({ children, role, theme, selfArtistId }) {
             role={role}
             onClose={closeAll}
             onSaved={handleAvailSaved}
-            t={t}
-          />
-        )}
-      </AnimatePresence>
-      <AnimatePresence>
-        {action === 'client' && (
-          <QuickClientModal
-            key="client"
-            onClose={closeAll}
-            onSaved={handleClientSaved}
             t={t}
           />
         )}
