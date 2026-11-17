@@ -16,7 +16,7 @@ export default function TrendBadge({ change, note = 'vs poprzedni miesiąc', t, 
   if (change.pct == null) {
     return (
       <p className="flex items-center gap-1" style={{ ...style, color: t.muted, opacity: 0.8 }}>
-        brak danych za poprzedni okres
+        {note ? 'brak danych za poprzedni okres' : 'brak danych'}
       </p>
     );
   }
@@ -28,7 +28,7 @@ export default function TrendBadge({ change, note = 'vs poprzedni miesiąc', t, 
     <p className="flex items-center gap-1" style={{ ...style, color }}>
       <Icon size={9} />
       {change.pct > 0 ? '+' : ''}{change.pct}%
-      <span style={{ color: t.muted, letterSpacing: '0.06em' }}>{note}</span>
+      {note && <span style={{ color: t.muted, letterSpacing: '0.06em' }}>{note}</span>}
     </p>
   );
 }

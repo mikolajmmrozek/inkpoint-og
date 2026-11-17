@@ -3,7 +3,9 @@ import { base44 } from '@/api/base44Client';
 import { bookingUpdate, bookingDelete } from '@/lib/bookingAudit';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, MessageSquare, TrendingUp, AlertCircle, ClipboardList, Wallet, Inbox } from 'lucide-react';
+import { Calendar, MessageSquare, AlertCircle, ClipboardList, Wallet, Inbox } from 'lucide-react';
+import TrendBadge from '@/components/stats/TrendBadge';
+import { rollingTrend } from '@/lib/trends';
 import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
 import { AnimatePresence } from 'framer-motion';
 import { useTheme } from './Dashboard';
@@ -100,11 +102,12 @@ export default function DashboardHome() {
   // Połączony kafekl: oczekujące rezerwacje + prośby o zmianę terminu → jeden widok w Rezerwacjach.
   const pendingAndRequests = stats.pending + stats.changeRequests;
 
+  const todayKpi = new Date().toISOString().split('T')[0];
   const KPI = [
-    { label: 'Wszystkie rezerwacje', value: stats.bookings, icon: Calendar, link: '/dashboard/bookings' },
-    { label: 'Do weryfikacji', value: pendingAndRequests, icon: Inbox, link: '/dashboard/bookings?view=pending', sublabel: `${stats.pending} rezerw. · ${stats.changeRequests} zmiany` },
+    { label: 'Wszystkie rezerwacje', value: stats.bookings, icon: Calendar, link: '/dashboard/bookings', trend: rollingTrend(allBookings, () => true) },
+    { label: 'Do weryfikacji', value: pendingAndRequests, icon: Inbox, link: '/dashboard/bookings?view=pending', sublabel: `${stats.pending} rezerw. · ${stats.changeRequests} zmiany`, trend: rollingTrend(allBookings, b => b.status === 'pending') },
     { label: 'Nowe wiadomości', value: stats.messages, icon: MessageSquare, link: '/dashboard/messages' },
-    { label: 'Do rozliczenia', value: stats.toSettle, icon: Wallet, link: '/dashboard/bookings?filter=to_settle&view=list&tab=past' },
+    { label: 'Do rozliczenia', value: stats.toSettle, icon: Wallet, link: '/dashboard/bookings?filter=to_settle&view=list&tab=past', trend: rollingTrend(allBookings, b => (b.session_date || '') <= todayKpi && b.status !== 'cancelled' && b.status !== 'completed' && !b.is_settled, { mode: 'backward' }) },
   ];
 
   const buildPendingByDay = (bookingsArr) => {
@@ -143,9 +146,9 @@ export default function DashboardHome() {
               transition={{ delay: i * 0.1, duration: 0.5 }}
             >
               <Link to={kpi.link} className="block p-6 transition-all duration-300 h-full" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start justify-between gap-2 mb-4">
                   <Icon size={16} color="var(--brand)" />
-                  <TrendingUp size={12} color={t.muted} />
+                  {kpi.trend && !loading && <TrendBadge change={kpi.trend} t={t} size="8px" note="m/m" />}
                 </div>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 400, color: t.value, lineHeight: 1, letterSpacing: '0.04em' }}>
                   {loading ? '—' : formatCompact(kpi.value)}

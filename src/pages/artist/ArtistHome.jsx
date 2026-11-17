@@ -19,7 +19,7 @@ import ReferenceImagesGallery from '@/components/booking/ReferenceImagesGallery'
 import { buildHealthFormStatusMap } from '@/lib/healthFormStatus';
 import { pluralSesji } from '@/utils';
 import TrendBadge from '@/components/stats/TrendBadge';
-import { comparePeriods, monthBounds, serviceRevenue } from '@/lib/trends';
+import { comparePeriods, monthBounds, rollingTrend, serviceRevenue } from '@/lib/trends';
 
 const PAYMENT_METHOD_LABELS = { cash: 'Gotówka', card: 'Karta', voucher: 'Voucher' };
 const PAYMENT_METHOD_COLORS = { cash: '#16a34a', card: '#2563eb', voucher: '#f59e0b' };
@@ -540,7 +540,7 @@ export default function ArtistHome() {
   });
 
   const KPI = [
-    { label: 'Nadchodzące sesje', value: upcoming.length, icon: Calendar, link: '/artist/schedule' },
+    { label: 'Nadchodzące sesje', value: upcoming.length, trend: rollingTrend(bookings, b => b.status === 'pending' || b.status === 'confirmed'), icon: Calendar, link: '/artist/schedule' },
     { label: 'Sesje w tym miesiącu', value: thisMonth.length, trend: monthTrend.sessions, icon: TrendingUp, link: '/artist/stats' },
     { label: 'Mój zarobek (mies.)', value: `${Math.round(revenue)} zł`, sub: `Prognoza: +${forecast} zł`, trend: monthTrend.revenue, icon: Clock, link: '/artist/stats' },
   ];
@@ -596,15 +596,17 @@ export default function ArtistHome() {
           const Icon = kpi.icon;
           return (
             <motion.div key={kpi.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
-              <Link to={kpi.link} className="block p-6 h-full" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
-                <Icon size={16} color="var(--brand)" className="mb-4" />
+              <Link to={kpi.link} className="block p-6 h-full relative" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
+                <div className="flex items-start justify-between gap-2 mb-4">
+                  <Icon size={16} color="var(--brand)" />
+                  {kpi.trend && !loading && <TrendBadge change={kpi.trend} t={t} size="8px" note="m/m" />}
+                </div>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 400, color: t.value, lineHeight: 1, letterSpacing: '0.04em' }}>
                   {loading ? '—' : kpi.value}
                 </p>
                 {kpi.sub && !loading && (
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.06em', marginTop: '6px' }}>{kpi.sub}</p>
                 )}
-                {kpi.trend && !loading && <TrendBadge change={kpi.trend} t={t} size="8px" />}
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px' }}>{kpi.label}</p>
               </Link>
             </motion.div>

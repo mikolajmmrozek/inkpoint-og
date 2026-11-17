@@ -58,6 +58,21 @@ export function periodTotals(bookings, range, { artistId = 'all', amountOf = ser
   return { sessions: rows.length, revenue: rows.reduce((s, b) => s + amountOf(b), 0), rows };
 }
 
+// Okno kroczące dla liczników „nadchodzące” i „do zrobienia”.
+// forward: najbliższe N dni vs poprzednie N dni. backward: ostatnie N dni vs N dni przed nimi.
+export function rollingTrend(bookings, predicate, { days = 30, mode = 'forward', now = new Date() } = {}) {
+  const base = new Date(now);
+  base.setHours(0, 0, 0, 0);
+  const shift = (n) => { const d = new Date(base); d.setDate(d.getDate() + n); return iso(d); };
+  const [curFrom, curTo, prevFrom, prevTo] = mode === 'backward'
+    ? [shift(-days), iso(base), shift(-2 * days), shift(-days - 1)]
+    : [iso(base), shift(days), shift(-days), shift(-1)];
+  const count = (from, to) => bookings.filter(b =>
+    b.session_date && b.session_date >= from && b.session_date <= to && predicate(b)
+  ).length;
+  return pctChange(count(curFrom, curTo), count(prevFrom, prevTo));
+}
+
 // Porównanie zakresów: sesje i przychód vs okres bazowy.
 export function comparePeriods(bookings, bounds, opts = {}) {
   const current = periodTotals(bookings, bounds.current, opts);
