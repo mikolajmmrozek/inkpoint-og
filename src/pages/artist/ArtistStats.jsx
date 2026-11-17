@@ -134,7 +134,7 @@ export default function ArtistStats() {
           <div key={kpi.label} className="p-5" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
             <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.2rem', color: t.text, lineHeight: 1, letterSpacing: '0.04em' }}>{loading ? '—' : kpi.value}</p>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '4px' }}>{kpi.label}</p>
-            {kpi.trend && !loading && <TrendBadge change={kpi.trend} t={t} note="rok do roku" />}
+            {kpi.trend && !loading && <TrendBadge change={kpi.trend} t={t} />}
           </div>
         ))}
       </div>

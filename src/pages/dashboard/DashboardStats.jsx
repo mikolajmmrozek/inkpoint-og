@@ -245,12 +245,12 @@ export default function DashboardStats() {
   const mono = { fontFamily: 'var(--font-mono)' };
   const display = { fontFamily: 'var(--font-display)', fontWeight: 400 };
 
-  const KPICard = ({ label, value, sub, trend, trendNote }) => (
+  const KPICard = ({ label, value, sub, trend }) => (
     <div className="p-5" style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
       <p style={{ ...display, fontSize: '2.2rem', color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>{value}</p>
       <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '6px' }}>{label}</p>
       {sub && <p style={{ ...mono, fontSize: '9px', color: t.fuchsia, marginTop: '4px' }}>{sub}</p>}
-      {trend && <TrendBadge change={trend} t={t} note={trendNote} />}
+      {trend && <TrendBadge change={trend} t={t} />}
     </div>
   );
 
@@ -356,7 +356,7 @@ export default function DashboardStats() {
             <KPICard label="Łączny przychód" value={`${totals.revenue.toLocaleString('pl-PL')} PLN`} />
             <KPICard label="Zarobki artystów" value={`${totals.artistEarnings.toLocaleString('pl-PL')} PLN`} sub={totals.revenue ? `${Math.round(totals.artistEarnings / totals.revenue * 100)}% całości` : ''} />
             <KPICard label="Zarobki studia" value={`${totals.studioEarnings.toLocaleString('pl-PL')} PLN`} sub={totals.revenue ? `${Math.round(totals.studioEarnings / totals.revenue * 100)}% całości` : ''} />
-            <KPICard label="Sesji" value={totals.sessions} trend={yoy.sessions} trendNote="rok do roku" />
+            <KPICard label="Sesji" value={totals.sessions} trend={yoy.sessions} />
           </div>
 
           {/* Sklep, produkty w sesjach, prowizje, zysk */}
@@ -371,7 +371,6 @@ export default function DashboardStats() {
               value={`${servicesRevenue.toLocaleString('pl-PL')} PLN`}
               sub={`${totals.sessions} sesji`}
               trend={yoy.revenue}
-              trendNote="rok do roku"
             />
             <KPICard
               label="Produkty w sesjach"
@@ -503,7 +502,7 @@ export default function DashboardStats() {
                     <p className="col-span-1" style={{ ...mono, fontSize: '11px', color: t.muted }}>{row.sessions}</p>
                     <div className="col-span-3">
                       <p style={{ ...mono, fontSize: '11px', color: t.text }}>{row.revenue.toLocaleString('pl-PL')} PLN</p>
-                      {row.trend && <TrendBadge change={row.trend} t={t} note="zeszły miesiąc" />}
+                      {row.trend && <TrendBadge change={row.trend} t={t} />}
                     </div>
                     <p className="col-span-3" style={{ ...mono, fontSize: '11px', color: '#16a34a', fontWeight: 600 }}>{row.artistEarnings.toLocaleString('pl-PL')} PLN</p>
                     <p className="col-span-2" style={{ ...mono, fontSize: '11px', color: t.fuchsia, fontWeight: 600 }}>{row.studioEarnings.toLocaleString('pl-PL')} PLN</p>
