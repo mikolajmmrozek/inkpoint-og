@@ -129,7 +129,7 @@ export default function PanelMessages({ theme, userEmail, userName, roleLabel })
               if (isBookingCard) {
                 return (
                   <div key={msg.id} className="flex flex-col items-center">
-                    <BookingCard bookingId={msg.booking_id} t={t} theme={theme} readOnly />
+                    <BookingCard bookingId={msg.booking_id} t={t} theme={theme} readOnly hideArtist={roleLabel === 'ARTYSTA'} />
                     <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, marginTop: '4px' }}>
                       {format(new Date(msg.created_date), 'dd.MM.yyyy HH:mm')}
                     </p>

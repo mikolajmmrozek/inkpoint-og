@@ -47,7 +47,7 @@ function getStatusEmailSubject(status) {
   }
 }
 
-export default function BookingCard({ bookingId, t, theme, onAction, readOnly = false }) {
+export default function BookingCard({ bookingId, t, theme, onAction, readOnly = false, hideArtist = false }) {
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showImages, setShowImages] = useState(false);
@@ -166,7 +166,7 @@ export default function BookingCard({ bookingId, t, theme, onAction, readOnly = 
           {booking.service_name && (
             <p style={{ fontSize: '12px', color: t.muted }}>Usługa: <span style={{ color: t.text }}>{booking.service_name}</span></p>
           )}
-          {booking.artist_name && (
+          {booking.artist_name && !hideArtist && (
             <p style={{ fontSize: '12px', color: t.muted }}>Artysta: <span style={{ color: t.text }}>{booking.artist_name}</span></p>
           )}
           {booking.tattoo_placement && (
