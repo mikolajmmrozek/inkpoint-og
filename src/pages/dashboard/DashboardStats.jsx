@@ -141,10 +141,10 @@ export default function DashboardStats() {
     };
   }, [shopOrders, filtered]);
 
-  // Przychód samych usług (bez produktów i usług dodatkowych dopisanych w rozliczeniu)
+  // Przychód usług (usługa główna + usługi dopisane w rozliczeniu) — bez produktów
   const serviceRevenue = useMemo(
-    () => Math.max(0, totals.revenue - shopTotals.productsRevenue - shopTotals.extrasRevenue),
-    [totals.revenue, shopTotals.productsRevenue, shopTotals.extrasRevenue]
+    () => Math.max(0, totals.revenue - shopTotals.productsRevenue),
+    [totals.revenue, shopTotals.productsRevenue]
   );
 
   // Monthly chart data — stacked by payment method
@@ -358,8 +358,8 @@ export default function DashboardStats() {
               sub={`${totals.sessions} sesji`}
             />
             <KPICard
-              label="Produkty i usługi dodatkowe"
-              value={`${(shopTotals.productsRevenue + shopTotals.extrasRevenue).toLocaleString('pl-PL')} PLN`}
+              label="Produkty w sesjach"
+              value={`${shopTotals.productsRevenue.toLocaleString('pl-PL')} PLN`}
               sub={`${shopTotals.productsCount} szt. · prowizje ${shopTotals.commission.toLocaleString('pl-PL')} PLN`}
             />
             <KPICard
