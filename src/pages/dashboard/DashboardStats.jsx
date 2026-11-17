@@ -10,22 +10,11 @@ import TodaySettlementView from '@/components/dashboard/TodaySettlementView';
 import StatsServicesView from '@/components/dashboard/stats/StatsServicesView';
 import StatsShopView from '@/components/dashboard/stats/StatsShopView';
 import { sessionAmount } from '@/lib/settlement';
+import { PAYMENT_COLORS, PAYMENT_LABELS, sumMethod } from '@/lib/statsPayments';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 
 const MONTHS_PL = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
 const MONTHS_FULL = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
-
-const PAYMENT_COLORS = { cash: '#16a34a', card: '#2563eb', voucher: '#f59e0b' };
-const PAYMENT_LABELS = { cash: 'Gotówka', card: 'Karta', voucher: 'Voucher' };
-
-// Sum amount for a given method from a booking's payment_breakdown.
-// Falls back to estimated_price as 'cash' for legacy completed bookings without breakdown.
-const sumMethod = (b, method) => {
-  if (b.payment_breakdown && b.payment_breakdown.length > 0) {
-    return b.payment_breakdown.filter(p => p.method === method).reduce((s, p) => s + Number(p.amount || 0), 0);
-  }
-  return method === 'cash' ? sessionAmount(b) : 0;
-};
 
 export default function DashboardStats() {
   const { theme } = useTheme();
@@ -334,7 +323,7 @@ export default function DashboardStats() {
       ) : scope === 'services' ? (
         <StatsServicesView t={t} filtered={filtered} MONTHS_FULL={MONTHS_FULL} selectedYear={selectedYear} />
       ) : scope === 'shop' ? (
-        <StatsShopView t={t} shopOrders={shopOrders} filtered={filtered} shopTotals={shopTotals} />
+        <StatsShopView t={t} shopOrders={shopOrders} filtered={filtered} shopTotals={shopTotals} selectedYear={selectedYear} />
       ) : (
         <>
           {/* KPI row */}

@@ -1,8 +1,12 @@
 import { useMemo, useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { money } from '@/lib/shop';
+import { PAYMENT_METHODS, methodShare } from '@/lib/statsPayments';
+import { MONTHS_PL, monthIndex } from '@/lib/statsDates';
+import StatsPaymentChart from './StatsPaymentChart';
+import StatsShopCalendar from './StatsShopCalendar';
 
-export default function StatsShopView({ t, shopOrders, filtered, shopTotals }) {
+export default function StatsShopView({ t, shopOrders, filtered, shopTotals, selectedYear }) {
   const mono = { fontFamily: 'var(--font-mono)' };
   const display = { fontFamily: 'var(--font-display)', fontWeight: 400 };
   const [categories, setCategories] = useState([]);
@@ -42,6 +46,17 @@ export default function StatsShopView({ t, shopOrders, filtered, shopTotals }) {
 
   const revenueAll = products.reduce((s, p) => s + p.revenue, 0);
 
+  // Formy płatności dla produktów sprzedanych w sesjach — przychód rozdzielony
+  // wg udziału metody płatności w danej sesji.
+  const paymentData = useMemo(() => MONTHS_PL.map((name, mi) => {
+    const mb = filtered.filter(b => monthIndex(b.session_date) === mi);
+    const row = { name };
+    PAYMENT_METHODS.forEach(m => {
+      row[m] = mb.reduce((s, b) => s + (Number(b.products_total) || 0) * methodShare(b, m), 0);
+    });
+    return row;
+  }), [filtered]);
+
   const KPICard = ({ label, value, sub }) => (
     <div className="p-5" style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
       <p style={{ ...display, fontSize: '2.2rem', color: t.title, lineHeight: 1, letterSpacing: '0.04em' }}>{value}</p>
@@ -75,6 +90,13 @@ export default function StatsShopView({ t, shopOrders, filtered, shopTotals }) {
         />
       </div>
 
+      <StatsPaymentChart
+        t={t}
+        title={`FORMY PŁATNOŚCI — PRODUKTY ${selectedYear}`}
+        data={paymentData}
+        note="Produkty sprzedane w sesjach; zamówienia online nie zapisują metody płatności."
+      />
+
       <div className="mb-8">
         <p style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>
           PRODUKTY — PRZYCHÓD I ZYSK
@@ -100,6 +122,8 @@ export default function StatsShopView({ t, shopOrders, filtered, shopTotals }) {
           ))}
         </div>
       </div>
+
+      <StatsShopCalendar t={t} shopOrders={shopOrders} filtered={filtered} selectedYear={selectedYear} />
 
       <div>
         <p style={{ ...mono, fontSize: '9px', color: t.muted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>
