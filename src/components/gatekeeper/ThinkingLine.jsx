@@ -41,8 +41,6 @@ export default function ThinkingLine({ t, toolCalls = [] }) {
   const steps = useMemo(() => buildSteps(toolCalls), [signature]);
   const [index, setIndex] = useState(0);
 
-  useEffect(() => { setIndex(0); }, [signature]);
-
   useEffect(() => {
     if (steps.length < 2) return;
     const id = setInterval(() => setIndex((i) => (i + 1) % steps.length), 2000);

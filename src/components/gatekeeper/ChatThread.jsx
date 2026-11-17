@@ -33,6 +33,19 @@ export default function ChatThread({ t, loading, error, messages, isResponding, 
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, loading]);
 
+  // Wskaźnik pracy pokazujemy od wysłania wiadomości aż do pierwszej treści
+  // odpowiedzi — puste wiadomości asystenta w trakcie przetwarzania go nie gaszą.
+  const working = useMemo(() => {
+    let lastUserIdx = -1;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === 'user') { lastUserIdx = i; break; }
+    }
+    if (lastUserIdx === -1) return false;
+    const answered = messages.slice(lastUserIdx + 1)
+      .some(m => m.role === 'assistant' && String(m.content || '').trim());
+    return !answered;
+  }, [messages]);
+
   return (
     <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4">
       {loading ? (
@@ -58,7 +71,7 @@ export default function ChatThread({ t, loading, error, messages, isResponding, 
               )}
             </div>
           ))}
-          {isResponding && <ThinkingLine t={t} toolCalls={turns.length ? turns[turns.length - 1].toolCalls : []} />}
+          {working && !error && <ThinkingLine t={t} toolCalls={turns.length ? turns[turns.length - 1].toolCalls : []} />}
           {showSuggestions && (
             <div className="flex flex-col gap-1.5 mt-1">
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '2px' }}>POPULARNE PYTANIA</p>
