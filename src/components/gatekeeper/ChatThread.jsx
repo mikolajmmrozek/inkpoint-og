@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { Bot, Loader2, RefreshCw } from 'lucide-react';
+import { Loader2, RefreshCw } from 'lucide-react';
 import MessageBubble from './MessageBubble';
 import TurnStatusBubble from './TurnStatusBubble';
+import ThinkingLine from './ThinkingLine';
 
 export default function ChatThread({ t, loading, error, messages, isResponding, showSuggestions, suggestions, onRetry, onSuggestion }) {
   const scrollRef = useRef(null);
@@ -52,17 +53,12 @@ export default function ChatThread({ t, loading, error, messages, isResponding, 
             <div key={turn.key}>
               {turn.user && <MessageBubble message={turn.user} t={t} />}
               {turn.assistant.map((m, i) => <MessageBubble key={i} message={m} t={t} />)}
-              {turn.toolCalls.length > 0 && <TurnStatusBubble toolCalls={turn.toolCalls} t={t} seed={turn.key} />}
+              {turn.toolCalls.length > 0 && (
+                <TurnStatusBubble toolCalls={turn.toolCalls} t={t} seed={turn.key} hasAnswer={turn.assistant.length > 0} />
+              )}
             </div>
           ))}
-          {isResponding && (
-            <div className="flex items-center gap-2 mb-3">
-              <span style={{ width: '26px', height: '26px', borderRadius: 'var(--radius)', background: 'var(--brand)', color: 'var(--btn-text, #F5F0EB)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Bot size={15} /></span>
-              <span style={{ display: 'flex', gap: '4px', padding: '10px 14px', background: 'rgba(128,128,128,0.06)', border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)' }}>
-                {[0, 1, 2].map(d => <span key={d} style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--brand)', opacity: 1 - d * 0.25, animation: `pulse 1.2s ${d * 0.2}s infinite` }} />)}
-              </span>
-            </div>
-          )}
+          {isResponding && <ThinkingLine t={t} toolCalls={turns.length ? turns[turns.length - 1].toolCalls : []} />}
           {showSuggestions && (
             <div className="flex flex-col gap-1.5 mt-1">
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '2px' }}>POPULARNE PYTANIA</p>

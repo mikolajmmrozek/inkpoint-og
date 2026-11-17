@@ -62,7 +62,7 @@ const AVATAR = {
   flexShrink: 0,
 };
 
-export default function TurnStatusBubble({ toolCalls, t, seed }) {
+export default function TurnStatusBubble({ toolCalls, t, seed, hasAnswer = false }) {
   const [open, setOpen] = useState(false);
   const reportedRef = useRef(false);
 
@@ -88,7 +88,9 @@ export default function TurnStatusBubble({ toolCalls, t, seed }) {
 
   // Po sukcesie nie pokazujemy dymka z zielonym "OK" — wystarczy sama odpowiedź.
   // Dymek zostaje tylko w trakcie pracy ("Pracuję · …") i przy błędzie.
+  // Gdy asystent zaczął już pisać odpowiedź, status pracy też znika.
   if (status === 'ok') return null;
+  if (status === 'working' && hasAnswer) return null;
 
   const chip = {
     display: 'flex', alignItems: 'center', gap: '7px', width: 'fit-content',
