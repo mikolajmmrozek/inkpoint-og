@@ -794,7 +794,7 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
             {/* Notatki o kliencie — persistent, stored on Client entity */}
             <div className="mb-4">
               {label('Notatki o kliencie (widoczne przy każdej sesji)')}
-              <textarea rows={2} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} value={form.client_notes || ''} onChange={e => set('client_notes', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} placeholder="Np. spóźnia się, alergia na lateks..." />
+              <textarea rows={2} style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, resize: 'none' }} value={form.client_notes || ''} onChange={e => set('client_notes', e.target.value)} onFocus={e => e.target.style.borderBottomColor = 'var(--brand)'} onBlur={e => e.target.style.borderBottomColor = t.border} placeholder="Np. spóźnia się, alergia itp." />
             </div>
             {/* Notatki od klienta — read-only, from online form */}
             {form.notes ? (
