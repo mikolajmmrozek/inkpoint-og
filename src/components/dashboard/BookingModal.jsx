@@ -588,19 +588,20 @@ export default function BookingModal({ booking, defaultDate, onClose, onSaved, t
                 ))}
               </div>
             </div>
-            {/* Artist — right below categories */}
-            <div className="mb-4 mt-4">
-              {label('Artysta')}
-              <select
-                value={form.artist_id || ''}
-                onChange={e => handleArtist(e.target.value)}
-                disabled={!!lockArtistId}
-                style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark', cursor: lockArtistId ? 'not-allowed' : 'pointer' }}
-              >
-                {!lockArtistId && <option value="">Wybierz artystę</option>}
-                {artists.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-              </select>
-            </div>
+            {/* Artist — right below categories (nie pokazujemy, gdy artysta jest zalogowany) */}
+            {!lockArtistId && (
+              <div className="mb-4 mt-4">
+                {label('Artysta')}
+                <select
+                  value={form.artist_id || ''}
+                  onChange={e => handleArtist(e.target.value)}
+                  style={{ ...inputStyle, color: t.text, borderBottomColor: t.border, colorScheme: t.bg === '#FFFFFF' ? 'light' : 'dark', cursor: 'pointer' }}
+                >
+                  <option value="">Wybierz artystę</option>
+                  {artists.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                </select>
+              </div>
+            )}
             <div style={{ position: 'relative' }}>
               {label('Wybierz usługę (opcjonalnie)')}
               <div style={{ position: 'relative' }}>
