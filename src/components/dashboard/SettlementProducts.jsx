@@ -15,21 +15,22 @@ const input = {
 };
 const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
 
+const chip = (active, t) => ({
+  border: `0.5px solid ${active ? 'var(--brand)' : t.border}`,
+  color: active ? 'var(--brand)' : t.muted,
+  background: active ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent',
+  fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase',
+  padding: '5px 10px', cursor: 'pointer', borderRadius: 'var(--radius)',
+});
+
 const DiscountPanel = ({ item, onChange, t }) => {
   const type = item.discount_type === 'percent' ? 'percent' : item.discount_type === 'amount' ? 'amount' : 'none';
   const setType = (next) => onChange({ discount_type: next, discount_value: next === 'none' ? 0 : (item.discount_value || 0) });
-  const chip = (active) => ({
-    border: `0.5px solid ${active ? 'var(--brand)' : t.border}`,
-    color: active ? 'var(--brand)' : t.muted,
-    background: active ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent',
-    fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase',
-    padding: '5px 10px', cursor: 'pointer', borderRadius: 'var(--radius)',
-  });
   return (
     <div className="mt-2 pt-2" style={{ borderTop: `0.5px solid ${t.border}` }}>
       <div className="flex items-center gap-2 flex-wrap">
-        <button onClick={() => setType('amount')} style={chip(type === 'amount')}>Kwota</button>
-        <button onClick={() => setType('percent')} style={chip(type === 'percent')}>Procent</button>
+        <button onClick={() => setType('amount')} style={chip(type === 'amount', t)}>Kwota</button>
+        <button onClick={() => setType('percent')} style={chip(type === 'percent', t)}>Procent</button>
         {type !== 'none' && (
           <>
             <input
@@ -43,7 +44,7 @@ const DiscountPanel = ({ item, onChange, t }) => {
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted }}>{type === 'percent' ? '%' : 'PLN'}</span>
           </>
         )}
-        <button onClick={() => setType('none')} style={chip(type === 'none')} title="Bez rabatu">
+        <button onClick={() => setType('none')} style={chip(type === 'none', t)} title="Bez rabatu">
           <X size={9} style={{ display: 'inline', verticalAlign: 'middle' }} /> Brak
         </button>
       </div>
@@ -60,6 +61,7 @@ export default function SettlementProducts({ value = [], onChange, t }) {
   const [products, setProducts] = useState([]);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [category, setCategory] = useState('');
   const [discountFor, setDiscountFor] = useState(null);
 
   useEffect(() => {
@@ -67,6 +69,8 @@ export default function SettlementProducts({ value = [], onChange, t }) {
       .then(setProducts)
       .catch(() => setProducts([]));
   }, []);
+
+  const categories = [...new Set(products.map((p) => (p.category_name || '').trim()).filter(Boolean))];
 
   const add = (product) => {
     const variant = (product.variants || []).find((v) => v.is_active !== false) || null;
@@ -109,8 +113,9 @@ export default function SettlementProducts({ value = [], onChange, t }) {
   };
 
   const matches = products
+    .filter((p) => !category || (p.category_name || '') === category)
     .filter((p) => !query || p.name.toLowerCase().includes(query.toLowerCase()))
-    .slice(0, 6);
+    .slice(0, 8);
 
   const total = value.reduce((s, item) => s + r2(item.price) * num(item.qty), 0);
   const baseTotal = value.reduce((s, item) => s + r2(item.unit_price) * num(item.qty), 0);
@@ -118,15 +123,24 @@ export default function SettlementProducts({ value = [], onChange, t }) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-3">
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>PRODUKTY</p>
-        <button onClick={() => setOpen(!open)} className="flex items-center gap-1.5" style={{ background: 'none', border: `0.5px solid ${t.border}`, color: t.text, cursor: 'pointer', padding: '6px 11px', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', borderRadius: 'var(--radius)' }}>
-          {open ? <X size={11} /> : <Plus size={11} />} {open ? 'ZAMKNIJ' : 'DODAJ PRODUKT'}
-        </button>
-      </div>
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-center gap-2"
+        style={{ padding: '11px', border: `0.5px solid ${open ? 'var(--brand)' : t.border}`, background: 'transparent', color: open ? 'var(--brand)' : t.text, cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', borderRadius: 'var(--radius)' }}
+      >
+        {open ? <X size={12} /> : <Plus size={12} />} DODAJ PRODUKT
+      </button>
 
       {open && (
-        <>
+        <div className="mt-3">
+          {categories.length > 1 && (
+            <div className="flex flex-wrap gap-2 mb-3">
+              <button onClick={() => setCategory('')} style={chip(!category, t)}>Wszystkie</button>
+              {categories.map((c) => (
+                <button key={c} onClick={() => setCategory(category === c ? '' : c)} style={chip(category === c, t)}>{c}</button>
+              ))}
+            </div>
+          )}
           <div className="flex items-center gap-2 mb-3" style={{ border: `0.5px solid ${t.border}`, padding: '7px 11px', borderRadius: 'var(--radius)' }}>
             <Search size={12} color={t.muted} />
             <input
@@ -137,7 +151,7 @@ export default function SettlementProducts({ value = [], onChange, t }) {
               style={{ ...input, color: t.text, flex: 1, borderBottom: 'none' }}
             />
           </div>
-          {matches.length > 0 && (
+          {matches.length > 0 ? (
             <div style={{ border: `0.5px solid ${t.border}`, marginBottom: '12px', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
               {matches.map((p) => (
                 <button
@@ -151,16 +165,16 @@ export default function SettlementProducts({ value = [], onChange, t }) {
                 </button>
               ))}
             </div>
+          ) : (
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.06em', marginBottom: '12px' }}>
+              Brak produktów w tej kategorii.
+            </p>
           )}
-        </>
+        </div>
       )}
 
-      {value.length === 0 ? (
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.06em', lineHeight: 1.7 }}>
-          Brak produktów w rozliczeniu. „Dodaj produkt” otwiera wyszukiwanie w katalogu.
-        </p>
-      ) : (
-        <div style={{ border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)' }}>
+      {value.length > 0 && (
+        <div className="mt-3" style={{ border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)' }}>
           {value.map((item, i) => {
             const product = products.find((p) => p.id === item.product_id);
             const variants = (product?.variants || []).filter((v) => v.is_active !== false);
@@ -220,10 +234,6 @@ export default function SettlementProducts({ value = [], onChange, t }) {
           </div>
         </div>
       )}
-
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '8px', lineHeight: 1.7 }}>
-        Zatwierdzenie zdejmuje sztuki z magazynu. Edycja koryguje tylko różnicę, anulowanie przywraca stan.
-      </p>
     </div>
   );
 }

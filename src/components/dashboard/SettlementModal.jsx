@@ -40,12 +40,16 @@ export default function SettlementModal({ booking, user, onClose, onSettled, t, 
   const storedProductsTotal = storedProducts.reduce((s, p) => s + r2(p.price) * (Number(p.qty) || 0), 0);
   const storedExtrasTotal = storedExtras.reduce((s, p) => s + r2(p.price), 0);
 
-  // Cena wyjściowa sesji = kwota usługi bez produktów i usług dodatkowych.
-  const [serviceBase, setServiceBase] = useState(
-    isEditing && booking?.final_amount != null
-      ? r2(Number(booking.final_amount) - storedProductsTotal - storedExtrasTotal)
-      : (booking?.estimated_price || '')
-  );
+  // Cena wyjściowa sesji = oryginalna cena podana w rezerwacji, a przy edycji
+  // rozliczenia kwota usługi bez produktów i usług dodatkowych.
+  const [serviceBase, setServiceBase] = useState(() => {
+    const original = r2(booking?.estimated_price);
+    if (original > 0) return original;
+    if (isEditing && booking?.final_amount != null) {
+      return r2(Number(booking.final_amount) - storedProductsTotal - storedExtrasTotal);
+    }
+    return '';
+  });
   const [sessionDiscount, setSessionDiscount] = useState({ type: 'none', value: 0 });
   const [showSessionDiscount, setShowSessionDiscount] = useState(false);
   const [depositAmount, setDepositAmount] = useState(booking?.deposit_amount || 0);
@@ -69,6 +73,18 @@ export default function SettlementModal({ booking, user, onClose, onSettled, t, 
     base44.entities.ShopCategory.list('order', 100)
       .then(setCategories)
       .catch(() => setCategories([]));
+  }, []);
+
+  // Gdy rezerwacja nie ma podanej ceny, zaczytujemy cenę usługi z katalogu.
+  useEffect(() => {
+    if (!booking?.service_id) return;
+    base44.entities.Service.get(booking.service_id)
+      .then(s => {
+        if (!s) return;
+        const price = r2(s.price_type === 'fixed' ? s.price_fixed : s.price_min);
+        setServiceBase(prev => (prev === '' && price > 0 ? price : prev));
+      })
+      .catch(() => {});
   }, []);
 
   const categoryById = new Map(categories.map(c => [c.id, c]));
@@ -270,7 +286,7 @@ export default function SettlementModal({ booking, user, onClose, onSettled, t, 
           )}
 
           <div className="flex items-center justify-between p-3 mt-3" style={{ border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)' }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Usługa po rabacie</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Kwota finalna</span>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: serviceFinal < baseNum ? '#16a34a' : t.text }}>
               {serviceFinal < baseNum && <span style={{ textDecoration: 'line-through', color: t.muted, marginRight: '6px' }}>{money(baseNum)}</span>}
               {money(serviceFinal)}
@@ -278,14 +294,19 @@ export default function SettlementModal({ booking, user, onClose, onSettled, t, 
           </div>
         </div>
 
-        {/* 2. Usługi dodatkowe */}
+        {/* 2. Dodawanie pozycji — na start tylko przyciski */}
         <div className="mb-6" style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '18px' }}>
-          <SettlementExtraServices value={extraServices} onChange={setExtraServices} t={t} theme={theme} />
-        </div>
-
-        {/* 3. Produkty */}
-        <div className="mb-6" style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '18px' }}>
-          <SettlementProducts value={products} onChange={setProducts} t={t} />
+          <div className="flex flex-col gap-2">
+            <SettlementProducts value={products} onChange={setProducts} t={t} />
+            <SettlementExtraServices
+              value={extraServices}
+              onChange={setExtraServices}
+              t={t}
+              theme={theme}
+              artistId={booking?.artist_id || ''}
+              artistName={booking?.artist_name || ''}
+            />
+          </div>
         </div>
 
         {/* 4. Rozliczenie — suma, rabaty, zaliczka */}
@@ -389,7 +410,7 @@ export default function SettlementModal({ booking, user, onClose, onSettled, t, 
             </div>
           ))}
           {payments.length < 3 && (
-            <button onClick={addPayment} className="flex items-center gap-1.5" style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--brand)' }}>
+            <button onClick={addPayment} className="w-full flex items-center justify-center gap-2" style={{ background: 'transparent', border: '0.5px solid var(--brand)', cursor: 'pointer', padding: '11px', fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--brand)', borderRadius: 'var(--radius)' }}>
               <Plus size={12} /> DODAJ METODĘ
             </button>
           )}

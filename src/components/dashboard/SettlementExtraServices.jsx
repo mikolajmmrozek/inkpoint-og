@@ -14,7 +14,9 @@ const input = {
   fontFamily: 'var(--font-body)',
 };
 
-const chipStyle = (active, t) => ({
+const CATEGORY_LABELS = { tattoo: 'Tatuaż', piercing: 'Piercing', studio: 'Studio' };
+
+const chip = (active, t) => ({
   border: `0.5px solid ${active ? 'var(--brand)' : t.border}`,
   color: active ? 'var(--brand)' : t.muted,
   background: active ? 'rgb(var(--brand-rgb) /0.08)' : 'transparent',
@@ -22,10 +24,11 @@ const chipStyle = (active, t) => ({
   padding: '5px 10px', cursor: 'pointer', borderRadius: 'var(--radius)',
 });
 
-export default function SettlementExtraServices({ value = [], onChange, t, theme }) {
+export default function SettlementExtraServices({ value = [], onChange, t, artistId = '', artistName = '' }) {
   const [services, setServices] = useState([]);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [category, setCategory] = useState('');
   const [discountFor, setDiscountFor] = useState(null);
 
   useEffect(() => {
@@ -33,6 +36,12 @@ export default function SettlementExtraServices({ value = [], onChange, t, theme
       .then(setServices)
       .catch(() => setServices([]));
   }, []);
+
+  // Artysta widzi tylko swoje usługi — gdy nie ma jeszcze przypisanych, pokazujemy wszystkie.
+  const own = artistId ? services.filter((s) => (s.artist_ids || []).includes(artistId)) : services;
+  const pool = own.length > 0 ? own : services;
+
+  const categories = Object.keys(CATEGORY_LABELS).filter((key) => pool.some((s) => s.category === key));
 
   const add = (service) => {
     const price = r2(service.price_type === 'fixed' ? service.price_fixed : service.price_min);
@@ -44,8 +53,8 @@ export default function SettlementExtraServices({ value = [], onChange, t, theme
       price,
       discount_type: 'none',
       discount_value: 0,
-      artist_id: '',
-      artist_name: '',
+      artist_id: artistId,
+      artist_name: artistName,
     }]);
     setQuery('');
     setOpen(false);
@@ -60,9 +69,10 @@ export default function SettlementExtraServices({ value = [], onChange, t, theme
     update(index, { ...patch, base_price: base, price: afterDiscount(base, next.discount_type, next.discount_value) });
   };
 
-  const matches = services
+  const matches = pool
+    .filter((s) => !category || s.category === category)
     .filter((s) => !query || s.name.toLowerCase().includes(query.toLowerCase()))
-    .slice(0, 6);
+    .slice(0, 8);
 
   const total = value.reduce((s, x) => s + r2(x.price), 0);
   const baseTotal = value.reduce((s, x) => s + r2(x.base_price != null ? x.base_price : x.price), 0);
@@ -70,15 +80,24 @@ export default function SettlementExtraServices({ value = [], onChange, t, theme
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-3">
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>USŁUGI DODATKOWE</p>
-        <button onClick={() => setOpen(!open)} className="flex items-center gap-1.5" style={{ background: 'none', border: `0.5px solid ${t.border}`, color: t.text, cursor: 'pointer', padding: '6px 11px', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', borderRadius: 'var(--radius)' }}>
-          {open ? <X size={11} /> : <Plus size={11} />} {open ? 'ZAMKNIJ' : 'DODAJ USŁUGĘ'}
-        </button>
-      </div>
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-center gap-2"
+        style={{ padding: '11px', border: `0.5px solid ${open ? 'var(--brand)' : t.border}`, background: 'transparent', color: open ? 'var(--brand)' : t.text, cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', borderRadius: 'var(--radius)' }}
+      >
+        {open ? <X size={12} /> : <Plus size={12} />} DODAJ USŁUGĘ
+      </button>
 
       {open && (
-        <>
+        <div className="mt-3">
+          {categories.length > 1 && (
+            <div className="flex flex-wrap gap-2 mb-3">
+              <button onClick={() => setCategory('')} style={chip(!category, t)}>Wszystkie</button>
+              {categories.map((key) => (
+                <button key={key} onClick={() => setCategory(category === key ? '' : key)} style={chip(category === key, t)}>{CATEGORY_LABELS[key]}</button>
+              ))}
+            </div>
+          )}
           <div className="flex items-center gap-2 mb-3" style={{ border: `0.5px solid ${t.border}`, padding: '7px 11px', borderRadius: 'var(--radius)' }}>
             <Search size={12} color={t.muted} />
             <input
@@ -89,7 +108,7 @@ export default function SettlementExtraServices({ value = [], onChange, t, theme
               style={{ ...input, color: t.text, flex: 1, borderBottom: 'none' }}
             />
           </div>
-          {matches.length > 0 && (
+          {matches.length > 0 ? (
             <div style={{ border: `0.5px solid ${t.border}`, marginBottom: '12px', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
               {matches.map((s) => (
                 <button
@@ -98,23 +117,23 @@ export default function SettlementExtraServices({ value = [], onChange, t, theme
                   className="w-full flex items-center justify-between px-3 py-2"
                   style={{ background: 'none', border: 'none', borderBottom: `0.5px solid ${t.border}`, cursor: 'pointer', textAlign: 'left' }}
                 >
-                  <span style={{ fontSize: '12px', color: t.text }}>{s.name}{s.category ? ` · ${s.category}` : ''}</span>
+                  <span style={{ fontSize: '12px', color: t.text }}>{s.name}</span>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted }}>
                     {money(s.price_type === 'fixed' ? s.price_fixed : s.price_min)}
                   </span>
                 </button>
               ))}
             </div>
+          ) : (
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.06em', marginBottom: '12px' }}>
+              Brak usług w tej kategorii.
+            </p>
           )}
-        </>
+        </div>
       )}
 
-      {value.length === 0 ? (
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.06em', lineHeight: 1.7 }}>
-          Brak usług dodatkowych. Dodana usługa zostaje przy tym samym kliencie i terminie — bez nowej rezerwacji i bez konfliktu w kalendarzu.
-        </p>
-      ) : (
-        <div style={{ border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)' }}>
+      {value.length > 0 && (
+        <div className="mt-3" style={{ border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)' }}>
           {value.map((item, i) => {
             const base = item.base_price != null ? item.base_price : item.price;
             const discounted = r2(base) > r2(item.price);
@@ -128,7 +147,7 @@ export default function SettlementExtraServices({ value = [], onChange, t, theme
                     <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, marginTop: '2px' }}>
                       {discounted && <span style={{ textDecoration: 'line-through', marginRight: '5px' }}>{money(base)}</span>}
                       <span style={{ color: discounted ? '#16a34a' : t.muted }}>{money(item.price)}</span>
-                      {item.category ? ` · ${item.category}` : ''}
+                      {item.category ? ` · ${CATEGORY_LABELS[item.category] || item.category}` : ''}
                     </p>
                   </div>
                   <button onClick={() => setDiscountFor(showDiscount ? null : i)} title="Rabat na tę usługę" style={{ background: 'none', border: 'none', cursor: 'pointer', color: showDiscount || discounted ? 'var(--brand)' : t.muted, padding: '3px' }}>
@@ -141,8 +160,8 @@ export default function SettlementExtraServices({ value = [], onChange, t, theme
                 {showDiscount && (
                   <div className="mt-2 pt-2" style={{ borderTop: `0.5px solid ${t.border}` }}>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <button onClick={() => applyDiscount(i, { discount_type: 'amount' })} style={chipStyle(type === 'amount', t)}>Kwota</button>
-                      <button onClick={() => applyDiscount(i, { discount_type: 'percent' })} style={chipStyle(type === 'percent', t)}>Procent</button>
+                      <button onClick={() => applyDiscount(i, { discount_type: 'amount' })} style={chip(type === 'amount', t)}>Kwota</button>
+                      <button onClick={() => applyDiscount(i, { discount_type: 'percent' })} style={chip(type === 'percent', t)}>Procent</button>
                       {type !== 'none' && (
                         <>
                           <input
@@ -156,7 +175,7 @@ export default function SettlementExtraServices({ value = [], onChange, t, theme
                           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted }}>{type === 'percent' ? '%' : 'PLN'}</span>
                         </>
                       )}
-                      <button onClick={() => applyDiscount(i, { discount_type: 'none', discount_value: 0 })} style={chipStyle(type === 'none', t)}>Brak</button>
+                      <button onClick={() => applyDiscount(i, { discount_type: 'none', discount_value: 0 })} style={chip(type === 'none', t)}>Brak</button>
                     </div>
                     {type !== 'none' && (
                       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '5px' }}>
