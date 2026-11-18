@@ -202,7 +202,7 @@ const ENTITIES = {
     ops: { read: true, create: true, update: true, delete: true },
     required: ['name'],
     fields: ['name', 'slug', 'short_description', 'description', 'category_id', 'category_name', 'piercing_placements', 'piercing_types', 'clothing_types', 'collection_ids', 'price', 'cost', 'discount_type', 'discount_value', 'pricing_mode', 'slider_min', 'slider_max', 'slider_step', 'is_voucher', 'unlimited_stock', 'stock', 'restock', 'shipping_form_ids', 'pickup_in_studio', 'shipping_cost', 'shipping_info', 'shipping_options', 'image_url', 'images', 'variant_axes', 'variants', 'multipacks', 'is_active', 'is_featured', 'order'],
-    filter: ['name', 'slug', 'category_id', 'category_name', 'is_active', 'is_featured', 'pricing_mode', 'price', 'order'],
+    filter: ['name', 'slug', 'sku', 'category_id', 'category_name', 'is_active', 'is_featured', 'pricing_mode', 'price', 'order'],
     sensitive: ['price', 'cost', 'stock', 'discount_type', 'discount_value'],
   },
   ShopCategory: {
@@ -257,6 +257,7 @@ export default async function (req: Request): Promise<Response> {
       const dat = {
         items: (Array.isArray(body.items) ? body.items : []).map((i: any) => ({
           product_id: String(i?.product_id || ''),
+          sku: String(i?.sku || ''),
           variant_key: String(i?.variant_key || ''),
           qty: Math.max(1, Math.round(Number(i?.qty) || 1)),
           price: i?.price != null && i.price !== '' ? r2(i.price) : null,
@@ -269,10 +270,16 @@ export default async function (req: Request): Promise<Response> {
         artist_id: String(body.artist_id || ''),
       };
 
+      // Błędy w danych sprzedaży (brak produktu, niezgodna suma wpłat) to nie awaria —
+      // wracają jako status 'invalid', żeby asystent poprawił dane zamiast pokazywać błąd.
       let preview: any = null;
-      try { preview = await previewSale(base44, dat.items); } catch (e: any) { return Response.json({ error: e.message }, { status: 400 }); }
+      try { preview = await previewSale(base44, dat.items); } catch (e: any) {
+        return Response.json({ status: 'invalid', action: 'sale', problem: e.message, hint: 'Popraw dane sprzedaży (produkt / SKU / ilość) i wywołaj ponownie.' });
+      }
       let payments: any[] = [];
-      try { payments = normalizePayments(dat.payments, preview.total); } catch (e: any) { return Response.json({ error: e.message }, { status: 400 }); }
+      try { payments = normalizePayments(dat.payments, preview.total); } catch (e: any) {
+        return Response.json({ status: 'invalid', action: 'sale', problem: e.message, razem: preview.total, hint: 'Popraw wpłaty tak, aby ich suma równała się kwocie sprzedaży, i wywołaj ponownie.' });
+      }
 
       let artistName = '';
       if (dat.artist_id) {

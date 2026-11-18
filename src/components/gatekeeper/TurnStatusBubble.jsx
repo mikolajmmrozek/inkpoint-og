@@ -40,7 +40,7 @@ function errorIdFrom(seed) {
   let h = 0;
   const s = String(seed);
   for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
-  return 'BŁ-' + h.toString(16).toUpperCase().padStart(6, '0');
+  return 'BL-' + h.toString(16).toUpperCase().padStart(6, '0');
 }
 
 // Krótki, bezpieczny opis błędu — bez payloadów, stack trace'ów i danych klientów

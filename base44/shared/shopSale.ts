@@ -14,38 +14,65 @@ const todayIso = () => {
 
 export function cleanSaleItems(items: any[]) {
   return (Array.isArray(items) ? items : [])
-    .filter((i) => i && i.product_id && Number(i.qty) > 0)
+    .filter((i) => i && (i.product_id || i.sku) && Number(i.qty) > 0)
     .map((i) => ({
-      product_id: String(i.product_id),
+      product_id: i.product_id ? String(i.product_id) : '',
+      sku: i.sku ? String(i.sku).trim() : '',
       variant_key: i.variant_key ? String(i.variant_key) : '',
       qty: Math.max(1, Math.round(Number(i.qty) || 1)),
       price: i.price != null && i.price !== '' ? r2(i.price) : null,
     }));
 }
 
+const asList = (res: any) => (Array.isArray(res) ? res : (res?.items || []));
+
 // Pozycje sprzedaży z cenami z katalogu + kwota razem.
 export async function previewSale(base44: any, items: any[]) {
   const clean = cleanSaleItems(items);
-  if (clean.length === 0) throw new Error('Brak produktów w sprzedaży — podaj items: [{product_id, qty}].');
-  const ids = [...new Set(clean.map((i) => i.product_id))];
-  const products = await base44.asServiceRole.entities.ShopProduct.filter({ id: { $in: ids } });
+  if (clean.length === 0) throw new Error('Brak produktów w sprzedaży — podaj items: [{product_id, qty}] albo [{sku, qty}].');
+  const ids = [...new Set(clean.map((i) => i.product_id).filter(Boolean))];
+  const products = ids.length ? await base44.asServiceRole.entities.ShopProduct.filter({ id: { $in: ids } }) : [];
   const byId = new Map((products || []).map((p: any) => [p.id, p]));
 
+  // SKU = kod kreskowy: produktu albo wariantu. Sprzedaż może wskazać sam kod zamiast id.
+  let catalog: any[] = [];
+  if (clean.some((i) => !i.product_id && i.sku)) {
+    catalog = asList(await base44.asServiceRole.entities.ShopProduct.filter({}, { limit: 500 }));
+  }
+  const bySku = (raw: string) => {
+    const code = String(raw || '').trim();
+    if (!code) return null;
+    for (const p of catalog) {
+      if (String(p.sku || '').trim() === code) return { product: p, variantKey: '' };
+      const v = (p.variants || []).find((x: any) => String(x.sku || '').trim() === code);
+      if (v) return { product: p, variantKey: v.key };
+    }
+    return null;
+  };
+
   const lines = clean.map((i) => {
-    const product: any = byId.get(i.product_id);
-    if (!product) throw new Error(`Produkt ${i.product_id} nie istnieje w katalogu.`);
-    const variant = i.variant_key ? (product.variants || []).find((v: any) => v.key === i.variant_key) : null;
-    if (i.variant_key && !variant) throw new Error(`Produkt ${product.name} nie ma wariantu "${i.variant_key}".`);
+    let product: any = i.product_id ? byId.get(i.product_id) : null;
+    let variantKey = i.variant_key;
+    if (!product && i.sku) {
+      const hit = bySku(i.sku);
+      if (hit) {
+        product = hit.product;
+        if (!variantKey) variantKey = hit.variantKey;
+      }
+    }
+    if (!product) throw new Error(`Produkt ${i.product_id || i.sku} nie istnieje w katalogu.`);
+    const variant = variantKey ? (product.variants || []).find((v: any) => v.key === variantKey) : null;
+    if (variantKey && !variant) throw new Error(`Produkt ${product.name} nie ma wariantu "${variantKey}".`);
     const unit = r2(variant ? variant.price : product.price);
     return {
       product_id: product.id,
       name: product.name,
-      variant_key: i.variant_key,
+      variant_key: variantKey,
       variant_label: variant ? (variant.options || []).map((o: any) => o.value).join(' / ') : '',
       qty: i.qty,
       unit_price: unit,
       price: i.price != null ? i.price : unit,
-      stock: i.variant_key ? Number(variant?.stock ?? 0) : (product.unlimited_stock ? null : Number(product.stock ?? 0)),
+      stock: variantKey ? Number(variant?.stock ?? 0) : (product.unlimited_stock ? null : Number(product.stock ?? 0)),
     };
   });
 

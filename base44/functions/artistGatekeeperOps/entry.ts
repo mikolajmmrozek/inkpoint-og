@@ -34,7 +34,7 @@ const FILTERS: Record<string, string[]> = {
   Service: ['name', 'category', 'is_active'],
   Artist: [],
   CalendarImportDraft: ['status', 'session_date', 'gcal_event_id'],
-  ShopProduct: ['name', 'category_name', 'is_active', 'price', 'order'],
+  ShopProduct: ['name', 'sku', 'category_name', 'is_active', 'price', 'order'],
 };
 
 function notFound(entityName: string) {
@@ -166,6 +166,12 @@ export default async function (req: Request): Promise<Response> {
           let out = asList(res);
           if (filters.name) out = out.filter((p: any) => (p.name || '').toLowerCase().includes(String(filters.name).toLowerCase()));
           if (filters.price !== undefined) out = out.filter((p: any) => Number(p.price) === Number(filters.price));
+          // SKU = kod kreskowy produktu albo wariantu — sprzedaż i wyszukiwanie po kodzie
+          if (filters.sku) {
+            const code = String(filters.sku).trim();
+            out = out.filter((p: any) => String(p.sku || '').trim() === code
+              || (p.variants || []).some((v: any) => String(v.sku || '').trim() === code));
+          }
           items = out.slice(0, limit);
         } else if (entityName === 'Artist') {
           items = [artist];
@@ -236,6 +242,7 @@ export default async function (req: Request): Promise<Response> {
       const dat = {
         items: (Array.isArray(body.items) ? body.items : []).map((i: any) => ({
           product_id: String(i?.product_id || ''),
+          sku: String(i?.sku || ''),
           variant_key: String(i?.variant_key || ''),
           qty: Math.max(1, Math.round(Number(i?.qty) || 1)),
           price: i?.price != null && i.price !== '' ? r2(i.price) : null,
@@ -247,10 +254,16 @@ export default async function (req: Request): Promise<Response> {
         client_name: String(body.client_name || ''),
       };
 
+      // Błędy w danych sprzedaży (brak produktu, niezgodna suma wpłat) to nie awaria —
+      // wracają jako status 'invalid', żeby asystent poprawił dane zamiast pokazywać błąd.
       let preview: any = null;
-      try { preview = await previewSale(base44, dat.items); } catch (e: any) { return Response.json({ error: e.message }, { status: 400 }); }
+      try { preview = await previewSale(base44, dat.items); } catch (e: any) {
+        return Response.json({ status: 'invalid', action: 'sale', problem: e.message, hint: 'Popraw dane sprzedaży (produkt / SKU / ilość) i wywołaj ponownie.' });
+      }
       let payments: any[] = [];
-      try { payments = normalizePayments(dat.payments, preview.total); } catch (e: any) { return Response.json({ error: e.message }, { status: 400 }); }
+      try { payments = normalizePayments(dat.payments, preview.total); } catch (e: any) {
+        return Response.json({ status: 'invalid', action: 'sale', problem: e.message, razem: preview.total, hint: 'Popraw wpłaty tak, aby ich suma równała się kwocie sprzedaży, i wywołaj ponownie.' });
+      }
 
       if (!body.confirm_token) {
         const confirm_token = await signToken(user.id, 'sale', 'ShopSale', dat, 'artist-gatekeeper-confirm');
