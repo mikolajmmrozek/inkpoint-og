@@ -474,6 +474,13 @@ Deno.serve(async (req) => {
         return Response.json({ success: true, action: 'skipped', reason: 'technical_fields_only', changed_fields: changedFields });
       }
 
+      // Sprzedaż sklepowa (bez sesji) nie ma wydarzenia w kalendarzu.
+      const payloadBooking = body.data || body.event?.data || {};
+      if (payloadBooking.is_shop_sale) {
+        log('skip_shop_sale', { booking_id: bookingId });
+        return Response.json({ success: true, action: 'skipped', reason: 'shop_sale' });
+      }
+
       const conn = await getSharedConnection();
       if (!conn) return Response.json({ success: true, action: 'skipped', reason: 'no_shared_connection' });
 

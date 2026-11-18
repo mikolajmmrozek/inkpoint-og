@@ -6,6 +6,7 @@ import CreateMenuFAB from './CreateMenuFAB';
 import BookingModal from '@/components/dashboard/BookingModal';
 import QuickAvailabilityModal from './QuickAvailabilityModal';
 import QuickPromotionModal from './QuickPromotionModal';
+import QuickSaleModal from '@/components/sales/QuickSaleModal';
 import { openHealthFormQRPage } from '@/lib/qrPage';
 import GatekeeperChat from '@/components/gatekeeper/GatekeeperChat';
 import ArtistGatekeeperChat from '@/components/gatekeeper/ArtistGatekeeperChat';
@@ -54,6 +55,7 @@ export function CreateMenuProvider({ children, role, theme, selfArtistId }) {
     openHealthFormQRPage(`${window.location.origin}/health-form`);
   }, []);
   const newGatekeeper = useCallback(() => setAction('gatekeeper'), []);
+  const newSale = useCallback(() => setAction('sale'), []);
 
   const closeAll = () => { setAction(null); setBookingPrefill(null); setAvailPrefill(null); };
 
@@ -79,14 +81,21 @@ export function CreateMenuProvider({ children, role, theme, selfArtistId }) {
     toast({ title: 'Promocja utworzona' });
   };
 
+  const handleSaleSaved = async (sale) => {
+    closeAll();
+    toast({ title: 'Sprzedaż zapisana', description: `Razem ${Number(sale?.total || 0).toLocaleString('pl-PL')} zł` });
+    await runRefresh('bookings');
+  };
+
   return (
-    <CreateMenuContext.Provider value={{ newBooking, newAvailability, newClient, newPromotion, newHealthForm, newGatekeeper, registerBookingsRefresh, registerAvailabilityRefresh, registerClientsRefresh, registerSelectedDate, role }}>
+    <CreateMenuContext.Provider value={{ newBooking, newSale, newAvailability, newClient, newPromotion, newHealthForm, newGatekeeper, registerBookingsRefresh, registerAvailabilityRefresh, registerClientsRefresh, registerSelectedDate, role }}>
       {children}
       {role !== 'user' && !action && (
         <CreateMenuFAB
           theme={theme}
           role={role}
           onNewBooking={() => newBooking(null)}
+          onNewSale={() => newSale()}
           onNewAvailability={() => newAvailability(null)}
           onNewHealthForm={newHealthForm}
           onNewClient={newClient}
@@ -127,6 +136,19 @@ export function CreateMenuProvider({ children, role, theme, selfArtistId }) {
             onSaved={handlePromotionSaved}
             t={t}
             theme={theme}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {action === 'sale' && (
+          <QuickSaleModal
+            key="sale"
+            theme={theme}
+            role={role}
+            selfArtistId={selfArtistId}
+            t={t}
+            onClose={closeAll}
+            onSaved={handleSaleSaved}
           />
         )}
       </AnimatePresence>

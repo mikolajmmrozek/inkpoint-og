@@ -267,6 +267,30 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
           </button>
         </div>
 
+        {/* Nieobecność — bezpośrednio pod rozliczeniem */}
+        <div className="mb-5">
+          <button
+            onClick={toggleNoShow}
+            disabled={noShowBusy}
+            className="w-full flex items-center justify-center gap-2 py-2"
+            style={{
+              border: `0.5px solid ${currentBooking.no_show ? '#ef4444' : t.border}`,
+              color: currentBooking.no_show ? '#ef4444' : t.muted,
+              background: currentBooking.no_show ? 'rgba(239,68,68,0.05)' : 'transparent',
+              ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase',
+              cursor: 'pointer', opacity: noShowBusy ? 0.6 : 1, borderRadius: 'var(--radius)',
+            }}
+          >
+            {noShowBusy ? <Loader2 size={11} className="animate-spin" /> : currentBooking.no_show ? <RotateCcw size={11} /> : <Ban size={11} />}
+            {currentBooking.no_show ? 'COFNIJ OZNACZENIE NIEOBECNOŚCI' : 'OZNACZ KLIENTA JAKO NIEOBECNEGO'}
+          </button>
+          {currentBooking.no_show && (
+            <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '6px', lineHeight: 1.6 }}>
+              Zapisane w historii klienta{currentBooking.no_show_by_name ? ` · ${currentBooking.no_show_by_name}` : ''}
+            </p>
+          )}
+        </div>
+
         {/* Status change */}
         <div className="mb-5">
           <p style={{ ...mono, fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>ZMIEŃ STATUS</p>
@@ -338,31 +362,6 @@ export default function BookingDetailPanel({ booking, onClose, onStatusChange, o
             <BookingSettlementSummary booking={currentBooking} t={t} />
           </div>
         )}
-
-        {/* No-show */}
-        <div className="mb-5">
-          <p style={{ ...mono, fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>NIEOBECNOŚĆ</p>
-          <button
-            onClick={toggleNoShow}
-            disabled={noShowBusy}
-            className="w-full flex items-center justify-center gap-2 py-2"
-            style={{
-              border: `0.5px solid ${currentBooking.no_show ? '#ef4444' : t.border}`,
-              color: currentBooking.no_show ? '#ef4444' : t.muted,
-              background: currentBooking.no_show ? 'rgba(239,68,68,0.05)' : 'transparent',
-              ...mono, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase',
-              cursor: 'pointer', opacity: noShowBusy ? 0.6 : 1, borderRadius: 'var(--radius)',
-            }}
-          >
-            {noShowBusy ? <Loader2 size={11} className="animate-spin" /> : currentBooking.no_show ? <RotateCcw size={11} /> : <Ban size={11} />}
-            {currentBooking.no_show ? 'COFNIJ OZNACZENIE NIEOBECNOŚCI' : 'OZNACZ KLIENTA JAKO NIEOBECNEGO'}
-          </button>
-          {currentBooking.no_show && (
-            <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '6px', lineHeight: 1.6 }}>
-              Zapisane w historii klienta{currentBooking.no_show_by_name ? ` · ${currentBooking.no_show_by_name}` : ''}
-            </p>
-          )}
-        </div>
 
         {/* Session details */}
         <div className="mb-5">

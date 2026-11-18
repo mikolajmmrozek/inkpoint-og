@@ -185,6 +185,11 @@
       "default": false,
       "description": "True = magazyn zosta\u0142 ju\u017c obci\u0105\u017cony za t\u0119 sesj\u0119 (chroni przed podw\u00f3jnym odj\u0119ciem)"
     },
+    "is_shop_sale": {
+      "type": "boolean",
+      "default": false,
+      "description": "True = sprzeda\u017c sklepowa bez sesji (okno sprzeda\u017cy / Gatekeeper). Nie jest rezerwacj\u0105: nie tworzy wydarzenia w kalendarzu i nie wysy\u0142a powiadomie\u0144 o rezerwacji."
+    },
     "no_show": {
       "type": "boolean",
       "default": false,

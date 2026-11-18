@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { TOKEN_TTL_MS, signToken, verifyToken } from '../../shared/gatekeeperConfirm.ts';
 import { builtinFields, maskRecord, pick, genSessionId, asList } from '../../shared/gatekeeperData.ts';
+import { previewSale, normalizePayments, recordSale, r2 } from '../../shared/shopSale.ts';
 
 // ─────────────────────────────────────────────────────────────────────────
 // gatekeeperOps — narzędzie Gatekeepera do zarządzania danymi Dashboard.
@@ -196,6 +197,35 @@ const ENTITIES = {
     filter: ['artist_id', 'gcal_event_id', 'status', 'session_date'],
     sensitive: [],
   },
+  ShopProduct: {
+    // Produkty sklepu: pełna edycja, dodawanie, stan magazynowy, warianty, ceny.
+    ops: { read: true, create: true, update: true, delete: true },
+    required: ['name'],
+    fields: ['name', 'slug', 'short_description', 'description', 'category_id', 'category_name', 'piercing_placements', 'piercing_types', 'clothing_types', 'collection_ids', 'price', 'cost', 'discount_type', 'discount_value', 'pricing_mode', 'slider_min', 'slider_max', 'slider_step', 'is_voucher', 'unlimited_stock', 'stock', 'restock', 'shipping_form_ids', 'pickup_in_studio', 'shipping_cost', 'shipping_info', 'shipping_options', 'image_url', 'images', 'variant_axes', 'variants', 'multipacks', 'is_active', 'is_featured', 'order'],
+    filter: ['name', 'slug', 'category_id', 'category_name', 'is_active', 'is_featured', 'pricing_mode', 'price', 'order'],
+    sensitive: ['price', 'cost', 'stock', 'discount_type', 'discount_value'],
+  },
+  ShopCategory: {
+    ops: { read: true, create: true, update: true, delete: true },
+    required: ['name'],
+    fields: ['name', 'slug', 'description', 'image_url', 'order', 'filter_group', 'commission_type', 'commission_value', 'is_active'],
+    filter: ['name', 'slug', 'filter_group', 'is_active'],
+    sensitive: ['commission_type', 'commission_value'],
+  },
+  ShopSettings: {
+    ops: NO_DELETE,
+    required: ['key'],
+    fields: ['key', 'currency', 'new_badge_days', 'product_note', 'contact_email', 'is_open', 'product_commission_type', 'product_commission_value'],
+    filter: ['key'],
+    sensitive: ['product_commission_type', 'product_commission_value'],
+  },
+  StockMovement: {
+    ops: READ_ONLY, // historia ruchów magazynowych — powstaje przy sprzedaży i rozliczeniu
+    required: [],
+    fields: [],
+    filter: ['product_id', 'variant_key', 'reason', 'booking_id', 'booking_session_id'],
+    sensitive: [],
+  },
 };
 
 function pickSummary(record, cfg) {
@@ -220,6 +250,81 @@ export default async function (req: Request): Promise<Response> {
 
     const body = await req.json();
     const action = String(body.action || '');
+
+    // ── SPRZEDAŻ SKLEPOWA (bez sesji) — dwuetapowo ──────────────────
+    // action='sale' z items: [{product_id, qty, variant_key?, price?}] i payments: [{method, amount}].
+    if (action === 'sale') {
+      const dat = {
+        items: (Array.isArray(body.items) ? body.items : []).map((i: any) => ({
+          product_id: String(i?.product_id || ''),
+          variant_key: String(i?.variant_key || ''),
+          qty: Math.max(1, Math.round(Number(i?.qty) || 1)),
+          price: i?.price != null && i.price !== '' ? r2(i.price) : null,
+        })),
+        payments: (Array.isArray(body.payments) ? body.payments : []).map((p: any) => ({
+          method: String(p?.method || ''),
+          amount: r2(p?.amount),
+        })),
+        client_name: String(body.client_name || ''),
+        artist_id: String(body.artist_id || ''),
+      };
+
+      let preview: any = null;
+      try { preview = await previewSale(base44, dat.items); } catch (e: any) { return Response.json({ error: e.message }, { status: 400 }); }
+      let payments: any[] = [];
+      try { payments = normalizePayments(dat.payments, preview.total); } catch (e: any) { return Response.json({ error: e.message }, { status: 400 }); }
+
+      let artistName = '';
+      if (dat.artist_id) {
+        const artist = await base44.asServiceRole.entities.Artist.get(dat.artist_id).catch(() => null);
+        if (!artist) return Response.json({ error: 'Artysta o podanym id nie istnieje.' }, { status: 400 });
+        artistName = artist.name || '';
+      }
+
+      if (!body.confirm_token) {
+        const confirm_token = await signToken(user.id, 'sale', 'ShopSale', dat, 'gatekeeper-confirm');
+        return Response.json({
+          status: 'awaiting_confirmation',
+          action: 'sale',
+          entity: 'ShopSale',
+          proposed: {
+            pozycje: preview.lines.map((l: any) => `${l.name}${l.variant_label ? ` (${l.variant_label})` : ''} × ${l.qty} — ${r2(l.price * l.qty)} PLN`),
+            razem: `${preview.total} PLN`,
+            platnosci: payments.map((p: any) => `${p.method}: ${p.amount} PLN`),
+            klient: dat.client_name || 'Sprzedaż sklepowa',
+            artysta: artistName || '(bez artysty)',
+          },
+          sensitive: true,
+          side_effects: [
+            'Sprzedaż zdejmie sprzedane sztuki ze stanu magazynowego i zapisze ruch magazynowy.',
+            'Naliczona zostanie prowizja pracowników wg stawek kategorii sklepu.',
+            'Sprzedaż wejdzie do statystyk sklepu jako sprzedaż produktów.',
+          ],
+          confirm_token,
+          expires_in_seconds: TOKEN_TTL_MS / 1000,
+          hint: 'Przedstaw administratorowi podsumowanie i po potwierdzeniu wywołaj ponownie z identycznymi danymi oraz confirm_token.',
+        });
+      }
+
+      const saleTokenOk = await verifyToken(body.confirm_token, user.id, 'sale', 'ShopSale', dat, 'gatekeeper-confirm');
+      if (!saleTokenOk) {
+        return Response.json({ error: 'Token potwierdzenia nieprawidłowy lub wygasł (max 15 min). Wygeneruj nową propozycję bez confirm_token, uzyskaj potwierdzenie administratora i wykonaj ponownie.' }, { status: 400 });
+      }
+      try {
+        const sale = await recordSale(base44, {
+          items: dat.items,
+          payments: dat.payments,
+          clientName: dat.client_name,
+          artistId: dat.artist_id,
+          artistName,
+          seller: user.full_name || user.email || '',
+        });
+        return Response.json({ status: 'executed', action: 'sale', entity: 'ShopSale', total: sale.total, booking_id: sale.booking.id, lines: sale.lines, payments: sale.payments });
+      } catch (e: any) {
+        return Response.json({ error: `Sprzedaż NIE została zapisana: ${e.message}` }, { status: 500 });
+      }
+    }
+
     const entityName = String(body.entity || '');
     const cfg = Object.prototype.hasOwnProperty.call(ENTITIES, entityName) ? ENTITIES[entityName] : null;
     if (!cfg) {

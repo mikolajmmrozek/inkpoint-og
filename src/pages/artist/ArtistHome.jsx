@@ -5,7 +5,7 @@ import { bookingUpdate } from '@/lib/bookingAudit';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { useAuth } from '@/lib/AuthContext';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, TrendingUp, X, ChevronLeft, ChevronRight, Search, Zap, Wallet, Phone, Mail, QrCode, FileText, Check } from 'lucide-react';
+import { Calendar, Clock, TrendingUp, X, ChevronLeft, ChevronRight, Search, Zap, Wallet, Phone, Mail, QrCode, FileText, Check, Ban, RotateCcw, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, isToday, isPast, parseISO, addDays, subDays } from 'date-fns';
 import { pl } from 'date-fns/locale';
@@ -73,8 +73,24 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, user, onC
   const [editing, setEditing] = useState(isNew);
   const [saving, setSaving] = useState(false);
   const [showServiceSuggestions, setShowServiceSuggestions] = useState(false);
+  const [noShowBusy, setNoShowBusy] = useState(false);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const toggleNoShow = async () => {
+    if (!booking?.id || noShowBusy) return;
+    setNoShowBusy(true);
+    try {
+      const revert = form.no_show === true;
+      const res = await base44.functions.invoke('markClientNoShow', { booking_id: booking.id, revert });
+      if (!res.data?.error) {
+        setForm(f => ({ ...f, no_show: !revert, no_show_by_name: revert ? '' : (user?.full_name || user?.email || '') }));
+        onSaved();
+      }
+    } finally {
+      setNoShowBusy(false);
+    }
+  };
 
   useEffect(() => {
     setForm(buildForm(booking));
@@ -221,8 +237,8 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, user, onC
               </div>
             )}
 
-            {/* Settlement action */}
-            <div>
+            {/* Settlement + no-show (nieobecność od razu pod rozliczeniem) */}
+            <div className="space-y-2">
               <button
                 onClick={() => setSettlingBooking(booking)}
                 className="btn-oxblood flex items-center gap-1.5 justify-center w-full"
@@ -230,6 +246,26 @@ function BookingModal({ booking, isNew, artist, artistServices, theme, user, onC
               >
                 <Wallet size={12} /> {form.is_settled ? 'EDYTUJ ROZLICZENIE' : 'ROZLICZ'}
               </button>
+              <button
+                onClick={toggleNoShow}
+                disabled={noShowBusy}
+                className="w-full flex items-center justify-center gap-2"
+                style={{
+                  border: `0.5px solid ${form.no_show ? '#ef4444' : t.border}`,
+                  color: form.no_show ? '#ef4444' : t.muted,
+                  background: form.no_show ? 'rgba(239,68,68,0.05)' : 'transparent',
+                  fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase',
+                  padding: '10px', cursor: 'pointer', opacity: noShowBusy ? 0.6 : 1, borderRadius: 'var(--radius)',
+                }}
+              >
+                {noShowBusy ? <Loader2 size={11} className="animate-spin" /> : form.no_show ? <RotateCcw size={11} /> : <Ban size={11} />}
+                {form.no_show ? 'COFNIJ NIEOBECNOŚĆ' : 'NIE PRZYSZEDŁ'}
+              </button>
+              {form.no_show && (
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.06em', lineHeight: 1.6 }}>
+                  Zapisane w historii klienta{form.no_show_by_name ? ` · ${form.no_show_by_name}` : ''}
+                </p>
+              )}
             </div>
 
             {/* Settlement summary */}

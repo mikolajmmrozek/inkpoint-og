@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { TOKEN_TTL_MS, signToken, verifyToken } from '../../shared/gatekeeperConfirm.ts';
 import { builtinFields, maskRecord, pick, genSessionId, asList, HEALTH_FORM_MASK, HEALTH_FORM_MASK_PATTERN } from '../../shared/gatekeeperData.ts';
+import { previewSale, normalizePayments, recordSale, r2 } from '../../shared/shopSale.ts';
 
 // ─────────────────────────────────────────────────────────────────────────
 // artistGatekeeperOps — narzędzie Gatekeepera artysty.
@@ -33,6 +34,7 @@ const FILTERS: Record<string, string[]> = {
   Service: ['name', 'category', 'is_active'],
   Artist: [],
   CalendarImportDraft: ['status', 'session_date', 'gcal_event_id'],
+  ShopProduct: ['name', 'category_name', 'is_active', 'price', 'order'],
 };
 
 function notFound(entityName: string) {
@@ -155,6 +157,16 @@ export default async function (req: Request): Promise<Response> {
           if (filters.gcal_event_id) query.gcal_event_id = filters.gcal_event_id;
           const res: any = await base44.asServiceRole.entities.CalendarImportDraft.filter(query, { sort: rawSort, limit });
           items = (Array.isArray(res) ? res : (res?.items || [])).slice(0, limit);
+        } else if (entityName === 'ShopProduct') {
+          // Artysta widzi katalog (nazwa, cena, stan) — wyłącznie do sprzedaży.
+          const query: any = {};
+          if (filters.is_active !== undefined) query.is_active = filters.is_active;
+          if (filters.category_name) query.category_name = filters.category_name;
+          const res: any = await base44.entities.ShopProduct.filter(query, { sort: rawSort, limit: 300 });
+          let out = asList(res);
+          if (filters.name) out = out.filter((p: any) => (p.name || '').toLowerCase().includes(String(filters.name).toLowerCase()));
+          if (filters.price !== undefined) out = out.filter((p: any) => Number(p.price) === Number(filters.price));
+          items = out.slice(0, limit);
         } else if (entityName === 'Artist') {
           items = [artist];
         }
@@ -207,8 +219,80 @@ export default async function (req: Request): Promise<Response> {
         if (!record || record.artist_id !== artistId) return notFound(entityName);
         return Response.json({ entity: entityName, record });
       }
+      if (entityName === 'ShopProduct') {
+        record = await base44.entities.ShopProduct.get(body.id).catch(() => null);
+        if (!record) return notFound(entityName);
+        return Response.json({ entity: entityName, record });
+      }
       if (entityName === 'Artist') {
         return Response.json({ entity: entityName, record: artist });
+      }
+    }
+
+    // ── SPRZEDAŻ SKLEPOWA — jedyna operacja zapisu poza sesjami ─────
+    // Artysta tylko sprzedaje (jak przy rozliczeniu): nie edytuje produktów,
+    // kategorii ani stanów magazynowych. Sprzedaż zawsze na własny profil.
+    if (action === 'sale') {
+      const dat = {
+        items: (Array.isArray(body.items) ? body.items : []).map((i: any) => ({
+          product_id: String(i?.product_id || ''),
+          variant_key: String(i?.variant_key || ''),
+          qty: Math.max(1, Math.round(Number(i?.qty) || 1)),
+          price: i?.price != null && i.price !== '' ? r2(i.price) : null,
+        })),
+        payments: (Array.isArray(body.payments) ? body.payments : []).map((p: any) => ({
+          method: String(p?.method || ''),
+          amount: r2(p?.amount),
+        })),
+        client_name: String(body.client_name || ''),
+      };
+
+      let preview: any = null;
+      try { preview = await previewSale(base44, dat.items); } catch (e: any) { return Response.json({ error: e.message }, { status: 400 }); }
+      let payments: any[] = [];
+      try { payments = normalizePayments(dat.payments, preview.total); } catch (e: any) { return Response.json({ error: e.message }, { status: 400 }); }
+
+      if (!body.confirm_token) {
+        const confirm_token = await signToken(user.id, 'sale', 'ShopSale', dat, 'artist-gatekeeper-confirm');
+        return Response.json({
+          status: 'awaiting_confirmation',
+          action: 'sale',
+          entity: 'ShopSale',
+          proposed: {
+            pozycje: preview.lines.map((l: any) => `${l.name}${l.variant_label ? ` (${l.variant_label})` : ''} × ${l.qty} — ${r2(l.price * l.qty)} PLN`),
+            razem: `${preview.total} PLN`,
+            platnosci: payments.map((p: any) => `${p.method}: ${p.amount} PLN`),
+            klient: dat.client_name || 'Sprzedaż sklepowa',
+            artysta: artistName,
+          },
+          sensitive: true,
+          side_effects: [
+            'Sprzedaż zdejmie sprzedane sztuki ze stanu magazynowego i zapisze ruch magazynowy.',
+            'Naliczona zostanie prowizja pracownika wg stawek kategorii sklepu.',
+            'Sprzedaż wejdzie do statystyk sklepu jako sprzedaż produktów.',
+          ],
+          confirm_token,
+          expires_in_seconds: TOKEN_TTL_MS / 1000,
+          hint: 'Przedstaw artyście podsumowanie i po uzyskaniu potwierdzenia wywołaj ponownie z identycznymi danymi oraz confirm_token.',
+        });
+      }
+
+      const saleTokenOk = await verifyToken(body.confirm_token, user.id, 'sale', 'ShopSale', dat, 'artist-gatekeeper-confirm');
+      if (!saleTokenOk) {
+        return Response.json({ error: 'Token potwierdzenia nieprawidłowy lub wygasł (max 15 min). Wygeneruj nową propozycję bez confirm_token, uzyskaj potwierdzenie artysty i wykonaj ponownie.' }, { status: 400 });
+      }
+      try {
+        const sale = await recordSale(base44, {
+          items: dat.items,
+          payments: dat.payments,
+          clientName: dat.client_name,
+          artistId,
+          artistName,
+          seller: user.full_name || user.email || '',
+        });
+        return Response.json({ status: 'executed', action: 'sale', entity: 'ShopSale', total: sale.total, booking_id: sale.booking.id, lines: sale.lines, payments: sale.payments });
+      } catch (e: any) {
+        return Response.json({ error: `Sprzedaż NIE została zapisana: ${e.message}` }, { status: 500 });
       }
     }
 

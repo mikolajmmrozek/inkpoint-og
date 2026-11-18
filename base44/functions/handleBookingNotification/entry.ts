@@ -19,6 +19,11 @@ Deno.serve(async (req) => {
 
     // --- Uczestnicy ---
 
+    // Sprzedaż sklepowa (bez sesji) nie jest rezerwacją — bez powiadomień.
+    if (booking.is_shop_sale) {
+      return Response.json({ success: true, skipped: 'shop_sale' });
+    }
+
     // Wszyscy administratorzy — powiadomienia trafiają do każdego z osobna,
     // dzięki czemu informacje przepływają między adminami.
     let adminEmails = [];
