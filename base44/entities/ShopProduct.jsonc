@@ -9,6 +9,10 @@
       "type": "string",
       "description": "Identyfikator w adresie URL (np. t-shirt-romans)"
     },
+    "sku": {
+      "type": "string",
+      "description": "Numeryczne SKU produktu \u2014 pe\u0142ni te\u017c rol\u0119 kodu kreskowego. Nadawane automatycznie, wy\u0142\u0105cznie cyfry. Produkty z wariantami maj\u0105 osobne SKU przy ka\u017cdym wariancie."
+    },
     "short_description": {
       "type": "string"
     },
@@ -215,7 +219,8 @@
             "default": 0
           },
           "sku": {
-            "type": "string"
+            "type": "string",
+            "description": "Numeryczne SKU wariantu \u2014 kod kreskowy tej kombinacji. Nadawane automatycznie."
           },
           "is_active": {
             "type": "boolean",

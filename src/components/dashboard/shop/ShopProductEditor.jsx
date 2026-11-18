@@ -5,6 +5,7 @@ import { Plus, X, Trash2, Upload, RefreshCw, Check, ChevronDown, ChevronRight } 
 import { shopTheme, mono, display, inputStyle, labelStyle } from './shopTheme';
 import ShopMultipacksEditor from './ShopMultipacksEditor';
 import { slugify, money, applyDiscount } from '@/lib/shop';
+import { newSku } from '@/lib/sku';
 
 const ALLOWED_IMG = ['image/jpeg', 'image/png', 'image/webp'];
 
@@ -162,6 +163,8 @@ export default function ShopProductEditor({ product, categories, collections, on
       const payload = {
         name: form.name.trim(),
         slug: (form.slug || slugify(form.name)).trim(),
+        // SKU = kod kreskowy. Vouchery (suwak) nie dostają SKU.
+        sku: form.pricing_mode === 'slider' ? (form.sku || '') : (form.sku || newSku()),
         short_description: form.short_description || '',
         description: form.description || '',
         category_id: form.category_id || '',
@@ -191,6 +194,7 @@ export default function ShopProductEditor({ product, categories, collections, on
           ...v,
           price: Number(v.price) || 0,
           stock: Number(v.stock) || 0,
+          sku: v.sku || newSku(),
           multipacks: cleanPacks(v.multipacks),
         })),
         // Pakiety przy produkcie dotyczą tylko produktów bez wariantów.
@@ -215,6 +219,11 @@ export default function ShopProductEditor({ product, categories, collections, on
           <div>
             <p style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: '5px' }}>{product?.id ? 'EDYCJA' : 'NOWY PRODUKT'}</p>
             <h3 style={{ ...display, fontSize: '1.7rem', color: t.title, letterSpacing: '0.04em', lineHeight: 1 }}>{form.name || 'Produkt'}</h3>
+            {form.pricing_mode !== 'slider' && (
+              <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px' }}>
+                SKU / kod kreskowy: {form.sku || 'nadawany przy zapisie'}
+              </p>
+            )}
           </div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}><X size={18} /></button>
         </div>
@@ -460,7 +469,7 @@ export default function ShopProductEditor({ product, categories, collections, on
                         </button>
                         <input className="col-span-2" type="number" value={v.price ?? ''} onChange={e => updateVariant(v.key, 'price', e.target.value)} style={{ ...inputStyle(t), fontSize: '12px' }} />
                         <input className="col-span-2" type="number" value={v.stock ?? 0} onChange={e => updateVariant(v.key, 'stock', e.target.value)} style={{ ...inputStyle(t), fontSize: '12px' }} />
-                        <input className="col-span-3" value={v.sku || ''} onChange={e => updateVariant(v.key, 'sku', e.target.value)} style={{ ...inputStyle(t), fontSize: '12px' }} />
+                        <input className="col-span-3" value={v.sku || ''} onChange={e => updateVariant(v.key, 'sku', e.target.value.replace(/\D/g, ''))} placeholder="nadawany przy zapisie" style={{ ...inputStyle(t), fontSize: '12px' }} />
                       </div>
                       {open && (
                         <div className="px-3 pb-3">

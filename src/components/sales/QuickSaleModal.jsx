@@ -6,7 +6,6 @@ import SettlementProducts from '@/components/dashboard/SettlementProducts';
 import VoucherPicker from '@/components/dashboard/VoucherPicker';
 import { money } from '@/lib/shop';
 import { r2 } from '@/lib/settlement';
-import { useAuth } from '@/lib/AuthContext';
 
 const PAYMENT_METHODS = [
   { value: 'cash', label: 'Gotówka' },
@@ -18,7 +17,6 @@ const mono = { fontFamily: 'var(--font-mono)' };
 
 // Okno sprzedaży — sprzedaż bez sesji: produkty + płatności.
 export default function QuickSaleModal({ onClose, onSaved, t, theme = 'dark', role, selfArtistId }) {
-  const { user } = useAuth();
   const isAdmin = role === 'admin';
 
   const [products, setProducts] = useState([]);
@@ -135,21 +133,15 @@ export default function QuickSaleModal({ onClose, onSaved, t, theme = 'dark', ro
 
         {/* Pasek narzędzi */}
         <div
-          className="flex flex-wrap items-center gap-x-4 gap-y-2 flex-shrink-0"
-          style={{ padding: '8px 44px 8px 14px', borderBottom: `1px solid ${t.border}`, background: subtleBg }}
+          className="flex flex-col gap-2 flex-shrink-0"
+          style={{ padding: '10px 44px 12px 14px', borderBottom: `1px solid ${t.border}`, background: subtleBg }}
         >
-          <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-            {new Date().toLocaleDateString('pl-PL')}
-          </p>
-          <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-            Kasjer: {user?.full_name || user?.email || '—'}
-          </p>
           {isAdmin && (
             <select
               value={artistId}
               onChange={(e) => setArtistId(e.target.value)}
               style={{
-                ...mono, fontSize: '9px', letterSpacing: '0.06em',
+                ...mono, fontSize: '9px', letterSpacing: '0.06em', alignSelf: 'flex-start',
                 background: 'transparent', border: `0.5px solid ${t.border}`,
                 color: t.text, padding: '4px 8px', outline: 'none', cursor: 'pointer',
                 colorScheme: theme === 'light' ? 'light' : 'dark', borderRadius: 'var(--radius)',
@@ -164,10 +156,12 @@ export default function QuickSaleModal({ onClose, onSaved, t, theme = 'dark', ro
             onChange={(e) => setClientName(e.target.value)}
             placeholder="Klient (opcjonalnie)"
             style={{
-              ...mono, fontSize: '9px', letterSpacing: '0.04em', flex: '1 1 150px', minWidth: '120px',
+              ...mono, fontSize: '15px', letterSpacing: '0.02em', width: '100%',
               background: 'transparent', border: 'none', borderBottom: `0.5px solid ${t.border}`,
-              color: t.text, padding: '4px 0', outline: 'none',
+              color: t.text, padding: '8px 0', outline: 'none',
             }}
+            onFocus={(e) => { e.target.style.borderBottomColor = 'var(--brand)'; }}
+            onBlur={(e) => { e.target.style.borderBottomColor = t.border; }}
           />
         </div>
 

@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Plus, Search, Trash2, Tag, X } from 'lucide-react';
+import { Plus, Search, Trash2, Tag, X, ScanLine } from 'lucide-react';
 import { money } from '@/lib/shop';
 import { r2, afterDiscount, discountOf } from '@/lib/settlement';
+import { normalizeSku } from '@/lib/sku';
+import BarcodeScanner from '@/components/shop/BarcodeScanner';
 
 const input = {
   background: 'transparent',
@@ -63,6 +65,8 @@ export default function SettlementProducts({ value = [], onChange, t }) {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('');
   const [discountFor, setDiscountFor] = useState(null);
+  const [scanning, setScanning] = useState(false);
+  const [scanError, setScanError] = useState('');
 
   useEffect(() => {
     base44.entities.ShopProduct.filter({ is_active: true }, 'order', 300)
@@ -72,8 +76,11 @@ export default function SettlementProducts({ value = [], onChange, t }) {
 
   const categories = [...new Set(products.map((p) => (p.category_name || '').trim()).filter(Boolean))];
 
-  const add = (product) => {
-    const variant = (product.variants || []).find((v) => v.is_active !== false) || null;
+  const add = (product, variantKey) => {
+    const variants = product.variants || [];
+    const variant = variantKey
+      ? variants.find((v) => v.key === variantKey) || null
+      : variants.find((v) => v.is_active !== false) || null;
     const price = r2(variant ? variant.price : product.price);
     onChange([...value, {
       product_id: product.id,
@@ -112,9 +119,25 @@ export default function SettlementProducts({ value = [], onChange, t }) {
     });
   };
 
+  // Zeskanowany kod = SKU produktu albo SKU wariantu — od razu dodajemy pozycję.
+  const handleScan = (raw) => {
+    setScanning(false);
+    const code = normalizeSku(raw);
+    if (!code) return;
+    const product = products.find((p) => normalizeSku(p.sku) === code || (p.variants || []).some((v) => normalizeSku(v.sku) === code));
+    if (!product) { setScanError(`Nie znaleziono produktu o SKU ${code}`); return; }
+    const variant = (product.variants || []).find((v) => normalizeSku(v.sku) === code);
+    setScanError('');
+    add(product, variant?.key);
+  };
+
+  const q = query.trim().toLowerCase();
   const matches = products
     .filter((p) => !category || (p.category_name || '') === category)
-    .filter((p) => !query || p.name.toLowerCase().includes(query.toLowerCase()))
+    .filter((p) => !q
+      || p.name.toLowerCase().includes(q)
+      || String(p.sku || '').includes(q)
+      || (p.variants || []).some((v) => String(v.sku || '').includes(q)))
     .slice(0, 8);
 
   const total = value.reduce((s, item) => s + r2(item.price) * num(item.qty), 0);
@@ -123,13 +146,30 @@ export default function SettlementProducts({ value = [], onChange, t }) {
 
   return (
     <div>
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-center gap-2"
-        style={{ padding: '11px', border: `0.5px solid ${open ? 'var(--brand)' : t.border}`, background: 'transparent', color: open ? 'var(--brand)' : t.text, cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', borderRadius: 'var(--radius)' }}
-      >
-        {open ? <X size={12} /> : <Plus size={12} />} DODAJ PRODUKT
-      </button>
+      <div className="flex items-stretch gap-2">
+        <button
+          onClick={() => setOpen(!open)}
+          className="flex-1 flex items-center justify-center gap-2"
+          style={{ padding: '11px', border: `0.5px solid ${open ? 'var(--brand)' : t.border}`, background: 'transparent', color: open ? 'var(--brand)' : t.text, cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', borderRadius: 'var(--radius)' }}
+        >
+          {open ? <X size={12} /> : <Plus size={12} />} DODAJ PRODUKT
+        </button>
+        <button
+          onClick={() => { setScanError(''); setScanning(true); }}
+          title="Skanuj kod kreskowy (SKU)"
+          style={{ padding: '11px 14px', border: `0.5px solid ${t.border}`, background: 'transparent', color: 'var(--brand)', cursor: 'pointer', borderRadius: 'var(--radius)', display: 'flex', alignItems: 'center' }}
+        >
+          <ScanLine size={14} />
+        </button>
+      </div>
+
+      {scanError && (
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#ef4444', letterSpacing: '0.05em', marginTop: '6px' }}>{scanError}</p>
+      )}
+
+      {scanning && (
+        <BarcodeScanner t={t} onDetected={handleScan} onClose={() => setScanning(false)} />
+      )}
 
       {open && (
         <div className="mt-3">
@@ -147,7 +187,7 @@ export default function SettlementProducts({ value = [], onChange, t }) {
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Szukaj produktu..."
+              placeholder="Szukaj po nazwie lub SKU..."
               style={{ ...input, color: t.text, flex: 1, borderBottom: 'none' }}
             />
           </div>
@@ -160,7 +200,10 @@ export default function SettlementProducts({ value = [], onChange, t }) {
                   className="w-full flex items-center justify-between px-3 py-2"
                   style={{ background: 'none', border: 'none', borderBottom: `0.5px solid ${t.border}`, cursor: 'pointer', textAlign: 'left' }}
                 >
-                  <span style={{ fontSize: '12px', color: t.text }}>{p.name}</span>
+                  <span style={{ fontSize: '12px', color: t.text }}>
+                    {p.name}
+                    {p.sku ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, marginLeft: '6px' }}>{p.sku}</span> : null}
+                  </span>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted }}>{money(p.price)} · stan {p.unlimited_stock ? '∞' : (p.stock ?? 0)}</span>
                 </button>
               ))}
