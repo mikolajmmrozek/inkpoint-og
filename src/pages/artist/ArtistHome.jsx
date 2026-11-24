@@ -22,6 +22,7 @@ import TrendBadge from '@/components/stats/TrendBadge';
 import PinnedTiles from '@/components/dashboard/PinnedTiles';
 import { defaultTiles } from '@/lib/pinnedTiles';
 import { comparePeriods, monthBounds, pctChange, serviceRevenue, upcomingMonthBounds } from '@/lib/trends';
+import { sessionAmount } from '@/lib/settlement';
 
 const PAYMENT_METHOD_LABELS = { cash: 'Gotówka', card: 'Karta', voucher: 'Voucher' };
 const PAYMENT_METHOD_COLORS = { cash: '#16a34a', card: '#2563eb', voucher: '#f59e0b' };
@@ -567,10 +568,11 @@ export default function ArtistHome() {
   const monthPrefix = new Date().toISOString().slice(0, 7);
   const thisMonth = bookings.filter(b => b.session_date?.startsWith(monthPrefix) && b.status === 'completed');
   const cut = artist.artist_cut_percent || 60;
-  const revenue = thisMonth.reduce((sum, b) => sum + ((b.estimated_price || 0) * cut / 100), 0);
+  // Kwota sesji jak w statystykach: rozliczona = kwota finalna, nierozliczona = cena orientacyjna.
+  const revenue = thisMonth.reduce((sum, b) => sum + (sessionAmount(b) * cut / 100), 0);
   // Prognoza: wszystkie zapisane sesje w tym miesiącu (bez anulowanych) minus to, co już zarobione
   const bookedThisMonth = bookings.filter(b => b.session_date?.startsWith(monthPrefix) && b.status !== 'cancelled');
-  const projected = bookedThisMonth.reduce((sum, b) => sum + (b.estimated_price || 0), 0) * cut / 100;
+  const projected = bookedThisMonth.reduce((sum, b) => sum + sessionAmount(b), 0) * cut / 100;
   const forecast = Math.round(projected - revenue);
 
   // Porównanie z poprzednim miesiącem: sesje i mój zarobek z samych usług.
