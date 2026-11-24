@@ -2,10 +2,11 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { CalendarDays, Clock, MapPin, Users } from 'lucide-react';
 import { formatPrice, formatSessionDate, formatSessionTime } from '@/lib/events';
+import LeaderStack from '@/components/events/LeaderStack';
 
 const mono = { fontFamily: 'var(--font-mono)', letterSpacing: '0.12em', textTransform: 'uppercase' };
 
-export default function EventCard({ event, session, spots, index = 0 }) {
+export default function EventCard({ event, session, spots, index = 0, leaders = [] }) {
   const full = spots?.full;
   const noSession = !session;
   const left = spots ? spots.left : null;
@@ -59,6 +60,15 @@ export default function EventCard({ event, session, spots, index = 0 }) {
             <p className="mt-2" style={{ fontSize: '14px', lineHeight: 1.6, color: 'rgb(var(--foreground-rgb) / 0.6)' }}>
               {event.short_description}
             </p>
+          )}
+
+          {leaders.length > 0 && (
+            <div className="mt-4 flex items-center gap-2 min-w-0">
+              <LeaderStack people={leaders} size={24} />
+              <span style={{ ...mono, fontSize: '9px', color: 'rgb(var(--foreground-rgb) / 0.55)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {leaders.map(l => l.name).join(' · ')}
+              </span>
+            </div>
           )}
 
           <div className="mt-4 space-y-1.5">

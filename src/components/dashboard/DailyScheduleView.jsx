@@ -7,6 +7,8 @@ import { isArtistOffOnDate } from '@/lib/bookingConflicts';
 import { getThumbnailUrl } from '@/lib/thumbnail';
 import { getBreaksForDay } from '@/lib/availability';
 import DaySlotActionModal from '@/components/dashboard/DaySlotActionModal';
+import LeaderStack from '@/components/events/LeaderStack';
+import { EVENT_COLOR, eventTimeLabel } from '@/lib/calendarEvents';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -118,6 +120,50 @@ const BookingTile = memo(function BookingTile({ booking, onClick, t }) {
   );
 });
 
+// Termin oferty w kolumnie prowadzącego — blokuje czas tak jak sesja.
+const EventTile = memo(function EventTile({ entry, t }) {
+  const startMin = toMinutes(entry.start_time);
+  if (startMin === null) return null;
+
+  const endMin = toMinutes(entry.end_time) || startMin + 120;
+  const top = Math.max(0, startMin - DAY_START) * PX_PER_MIN;
+  const height = Math.max(30, (endMin - startMin) * PX_PER_MIN);
+
+  return (
+    <div
+      data-booking-tile="true"
+      title={entry.title}
+      style={{
+        position: 'absolute',
+        top: `${top}px`,
+        height: `${height}px`,
+        left: '2px',
+        right: '2px',
+        background: 'rgba(245,158,11,0.14)',
+        borderLeft: `2px solid ${EVENT_COLOR}`,
+        borderTop: `0.5px solid rgba(245,158,11,0.45)`,
+        borderRight: `0.5px solid rgba(245,158,11,0.45)`,
+        borderBottom: `0.5px solid rgba(245,158,11,0.45)`,
+        padding: '4px 6px',
+        overflow: 'hidden',
+        zIndex: 1,
+      }}
+    >
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: EVENT_COLOR, letterSpacing: '0.06em', lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        {entry.start_time}{entry.end_time ? `–${entry.end_time}` : ''}
+      </p>
+      {height >= 40 && (
+        <p style={{ fontSize: '11px', color: t.text, fontWeight: 500, lineHeight: 1.3, marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {entry.title}
+        </p>
+      )}
+      {height >= 64 && (
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, marginTop: '2px', letterSpacing: '0.08em' }}>OFERTA</p>
+      )}
+    </div>
+  );
+});
+
 const TimeAxis = memo(function TimeAxis({ muted }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: `${TOTAL_HEIGHT}px`, width: '44px', flexShrink: 0, position: 'relative' }}>
@@ -130,7 +176,7 @@ const TimeAxis = memo(function TimeAxis({ muted }) {
   );
 }, (prev, next) => prev.muted === next.muted);
 
-const ArtistColumn = memo(function ArtistColumn({ artist, artistBookings, onColumnClick, onBookingClick, border, t, isLast, availability, breaks = [] }) {
+const ArtistColumn = memo(function ArtistColumn({ artist, artistBookings, artistEvents = [], onColumnClick, onBookingClick, border, t, isLast, availability, breaks = [] }) {
   const handleClick = useCallback((e) => onColumnClick(e, artist), [onColumnClick, artist]);
 
   // Calculate inactive overlay regions
@@ -189,6 +235,9 @@ const ArtistColumn = memo(function ArtistColumn({ artist, artistBookings, onColu
           </div>
         );
       })}
+      {artistEvents.map(e => (
+        <EventTile key={`event-${e.id}`} entry={e} t={t} />
+      ))}
       {artistBookings.map(b => (
         <BookingTile key={b.id} booking={b} onClick={onBookingClick} t={t} />
       ))}
@@ -196,7 +245,7 @@ const ArtistColumn = memo(function ArtistColumn({ artist, artistBookings, onColu
   );
 });
 
-export default function DailyScheduleView({ bookings, artists, selectedDate, onDateChange, onBookingClick, onNewBookingRequest, onNewAvailabilityRequest, t, artistFilter = 'all', availabilityRecords = [] }) {
+export default function DailyScheduleView({ bookings, artists, selectedDate, onDateChange, onBookingClick, onNewBookingRequest, onNewAvailabilityRequest, t, artistFilter = 'all', availabilityRecords = [], calendarEvents = [] }) {
   const scrollRef = useRef(null);
   const [slot, setSlot] = useState(null);
 
@@ -225,6 +274,24 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
     }
     return map;
   }, [dayBookings]);
+
+  const dayEvents = useMemo(
+    () => calendarEvents
+      .filter(e => e.session_date === dateStr)
+      .sort((a, b) => (a.start_time || '99:99').localeCompare(b.start_time || '99:99')),
+    [calendarEvents, dateStr]
+  );
+
+  const eventsByArtist = useMemo(() => {
+    const map = {};
+    for (const e of dayEvents) {
+      for (const id of e.leader_ids || []) {
+        if (!map[id]) map[id] = [];
+        map[id].push(e);
+      }
+    }
+    return map;
+  }, [dayEvents]);
 
   useEffect(() => {
     if (scrollRef.current && showNowLine) {
@@ -286,6 +353,42 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
         })}
       </div>
 
+      {/* Oferty w tym dniu — widoczne także dla szkiców i ukrytych ofert */}
+      {dayEvents.length > 0 && (
+        <div style={{ borderBottom: `0.5px solid ${t.border}`, background: 'rgba(245,158,11,0.06)' }}>
+          <div style={{ padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: EVENT_COLOR, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+              Oferty w tym dniu
+            </p>
+            {dayEvents.map(e => (
+              <div key={e.id} className="flex items-center gap-2" style={{ minWidth: 0 }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: EVENT_COLOR, flexShrink: 0, minWidth: '74px' }}>
+                  {eventTimeLabel(e)}
+                </span>
+                <LeaderStack
+                  people={[...(e.leaders || []), ...(e.external_leaders || []).map(n => ({ name: n }))]}
+                  size={22}
+                  ring={t.bg}
+                />
+                <span style={{ fontSize: '12px', color: t.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
+                  {e.title}
+                </span>
+                {e.capacity > 0 && (
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: e.full ? '#ef4444' : t.muted, flexShrink: 0 }}>
+                    {e.taken}/{e.capacity}
+                  </span>
+                )}
+                {e.cancelled && (
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, border: `0.5px solid ${t.muted}`, padding: '1px 4px', flexShrink: 0 }}>
+                    ANULOWANA
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Timeline body */}
       <div ref={scrollRef} className="overflow-y-auto" style={{ maxHeight: '600px' }}>
         <div style={{ display: 'flex', width: '100%', minHeight: 0, boxSizing: 'border-box', position: 'relative' }}>
@@ -297,6 +400,7 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
                   key={a.id}
                   artist={a}
                   artistBookings={bookingsByArtist[a.id] || []}
+                  artistEvents={eventsByArtist[a.id] || []}
                   onColumnClick={handleColumnClick}
                   onBookingClick={onBookingClick}
                   border={t.border}

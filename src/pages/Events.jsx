@@ -12,6 +12,7 @@ export default function Events() {
   const [sessions, setSessions] = useState([]);
   const [availability, setAvailability] = useState({});
   const [categories, setCategories] = useState([]);
+  const [artists, setArtists] = useState([]);
   const [category, setCategory] = useState('all');
   const [loading, setLoading] = useState(true);
 
@@ -25,13 +26,15 @@ export default function Events() {
         setEvents(sorted);
 
         if (sorted.length > 0) {
-          const [sess, cats, avail] = await Promise.all([
+          const [sess, cats, avail, arts] = await Promise.all([
             base44.entities.EventSession.filter({ event_id: { $in: sorted.map(e => e.id) } }),
             base44.entities.EventCategory.filter({ is_active: true }),
             base44.functions.invoke('getEventAvailability', { event_ids: sorted.map(e => e.id) }).then(r => r.data).catch(() => ({ sessions: [] })),
+            base44.entities.Artist.list(),
           ]);
           if (cancelled) return;
           setSessions(sess.filter(s => s.status !== 'cancelled'));
+          setArtists(arts || []);
           setCategories(cats.sort((a, b) => (a.order ?? 999) - (b.order ?? 999)));
           const map = {};
           (avail?.sessions || []).forEach(s => { map[s.id] = s; });
@@ -50,6 +53,16 @@ export default function Events() {
   }, [events, category]);
 
   const sessionsOf = (eventId) => sessions.filter(s => s.event_id === eventId);
+
+  // Prowadzący oferty: artyści studia (ze zdjęciem) + osoby wpisane ręcznie (inicjały).
+  const leadersOf = (event) => {
+    const internal = (event.leader_ids || [])
+      .map(id => artists.find(a => a.id === id))
+      .filter(Boolean)
+      .map(a => ({ id: a.id, name: a.name, photo_url: a.photo_url }));
+    const external = (event.external_leaders || []).map(name => ({ name }));
+    return [...internal, ...external];
+  };
 
   return (
     <PageLayout>
@@ -122,6 +135,7 @@ export default function Events() {
                   session={session}
                   spots={session ? availability[session.id] : null}
                   index={i}
+                  leaders={leadersOf(event)}
                 />
               );
             })}

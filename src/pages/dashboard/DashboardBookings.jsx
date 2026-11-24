@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { bookingUpdate, bookingDelete } from '@/lib/bookingAudit';
@@ -11,7 +11,6 @@ import { useTheme } from './Dashboard';
 import BookingCalendar from '@/components/dashboard/BookingCalendar';
 import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
 import DailyScheduleView from '@/components/dashboard/DailyScheduleView.jsx';
-import { getArtistsOffForDate } from '@/lib/bookingConflicts';
 import { recomputeClientTotalSessions } from '@/lib/clientStats';
 import { buildHealthFormStatusMap, resolveBookingHealthStatus } from '@/lib/healthFormStatus';
 import HealthFormBadge from '@/components/booking/HealthFormBadge';
@@ -21,6 +20,8 @@ import PendingRequestsView from '@/components/dashboard/PendingRequestsView';
 import AvailabilityEditModal from '@/components/dashboard/AvailabilityEditModal';
 import { getThumbnailUrl } from '@/lib/thumbnail';
 import { useCreateMenu } from '@/components/create/CreateMenuContext';
+import EventRow from '@/components/dashboard/EventRow';
+import { buildCalendarEvents, eventLeaderNames } from '@/lib/calendarEvents';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -90,11 +91,14 @@ function BookingRow({ b, i, items, selected, setSelected, artists, t, healthStat
   );
 }
 
-function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPageBookings, listPageCount, listPage, setListPage, listTab, setListTab, selected, setSelected, artists, t, onNewBooking, availabilityRecords, artistFilter, healthStatusMap }) {
-  const getOffForDate = (dateStr) => getArtistsOffForDate(availabilityRecords, artists, artistFilter, dateStr);
+function ListContent({ viewMode, searchQuery, selectedDate, listItems, listCount, listPageCount, listPage, setListPage, listTab, setListTab, selected, setSelected, artists, t, onNewBooking, healthStatusMap }) {
   const todayStr = format(new Date(), 'yyyy-MM-dd');
 
-  if (listBookings.length === 0) {
+  const renderItem = (item, i, arr) => item.kind === 'event'
+    ? <EventRow key={`ev-${item.data.id}`} entry={item.data} t={t} isLast={i === arr.length - 1} />
+    : <BookingRow key={item.data.id} b={item.data} i={i} items={arr.map(x => x.data)} selected={selected} setSelected={setSelected} artists={artists} t={t} healthStatusMap={healthStatusMap} />;
+
+  if (listCount === 0) {
     return (
       <div className="py-12 text-center" style={{ border: `0.5px solid ${t.border}` }}>
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
@@ -111,10 +115,10 @@ function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPa
 
   if (viewMode === 'list') {
     const grouped = {};
-    listPageBookings.forEach(b => {
-      const day = b.session_date || 'Brak daty';
+    listItems.forEach(item => {
+      const day = item.date || 'Brak daty';
       if (!grouped[day]) grouped[day] = [];
-      grouped[day].push(b);
+      grouped[day].push(item);
     });
 
     return (
@@ -142,6 +146,8 @@ function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPa
           const isToday = dateObj && date === todayStr;
           const isPast = dateObj && date < todayStr;
           const dayLabel = dateObj ? format(dateObj, 'EEEE, d MMMM yyyy', { locale: pl }).toUpperCase() : 'BRAK DATY';
+          const sessionCount = items.filter(x => x.kind === 'booking').length;
+          const eventCount = items.length - sessionCount;
           return (
             <div key={date}>
               <div className="flex items-center gap-3 mb-2">
@@ -151,12 +157,13 @@ function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPa
                 </p>
                 <div style={{ flex: 1, height: '0.5px', background: t.border }} />
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: t.muted }}>
-                  {items.length} {items.length === 1 ? 'sesja' : 'sesji'}
+                  {sessionCount} {sessionCount === 1 ? 'sesja' : sessionCount >= 2 && sessionCount <= 4 ? 'sesje' : 'sesji'}
+                  {eventCount > 0 ? ` · ${eventCount} ${eventCount === 1 ? 'oferta' : eventCount >= 2 && eventCount <= 4 ? 'oferty' : 'ofert'}` : ''}
                 </span>
               </div>
 
               <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-                {items.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={items} selected={selected} setSelected={setSelected} artists={artists} t={t} healthStatusMap={healthStatusMap} />)}
+                {items.map((item, i) => renderItem(item, i, items))}
               </div>
             </div>
           );
@@ -167,7 +174,7 @@ function ListContent({ viewMode, searchQuery, selectedDate, listBookings, listPa
 
   return (
     <div style={{ border: `0.5px solid ${t.border}`, background: t.bg }}>
-      {listBookings.map((b, i) => <BookingRow key={b.id} b={b} i={i} items={listBookings} selected={selected} setSelected={setSelected} artists={artists} t={t} healthStatusMap={healthStatusMap} />)}
+      {listItems.map((item, i) => renderItem(item, i, listItems))}
     </div>
   );
 }
@@ -182,6 +189,9 @@ export default function DashboardBookings() {
   const [bookings, setBookings] = useState([]);
   const [artists, setArtists] = useState([]);
   const [availabilityRecords, setAvailabilityRecords] = useState([]);
+  const [eventSessions, setEventSessions] = useState([]);
+  const [eventList, setEventList] = useState([]);
+  const [eventBookings, setEventBookings] = useState([]);
   const [editingAvailability, setEditingAvailability] = useState(null);
   const [healthStatusMap, setHealthStatusMap] = useState({});
   const [loading, setLoading] = useState(true);
@@ -225,6 +235,19 @@ export default function DashboardBookings() {
   const refreshAvailability = useCallback(async () => {
     try { const avail = await base44.entities.ArtistAvailability.list(); setAvailabilityRecords(avail); } catch (e) {}
   }, []);
+  // Terminy ofert trafiają do kalendarza razem z rezerwacjami — także szkice i ukryte.
+  const refreshEvents = useCallback(async () => {
+    try {
+      const [sess, evts, evBookings] = await Promise.all([
+        base44.entities.EventSession.list(),
+        base44.entities.Event.list(),
+        base44.entities.EventBooking.list('-created_date', 5000),
+      ]);
+      setEventSessions(sess || []);
+      setEventList(evts || []);
+      setEventBookings(evBookings || []);
+    } catch (e) { /* kalendarz działa dalej bez ofert */ }
+  }, []);
   useEffect(() => {
     registerBookingsRefresh(refreshBookings);
     registerAvailabilityRefresh(refreshAvailability);
@@ -233,6 +256,8 @@ export default function DashboardBookings() {
   // Realtime — odśwież kalendarz i listy natychmiast po dodaniu / edycji / zmianie statusu / usunięciu
   useRealtimeSync('Booking', () => { refreshBookings(); loadHealthForms(); });
   useRealtimeSync('ArtistAvailability', () => { refreshAvailability(); });
+  useRealtimeSync('EventSession', () => { refreshEvents(); });
+  useRealtimeSync('EventBooking', () => { refreshEvents(); });
 
   // Keep the create-menu's booking/dyspozycja prefill in sync with the selected day.
   useEffect(() => {
@@ -261,6 +286,7 @@ export default function DashboardBookings() {
       setLoading(false);
       // Health forms are the slowest and only feed the badge — load after render.
       loadHealthForms();
+      refreshEvents();
     } catch (err) {
       setLoadError(err);
       setLoading(false);
@@ -462,9 +488,67 @@ export default function DashboardBookings() {
     return [...base].sort((a, b) => (a.session_time || '').localeCompare(b.session_time || ''));
   })();
 
+  const calendarEvents = useMemo(
+    () => buildCalendarEvents({ events: eventList, sessions: eventSessions, bookings: eventBookings, artists }),
+    [eventList, eventSessions, eventBookings, artists]
+  );
+
+  // Filtr artystów dotyczy też ofert — po prowadzących przypisanych do terminu.
+  const visibleEvents = useMemo(
+    () => (artistFilters.length === 0
+      ? calendarEvents
+      : calendarEvents.filter(e => (e.leader_ids || []).some(id => artistFilters.includes(id)))),
+    [calendarEvents, artistFilters]
+  );
+
+  const listEvents = useMemo(() => {
+    if (viewMode !== 'list' && viewMode !== 'day') return [];
+    if (viewMode === 'day') {
+      if (!selectedDate || !(selectedDate instanceof Date) || isNaN(selectedDate)) return [];
+      const ds = format(selectedDate, 'yyyy-MM-dd');
+      return visibleEvents
+        .filter(e => e.session_date === ds)
+        .sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''));
+    }
+    if (toSettleMode) return [];
+    let base = visibleEvents;
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      base = base.filter(e =>
+        (e.title || '').toLowerCase().includes(q) ||
+        (e.location || '').toLowerCase().includes(q) ||
+        eventLeaderNames(e).join(' ').toLowerCase().includes(q)
+      );
+    }
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
+    if (listTab === 'upcoming') {
+      return [...base]
+        .filter(e => (e.session_date || '') >= todayStr)
+        .sort((a, b) => (a.session_date || '').localeCompare(b.session_date || '') || (a.start_time || '').localeCompare(b.start_time || ''));
+    }
+    return [...base]
+      .filter(e => (e.session_date || '') < todayStr)
+      .sort((a, b) => (b.session_date || '').localeCompare(a.session_date || '') || (a.start_time || '').localeCompare(b.start_time || ''));
+  }, [viewMode, visibleEvents, selectedDate, toSettleMode, searchQuery, listTab]);
+
+  // Lista miesza sesje i oferty — porządek daty i godziny jak w kalendarzu.
+  const listItems = useMemo(() => {
+    const items = [
+      ...listBookings.map(b => ({ kind: 'booking', date: b.session_date || '', time: b.session_time || '99:99', data: b })),
+      ...listEvents.map(e => ({ kind: 'event', date: e.session_date || '', time: e.start_time || '99:99', data: e })),
+    ];
+    const desc = (viewMode === 'list' && listTab === 'past') || toSettleMode;
+    items.sort((a, b) => {
+      const d = (a.date || '').localeCompare(b.date || '');
+      if (d !== 0) return desc ? -d : d;
+      return (a.time || '').localeCompare(b.time || '');
+    });
+    return items;
+  }, [listBookings, listEvents, viewMode, listTab, toSettleMode]);
+
   const PAGE_SIZE = 10;
-  const listPageCount = Math.ceil(listBookings.length / PAGE_SIZE);
-  const listPageBookings = listBookings.slice(listPage * PAGE_SIZE, (listPage + 1) * PAGE_SIZE);
+  const listPageCount = Math.ceil(listItems.length / PAGE_SIZE);
+  const listPageItems = listItems.slice(listPage * PAGE_SIZE, (listPage + 1) * PAGE_SIZE);
   const selectedDateStr = selectedDate && selectedDate instanceof Date && !isNaN(selectedDate) ? format(selectedDate, 'yyyy-MM-dd') : null;
 
   const calendarBookings = (() => {
@@ -658,6 +742,7 @@ export default function DashboardBookings() {
                 healthStatusMap={healthStatusMap}
                 showSessionsList={!searchQuery.trim()}
                 onAvailabilityClick={setEditingAvailability}
+                calendarEvents={visibleEvents}
               />
             )}
 
@@ -690,6 +775,7 @@ export default function DashboardBookings() {
                 t={t}
                 artistFilter={artistFilters}
                 availabilityRecords={availabilityRecords}
+                calendarEvents={visibleEvents}
               />
             )}
 
@@ -752,8 +838,8 @@ export default function DashboardBookings() {
                     viewMode={viewMode}
                     searchQuery={searchQuery}
                     selectedDate={selectedDate}
-                    listBookings={listBookings}
-                    listPageBookings={listPageBookings}
+                    listItems={listPageItems}
+                    listCount={listItems.length}
                     listPageCount={listPageCount}
                     listPage={listPage}
                     setListPage={setListPage}
@@ -764,8 +850,6 @@ export default function DashboardBookings() {
                     artists={artists}
                     t={t}
                     onNewBooking={handleNewBooking}
-                    availabilityRecords={availabilityRecords}
-                    artistFilter={artistFilters}
                     healthStatusMap={healthStatusMap}
                   />
                 )}

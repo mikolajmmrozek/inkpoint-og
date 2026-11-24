@@ -8,6 +8,8 @@ import HealthFormBadge from '@/components/booking/HealthFormBadge';
 import AvailabilityDayBanner, { AvailabilityBannerFrame } from '@/components/booking/AvailabilityDayBanner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { getThumbnailUrl } from '@/lib/thumbnail';
+import EventRow from '@/components/dashboard/EventRow';
+import { EVENT_COLOR } from '@/lib/calendarEvents';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -16,7 +18,7 @@ const STATUS_COLORS = {
   cancelled: '#9ca3af',
 };
 
-export default function BookingCalendar({ bookings, onDayClick, selectedDate, t, artists = [], onAddBooking, searchQuery = '', onBookingClick, availabilityRecords = [], artistFilter = 'all', healthStatusMap = {}, showSessionsList = true, onAvailabilityClick }) {
+export default function BookingCalendar({ bookings, onDayClick, selectedDate, t, artists = [], onAddBooking, searchQuery = '', onBookingClick, availabilityRecords = [], artistFilter = 'all', healthStatusMap = {}, showSessionsList = true, onAvailabilityClick, calendarEvents = [] }) {
   const [viewMonth, setViewMonth] = useState(new Date());
   const isMobile = useIsMobile();
   const today = new Date();
@@ -50,7 +52,12 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
   const getBookingsForDay = (day) =>
     sortByTime(bookings.filter(b => b.session_date && isSameDay(new Date(b.session_date), day)));
 
+  const getEventsForDay = (day) => calendarEvents
+    .filter(e => e.session_date && isSameDay(new Date(e.session_date), day))
+    .sort((a, b) => (a.start_time || '99:99').localeCompare(b.start_time || '99:99'));
+
   const selectedDayBookings = getBookingsForDay(effectiveSelectedDate);
+  const selectedDayEvents = getEventsForDay(effectiveSelectedDate);
   const selectedDateStr = format(effectiveSelectedDate, 'yyyy-MM-dd');
   const selectedDayOff = offByDate[selectedDateStr] || [];
 
@@ -87,6 +94,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
 
         {days.map(day => {
           const dayBookings = getBookingsForDay(day);
+          const dayEvents = getEventsForDay(day);
           const isSelected = isSameDay(day, effectiveSelectedDate);
           const isToday = isSameDay(day, today);
           const dayOff = offByDate[format(day, 'yyyy-MM-dd')] || [];
@@ -137,6 +145,17 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
                   )}
                 </div>
               )}
+              {/* Oferty (wydarzenia) — krótkie belki, żeby odróżnić je od kropek sesji */}
+              {dayEvents.length > 0 && (
+                <div className="flex gap-0.5 mt-1 items-center justify-center">
+                  {dayEvents.slice(0, 2).map((e, i) => (
+                    <div key={i} style={{ width: '10px', height: '3px', background: e.cancelled ? t.muted : EVENT_COLOR, flexShrink: 0 }} />
+                  ))}
+                  {dayEvents.length > 2 && (
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', color: t.muted }}>+{dayEvents.length - 2}</span>
+                  )}
+                </div>
+              )}
             </button>
           );
         })}
@@ -164,6 +183,18 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
                   </div>
                 ))}
               </AvailabilityBannerFrame>
+            </div>
+          )}
+          {selectedDayEvents.length > 0 && (
+            <div className="mb-3">
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: EVENT_COLOR, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>
+                Oferty w tym dniu
+              </p>
+              <div style={{ border: `0.5px solid ${t.border}`, borderLeft: `2px solid ${EVENT_COLOR}`, background: t.bg, borderRadius: 'var(--radius)', overflow: 'hidden' }}>
+                {selectedDayEvents.map((e, i) => (
+                  <EventRow key={e.id} entry={e} t={t} isMobile={isMobile} isLast={i === selectedDayEvents.length - 1} />
+                ))}
+              </div>
             </div>
           )}
           {selectedDayBookings.length === 0 && !searchQuery.trim() ? (
@@ -270,6 +301,10 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{status}</span>
           </div>
         ))}
+        <div className="flex items-center gap-1.5">
+          <div style={{ width: '10px', height: '3px', background: EVENT_COLOR }} />
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.08em', textTransform: 'uppercase' }}>oferta</span>
+        </div>
       </div>
     </div>
   );
