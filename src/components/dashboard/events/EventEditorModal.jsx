@@ -86,13 +86,14 @@ export default function EventEditorModal({ event, categories, artists, theme, on
   // Prowadzący spoza organizacji — formularz otwiera się dopiero po kliknięciu „Dodaj prowadzącego”.
   const sameName = (a, b) => String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
 
+  // Puste wartości zostają w formularzu (pole linku musi się pokazać po wyborze),
+  // a dopiero zapis wydarzenia odrzuca social media bez adresu.
   const socialsToLinks = (entry) => ['instagram', 'facebook', 'tiktok', 'website']
-    .filter(kind => entry?.[kind])
-    .map(kind => ({ kind, value: entry[kind] }));
+    .filter(kind => entry && entry[kind] !== undefined && entry[kind] !== null)
+    .map(kind => ({ kind, value: entry[kind] || '' }));
 
   const linksToSocials = (links) => (links || []).reduce((acc, link) => {
-    const value = String(link.value || '').trim();
-    if (value) acc[link.kind] = value;
+    acc[link.kind] = String(link.value || '');
     return acc;
   }, {});
 
