@@ -80,6 +80,35 @@
       },
       "description": "Prowadz\u0105cy spoza organizacji \u2014 wpisani r\u0119cznie imieniem i nazwiskiem. Nie maj\u0105 profilu artysty ani statystyk, na stronie wydarzenia pokazujemy inicja\u0142y."
     },
+    "external_leader_socials": {
+      "type": "array",
+      "description": "Social media prowadz\u0105cych spoza organizacji \u2014 wpisy powi\u0105zane z nazw\u0105 z pola external_leaders. Puste pola nie s\u0105 wy\u015bwietlane na stronie wydarzenia.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Imi\u0119 i nazwisko prowadz\u0105cego (musi odpowiada\u0107 wpisowi w external_leaders)"
+          },
+          "instagram": {
+            "type": "string",
+            "description": "Link lub nazwa profilu Instagram"
+          },
+          "facebook": {
+            "type": "string",
+            "description": "Link lub nazwa profilu Facebook"
+          },
+          "tiktok": {
+            "type": "string",
+            "description": "Link lub nazwa profilu TikTok"
+          },
+          "website": {
+            "type": "string",
+            "description": "Adres strony www"
+          }
+        }
+      }
+    },
     "price": {
       "type": "number",
       "default": 0,

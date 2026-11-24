@@ -5,6 +5,8 @@ import { CalendarDays, Clock, MapPin, Users, ArrowLeft, Loader2, Play } from 'lu
 import { base44 } from '@/api/base44Client';
 import PageLayout from '@/components/layout/PageLayout';
 import EventBookingForm from '@/components/events/EventBookingForm';
+import LeaderSocials from '@/components/events/LeaderSocials';
+import { leaderSocials, externalLeaderSocials } from '@/lib/leaderSocials';
 import { formatPrice, formatSessionDate, formatSessionTime, nextSession } from '@/lib/events';
 
 const mono = { fontFamily: 'var(--font-mono)', letterSpacing: '0.14em', textTransform: 'uppercase' };
@@ -256,14 +258,19 @@ export default function EventDetail() {
                 <p style={{ ...mono, fontSize: '8px', color: 'rgb(var(--foreground-rgb) / 0.5)', marginBottom: '12px' }}>PROWADZĄCY</p>
                 <div className="space-y-3">
                   {leaders.map(a => (
-                    <Link key={a.id} to={`/artists/${a.slug || a.id}`} className="flex items-center gap-3" style={{ textDecoration: 'none' }}>
+                    <div key={a.id} className="flex items-center gap-3">
                       {a.photo_url ? (
                         <img src={a.photo_url} alt={a.name} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />
                       ) : (
                         <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgb(var(--brand-rgb) / 0.12)' }} />
                       )}
-                      <span style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'hsl(var(--foreground))' }}>{a.name}</span>
-                    </Link>
+                      <div>
+                        <Link to={`/artists/${a.slug || a.id}`} style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'hsl(var(--foreground))', textDecoration: 'none' }}>
+                          {a.name}
+                        </Link>
+                        <LeaderSocials links={leaderSocials({ instagram: a.instagram })} />
+                      </div>
+                    </div>
                   ))}
                   {externalLeaders.map((name, i) => (
                     <div key={`external-${name}-${i}`} className="flex items-center gap-3">
@@ -273,7 +280,10 @@ export default function EventDetail() {
                       >
                         {initials(name)}
                       </div>
-                      <span style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'hsl(var(--foreground))' }}>{name}</span>
+                      <div>
+                        <span style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'hsl(var(--foreground))' }}>{name}</span>
+                        <LeaderSocials links={externalLeaderSocials(event, name)} />
+                      </div>
                     </div>
                   ))}
                 </div>

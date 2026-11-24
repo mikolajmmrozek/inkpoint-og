@@ -8,6 +8,15 @@ const mono = { fontFamily: 'var(--font-mono)', letterSpacing: '0.12em', textTran
 
 const emptySession = () => ({ date: '', start_time: '10:00', end_time: '16:00', capacity: 10, leader_ids: [], note: '' });
 
+const SOCIAL_FIELDS = [
+  { key: 'instagram', placeholder: 'Instagram' },
+  { key: 'facebook', placeholder: 'Facebook' },
+  { key: 'tiktok', placeholder: 'TikTok' },
+  { key: 'website', placeholder: 'Strona www' },
+];
+
+const emptyExternalLeader = () => ({ name: '', instagram: '', facebook: '', tiktok: '', website: '' });
+
 const toMin = (time) => {
   const [h, m] = String(time || '').split(':').map(Number);
   return Number.isFinite(h) && Number.isFinite(m) ? h * 60 + m : null;
@@ -38,6 +47,7 @@ export default function EventEditorModal({ event, categories, artists, theme, on
     organizer_info: event?.organizer_info || '',
     leader_ids: event?.leader_ids || [],
     external_leaders: event?.external_leaders || [],
+    external_leader_socials: event?.external_leader_socials || [],
     price: event?.price ?? 0,
     location: event?.location || '',
     min_participants: event?.min_participants ?? 0,
@@ -52,7 +62,7 @@ export default function EventEditorModal({ event, categories, artists, theme, on
   const [error, setError] = useState('');
   const [uploading, setUploading] = useState(false);
   const [conflicts, setConflicts] = useState([]);
-  const [newExternalLeader, setNewExternalLeader] = useState('');
+  const [newExternalLeader, setNewExternalLeader] = useState(emptyExternalLeader);
 
   useEffect(() => {
     if (!event?.id) {
@@ -78,13 +88,53 @@ export default function EventEditorModal({ event, categories, artists, theme, on
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
   const setSession = (index, patch) => setSessions(list => list.map((s, i) => (i === index ? { ...s, ...patch } : s)));
 
-  // Prowadzący spoza organizacji — wpis ręczny imieniem i nazwiskiem.
+  // Prowadzący spoza organizacji — wpis ręczny imieniem i nazwiskiem, z opcjonalnymi linkami social mediów.
   const addExternalLeader = () => {
-    const name = newExternalLeader.trim();
-    if (!name) return;
-    const list = form.external_leaders || [];
-    if (!list.some(n => n.toLowerCase() === name.toLowerCase())) set('external_leaders', [...list, name]);
-    setNewExternalLeader('');
+    const entry = {
+      name: newExternalLeader.name.trim(),
+      instagram: newExternalLeader.instagram.trim(),
+      facebook: newExternalLeader.facebook.trim(),
+      tiktok: newExternalLeader.tiktok.trim(),
+      website: newExternalLeader.website.trim(),
+    };
+    if (!entry.name) return;
+    const sameName = (a, b) => String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
+    setForm(f => {
+      const names = f.external_leaders || [];
+      if (names.some(n => sameName(n, entry.name))) return f;
+      return {
+        ...f,
+        external_leaders: [...names, entry.name],
+        external_leader_socials: [...(f.external_leader_socials || []).filter(s => !sameName(s?.name, entry.name)), entry],
+      };
+    });
+    setNewExternalLeader(emptyExternalLeader());
+  };
+
+  const removeExternalLeader = (name) => {
+    const sameName = (a, b) => String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
+    setForm(f => ({
+      ...f,
+      external_leaders: (f.external_leaders || []).filter(n => !sameName(n, name)),
+      external_leader_socials: (f.external_leader_socials || []).filter(s => !sameName(s?.name, name)),
+    }));
+  };
+
+  const socialOf = (name, key) => {
+    const key_ = String(name || '').trim().toLowerCase();
+    const found = (form.external_leader_socials || []).find(s => String(s?.name || '').trim().toLowerCase() === key_);
+    return found?.[key] || '';
+  };
+
+  const setExternalSocial = (name, key, value) => {
+    const key_ = String(name || '').trim().toLowerCase();
+    setForm(f => {
+      const list = [...(f.external_leader_socials || [])];
+      const index = list.findIndex(s => String(s?.name || '').trim().toLowerCase() === key_);
+      if (index >= 0) list[index] = { ...list[index], [key]: value };
+      else list.push({ name, [key]: value });
+      return { ...f, external_leader_socials: list };
+    });
   };
 
   // Zmiana godziny rozpoczęcia przesuwa zakończenie tak, by zawsze było późniejsze
@@ -176,6 +226,16 @@ export default function EventEditorModal({ event, categories, artists, theme, on
           ...(form.external_leaders || []),
         ],
         external_leaders: (form.external_leaders || []).map(n => n.trim()).filter(Boolean),
+        external_leader_socials: (form.external_leader_socials || [])
+          .filter(s => (form.external_leaders || []).some(n => n.trim().toLowerCase() === String(s?.name || '').trim().toLowerCase()))
+          .map(s => ({
+            name: String(s.name).trim(),
+            instagram: (s.instagram || '').trim(),
+            facebook: (s.facebook || '').trim(),
+            tiktok: (s.tiktok || '').trim(),
+            website: (s.website || '').trim(),
+          }))
+          .filter(s => s.instagram || s.facebook || s.tiktok || s.website),
         price: Number(form.price) || 0,
         min_participants: Number(form.min_participants) || 0,
         leader_pay_value: Number(form.leader_pay_value) || 0,
@@ -352,9 +412,9 @@ export default function EventEditorModal({ event, categories, artists, theme, on
           <div className="flex gap-2">
             <input
               style={input}
-              value={newExternalLeader}
+              value={newExternalLeader.name}
               placeholder="Imię i nazwisko"
-              onChange={e => setNewExternalLeader(e.target.value)}
+              onChange={e => setNewExternalLeader(v => ({ ...v, name: e.target.value }))}
               onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addExternalLeader(); } }}
             />
             <button
@@ -364,25 +424,45 @@ export default function EventEditorModal({ event, categories, artists, theme, on
               Dodaj
             </button>
           </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
+            {SOCIAL_FIELDS.map(f => (
+              <input
+                key={f.key}
+                style={input}
+                placeholder={f.placeholder}
+                value={newExternalLeader[f.key]}
+                onChange={e => setNewExternalLeader(v => ({ ...v, [f.key]: e.target.value }))}
+              />
+            ))}
+          </div>
           <p style={{ ...mono, fontSize: '7px', color: t.muted, marginTop: '5px', lineHeight: 1.5 }}>
-            Wpis ręczny — bez profilu i statystyk artysty. Na stronie wydarzenia pokazujemy inicjały.
+            Wpis ręczny — bez profilu i statystyk artysty. Na stronie wydarzenia pokazujemy inicjały. Social media opcjonalne: wklej link albo samą nazwę profilu — wyświetlamy tylko uzupełnione ikony.
           </p>
           {(form.external_leaders || []).length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-3">
+            <div className="space-y-2 mt-3">
               {(form.external_leaders || []).map((name, i) => (
-                <span
-                  key={`${name}-${i}`}
-                  className="inline-flex items-center gap-2"
-                  style={{ ...mono, fontSize: '9px', padding: '6px 10px', border: `0.5px solid ${t.border}`, color: t.text, borderRadius: 'var(--radius)' }}
-                >
-                  {name}
-                  <button
-                    onClick={() => set('external_leaders', form.external_leaders.filter((_, idx) => idx !== i))}
-                    style={{ background: 'none', border: 'none', color: t.muted, cursor: 'pointer', display: 'flex' }}
-                  >
-                    <X size={11} />
-                  </button>
-                </span>
+                <div key={`${name}-${i}`} className="p-3" style={{ border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)' }}>
+                  <div className="flex items-center justify-between gap-2">
+                    <span style={{ ...mono, fontSize: '9px', color: t.text }}>{name}</span>
+                    <button
+                      onClick={() => removeExternalLeader(name)}
+                      style={{ background: 'none', border: 'none', color: t.muted, cursor: 'pointer', display: 'flex' }}
+                    >
+                      <X size={11} />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
+                    {SOCIAL_FIELDS.map(f => (
+                      <input
+                        key={f.key}
+                        style={input}
+                        placeholder={f.placeholder}
+                        value={socialOf(name, f.key)}
+                        onChange={e => setExternalSocial(name, f.key, e.target.value)}
+                      />
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           )}
