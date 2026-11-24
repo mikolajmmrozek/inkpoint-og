@@ -55,9 +55,9 @@ export default function Events() {
     <PageLayout>
       <div className="pt-40 pb-14 px-8 md:px-16">
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-          <p style={{ ...mono, fontSize: '10px', color: 'var(--brand)' }}>WARSZTATY I WYDARZENIA</p>
+          <p style={{ ...mono, fontSize: '10px', color: 'var(--brand)' }}>WYDARZENIA I WARSZTATY</p>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(3.4rem, 9vw, 8rem)', fontWeight: 400, lineHeight: 0.9, letterSpacing: '0.04em', color: 'hsl(var(--foreground))', marginTop: '14px' }}>
-            Oferta
+            Oferty
           </h1>
           <div className="mt-6" style={{ height: '1px', width: '64px', background: 'linear-gradient(to right, var(--brand), transparent)' }} />
           <p className="mt-6 max-w-2xl" style={{ fontSize: '16px', lineHeight: 1.7, color: 'rgb(var(--foreground-rgb) / 0.6)' }}>
