@@ -1,4 +1,4 @@
-import { Users, ExternalLink } from 'lucide-react';
+import { Users } from 'lucide-react';
 import LeaderStack from '@/components/events/LeaderStack';
 import { EVENT_COLOR, eventLeaderNames } from '@/lib/calendarEvents';
 
@@ -72,15 +72,6 @@ export default function EventRow({ entry, t, isLast = false, isMobile = false, o
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: accent, border: `0.5px solid ${accent}`, padding: '2px 6px', letterSpacing: '0.1em', borderRadius: 'var(--radius)' }}>
             {statusLabel}
           </span>
-        )}
-        {entry.slug && !isMobile && (
-          <button
-            onClick={(e) => { e.stopPropagation(); openPublic(); }}
-            title="Otwórz stronę oferty"
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', display: 'flex', alignItems: 'center' }}
-          >
-            <ExternalLink size={12} color={t.muted} />
-          </button>
         )}
       </div>
     </div>

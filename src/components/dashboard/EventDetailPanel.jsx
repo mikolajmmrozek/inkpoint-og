@@ -44,7 +44,7 @@ export default function EventDetailPanel({ entry, event = {}, session = {}, book
   const taken = participants.reduce((sum, b) => sum + (Number(b.participants) || 1), 0);
   const capacity = Number(entry.capacity ?? session.capacity) || 0;
   const price = Number(event.price) || 0;
-  const canOpenPublic = entry.published && entry.slug;
+  const canOpenPublic = Boolean(entry.slug);
 
   return (
     <>
@@ -121,6 +121,15 @@ export default function EventDetailPanel({ entry, event = {}, session = {}, book
             >
               <List size={11} /> WSZYSTKIE OFERTY
             </button>
+          )}
+          {canOpenPublic && (
+            <a
+              href={`/wydarzenia/${entry.slug}`}
+              onClick={(e) => { e.preventDefault(); navigate(`/wydarzenia/${entry.slug}`); }}
+              style={{ display: 'flex', alignItems: 'center', gap: '5px', fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.04em', textDecoration: 'underline', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}
+            >
+              <ExternalLink size={10} style={{ flexShrink: 0 }} /> /wydarzenia/{entry.slug}
+            </a>
           )}
         </div>
 
