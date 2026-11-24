@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { X, Edit, ExternalLink, Calendar, Clock, MapPin, Users, Wallet } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { X, Edit, ExternalLink, List, Calendar, Clock, MapPin, Users, Wallet } from 'lucide-react';
 import LeaderStack from '@/components/events/LeaderStack';
 import { EVENT_COLOR } from '@/lib/calendarEvents';
 import { EVENT_STATUS_LABELS, BOOKING_STATUS_LABELS, BOOKING_STATUS_COLORS, formatSessionDate, formatSessionTime, formatPrice } from '@/lib/events';
@@ -26,7 +27,8 @@ function Text({ value, t }) {
  * Podgląd terminu oferty — otwierany z kalendarza, widoku dnia i listy rezerwacji.
  * Pokazuje dane oferty i terminu, zapisanych uczestników oraz skrót do edycji.
  */
-export default function EventDetailPanel({ entry, event = {}, session = {}, bookings = [], theme = 'dark', onClose, onEdit, onOpenPublic }) {
+export default function EventDetailPanel({ entry, event = {}, session = {}, bookings = [], theme = 'dark', isAdmin = false, onClose, onEdit }) {
+  const navigate = useNavigate();
   const t = theme === 'light'
     ? { bg: '#FFFFFF', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.65)', border: '#E5E5E5' }
     : { bg: '#0A0A0A', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.75)', border: '#262626' };
@@ -94,21 +96,30 @@ export default function EventDetailPanel({ entry, event = {}, session = {}, book
         )}
 
         {/* Akcje */}
-        <div className="flex gap-2 mb-5">
+        <div className="flex flex-col gap-2 mb-5">
           <button
             onClick={onEdit}
-            className="flex items-center justify-center gap-1.5 flex-1 py-2"
+            className="flex items-center justify-center gap-1.5 w-full py-2"
             style={{ border: '0.5px solid var(--brand)', background: 'rgb(var(--brand-rgb) /0.08)', color: 'var(--brand)', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', borderRadius: 'var(--radius)' }}
           >
             <Edit size={11} /> EDYTUJ OFERTĘ
           </button>
           {canOpenPublic && (
             <button
-              onClick={() => onOpenPublic(entry)}
-              className="flex items-center justify-center gap-1.5 flex-1 py-2"
+              onClick={() => navigate(`/wydarzenia/${entry.slug}`)}
+              className="flex items-center justify-center gap-1.5 w-full py-2"
               style={{ border: `0.5px solid ${t.border}`, background: 'transparent', color: t.text, fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', borderRadius: 'var(--radius)' }}
             >
-              <ExternalLink size={11} /> STRONA
+              <ExternalLink size={11} /> ZOBACZ OFERTĘ
+            </button>
+          )}
+          {isAdmin && (
+            <button
+              onClick={() => { onClose(); navigate('/dashboard/events'); }}
+              className="flex items-center justify-center gap-1.5 w-full py-2"
+              style={{ border: `0.5px solid ${t.border}`, background: 'transparent', color: t.muted, fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', borderRadius: 'var(--radius)' }}
+            >
+              <List size={11} /> WSZYSTKIE OFERTY
             </button>
           )}
         </div>

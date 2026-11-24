@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
 import { bookingUpdate, bookingDelete } from '@/lib/bookingAudit';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { AnimatePresence } from 'framer-motion';
@@ -184,6 +185,7 @@ function ListContent({ viewMode, searchQuery, selectedDate, listItems, listCount
 export default function DashboardBookings() {
   const [searchParams] = useSearchParams();
   const { theme } = useTheme();
+  const { user } = useAuth();
   const t = theme === 'light'
     ? { bg: '#FFFFFF', pageBg: '#D5D5D5', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.62)', fuchsia: 'var(--brand)' }
     : { bg: 'rgba(255,255,255,0.06)', pageBg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.72)', fuchsia: 'var(--brand)' };
@@ -906,9 +908,9 @@ export default function DashboardBookings() {
                 session={selectedEventSession}
                 bookings={eventBookings}
                 theme={theme}
+                isAdmin={user?.role === 'admin'}
                 onClose={() => setSelectedEvent(null)}
                 onEdit={() => { setEditingEvent(selectedEventRecord); setSelectedEvent(null); }}
-                onOpenPublic={(e) => window.open(`/wydarzenia/${e.slug}`, '_blank', 'noopener')}
               />
             )}
           </AnimatePresence>
