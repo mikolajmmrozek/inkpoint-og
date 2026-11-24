@@ -15,7 +15,8 @@ import { openHealthFormQRPage } from '@/lib/qrPage';
 import AvailabilityEditModal from '@/components/dashboard/AvailabilityEditModal';
 import AvailabilityDayBanner, { AvailabilityBannerFrame } from '@/components/booking/AvailabilityDayBanner';
 import ReferenceImagesUpload from '@/components/dashboard/ReferenceImagesUpload';
-import { exceptionCoversDate, getDayWindow, dayWindowLabel } from '@/lib/availability';
+import { exceptionCoversDate, getDayWindow, dayWindowLabel, getStudioRecordForDate, getBreaksForDay } from '@/lib/availability';
+import DaySlotActionModal from '@/components/dashboard/DaySlotActionModal';
 import { findTimeOffConflict, findDoubleBookingConflict } from '@/lib/bookingConflicts';
 import BookingConflictModal from '@/components/booking/BookingConflictModal';
 import { recomputeClientTotalSessions } from '@/lib/clientStats';
@@ -718,7 +719,7 @@ function MonthView({ bookings, selectedDate, onDayClick, viewMonth, setViewMonth
                   label={`${avail.type === 'free' ? 'Dyspozycja' : 'Blokada'} · ${timeStr}`}
                   note={avail.record.note}
                   recurring={isRecurring}
-                  onClick={() => onAvailabilityClick({ record: avail.record, dateStr, allRecords: [avail.record] })}
+                  onClick={avail.record.scope === 'studio' ? undefined : () => onAvailabilityClick({ record: avail.record, dateStr, allRecords: [avail.record] })}
                 />
               </AvailabilityBannerFrame>
             </div>
@@ -755,15 +756,18 @@ function toMin(t) {
   return h * 60 + m;
 }
 
-function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, onNewBookingClick, t, artistId, availabilityRecords, onAvailabilityClick }) {
+function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, onNewBookingClick, onNewAvailabilityClick, t, artistId, availabilityRecords, onAvailabilityClick }) {
   const scrollRef = useRef(null);
+  const [slot, setSlot] = useState(null);
   const dateStr = format(selectedDate, 'yyyy-MM-dd');
   const dayBk = bookings.filter(b => b.session_date === dateStr).sort((a, b) => (a.session_time || '').localeCompare(b.session_time || ''));
+  const breaks = getBreaksForDay(availabilityRecords, artistId, selectedDate.getDay());
 
-  // Find availability record for this day (zakresowy rekord pokrywa cały okres)
+  // Wpis artysty ma pierwszeństwo; dopiero potem wpis administratora (studio).
   const availRecord = (() => {
-    const exceptions = (availabilityRecords || []).filter(r => r.type === 'exception');
-    return exceptions.find(r => exceptionCoversDate(r, dateStr)) || null;
+    const exceptions = (availabilityRecords || []).filter(r => r.type === 'exception' && r.scope !== 'studio');
+    const own = exceptions.find(r => exceptionCoversDate(r, dateStr));
+    return own || getStudioRecordForDate(availabilityRecords, dateStr);
   })();
 
   // Compute unavailable ranges (hours outside working schedule)
@@ -781,7 +785,11 @@ function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, o
     // Zakresowy wpis: godziny graniczne obowiązują pierwszego/ostatniego dnia,
     // dni środkowe są całodniowe (getDayWindow zwraca wtedy otwarte brzegi).
     const window = availRecord ? getDayWindow(availRecord, dateStr) : null;
-    if (window) {
+    const isStudio = availRecord?.scope === 'studio';
+    if (window && isStudio) {
+      // Wpis studia: zamknięcie = cały dzień wolny, dyspozycja studia nie zmienia grafiku artysty.
+      if (availRecord.is_available === false) { workStart = null; workEnd = null; }
+    } else if (window) {
       if (availRecord.is_available) {
         // dyspozycja: otwarty brzeg = dostępny przez cały widok dnia
         workStart = window.start === null ? DAY_START_MIN : window.start;
@@ -831,7 +839,7 @@ function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, o
     const clickedMin = Math.round((offsetY / PX_PER_MIN + DAY_START_H * 60) / 15) * 15;
     const h = String(Math.floor(clickedMin / 60)).padStart(2, '0');
     const m = String(clickedMin % 60).padStart(2, '0');
-    onNewBookingClick?.(`${h}:${m}`);
+    setSlot({ time: `${h}:${m}`, date: dateStr });
   };
 
   return (
@@ -877,6 +885,28 @@ function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, o
                 }} />
               );
             })}
+            {/* Przerwy (obiad) — zakreskowane bloki z etykietą */}
+            {breaks.map(brk => {
+              const startMin = toMin(brk.start_time);
+              const endMin = toMin(brk.end_time);
+              if (startMin === null || endMin === null || endMin <= startMin) return null;
+              const top = Math.max(0, (startMin - DAY_START_H * 60)) * PX_PER_MIN;
+              const height = Math.max(18, (endMin - startMin) * PX_PER_MIN);
+              return (
+                <div key={`break-${brk.id}`} style={{
+                  position: 'absolute', top: `${top}px`, height: `${height}px`, left: 0, right: 0,
+                  backgroundImage: 'repeating-linear-gradient(45deg, rgba(128,128,128,0.16) 0px, rgba(128,128,128,0.16) 3px, transparent 3px, transparent 9px)',
+                  borderTop: '0.5px dashed rgba(128,128,128,0.4)',
+                  borderBottom: '0.5px dashed rgba(128,128,128,0.4)',
+                  pointerEvents: 'none', zIndex: 0, padding: '2px 6px', overflow: 'hidden',
+                }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                    PRZERWA {brk.start_time}–{brk.end_time}
+                  </span>
+                </div>
+              );
+            })}
+
             {/* Now line */}
             {showNow && (
               <>
@@ -888,8 +918,9 @@ function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, o
             {availRecord && (() => {
               const w = getDayWindow(availRecord, dateStr);
               if (!w || w.start === null || w.end === null) return null;
+              const isStudio = availRecord.scope === 'studio';
               const color = availRecord.is_available ? '#16a34a' : 'var(--brand)';
-              const label = availRecord.is_available ? 'Dyspozycja' : 'Blokada';
+              const label = isStudio ? (availRecord.is_available ? 'Dyspozycja studia' : 'Studio zamknięte') : (availRecord.is_available ? 'Dyspozycja' : 'Blokada');
               const isRecurring = availRecord.repeat && availRecord.repeat !== 'none';
               const startMin = w.start;
               const endMin = w.end;
@@ -900,9 +931,11 @@ function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, o
                   key="avail-tile"
                   onClick={(e) => {
                     e.stopPropagation();
+                    if (isStudio) return;
                     onAvailabilityClick?.({ record: availRecord, dateStr, allRecords: [availRecord] });
                   }}
-                  style={{ position: 'absolute', top: `${top}px`, height: `${height}px`, left: '4px', right: '4px', background: `${color}12`, borderLeft: `2px solid ${color}80`, borderTop: `0.5px solid ${color}40`, borderRight: `0.5px solid ${color}40`, borderBottom: `0.5px solid ${color}40`, cursor: 'pointer', padding: '3px 6px', zIndex: 0, display: 'flex', alignItems: 'flex-start', gap: '4px' }}
+                  title={isStudio ? 'Wpis administratora — tylko podgląd' : 'Edytuj dyspozycję'}
+                  style={{ position: 'absolute', top: `${top}px`, height: `${height}px`, left: '4px', right: '4px', background: `${color}12`, borderLeft: `2px solid ${color}80`, borderTop: `0.5px solid ${color}40`, borderRight: `0.5px solid ${color}40`, borderBottom: `0.5px solid ${color}40`, borderRadius: 'var(--radius)', cursor: isStudio ? 'default' : 'pointer', padding: '3px 6px', zIndex: 0, display: 'flex', alignItems: 'flex-start', gap: '4px' }}
                   onMouseEnter={e => e.currentTarget.style.background = `${color}20`}
                   onMouseLeave={e => e.currentTarget.style.background = `${color}12`}
                 >
@@ -941,10 +974,20 @@ function HourlyDayView({ bookings, selectedDate, onDateChange, onBookingClick, o
       {/* Summary */}
       <div className="px-4 py-2 flex items-center gap-4 flex-wrap" style={{ borderTop: `0.5px solid ${t.cardBorder}` }}>
         {dayBk.length === 0
-          ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>BRAK SESJI — kliknij na oś czasu aby dodać</span>
+          ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>BRAK SESJI — kliknij na oś czasu, aby dodać rezerwację lub dyspozycję</span>
           : <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>{dayBk.length} {dayBk.length === 1 ? 'SESJA' : 'SESJE'}</span>
         }
       </div>
+
+      {slot && (
+        <DaySlotActionModal
+          slot={slot}
+          theme={t.cardBg === '#FFFFFF' ? 'light' : 'dark'}
+          onBooking={() => { onNewBookingClick?.(slot.time); setSlot(null); }}
+          onAvailability={() => { onNewAvailabilityClick?.(slot.time); setSlot(null); }}
+          onClose={() => setSlot(null)}
+        />
+      )}
     </div>
   );
 }
@@ -976,19 +1019,34 @@ export default function ArtistSchedule() {
 
   const loadAvailability = useCallback(() => {
     if (!artist?.id) return;
-    base44.entities.ArtistAvailability.filter({ artist_id: artist.id }, '-date', 500).then(setAvailabilityRecords);
+    // Własne wpisy artysty + wpisy administratora (dni wolne/zajęte studia) — te drugie tylko do odczytu.
+    Promise.all([
+      base44.entities.ArtistAvailability.filter({ artist_id: artist.id }, '-date', 500),
+      base44.entities.ArtistAvailability.filter({ scope: 'studio' }, '-date', 300).catch(() => []),
+    ]).then(([own, studio]) => setAvailabilityRecords([...own, ...studio]));
   }, [artist?.id]);
 
   // Find the availability record that applies to a given date string
   // (zakresowy rekord pokrywa cały okres od date do end_date)
   const getAvailabilityRecordForDate = useCallback((dateStr) => {
-    const exceptions = availabilityRecords.filter(r => r.type === 'exception');
+    const exceptions = availabilityRecords.filter(r => r.type === 'exception' && r.scope !== 'studio');
     // First: exact single-day match (no repeat, no range)
     const exact = exceptions.find(r => r.date === dateStr && (!r.repeat || r.repeat === 'none') && (!r.end_date || r.end_date <= r.date));
     if (exact) return exact;
-    // Then: any record covering this day (range or recurring occurrence)
-    return exceptions.find(r => exceptionCoversDate(r, dateStr)) || null;
+    // Then: any record covering this day (range or recurring occurrence), na końcu wpis studia
+    return exceptions.find(r => exceptionCoversDate(r, dateStr)) || getStudioRecordForDate(availabilityRecords, dateStr);
   }, [availabilityRecords]);
+
+  // Dyspozycja z widoku godzinowego — termin wypełniony kliknięciem w oś czasu.
+  const openNewAvailability = useCallback((time) => {
+    const dateStr = format(selectedDate, 'yyyy-MM-dd');
+    const [h, m] = (time || '09:00').split(':').map(Number);
+    const endMin = Math.min(23 * 60 + 45, h * 60 + m + 60);
+    const endTime = `${String(Math.floor(endMin / 60)).padStart(2, '0')}:${String(endMin % 60).padStart(2, '0')}`;
+    if (createMenu.newAvailability) {
+      createMenu.newAvailability({ artist_id: artist.id, date: dateStr, start_time: time, end_time: endTime });
+    }
+  }, [createMenu.newAvailability, selectedDate, artist?.id]);
 
   const t = theme === 'light'
     ? { title: '#111111', muted: 'rgba(0,0,0,0.4)', cardBg: '#FFFFFF', cardBorder: '#E5E5E5', text: '#111111', rowBorder: '#E5E5E5', rowHover: 'rgba(0,0,0,0.03)' }
@@ -1141,6 +1199,7 @@ export default function ArtistSchedule() {
           onDateChange={setSelectedDate}
           onBookingClick={setSelectedBooking}
           onNewBookingClick={() => setShowNewModal(true)}
+          onNewAvailabilityClick={openNewAvailability}
           t={t}
           artistId={artist.id}
           availabilityRecords={availabilityRecords}
@@ -1181,7 +1240,7 @@ export default function ArtistSchedule() {
                     color={color}
                     label={`${label} · ${timeStr}`}
                     note={record.note}
-                    onClick={ex ? () => setSelectedAvailability({ record: ex, dateStr, allRecords: [ex] }) : undefined}
+                    onClick={ex && ex.scope !== 'studio' ? () => setSelectedAvailability({ record: ex, dateStr, allRecords: [ex] }) : undefined}
                   />
                 </AvailabilityBannerFrame>
               </div>

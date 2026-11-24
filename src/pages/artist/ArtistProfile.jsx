@@ -4,9 +4,12 @@ import { base44 } from '@/api/base44Client';
 import { compressImage } from '@/utils/compressImage';
 import { Upload, Instagram } from 'lucide-react';
 import ArtistScheduleEditor from '@/components/dashboard/ArtistScheduleEditor';
+import PinnedTilesSettings from '@/components/dashboard/PinnedTilesSettings';
+import { useAuth } from '@/lib/AuthContext';
 
 export default function ArtistProfile() {
   const { artist: initialArtist, theme } = useOutletContext();
+  const { user } = useAuth();
   const [artist, setArtist] = useState(initialArtist);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -75,7 +78,7 @@ export default function ArtistProfile() {
     <div>
       {/* Tabs */}
       <div className="flex mb-6" style={{ borderBottom: `0.5px solid ${t.cardBorder}` }}>
-        {[['profile', 'Profil'], ['schedule', 'Mój Grafik']].map(([key, lbl]) => (
+        {[['profile', 'Profil'], ['schedule', 'Mój Grafik'], ['tiles', 'Kafle pulpitu']].map(([key, lbl]) => (
           <button key={key} onClick={() => setActiveTab(key)} style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '8px 16px', background: 'transparent', border: 'none', borderBottom: `1.5px solid ${activeTab === key ? 'var(--brand)' : 'transparent'}`, color: activeTab === key ? 'var(--brand)' : t.muted, cursor: 'pointer', marginBottom: '-0.5px' }}>{lbl}</button>
         ))}
       </div>
@@ -84,6 +87,14 @@ export default function ArtistProfile() {
       {activeTab === 'schedule' && (
         <div className="p-6" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
           <ArtistScheduleEditor artistId={artist?.id} t={{ border: t.inputBorder, text: t.text, muted: t.muted, cardBg: 'transparent' }} />
+        </div>
+      )}
+
+      {/* Pinned tiles tab */}
+      {activeTab === 'tiles' && (
+        <div className="p-6" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>KAFLE PULPITU</p>
+          <PinnedTilesSettings role="artist" userEmail={user?.email} t={{ ...t, border: t.cardBorder }} />
         </div>
       )}
 

@@ -27,7 +27,8 @@ export default function QuickAvailabilityModal({ prefill, role, onClose, onSaved
   const [note, setNote] = useState('');
   const [repeat, setRepeat] = useState('none');
   const [repeatUntil, setRepeatUntil] = useState('');
-  const [allDay, setAllDay] = useState(true);
+  // Z widoku dnia przychodzimy z gotowymi godzinami — wtedy nie są całodniowe.
+  const [allDay, setAllDay] = useState(!prefill?.start_time);
   const [saving, setSaving] = useState(false);
 
   const lockedArtist = role === 'artist' && !!prefill?.artist_id;
@@ -106,7 +107,7 @@ export default function QuickAvailabilityModal({ prefill, role, onClose, onSaved
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
         className="w-full max-w-md p-6 sm:p-8"
-        style={{ border: `0.5px solid ${t.border}`, background: isLight ? '#FFFFFF' : '#0A0A0A' }}
+        style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-6">
@@ -148,6 +149,7 @@ export default function QuickAvailabilityModal({ prefill, role, onClose, onSaved
                     fontSize: '9px',
                     letterSpacing: '0.1em',
                     padding: '9px 0',
+                    borderRadius: 'var(--radius)',
                     cursor: 'pointer',
                   }}
                 >{lbl}</button>
@@ -172,6 +174,7 @@ export default function QuickAvailabilityModal({ prefill, role, onClose, onSaved
                     fontSize: '9px',
                     letterSpacing: '0.1em',
                     padding: '9px 0',
+                    borderRadius: 'var(--radius)',
                     cursor: 'pointer',
                   }}
                 >{lbl}</button>

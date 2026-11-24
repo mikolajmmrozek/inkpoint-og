@@ -19,6 +19,7 @@ import ReferenceImagesGallery from '@/components/booking/ReferenceImagesGallery'
 import { buildHealthFormStatusMap } from '@/lib/healthFormStatus';
 import { pluralSesji } from '@/utils';
 import TrendBadge from '@/components/stats/TrendBadge';
+import PinnedTiles from '@/components/dashboard/PinnedTiles';
 import { comparePeriods, monthBounds, pctChange, serviceRevenue, upcomingMonthBounds } from '@/lib/trends';
 
 const PAYMENT_METHOD_LABELS = { cash: 'Gotówka', card: 'Karta', voucher: 'Voucher' };
@@ -585,6 +586,12 @@ export default function ArtistHome() {
     return pctChange(count(bounds.current), count(bounds.previous));
   })();
 
+  const pinnedValues = {
+    upcoming: { value: loading ? '—' : upcoming.length, trend: upcomingTrend },
+    month_sessions: { value: loading ? '—' : thisMonth.length, trend: monthTrend.sessions },
+    month_revenue: { value: loading ? '—' : `${Math.round(revenue)} zł`, sub: `Prognoza: +${forecast} zł`, trend: monthTrend.revenue },
+  };
+
   const KPI = [
     { label: 'Nadchodzące sesje', value: upcoming.length, trend: upcomingTrend, icon: Calendar, link: '/artist/schedule' },
     { label: 'Sesje w tym miesiącu', value: thisMonth.length, trend: monthTrend.sessions, icon: TrendingUp, link: '/artist/stats' },
@@ -636,6 +643,8 @@ export default function ArtistHome() {
           Cześć, {artist.name?.split(' ')[0]}
         </h1>
       </div>
+
+      <PinnedTiles role="artist" userEmail={user?.email} values={pinnedValues} t={t} theme={theme} />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
         {KPI.map((kpi, i) => {

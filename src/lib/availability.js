@@ -20,6 +20,52 @@ function minToTime(m) {
   return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 }
 
+// ── Wpisy studia (admin) i przerwy ──────────────────────────────────────────
+export const STUDIO_ARTIST_ID = 'studio';
+
+// Wpis administratora obowiązujący wszystkich artystów.
+export function isStudioRecord(r) {
+  return r?.scope === 'studio';
+}
+
+// Przerwa w grafiku tygodniowym (np. obiad).
+export function isBreakRecord(r) {
+  return r?.type === 'break';
+}
+
+// Wpis studia obejmujący dany dzień: zamknięcie (is_available = false) ma
+// pierwszeństwo przed dyspozycją studia (is_available = true).
+export function getStudioRecordForDate(records, dateStr) {
+  const studio = (records || []).filter(r => isStudioRecord(r) && r.type === 'exception' && exceptionCoversDate(r, dateStr));
+  return studio.find(r => r.is_available === false) || studio[0] || null;
+}
+
+// Przerwy artysty w danym dniu tygodnia.
+export function getBreaksForDay(records, artistId, dayOfWeek) {
+  return (records || [])
+    .filter(r => isBreakRecord(r) && r.artist_id === artistId && r.day_of_week === dayOfWeek && r.start_time && r.end_time)
+    .sort((a, b) => a.start_time.localeCompare(b.start_time));
+}
+
+// Łączny czas pracy w tygodniu w godzinach — z grafiku cyklicznego, bez przerw.
+export function weekHours(records, artistId) {
+  const recurring = (records || []).filter(r => r.type === 'recurring' && r.artist_id === artistId && r.is_available !== false);
+  let minutes = 0;
+  for (const day of recurring) {
+    const start = timeToMin(day.start_time);
+    const end = timeToMin(day.end_time);
+    if (start === null || end === null || end <= start) continue;
+    let dayMinutes = end - start;
+    for (const brk of getBreaksForDay(records, artistId, day.day_of_week)) {
+      const bStart = Math.max(start, timeToMin(brk.start_time));
+      const bEnd = Math.min(end, timeToMin(brk.end_time));
+      if (bEnd > bStart) dayMinutes -= (bEnd - bStart);
+    }
+    minutes += Math.max(0, dayMinutes);
+  }
+  return Math.round((minutes / 60) * 10) / 10;
+}
+
 // Następny dzień (YYYY-MM-DD) — arytmetyka UTC, niezależna od strefy.
 export function nextDateStr(dateStr) {
   const [y, m, d] = dateStr.split('-').map(Number);

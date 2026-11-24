@@ -5,6 +5,8 @@ import { pl } from 'date-fns/locale';
 import { getAvailabilityForDay } from '@/components/dashboard/ArtistScheduleEditor';
 import { isArtistOffOnDate } from '@/lib/bookingConflicts';
 import { getThumbnailUrl } from '@/lib/thumbnail';
+import { getBreaksForDay } from '@/lib/availability';
+import DaySlotActionModal from '@/components/dashboard/DaySlotActionModal';
 
 const STATUS_COLORS = {
   pending: '#FF007F',
@@ -128,7 +130,7 @@ const TimeAxis = memo(function TimeAxis({ muted }) {
   );
 }, (prev, next) => prev.muted === next.muted);
 
-const ArtistColumn = memo(function ArtistColumn({ artist, artistBookings, onColumnClick, onBookingClick, border, t, isLast, availability }) {
+const ArtistColumn = memo(function ArtistColumn({ artist, artistBookings, onColumnClick, onBookingClick, border, t, isLast, availability, breaks = [] }) {
   const handleClick = useCallback((e) => onColumnClick(e, artist), [onColumnClick, artist]);
 
   // Calculate inactive overlay regions
@@ -163,6 +165,30 @@ const ArtistColumn = memo(function ArtistColumn({ artist, artistBookings, onColu
       {inactiveRegions.map((r, i) => (
         <div key={i} style={{ position: 'absolute', top: `${r.top}px`, left: 0, right: 0, height: `${r.height}px`, background: 'repeating-linear-gradient(45deg, rgba(128,128,128,0.06) 0px, rgba(128,128,128,0.06) 3px, transparent 3px, transparent 9px)', pointerEvents: 'none', zIndex: 0, borderTop: r.top > 0 ? `0.5px dashed rgba(128,128,128,0.2)` : 'none', borderBottom: r.top === 0 ? `0.5px dashed rgba(128,128,128,0.2)` : 'none' }} />
       ))}
+      {/* Przerwy (obiad) — zakreskowane bloki */}
+      {breaks.map(brk => {
+        const startMin = toMinutes(brk.start_time);
+        const endMin = toMinutes(brk.end_time);
+        if (startMin === null || endMin === null || endMin <= startMin) return null;
+        const top = Math.max(0, (startMin - DAY_START)) * PX_PER_MIN;
+        const height = Math.max(16, (endMin - startMin) * PX_PER_MIN);
+        return (
+          <div
+            key={`break-${brk.id}`}
+            style={{
+              position: 'absolute', top: `${top}px`, height: `${height}px`, left: 0, right: 0,
+              background: 'repeating-linear-gradient(45deg, rgba(128,128,128,0.16) 0px, rgba(128,128,128,0.16) 3px, transparent 3px, transparent 9px)',
+              borderTop: '0.5px dashed rgba(128,128,128,0.4)',
+              borderBottom: '0.5px dashed rgba(128,128,128,0.4)',
+              pointerEvents: 'none', zIndex: 1, padding: '2px 4px', overflow: 'hidden',
+            }}
+          >
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              PRZERWA {brk.start_time}–{brk.end_time}
+            </span>
+          </div>
+        );
+      })}
       {artistBookings.map(b => (
         <BookingTile key={b.id} booking={b} onClick={onBookingClick} t={t} />
       ))}
@@ -170,8 +196,9 @@ const ArtistColumn = memo(function ArtistColumn({ artist, artistBookings, onColu
   );
 });
 
-export default function DailyScheduleView({ bookings, artists, selectedDate, onDateChange, onBookingClick, onNewBookingRequest, t, artistFilter = 'all', availabilityRecords = [] }) {
+export default function DailyScheduleView({ bookings, artists, selectedDate, onDateChange, onBookingClick, onNewBookingRequest, onNewAvailabilityRequest, t, artistFilter = 'all', availabilityRecords = [] }) {
   const scrollRef = useRef(null);
+  const [slot, setSlot] = useState(null);
 
   const dateStr = useMemo(() => format(selectedDate, 'yyyy-MM-dd'), [selectedDate]);
   const showNowLine = useMemo(() => isToday(selectedDate), [selectedDate]);
@@ -214,8 +241,8 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
     const clickedMin = Math.round((offsetY / PX_PER_MIN + DAY_START) / 15) * 15;
     const h = String(Math.floor(clickedMin / 60)).padStart(2, '0');
     const m = String(clickedMin % 60).padStart(2, '0');
-    onNewBookingRequest?.({ artist, time: `${h}:${m}`, date: dateStr });
-  }, [onNewBookingRequest, dateStr]);
+    setSlot({ artist, artistName: artist?.name, time: `${h}:${m}`, date: dateStr });
+  }, [dateStr]);
 
   return (
     <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, width: '100%', boxSizing: 'border-box' }}>
@@ -276,6 +303,7 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
                   t={t}
                   isLast={idx === displayedArtists.length - 1}
                   availability={availabilityRecords.length > 0 ? getAvailabilityForDay(availabilityRecords, a.id, dateStr) : null}
+                  breaks={availabilityRecords.length > 0 ? getBreaksForDay(availabilityRecords, a.id, new Date(dateStr + 'T12:00:00').getDay()) : []}
                 />
               ));
             })()}
@@ -299,9 +327,19 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
           );
         })}
         {dayBookings.length === 0 && (
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>BRAK SESJI W TEN DZIEŃ</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.08em' }}>BRAK SESJI W TEN DZIEŃ — KLIKNIJ OŚ CZASU, ABY DODAĆ WPIS</span>
         )}
       </div>
+
+      {slot && (
+        <DaySlotActionModal
+          slot={slot}
+          theme={t.bg === '#FFFFFF' ? 'light' : 'dark'}
+          onBooking={() => { onNewBookingRequest?.({ artist: slot.artist, time: slot.time, date: slot.date }); setSlot(null); }}
+          onAvailability={() => { onNewAvailabilityRequest?.({ artist: slot.artist, time: slot.time, date: slot.date }); setSlot(null); }}
+          onClose={() => setSlot(null)}
+        />
+      )}
     </div>
   );
 }

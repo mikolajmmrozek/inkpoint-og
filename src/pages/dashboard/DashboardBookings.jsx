@@ -214,6 +214,7 @@ export default function DashboardBookings() {
 
   const createMenu = useCreateMenu() || {};
   const newBooking = createMenu.newBooking || (() => {});
+  const newAvailability = createMenu.newAvailability || (() => {});
   const registerBookingsRefresh = createMenu.registerBookingsRefresh || (() => {});
   const registerAvailabilityRefresh = createMenu.registerAvailabilityRefresh || (() => {});
   const registerSelectedDate = createMenu.registerSelectedDate || (() => {});
@@ -335,6 +336,19 @@ export default function DashboardBookings() {
       session_time: time,
     });
   }, [newBooking]);
+
+  // Kliknięcie osi czasu w widoku dnia: dyspozycja z wypełnionym terminem.
+  const handleNewAvailabilityRequest = useCallback(({ artist, time, date }) => {
+    const [h, m] = (time || '09:00').split(':').map(Number);
+    const endMin = Math.min(23 * 60 + 45, h * 60 + m + 60);
+    const endTime = `${String(Math.floor(endMin / 60)).padStart(2, '0')}:${String(endMin % 60).padStart(2, '0')}`;
+    newAvailability({
+      artist_id: artist?.id,
+      date,
+      start_time: time,
+      end_time: endTime,
+    });
+  }, [newAvailability]);
 
   const handleDayClick = (day) => {
     const dayDateStr = format(day, 'yyyy-MM-dd');
@@ -672,6 +686,7 @@ export default function DashboardBookings() {
                 onDateChange={(day) => setSelectedDate(day)}
                 onBookingClick={handleBookingClick}
                 onNewBookingRequest={handleNewBookingRequest}
+                onNewAvailabilityRequest={handleNewAvailabilityRequest}
                 t={t}
                 artistFilter={artistFilters}
                 availabilityRecords={availabilityRecords}

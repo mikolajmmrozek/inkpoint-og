@@ -172,13 +172,20 @@ export default function ArtistPanel() {
     if (!isLoadingAuth) {
       if (!user) {
         base44.auth.redirectToLogin(window.location.href);
-      } else if (user.role === 'artist' && user.artist_id) {
-        base44.entities.Artist.get(user.artist_id).then(res => {
-          if (res) setArtist(res);
+      } else if (user.role === 'artist') {
+        if (user.artist_id) {
+          base44.entities.Artist.get(user.artist_id).then(res => {
+            if (res) setArtist(res);
+            setLoadingArtist(false);
+          }).catch(() => setLoadingArtist(false));
+        } else {
           setLoadingArtist(false);
-        }).catch(() => setLoadingArtist(false));
+        }
+      } else if (user.role === 'admin') {
+        // Admin trafia do swojego panelu — loader zamiast chwilowego komunikatu o braku uprawnień.
+        navigate('/dashboard', { replace: true });
       } else {
-        setLoadingArtist(false);
+        navigate('/panel', { replace: true });
       }
     }
   }, [user, isLoadingAuth]);
@@ -191,16 +198,10 @@ export default function ArtistPanel() {
 
   if (!user) return null;
 
+  // Każda inna rola jest przekierowywana do właściwego panelu — pokazujemy loader.
   if (user.role !== 'artist') return (
-    <div className="h-screen flex items-center justify-center flex-col gap-6" style={{ background: '#0A0A0A' }}>
-      <div style={{ border: '0.5px solid #262626', padding: '48px', textAlign: 'center', maxWidth: '400px' }}>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>DOSTĘP ZABRONIONY</p>
-        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 400, color: '#F5F0EB', letterSpacing: '0.04em', marginBottom: '12px' }}>Brak uprawnień</h2>
-        <p style={{ fontSize: '14px', color: 'rgba(245,240,235,0.5)', lineHeight: 1.7, marginBottom: '32px' }}>
-          Ten panel jest dostępny tylko dla artystów studia.
-        </p>
-        <button onClick={() => base44.auth.logout('/')} className="btn-ghost-parchment" style={{ fontSize: '10px' }}>WYLOGUJ SIĘ</button>
-      </div>
+    <div className="h-screen flex items-center justify-center" style={{ background: '#0A0A0A' }}>
+      <div className="w-8 h-px animate-pulse" style={{ background: 'var(--brand)' }} />
     </div>
   );
 

@@ -1,0 +1,42 @@
+{
+  "name": "DashboardPinnedTiles",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "E-mail u\u017cytkownika, do kt\u00f3rego nale\u017c\u0105 przypi\u0119te kafle"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "artist"
+      ],
+      "description": "Rola, dla kt\u00f3rej zapisano zestaw kafli"
+    },
+    "tiles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Klucze przypi\u0119tych kafli w kolejno\u015bci wy\u015bwietlania (maksymalnie 6)"
+    }
+  },
+  "required": [
+    "user_email"
+  ],
+  "rls": {
+    "read": {
+      "data.user_email": "{{user.email}}"
+    },
+    "create": {
+      "data.user_email": "{{user.email}}"
+    },
+    "update": {
+      "data.user_email": "{{user.email}}"
+    },
+    "delete": {
+      "data.user_email": "{{user.email}}"
+    }
+  }
+}

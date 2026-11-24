@@ -9,6 +9,8 @@ import { monthBounds, pctChange } from '@/lib/trends';
 import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
 import { AnimatePresence } from 'framer-motion';
 import { useTheme } from './Dashboard';
+import { useAuth } from '@/lib/AuthContext';
+import PinnedTiles from '@/components/dashboard/PinnedTiles';
 import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
 import BookingModal from '@/components/dashboard/BookingModal';
 import HealthFormBadge from '@/components/booking/HealthFormBadge';
@@ -20,6 +22,7 @@ import { formatCompact } from '@/lib/formatNumber';
 
 export default function DashboardHome() {
   const { theme } = useTheme();
+  const { user } = useAuth();
   const isMobile = useIsMobile();
   const [stats, setStats] = useState({ bookings: 0, pending: 0, messages: 0, forms: 0, toSettle: 0, changeRequests: 0 });
   const [pendingByDay, setPendingByDay] = useState([]);
@@ -112,6 +115,13 @@ export default function DashboardHome() {
     return pctChange(count(bounds.current), count(bounds.previous));
   })();
 
+  const pinnedValues = {
+    all_bookings: { value: loading ? '—' : formatCompact(stats.bookings), trend: monthBookingsTrend },
+    pending: { value: loading ? '—' : pendingAndRequests, sub: `${stats.pending} rezerw. · ${stats.changeRequests} zmiany` },
+    messages: { value: loading ? '—' : stats.messages },
+    to_settle: { value: loading ? '—' : stats.toSettle },
+  };
+
   const KPI = [
     { label: 'Wszystkie rezerwacje', value: stats.bookings, icon: Calendar, link: '/dashboard/bookings', trend: monthBookingsTrend },
     { label: 'Do weryfikacji', value: pendingAndRequests, icon: Inbox, link: '/dashboard/bookings?view=pending', sublabel: `${stats.pending} rezerw. · ${stats.changeRequests} zmiany` },
@@ -143,6 +153,9 @@ export default function DashboardHome() {
 
   return (
     <div>
+      {/* Przypięte kafle */}
+      <PinnedTiles role="admin" userEmail={user?.email} values={pinnedValues} t={t} theme={theme} />
+
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
         {KPI.map((kpi, i) => {

@@ -1,21 +1,38 @@
 // Shared booking conflict detection utilities
-import { exceptionCoversDate, getDayWindow, dayWindowLabel, timeToMin } from './availability';
+import { exceptionCoversDate, getDayWindow, dayWindowLabel, timeToMin, getStudioRecordForDate } from './availability';
 
 export { timeToMin };
 
+// Wpisy artysty mają pierwszeństwo przed wpisami studia — dopiero gdy artysta
+// nie ma własnego wpisu, używamy wpisu administratora.
 export function getExceptionForDate(records, dateStr) {
-  const exceptions = (records || []).filter(r => r.type === 'exception');
+  const exceptions = (records || []).filter(r => r.type === 'exception' && r.scope !== 'studio');
   // First: exact single-day match (no repeat, no range) — dzień ma własny wpis
   const exact = exceptions.find(r => r.date === dateStr && (!r.repeat || r.repeat === 'none') && (!r.end_date || r.end_date <= r.date));
   if (exact) return exact;
   // Then: any record covering this day — zakres (date..end_date) albo wystąpienie cyklu
-  return exceptions.find(r => exceptionCoversDate(r, dateStr)) || null;
+  const covering = exceptions.find(r => exceptionCoversDate(r, dateStr));
+  if (covering) return covering;
+  // Na końcu wpis studia (zamknięcie lub dyspozycja dla wszystkich artystów)
+  return getStudioRecordForDate(records, dateStr);
 }
 
 // Determine whether an artist is off (unavailable) on a given date.
 // Returns { off: boolean, note, timeRange, isException, record }.
 export function isArtistOffOnDate(records, artistId, dateStr) {
   const dow = new Date(dateStr + 'T12:00:00').getDay();
+  // Zamknięcie studia przez administratora obowiązuje wszystkich artystów.
+  const studio = getStudioRecordForDate(records, dateStr);
+  if (studio && studio.is_available === false) {
+    return {
+      off: true,
+      note: studio.note || 'Studio zamknięte',
+      timeRange: studio.start_time && studio.end_time ? dayWindowLabel(studio, dateStr) : null,
+      isException: true,
+      isStudio: true,
+      record: studio,
+    };
+  }
   const artistRecords = (records || []).filter(r => r.artist_id === artistId);
   const ex = getExceptionForDate(artistRecords, dateStr);
   if (ex) {

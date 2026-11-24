@@ -4,7 +4,9 @@ import { Plus, Trash2, Edit2, X, RefreshCw, ChevronDown } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import AvailabilityEditModal from '@/components/dashboard/AvailabilityEditModal';
-import { generateDates, exceptionCoversDate, getDayWindow, nextDateStr } from '@/lib/availability';
+import BreaksEditor from '@/components/dashboard/BreaksEditor';
+import { generateDates, exceptionCoversDate, getDayWindow, nextDateStr, weekHours, getStudioRecordForDate, isStudioRecord } from '@/lib/availability';
+import { Lock } from 'lucide-react';
 
 const DAYS = [
   { label: 'Pn', value: 1 },
@@ -171,6 +173,8 @@ function ExceptionRow({ group, color, border, muted, text, onView, onEdit, onDel
 export default function ArtistScheduleEditor({ artistId, t }) {
   const [recurring, setRecurring] = useState([]);
   const [exceptions, setExceptions] = useState([]);
+  const [allRecords, setAllRecords] = useState([]);
+  const [studioRecords, setStudioRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -183,9 +187,14 @@ export default function ArtistScheduleEditor({ artistId, t }) {
   const muted = t?.muted || 'rgba(245,240,235,0.4)';
 
   const reload = async () => {
-    const all = await base44.entities.ArtistAvailability.filter({ artist_id: artistId }, '-date', 500);
+    const [all, studio] = await Promise.all([
+      base44.entities.ArtistAvailability.filter({ artist_id: artistId }, '-date', 500),
+      base44.entities.ArtistAvailability.filter({ scope: 'studio' }, '-date', 200).catch(() => []),
+    ]);
+    setAllRecords(all);
     setRecurring(all.filter(r => r.type === 'recurring'));
     setExceptions(all.filter(r => r.type === 'exception').sort((a, b) => (a.date || '').localeCompare(b.date || '')));
+    setStudioRecords(studio.filter(r => r.type === 'exception').sort((a, b) => (a.date || '').localeCompare(b.date || '')));
   };
 
   useEffect(() => {
@@ -361,9 +370,14 @@ export default function ArtistScheduleEditor({ artistId, t }) {
       {/* ── Grafik tygodniowy ── */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-            GRAFIK TYGODNIOWY ({activeCount} dni)
-          </p>
+          <div className="min-w-0">
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              GRAFIK TYGODNIOWY ({activeCount} dni)
+            </p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: muted, letterSpacing: '0.08em', marginTop: '3px' }}>
+              {weekHours(allRecords, artistId)} GODZ. / TYDZ. — BEZ PRZERW
+            </p>
+          </div>
           <button onClick={applyDefault} disabled={saving} style={{ fontFamily: 'var(--font-mono)', fontSize: '7px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 8px', border: `0.5px solid ${border}`, color: muted, background: 'transparent', cursor: 'pointer', borderRadius: 'var(--radius)' }}>
             RESETUJ DO DOMYŚLNEGO
           </button>
@@ -395,6 +409,43 @@ export default function ArtistScheduleEditor({ artistId, t }) {
           })}
         </div>
       </div>
+
+      {/* ── Przerwy (obiad itp.) ── */}
+      <BreaksEditor
+        artistId={artistId}
+        records={allRecords}
+        onChanged={reload}
+        t={{ border, text, muted, bg: t?.bg }}
+      />
+
+      {/* ── Wpisy administratora (tylko podgląd) ── */}
+      {studioRecords.length > 0 && (
+        <div style={{ borderTop: `0.5px solid ${border}`, paddingTop: '16px' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>
+            DNI WOLNE STUDIA
+          </p>
+          <div className="space-y-1">
+            {studioRecords.map(r => {
+              const off = r.is_available === false;
+              let dateStr = r.date || '';
+              try {
+                dateStr = r.end_date && r.end_date > r.date
+                  ? `${format(parseISO(r.date), 'd MMM', { locale: pl })} – ${format(parseISO(r.end_date), 'd MMM yyyy', { locale: pl })}`
+                  : format(parseISO(r.date), 'd MMM yyyy', { locale: pl });
+              } catch {}
+              return (
+                <div key={r.id} className="flex items-center gap-2 px-3 py-2" style={{ border: `0.5px solid ${border}`, background: 'rgb(var(--brand-rgb) /0.03)', borderRadius: 'var(--radius)' }}>
+                  <Lock size={9} color={muted} />
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: off ? 'var(--brand)' : '#16a34a', letterSpacing: '0.06em' }}>
+                    {off ? 'WOLNE' : 'ZAJĘTE'} · {dateStr}
+                  </span>
+                  {r.note && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: muted }}>· {r.note}</span>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* ── Blokady / Dodaj wolne ── */}
       <div style={{ borderTop: `0.5px solid ${border}`, paddingTop: '16px' }}>
@@ -573,6 +624,11 @@ export default function ArtistScheduleEditor({ artistId, t }) {
 
 export function getAvailabilityForDay(availabilityRecords, artistId, dateStr) {
   const dow = new Date(dateStr + 'T12:00:00').getDay();
+  // Zamknięcie studia przez administratora obowiązuje wszystkich artystów.
+  const studio = getStudioRecordForDate(availabilityRecords, dateStr);
+  if (studio && studio.is_available === false) {
+    return { isWorkday: false, start_time: null, end_time: null, isException: true, isStudio: true, note: studio.note || 'Studio zamknięte' };
+  }
   const artistRecords = (availabilityRecords || []).filter(r => r.artist_id === artistId);
 
   // Zakresowy wpis pokrywa cały okres; godziny graniczne obowiązują

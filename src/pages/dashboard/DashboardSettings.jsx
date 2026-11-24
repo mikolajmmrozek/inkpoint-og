@@ -4,6 +4,20 @@ import { useTheme } from './Dashboard';
 import { X } from 'lucide-react';
 import ThemeSettings from '@/components/dashboard/ThemeSettings';
 import SiteContentSettings from '@/components/dashboard/SiteContentSettings';
+import PinnedTilesSettings from '@/components/dashboard/PinnedTilesSettings';
+import StudioDaysOffPanel from '@/components/dashboard/StudioDaysOffPanel';
+import { useAuth } from '@/lib/AuthContext';
+
+const TAB_LABELS = {
+  content: 'Zawartość strony',
+  hero: 'Strona Główna — Hero',
+  about: 'Strona Główna — O Studiu',
+  contact: 'Strona Kontaktu',
+  branding: 'Branding',
+  theme: 'Motyw i Czcionki',
+  tiles: 'Kafle pulpitu',
+  days_off: 'Dni wolne studia',
+};
 
 const inputStyle = {
   background: 'transparent',
@@ -62,6 +76,7 @@ const DEFAULTS = {
 
 export default function DashboardSettings() {
   const { theme } = useTheme();
+  const { user } = useAuth();
   const t = theme === 'light'
     ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.4)', fuchsia: 'var(--brand)' }
     : { bg: 'rgba(10,10,10,0.8)', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.4)', fuchsia: 'var(--brand)' };
@@ -129,10 +144,10 @@ export default function DashboardSettings() {
     <div>
       {/* Tabs */}
       <div className="flex gap-2 mb-6 flex-wrap">
-        {['content', 'hero', 'about', 'contact', 'branding', 'theme'].map(tab => (
+        {['content', 'hero', 'about', 'contact', 'branding', 'theme', 'tiles', 'days_off'].map(tab => (
           <button
             key={tab}
-            onClick={() => tab === 'theme' || tab === 'content' ? setActiveTab(tab) : loadTab(tab)}
+            onClick={() => ['theme', 'content', 'tiles', 'days_off'].includes(tab) ? setActiveTab(tab) : loadTab(tab)}
             style={{
               fontFamily: 'var(--font-mono)',
               fontSize: '10px',
@@ -145,7 +160,7 @@ export default function DashboardSettings() {
               cursor: 'pointer',
             }}
           >
-            {tab === 'content' ? 'Zawartość strony' : tab === 'hero' ? 'Strona Główna — Hero' : tab === 'about' ? 'Strona Główna — O Studiu' : tab === 'contact' ? 'Strona Kontaktu' : tab === 'branding' ? 'Branding' : 'Motyw i Czcionki'}
+            {TAB_LABELS[tab]}
           </button>
         ))}
       </div>
@@ -154,6 +169,15 @@ export default function DashboardSettings() {
         <ThemeSettings t={t} />
       ) : activeTab === 'content' ? (
         <SiteContentSettings t={t} />
+      ) : activeTab === 'tiles' ? (
+        <div className="max-w-2xl" style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '32px', borderRadius: 'var(--radius)' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.fuchsia, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>
+            KAFLE PULPITU
+          </p>
+          <PinnedTilesSettings role="admin" userEmail={user?.email} t={t} />
+        </div>
+      ) : activeTab === 'days_off' ? (
+        <StudioDaysOffPanel t={t} theme={theme} />
       ) : (
       <div className="max-w-2xl space-y-10" style={{ border: `0.5px solid ${t.border}`, background: t.bg, padding: '40px', borderRadius: 'var(--radius)' }}>
         {activeTab === 'hero' && (

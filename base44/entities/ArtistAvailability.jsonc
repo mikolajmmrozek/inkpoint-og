@@ -4,19 +4,29 @@
   "properties": {
     "artist_id": {
       "type": "string",
-      "description": "ID artysty"
+      "description": "ID artysty. Dla wpis\u00f3w studia (scope = studio) warto\u015b\u0107 'studio'."
+    },
+    "scope": {
+      "type": "string",
+      "enum": [
+        "artist",
+        "studio"
+      ],
+      "default": "artist",
+      "description": "artist = wpis artysty, studio = wpis administratora obowi\u0105zuj\u0105cy wszystkich artyst\u00f3w (tylko do odczytu dla artyst\u00f3w)"
     },
     "type": {
       "type": "string",
       "enum": [
         "recurring",
-        "exception"
+        "exception",
+        "break"
       ],
-      "description": "recurring = sta\u0142y grafik tygodniowy, exception = blokada/wyj\u0105tek na konkretny dzie\u0144 lub zakres"
+      "description": "recurring = sta\u0142y grafik tygodniowy, exception = blokada/wyj\u0105tek na konkretny dzie\u0144 lub zakres, break = przerwa w grafiku tygodniowym (np. obiad)"
     },
     "day_of_week": {
       "type": "number",
-      "description": "Dzie\u0144 tygodnia dla recurring: 0=Niedziela, 1=Poniedzia\u0142ek, ..., 6=Sobota"
+      "description": "Dzie\u0144 tygodnia dla recurring i break: 0=Niedziela, 1=Poniedzia\u0142ek, ..., 6=Sobota"
     },
     "date": {
       "type": "string",

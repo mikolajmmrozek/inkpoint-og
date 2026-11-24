@@ -227,6 +227,14 @@ export default function Dashboard() {
 
   if (!user) return null; // redirecting to login
 
+  // Artysta jest przekierowywany do swojego panelu — pokazujemy neutralny loader,
+  // żeby przez chwilę nie mignął komunikat o braku uprawnień.
+  if (user.role === 'artist') return (
+    <div className="h-screen flex items-center justify-center" style={{ background: '#0A0A0A' }}>
+      <div className="w-8 h-px animate-pulse" style={{ background: 'var(--brand)' }} />
+    </div>
+  );
+
   if (user.role !== 'admin') return (
     <div className="h-screen flex items-center justify-center flex-col gap-6" style={{ background: '#0A0A0A' }}>
       <div style={{ border: '0.5px solid #262626', padding: '48px', textAlign: 'center', maxWidth: '400px', borderRadius: 'var(--radius)' }}>

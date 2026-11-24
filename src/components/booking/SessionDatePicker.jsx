@@ -35,7 +35,11 @@ export default function SessionDatePicker({ artistId, selectedDate, selectedTime
     if (!artistId) return;
     setLoading(true);
     Promise.all([
-      base44.entities.ArtistAvailability.filter({ artist_id: artistId }, '-date', 500).catch(() => []),
+      // Własne wpisy artysty + wpisy administratora (dni wolne/zajęte studia).
+      Promise.all([
+        base44.entities.ArtistAvailability.filter({ artist_id: artistId }, '-date', 500).catch(() => []),
+        base44.entities.ArtistAvailability.filter({ scope: 'studio' }, '-date', 300).catch(() => []),
+      ]).then(([own, studio]) => [...own, ...studio]),
       base44.entities.Booking.filter({ artist_id: artistId }, '-session_date', 200).catch(() => []),
       serviceId ? base44.entities.Service.list(undefined, 1).then(s => s.find(x => x.id === serviceId)).catch(() => null) : Promise.resolve(null),
     ]).then(([avail, bk, svc]) => {
