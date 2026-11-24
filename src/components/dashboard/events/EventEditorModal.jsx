@@ -2,20 +2,14 @@ import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { X, Plus, Trash2, Loader2, Upload, AlertTriangle } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import SocialLinksEditor from '@/components/dashboard/events/SocialLinksEditor';
 import { slugify, formatSessionDate, timeToMinutes } from '@/lib/events';
 
 const mono = { fontFamily: 'var(--font-mono)', letterSpacing: '0.12em', textTransform: 'uppercase' };
 
 const emptySession = () => ({ date: '', start_time: '10:00', end_time: '16:00', capacity: 10, leader_ids: [], note: '' });
 
-const SOCIAL_FIELDS = [
-  { key: 'instagram', placeholder: 'Instagram' },
-  { key: 'facebook', placeholder: 'Facebook' },
-  { key: 'tiktok', placeholder: 'TikTok' },
-  { key: 'website', placeholder: 'Strona www' },
-];
-
-const emptyExternalLeader = () => ({ name: '', instagram: '', facebook: '', tiktok: '', website: '' });
+const emptyExternalLeader = () => ({ first_name: '', last_name: '', links: [] });
 
 const toMin = (time) => {
   const [h, m] = String(time || '').split(':').map(Number);
@@ -62,6 +56,7 @@ export default function EventEditorModal({ event, categories, artists, theme, on
   const [error, setError] = useState('');
   const [uploading, setUploading] = useState(false);
   const [conflicts, setConflicts] = useState([]);
+  const [addingExternalLeader, setAddingExternalLeader] = useState(false);
   const [newExternalLeader, setNewExternalLeader] = useState(emptyExternalLeader);
 
   useEffect(() => {
@@ -88,31 +83,41 @@ export default function EventEditorModal({ event, categories, artists, theme, on
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
   const setSession = (index, patch) => setSessions(list => list.map((s, i) => (i === index ? { ...s, ...patch } : s)));
 
-  // Prowadzący spoza organizacji — wpis ręczny imieniem i nazwiskiem, z opcjonalnymi linkami social mediów.
-  const addExternalLeader = () => {
-    const entry = {
-      name: newExternalLeader.name.trim(),
-      instagram: newExternalLeader.instagram.trim(),
-      facebook: newExternalLeader.facebook.trim(),
-      tiktok: newExternalLeader.tiktok.trim(),
-      website: newExternalLeader.website.trim(),
-    };
-    if (!entry.name) return;
-    const sameName = (a, b) => String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
+  // Prowadzący spoza organizacji — formularz otwiera się dopiero po kliknięciu „Dodaj prowadzącego”.
+  const sameName = (a, b) => String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
+
+  const socialsToLinks = (entry) => ['instagram', 'facebook', 'tiktok', 'website']
+    .filter(kind => entry?.[kind])
+    .map(kind => ({ kind, value: entry[kind] }));
+
+  const linksToSocials = (links) => (links || []).reduce((acc, link) => {
+    const value = String(link.value || '').trim();
+    if (value) acc[link.kind] = value;
+    return acc;
+  }, {});
+
+  const confirmExternalLeader = () => {
+    const name = `${newExternalLeader.first_name.trim()} ${newExternalLeader.last_name.trim()}`.trim();
+    if (!name) { setError('Podaj imię i nazwisko prowadzącego.'); return; }
+    setError('');
+    const socials = linksToSocials(newExternalLeader.links);
     setForm(f => {
       const names = f.external_leaders || [];
-      if (names.some(n => sameName(n, entry.name))) return f;
+      if (names.some(n => sameName(n, name))) return f;
       return {
         ...f,
-        external_leaders: [...names, entry.name],
-        external_leader_socials: [...(f.external_leader_socials || []).filter(s => !sameName(s?.name, entry.name)), entry],
+        external_leaders: [...names, name],
+        external_leader_socials: [
+          ...(f.external_leader_socials || []).filter(s => !sameName(s?.name, name)),
+          { name, ...socials },
+        ],
       };
     });
     setNewExternalLeader(emptyExternalLeader());
+    setAddingExternalLeader(false);
   };
 
   const removeExternalLeader = (name) => {
-    const sameName = (a, b) => String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
     setForm(f => ({
       ...f,
       external_leaders: (f.external_leaders || []).filter(n => !sameName(n, name)),
@@ -120,19 +125,13 @@ export default function EventEditorModal({ event, categories, artists, theme, on
     }));
   };
 
-  const socialOf = (name, key) => {
-    const key_ = String(name || '').trim().toLowerCase();
-    const found = (form.external_leader_socials || []).find(s => String(s?.name || '').trim().toLowerCase() === key_);
-    return found?.[key] || '';
-  };
-
-  const setExternalSocial = (name, key, value) => {
-    const key_ = String(name || '').trim().toLowerCase();
+  const setExternalSocials = (name, links) => {
     setForm(f => {
       const list = [...(f.external_leader_socials || [])];
-      const index = list.findIndex(s => String(s?.name || '').trim().toLowerCase() === key_);
-      if (index >= 0) list[index] = { ...list[index], [key]: value };
-      else list.push({ name, [key]: value });
+      const index = list.findIndex(s => sameName(s?.name, name));
+      const entry = { name, ...linksToSocials(links) };
+      if (index >= 0) list[index] = entry;
+      else list.push(entry);
       return { ...f, external_leader_socials: list };
     });
   };
@@ -409,34 +408,46 @@ export default function EventEditorModal({ event, categories, artists, theme, on
           </div>
 
           <p style={{ ...label, marginTop: '16px' }}>Prowadzący spoza organizacji</p>
-          <div className="flex gap-2">
-            <input
-              style={input}
-              value={newExternalLeader.name}
-              placeholder="Imię i nazwisko"
-              onChange={e => setNewExternalLeader(v => ({ ...v, name: e.target.value }))}
-              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addExternalLeader(); } }}
-            />
+          {!addingExternalLeader ? (
             <button
-              onClick={addExternalLeader}
-              style={{ ...mono, fontSize: '9px', padding: '0 14px', border: `0.5px solid var(--brand)`, color: 'var(--brand)', background: 'transparent', cursor: 'pointer', whiteSpace: 'nowrap', borderRadius: 'var(--radius)' }}
+              onClick={() => setAddingExternalLeader(true)}
+              style={{ ...mono, fontSize: '9px', padding: '7px 14px', border: `0.5px solid var(--brand)`, color: 'var(--brand)', background: 'transparent', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '5px', borderRadius: 'var(--radius)' }}
             >
-              Dodaj
+              <Plus size={11} /> Dodaj prowadzącego
             </button>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
-            {SOCIAL_FIELDS.map(f => (
-              <input
-                key={f.key}
-                style={input}
-                placeholder={f.placeholder}
-                value={newExternalLeader[f.key]}
-                onChange={e => setNewExternalLeader(v => ({ ...v, [f.key]: e.target.value }))}
-              />
-            ))}
-          </div>
+          ) : (
+            <div className="p-3" style={{ border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)' }}>
+              <div className="grid grid-cols-2 gap-2">
+                <div><label style={label}>Imię</label><input style={input} value={newExternalLeader.first_name} onChange={e => setNewExternalLeader(v => ({ ...v, first_name: e.target.value }))} /></div>
+                <div><label style={label}>Nazwisko</label><input style={input} value={newExternalLeader.last_name} onChange={e => setNewExternalLeader(v => ({ ...v, last_name: e.target.value }))} /></div>
+              </div>
+              <div className="mt-3">
+                <SocialLinksEditor
+                  links={newExternalLeader.links}
+                  onChange={links => setNewExternalLeader(v => ({ ...v, links }))}
+                  t={t}
+                  inputStyle={input}
+                  mono={mono}
+                />
+              </div>
+              <div className="flex gap-2 mt-3">
+                <button
+                  onClick={confirmExternalLeader}
+                  style={{ ...mono, fontSize: '9px', padding: '7px 14px', background: 'var(--brand)', border: 'none', color: 'var(--btn-text)', cursor: 'pointer', borderRadius: 'var(--radius)' }}
+                >
+                  Dodaj prowadzącego
+                </button>
+                <button
+                  onClick={() => { setAddingExternalLeader(false); setNewExternalLeader(emptyExternalLeader()); }}
+                  style={{ ...mono, fontSize: '9px', padding: '7px 14px', background: 'transparent', border: `0.5px solid ${t.border}`, color: t.muted, cursor: 'pointer', borderRadius: 'var(--radius)' }}
+                >
+                  Anuluj
+                </button>
+              </div>
+            </div>
+          )}
           <p style={{ ...mono, fontSize: '7px', color: t.muted, marginTop: '5px', lineHeight: 1.5 }}>
-            Wpis ręczny — bez profilu i statystyk artysty. Na stronie wydarzenia pokazujemy inicjały. Social media opcjonalne: wklej link albo samą nazwę profilu — wyświetlamy tylko uzupełnione ikony.
+            Wpis ręczny — bez profilu i statystyk artysty. Na stronie wydarzenia pokazujemy inicjały. Social media opcjonalne: wybierz z listy i wklej link — wyświetlamy tylko uzupełnione ikony.
           </p>
           {(form.external_leaders || []).length > 0 && (
             <div className="space-y-2 mt-3">
@@ -451,16 +462,14 @@ export default function EventEditorModal({ event, categories, artists, theme, on
                       <X size={11} />
                     </button>
                   </div>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
-                    {SOCIAL_FIELDS.map(f => (
-                      <input
-                        key={f.key}
-                        style={input}
-                        placeholder={f.placeholder}
-                        value={socialOf(name, f.key)}
-                        onChange={e => setExternalSocial(name, f.key, e.target.value)}
-                      />
-                    ))}
+                  <div className="mt-2">
+                    <SocialLinksEditor
+                      links={socialsToLinks((form.external_leader_socials || []).find(s => sameName(s?.name, name)))}
+                      onChange={links => setExternalSocials(name, links)}
+                      t={t}
+                      inputStyle={input}
+                      mono={mono}
+                    />
                   </div>
                 </div>
               ))}
