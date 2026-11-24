@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bot } from 'lucide-react';
+import { Bot, FileText } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { base44 } from '@/api/base44Client';
 import Lightbox from '@/components/ui/Lightbox';
@@ -11,6 +11,8 @@ const PDF_URL_RE = /\.pdf(\?[^)\s]*)?$/i;
 const AUTOLINK_RE = /(^|[\s>])(https?:\/\/[^\s<>()\[\]]+)/g;
 // Dopasowuje zarówno stare publiczne adresy (http…), jak i nowe prywatne identyfikatory plików
 const VOICE_RE = /^\[Wiadomość głosowa\]\(([^\s)]+)\)(?: \[(\d{1,2}:\d{2})\])?([\s\S]*)$/;
+// Załączniki wysłane przez użytkownika — prywatne identyfikatory plików w treści
+const ATTACH_RE = /\[Załącznik:\s*([^\]\s]+)\s*\]/g;
 
 // Gołe adresy URL w treści zamieniamy na linki markdown
 // (adresy już osadzone w [nazwa](adres) nie są poprzedzone spacją — nie zostaną podwójnie opakowane).
@@ -103,27 +105,66 @@ export default function MessageBubble({ message, t }) {
     );
   }
 
+  // Załączniki wysłane przez użytkownika: zdjęcia pokazujemy jako miniatury,
+  // PDF otwieramy w podglądzie (adres podpisujemy dopiero przy kliknięciu).
+  const userAttachments = isUser ? [...String(message.content).matchAll(ATTACH_RE)].map(m => m[1]) : [];
+  const userText = isUser ? String(message.content).replace(ATTACH_RE, '').trim() : message.content;
+
+  const openPrivatePdf = async (uri, name) => {
+    try {
+      const res = await base44.integrations.Core.CreateFileSignedUrl({ file_uri: uri, expires_in: 900 });
+      if (res?.signed_url) setPdfPreview({ url: res.signed_url, type: 'pdf', name });
+    } catch {
+      /* podgląd niedostępny */
+    }
+  };
+
   return (
     <div className="flex gap-2 mb-3" style={{ justifyContent: isUser ? 'flex-end' : 'flex-start' }}>
       {!isUser && (
         <span style={{ width: '26px', height: '26px', borderRadius: 'var(--radius)', background: 'var(--brand)', color: 'var(--btn-text, #F5F0EB)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px' }}><Bot size={15} /></span>
       )}
       <div style={{ maxWidth: '82%' }}>
-        <div
-          className="px-3 py-2"
-          style={{
-            background: isUser ? 'rgb(var(--brand-rgb) / 0.12)' : 'rgba(128,128,128,0.06)',
-            border: `0.5px solid ${isUser ? 'rgb(var(--brand-rgb) / 0.3)' : t.border}`,
-            borderRadius: 'var(--radius)',
-            fontSize: '13px',
-            lineHeight: 1.55,
-            color: t.text,
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word',
-          }}
-        >
-          {isUser ? message.content : <ReactMarkdown components={markdownComponents(t, openImage, openPdf)}>{autolinkUrls(message.content)}</ReactMarkdown>}
-        </div>
+        {(!isUser || userText) && (
+          <div
+            className="px-3 py-2"
+            style={{
+              background: isUser ? 'rgb(var(--brand-rgb) / 0.12)' : 'rgba(128,128,128,0.06)',
+              border: `0.5px solid ${isUser ? 'rgb(var(--brand-rgb) / 0.3)' : t.border}`,
+              borderRadius: 'var(--radius)',
+              fontSize: '13px',
+              lineHeight: 1.55,
+              color: t.text,
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+            }}
+          >
+            {isUser ? userText : <ReactMarkdown components={markdownComponents(t, openImage, openPdf)}>{autolinkUrls(message.content)}</ReactMarkdown>}
+          </div>
+        )}
+        {userAttachments.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-1.5" style={{ justifyContent: 'flex-end' }}>
+            {userAttachments.map((uri, i) => (
+              PDF_URL_RE.test(uri) ? (
+                <button
+                  key={`${uri}-${i}`}
+                  onClick={() => openPrivatePdf(uri, `Załącznik ${i + 1}`)}
+                  className="inline-flex items-center gap-1.5"
+                  style={{ padding: '6px 10px', background: 'rgba(128,128,128,0.06)', border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)', color: 'var(--brand)', fontSize: '11px', cursor: 'pointer' }}
+                >
+                  <FileText size={12} /> PDF
+                </button>
+              ) : (
+                <PrivateImage
+                  key={`${uri}-${i}`}
+                  src={uri}
+                  style={{ width: '88px', height: '88px', objectFit: 'cover', borderRadius: 'var(--radius)', border: `0.5px solid ${t.border}`, cursor: 'zoom-in' }}
+                  onClick={openImage}
+                />
+              )
+            ))}
+          </div>
+        )}
       </div>
       {lightbox.images.length > 0 && (
         <div style={{ position: 'relative', zIndex: 90 }}>
