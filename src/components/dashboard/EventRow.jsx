@@ -8,13 +8,18 @@ const STATUS_LABELS = { draft: 'SZKIC', hidden: 'UKRYTE' };
  * Wiersz terminu oferty w kalendarzu rezerwacji (miesiąc / dzień / lista).
  * Wyróżniony bursztynowym akcentem, ze stosem avatary prowadzących.
  */
-export default function EventRow({ entry, t, isLast = false, isMobile = false }) {
+export default function EventRow({ entry, t, isLast = false, isMobile = false, onClick }) {
   const accent = entry.cancelled ? t.muted : EVENT_COLOR;
   const names = eventLeaderNames(entry);
   const statusLabel = entry.cancelled ? 'ANULOWANA' : STATUS_LABELS[entry.event_status];
 
-  const open = () => {
+  const openPublic = () => {
     if (entry.slug) window.open(`/wydarzenia/${entry.slug}`, '_blank', 'noopener');
+  };
+  // Klik w wiersz otwiera podgląd oferty; ikona obok prowadzi na stronę publiczną.
+  const open = () => {
+    if (onClick) onClick(entry);
+    else openPublic();
   };
 
   return (
@@ -26,7 +31,7 @@ export default function EventRow({ entry, t, isLast = false, isMobile = false })
         gap: isMobile ? '10px' : '12px',
         padding: '12px',
         borderBottom: isLast ? 'none' : `0.5px solid ${t.border}`,
-        cursor: entry.slug ? 'pointer' : 'default',
+        cursor: (onClick || entry.slug) ? 'pointer' : 'default',
         background: 'transparent',
       }}
       onMouseEnter={e => { e.currentTarget.style.background = 'rgba(245,158,11,0.06)'; }}
@@ -68,7 +73,15 @@ export default function EventRow({ entry, t, isLast = false, isMobile = false })
             {statusLabel}
           </span>
         )}
-        {entry.slug && !isMobile && <ExternalLink size={12} color={t.muted} />}
+        {entry.slug && !isMobile && (
+          <button
+            onClick={(e) => { e.stopPropagation(); openPublic(); }}
+            title="Otwórz stronę oferty"
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', display: 'flex', alignItems: 'center' }}
+          >
+            <ExternalLink size={12} color={t.muted} />
+          </button>
+        )}
       </div>
     </div>
   );

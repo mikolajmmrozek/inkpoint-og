@@ -18,7 +18,7 @@ const STATUS_COLORS = {
   cancelled: '#9ca3af',
 };
 
-export default function BookingCalendar({ bookings, onDayClick, selectedDate, t, artists = [], onAddBooking, searchQuery = '', onBookingClick, availabilityRecords = [], artistFilter = 'all', healthStatusMap = {}, showSessionsList = true, onAvailabilityClick, calendarEvents = [] }) {
+export default function BookingCalendar({ bookings, onDayClick, selectedDate, t, artists = [], onAddBooking, searchQuery = '', onBookingClick, availabilityRecords = [], artistFilter = 'all', healthStatusMap = {}, showSessionsList = true, onAvailabilityClick, calendarEvents = [], onEventClick }) {
   const [viewMonth, setViewMonth] = useState(new Date());
   const isMobile = useIsMobile();
   const today = new Date();
@@ -192,7 +192,7 @@ export default function BookingCalendar({ bookings, onDayClick, selectedDate, t,
               </p>
               <div style={{ border: `0.5px solid ${t.border}`, borderLeft: `2px solid ${EVENT_COLOR}`, background: t.bg, borderRadius: 'var(--radius)', overflow: 'hidden' }}>
                 {selectedDayEvents.map((e, i) => (
-                  <EventRow key={e.id} entry={e} t={t} isMobile={isMobile} isLast={i === selectedDayEvents.length - 1} />
+                  <EventRow key={e.id} entry={e} t={t} isMobile={isMobile} isLast={i === selectedDayEvents.length - 1} onClick={onEventClick} />
                 ))}
               </div>
             </div>

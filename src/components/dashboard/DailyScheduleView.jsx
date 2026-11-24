@@ -245,7 +245,7 @@ const ArtistColumn = memo(function ArtistColumn({ artist, artistBookings, artist
   );
 });
 
-export default function DailyScheduleView({ bookings, artists, selectedDate, onDateChange, onBookingClick, onNewBookingRequest, onNewAvailabilityRequest, t, artistFilter = 'all', availabilityRecords = [], calendarEvents = [] }) {
+export default function DailyScheduleView({ bookings, artists, selectedDate, onDateChange, onBookingClick, onNewBookingRequest, onNewAvailabilityRequest, t, artistFilter = 'all', availabilityRecords = [], calendarEvents = [], onEventClick }) {
   const scrollRef = useRef(null);
   const [slot, setSlot] = useState(null);
 
@@ -361,7 +361,12 @@ export default function DailyScheduleView({ bookings, artists, selectedDate, onD
               Oferty w tym dniu
             </p>
             {dayEvents.map(e => (
-              <div key={e.id} className="flex items-center gap-2" style={{ minWidth: 0 }}>
+              <div
+                key={e.id}
+                className="flex items-center gap-2"
+                style={{ minWidth: 0, cursor: onEventClick ? 'pointer' : 'default' }}
+                onClick={onEventClick ? () => onEventClick(e) : undefined}
+              >
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: EVENT_COLOR, flexShrink: 0, minWidth: '74px' }}>
                   {eventTimeLabel(e)}
                 </span>

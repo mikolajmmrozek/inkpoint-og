@@ -21,6 +21,8 @@ import AvailabilityEditModal from '@/components/dashboard/AvailabilityEditModal'
 import { getThumbnailUrl } from '@/lib/thumbnail';
 import { useCreateMenu } from '@/components/create/CreateMenuContext';
 import EventRow from '@/components/dashboard/EventRow';
+import EventDetailPanel from '@/components/dashboard/EventDetailPanel';
+import EventEditorModal from '@/components/dashboard/events/EventEditorModal';
 import { buildCalendarEvents, eventLeaderNames } from '@/lib/calendarEvents';
 
 const STATUS_COLORS = {
@@ -91,11 +93,11 @@ function BookingRow({ b, i, items, selected, setSelected, artists, t, healthStat
   );
 }
 
-function ListContent({ viewMode, searchQuery, selectedDate, listItems, listCount, listPageCount, listPage, setListPage, listTab, setListTab, selected, setSelected, artists, t, onNewBooking, healthStatusMap }) {
+function ListContent({ viewMode, searchQuery, selectedDate, listItems, listCount, listPageCount, listPage, setListPage, listTab, setListTab, selected, setSelected, artists, t, onNewBooking, healthStatusMap, onEventClick }) {
   const todayStr = format(new Date(), 'yyyy-MM-dd');
 
   const renderItem = (item, i, arr) => item.kind === 'event'
-    ? <EventRow key={`ev-${item.data.id}`} entry={item.data} t={t} isLast={i === arr.length - 1} />
+    ? <EventRow key={`ev-${item.data.id}`} entry={item.data} t={t} isLast={i === arr.length - 1} onClick={onEventClick} />
     : <BookingRow key={item.data.id} b={item.data} i={i} items={arr.map(x => x.data)} selected={selected} setSelected={setSelected} artists={artists} t={t} healthStatusMap={healthStatusMap} />;
 
   if (listCount === 0) {
@@ -193,6 +195,9 @@ export default function DashboardBookings() {
   const [eventList, setEventList] = useState([]);
   const [eventBookings, setEventBookings] = useState([]);
   const [editingAvailability, setEditingAvailability] = useState(null);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [editingEvent, setEditingEvent] = useState(null);
+  const [eventCategories, setEventCategories] = useState([]);
   const [healthStatusMap, setHealthStatusMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
@@ -238,14 +243,16 @@ export default function DashboardBookings() {
   // Terminy ofert trafiają do kalendarza razem z rezerwacjami — także szkice i ukryte.
   const refreshEvents = useCallback(async () => {
     try {
-      const [sess, evts, evBookings] = await Promise.all([
+      const [sess, evts, evBookings, cats] = await Promise.all([
         base44.entities.EventSession.list(),
         base44.entities.Event.list(),
         base44.entities.EventBooking.list('-created_date', 5000),
+        base44.entities.EventCategory.list(),
       ]);
       setEventSessions(sess || []);
       setEventList(evts || []);
       setEventBookings(evBookings || []);
+      setEventCategories(cats || []);
     } catch (e) { /* kalendarz działa dalej bez ofert */ }
   }, []);
   useEffect(() => {
@@ -501,6 +508,9 @@ export default function DashboardBookings() {
     [calendarEvents, artistFilters]
   );
 
+  const selectedEventRecord = selectedEvent ? (eventList.find(e => e.id === selectedEvent.event_id) || {}) : null;
+  const selectedEventSession = selectedEvent ? (eventSessions.find(s => s.id === selectedEvent.id) || {}) : null;
+
   const listEvents = useMemo(() => {
     if (viewMode !== 'list' && viewMode !== 'day') return [];
     if (viewMode === 'day') {
@@ -743,6 +753,7 @@ export default function DashboardBookings() {
                 showSessionsList={!searchQuery.trim()}
                 onAvailabilityClick={setEditingAvailability}
                 calendarEvents={visibleEvents}
+                onEventClick={setSelectedEvent}
               />
             )}
 
@@ -776,6 +787,7 @@ export default function DashboardBookings() {
                 artistFilter={artistFilters}
                 availabilityRecords={availabilityRecords}
                 calendarEvents={visibleEvents}
+                onEventClick={setSelectedEvent}
               />
             )}
 
@@ -851,6 +863,7 @@ export default function DashboardBookings() {
                     t={t}
                     onNewBooking={handleNewBooking}
                     healthStatusMap={healthStatusMap}
+                    onEventClick={setSelectedEvent}
                   />
                 )}
               </div>
@@ -883,6 +896,34 @@ export default function DashboardBookings() {
               />
             )}
           </AnimatePresence>
+
+          {/* Podgląd oferty — z kalendarza, widoku dnia i listy */}
+          <AnimatePresence>
+            {selectedEvent && (
+              <EventDetailPanel
+                entry={selectedEvent}
+                event={selectedEventRecord}
+                session={selectedEventSession}
+                bookings={eventBookings}
+                theme={theme}
+                onClose={() => setSelectedEvent(null)}
+                onEdit={() => { setEditingEvent(selectedEventRecord); setSelectedEvent(null); }}
+                onOpenPublic={(e) => window.open(`/wydarzenia/${e.slug}`, '_blank', 'noopener')}
+              />
+            )}
+          </AnimatePresence>
+
+          {/* Edycja oferty — ten sam modal co w panelu ofert */}
+          {editingEvent && (
+            <EventEditorModal
+              event={editingEvent}
+              categories={eventCategories}
+              artists={artists}
+              theme={theme}
+              onClose={() => setEditingEvent(null)}
+              onSaved={() => { setEditingEvent(null); refreshEvents(); }}
+            />
+          )}
 
           {/* Edycja dyspozycji/blokady z kalendarza — ten sam modal co artysta */}
           {editingAvailability && (
