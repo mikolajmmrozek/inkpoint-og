@@ -1,0 +1,137 @@
+{
+  "name": "EventBooking",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string"
+    },
+    "event_title": {
+      "type": "string",
+      "description": "Tytu\u0142 wydarzenia (cache)"
+    },
+    "session_id": {
+      "type": "string"
+    },
+    "session_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "session_start_time": {
+      "type": "string"
+    },
+    "session_end_time": {
+      "type": "string"
+    },
+    "leader_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Prowadz\u0105cy terminu (cache)"
+    },
+    "leader_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "first_name": {
+      "type": "string"
+    },
+    "last_name": {
+      "type": "string"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Imi\u0119 i nazwisko uczestnika"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "E-mail zalogowanego konta, je\u015bli zapis wykonano po zalogowaniu"
+    },
+    "participants": {
+      "type": "number",
+      "default": 1,
+      "description": "Liczba zajmowanych miejsc"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "confirmed",
+        "cancelled",
+        "rejected"
+      ],
+      "default": "pending",
+      "enumColors": [
+        "yellow",
+        "green",
+        "gray",
+        "red"
+      ],
+      "description": "pending = oczekuje na r\u0119czne potwierdzenie, confirmed = miejsce potwierdzone"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "online",
+        "dashboard"
+      ],
+      "default": "online",
+      "enumColors": [
+        "blue",
+        "gray"
+      ]
+    },
+    "confirmed_at": {
+      "type": "string"
+    },
+    "confirmed_by_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "event_id",
+    "session_id",
+    "client_name",
+    "email"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "name": "EventSession",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "ID wydarzenia, do kt\u00f3rego nale\u017cy termin"
+    },
+    "event_title": {
+      "type": "string",
+      "description": "Tytu\u0142 wydarzenia (cache)"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data terminu (YYYY-MM-DD)"
+    },
+    "start_time": {
+      "type": "string",
+      "description": "Godzina rozpocz\u0119cia (HH:MM)"
+    },
+    "end_time": {
+      "type": "string",
+      "description": "Godzina zako\u0144czenia (HH:MM)"
+    },
+    "capacity": {
+      "type": "number",
+      "default": 1,
+      "description": "Maksymalna liczba uczestnik\u00f3w tego terminu"
+    },
+    "min_participants": {
+      "type": "number",
+      "default": 0,
+      "description": "Minimalna liczba uczestnik\u00f3w terminu (0 = brak minimum)"
+    },
+    "location": {
+      "type": "string",
+      "description": "Miejsce terminu (puste = miejsce wydarzenia)"
+    },
+    "leader_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Prowadz\u0105cy przypisani do terminu"
+    },
+    "note": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "scheduled",
+        "cancelled"
+      ],
+      "default": "scheduled",
+      "enumColors": [
+        "green",
+        "gray"
+      ]
+    },
+    "gcal_events": {
+      "type": "array",
+      "description": "Wydarzenia w kalendarzach Google prowadz\u0105cych",
+      "items": {
+        "type": "object",
+        "properties": {
+          "artist_id": {
+            "type": "string"
+          },
+          "event_id": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "event_id",
+    "date"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

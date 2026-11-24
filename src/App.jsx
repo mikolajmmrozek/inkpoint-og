@@ -10,6 +10,8 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 // Pages
 import Home from './pages/Home';
 import Artists from './pages/Artists';
+import Events from './pages/Events';
+import EventDetail from './pages/EventDetail';
 import ArtistProfile from './pages/ArtistProfile';
 import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
@@ -50,12 +52,14 @@ import DashboardFAQ from './pages/dashboard/DashboardFAQ';
 import DashboardFeedback from './pages/dashboard/DashboardFeedback';
 import DashboardServices from './pages/dashboard/DashboardServices';
 import DashboardPromotions from './pages/dashboard/DashboardPromotions';
+import DashboardEvents from './pages/dashboard/DashboardEvents';
 import DashboardUsers from './pages/dashboard/DashboardUsers';
 import DashboardAgentActivity from './pages/dashboard/DashboardAgentActivity';
 import NotificationsPage from './pages/shared/NotificationsPage';
 import ArtistPanel from './pages/artist/ArtistPanel';
 import ArtistHome from './pages/artist/ArtistHome';
 import ArtistSchedule from './pages/artist/ArtistSchedule';
+import ArtistEvents from './pages/artist/ArtistEvents';
 import ArtistStats from './pages/artist/ArtistStats';
 import ArtistProfilePage from './pages/artist/ArtistProfile';
 import ArtistMessages from './pages/artist/ArtistMessages';
@@ -64,6 +68,7 @@ import ClientHome from './pages/client/ClientHome';
 import ClientSessions from './pages/client/ClientSessions';
 import ClientHealthForms from './pages/client/ClientHealthForms';
 import ClientVouchers from './pages/client/ClientVouchers';
+import ClientEvents from './pages/client/ClientEvents';
 import ClientProfile from './pages/client/ClientProfile';
 import ClientMessages from './pages/client/ClientMessages';
 import FeedbackSurvey from './pages/FeedbackSurvey';
@@ -100,6 +105,8 @@ const AuthenticatedApp = () => {
       <Route path="/" element={<Home />} />
       <Route path="/artists" element={<Artists />} />
       <Route path="/artists/:slug" element={<ArtistProfile />} />
+      <Route path="/wydarzenia" element={<Events />} />
+      <Route path="/wydarzenia/:slug" element={<EventDetail />} />
       <Route path="/blog" element={<ContentGate flag="show_blog" title="Blog jest chwilowo ukryty" message="Wróć do nas wkrótce — nowe wpisy już się piszą."><Blog /></ContentGate>} />
       <Route path="/blog/:id" element={<BlogPost />} />
       <Route path="/contact" element={<Contact />} />
@@ -137,6 +144,7 @@ const AuthenticatedApp = () => {
         <Route path="feedback" element={<DashboardFeedback />} />
         <Route path="services" element={<DashboardServices />} />
         <Route path="promotions" element={<DashboardPromotions />} />
+        <Route path="events" element={<DashboardEvents />} />
         <Route path="shop" element={<DashboardShop />} />
         <Route path="users" element={<DashboardUsers />} />
         <Route path="agent-activity" element={<DashboardAgentActivity />} />
@@ -149,6 +157,7 @@ const AuthenticatedApp = () => {
         <Route index element={<ArtistHome />} />
         <Route path="schedule" element={<ArtistSchedule />} />
         <Route path="stats" element={<ArtistStats />} />
+        <Route path="events" element={<ArtistEvents />} />
         <Route path="profile" element={<ArtistProfilePage />} />
         <Route path="messages" element={<ArtistMessages />} />
         <Route path="notifications" element={<NotificationsPage />} />
@@ -160,6 +169,7 @@ const AuthenticatedApp = () => {
         <Route path="sessions" element={<ClientSessions />} />
         <Route path="health-forms" element={<ClientHealthForms />} />
         <Route path="vouchers" element={<ClientVouchers />} />
+        <Route path="events" element={<ClientEvents />} />
         <Route path="orders" element={<ClientOrders />} />
         <Route path="shop-account" element={<ClientShopAccount />} />
         <Route path="profile" element={<ClientProfile />} />

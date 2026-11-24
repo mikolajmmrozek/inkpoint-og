@@ -2,7 +2,7 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Calendar, BarChart2, User, LogOut, Menu, X, Sun, Moon, MessageSquare, Bell, PanelLeftClose, PanelLeftOpen, Home as HomeIcon } from 'lucide-react';
+import { Calendar, BarChart2, User, LogOut, Menu, X, Sun, Moon, MessageSquare, Bell, PanelLeftClose, PanelLeftOpen, Home as HomeIcon, GraduationCap } from 'lucide-react';
 import BottomNav from '@/components/panel/BottomNav';
 import NotificationBell from '@/components/panel/NotificationBell';
 import NotificationPanel from '@/components/panel/NotificationPanel';
@@ -18,6 +18,7 @@ const NAV = [
   { path: '/artist', label: 'Przegląd', icon: BarChart2, exact: true },
   { path: '/artist/schedule', label: 'Mój Kalendarz', icon: Calendar },
   { path: '/artist/stats', label: 'Moje Wyniki', icon: BarChart2 },
+  { path: '/artist/events', label: 'Moje warsztaty', icon: GraduationCap },
   { path: '/artist/profile', label: 'Mój Profil', icon: User },
   { path: '/artist/messages', label: 'Wiadomości', icon: MessageSquare },
 ];

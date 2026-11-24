@@ -26,12 +26,17 @@
       "default": true,
       "description": "True = rezerwacja wizyt online jest dost\u0119pna"
     },
+    "show_events": {
+      "type": "boolean",
+      "default": true,
+      "description": "True = sekcja warsztat\u00f3w i wydarze\u0144 widoczna w nawigacji i w ofercie"
+    },
     "nav_order": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "Kolejno\u015b\u0107 zak\u0142adek w pasku nawigacji, menu i stopce \u2014 lista kluczy: artists, shop, blog, faq. Home zawsze pierwszy, Kontakt zawsze ostatni."
+      "description": "Kolejno\u015b\u0107 zak\u0142adek w pasku nawigacji, menu i stopce \u2014 lista kluczy: artists, events, shop, blog, faq. Home zawsze pierwszy, Kontakt zawsze ostatni."
     },
     "studio_name": {
       "type": "string",

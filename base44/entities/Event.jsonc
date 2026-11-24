@@ -1,0 +1,142 @@
+{
+  "name": "Event",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Tytu\u0142 wydarzenia"
+    },
+    "slug": {
+      "type": "string",
+      "description": "Adres URL wydarzenia, np. warsztaty-linework"
+    },
+    "category_id": {
+      "type": "string"
+    },
+    "category_name": {
+      "type": "string",
+      "description": "Nazwa kategorii (cache dla list)"
+    },
+    "main_image_url": {
+      "type": "string",
+      "description": "Zdj\u0119cie g\u0142\u00f3wne wydarzenia"
+    },
+    "gallery_images": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Galeria zdj\u0119\u0107 wydarzenia"
+    },
+    "video_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Materia\u0142y wideo (adresy plik\u00f3w lub linki do film\u00f3w)"
+    },
+    "short_description": {
+      "type": "string",
+      "description": "Kr\u00f3tki opis na karcie oferty"
+    },
+    "full_description": {
+      "type": "string",
+      "description": "Pe\u0142ny opis wydarzenia"
+    },
+    "program": {
+      "type": "string",
+      "description": "Szczeg\u00f3\u0142owy program zaj\u0119\u0107"
+    },
+    "requirements": {
+      "type": "string",
+      "description": "Wymagania i poziom zaawansowania"
+    },
+    "materials": {
+      "type": "string",
+      "description": "Materia\u0142y zapewniane przez studio"
+    },
+    "organizer_info": {
+      "type": "string",
+      "description": "Informacje organizacyjne dla uczestnik\u00f3w"
+    },
+    "leader_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "ID artyst\u00f3w prowadz\u0105cych wydarzenie"
+    },
+    "leader_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Nazwy prowadz\u0105cych (cache)"
+    },
+    "price": {
+      "type": "number",
+      "default": 0,
+      "description": "Cena za osob\u0119 w PLN"
+    },
+    "location": {
+      "type": "string",
+      "description": "Miejsce wydarzenia"
+    },
+    "min_participants": {
+      "type": "number",
+      "default": 0,
+      "description": "Minimalna liczba uczestnik\u00f3w (0 = brak minimum)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published",
+        "hidden"
+      ],
+      "default": "draft",
+      "enumColors": [
+        "gray",
+        "green",
+        "gray"
+      ],
+      "description": "draft = szkic, published = widoczne w ofercie, hidden = ukryte"
+    },
+    "order": {
+      "type": "number",
+      "default": 999
+    }
+  },
+  "required": [
+    "title"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.status": "published"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

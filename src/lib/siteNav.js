@@ -3,6 +3,7 @@
 // Home jest zawsze pierwszy, Kontakt zawsze ostatni.
 export const NAV_TABS = [
   { key: 'artists', label: 'Artyści', href: '/artists' },
+  { key: 'events', label: 'Warsztaty', href: '/wydarzenia', field: 'show_events' },
   { key: 'shop', label: 'Sklep', href: '/sklep', field: 'show_shop' },
   { key: 'blog', label: 'Blog', href: '/blog', field: 'show_blog' },
   { key: 'faq', label: 'FAQ', href: '/faq', field: 'show_faq' },

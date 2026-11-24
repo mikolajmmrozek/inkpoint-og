@@ -45,6 +45,7 @@ export default function SiteContentSettings({ t }) {
         show_blog: isOn('show_blog'),
         show_faq: isOn('show_faq'),
         show_shop: isOn('show_shop'),
+        show_events: isOn('show_events'),
         show_booking: isOn('show_booking'),
         nav_order: order,
       };
