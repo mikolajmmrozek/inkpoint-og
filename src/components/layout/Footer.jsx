@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Instagram, Facebook, Youtube } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import useSiteContent from '@/hooks/useSiteContent';
+import { buildNavLinks } from '@/lib/siteNav';
 
 const TikTokIcon = ({ size = 13 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -12,15 +13,8 @@ const TikTokIcon = ({ size = 13 }) => (
 
 export default function Footer() {
   const [social, setSocial] = useState({ youtube_url: '', tiktok_url: '' });
-  const { content } = useSiteContent();
-  const navItems = [
-    ['/', 'Home', true],
-    ['/artists', 'Artyści', true],
-    ['/faq', 'FAQ', content.show_faq],
-    ['/blog', 'Blog', content.show_blog],
-    ['/sklep', 'Sklep', content.show_shop],
-    ['/contact', 'Kontakt', true],
-  ].filter(([, , show]) => show !== false);
+  const { content, navOrder } = useSiteContent();
+  const navItems = buildNavLinks(navOrder, content);
 
   useEffect(() => {
     base44.entities.SiteSettings.filter({ key: 'contact' })
@@ -75,9 +69,9 @@ export default function Footer() {
               NAWIGACJA
             </p>
             <div className="space-y-3">
-              {navItems.map(([href, label]) => (
-                <Link key={href} to={href} className="block text-parchment/50 hover:text-parchment transition-colors text-sm" style={{ color: 'rgb(var(--foreground-rgb) / 0.5)', fontSize: '14px' }}>
-                  {label}
+              {navItems.map(item => (
+                <Link key={item.href} to={item.href} className="block text-parchment/50 hover:text-parchment transition-colors text-sm" style={{ color: 'rgb(var(--foreground-rgb) / 0.5)', fontSize: '14px' }}>
+                  {item.label}
                 </Link>
               ))}
             </div>

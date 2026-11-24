@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { useCart } from '@/components/shop/CartProvider';
 import useSiteContent from '@/hooks/useSiteContent';
+import { buildNavLinks } from '@/lib/siteNav';
 
 export default function Navbar() {
   const { user, isAuthenticated } = useAuth();
@@ -14,7 +15,7 @@ export default function Navbar() {
   const [artist, setArtist] = useState(null);
   const location = useLocation();
   const { count: cartCount } = useCart();
-  const { content } = useSiteContent();
+  const { content, navOrder } = useSiteContent();
   const shopVisible = content.show_shop;
   const bookingVisible = content.show_booking;
 
@@ -55,13 +56,7 @@ export default function Navbar() {
 
   useEffect(() => setMenuOpen(false), [location]);
 
-  const navLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/artists', label: 'Artyści' },
-  { href: '/sklep', label: 'Sklep', show: content.show_shop },
-  { href: '/blog', label: 'Blog', show: content.show_blog },
-  { href: '/faq', label: 'FAQ', show: content.show_faq },
-  { href: '/contact', label: 'Kontakt' }].filter(link => link.show !== false);
+  const navLinks = buildNavLinks(navOrder, content);
 
 
   return (

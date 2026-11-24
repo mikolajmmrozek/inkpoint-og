@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { DEFAULT_NAV_ORDER } from '@/lib/siteNav';
 
 const DEFAULTS = { show_blog: true, show_faq: true, show_shop: true, show_booking: true };
 
 export default function useSiteContent() {
   const [content, setContent] = useState(DEFAULTS);
+  const [navOrder, setNavOrder] = useState(DEFAULT_NAV_ORDER);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,11 +20,12 @@ export default function useSiteContent() {
             show_shop: r.show_shop !== false,
             show_booking: r.show_booking !== false,
           });
+          if (Array.isArray(r.nav_order) && r.nav_order.length > 0) setNavOrder(r.nav_order);
         }
       })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
-  return { content, loading };
+  return { content, navOrder, loading };
 }

@@ -26,6 +26,13 @@
       "default": true,
       "description": "True = rezerwacja wizyt online jest dost\u0119pna"
     },
+    "nav_order": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Kolejno\u015b\u0107 zak\u0142adek w pasku nawigacji, menu i stopce \u2014 lista kluczy: artists, shop, blog, faq. Home zawsze pierwszy, Kontakt zawsze ostatni."
+    },
     "studio_name": {
       "type": "string",
       "description": "Nazwa firmy/studia u\u017cywana w mailach automatycznych, voucherach i dokumentach \u2014 jedno \u017ar\u00f3d\u0142o prawdy, edytowalne w Ustawieniach strony (Branding)."
