@@ -27,7 +27,7 @@ const NAV = [
   { path: '/dashboard/faq', label: 'FAQ', icon: MessageSquare },
   { path: '/dashboard/services', label: 'Usługi', icon: Scissors },
   { path: '/dashboard/promotions', label: 'Promocje', icon: Gift },
-  { path: '/dashboard/events', label: 'Warsztaty', icon: CalendarDays },
+  { path: '/dashboard/events', label: 'Oferty', icon: CalendarDays },
   { path: '/dashboard/shop', label: 'Sklep', icon: ShoppingBag },
   { path: '/dashboard/feedback', label: 'Opinie', icon: Star },
   { path: '/dashboard/stats', label: 'Statystyki', icon: PieChart },
