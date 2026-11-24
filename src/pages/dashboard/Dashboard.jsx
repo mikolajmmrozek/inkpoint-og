@@ -2,55 +2,22 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Calendar, Users, BookOpen, MessageSquare, FileText, LogOut, BarChart2, Menu, X, Sun, Moon, Settings, UserCircle, PieChart, Star, FolderOpen, Scissors, ShieldCheck, Bell, PanelLeftClose, PanelLeftOpen, Home as HomeIcon, Gift, ShoppingBag, CalendarDays } from 'lucide-react';
+import { LogOut, Menu, X, Sun, Moon, PanelLeftClose, PanelLeftOpen, Home as HomeIcon } from 'lucide-react';
 import BottomNav from '@/components/panel/BottomNav';
 import NotificationBell from '@/components/panel/NotificationBell';
 import NotificationPanel from '@/components/panel/NotificationPanel';
 import NotificationSidebarItem from '@/components/panel/NotificationSidebarItem';
-import SidebarBadge from '@/components/panel/SidebarBadge';
 import StudioAvatar from '@/components/panel/StudioAvatar';
+import DashboardSidebarNav from '@/components/dashboard/DashboardSidebarNav';
+import { labelForPath } from '@/lib/dashboardNav';
 import { useBadgeCounts } from '@/hooks/useBadgeCounts';
 import { CreateMenuProvider } from '@/components/create/CreateMenuContext';
 
 export const ThemeContext = createContext({ theme: 'light', toggleTheme: () => {} });
 export const useTheme = () => useContext(ThemeContext);
 
-const NAV = [
-  { path: '/dashboard', label: 'Przegląd', icon: BarChart2, exact: true },
-  { path: '/dashboard/bookings', label: 'Rezerwacje', icon: Calendar },
-  { path: '/dashboard/artists', label: 'Artyści', icon: Users },
-  { path: '/dashboard/blog', label: 'Blog', icon: BookOpen },
-  { path: '/dashboard/messages', label: 'Wiadomości', icon: MessageSquare },
-  { path: '/dashboard/health-forms', label: 'Ankiety', icon: FileText },
-  { path: '/dashboard/clients', label: 'Klienci', icon: UserCircle },
-  { path: '/dashboard/documents', label: 'Dokumenty', icon: FolderOpen },
-  { path: '/dashboard/faq', label: 'FAQ', icon: MessageSquare },
-  { path: '/dashboard/services', label: 'Usługi', icon: Scissors },
-  { path: '/dashboard/promotions', label: 'Promocje', icon: Gift },
-  { path: '/dashboard/events', label: 'Oferty', icon: CalendarDays },
-  { path: '/dashboard/shop', label: 'Sklep', icon: ShoppingBag },
-  { path: '/dashboard/feedback', label: 'Opinie', icon: Star },
-  { path: '/dashboard/stats', label: 'Statystyki', icon: PieChart },
-  { path: '/dashboard/users', label: 'Użytkownicy', icon: ShieldCheck },
-  { path: '/dashboard/settings', label: 'Ustawienia', icon: Settings },
-];
-
-const getBadgeForPath = (path, counts) => {
-  const map = {
-    '/dashboard/messages': counts.messages > 0 ? { type: 'count', value: counts.messages } : null,
-    '/dashboard/bookings': (counts.pendingBookings + counts.openChangeRequests) > 0 ? { type: 'count', value: counts.pendingBookings + counts.openChangeRequests } : null,
-    '/dashboard/health-forms': counts.newHealthForms > 0 ? { type: 'count', value: counts.newHealthForms } : null,
-    '/dashboard/feedback': counts.unpublishedFeedback > 0 ? { type: 'count', value: counts.unpublishedFeedback } : null,
-    '/dashboard/clients': counts.newClients > 0 ? { type: 'count', value: counts.newClients } : null,
-  };
-  return map[path] || null;
-};
-
 function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, onNotifClick, collapsed, onToggleCollapse }) {
-  const location = useLocation();
   const counts = useBadgeCounts({ role: 'admin', userEmail });
-
-  const isActive = (nav) => nav.exact ? location.pathname === nav.path : location.pathname.startsWith(nav.path);
 
   const bg = theme === 'light' ? '#FFFFFF' : '#0A0A0A';
   const border = theme === 'light' ? '#E5E5E5' : '#262626';
@@ -82,34 +49,13 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-2 py-6 space-y-1 overflow-y-auto overflow-x-hidden">
-          {NAV.map(nav => {
-            const Icon = nav.icon;
-            const active = isActive(nav);
-            const badge = getBadgeForPath(nav.path, counts);
-            return (
-              <Link
-                key={nav.path}
-                to={nav.path}
-                className="flex items-center gap-3 px-4 py-3 whitespace-nowrap overflow-hidden transition-colors duration-200"
-                style={{
-                  background: active ? 'rgb(var(--brand-rgb) / 0.08)' : 'transparent',
-                  borderLeft: active ? '2px solid var(--brand)' : '2px solid transparent',
-                  color: active ? textColor : mutedColor,
-                }}
-                onClick={() => setSidebarOpen(false)}
-                title={collapsed ? nav.label : ''}
-              >
-                <div className="shrink-0" style={{ position: 'relative' }}>
-                  <Icon size={20} color={active ? 'var(--brand)' : (theme === 'light' ? 'rgba(0,0,0,0.55)' : 'rgba(245,240,235,0.65)')} />
-                  {badge && <SidebarBadge type={badge.type} value={badge.value} />}
-                </div>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                  {nav.label}
-                </span>
-              </Link>
-            );
-          })}
+        <nav className="flex-1 px-2 py-6 overflow-y-auto overflow-x-hidden">
+          <DashboardSidebarNav
+            theme={theme}
+            collapsed={collapsed}
+            counts={counts}
+            onNavigate={() => setSidebarOpen(false)}
+          />
           {/* Notifications */}
           <div className="mt-3 pt-3" style={{ borderTop: `0.5px solid ${border}` }}>
             <NotificationSidebarItem
@@ -257,8 +203,7 @@ export default function Dashboard() {
   const textColor = theme === 'light' ? '#111111' : '#F5F0EB';
   const mutedColor = theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.75)';
 
-  const currentNav = NAV.find(n => n.exact ? location.pathname === n.path : location.pathname.startsWith(n.path));
-  const currentLabel = currentNav?.label || (location.pathname === '/dashboard/notifications' ? 'Powiadomienia' : 'Przegląd');
+  const currentLabel = labelForPath(location.pathname);
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
