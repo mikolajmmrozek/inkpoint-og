@@ -11,6 +11,7 @@ import { AnimatePresence } from 'framer-motion';
 import { useTheme } from './Dashboard';
 import { useAuth } from '@/lib/AuthContext';
 import PinnedTiles from '@/components/dashboard/PinnedTiles';
+import { defaultTiles } from '@/lib/pinnedTiles';
 import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
 import BookingModal from '@/components/dashboard/BookingModal';
 import HealthFormBadge from '@/components/booking/HealthFormBadge';
@@ -28,6 +29,7 @@ export default function DashboardHome() {
   const [pendingByDay, setPendingByDay] = useState([]);
   const [draftForms, setDraftForms] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pinnedKeys, setPinnedKeys] = useState(defaultTiles('admin'));
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [editingBooking, setEditingBooking] = useState(null);
   const [allBookings, setAllBookings] = useState([]);
@@ -123,11 +125,14 @@ export default function DashboardHome() {
   };
 
   const KPI = [
-    { label: 'Wszystkie rezerwacje', value: stats.bookings, icon: Calendar, link: '/dashboard/bookings', trend: monthBookingsTrend },
-    { label: 'Do weryfikacji', value: pendingAndRequests, icon: Inbox, link: '/dashboard/bookings?view=pending', sublabel: `${stats.pending} rezerw. · ${stats.changeRequests} zmiany` },
-    { label: 'Nowe wiadomości', value: stats.messages, icon: MessageSquare, link: '/dashboard/messages' },
-    { label: 'Do rozliczenia', value: stats.toSettle, icon: Wallet, link: '/dashboard/bookings?filter=to_settle&view=list&tab=past' },
+    { key: 'all_bookings', label: 'Wszystkie rezerwacje', value: stats.bookings, icon: Calendar, link: '/dashboard/bookings', trend: monthBookingsTrend },
+    { key: 'pending', label: 'Do weryfikacji', value: pendingAndRequests, icon: Inbox, link: '/dashboard/bookings?view=pending', sublabel: `${stats.pending} rezerw. · ${stats.changeRequests} zmiany` },
+    { key: 'messages', label: 'Nowe wiadomości', value: stats.messages, icon: MessageSquare, link: '/dashboard/messages' },
+    { key: 'to_settle', label: 'Do rozliczenia', value: stats.toSettle, icon: Wallet, link: '/dashboard/bookings?filter=to_settle&view=list&tab=past' },
   ];
+
+  // Kafle przypięte u góry nie powtarzają się w siatce poniżej.
+  const visibleKpi = KPI.filter(k => !pinnedKeys.includes(k.key));
 
   const buildPendingByDay = (bookingsArr) => {
     const todayStr = new Date().toISOString().split('T')[0];
@@ -154,11 +159,11 @@ export default function DashboardHome() {
   return (
     <div>
       {/* Przypięte kafle */}
-      <PinnedTiles role="admin" userEmail={user?.email} values={pinnedValues} t={t} theme={theme} />
+      <PinnedTiles role="admin" userEmail={user?.email} values={pinnedValues} t={t} theme={theme} onKeysChange={setPinnedKeys} />
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-        {KPI.map((kpi, i) => {
+      {/* KPI Cards — bez kafli już przypiętych u góry */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12" style={{ display: visibleKpi.length ? undefined : 'none' }}>
+        {visibleKpi.map((kpi, i) => {
           const Icon = kpi.icon;
           return (
             <motion.div

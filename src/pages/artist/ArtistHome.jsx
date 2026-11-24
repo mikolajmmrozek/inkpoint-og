@@ -20,6 +20,7 @@ import { buildHealthFormStatusMap } from '@/lib/healthFormStatus';
 import { pluralSesji } from '@/utils';
 import TrendBadge from '@/components/stats/TrendBadge';
 import PinnedTiles from '@/components/dashboard/PinnedTiles';
+import { defaultTiles } from '@/lib/pinnedTiles';
 import { comparePeriods, monthBounds, pctChange, serviceRevenue, upcomingMonthBounds } from '@/lib/trends';
 
 const PAYMENT_METHOD_LABELS = { cash: 'Gotówka', card: 'Karta', voucher: 'Voucher' };
@@ -531,6 +532,7 @@ export default function ArtistHome() {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [settlingBooking, setSettlingBooking] = useState(null);
   const [artistServices, setArtistServices] = useState([]);
+  const [pinnedKeys, setPinnedKeys] = useState(defaultTiles('artist'));
   const [healthStatusMap, setHealthStatusMap] = useState({});
 
   const t = theme === 'light'
@@ -593,10 +595,13 @@ export default function ArtistHome() {
   };
 
   const KPI = [
-    { label: 'Nadchodzące sesje', value: upcoming.length, trend: upcomingTrend, icon: Calendar, link: '/artist/schedule' },
-    { label: 'Sesje w tym miesiącu', value: thisMonth.length, trend: monthTrend.sessions, icon: TrendingUp, link: '/artist/stats' },
-    { label: 'Mój zarobek (mies.)', value: `${Math.round(revenue)} zł`, sub: `Prognoza: +${forecast} zł`, trend: monthTrend.revenue, icon: Clock, link: '/artist/stats' },
+    { key: 'upcoming', label: 'Nadchodzące sesje', value: upcoming.length, trend: upcomingTrend, icon: Calendar, link: '/artist/schedule' },
+    { key: 'month_sessions', label: 'Sesje w tym miesiącu', value: thisMonth.length, trend: monthTrend.sessions, icon: TrendingUp, link: '/artist/stats' },
+    { key: 'month_revenue', label: 'Mój zarobek (mies.)', value: `${Math.round(revenue)} zł`, sub: `Prognoza: +${forecast} zł`, trend: monthTrend.revenue, icon: Clock, link: '/artist/stats' },
   ];
+
+  // Kafle już przypięte u góry nie powtarzają się w siatce poniżej.
+  const visibleKpi = KPI.filter(k => !pinnedKeys.includes(k.key));
 
   // All active sessions sorted ascending, max 10 upcoming
   const sortedUpcoming = [...upcoming].sort((a, b) => (a.session_date || '').localeCompare(b.session_date || '') || (a.session_time || '').localeCompare(b.session_time || '')).slice(0, 10);
@@ -644,10 +649,10 @@ export default function ArtistHome() {
         </h1>
       </div>
 
-      <PinnedTiles role="artist" userEmail={user?.email} values={pinnedValues} t={t} theme={theme} />
+      <PinnedTiles role="artist" userEmail={user?.email} values={pinnedValues} t={t} theme={theme} onKeysChange={setPinnedKeys} />
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
-        {KPI.map((kpi, i) => {
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10" style={{ display: visibleKpi.length ? undefined : 'none' }}>
+        {visibleKpi.map((kpi, i) => {
           const Icon = kpi.icon;
           return (
             <motion.div key={kpi.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>

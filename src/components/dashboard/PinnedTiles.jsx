@@ -9,11 +9,15 @@ import PinnedTilesSettings from './PinnedTilesSettings';
 
 // Przypięte kafle pulpitu: skróty oraz podstawowe wartości z trendami.
 // values: { [klucz]: { value, trend, sub } }
-export default function PinnedTiles({ role, userEmail, values = {}, t, theme }) {
+export default function PinnedTiles({ role, userEmail, values = {}, t, theme, onKeysChange }) {
   const catalog = tileCatalog(role);
   const [keys, setKeys] = useState(defaultTiles(role));
   const [editing, setEditing] = useState(false);
   const [version, setVersion] = useState(0);
+
+  // Rodzic potrzebuje listy przypiętych kluczy, żeby nie powtarzać tych samych
+  // wskaźników w sekcji poniżej.
+  useEffect(() => { onKeysChange?.(keys); }, [keys]);
 
   useEffect(() => {
     if (!userEmail) return;
