@@ -2,6 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { TOKEN_TTL_MS, signToken, verifyToken } from '../../shared/gatekeeperConfirm.ts';
 import { builtinFields, maskRecord, pick, genSessionId, asList } from '../../shared/gatekeeperData.ts';
 import { previewSale, normalizePayments, recordSale, r2 } from '../../shared/shopSale.ts';
+import { extractHealthTemplate, buildHealthTemplatePlan, planHash } from '../../shared/healthTemplate.ts';
 
 // ─────────────────────────────────────────────────────────────────────────
 // gatekeeperOps — narzędzie Gatekeepera do zarządzania danymi Dashboard.
@@ -471,6 +472,108 @@ export default async function (req: Request): Promise<Response> {
           error: `Zdjęcia zostały opublikowane, ale zapis w ofercie NIE powiódł się: ${e.message}`,
           published_urls: publishedItems.map(p => p.url),
         }, { status: 500 });
+      }
+    }
+
+    // ── SZABLON ANKIETY Z PAPIEROWEGO DOKUMENTU ────────────────────
+    // action='health_template_from_file', file_uri (lub file_urls) — odczyt PDF/zdjęcia
+    // ankiety i propozycja pytań zdrowotnych, przedzabiegowych, oświadczenia i zgód.
+    // Sekcje, których w dokumencie nie ma, pozostają bez zmian. Dwuetapowo z confirm_token.
+    if (action === 'health_template_from_file') {
+      const raw = Array.isArray(body.file_urls) ? body.file_urls : body.file_uri ? [body.file_uri] : [];
+      const files = [...new Set(raw.map(String).filter(Boolean))].sort();
+      if (files.length === 0) {
+        return Response.json({ error: 'Brak pliku — przekaż file_uri (identyfikator [Załącznik: ...] z wiadomości) lub file_urls' }, { status: 400 });
+      }
+      if (files.length > 5) return Response.json({ error: 'Maksymalnie 5 plików na jedno wywołanie' }, { status: 400 });
+
+      const existingArr: any = await base44.entities.HealthFormTemplate.filter({ key: 'default' });
+      const current: any = (Array.isArray(existingArr) ? existingArr[0] : existingArr?.items?.[0]) || null;
+
+      let extracted: any;
+      try {
+        extracted = await extractHealthTemplate(base44, files);
+      } catch (e: any) {
+        return Response.json({ error: `Nie udało się odczytać ankiety z pliku: ${e?.message || 'nieznany błąd'}` }, { status: 400 });
+      }
+
+      const plan = buildHealthTemplatePlan(current, extracted);
+      if (Object.keys(plan.sections).length === 0) {
+        return Response.json({
+          status: 'nothing_found',
+          action,
+          entity: 'HealthFormTemplate',
+          message: 'W dokumencie nie znaleziono treści ankiety (pytań zdrowotnych, przedzabiegowych, oświadczenia ani zgód). Szablon NIE został zmieniony.',
+        });
+      }
+
+      const hash = await planHash(plan.sections);
+      const counts: Record<string, number> = {};
+      for (const key of Object.keys(plan.labels)) counts[key] = plan.labels[key].length;
+
+      // ── ETAP 1: propozycja ────────────────────────────────────────
+      if (!body.confirm_token) {
+        const confirm_token = await signToken(user.id, action, 'HealthFormTemplate', { files, hash }, 'gatekeeper-confirm');
+        return Response.json({
+          status: 'awaiting_confirmation',
+          action,
+          entity: 'HealthFormTemplate',
+          template_exists: !!current?.id,
+          counts,
+          proposed: plan.labels,
+          skipped_sections: plan.skipped,
+          plan_hash: hash,
+          confirm_token,
+          expires_in_seconds: TOKEN_TTL_MS / 1000,
+          side_effects: [
+            'Pytania z dokumentu zastąpią treść swoich sekcji w szablonie ankiety — formularz klienta od razu pokaże nowe pytania.',
+            plan.skipped.length > 0
+              ? `Sekcje nieznalezione w dokumencie pozostaną bez zmian: ${plan.skipped.join(', ')}.`
+              : 'Wszystkie sekcje znaleziono w dokumencie.',
+            'Pytania o brzmieniu już obecnym w szablonie zachowują dotychczasowe klucze — odpowiedzi klientów pozostają powiązane.',
+            current?.id ? 'Zapis nadpisze istniejący szablon ankiety (nie powstanie nowy rekord).' : 'Szablon ankiety jeszcze nie istnieje — zostanie utworzony.',
+          ],
+          hint: 'Przedstaw administratorowi pytania per sekcja oraz informację, które sekcje są pomijane. Po potwierdzeniu wywołaj ponownie z identycznymi plikami, plan_hash i confirm_token.',
+        });
+      }
+
+      // ── ETAP 2: zapis ─────────────────────────────────────────────
+      const tokenOk = await verifyToken(body.confirm_token, user.id, action, 'HealthFormTemplate', { files, hash: String(body.plan_hash || '') }, 'gatekeeper-confirm');
+      if (!tokenOk) {
+        return Response.json({ error: 'Token potwierdzenia nieprawidłowy lub wygasł (max 15 min). Wygeneruj nową propozycję bez confirm_token, uzyskaj potwierdzenie administratora i wykonaj ponownie.' }, { status: 400 });
+      }
+      if (String(body.plan_hash || '') !== hash) {
+        const next_token = await signToken(user.id, action, 'HealthFormTemplate', { files, hash }, 'gatekeeper-confirm');
+        return Response.json({
+          status: 'plan_changed',
+          action,
+          entity: 'HealthFormTemplate',
+          message: 'Ponowny odczyt dokumentu dał inną treść niż przedstawiona propozycja — szablon NIE został zmieniony. Przedstaw administratorowi nową propozycję i poproś o ponowne potwierdzenie.',
+          counts,
+          proposed: plan.labels,
+          skipped_sections: plan.skipped,
+          plan_hash: hash,
+          confirm_token: next_token,
+          expires_in_seconds: TOKEN_TTL_MS / 1000,
+        });
+      }
+
+      try {
+        const saved: any = current?.id
+          ? await base44.entities.HealthFormTemplate.update(current.id, plan.sections)
+          : await base44.entities.HealthFormTemplate.create({ key: 'default', ...plan.sections });
+        return Response.json({
+          status: 'executed',
+          action,
+          entity: 'HealthFormTemplate',
+          template_id: saved?.id || current?.id || null,
+          created: !current?.id,
+          updated_sections: Object.keys(plan.sections),
+          counts,
+          skipped_sections: plan.skipped,
+        });
+      } catch (e: any) {
+        return Response.json({ error: `Szablon ankiety NIE został zapisany: ${e?.message || 'nieznany błąd'}` }, { status: 500 });
       }
     }
 
