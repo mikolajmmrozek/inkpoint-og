@@ -35,7 +35,16 @@ const FILTERS: Record<string, string[]> = {
   Artist: [],
   CalendarImportDraft: ['status', 'session_date', 'gcal_event_id'],
   ShopProduct: ['name', 'sku', 'category_name', 'is_active', 'price', 'order'],
+  Event: [],
+  EventSession: ['event_id', 'date', 'status'],
+  EventBooking: ['event_id', 'session_id', 'status', 'session_date', 'email'],
 };
+
+// Terminy ofert, w których artysta jest prowadzącym (serwerowe zawężenie zakresu)
+async function ownEventSessions(base44: any, artistId: string): Promise<any[]> {
+  const res: any = await base44.asServiceRole.entities.EventSession.list('date', 500).catch(() => []);
+  return asList(res).filter((s: any) => (s.leader_ids || []).includes(artistId));
+}
 
 function notFound(entityName: string) {
   return Response.json({ error: `Rekord ${entityName} nie istnieje lub nie należy do Twoich sesji.` }, { status: 404 });
@@ -175,6 +184,29 @@ export default async function (req: Request): Promise<Response> {
           items = out.slice(0, limit);
         } else if (entityName === 'Artist') {
           items = [artist];
+        } else if (entityName === 'Event') {
+          // Oferty prowadzone przez artystę (RLS ofert dopuszcza artystom tylko opublikowane — czytamy przez service role z zawężeniem)
+          const res: any = await base44.asServiceRole.entities.Event.list('order', 200).catch(() => []);
+          items = asList(res).filter((e: any) => (e.leader_ids || []).includes(artistId)).slice(0, limit);
+        } else if (entityName === 'EventSession') {
+          const own = await ownEventSessions(base44, artistId);
+          items = own.filter((s: any) =>
+            (!filters.event_id || s.event_id === filters.event_id) &&
+            (!filters.date || s.date === filters.date) &&
+            (!filters.status || s.status === filters.status)
+          ).slice(0, limit);
+        } else if (entityName === 'EventBooking') {
+          const own = await ownEventSessions(base44, artistId);
+          const ids = own.map((s: any) => s.id);
+          const query: any = { session_id: { $in: ids } };
+          if (filters.session_id) query.session_id = filters.session_id;
+          if (filters.event_id) query.event_id = filters.event_id;
+          if (filters.status) query.status = filters.status;
+          if (filters.session_date) query.session_date = filters.session_date;
+          if (filters.email) query.email = filters.email;
+          // Zapisy na oferty: RLS czyta tylko własne konta/adminowi — artysta przez service role z zawężeniem do własnych terminów
+          const res: any = await base44.asServiceRole.entities.EventBooking.filter(query, { sort: rawSort, limit });
+          items = asList(res).slice(0, limit);
         }
 
         return Response.json({
@@ -232,6 +264,23 @@ export default async function (req: Request): Promise<Response> {
       }
       if (entityName === 'Artist') {
         return Response.json({ entity: entityName, record: artist });
+      }
+      if (entityName === 'Event') {
+        record = await base44.asServiceRole.entities.Event.get(body.id).catch(() => null);
+        if (!record || !(record.leader_ids || []).includes(artistId)) return notFound(entityName);
+        return Response.json({ entity: entityName, record });
+      }
+      if (entityName === 'EventSession') {
+        record = await base44.asServiceRole.entities.EventSession.get(body.id).catch(() => null);
+        if (!record || !(record.leader_ids || []).includes(artistId)) return notFound(entityName);
+        return Response.json({ entity: entityName, record });
+      }
+      if (entityName === 'EventBooking') {
+        record = await base44.asServiceRole.entities.EventBooking.get(body.id).catch(() => null);
+        if (!record) return notFound(entityName);
+        const own = await ownEventSessions(base44, artistId);
+        if (!own.some((s: any) => s.id === record.session_id)) return notFound(entityName);
+        return Response.json({ entity: entityName, record });
       }
     }
 
@@ -377,6 +426,57 @@ export default async function (req: Request): Promise<Response> {
         status: 'executed', entity: 'Booking', action, record: created,
         note: 'Nowa rezerwacja uruchamia automatycznie powiadomienia studia, konwersację z klientem i synchronizację z Google Calendar. Status sesji to confirmed — artysta sam potwierdza swoje sesje.',
       });
+    }
+
+    // ── ZAPISY NA OFERTY (EventBooking) — potwierdzanie uczestników ─
+    if (action === 'update' && entityName === 'EventBooking') {
+      if (!body.id) return Response.json({ error: 'Brak id zapisu' }, { status: 400 });
+      const booking = await base44.asServiceRole.entities.EventBooking.get(body.id).catch(() => null);
+      if (!booking) return notFound(entityName);
+      const own = await ownEventSessions(base44, artistId);
+      if (!own.some((s: any) => s.id === booking.session_id)) return notFound(entityName);
+
+      const changes = body.changes || {};
+      const allowed = ['status', 'notes'];
+      const bad = Object.keys(changes).filter(k => !allowed.includes(k));
+      if (bad.length > 0) {
+        return Response.json({ error: `Niedozwolone pola edycji zapisu: ${bad.join(', ')}. Dozwolone: ${allowed.join(', ')}. Edycja ofert i terminów należy do administratora.` }, { status: 400 });
+      }
+      if (Object.keys(changes).length === 0) return Response.json({ error: 'Brak zmian do wykonania' }, { status: 400 });
+      if (changes.status !== undefined && !['pending', 'confirmed', 'rejected', 'cancelled'].includes(changes.status)) {
+        return Response.json({ error: 'Status zapisu musi być jednym z: pending, confirmed, rejected, cancelled.' }, { status: 400 });
+      }
+
+      const dat = { id: body.id, changes };
+      if (!body.confirm_token) {
+        const confirm_token = await signToken(user.id, 'update', 'EventBooking', dat, 'artist-gatekeeper-confirm');
+        return Response.json({
+          status: 'awaiting_confirmation', entity: 'EventBooking', action,
+          current: {
+            id: booking.id, event_title: booking.event_title, session_date: booking.session_date,
+            client_name: booking.client_name, email: booking.email,
+            participants: booking.participants, status: booking.status,
+          },
+          proposed: changes,
+          sensitive: true,
+          sensitive_fields: Object.keys(changes),
+          side_effects: ['Status decyduje o zajęciu miejsca: confirmed zajmuje miejsce, rejected i cancelled je zwalniają. Uczestnik widzi nowy status w swoim panelu.'],
+          confirm_token,
+          expires_in_seconds: TOKEN_TTL_MS / 1000,
+          hint: 'Przedstaw artyście podsumowanie i po uzyskaniu potwierdzenia wywołaj ponownie z identycznymi danymi oraz confirm_token.',
+        });
+      }
+      const tokenOk = await verifyToken(body.confirm_token, user.id, 'update', 'EventBooking', dat, 'artist-gatekeeper-confirm');
+      if (!tokenOk) {
+        return Response.json({ error: 'Token potwierdzenia nieprawidłowy lub wygasł (max 15 min). Wygeneruj nową propozycję bez confirm_token, uzyskaj potwierdzenie artysty i wykonaj ponownie.' }, { status: 400 });
+      }
+      const apply: any = { ...changes };
+      if (apply.status === 'confirmed') {
+        apply.confirmed_at = new Date().toISOString();
+        apply.confirmed_by_name = user.full_name || user.email || '';
+      }
+      const updated = await base44.asServiceRole.entities.EventBooking.update(body.id, apply);
+      return Response.json({ status: 'executed', entity: 'EventBooking', action, record: updated });
     }
 
     // ── EDYCJA SESJI (Booking) ──────────────────────────────────────

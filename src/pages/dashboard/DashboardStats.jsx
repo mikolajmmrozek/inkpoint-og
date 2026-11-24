@@ -2,13 +2,15 @@ import { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useTheme } from './Dashboard';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, Legend } from 'recharts';
-import { TrendingUp, Users, Calendar, DollarSign, BarChart2, Wallet, ChevronLeft, ChevronRight, Scissors, ShoppingBag } from 'lucide-react';
+import { TrendingUp, Users, Calendar, DollarSign, BarChart2, Wallet, ChevronLeft, ChevronRight, Scissors, ShoppingBag, CalendarDays } from 'lucide-react';
 import { format, addDays, addWeeks, startOfWeek } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import { useSearchParams } from 'react-router-dom';
 import TodaySettlementView from '@/components/dashboard/TodaySettlementView';
 import StatsServicesView from '@/components/dashboard/stats/StatsServicesView';
 import StatsShopView from '@/components/dashboard/stats/StatsShopView';
+import StatsEventsView from '@/components/dashboard/stats/StatsEventsView';
+import { eventSummary } from '@/lib/eventFinance';
 import { sessionAmount } from '@/lib/settlement';
 import { PAYMENT_COLORS, PAYMENT_LABELS, sumMethod } from '@/lib/statsPayments';
 import TrendBadge from '@/components/stats/TrendBadge';
@@ -27,6 +29,9 @@ export default function DashboardStats() {
   const [bookings, setBookings] = useState([]);
   const [artists, setArtists] = useState([]);
   const [shopOrders, setShopOrders] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [eventSessions, setEventSessions] = useState([]);
+  const [eventBookings, setEventBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedArtistId, setSelectedArtistId] = useState('all');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -35,7 +40,7 @@ export default function DashboardStats() {
   const [pageView, setPageView] = useState('stats'); // 'stats' | 'today'
   const [paymentWeekStart, setPaymentWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [searchParams] = useSearchParams();
-  const [scope, setScope] = useState(() => (['services', 'shop'].includes(searchParams.get('view')) ? searchParams.get('view') : 'studio'));
+  const [scope, setScope] = useState(() => (['services', 'shop', 'events'].includes(searchParams.get('view')) ? searchParams.get('view') : 'studio'));
   const [reloadKey, setReloadKey] = useState(0);
 
   // Rozliczenie / zmiana kwoty sesji od razu odświeża statystyki.
@@ -46,6 +51,9 @@ export default function DashboardStats() {
       setArtists(a.filter(x => x.is_visible !== false));
     });
     base44.entities.ShopOrder.list('-created_date', 300).then(setShopOrders).catch(() => setShopOrders([]));
+    base44.entities.Event.list('order', 200).then(setEvents).catch(() => setEvents([]));
+    base44.entities.EventSession.list('date', 500).then(setEventSessions).catch(() => setEventSessions([]));
+    base44.entities.EventBooking.list('-created_date', 1000).then(setEventBookings).catch(() => setEventBookings([]));
     setTimeout(() => {
       base44.entities.Booking.list('-session_date', 300)
         .then(setBookings)
@@ -131,6 +139,21 @@ export default function DashboardStats() {
       unknownCount,
     };
   }, [shopOrders, filtered]);
+
+  // Oferty (warsztaty i wydarzenia): przychód z potwierdzonych zapisów i wynagrodzenia prowadzących
+  const eventsTotals = useMemo(() => {
+    const yearSessions = eventSessions.filter(s => String(s.date || '').startsWith(String(selectedYear)));
+    return events.reduce((acc, e) => {
+      const evSessions = yearSessions.filter(s => s.event_id === e.id);
+      const s = eventSummary(e, evSessions, eventBookings);
+      return {
+        revenue: acc.revenue + s.revenue,
+        participants: acc.participants + s.participants,
+        payout: acc.payout + s.payout,
+        offers: acc.offers + (evSessions.length > 0 ? 1 : 0),
+      };
+    }, { revenue: 0, participants: 0, payout: 0, offers: 0 });
+  }, [events, eventSessions, eventBookings, selectedYear]);
 
   // Przychód usług (usługa główna + usługi dopisane w rozliczeniu) — bez produktów
   const servicesRevenue = useMemo(
@@ -298,6 +321,7 @@ export default function DashboardStats() {
           { id: 'studio', label: 'Całe studio', icon: BarChart2 },
           { id: 'services', label: 'Usługi', icon: Scissors },
           { id: 'shop', label: 'Sklep', icon: ShoppingBag },
+          { id: 'events', label: 'Oferty', icon: CalendarDays },
         ].map(s => {
           const Icon = s.icon;
           const active = scope === s.id;
@@ -349,6 +373,8 @@ export default function DashboardStats() {
         <StatsServicesView t={t} filtered={filtered} MONTHS_FULL={MONTHS_FULL} selectedYear={selectedYear} bookings={bookings} artistId={selectedArtistId} />
       ) : scope === 'shop' ? (
         <StatsShopView t={t} shopOrders={shopOrders} filtered={filtered} shopTotals={shopTotals} selectedYear={selectedYear} />
+      ) : scope === 'events' ? (
+        <StatsEventsView t={t} events={events} sessions={eventSessions} bookings={eventBookings} selectedYear={selectedYear} />
       ) : (
         <>
           {/* KPI row */}
@@ -357,6 +383,11 @@ export default function DashboardStats() {
             <KPICard label="Zarobki artystów" value={`${totals.artistEarnings.toLocaleString('pl-PL')} PLN`} sub={totals.revenue ? `${Math.round(totals.artistEarnings / totals.revenue * 100)}% całości` : ''} />
             <KPICard label="Zarobki studia" value={`${totals.studioEarnings.toLocaleString('pl-PL')} PLN`} sub={totals.revenue ? `${Math.round(totals.studioEarnings / totals.revenue * 100)}% całości` : ''} />
             <KPICard label="Sesji" value={totals.sessions} trend={yoy.sessions} />
+            <KPICard
+              label="Przychód z ofert"
+              value={`${eventsTotals.revenue.toLocaleString('pl-PL')} PLN`}
+              sub={`${eventsTotals.participants} miejsc · ${eventsTotals.offers} ofert · wynagrodzenia ${eventsTotals.payout.toLocaleString('pl-PL')} PLN`}
+            />
           </div>
 
           {/* Sklep, produkty w sesjach, prowizje, zysk */}

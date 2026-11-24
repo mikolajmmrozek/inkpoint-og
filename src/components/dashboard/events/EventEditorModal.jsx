@@ -40,6 +40,8 @@ export default function EventEditorModal({ event, categories, artists, theme, on
     price: event?.price ?? 0,
     location: event?.location || '',
     min_participants: event?.min_participants ?? 0,
+    leader_pay_type: event?.leader_pay_type || 'none',
+    leader_pay_value: event?.leader_pay_value ?? 0,
     status: event?.status || 'draft',
     order: event?.order ?? 999,
   }));
@@ -161,6 +163,7 @@ export default function EventEditorModal({ event, categories, artists, theme, on
         leader_names: artists.filter(a => (form.leader_ids || []).includes(a.id)).map(a => a.name),
         price: Number(form.price) || 0,
         min_participants: Number(form.min_participants) || 0,
+        leader_pay_value: Number(form.leader_pay_value) || 0,
         order: Number(form.order) || 999,
       };
 
@@ -263,6 +266,31 @@ export default function EventEditorModal({ event, categories, artists, theme, on
           <div><label style={label}>Miejsce</label><input style={input} value={form.location} onChange={e => set('location', e.target.value)} /></div>
           <div><label style={label}>Minimalna liczba uczestników</label><input type="number" style={input} value={form.min_participants} onChange={e => set('min_participants', e.target.value)} /></div>
           <div><label style={label}>Kolejność</label><input type="number" style={input} value={form.order} onChange={e => set('order', e.target.value)} /></div>
+          <div>
+            <label style={label}>Wynagrodzenie prowadzącego</label>
+            <select style={input} value={form.leader_pay_type} onChange={e => set('leader_pay_type', e.target.value)}>
+              <option value="none">Brak</option>
+              <option value="percent">Procent od kwoty potwierdzonych zapisów</option>
+              <option value="fixed">Stała kwota za termin</option>
+            </select>
+          </div>
+          <div>
+            <label style={label}>{form.leader_pay_type === 'fixed' ? 'Kwota za termin (PLN)' : 'Procent od kwoty (%)'}</label>
+            <input
+              type="number"
+              style={{ ...input, opacity: form.leader_pay_type === 'none' ? 0.45 : 1 }}
+              disabled={form.leader_pay_type === 'none'}
+              value={form.leader_pay_value}
+              onChange={e => set('leader_pay_value', e.target.value)}
+            />
+            <p style={{ ...mono, fontSize: '7px', color: t.muted, marginTop: '4px', lineHeight: 1.5 }}>
+              {form.leader_pay_type === 'fixed'
+                ? 'Kwota dla każdego prowadzącego za jeden termin z potwierdzonymi zapisami.'
+                : form.leader_pay_type === 'percent'
+                  ? 'Procent łącznej kwoty potwierdzonych zapisów, dzielony między prowadzących.'
+                  : 'Oferta nie generuje wynagrodzenia prowadzącego.'}
+            </p>
+          </div>
         </div>
 
         <div className="mb-4">

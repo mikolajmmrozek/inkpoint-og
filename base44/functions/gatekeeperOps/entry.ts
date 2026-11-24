@@ -226,6 +226,30 @@ const ENTITIES = {
     filter: ['product_id', 'variant_key', 'reason', 'booking_id', 'booking_session_id'],
     sensitive: [],
   },
+  Event: {
+    // Oferty (warsztaty i wydarzenia) — pełne zarządzanie wraz z wynagrodzeniem prowadzącego
+    ops: { read: true, create: true, update: true, delete: true },
+    required: ['title'],
+    fields: ['title', 'slug', 'category_id', 'category_name', 'main_image_url', 'gallery_images', 'video_urls', 'short_description', 'full_description', 'program', 'requirements', 'materials', 'organizer_info', 'leader_ids', 'leader_names', 'price', 'location', 'min_participants', 'leader_pay_type', 'leader_pay_value', 'status', 'order'],
+    filter: ['title', 'slug', 'category_id', 'category_name', 'status'],
+    sensitive: ['price', 'leader_pay_type', 'leader_pay_value'],
+  },
+  EventSession: {
+    // Terminy ofert: data, godziny, limit miejsc, prowadzący
+    ops: { read: true, create: true, update: true, delete: true },
+    required: ['event_id', 'date'],
+    fields: ['event_id', 'event_title', 'date', 'start_time', 'end_time', 'capacity', 'min_participants', 'location', 'leader_ids', 'note', 'status'],
+    filter: ['event_id', 'date', 'status'],
+    sensitive: ['capacity'],
+  },
+  EventBooking: {
+    // Zapisy na oferty: pending → confirmed / rejected / cancelled
+    ops: { read: true, create: true, update: true, delete: true },
+    required: ['event_id', 'session_id', 'client_name', 'email'],
+    fields: ['event_id', 'event_title', 'session_id', 'session_date', 'session_start_time', 'session_end_time', 'leader_ids', 'leader_names', 'first_name', 'last_name', 'client_name', 'email', 'phone', 'notes', 'user_email', 'participants', 'status', 'source', 'confirmed_at', 'confirmed_by_name'],
+    filter: ['event_id', 'session_id', 'session_date', 'email', 'user_email', 'client_name', 'status'],
+    sensitive: ['status', 'confirmed_at', 'confirmed_by_name'],
+  },
 };
 
 function pickSummary(record, cfg) {
@@ -548,6 +572,11 @@ export default async function (req: Request): Promise<Response> {
       changes.last_editor_name = user.full_name || user.email || '';
       changes.last_editor_role = user.role;
     }
+    if (entityName === 'EventBooking' && changes.status === 'confirmed') {
+      // Potwierdzenie zapisu — stempel osoby potwierdzającej (jak w panelu Oferty)
+      changes.confirmed_at = new Date().toISOString();
+      changes.confirmed_by_name = user.full_name || user.email || '';
+    }
     const updated = await ent.update(body.id, changes);
     return Response.json({ status: 'executed', entity: entityName, action, record: updated });
   } catch (error) {
@@ -577,5 +606,19 @@ function sideEffectsFor(entityName, action, dat) {
   if (entityName === 'Client' && action === 'update' && dat.changes && dat.changes.is_blocked === true) return ['Zablokowanie klienta odbiera mu możliwość rezerwacji i wysyłania wiadomości (bez informowania go o blokadzie).'];
   if (entityName === 'Feedback' && action === 'update' && dat.changes && dat.changes.is_published !== undefined) return ['Publikacja opinii sprawia, że staje się ona widoczna publicznie na stronie.'];
   if (entityName === 'TermsAndConditions' && action !== 'create') return ['Zmiany treści prawnych widzą wszyscy klienci — zmiana ma charakter dokumentu.'];
+  if (entityName === 'Event') {
+    return ['Oferta jest widoczna publicznie tylko ze statusem published. Zmiany ceny i wynagrodzenia prowadzącego wpływają na statystyki ofert.'];
+  }
+  if (entityName === 'EventSession') {
+    return ['Termin oferty wpływa na zapisy uczestników i widoczność oferty w kalendarzu zajęć.'];
+  }
+  if (entityName === 'EventBooking') {
+    if (action === 'create') return ['Nowy zapis powstaje ze statusem pending — miejsce nie jest zajęte do potwierdzenia przez administratora.'];
+    if (action === 'delete') return ['Usunięcie zapisu jest nieodwracalne — uczestnik znika z listy oferty.'];
+    const changed = action === 'update' ? Object.keys(dat.changes || {}) : [];
+    if (changed.includes('status')) return ['Status zapisu decyduje o zajęciu miejsca: confirmed zajmuje miejsce, rejected i cancelled je zwalniają. Zmiana jest widoczna dla uczestnika.'];
+    if (changed.includes('participants')) return ['Liczba miejsc wpływa na dostępność terminu.'];
+    return [];
+  }
   return [];
 }

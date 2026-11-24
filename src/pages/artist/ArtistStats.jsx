@@ -4,6 +4,8 @@ import { base44 } from '@/api/base44Client';
 import { sessionAmount } from '@/lib/settlement';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { CalendarDays } from 'lucide-react';
+import { eventSummary, payoutPerLeader } from '@/lib/eventFinance';
 import TrendBadge from '@/components/stats/TrendBadge';
 import { comparePeriods, monthBounds, pctChange, serviceRevenue, yearBounds } from '@/lib/trends';
 
@@ -13,6 +15,9 @@ const MONTHS_FULL = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec
 export default function ArtistStats() {
   const { artist, theme } = useOutletContext();
   const [bookings, setBookings] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [eventSessions, setEventSessions] = useState([]);
+  const [eventBookings, setEventBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [year, setYear] = useState(new Date().getFullYear());
   const [viewMode, setViewMode] = useState('monthly'); // 'monthly' | 'daily'
@@ -32,7 +37,35 @@ export default function ArtistStats() {
     base44.entities.Booking.filter({ artist_id: artist.id }, '-session_date', 200)
       .then(setBookings)
       .finally(() => setLoading(false));
+    // Oferty artysty — funkcja serwerowa zwraca tylko wydarzenia prowadzone przez artystę
+    base44.functions.invoke('getEventParticipants', {})
+      .then(res => {
+        setEvents(res.data?.events || []);
+        setEventSessions(res.data?.sessions || []);
+        setEventBookings(res.data?.bookings || []);
+      })
+      .catch(() => {
+        setEvents([]);
+        setEventSessions([]);
+        setEventBookings([]);
+      });
   }, [artist?.id, reloadKey]);
+
+  // Oferty prowadzone przez artystę: terminy, miejsca i własne wynagrodzenie.
+  const eventStats = useMemo(() => {
+    const myEvents = events.filter(e => (e.leader_ids || []).includes(artist?.id));
+    const rows = myEvents.map(e => {
+      const evSessions = eventSessions.filter(s => s.event_id === e.id && String(s.date || '').startsWith(String(year)));
+      const s = eventSummary(e, evSessions, eventBookings);
+      return { event: e, sessionsCount: evSessions.length, ...s, myPayout: payoutPerLeader(e, s.payout) };
+    }).filter(r => r.sessionsCount > 0 || r.revenue > 0);
+    const totals = rows.reduce((acc, r) => ({
+      sessions: acc.sessions + r.sessionsCount,
+      participants: acc.participants + r.participants,
+      myPayout: acc.myPayout + r.myPayout,
+    }), { sessions: 0, participants: 0, myPayout: 0 });
+    return { rows, totals };
+  }, [events, eventSessions, eventBookings, artist?.id, year]);
 
   const cut = artist?.artist_cut_percent || 60;
 
@@ -250,6 +283,45 @@ export default function ArtistStats() {
           )}
         </div>
       )}
+
+      {/* Oferty prowadzone przez artystę */}
+      <div className="mt-8">
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '12px' }}>
+          OFERTY — WARSZTATY I WYDARZENIA · {year}
+        </p>
+        <div className="grid grid-cols-3 gap-3 mb-4">
+          {[
+            { label: 'Terminy', value: eventStats.totals.sessions, color: t.text },
+            { label: 'Miejsca (potwierdzone)', value: eventStats.totals.participants, color: t.text },
+            { label: 'Moje wynagrodzenie', value: `${eventStats.totals.myPayout} zł`, color: 'var(--brand)' },
+          ].map(k => (
+            <div key={k.label} className="p-4" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: k.color, lineHeight: 1, letterSpacing: '0.04em' }}>{loading ? '—' : k.value}</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px' }}>{k.label}</p>
+            </div>
+          ))}
+        </div>
+        <div style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg }}>
+          <div className="grid grid-cols-4 gap-4 p-3" style={{ borderBottom: `0.5px solid ${t.rowBorder}` }}>
+            {['Oferta', 'Terminy', 'Miejsca', 'Wynagrodzenie'].map(h => (
+              <p key={h} style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{h}</p>
+            ))}
+          </div>
+          {eventStats.rows.length === 0 ? (
+            <div className="p-6 text-center flex flex-col items-center gap-2">
+              <CalendarDays size={18} color="var(--brand)" />
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK OFERT W TYM ROKU</p>
+            </div>
+          ) : eventStats.rows.map((row, i) => (
+            <div key={row.event.id} className="grid grid-cols-4 gap-4 p-3" style={{ borderBottom: i < eventStats.rows.length - 1 ? `0.5px solid ${t.rowBorder}` : 'none' }}>
+              <p style={{ fontSize: '13px', color: t.text, fontWeight: 500 }}>{row.event.title}</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: t.text }}>{row.sessionsCount}</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: t.text }}>{row.participants}</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: row.myPayout > 0 ? 'var(--brand)' : t.muted }}>{row.myPayout} zł</p>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

@@ -87,6 +87,26 @@
       "default": 0,
       "description": "Minimalna liczba uczestnik\u00f3w (0 = brak minimum)"
     },
+    "leader_pay_type": {
+      "type": "string",
+      "enum": [
+        "none",
+        "percent",
+        "fixed"
+      ],
+      "default": "none",
+      "enumColors": [
+        "gray",
+        "blue",
+        "purple"
+      ],
+      "description": "Wynagrodzenie prowadz\u0105cego: none = brak, percent = procent od \u0142\u0105cznej kwoty potwierdzonych zapis\u00f3w, fixed = sta\u0142a kwota za termin (dla ka\u017cdego prowadz\u0105cego terminu)"
+    },
+    "leader_pay_value": {
+      "type": "number",
+      "default": 0,
+      "description": "Warto\u015b\u0107 wynagrodzenia prowadz\u0105cego: procent (leader_pay_type = percent) albo kwota PLN za termin (leader_pay_type = fixed)"
+    },
     "status": {
       "type": "string",
       "enum": [
