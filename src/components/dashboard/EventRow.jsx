@@ -44,7 +44,7 @@ export default function EventRow({ entry, t, isLast = false, isMobile = false })
 
       {/* Prowadzący + tytuł */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
-        <LeaderStack people={[...(entry.leaders || []), ...(entry.external_leaders || []).map(n => ({ name: n }))]} size={isMobile ? 32 : 38} ring={t.bg} />
+        <LeaderStack people={[...(entry.leaders || []), ...(entry.external_leaders || []).map(n => ({ name: n }))]} size={40} ring={t.bg} />
         <div className="min-w-0">
           <p style={{ color: t.text, fontSize: isMobile ? '14px' : '15px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textDecoration: entry.cancelled ? 'line-through' : 'none' }}>
             {entry.title}
@@ -64,7 +64,7 @@ export default function EventRow({ entry, t, isLast = false, isMobile = false })
           </span>
         )}
         {statusLabel && (
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: accent, border: `0.5px solid ${accent}`, padding: '2px 5px', letterSpacing: '0.08em' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: accent, border: `0.5px solid ${accent}`, padding: '2px 6px', letterSpacing: '0.1em', borderRadius: 'var(--radius)' }}>
             {statusLabel}
           </span>
         )}
