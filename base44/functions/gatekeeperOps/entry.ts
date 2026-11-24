@@ -356,6 +356,124 @@ export default async function (req: Request): Promise<Response> {
       }
     }
 
+    // ── ZDJĘCIA OFERTY Z ZAŁĄCZNIKÓW CZATU (prywatne → publiczne) ───
+    // action='publish_images', entity='Event', id (oferta), items: [{file_uri, target: 'main'|'gallery'}],
+    // gallery_mode: 'append' (domyślnie) | 'replace'. Dwuetapowo jak pozostałe mutacje.
+    if (action === 'publish_images') {
+      const eventId = String(body.id || '');
+      if (!eventId) return Response.json({ error: 'Brak id oferty (id = identyfikator oferty Event)' }, { status: 400 });
+      const galleryMode = body.gallery_mode === 'replace' ? 'replace' : 'append';
+      const rawItems = Array.isArray(body.items) ? body.items : [];
+      if (rawItems.length === 0) return Response.json({ error: 'Brak zdjęć do opublikowania — przekaż items: [{file_uri, target}]' }, { status: 400 });
+      if (rawItems.length > 10) return Response.json({ error: 'Maksymalnie 10 zdjęć w jednym wywołaniu' }, { status: 400 });
+
+      const items = rawItems.map((i: any) => ({
+        file_uri: String(i?.file_uri || '').trim(),
+        target: i?.target === 'main' ? 'main' : 'gallery',
+      }));
+      if (items.some(i => !i.file_uri)) {
+        return Response.json({ error: 'Każde zdjęcie musi mieć file_uri — identyfikator pliku z wiadomości ([Załącznik: ...])' }, { status: 400 });
+      }
+      if (items.some(i => /^https?:\/\//i.test(i.file_uri))) {
+        return Response.json({ error: 'Ten plik ma już publiczny adres — nie wymaga publikacji. Wpisz go bezpośrednio przez action="update" na Event (main_image_url / gallery_images).' }, { status: 400 });
+      }
+      if (items.filter(i => i.target === 'main').length > 1) {
+        return Response.json({ error: 'Tylko jedno zdjęcie może być głównym (target="main")' }, { status: 400 });
+      }
+
+      const event: any = await base44.entities.Event.get(eventId).catch(() => null);
+      if (!event) return Response.json({ error: 'Oferta o podanym id nie istnieje' }, { status: 404 });
+      const currentGallery: string[] = Array.isArray(event.gallery_images) ? event.gallery_images : [];
+      const mainItem = items.find(i => i.target === 'main');
+      const galleryItems = items.filter(i => i.target === 'gallery');
+
+      const dat = { id: eventId, items, gallery_mode: galleryMode };
+
+      // ── ETAP 1: propozycja ────────────────────────────────────────
+      if (!body.confirm_token) {
+        const confirm_token = await signToken(user.id, 'publish_images', 'Event', dat, 'gatekeeper-confirm');
+        return Response.json({
+          status: 'awaiting_confirmation',
+          action: 'publish_images',
+          entity: 'Event',
+          event: { id: event.id, title: event.title, status: event.status },
+          current: { main_image_url: event.main_image_url || null, gallery_count: currentGallery.length },
+          proposed: {
+            zdjecia: items.map((i, idx) => `${idx + 1}. ${i.target === 'main' ? 'zdjęcie główne' : 'galeria'}`),
+            zdjecie_glowne: mainItem ? 'tak — nowe zdjęcie główne' : 'bez zmian',
+            galeria: galleryItems.length === 0
+              ? 'bez zmian'
+              : galleryMode === 'replace'
+                ? `zastąpiona ${galleryItems.length} nowymi zdjęciami`
+                : `dopisane na koniec (obecnie ${currentGallery.length} zdj.)`,
+          },
+          sensitive: true,
+          side_effects: [
+            'Z prywatnych załączników powstaną PUBLICZNE kopie zdjęć — każdy z linkiem może je otworzyć.',
+            'Zdjęcia zostaną wpisane w ofertę (main_image_url i/lub gallery_images) i będą widoczne na stronie oraz w panelu.',
+            galleryMode === 'replace'
+              ? 'Obecna galeria oferty zostanie ZASTĄPIONA nowymi zdjęciami.'
+              : 'Obecna galeria oferty zostanie zachowana, nowe zdjęcia dojdą na koniec.',
+          ],
+          confirm_token,
+          expires_in_seconds: TOKEN_TTL_MS / 1000,
+          hint: 'Przedstaw administratorowi podsumowanie (zdjęcie główne, kolejność galerii, publiczny charakter kopii) i po potwierdzeniu wywołaj ponownie z identycznymi danymi oraz confirm_token.',
+        });
+      }
+
+      // ── ETAP 2: publikacja + zapis w ofercie ──────────────────────
+      const publishTokenOk = await verifyToken(body.confirm_token, user.id, 'publish_images', 'Event', dat, 'gatekeeper-confirm');
+      if (!publishTokenOk) {
+        return Response.json({ error: 'Token potwierdzenia nieprawidłowy lub wygasł (max 15 min). Wygeneruj nową propozycję bez confirm_token, uzyskaj potwierdzenie administratora i wykonaj ponownie.' }, { status: 400 });
+      }
+
+      const publishedItems: { target: string; url: string }[] = [];
+      const failures: any[] = [];
+      for (let idx = 0; idx < items.length; idx++) {
+        try {
+          const url = await publishPrivateFile(base44, items[idx].file_uri);
+          publishedItems.push({ target: items[idx].target, url });
+        } catch (e: any) {
+          failures.push({ pozycja: idx + 1, target: items[idx].target, blad: e.message });
+        }
+      }
+
+      if (failures.length > 0) {
+        return Response.json({
+          error: `Oferta NIE została zaktualizowana — nie udało się opublikować ${failures.length} z ${items.length} zdjęć.`,
+          published_urls: publishedItems.map(p => p.url),
+          failures,
+          hint: 'Opublikowane pliki pozostają w publicznym magazynie, ale oferta jest bez zmian. Popraw wskazane zdjęcia i wywołaj ponownie (tylko nieudane pozycje).',
+        }, { status: 400 });
+      }
+
+      const changes: any = {};
+      const mainUrl = publishedItems.find(p => p.target === 'main')?.url;
+      if (mainUrl) changes.main_image_url = mainUrl;
+      const galleryUrls = publishedItems.filter(p => p.target === 'gallery').map(p => p.url);
+      if (galleryUrls.length > 0) {
+        changes.gallery_images = galleryMode === 'replace' ? galleryUrls : [...currentGallery, ...galleryUrls];
+      }
+
+      try {
+        const updated: any = await base44.entities.Event.update(eventId, changes);
+        return Response.json({
+          status: 'executed',
+          action: 'publish_images',
+          entity: 'Event',
+          event: { id: updated.id, title: updated.title, status: updated.status },
+          main_image_url: updated.main_image_url || null,
+          gallery_images: Array.isArray(updated.gallery_images) ? updated.gallery_images : [],
+          published: publishedItems,
+        });
+      } catch (e: any) {
+        return Response.json({
+          error: `Zdjęcia zostały opublikowane, ale zapis w ofercie NIE powiódł się: ${e.message}`,
+          published_urls: publishedItems.map(p => p.url),
+        }, { status: 500 });
+      }
+    }
+
     const entityName = String(body.entity || '');
     const cfg = Object.prototype.hasOwnProperty.call(ENTITIES, entityName) ? ENTITIES[entityName] : null;
     if (!cfg) {
@@ -582,6 +700,30 @@ export default async function (req: Request): Promise<Response> {
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
+}
+
+const EXT_BY_TYPE: Record<string, string> = {
+  'image/jpeg': 'jpg', 'image/jpg': 'jpg', 'image/png': 'png',
+  'image/webp': 'webp', 'image/gif': 'gif', 'image/avif': 'avif',
+};
+
+// Publikuje prywatny załącznik z czatu jako publiczne zdjęcie i zwraca jego publiczny adres.
+// CreateFileSignedUrl sam odrzuca pliki spoza aplikacji, więc tylko własne pliki mogą zostać opublikowane.
+async function publishPrivateFile(base44: any, fileUri: string): Promise<string> {
+  const signed: any = await base44.integrations.Core.CreateFileSignedUrl({ file_uri: fileUri, expires_in: 300 });
+  if (!signed?.signed_url) throw new Error('Brak dostępu do pliku prywatnego (nieprawidłowy lub obcy identyfikator)');
+  const res = await fetch(signed.signed_url);
+  if (!res.ok) throw new Error(`Nie udało się pobrać pliku (${res.status})`);
+  const type = (res.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
+  if (!type.startsWith('image/')) throw new Error(`To nie jest zdjęcie (${type || 'nieznany typ'}) — zdjęcia oferty muszą być obrazami`);
+  const buf = await res.arrayBuffer();
+  const rawName = fileUri.split('/').pop() || 'zdjecie';
+  const stem = (rawName.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 40)) || 'zdjecie';
+  const ext = EXT_BY_TYPE[type] || type.split('/')[1] || 'jpg';
+  const file = new File([buf], `${stem}.${ext}`, { type });
+  const up: any = await base44.integrations.Core.UploadPublicFile({ file });
+  if (!up?.file_url) throw new Error('Publikacja nie zwróciła publicznego adresu');
+  return up.file_url;
 }
 
 function sideEffectsFor(entityName, action, dat) {
