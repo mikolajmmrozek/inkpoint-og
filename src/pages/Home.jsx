@@ -7,6 +7,7 @@ import HomeAbout from '../components/home/HomeAbout';
 import HomeCTA from '../components/home/HomeCTA';
 import HomeTestimonials from '../components/home/HomeTestimonials';
 import HomeShopCarousel from '../components/home/HomeShopCarousel';
+import HomeEventsCarousel from '../components/home/HomeEventsCarousel';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import Lightbox from '../components/ui/Lightbox';
@@ -113,6 +114,12 @@ export default function Home() {
       </div>
 
       <HomeTestimonials />
+
+      <div className="px-8 md:px-16">
+        <div className="w-full" style={{ height: '1px', background: 'linear-gradient(to right, transparent, var(--brand), transparent)' }} />
+      </div>
+
+      <HomeEventsCarousel />
 
       <div className="px-8 md:px-16">
         <div className="w-full" style={{ height: '1px', background: 'linear-gradient(to right, transparent, var(--brand), transparent)' }} />

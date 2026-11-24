@@ -158,6 +158,11 @@
       ],
       "description": "draft = szkic, published = widoczne w ofercie, hidden = ukryte"
     },
+    "is_featured": {
+      "type": "boolean",
+      "default": false,
+      "description": "True = oferta wyr\u00f3\u017cniona \u2014 pokazywana w sekcji ofert na stronie g\u0142\u00f3wnej (je\u015bli brak wyr\u00f3\u017cnionych, strona g\u0142\u00f3wna pokazuje losowe oferty)"
+    },
     "order": {
       "type": "number",
       "default": 999

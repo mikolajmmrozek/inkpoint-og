@@ -35,6 +35,12 @@ export default async function (req: Request): Promise<Response> {
       return Response.json({ error: 'To wydarzenie nie jest dostępne.' }, { status: 404 });
     }
 
+    // Globalne ustawienie ofert: zapisy online można wstrzymać w panelu.
+    const eventSettings = await base44.asServiceRole.entities.EventSettings.filter({ key: 'default' }).catch(() => []);
+    if (eventSettings[0]?.booking_enabled === false) {
+      return Response.json({ error: 'Zapisy online na oferty są w tej chwili wstrzymane. Napisz do nas, aby zarezerwować miejsce.' }, { status: 409 });
+    }
+
     const session = await base44.asServiceRole.entities.EventSession.get(sessionId).catch((e: any) => (e?.status === 404 ? null : Promise.reject(e)));
     if (!session || session.event_id !== eventId || session.status === 'cancelled') {
       return Response.json({ error: 'Wybrany termin nie jest już dostępny.' }, { status: 409 });

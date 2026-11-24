@@ -7,6 +7,7 @@ import PageLayout from '@/components/layout/PageLayout';
 import EventBookingForm from '@/components/events/EventBookingForm';
 import LeaderSocials from '@/components/events/LeaderSocials';
 import { leaderSocials, externalLeaderSocials } from '@/lib/leaderSocials';
+import useEventSettings from '@/hooks/useEventSettings';
 import { formatPrice, formatSessionDate, formatSessionTime, nextSession } from '@/lib/events';
 
 const mono = { fontFamily: 'var(--font-mono)', letterSpacing: '0.14em', textTransform: 'uppercase' };
@@ -32,6 +33,8 @@ const Section = ({ title, children }) => (
 
 export default function EventDetail() {
   const { slug } = useParams();
+  const settings = useEventSettings();
+  const bookingsOpen = settings.booking_enabled !== false;
   const [event, setEvent] = useState(null);
   const [sessions, setSessions] = useState([]);
   const [availability, setAvailability] = useState({});
@@ -225,14 +228,25 @@ export default function EventDetail() {
               </div>
 
               <button
-                onClick={() => selectedSession && !availability[selectedSession.id]?.full && setBookingSession(selectedSession)}
-                disabled={!selectedSession || availability[selectedSession.id]?.full}
+                onClick={() => bookingsOpen && selectedSession && !availability[selectedSession.id]?.full && setBookingSession(selectedSession)}
+                disabled={!bookingsOpen || !selectedSession || availability[selectedSession.id]?.full}
                 className="btn-oxblood w-full mt-6 flex items-center justify-center gap-2"
-                style={{ opacity: (!selectedSession || availability[selectedSession.id]?.full) ? 0.45 : 1 }}
+                style={{ opacity: (!bookingsOpen || !selectedSession || availability[selectedSession.id]?.full) ? 0.45 : 1 }}
               >
                 <Users size={13} />
-                {!selectedSession ? 'BRAK TERMINÓW' : availability[selectedSession.id]?.full ? 'BRAK WOLNYCH MIEJSC' : 'ZAREZERWUJ MIEJSCE'}
+                {!bookingsOpen
+                  ? 'ZAPISY WSTRZYMANE'
+                  : !selectedSession
+                    ? 'BRAK TERMINÓW'
+                    : availability[selectedSession.id]?.full
+                      ? 'BRAK WOLNYCH MIEJSC'
+                      : 'ZAREZERWUJ MIEJSCE'}
               </button>
+              {!bookingsOpen && (
+                <p className="mt-3" style={{ ...mono, fontSize: '8px', color: 'rgb(var(--foreground-rgb) / 0.5)', lineHeight: 1.7 }}>
+                  Zapisy online są w tej chwili wstrzymane. Napisz do nas, aby zarezerwować miejsce.
+                </p>
+              )}
 
               <div className="mt-6 space-y-2">
                 {event.location && (

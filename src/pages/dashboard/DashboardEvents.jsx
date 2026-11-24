@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Plus, Pencil, Users, Copy, Eye, EyeOff, Trash2, Tags, Loader2, CalendarDays, ArrowUpRight } from 'lucide-react';
+import { Plus, Pencil, Users, Copy, Eye, EyeOff, Trash2, Tags, Loader2, CalendarDays, ArrowUpRight, Star, Settings } from 'lucide-react';
 import EventEditorModal from '@/components/dashboard/events/EventEditorModal';
 import EventParticipantsModal from '@/components/dashboard/events/EventParticipantsModal';
 import EventCategoriesModal from '@/components/dashboard/events/EventCategoriesModal';
+import EventSettingsModal from '@/components/dashboard/events/EventSettingsModal';
 import {
   EVENT_STATUS_COLORS, EVENT_STATUS_LABELS, formatPrice, formatSessionDate,
   formatSessionTime, nextSession, sessionSpots, slugify,
@@ -27,6 +28,7 @@ export default function DashboardEvents() {
   const [editorEvent, setEditorEvent] = useState(null);
   const [participantsEvent, setParticipantsEvent] = useState(null);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [filters, setFilters] = useState({ category: 'all', leader: 'all', status: 'all', date: '' });
   const [busyId, setBusyId] = useState('');
 
@@ -65,6 +67,14 @@ export default function DashboardEvents() {
     setBusyId(event.id);
     try {
       await base44.entities.Event.update(event.id, { status: event.status === 'published' ? 'hidden' : 'published' });
+      await load();
+    } finally { setBusyId(''); }
+  };
+
+  const toggleFeatured = async (event) => {
+    setBusyId(event.id);
+    try {
+      await base44.entities.Event.update(event.id, { is_featured: !event.is_featured });
       await load();
     } finally { setBusyId(''); }
   };
@@ -122,6 +132,9 @@ export default function DashboardEvents() {
         </a>
         <button onClick={() => setCategoriesOpen(true)} style={{ ...mono, fontSize: '9px', padding: '9px 13px', border: `0.5px solid ${t.border}`, color: t.text, background: 'transparent', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '5px', borderRadius: 'var(--radius)' }}>
           <Tags size={12} /> KATEGORIE
+        </button>
+        <button onClick={() => setSettingsOpen(true)} style={{ ...mono, fontSize: '9px', padding: '9px 13px', border: `0.5px solid ${t.border}`, color: t.text, background: 'transparent', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '5px', borderRadius: 'var(--radius)' }}>
+          <Settings size={12} /> USTAWIENIA
         </button>
         <button onClick={() => setEditorEvent({})} className="btn-oxblood" style={{ fontSize: '9px', padding: '10px 16px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
           <Plus size={12} /> NOWE WYDARZENIE
@@ -192,6 +205,14 @@ export default function DashboardEvents() {
                   </p>
 
                   <div className="flex items-center gap-1.5 flex-wrap mt-2 lg:mt-0">
+                    <button
+                      title={event.is_featured ? 'Usuń wyróżnienie' : 'Wyróżnij na stronie głównej'}
+                      onClick={() => toggleFeatured(event)}
+                      disabled={busyId === event.id}
+                      style={{ background: event.is_featured ? 'rgb(var(--brand-rgb) / 0.1)' : 'none', border: `0.5px solid ${event.is_featured ? 'var(--brand)' : t.border}`, color: event.is_featured ? 'var(--brand)' : t.muted, padding: '5px', cursor: 'pointer', borderRadius: 'var(--radius)' }}
+                    >
+                      <Star size={12} fill={event.is_featured ? 'currentColor' : 'none'} />
+                    </button>
                     <button title="Edytuj" onClick={() => setEditorEvent(event)} style={{ background: 'none', border: `0.5px solid ${t.border}`, color: t.text, padding: '5px', cursor: 'pointer', borderRadius: 'var(--radius)' }}><Pencil size={12} /></button>
                     <button title="Uczestnicy" onClick={() => setParticipantsEvent(event)} style={{ background: 'none', border: `0.5px solid ${t.border}`, color: t.text, padding: '5px', cursor: 'pointer', borderRadius: 'var(--radius)' }}><Users size={12} /></button>
                     <button title="Duplikuj" onClick={() => duplicate(event)} disabled={busyId === event.id} style={{ background: 'none', border: `0.5px solid ${t.border}`, color: t.text, padding: '5px', cursor: 'pointer', borderRadius: 'var(--radius)' }}><Copy size={12} /></button>
@@ -241,6 +262,13 @@ export default function DashboardEvents() {
           theme={theme}
           onClose={() => setCategoriesOpen(false)}
           onReload={load}
+        />
+      )}
+
+      {settingsOpen && (
+        <EventSettingsModal
+          theme={theme}
+          onClose={() => setSettingsOpen(false)}
         />
       )}
     </div>
