@@ -37,6 +37,7 @@ export default function EventEditorModal({ event, categories, artists, theme, on
     materials: event?.materials || '',
     organizer_info: event?.organizer_info || '',
     leader_ids: event?.leader_ids || [],
+    external_leaders: event?.external_leaders || [],
     price: event?.price ?? 0,
     location: event?.location || '',
     min_participants: event?.min_participants ?? 0,
@@ -51,6 +52,7 @@ export default function EventEditorModal({ event, categories, artists, theme, on
   const [error, setError] = useState('');
   const [uploading, setUploading] = useState(false);
   const [conflicts, setConflicts] = useState([]);
+  const [newExternalLeader, setNewExternalLeader] = useState('');
 
   useEffect(() => {
     if (!event?.id) {
@@ -75,6 +77,15 @@ export default function EventEditorModal({ event, categories, artists, theme, on
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
   const setSession = (index, patch) => setSessions(list => list.map((s, i) => (i === index ? { ...s, ...patch } : s)));
+
+  // Prowadzący spoza organizacji — wpis ręczny imieniem i nazwiskiem.
+  const addExternalLeader = () => {
+    const name = newExternalLeader.trim();
+    if (!name) return;
+    const list = form.external_leaders || [];
+    if (!list.some(n => n.toLowerCase() === name.toLowerCase())) set('external_leaders', [...list, name]);
+    setNewExternalLeader('');
+  };
 
   // Zmiana godziny rozpoczęcia przesuwa zakończenie tak, by zawsze było późniejsze
   // (zachowując dotychczasową długość terminu). Zmiana zakończenia nie rusza startu.
@@ -160,7 +171,11 @@ export default function EventEditorModal({ event, categories, artists, theme, on
         title: form.title.trim(),
         slug: slugify(form.slug || form.title),
         category_name: category?.name || '',
-        leader_names: artists.filter(a => (form.leader_ids || []).includes(a.id)).map(a => a.name),
+        leader_names: [
+          ...artists.filter(a => (form.leader_ids || []).includes(a.id)).map(a => a.name),
+          ...(form.external_leaders || []),
+        ],
+        external_leaders: (form.external_leaders || []).map(n => n.trim()).filter(Boolean),
         price: Number(form.price) || 0,
         min_participants: Number(form.min_participants) || 0,
         leader_pay_value: Number(form.leader_pay_value) || 0,
@@ -303,8 +318,8 @@ export default function EventEditorModal({ event, categories, artists, theme, on
         </div>
         <div className="grid md:grid-cols-2 gap-4 mb-4">
           <div><label style={label}>Program</label><textarea rows={3} style={{ ...input, resize: 'vertical' }} value={form.program} onChange={e => set('program', e.target.value)} /></div>
-          <div><label style={label}>Wymagania i poziom</label><textarea rows={3} style={{ ...input, resize: 'vertical' }} value={form.requirements} onChange={e => set('requirements', e.target.value)} /></div>
-          <div><label style={label}>Materiały od studia</label><textarea rows={3} style={{ ...input, resize: 'vertical' }} value={form.materials} onChange={e => set('materials', e.target.value)} /></div>
+          <div><label style={label}>Wymagania</label><textarea rows={3} style={{ ...input, resize: 'vertical' }} value={form.requirements} onChange={e => set('requirements', e.target.value)} /></div>
+          <div><label style={label}>Co jest zapewnione</label><textarea rows={3} style={{ ...input, resize: 'vertical' }} value={form.materials} onChange={e => set('materials', e.target.value)} /></div>
           <div><label style={label}>Informacje organizacyjne</label><textarea rows={3} style={{ ...input, resize: 'vertical' }} value={form.organizer_info} onChange={e => set('organizer_info', e.target.value)} /></div>
         </div>
 
@@ -332,6 +347,45 @@ export default function EventEditorModal({ event, categories, artists, theme, on
             })}
             {artists.length === 0 && <p style={{ ...mono, fontSize: '9px', color: t.muted }}>Brak artystów w bazie.</p>}
           </div>
+
+          <p style={{ ...label, marginTop: '16px' }}>Prowadzący spoza organizacji</p>
+          <div className="flex gap-2">
+            <input
+              style={input}
+              value={newExternalLeader}
+              placeholder="Imię i nazwisko"
+              onChange={e => setNewExternalLeader(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addExternalLeader(); } }}
+            />
+            <button
+              onClick={addExternalLeader}
+              style={{ ...mono, fontSize: '9px', padding: '0 14px', border: `0.5px solid var(--brand)`, color: 'var(--brand)', background: 'transparent', cursor: 'pointer', whiteSpace: 'nowrap', borderRadius: 'var(--radius)' }}
+            >
+              Dodaj
+            </button>
+          </div>
+          <p style={{ ...mono, fontSize: '7px', color: t.muted, marginTop: '5px', lineHeight: 1.5 }}>
+            Wpis ręczny — bez profilu i statystyk artysty. Na stronie wydarzenia pokazujemy inicjały.
+          </p>
+          {(form.external_leaders || []).length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-3">
+              {(form.external_leaders || []).map((name, i) => (
+                <span
+                  key={`${name}-${i}`}
+                  className="inline-flex items-center gap-2"
+                  style={{ ...mono, fontSize: '9px', padding: '6px 10px', border: `0.5px solid ${t.border}`, color: t.text, borderRadius: 'var(--radius)' }}
+                >
+                  {name}
+                  <button
+                    onClick={() => set('external_leaders', form.external_leaders.filter((_, idx) => idx !== i))}
+                    style={{ background: 'none', border: 'none', color: t.muted, cursor: 'pointer', display: 'flex' }}
+                  >
+                    <X size={11} />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Media */}

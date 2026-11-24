@@ -71,7 +71,14 @@
       "items": {
         "type": "string"
       },
-      "description": "Nazwy prowadz\u0105cych (cache)"
+      "description": "Nazwy prowadz\u0105cych (cache) \u2014 arty\u015bci studia oraz prowadz\u0105cy wpisani r\u0119cznie"
+    },
+    "external_leaders": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Prowadz\u0105cy spoza organizacji \u2014 wpisani r\u0119cznie imieniem i nazwiskiem. Nie maj\u0105 profilu artysty ani statystyk, na stronie wydarzenia pokazujemy inicja\u0142y."
     },
     "price": {
       "type": "number",

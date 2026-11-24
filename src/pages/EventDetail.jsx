@@ -9,6 +9,16 @@ import { formatPrice, formatSessionDate, formatSessionTime, nextSession } from '
 
 const mono = { fontFamily: 'var(--font-mono)', letterSpacing: '0.14em', textTransform: 'uppercase' };
 
+// Inicjały prowadzącego spoza organizacji (wpis ręczny — bez profilu artysty).
+const initials = (name) => String(name || '')
+  .trim()
+  .split(/\s+/)
+  .filter(Boolean)
+  .slice(0, 2)
+  .map(w => w[0])
+  .join('')
+  .toUpperCase();
+
 const Section = ({ title, children }) => (
   <div className="py-8" style={{ borderTop: '0.5px solid hsl(var(--border))' }}>
     <p style={{ ...mono, fontSize: '9px', color: 'var(--brand)', marginBottom: '14px' }}>{title}</p>
@@ -96,6 +106,12 @@ export default function EventDetail() {
 
   const spots = selectedSession ? availability[selectedSession.id] : null;
   const gallery = [event.main_image_url, ...(event.gallery_images || [])].filter(Boolean);
+  const externalLeaders = event.external_leaders || [];
+  const leaderNames = [...new Set([
+    ...(event.leader_names || []),
+    ...leaders.map(a => a.name),
+    ...externalLeaders,
+  ].filter(Boolean))];
 
   return (
     <PageLayout>
@@ -109,8 +125,8 @@ export default function EventDetail() {
             {event.category_name && (
               <span style={{ ...mono, fontSize: '9px', color: 'var(--brand)', border: '0.5px solid var(--brand)', padding: '3px 9px' }}>{event.category_name}</span>
             )}
-            {event.leader_names?.length > 0 && (
-              <span style={{ ...mono, fontSize: '9px', color: 'rgb(var(--foreground-rgb) / 0.55)' }}>PROWADZENIE: {event.leader_names.join(', ')}</span>
+            {leaderNames.length > 0 && (
+              <span style={{ ...mono, fontSize: '9px', color: 'rgb(var(--foreground-rgb) / 0.55)' }}>PROWADZĄCY: {leaderNames.join(', ')}</span>
             )}
           </div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.6rem, 7vw, 5.2rem)', lineHeight: 0.95, letterSpacing: '0.03em', color: 'hsl(var(--foreground))' }}>
@@ -135,8 +151,8 @@ export default function EventDetail() {
 
             {event.full_description && <Section title="O WYDARZENIU">{event.full_description}</Section>}
             {event.program && <Section title="PROGRAM">{event.program}</Section>}
-            {event.requirements && <Section title="WYMAGANIA I POZIOM">{event.requirements}</Section>}
-            {event.materials && <Section title="MATERIAŁY ZAPEWNIA STUDIO">{event.materials}</Section>}
+            {event.requirements && <Section title="WYMAGANIA">{event.requirements}</Section>}
+            {event.materials && <Section title="CO JEST ZAPEWNIONE">{event.materials}</Section>}
             {event.organizer_info && <Section title="INFORMACJE ORGANIZACYJNE">{event.organizer_info}</Section>}
 
             {gallery.length > 1 && (
@@ -235,7 +251,7 @@ export default function EventDetail() {
               </div>
             </div>
 
-            {leaders.length > 0 && (
+            {(leaders.length > 0 || externalLeaders.length > 0) && (
               <div className="mt-6 p-6" style={{ border: '0.5px solid hsl(var(--border))', borderRadius: 'var(--radius)' }}>
                 <p style={{ ...mono, fontSize: '8px', color: 'rgb(var(--foreground-rgb) / 0.5)', marginBottom: '12px' }}>PROWADZĄCY</p>
                 <div className="space-y-3">
@@ -248,6 +264,17 @@ export default function EventDetail() {
                       )}
                       <span style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'hsl(var(--foreground))' }}>{a.name}</span>
                     </Link>
+                  ))}
+                  {externalLeaders.map((name, i) => (
+                    <div key={`external-${name}-${i}`} className="flex items-center gap-3">
+                      <div
+                        className="flex items-center justify-center shrink-0"
+                        style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgb(var(--brand-rgb) / 0.12)', fontFamily: 'var(--font-mono)', fontSize: '12px', letterSpacing: '0.06em', color: 'var(--brand)' }}
+                      >
+                        {initials(name)}
+                      </div>
+                      <span style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'hsl(var(--foreground))' }}>{name}</span>
+                    </div>
                   ))}
                 </div>
               </div>

@@ -230,7 +230,7 @@ const ENTITIES = {
     // Oferty (warsztaty i wydarzenia) — pełne zarządzanie wraz z wynagrodzeniem prowadzącego
     ops: { read: true, create: true, update: true, delete: true },
     required: ['title'],
-    fields: ['title', 'slug', 'category_id', 'category_name', 'main_image_url', 'gallery_images', 'video_urls', 'short_description', 'full_description', 'program', 'requirements', 'materials', 'organizer_info', 'leader_ids', 'leader_names', 'price', 'location', 'min_participants', 'leader_pay_type', 'leader_pay_value', 'status', 'order'],
+    fields: ['title', 'slug', 'category_id', 'category_name', 'main_image_url', 'gallery_images', 'video_urls', 'short_description', 'full_description', 'program', 'requirements', 'materials', 'organizer_info', 'leader_ids', 'leader_names', 'external_leaders', 'price', 'location', 'min_participants', 'leader_pay_type', 'leader_pay_value', 'status', 'order'],
     filter: ['title', 'slug', 'category_id', 'category_name', 'status'],
     sensitive: ['price', 'leader_pay_type', 'leader_pay_value'],
   },
