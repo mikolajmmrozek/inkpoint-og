@@ -1,10 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Plus, Pencil, Users, Copy, Eye, EyeOff, Trash2, Tags, Loader2, CalendarDays, ArrowUpRight, Star, Settings } from 'lucide-react';
+import { Plus, Pencil, Users, Copy, Eye, EyeOff, Trash2, Loader2, CalendarDays, ArrowUpRight, Star, Settings } from 'lucide-react';
 import EventEditorModal from '@/components/dashboard/events/EventEditorModal';
 import EventParticipantsModal from '@/components/dashboard/events/EventParticipantsModal';
-import EventCategoriesModal from '@/components/dashboard/events/EventCategoriesModal';
 import EventSettingsModal from '@/components/dashboard/events/EventSettingsModal';
 import {
   EVENT_STATUS_COLORS, EVENT_STATUS_LABELS, formatPrice, formatSessionDate,
@@ -27,7 +26,6 @@ export default function DashboardEvents() {
   const [loading, setLoading] = useState(true);
   const [editorEvent, setEditorEvent] = useState(null);
   const [participantsEvent, setParticipantsEvent] = useState(null);
-  const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [filters, setFilters] = useState({ category: 'all', leader: 'all', status: 'all', date: '' });
   const [busyId, setBusyId] = useState('');
@@ -130,9 +128,6 @@ export default function DashboardEvents() {
         <a href="/wydarzenia" target="_blank" rel="noopener noreferrer" style={{ ...mono, fontSize: '9px', padding: '9px 13px', border: `0.5px solid ${t.border}`, color: t.text, background: 'transparent', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '5px', borderRadius: 'var(--radius)', textDecoration: 'none' }}>
           POKAŻ OFERTY <ArrowUpRight size={12} />
         </a>
-        <button onClick={() => setCategoriesOpen(true)} style={{ ...mono, fontSize: '9px', padding: '9px 13px', border: `0.5px solid ${t.border}`, color: t.text, background: 'transparent', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '5px', borderRadius: 'var(--radius)' }}>
-          <Tags size={12} /> KATEGORIE
-        </button>
         <button onClick={() => setSettingsOpen(true)} style={{ ...mono, fontSize: '9px', padding: '9px 13px', border: `0.5px solid ${t.border}`, color: t.text, background: 'transparent', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '5px', borderRadius: 'var(--radius)' }}>
           <Settings size={12} /> USTAWIENIA
         </button>
@@ -256,19 +251,12 @@ export default function DashboardEvents() {
         />
       )}
 
-      {categoriesOpen && (
-        <EventCategoriesModal
-          categories={categories}
-          theme={theme}
-          onClose={() => setCategoriesOpen(false)}
-          onReload={load}
-        />
-      )}
-
       {settingsOpen && (
         <EventSettingsModal
+          categories={categories}
           theme={theme}
           onClose={() => setSettingsOpen(false)}
+          onReload={load}
         />
       )}
     </div>

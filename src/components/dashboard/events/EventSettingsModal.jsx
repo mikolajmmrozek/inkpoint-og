@@ -3,10 +3,11 @@ import { motion } from 'framer-motion';
 import { X, Loader2, Check } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { invalidateEventSettings } from '@/hooks/useEventSettings';
+import EventCategoriesPanel from '@/components/dashboard/events/EventCategoriesPanel';
 
 const mono = { fontFamily: 'var(--font-mono)', letterSpacing: '0.12em', textTransform: 'uppercase' };
 
-export default function EventSettingsModal({ theme, onClose, onSaved }) {
+export default function EventSettingsModal({ categories = [], theme, onClose, onSaved, onReload }) {
   const t = theme === 'light'
     ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.5)', field: '#FAFAFA' }
     : { bg: '#0A0A0A', border: '#262626', title: '#F5F0EB', text: '#F5F0EB', muted: 'rgba(245,240,235,0.5)', field: 'rgba(255,255,255,0.04)' };
@@ -118,6 +119,11 @@ export default function EventSettingsModal({ theme, onClose, onSaved }) {
                   Puste pole = tekst domyślny. Na stronie głównej pokazujemy oferty wyróżnione gwiazdką, a gdy żadnej nie ma — losowy wybór.
                 </p>
               </div>
+            </div>
+
+            <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '18px', marginTop: '20px' }}>
+              <p style={{ ...mono, fontSize: '9px', color: 'var(--brand)', marginBottom: '12px' }}>KATEGORIE OFERT</p>
+              <EventCategoriesPanel categories={categories} theme={theme} onReload={onReload} />
             </div>
 
             {error && <p style={{ ...mono, fontSize: '9px', color: '#ef4444', marginTop: '14px', lineHeight: 1.6 }}>{error}</p>}
