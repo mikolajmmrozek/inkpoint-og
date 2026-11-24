@@ -31,6 +31,9 @@ export default function ShopSettingsPanel() {
         currency: String(settings.currency || 'PLN').toUpperCase(),
         new_badge_days: Math.max(0, Number(settings.new_badge_days ?? 30) || 0),
         product_note: settings.product_note || '',
+        home_shop_label: settings.home_shop_label ?? '',
+        home_shop_heading: settings.home_shop_heading ?? '',
+        home_shop_text: settings.home_shop_text ?? '',
         contact_email: settings.contact_email || '',
         is_open: settings.is_open !== false,
         product_commission_type: settings.product_commission_type || 'none',
@@ -78,6 +81,27 @@ export default function ShopSettingsPanel() {
           <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px', lineHeight: 1.7 }}>
             Ten sam tekst pokazuje się na karcie każdego produktu.
           </p>
+        </div>
+
+        <div style={{ borderTop: `0.5px solid ${t.border}`, paddingTop: '16px' }}>
+          <p style={{ ...mono, fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: '12px' }}>SEKCJA SKLEPU NA STRONIE GŁÓWNEJ</p>
+          <div className="space-y-4">
+            <div>
+              <label style={labelStyle(t)}>Nadtytuł</label>
+              <input value={settings.home_shop_label ?? ''} onChange={e => set('home_shop_label', e.target.value)} placeholder="SKLEP" style={inputStyle(t)} />
+            </div>
+            <div>
+              <label style={labelStyle(t)}>Nagłówek</label>
+              <input value={settings.home_shop_heading ?? ''} onChange={e => set('home_shop_heading', e.target.value)} placeholder="Sprawdź nasze produkty polecane" style={inputStyle(t)} />
+            </div>
+            <div>
+              <label style={labelStyle(t)}>Opis</label>
+              <textarea rows={3} value={settings.home_shop_text ?? ''} onChange={e => set('home_shop_text', e.target.value)} placeholder="Rzeczy, które robimy i nosimy sami…" style={{ ...inputStyle(t), resize: 'vertical', border: `0.5px solid ${t.border}`, padding: '10px', borderRadius: 'var(--radius)' }} />
+            </div>
+            <p style={{ ...mono, fontSize: '8px', color: t.muted, letterSpacing: '0.06em', lineHeight: 1.7 }}>
+              Puste pole = tekst domyślny.
+            </p>
+          </div>
         </div>
 
         <div><label style={labelStyle(t)}>E-mail kontaktowy sklepu</label><input value={settings.contact_email || ''} onChange={e => set('contact_email', e.target.value)} style={inputStyle(t)} /></div>

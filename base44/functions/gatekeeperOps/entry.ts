@@ -215,7 +215,7 @@ const ENTITIES = {
   ShopSettings: {
     ops: NO_DELETE,
     required: ['key'],
-    fields: ['key', 'currency', 'new_badge_days', 'product_note', 'contact_email', 'is_open', 'product_commission_type', 'product_commission_value'],
+    fields: ['key', 'currency', 'new_badge_days', 'product_note', 'home_shop_label', 'home_shop_heading', 'home_shop_text', 'contact_email', 'is_open', 'product_commission_type', 'product_commission_value'],
     filter: ['key'],
     sensitive: ['product_commission_type', 'product_commission_value'],
   },

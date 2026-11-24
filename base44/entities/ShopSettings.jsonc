@@ -20,6 +20,18 @@
       "type": "string",
       "description": "Informacja og\u00f3lna wy\u015bwietlana przy ka\u017cdym produkcie w sklepie (ta sama dla wszystkich)"
     },
+    "home_shop_label": {
+      "type": "string",
+      "description": "Nadtytu\u0142 sekcji sklepu na stronie g\u0142\u00f3wnej (puste = domy\u015blnie SKLEP, warto\u015b\u0107 pusta ukrywa)"
+    },
+    "home_shop_heading": {
+      "type": "string",
+      "description": "Nag\u0142\u00f3wek sekcji sklepu na stronie g\u0142\u00f3wnej"
+    },
+    "home_shop_text": {
+      "type": "string",
+      "description": "Opis sekcji sklepu na stronie g\u0142\u00f3wnej"
+    },
     "contact_email": {
       "type": "string",
       "description": "Adres kontaktowy sklepu"
