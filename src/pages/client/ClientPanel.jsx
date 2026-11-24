@@ -8,6 +8,7 @@ import NotificationBell from '@/components/panel/NotificationBell';
 import NotificationPanel from '@/components/panel/NotificationPanel';
 import SidebarBadge from '@/components/panel/SidebarBadge';
 import { useBadgeCounts } from '@/hooks/useBadgeCounts';
+import useUserPrefs from '@/hooks/useUserPrefs';
 import { CreateMenuProvider } from '@/components/create/CreateMenuContext';
 
 export const ClientThemeContext = createContext({ theme: 'dark', toggleTheme: () => {} });
@@ -115,14 +116,12 @@ export default function ClientPanel() {
   const [client, setClient] = useState(null);
   const [loadingClient, setLoadingClient] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [theme, setTheme] = useState(() => localStorage.getItem('clientPanelTheme') || 'dark');
   const [notifOpen, setNotifOpen] = useState(false);
+  // Motyw zapisany na koncie — działa na każdym urządzeniu.
+  const { prefs, setPref } = useUserPrefs(user?.email);
+  const theme = prefs.clientPanelTheme || localStorage.getItem('clientPanelTheme') || 'dark';
 
-  const toggleTheme = () => {
-    const next = theme === 'light' ? 'dark' : 'light';
-    setTheme(next);
-    localStorage.setItem('clientPanelTheme', next);
-  };
+  const toggleTheme = () => setPref('clientPanelTheme', theme === 'light' ? 'dark' : 'light');
 
   useEffect(() => {
     if (isLoadingAuth || !authChecked) return;

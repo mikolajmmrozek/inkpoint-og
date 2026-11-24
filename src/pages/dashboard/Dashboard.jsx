@@ -11,12 +11,13 @@ import StudioAvatar from '@/components/panel/StudioAvatar';
 import DashboardSidebarNav from '@/components/dashboard/DashboardSidebarNav';
 import { labelForPath } from '@/lib/dashboardNav';
 import { useBadgeCounts } from '@/hooks/useBadgeCounts';
+import useUserPrefs from '@/hooks/useUserPrefs';
 import { CreateMenuProvider } from '@/components/create/CreateMenuContext';
 
 export const ThemeContext = createContext({ theme: 'light', toggleTheme: () => {} });
 export const useTheme = () => useContext(ThemeContext);
 
-function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, onNotifClick, collapsed, onToggleCollapse }) {
+function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, onNotifClick, collapsed, onToggleCollapse, navGroups, onGroupToggle }) {
   const counts = useBadgeCounts({ role: 'admin', userEmail });
 
   const bg = theme === 'light' ? '#FFFFFF' : '#0A0A0A';
@@ -55,6 +56,8 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
             collapsed={collapsed}
             counts={counts}
             onNavigate={() => setSidebarOpen(false)}
+            closedGroups={navGroups}
+            onGroupToggle={onGroupToggle}
           />
           {/* Notifications */}
           <div className="mt-3 pt-3" style={{ borderTop: `0.5px solid ${border}` }}>
@@ -116,22 +119,19 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
-  const [theme, setTheme] = useState(() => localStorage.getItem('dashboardTheme') || 'light');
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('dashboardSidebarCollapsed') === 'true');
   const location = useLocation();
   const [studioProfile, setStudioProfile] = useState(null);
+  // Układ panelu zapisany na koncie — te same ustawienia na każdym urządzeniu.
+  const { prefs, setPref } = useUserPrefs(user?.email);
+  const theme = prefs.dashboardTheme || localStorage.getItem('dashboardTheme') || 'light';
+  const sidebarCollapsed = prefs.dashboardSidebarCollapsed ?? (localStorage.getItem('dashboardSidebarCollapsed') === 'true');
+  const navGroups = prefs.dashboardNavGroups || {};
 
-  const toggleTheme = () => {
-    const next = theme === 'light' ? 'dark' : 'light';
-    setTheme(next);
-    localStorage.setItem('dashboardTheme', next);
-  };
+  const toggleTheme = () => setPref('dashboardTheme', theme === 'light' ? 'dark' : 'light');
 
-  const toggleSidebarCollapse = () => {
-    const next = !sidebarCollapsed;
-    setSidebarCollapsed(next);
-    localStorage.setItem('dashboardSidebarCollapsed', String(next));
-  };
+  const toggleSidebarCollapse = () => setPref('dashboardSidebarCollapsed', !sidebarCollapsed);
+
+  const toggleNavGroup = (key) => setPref('dashboardNavGroups', { ...navGroups, [key]: !navGroups[key] });
 
   useEffect(() => {
     base44.entities.Artist.filter({ name: 'Studio' })
@@ -209,7 +209,7 @@ export default function Dashboard() {
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <CreateMenuProvider role="admin" theme={theme}>
       <div className="min-h-screen flex overflow-x-hidden" style={{ background: bg, color: textColor }}>
-        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} theme={theme} toggleTheme={toggleTheme} userEmail={user.email} onNotifClick={() => setNotifOpen(true)} collapsed={sidebarCollapsed} onToggleCollapse={toggleSidebarCollapse} />
+        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} theme={theme} toggleTheme={toggleTheme} userEmail={user.email} onNotifClick={() => setNotifOpen(true)} collapsed={sidebarCollapsed} onToggleCollapse={toggleSidebarCollapse} navGroups={navGroups} onGroupToggle={toggleNavGroup} />
 
         <div className={`flex-1 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'} flex flex-col min-h-screen min-w-0 transition-all duration-500`}>
           {/* Top bar */}

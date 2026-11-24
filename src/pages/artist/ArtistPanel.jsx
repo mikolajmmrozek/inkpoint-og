@@ -9,6 +9,7 @@ import NotificationPanel from '@/components/panel/NotificationPanel';
 import NotificationSidebarItem from '@/components/panel/NotificationSidebarItem';
 import SidebarBadge from '@/components/panel/SidebarBadge';
 import { useBadgeCounts } from '@/hooks/useBadgeCounts';
+import useUserPrefs from '@/hooks/useUserPrefs';
 import { CreateMenuProvider } from '@/components/create/CreateMenuContext';
 
 export const ArtistThemeContext = createContext({ theme: 'dark', toggleTheme: () => {} });
@@ -150,24 +151,18 @@ export default function ArtistPanel() {
   const { user, isLoadingAuth } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [theme, setTheme] = useState(() => localStorage.getItem('artistPanelTheme') || 'dark');
   const [artist, setArtist] = useState(null);
   const [loadingArtist, setLoadingArtist] = useState(true);
   const [notifOpen, setNotifOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('artistSidebarCollapsed') === 'true');
   const location = useLocation();
+  // Układ panelu zapisany na koncie — te same ustawienia na każdym urządzeniu.
+  const { prefs, setPref } = useUserPrefs(user?.email);
+  const theme = prefs.artistPanelTheme || localStorage.getItem('artistPanelTheme') || 'dark';
+  const sidebarCollapsed = prefs.artistSidebarCollapsed ?? (localStorage.getItem('artistSidebarCollapsed') === 'true');
 
-  const toggleTheme = () => {
-    const next = theme === 'light' ? 'dark' : 'light';
-    setTheme(next);
-    localStorage.setItem('artistPanelTheme', next);
-  };
+  const toggleTheme = () => setPref('artistPanelTheme', theme === 'light' ? 'dark' : 'light');
 
-  const toggleSidebarCollapse = () => {
-    const next = !sidebarCollapsed;
-    setSidebarCollapsed(next);
-    localStorage.setItem('artistSidebarCollapsed', String(next));
-  };
+  const toggleSidebarCollapse = () => setPref('artistSidebarCollapsed', !sidebarCollapsed);
 
   useEffect(() => {
     if (!isLoadingAuth) {

@@ -1,10 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import SidebarBadge from '@/components/panel/SidebarBadge';
 import { NAV_GROUPS, groupKeyForPath } from '@/lib/dashboardNav';
-
-const STORAGE_KEY = 'dashboardNavGroups';
 
 const badgeForPath = (path, counts) => {
   const map = {
@@ -19,32 +17,17 @@ const badgeForPath = (path, counts) => {
   return map[path] || null;
 };
 
-// Menu panelu w rozwijanych kategoriach; stan zwinięcia grup pamiętany lokalnie.
-export default function DashboardSidebarNav({ theme, collapsed, counts, onNavigate }) {
+// Menu panelu w rozwijanych kategoriach; stan zwinięcia grup trzyma konto użytkownika.
+export default function DashboardSidebarNav({ theme, collapsed, counts, onNavigate, closedGroups = {}, onGroupToggle }) {
   const location = useLocation();
   const activeGroup = groupKeyForPath(location.pathname);
-  const [closedGroups, setClosedGroups] = useState(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : {};
-    } catch {
-      return {};
-    }
-  });
 
   // Strona, na której jesteśmy, ma zawsze otwartą swoją kategorię.
   useEffect(() => {
-    if (!activeGroup) return;
-    setClosedGroups(prev => (prev[activeGroup] ? { ...prev, [activeGroup]: false } : prev));
-  }, [activeGroup]);
+    if (activeGroup && closedGroups[activeGroup]) onGroupToggle?.(activeGroup);
+  }, [activeGroup, closedGroups]);
 
-  const toggleGroup = (key) => {
-    setClosedGroups(prev => {
-      const next = { ...prev, [key]: !prev[key] };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      return next;
-    });
-  };
+  const toggleGroup = (key) => onGroupToggle?.(key);
 
   const textColor = theme === 'light' ? '#111111' : '#F5F0EB';
   const mutedColor = theme === 'light' ? 'rgba(0,0,0,0.65)' : 'rgba(245,240,235,0.75)';

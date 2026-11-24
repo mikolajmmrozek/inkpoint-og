@@ -1,0 +1,31 @@
+{
+  "name": "UserUiPref",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "E-mail u\u017cytkownika, do kt\u00f3rego nale\u017c\u0105 zapami\u0119tane ustawienia interfejsu"
+    },
+    "prefs": {
+      "type": "object",
+      "description": "Zapami\u0119tane ustawienia panelu (JSON): motyw, zwini\u0119ty pasek boczny, rozwini\u0119te kategorie menu \u2014 wsp\u00f3lne dla wszystkich urz\u0105dze\u0144 u\u017cytkownika"
+    }
+  },
+  "required": [
+    "user_email"
+  ],
+  "rls": {
+    "read": {
+      "data.user_email": "{{user.email}}"
+    },
+    "create": {
+      "data.user_email": "{{user.email}}"
+    },
+    "update": {
+      "data.user_email": "{{user.email}}"
+    },
+    "delete": {
+      "data.user_email": "{{user.email}}"
+    }
+  }
+}
