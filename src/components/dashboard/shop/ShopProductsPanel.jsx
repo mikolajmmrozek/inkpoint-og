@@ -69,6 +69,7 @@ export default function ShopProductsPanel() {
   const allFilteredSelected = visibleIds.length > 0 && visibleIds.every(id => selected.includes(id));
   const toggleSelect = (id) => setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   const toggleSelectAll = () => setSelected(allFilteredSelected ? [] : visibleIds);
+  const invertSelection = () => setSelected(visibleIds.filter(id => !selected.includes(id)));
 
   // Zaznaczenie dotyczy tylko widocznych produktów — zmiana filtrów odznacza ukryte.
   useEffect(() => {
@@ -141,6 +142,7 @@ export default function ShopProductsPanel() {
             onDisable={() => bulkSetActive(false)}
             onDelete={() => setBulkDelete(true)}
             onClear={() => setSelected([])}
+            onInvert={invertSelection}
             busy={bulkBusy}
             t={t}
           />

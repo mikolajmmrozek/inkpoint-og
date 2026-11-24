@@ -1,4 +1,4 @@
-import { Power, PowerOff, Trash2, X, Loader2 } from 'lucide-react';
+import { Power, PowerOff, Trash2, X, Loader2, RefreshCw } from 'lucide-react';
 import { mono } from './shopTheme';
 
 const actionBtn = (t, tone) => ({
@@ -18,7 +18,7 @@ const actionBtn = (t, tone) => ({
 });
 
 // Pasek zaznaczania i akcji zbiorczych na liście produktów.
-export default function ShopProductsBulkBar({ count, total, allSelected, onToggleAll, onEnable, onDisable, onDelete, onClear, busy, t }) {
+export default function ShopProductsBulkBar({ count, total, allSelected, onToggleAll, onEnable, onDisable, onDelete, onClear, onInvert, busy, t }) {
   const active = count > 0;
   return (
     <div
@@ -51,6 +51,9 @@ export default function ShopProductsBulkBar({ count, total, allSelected, onToggl
           </button>
           <button onClick={onDelete} disabled={busy} style={actionBtn(t, 'danger')} title="Usuń zaznaczone produkty">
             {busy ? <Loader2 size={10} className="animate-spin" /> : <Trash2 size={10} />} Usuń
+          </button>
+          <button onClick={onInvert} disabled={busy} style={actionBtn(t)} title="Odwróć zaznaczenie">
+            <RefreshCw size={10} /> Odwróć
           </button>
           <button onClick={onClear} disabled={busy} style={actionBtn(t)} title="Odznacz wszystko">
             <X size={10} /> Odznacz
