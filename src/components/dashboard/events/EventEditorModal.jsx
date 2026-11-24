@@ -8,6 +8,16 @@ const mono = { fontFamily: 'var(--font-mono)', letterSpacing: '0.12em', textTran
 
 const emptySession = () => ({ date: '', start_time: '10:00', end_time: '16:00', capacity: 10, leader_ids: [], note: '' });
 
+const toMin = (time) => {
+  const [h, m] = String(time || '').split(':').map(Number);
+  return Number.isFinite(h) && Number.isFinite(m) ? h * 60 + m : null;
+};
+
+const fromMin = (total) => {
+  const capped = Math.max(0, Math.min(23 * 60 + 59, total));
+  return `${String(Math.floor(capped / 60)).padStart(2, '0')}:${String(capped % 60).padStart(2, '0')}`;
+};
+
 export default function EventEditorModal({ event, categories, artists, theme, onClose, onSaved }) {
   const t = theme === 'light'
     ? { bg: '#FFFFFF', border: '#E5E5E5', title: '#111111', text: '#111111', muted: 'rgba(0,0,0,0.5)', field: '#FAFAFA' }
@@ -63,6 +73,19 @@ export default function EventEditorModal({ event, categories, artists, theme, on
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
   const setSession = (index, patch) => setSessions(list => list.map((s, i) => (i === index ? { ...s, ...patch } : s)));
+
+  // Zmiana godziny rozpoczęcia przesuwa zakończenie tak, by zawsze było późniejsze
+  // (zachowując dotychczasową długość terminu). Zmiana zakończenia nie rusza startu.
+  const setSessionStart = (index, value) => {
+    const start = toMin(value);
+    setSessions(list => list.map((s, i) => {
+      if (i !== index) return s;
+      if (start == null) return { ...s, start_time: value };
+      const end = toMin(s.end_time);
+      const duration = end != null && end > start ? end - start : 120;
+      return { ...s, start_time: value, end_time: fromMin(start + duration) };
+    }));
+  };
 
   const leaderIds = useMemo(() => {
     const ids = new Set(form.leader_ids || []);
@@ -335,8 +358,8 @@ export default function EventEditorModal({ event, categories, artists, theme, on
               <div key={s.id || `new-${i}`} className="p-3" style={{ border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)' }}>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <div><label style={label}>Data *</label><input type="date" style={input} value={s.date} onChange={e => setSession(i, { date: e.target.value })} /></div>
-                  <div><label style={label}>Start</label><input style={input} placeholder="10:00" value={s.start_time} onChange={e => setSession(i, { start_time: e.target.value })} /></div>
-                  <div><label style={label}>Koniec</label><input style={input} placeholder="16:00" value={s.end_time} onChange={e => setSession(i, { end_time: e.target.value })} /></div>
+                  <div><label style={label}>Start</label><input type="time" style={input} value={s.start_time} onChange={e => setSessionStart(i, e.target.value)} /></div>
+                  <div><label style={label}>Koniec</label><input type="time" style={input} value={s.end_time} onChange={e => setSession(i, { end_time: e.target.value })} /></div>
                   <div><label style={label}>Miejsca</label><input type="number" style={input} value={s.capacity} onChange={e => setSession(i, { capacity: e.target.value })} /></div>
                 </div>
                 <div className="flex items-center justify-between mt-3 gap-3 flex-wrap">

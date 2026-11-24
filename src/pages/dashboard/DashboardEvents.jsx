@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Plus, Pencil, Users, Copy, Eye, EyeOff, Trash2, Tags, Loader2, CalendarDays } from 'lucide-react';
+import { Plus, Pencil, Users, Copy, Eye, EyeOff, Trash2, Tags, Loader2, CalendarDays, ArrowUpRight } from 'lucide-react';
 import EventEditorModal from '@/components/dashboard/events/EventEditorModal';
 import EventParticipantsModal from '@/components/dashboard/events/EventParticipantsModal';
 import EventCategoriesModal from '@/components/dashboard/events/EventCategoriesModal';
@@ -117,6 +117,9 @@ export default function DashboardEvents() {
             {events.length} wydarzeń · {bookings.filter(b => b.status === 'pending').length} zapisów do potwierdzenia
           </p>
         </div>
+        <a href="/wydarzenia" target="_blank" rel="noopener noreferrer" style={{ ...mono, fontSize: '9px', padding: '9px 13px', border: `0.5px solid ${t.border}`, color: t.text, background: 'transparent', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '5px', borderRadius: 'var(--radius)', textDecoration: 'none' }}>
+          POKAŻ OFERTY <ArrowUpRight size={12} />
+        </a>
         <button onClick={() => setCategoriesOpen(true)} style={{ ...mono, fontSize: '9px', padding: '9px 13px', border: `0.5px solid ${t.border}`, color: t.text, background: 'transparent', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '5px', borderRadius: 'var(--radius)' }}>
           <Tags size={12} /> KATEGORIE
         </button>
