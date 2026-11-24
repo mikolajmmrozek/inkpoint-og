@@ -6,6 +6,8 @@ import { Plus, Pencil, Trash2, Package, Power, ChevronDown, ChevronRight, ArrowU
 import { money, availability, shippingSummary } from '@/lib/shop';
 import { shopTheme, mono, display } from './shopTheme';
 import ShopProductEditor from './ShopProductEditor';
+import ShopProductsFilters from './ShopProductsFilters';
+import ShopProductsBulkBar from './ShopProductsBulkBar';
 import ConfirmDeleteDialog from '@/components/ui/ConfirmDeleteDialog';
 
 export default function ShopProductsPanel() {
@@ -19,6 +21,12 @@ export default function ShopProductsPanel() {
   const [editing, setEditing] = useState(null);
   const [deleteFor, setDeleteFor] = useState(null);
   const [search, setSearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [availabilityFilter, setAvailabilityFilter] = useState('');
+  const [selected, setSelected] = useState([]);
+  const [bulkDelete, setBulkDelete] = useState(false);
+  const [bulkBusy, setBulkBusy] = useState(false);
   const [openStocks, setOpenStocks] = useState([]);
   const toggleStocks = (id) => setOpenStocks(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
 
@@ -44,16 +52,70 @@ export default function ShopProductsPanel() {
     load();
   };
 
-  const filtered = search
-    ? products.filter(p => (p.name || '').toLowerCase().includes(search.toLowerCase()) || (p.category_name || '').toLowerCase().includes(search.toLowerCase()))
-    : products;
+  const q = search.trim().toLowerCase();
+  const filtered = products.filter(p => {
+    if (q) {
+      const haystack = `${p.name || ''} ${p.sku || ''} ${p.category_name || ''} ${(p.variants || []).map(v => v.sku || '').join(' ')}`.toLowerCase();
+      if (!haystack.includes(q)) return false;
+    }
+    if (categoryFilter && (p.category_name || '') !== categoryFilter) return false;
+    if (statusFilter === 'active' && p.is_active === false) return false;
+    if (statusFilter === 'inactive' && p.is_active !== false) return false;
+    if (availabilityFilter && availability(p).state !== availabilityFilter) return false;
+    return true;
+  });
+
+  const visibleIds = filtered.map(p => p.id);
+  const allFilteredSelected = visibleIds.length > 0 && visibleIds.every(id => selected.includes(id));
+  const toggleSelect = (id) => setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  const toggleSelectAll = () => setSelected(allFilteredSelected ? [] : visibleIds);
+
+  // Zaznaczenie dotyczy tylko widocznych produktów — zmiana filtrów odznacza ukryte.
+  useEffect(() => {
+    setSelected(prev => prev.filter(id => visibleIds.includes(id)));
+  }, [search, categoryFilter, statusFilter, availabilityFilter]);
+
+  const bulkSetActive = async (isActive) => {
+    if (selected.length === 0) return;
+    setBulkBusy(true);
+    try {
+      await base44.entities.ShopProduct.bulkUpdate(selected.map(id => ({ id, is_active: isActive })));
+      setSelected([]);
+      load();
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  const bulkRemove = async () => {
+    if (selected.length === 0) return;
+    setBulkBusy(true);
+    try {
+      await base44.entities.ShopProduct.deleteMany({ id: { $in: selected } });
+      setSelected([]);
+      setBulkDelete(false);
+      load();
+    } finally {
+      setBulkBusy(false);
+    }
+  };
 
   return (
     <div>
       <div className="flex flex-wrap gap-3 items-center justify-between mb-6">
-        <div className="flex items-center gap-2" style={{ border: `0.5px solid ${t.border}`, padding: '7px 12px', borderRadius: 'var(--radius)', minWidth: '220px' }}>
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Szukaj produktu..." style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: t.text, fontSize: '12px' }} />
-        </div>
+        <ShopProductsFilters
+          search={search}
+          onSearch={setSearch}
+          category={categoryFilter}
+          onCategory={setCategoryFilter}
+          status={statusFilter}
+          onStatus={setStatusFilter}
+          availability={availabilityFilter}
+          onAvailability={setAvailabilityFilter}
+          categories={categories}
+          theme={theme}
+          t={t}
+        />
         <button onClick={() => setEditing({})} className="flex items-center gap-2 btn-oxblood" style={{ padding: '8px 16px' }}>
           <Plus size={13} /> NOWY PRODUKT
         </button>
@@ -64,10 +126,25 @@ export default function ShopProductsPanel() {
       ) : filtered.length === 0 ? (
         <div className="py-20 text-center" style={{ border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)' }}>
           <Package size={26} color={t.muted} style={{ margin: '0 auto 12px' }} />
-          <p style={{ ...mono, fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>BRAK PRODUKTÓW</p>
+          <p style={{ ...mono, fontSize: '10px', color: t.muted, letterSpacing: '0.1em' }}>
+            {products.length === 0 ? 'BRAK PRODUKTÓW' : 'BRAK PRODUKTÓW DLA TYCH FILTRÓW'}
+          </p>
         </div>
       ) : (
-        <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
+        <div>
+          <ShopProductsBulkBar
+            count={selected.length}
+            total={filtered.length}
+            allSelected={allFilteredSelected}
+            onToggleAll={toggleSelectAll}
+            onEnable={() => bulkSetActive(true)}
+            onDisable={() => bulkSetActive(false)}
+            onDelete={() => setBulkDelete(true)}
+            onClear={() => setSelected([])}
+            busy={bulkBusy}
+            t={t}
+          />
+          <div style={{ border: `0.5px solid ${t.border}`, background: t.bg, borderRadius: 'var(--radius)' }}>
           {filtered.map((p, i) => {
             const avail = availability(p);
             const variants = Array.isArray(p.variants) ? p.variants : [];
@@ -83,7 +160,16 @@ export default function ShopProductsPanel() {
             return (
               <div key={p.id} style={{ borderBottom: i < filtered.length - 1 ? `0.5px solid ${t.border}` : 'none', opacity: p.is_active === false ? 0.55 : 1 }}>
               <div className="grid grid-cols-12 gap-3 px-4 py-3 items-center">
-                <div onClick={() => setEditing(p)} className="col-span-6 md:col-span-4 flex items-center gap-3 min-w-0" style={{ cursor: 'pointer' }} title="Edytuj produkt">
+                <div className="col-span-1 flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={selected.includes(p.id)}
+                    onChange={() => toggleSelect(p.id)}
+                    title="Zaznacz produkt"
+                    style={{ accentColor: 'var(--brand)', width: '13px', height: '13px', cursor: 'pointer' }}
+                  />
+                </div>
+                <div onClick={() => setEditing(p)} className="col-span-5 md:col-span-3 flex items-center gap-3 min-w-0" style={{ cursor: 'pointer' }} title="Edytuj produkt">
                   <div style={{ width: '42px', height: '52px', overflow: 'hidden', border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)', flexShrink: 0, background: t.panel }}>
                     {p.image_url && <img src={p.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                   </div>
@@ -158,6 +244,7 @@ export default function ShopProductsPanel() {
               </div>
             );
           })}
+          </div>
         </div>
       )}
 
@@ -177,6 +264,15 @@ export default function ShopProductsPanel() {
         message={`Czy na pewno usunąć „${deleteFor?.name}"?`}
         onConfirm={() => remove(deleteFor.id)}
         onCancel={() => setDeleteFor(null)}
+        theme={theme}
+      />
+
+      <ConfirmDeleteDialog
+        open={bulkDelete}
+        title={`Usuń ${selected.length} ${selected.length === 1 ? 'produkt' : selected.length < 5 ? 'produkty' : 'produktów'}`}
+        message={`Czy na pewno usunąć zaznaczone produkty (${selected.length})? Tej operacji nie można cofnąć.`}
+        onConfirm={bulkRemove}
+        onCancel={() => setBulkDelete(false)}
         theme={theme}
       />
     </div>
