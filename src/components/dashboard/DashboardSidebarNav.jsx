@@ -61,9 +61,18 @@ export default function DashboardSidebarNav({ theme, collapsed, counts, onNaviga
     );
   };
 
-  // Zwinięty pasek na desktopie: same ikony, bez nagłówków kategorii.
+  // Zwinięty pasek na desktopie: same ikony, bez nagłówków kategorii —
+  // pokazujemy tylko pozycje z kategorii, które były rozwinięte przed zwinięciem.
   if (collapsed) {
-    return <>{NAV_GROUPS.flatMap(group => group.items).map(renderItem)}</>;
+    return (
+      <>
+        {NAV_GROUPS.map(group => {
+          if (!group.label) return <div key={group.key}>{group.items.map(renderItem)}</div>;
+          if (closedGroups[group.key]) return null;
+          return <div key={group.key}>{group.items.map(renderItem)}</div>;
+        })}
+      </>
+    );
   }
 
   return (
