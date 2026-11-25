@@ -50,7 +50,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, userEmail, o
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-2 py-6 overflow-y-auto overflow-x-hidden">
+        <nav className="flex-1 px-2 pt-1 pb-4 overflow-y-auto overflow-x-hidden">
           <DashboardSidebarNav
             theme={theme}
             collapsed={collapsed}

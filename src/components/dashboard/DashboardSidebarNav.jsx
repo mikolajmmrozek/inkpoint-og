@@ -101,7 +101,7 @@ export default function DashboardSidebarNav({ theme, collapsed, counts, onNaviga
           <div key={group.key}>
             <button
               onClick={() => toggleGroup(group.key)}
-              className="flex items-center justify-between w-full px-4 pt-4 pb-1.5"
+              className="flex items-center justify-between w-full px-4 pt-3 pb-1"
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: mutedColor }}
             >
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', opacity: 0.65 }}>
