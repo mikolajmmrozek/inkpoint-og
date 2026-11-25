@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import SidebarBadge from '@/components/panel/SidebarBadge';
@@ -17,10 +17,27 @@ const badgeForPath = (path, counts) => {
   return map[path] || null;
 };
 
+// Zwinięty pasek (same ikony) dotyczy tylko desktopu — na tablecie i telefonie
+// menu wysuwa się jako pełna szuflada z kategoriami, więc zawsze pokazujemy nagłówki grup.
+const DESKTOP_QUERY = '(min-width: 1024px)';
+const useIsDesktop = () => {
+  const [isDesktop, setIsDesktop] = useState(() => typeof window !== 'undefined' && window.matchMedia(DESKTOP_QUERY).matches);
+  useEffect(() => {
+    const mql = window.matchMedia(DESKTOP_QUERY);
+    const onChange = () => setIsDesktop(mql.matches);
+    mql.addEventListener('change', onChange);
+    setIsDesktop(mql.matches);
+    return () => mql.removeEventListener('change', onChange);
+  }, []);
+  return isDesktop;
+};
+
 // Menu panelu w rozwijanych kategoriach; stan zwinięcia grup trzyma konto użytkownika.
 export default function DashboardSidebarNav({ theme, collapsed, counts, onNavigate, closedGroups = {}, onGroupToggle }) {
   const location = useLocation();
   const activeGroup = groupKeyForPath(location.pathname);
+  const isDesktop = useIsDesktop();
+  const isCollapsed = collapsed && isDesktop;
 
   // Strona, na której jesteśmy, ma zawsze otwartą swoją kategorię.
   useEffect(() => {
@@ -48,7 +65,7 @@ export default function DashboardSidebarNav({ theme, collapsed, counts, onNaviga
           color: active ? textColor : mutedColor,
         }}
         onClick={onNavigate}
-        title={collapsed ? nav.label : ''}
+        title={isCollapsed ? nav.label : ''}
       >
         <div className="shrink-0" style={{ position: 'relative' }}>
           <Icon size={20} color={iconColor(active)} />
@@ -63,7 +80,7 @@ export default function DashboardSidebarNav({ theme, collapsed, counts, onNaviga
 
   // Zwinięty pasek na desktopie: same ikony, bez nagłówków kategorii —
   // pokazujemy tylko pozycje z kategorii, które były rozwinięte przed zwinięciem.
-  if (collapsed) {
+  if (isCollapsed) {
     return (
       <>
         {NAV_GROUPS.map(group => {

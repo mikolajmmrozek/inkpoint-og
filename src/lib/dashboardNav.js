@@ -24,23 +24,16 @@ export const NAV_GROUPS = [
     key: 'offer',
     label: 'Oferta',
     items: [
-      { path: '/dashboard/services', label: 'Usługi', icon: Scissors },
+      { path: '/dashboard/shop', label: 'Sklep', icon: ShoppingBag },
+      { path: '/dashboard/promotions', label: 'Promocje', icon: Gift },
       { path: '/dashboard/events', label: 'Oferty', icon: CalendarDays },
     ],
   },
   {
-    key: 'sales',
-    label: 'Sprzedaż i finanse',
-    items: [
-      { path: '/dashboard/shop', label: 'Sklep', icon: ShoppingBag },
-      { path: '/dashboard/promotions', label: 'Promocje', icon: Gift },
-      { path: '/dashboard/stats', label: 'Statystyki', icon: PieChart },
-    ],
-  },
-  {
     key: 'content',
-    label: 'Treści',
+    label: 'Zasoby',
     items: [
+      { path: '/dashboard/services', label: 'Usługi', icon: Scissors },
       { path: '/dashboard/blog', label: 'Blog', icon: BookOpen },
       { path: '/dashboard/faq', label: 'FAQ', icon: MessageSquare },
       { path: '/dashboard/documents', label: 'Dokumenty', icon: FolderOpen },
@@ -49,8 +42,9 @@ export const NAV_GROUPS = [
   },
   {
     key: 'admin',
-    label: 'Administracja',
+    label: 'Zarządzanie',
     items: [
+      { path: '/dashboard/stats', label: 'Statystyki', icon: PieChart },
       { path: '/dashboard/artists', label: 'Artyści', icon: Users },
       { path: '/dashboard/users', label: 'Użytkownicy', icon: ShieldCheck },
       { path: '/dashboard/settings', label: 'Ustawienia', icon: Settings },
