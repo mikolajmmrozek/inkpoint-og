@@ -58,6 +58,32 @@ export default function StepConsents({ form, setField, t, showErrors, templateDa
       {consents.map(c => (
         <ConsentBlock key={c.field_key} title={c.label} text={c.description || c.label} fieldKey={c.field_key} required={c.required} form={form} setField={setField} showErrors={showErrors} t={t} lang={lang} textMuted={textMuted} borderColor={borderColor} />
       ))}
+      {/* Zgoda marketingowa — stała pozycja, domyślnie niezaznaczona, dobrowolna.
+          Zaznaczenie = tak, brak zaznaczenia = nie. */}
+      <div className="py-4" style={{ borderTop: `0.5px solid ${borderColor}`, marginTop: '4px' }}>
+        <div style={{ marginBottom: '10px' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--brand)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>
+            ZGODA MARKETINGOWA
+          </p>
+          <p style={{ color: textMuted, fontSize: '15px', lineHeight: 1.7 }}>
+            Wyrażam zgodę na otrzymywanie od studia Romans Tattoo wiadomości marketingowych o promocjach, nowościach i ofertach na podany adres e-mail. Zgodę mogę wycofać w każdej chwili.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setField('marketing_consent', !form.marketing_consent)}
+          className="flex items-center gap-3"
+          style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+        >
+          <div style={{ width: '16px', height: '16px', border: `0.5px solid ${form.marketing_consent ? '#16a34a' : borderColor}`, background: form.marketing_consent ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            {form.marketing_consent && <span style={{ color: '#fff', fontSize: '10px', lineHeight: 1 }}>✓</span>}
+          </div>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', color: form.marketing_consent ? '#16a34a' : textMuted }}>
+            {form.marketing_consent ? '✓ WYRAŻAM ZGODĘ' : 'KLIKNIJ, ABY WYRAZIĆ ZGODĘ'}
+          </span>
+        </button>
+      </div>
+
       {/* Link to studio terms in client's language */}
       <div className="mt-4 pt-4" style={{ borderTop: `0.5px solid ${borderColor}` }}>
         <a

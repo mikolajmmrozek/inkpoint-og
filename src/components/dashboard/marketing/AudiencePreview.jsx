@@ -60,7 +60,8 @@ export default function AudiencePreview({ filters, t, onCount }) {
       <div className="flex items-start gap-2 p-3 mb-4" style={{ border: `0.5px solid ${t.border}`, background: t.notice, borderRadius: 'var(--radius)' }}>
         <ShieldAlert size={13} color="#f59e0b" className="shrink-0 mt-0.5" />
         <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', lineHeight: 1.6, color: t.muted }}>
-          {stats.consent_undecided} {stats.consent_undecided === 1 ? 'osoba nie ma' : 'osób nie ma'} potwierdzonej zgody marketingowej — oznaczone jako wymagające decyzji. Wysyłka pozostaje wyłączona.
+          {stats.excluded_no_consent > 0 && `${stats.excluded_no_consent} ${stats.excluded_no_consent === 1 ? 'osobę pominięto' : 'osób pominięto'} — brak zgody marketingowej. `}
+          Nowi klienci trafiają do odbiorców tylko po zaznaczeniu zgody w ankiecie; osoby, które się wypisały, są pomijane. Wysyłka pozostaje wyłączona.
         </p>
       </div>
 
@@ -101,8 +102,8 @@ export default function AudiencePreview({ filters, t, onCount }) {
                   <td className="px-3 py-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, borderBottom: `0.5px solid ${t.border}` }}>
                     {person.age_group === 'adult' ? 'Pełnoletni' : person.age_group === 'minor' ? 'Niepełnoletni' : '—'}
                   </td>
-                  <td className="px-3 py-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.06em', textTransform: 'uppercase', color: person.consent === 'granted' ? '#16a34a' : person.consent === 'denied' ? 'var(--brand)' : '#f59e0b', borderBottom: `0.5px solid ${t.border}`, whiteSpace: 'nowrap' }}>
-                    {person.consent === 'granted' ? 'Tak' : person.consent === 'denied' ? 'Nie' : 'Decyzja'}
+                  <td className="px-3 py-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.06em', textTransform: 'uppercase', color: person.consent === 'granted' ? '#16a34a' : person.consent === 'unsubscribed' ? 'var(--brand)' : '#f59e0b', borderBottom: `0.5px solid ${t.border}`, whiteSpace: 'nowrap' }}>
+                    {person.consent === 'granted' ? 'Tak' : person.consent === 'unsubscribed' ? 'Wypis' : person.consent === 'denied' ? 'Nie' : 'Domyślnie'}
                   </td>
                 </tr>
               ))}

@@ -75,6 +75,7 @@ import ClientMessages from './pages/client/ClientMessages';
 import FeedbackSurvey from './pages/FeedbackSurvey';
 import Voucher from './pages/Voucher';
 import ChangeRequest from './pages/ChangeRequest';
+import MarketingUnsubscribe from './pages/MarketingUnsubscribe';
 
 import ScrollToTop from './components/ScrollToTop';
 import ContentGate from './components/ContentGate';
@@ -124,6 +125,7 @@ const AuthenticatedApp = () => {
       <Route path="/feedback" element={<FeedbackSurvey />} />
       <Route path="/voucher/:code" element={<Voucher />} />
       <Route path="/change-request" element={<ChangeRequest />} />
+      <Route path="/rezygnacja" element={<MarketingUnsubscribe />} />
       <Route path="/nowy-klient" element={<ClientQuickAdd />} />
       <Route path="/nowy-klient-qr" element={<ClientQuickAddQr />} />
 

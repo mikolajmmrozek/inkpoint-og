@@ -12,6 +12,7 @@ import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModa
 import StatsTile from '@/components/dashboard/StatsTile';
 import { formatCompact } from '@/lib/formatNumber';
 import ClientMessageButton from '@/components/dashboard/ClientMessageButton';
+import ClientConsentSection from '@/components/dashboard/ClientConsentSection';
 import { useCreateMenu } from '@/components/create/CreateMenuContext';
 
 const inputStyle = {
@@ -393,6 +394,7 @@ export default function DashboardClients() {
 
                 {isExpanded && (
                   <div style={{ background: 'rgb(var(--brand-rgb) /0.02)', borderBottom: `0.5px solid ${t.border}`, padding: '12px 20px' }}>
+                    <ClientConsentSection client={c} t={t} />
                     {sessions.length > 0 && (
                       <div className="mb-4">
                         <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.fuchsia, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>Sesje ({sessions.length})</p>

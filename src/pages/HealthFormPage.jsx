@@ -48,6 +48,8 @@ function buildInitialState(tpl) {
   (tpl?.consent_fields || []).forEach(f => {
     state[f.field_key] = false;
   });
+  // Zgoda marketingowa: zawsze startuje niezaznaczona, decyzja należy do klienta.
+  state.marketing_consent = false;
   if (tpl?.declaration_of_will?.field_key) {
     state[tpl.declaration_of_will.field_key] = false;
   }
@@ -226,6 +228,19 @@ export default function HealthFormPage() {
       return false;
     });
 
+    // Decyzja marketingowa z ankiety: zaznaczony checkbox = zgoda, brak zaznaczenia = brak zgody.
+    const consentGranted = currentForm.marketing_consent === true;
+    const consentPatch = {
+      marketing_consent: consentGranted ? 'granted' : 'denied',
+      marketing_consent_date: new Date().toISOString(),
+      marketing_consent_source: 'health_form',
+    };
+    // Świadoma zgoda cofa wcześniejszy wypis z mailingu.
+    if (consentGranted) {
+      consentPatch.marketing_unsubscribed = false;
+      consentPatch.marketing_unsubscribed_at = '';
+    }
+
     if (existing) {
       await base44.entities.Client.update(existing.id, {
         first_name: currentForm.client_first_name || existing.first_name,
@@ -233,6 +248,7 @@ export default function HealthFormPage() {
         name: fullName || existing.name,
         email: currentForm.client_email || existing.email,
         phone: currentForm.client_phone || existing.phone,
+        ...consentPatch,
       }).catch(() => {});
     } else {
       await base44.entities.Client.create({
@@ -241,6 +257,7 @@ export default function HealthFormPage() {
         name: fullName,
         email: currentForm.client_email || '',
         phone: currentForm.client_phone || '',
+        ...consentPatch,
       }).catch(() => {});
     }
   };

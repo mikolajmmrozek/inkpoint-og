@@ -81,6 +81,54 @@
       ],
       "description": "Sk\u0105d powsta\u0142 profil klienta: qr_form = formularz QR, dashboard = r\u0119cznie z panelu, booking = rezerwacja online, panel = konto klienta"
     },
+    "marketing_consent": {
+      "type": "string",
+      "enum": [
+        "granted",
+        "denied",
+        "undecided"
+      ],
+      "default": "undecided",
+      "enumColors": [
+        "green",
+        "red",
+        "gray"
+      ],
+      "description": "Zgoda na wiadomo\u015bci marketingowe: granted = zaznaczony checkbox w ankiecie, denied = brak zgody, undecided = brak decyzji (klienci sprzed wprowadzenia zg\u00f3d traktowani domy\u015blnie jako zapisani)"
+    },
+    "marketing_consent_date": {
+      "type": "string",
+      "description": "Kiedy klient podj\u0105\u0142 decyzj\u0119 o zgodzie marketingowej (ISO)"
+    },
+    "marketing_consent_source": {
+      "type": "string",
+      "enum": [
+        "health_form",
+        "dashboard",
+        "unsubscribe",
+        "import"
+      ],
+      "enumColors": [
+        "blue",
+        "purple",
+        "red",
+        "gray"
+      ],
+      "description": "\u0179r\u00f3d\u0142o decyzji o zgodzie: health_form = ankieta, dashboard = panel, unsubscribe = link rezygnacji w mailu, import = import danych"
+    },
+    "marketing_unsubscribed": {
+      "type": "boolean",
+      "default": false,
+      "description": "True = klient wypisa\u0142 si\u0119 z wiadomo\u015bci marketingowych (klikn\u0105\u0142 REZYGNUJ\u0118 w mailu). Taki klient jest wykluczany z kampanii."
+    },
+    "marketing_unsubscribed_at": {
+      "type": "string",
+      "description": "Kiedy klient wypisa\u0142 si\u0119 z mailingu (ISO)"
+    },
+    "marketing_token": {
+      "type": "string",
+      "description": "Nieprzewidywalny token do linku rezygnacji \u2014 nie pokazywa\u0107 klientowi, nie umieszcza\u0107 w widocznych adresach"
+    },
     "no_show_count": {
       "type": "number",
       "default": 0,

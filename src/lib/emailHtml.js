@@ -16,7 +16,8 @@ const escape = (value = '') => String(value)
 
 const withSample = (value = '') => String(value)
   .replace(/\{\{\s*first_name\s*\}\}/g, 'Ania')
-  .replace(/\{\{\s*app_url\s*\}\}/g, 'https://romanstattoo.base44.app');
+  .replace(/\{\{\s*app_url\s*\}\}/g, 'https://romanstattoo.base44.app')
+  .replace(/\{\{\s*unsubscribe_url\s*\}\}/g, 'https://romanstattoo.base44.app/rezygnacja?t=podglad');
 
 const paragraph = (value = '', style = '') => escape(withSample(value)).replace(/\n/g, '<br />')
   ? `<p style="margin:0 0 18px;font-family:Inter,Arial,sans-serif;font-size:15px;line-height:1.7;color:${BRAND.text};${style}">${escape(withSample(value)).replace(/\n/g, '<br />')}</p>`
@@ -65,7 +66,8 @@ export function buildEmailHtml({ subject = '', preheader = '', blocks = [], layo
           <tr><td style="padding:34px 32px 10px">${intro}${blocks.map(renderBlock).join('')}</td></tr>
           <tr><td style="padding:20px 32px 30px;border-top:1px solid #232323;font-family:Inter,Arial,sans-serif;font-size:11px;line-height:1.7;color:#8a8a8a">
             Romans Tattoo — studio tatuażu i piercingu w Wolsztynie.<br />
-            Otrzymujesz tę wiadomość, ponieważ korzystałeś z usług studia.
+            Otrzymujesz tę wiadomość, ponieważ korzystałeś z usług studia.<br />
+            <a href="${escape(withSample('{{unsubscribe_url}}'))}" style="display:inline-block;margin-top:12px;font-family:Inter,Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#8a8a8a;text-decoration:underline">REZYGNUJĘ</a>
           </td></tr>
         </table>
       </td></tr>

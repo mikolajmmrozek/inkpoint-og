@@ -1,6 +1,10 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 
 const DAY = 86400000;
+// Klienci obecni przed wprowadzeniem zgód marketingowych są domyślnie traktowani jako zapisani.
+// Profile powstałe później trafiają do odbiorców tylko po zaznaczeniu zgody w ankiecie.
+const CONSENT_CUTOFF = new Date('2026-11-28T00:00:00Z');
+
 const asList = (value) => (Array.isArray(value) ? value : value?.items || []);
 const norm = (value) => (typeof value === 'string' ? value.trim().toLowerCase() : '');
 
@@ -64,10 +68,17 @@ export default async function (req) {
         people.set(key, {
           email: key, name: '', phone: '', client_id: null, blocked: false,
           visits: 0, last_service: null, categories: new Set(),
-          workshop: false, shop_order: false, age: null, minor_flag: false, consent: 'undecided',
+          workshop: false, shop_order: false, age: null, minor_flag: false,
+          consent: 'undecided', consent_date: '', consent_source: '',
+          unsubscribed: false, token: '', since: null,
         });
       }
       return people.get(key);
+    };
+
+    // Najwcześniejszy ślad kontaktu — rozstrzyga, czy klient istniał przed wprowadzeniem zgód.
+    const touch = (person, date) => {
+      if (date && (!person.since || date < person.since)) person.since = date;
     };
 
     asList(clients).forEach((client) => {
@@ -80,6 +91,11 @@ export default async function (req) {
       if (client.marketing_consent === 'granted' || client.marketing_consent === 'denied') {
         person.consent = client.marketing_consent;
       }
+      person.consent_date = client.marketing_consent_date || '';
+      person.consent_source = client.marketing_consent_source || '';
+      person.unsubscribed = Boolean(client.marketing_unsubscribed);
+      person.token = client.marketing_token || '';
+      touch(person, toDate(client.created_date));
     });
 
     asList(bookings).forEach((booking) => {
@@ -88,6 +104,7 @@ export default async function (req) {
       if (!person) return;
       person.name = person.name || booking.client_name || '';
       person.phone = person.phone || booking.client_phone || '';
+      touch(person, toDate(booking.created_date));
 
       const service = serviceMap[booking.service_id];
       const category = service?.category || categoryFromText(service?.name || booking.service_name);
@@ -108,6 +125,7 @@ export default async function (req) {
       if (!person) return;
       person.name = person.name || form.client_name || [form.client_first_name, form.client_last_name].filter(Boolean).join(' ');
       person.phone = person.phone || form.client_phone || '';
+      touch(person, toDate(form.created_date));
       const category = categoryFromText(form.procedure_type);
       if (category) person.categories.add(category);
       const age = ageFrom(form.date_of_birth);
@@ -121,6 +139,7 @@ export default async function (req) {
       if (!person) return;
       person.name = person.name || booking.client_name || '';
       person.phone = person.phone || booking.phone || '';
+      touch(person, toDate(booking.created_date));
       person.workshop = true;
     });
 
@@ -130,6 +149,7 @@ export default async function (req) {
       if (!person) return;
       person.name = person.name || order.client_name || '';
       person.phone = person.phone || order.client_phone || '';
+      touch(person, toDate(order.created_date));
       person.shop_order = true;
     });
 
@@ -160,13 +180,66 @@ export default async function (req) {
       return true;
     };
 
+    // Zgody: odmowa i wypis wykluczają zawsze. Brak decyzji — tylko klienci sprzed wprowadzenia zgód.
+    const consentOf = (person) => (person.unsubscribed ? 'unsubscribed' : person.consent);
+    const isEligible = (person) => {
+      const consent = consentOf(person);
+      if (consent === 'denied' || consent === 'unsubscribed') return false;
+      if (consent === 'granted') return true;
+      return Boolean(person.since) && person.since < CONSENT_CUTOFF;
+    };
+
     const all = [...people.values()];
     const matched = all.filter(matches).sort((a, b) => (b.last_service?.getTime() || 0) - (a.last_service?.getTime() || 0));
+    const eligible = matched.filter(isEligible);
+    const excludedNoConsent = matched.length - eligible.length;
 
     const count = (list, predicate) => list.filter(predicate).length;
     const ageOf = (person) => (person.age !== null ? person.age : person.minor_flag ? 0 : null);
 
-    const recipients = matched.slice(0, 300).map((person) => {
+    const slice = eligible.slice(0, 300);
+
+    // Odbiorca bez profilu klienta nie mógłby się wypisać — zakładamy profil z tokenem.
+    const noProfile = slice.filter((person) => !person.client_id);
+    if (noProfile.length > 0) {
+      try {
+        await db.Client.bulkCreate(noProfile.map((person) => ({
+          first_name: person.name?.split(' ')[0] || '',
+          last_name: person.name?.split(' ').slice(1).join(' ') || '',
+          name: person.name || person.email,
+          email: person.email,
+          phone: person.phone || '',
+          source: 'booking',
+          marketing_token: crypto.randomUUID(),
+        })));
+        const saved = await db.Client.filter({ email: { $in: noProfile.map((person) => person.email) } });
+        asList(saved).forEach((client) => {
+          const person = noProfile.find((p) => norm(p.email) === norm(client.email));
+          if (person) {
+            person.client_id = client.id;
+            person.token = client.marketing_token || '';
+          }
+        });
+      } catch (error) {
+        // Brak profilu nie blokuje podglądu segmentu.
+      }
+    }
+
+    // Token do linku REZYGNUJĘ — generowany raz i zapisywany na profilu klienta.
+    const missingTokens = slice.filter((person) => person.client_id && !person.token);
+    if (missingTokens.length > 0) {
+      const patches = missingTokens.map((person) => {
+        person.token = crypto.randomUUID();
+        return { id: person.client_id, marketing_token: person.token };
+      });
+      try {
+        await db.Client.bulkUpdate(patches);
+      } catch (error) {
+        missingTokens.forEach((person) => { person.token = ''; });
+      }
+    }
+
+    const recipients = slice.map((person) => {
       const age = ageOf(person);
       return {
         name: person.name || person.email,
@@ -178,33 +251,39 @@ export default async function (req) {
         workshop: person.workshop,
         shop_order: person.shop_order,
         age_group: age === null ? 'unknown' : age < 18 ? 'minor' : 'adult',
-        consent: person.consent,
+        consent: consentOf(person),
+        consent_date: person.consent_date,
+        consent_source: person.consent_source,
+        unsubscribe_token: person.token,
       };
     });
 
     return Response.json({
       stats: {
         base_total: all.length,
-        matched: matched.length,
-        with_phone: count(matched, (p) => Boolean(p.phone)),
-        blocked: count(matched, (p) => p.blocked),
-        consent_undecided: count(matched, (p) => p.consent === 'undecided'),
-        consent_granted: count(matched, (p) => p.consent === 'granted'),
-        adult: count(matched, (p) => ageOf(p) !== null && ageOf(p) >= 18),
-        minor: count(matched, (p) => ageOf(p) !== null && ageOf(p) < 18),
-        unknown_age: count(matched, (p) => ageOf(p) === null),
-        one_time: count(matched, (p) => p.visits === 1),
-        returning: count(matched, (p) => p.visits >= 2),
-        workshop: count(matched, (p) => p.workshop),
-        shop_order: count(matched, (p) => p.shop_order),
+        matched: eligible.length,
+        excluded_no_consent: excludedNoConsent,
+        consent_granted: count(matched, (p) => consentOf(p) === 'granted'),
+        consent_denied: count(matched, (p) => consentOf(p) === 'denied'),
+        consent_undecided: count(matched, (p) => consentOf(p) === 'undecided'),
+        unsubscribed: count(matched, (p) => p.unsubscribed),
+        with_phone: count(eligible, (p) => Boolean(p.phone)),
+        blocked: count(eligible, (p) => p.blocked),
+        adult: count(eligible, (p) => ageOf(p) !== null && ageOf(p) >= 18),
+        minor: count(eligible, (p) => ageOf(p) !== null && ageOf(p) < 18),
+        unknown_age: count(eligible, (p) => ageOf(p) === null),
+        one_time: count(eligible, (p) => p.visits === 1),
+        returning: count(eligible, (p) => p.visits >= 2),
+        workshop: count(eligible, (p) => p.workshop),
+        shop_order: count(eligible, (p) => p.shop_order),
         categories: {
-          tattoo: count(matched, (p) => p.categories.has('tattoo')),
-          piercing: count(matched, (p) => p.categories.has('piercing')),
-          studio: count(matched, (p) => p.categories.has('studio')),
+          tattoo: count(eligible, (p) => p.categories.has('tattoo')),
+          piercing: count(eligible, (p) => p.categories.has('piercing')),
+          studio: count(eligible, (p) => p.categories.has('studio')),
         },
       },
       recipients,
-      truncated: matched.length > recipients.length,
+      truncated: eligible.length > recipients.length,
       generated_at: new Date().toISOString(),
     });
   } catch (error) {
