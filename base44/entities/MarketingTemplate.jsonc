@@ -1,0 +1,121 @@
+{
+  "name": "MarketingTemplate",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "newsletter",
+        "offer",
+        "workshop",
+        "shop",
+        "reactivation",
+        "custom"
+      ],
+      "default": "custom",
+      "enumColors": [
+        "blue",
+        "green",
+        "purple",
+        "pink",
+        "yellow",
+        "gray"
+      ]
+    },
+    "subject": {
+      "type": "string"
+    },
+    "preheader": {
+      "type": "string"
+    },
+    "blocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "heading",
+              "text",
+              "button",
+              "image",
+              "divider",
+              "spacer"
+            ]
+          },
+          "text": {
+            "type": "string"
+          },
+          "subtext": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "image_url": {
+            "type": "string"
+          },
+          "align": {
+            "type": "string",
+            "enum": [
+              "left",
+              "center"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      }
+    },
+    "layout": {
+      "type": "string",
+      "enum": [
+        "classic",
+        "editorial",
+        "minimal"
+      ],
+      "default": "classic"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "order": {
+      "type": "number",
+      "default": 999
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

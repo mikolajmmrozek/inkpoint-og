@@ -1,0 +1,194 @@
+{
+  "name": "MarketingCampaign",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nazwa kampanii widoczna w panelu"
+    },
+    "subject": {
+      "type": "string",
+      "description": "Temat wiadomo\u015bci"
+    },
+    "preheader": {
+      "type": "string",
+      "description": "Zajawka widoczna w skrzynce obok tematu"
+    },
+    "blocks": {
+      "type": "array",
+      "description": "Tre\u015b\u0107 i uk\u0142ad wiadomo\u015bci jako lista blok\u00f3w",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "heading",
+              "text",
+              "button",
+              "image",
+              "divider",
+              "spacer"
+            ]
+          },
+          "text": {
+            "type": "string"
+          },
+          "subtext": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "image_url": {
+            "type": "string"
+          },
+          "align": {
+            "type": "string",
+            "enum": [
+              "left",
+              "center"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      }
+    },
+    "layout": {
+      "type": "string",
+      "enum": [
+        "classic",
+        "editorial",
+        "minimal"
+      ],
+      "default": "classic",
+      "description": "Uk\u0142ad wiadomo\u015bci: classic = nag\u0142\u00f3wek z paskiem marki, editorial = du\u017cy tytu\u0142, minimal = sama tre\u015b\u0107"
+    },
+    "template_id": {
+      "type": "string"
+    },
+    "template_name": {
+      "type": "string",
+      "description": "Nazwa u\u017cytego szablonu (cache)"
+    },
+    "filters": {
+      "type": "object",
+      "description": "Filtry odbiorc\u00f3w \u2014 wszystkie wybrane wymiary musz\u0105 si\u0119 zgadza\u0107",
+      "properties": {
+        "service_categories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "workshop": {
+          "type": "string",
+          "enum": [
+            "any",
+            "yes",
+            "no"
+          ]
+        },
+        "shop_order": {
+          "type": "string",
+          "enum": [
+            "any",
+            "yes",
+            "no"
+          ]
+        },
+        "recency": {
+          "type": "string",
+          "enum": [
+            "any",
+            "month",
+            "quarter",
+            "half_year",
+            "year",
+            "older"
+          ]
+        },
+        "visits": {
+          "type": "string",
+          "enum": [
+            "any",
+            "one_time",
+            "returning"
+          ]
+        },
+        "adult": {
+          "type": "string",
+          "enum": [
+            "any",
+            "adult",
+            "minor"
+          ]
+        }
+      }
+    },
+    "audience_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Liczba odbiorc\u00f3w z ostatniego podgl\u0105du segmentu"
+    },
+    "audience_updated": {
+      "type": "string",
+      "description": "Kiedy ostatnio policzono segment (ISO)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "ready",
+        "archived"
+      ],
+      "default": "draft",
+      "enumColors": [
+        "yellow",
+        "green",
+        "gray"
+      ],
+      "description": "draft = szkic, ready = gotowa do wysy\u0142ki (wysy\u0142ka nadal wstrzymana), archived = archiwum"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Wewn\u0119trzna notatka dla studia"
+    },
+    "ai_generations": {
+      "type": "number",
+      "default": 0,
+      "description": "Ile razy AI tworzy\u0142o tre\u015b\u0107 tej kampanii"
+    },
+    "author_name": {
+      "type": "string",
+      "description": "Osoba, kt\u00f3ra utworzy\u0142a kampani\u0119"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

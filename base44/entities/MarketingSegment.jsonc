@@ -1,0 +1,100 @@
+{
+  "name": "MarketingSegment",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nazwa zapisanego segmentu, np. Powracaj\u0105cy klienci tatua\u017cu"
+    },
+    "description": {
+      "type": "string"
+    },
+    "filters": {
+      "type": "object",
+      "properties": {
+        "service_categories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "workshop": {
+          "type": "string",
+          "enum": [
+            "any",
+            "yes",
+            "no"
+          ]
+        },
+        "shop_order": {
+          "type": "string",
+          "enum": [
+            "any",
+            "yes",
+            "no"
+          ]
+        },
+        "recency": {
+          "type": "string",
+          "enum": [
+            "any",
+            "month",
+            "quarter",
+            "half_year",
+            "year",
+            "older"
+          ]
+        },
+        "visits": {
+          "type": "string",
+          "enum": [
+            "any",
+            "one_time",
+            "returning"
+          ]
+        },
+        "adult": {
+          "type": "string",
+          "enum": [
+            "any",
+            "adult",
+            "minor"
+          ]
+        }
+      }
+    },
+    "audience_count": {
+      "type": "number",
+      "default": 0
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

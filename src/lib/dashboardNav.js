@@ -1,6 +1,6 @@
 import {
   Calendar, BookOpen, MessageSquare, FileText, BarChart2, UserCircle, Star, FolderOpen,
-  Scissors, Gift, ShoppingBag, CalendarDays, PieChart, ShieldCheck, Settings, Users,
+  Scissors, Gift, ShoppingBag, CalendarDays, PieChart, ShieldCheck, Settings, Users, Mail,
 } from 'lucide-react';
 
 // Menu panelu administracyjnego w kategoriach. Kolejność grup i pozycji = kolejność w panelu.
@@ -27,6 +27,13 @@ export const NAV_GROUPS = [
       { path: '/dashboard/shop', label: 'Sklep', icon: ShoppingBag },
       { path: '/dashboard/promotions', label: 'Promocje', icon: Gift },
       { path: '/dashboard/events', label: 'Oferty', icon: CalendarDays },
+    ],
+  },
+  {
+    key: 'marketing',
+    label: 'Marketing',
+    items: [
+      { path: '/dashboard/campaigns', label: 'Kampanie', icon: Mail },
     ],
   },
   {

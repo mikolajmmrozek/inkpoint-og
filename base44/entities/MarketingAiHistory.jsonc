@@ -1,0 +1,87 @@
+{
+  "name": "MarketingAiHistory",
+  "type": "object",
+  "properties": {
+    "campaign_id": {
+      "type": "string"
+    },
+    "campaign_name": {
+      "type": "string"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "copy",
+        "layout"
+      ],
+      "default": "copy",
+      "enumColors": [
+        "purple",
+        "blue"
+      ],
+      "description": "copy = tre\u015b\u0107 od zera, layout = u\u0142o\u017cenie istniej\u0105cej tre\u015bci w bloki"
+    },
+    "brief": {
+      "type": "string",
+      "description": "Polecenie, kt\u00f3re otrzyma\u0142o AI"
+    },
+    "tone": {
+      "type": "string"
+    },
+    "preferences_used": {
+      "type": "string",
+      "description": "Zapis preferencji u\u017cytych przy generowaniu"
+    },
+    "result": {
+      "type": "object",
+      "description": "Wygenerowany temat, zajawka i bloki wiadomo\u015bci",
+      "properties": {
+        "subject": {
+          "type": "string"
+        },
+        "preheader": {
+          "type": "string"
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "applied": {
+      "type": "boolean",
+      "default": false,
+      "description": "Czy wynik zosta\u0142 wstawiony do kampanii"
+    },
+    "author_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "brief"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

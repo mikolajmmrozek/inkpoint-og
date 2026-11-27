@@ -53,6 +53,7 @@ import DashboardFeedback from './pages/dashboard/DashboardFeedback';
 import DashboardServices from './pages/dashboard/DashboardServices';
 import DashboardPromotions from './pages/dashboard/DashboardPromotions';
 import DashboardEvents from './pages/dashboard/DashboardEvents';
+import DashboardCampaigns from './pages/dashboard/DashboardCampaigns';
 import DashboardUsers from './pages/dashboard/DashboardUsers';
 import DashboardAgentActivity from './pages/dashboard/DashboardAgentActivity';
 import NotificationsPage from './pages/shared/NotificationsPage';
@@ -145,6 +146,7 @@ const AuthenticatedApp = () => {
         <Route path="services" element={<DashboardServices />} />
         <Route path="promotions" element={<DashboardPromotions />} />
         <Route path="events" element={<DashboardEvents />} />
+        <Route path="campaigns" element={<DashboardCampaigns />} />
         <Route path="shop" element={<DashboardShop />} />
         <Route path="users" element={<DashboardUsers />} />
         <Route path="agent-activity" element={<DashboardAgentActivity />} />

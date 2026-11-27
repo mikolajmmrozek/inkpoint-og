@@ -1,0 +1,92 @@
+{
+  "name": "MarketingAiPreference",
+  "type": "object",
+  "properties": {
+    "key": {
+      "type": "string",
+      "default": "default",
+      "description": "Jeden wsp\u00f3lny zestaw preferencji AI dla marketingu"
+    },
+    "tone": {
+      "type": "string",
+      "enum": [
+        "warm",
+        "professional",
+        "bold",
+        "playful"
+      ],
+      "default": "warm",
+      "enumColors": [
+        "pink",
+        "blue",
+        "red",
+        "yellow"
+      ]
+    },
+    "length": {
+      "type": "string",
+      "enum": [
+        "short",
+        "medium",
+        "long"
+      ],
+      "default": "short",
+      "enumColors": [
+        "green",
+        "yellow",
+        "red"
+      ]
+    },
+    "emoji": {
+      "type": "boolean",
+      "default": false
+    },
+    "cta_style": {
+      "type": "string",
+      "enum": [
+        "booking",
+        "shop",
+        "workshop",
+        "contact",
+        "none"
+      ],
+      "default": "booking"
+    },
+    "signature": {
+      "type": "string",
+      "description": "Podpis dodawany na ko\u0144cu wiadomo\u015bci"
+    },
+    "extra_notes": {
+      "type": "string",
+      "description": "Dodatkowe sta\u0142e wytyczne dla AI"
+    },
+    "updated_by_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "key"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
