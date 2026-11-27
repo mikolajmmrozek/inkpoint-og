@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Calendar, MessageSquare, AlertCircle, ClipboardList, Wallet, Inbox } from 'lucide-react';
 import TrendBadge from '@/components/stats/TrendBadge';
-import { monthBounds, pctChange } from '@/lib/trends';
+import { monthBounds, pctChange, serviceRevenue } from '@/lib/trends';
 import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
 import { AnimatePresence } from 'framer-motion';
 import { useTheme } from './Dashboard';
@@ -36,6 +36,12 @@ export default function DashboardHome() {
   const [artists, setArtists] = useState([]);
   const [healthStatusMap, setHealthStatusMap] = useState({});
   const [previewForm, setPreviewForm] = useState(null); // { id?, bookingId?, clientName }
+  // Liczniki dla kafli przypiętych: sklep, klienci, ankiety, promocje, opinie, dokumenty.
+  const [extra, setExtra] = useState({
+    clients: 0, newClients: 0, ordersNew: 0, ordersTotal: 0,
+    formsToReview: 0, formsTotal: 0, promosActive: 0, promosUsed: 0,
+    docs: 0, instructions: 0, feedbackPending: 0, avgRating: null,
+  });
 
   useEffect(() => {
     Promise.all([
@@ -46,7 +52,20 @@ export default function DashboardHome() {
       base44.entities.Artist.list(),
       base44.entities.HealthForm.list('-created_date', 300),
       base44.entities.ChangeRequest.list('-created_date', 200),
-    ]).then(([bookings, messages, forms, drafts, artistData, healthForms, changeRequests]) => {
+      base44.entities.Client.count(),
+      base44.entities.Client.count({ is_read: false }),
+      base44.entities.ShopOrder.count({ status: 'pending' }),
+      base44.entities.ShopOrder.count(),
+      base44.entities.HealthForm.count({ is_read: false, is_draft: false }),
+      base44.entities.HealthForm.count({ is_draft: false }),
+      base44.entities.Promotion.count({ status: 'active' }),
+      base44.entities.Promotion.count({ status: 'used' }),
+      base44.entities.Instruction.list(),
+      base44.entities.TermsAndConditions.list(),
+      base44.entities.Feedback.list('-created_date', 300),
+    ]).then(([bookings, messages, forms, drafts, artistData, healthForms, changeRequests,
+      clients, newClients, ordersNew, ordersTotal, formsToReview, formsTotal,
+      promosActive, promosUsed, instructions, legalDocs, feedbacks]) => {
       setAllBookings(bookings);
       setArtists(artistData);
       setHealthStatusMap(buildHealthFormStatusMap(healthForms));
@@ -65,6 +84,23 @@ export default function DashboardHome() {
         forms: completedForms.length,
         toSettle: toSettle.length,
         changeRequests: openChangeRequests.length,
+      });
+
+      const rated = feedbacks.filter(f => Number(f.rating_overall) > 0);
+      const legal = legalDocs.filter(d => ['default', 'cookies_policy', 'privacy_policy'].includes(d.key)).length;
+      setExtra({
+        clients,
+        newClients,
+        ordersNew,
+        ordersTotal,
+        formsToReview,
+        formsTotal,
+        promosActive,
+        promosUsed,
+        instructions: instructions.length,
+        docs: instructions.length + legal,
+        feedbackPending: feedbacks.filter(f => !f.is_published).length,
+        avgRating: rated.length ? (rated.reduce((s, f) => s + Number(f.rating_overall), 0) / rated.length).toFixed(1).replace('.', ',') : null,
       });
 
       // Today: show ALL sessions (except cancelled) for day-of operations
@@ -117,11 +153,36 @@ export default function DashboardHome() {
     return pctChange(count(bounds.current), count(bounds.previous));
   })();
 
+  // Przychód z usług (zakończone sesje) — bieżący miesiąc do dziś vs poprzedni do tego samego dnia.
+  const monthRevenue = (() => {
+    const nowDate = new Date();
+    const bounds = monthBounds(nowDate.getFullYear(), nowDate.getMonth(), nowDate);
+    const rows = (range) => allBookings.filter(b =>
+      b.status === 'completed' && b.session_date && b.session_date >= range.start && b.session_date <= range.end
+    );
+    const current = rows(bounds.current);
+    return {
+      revenue: current.reduce((s, b) => s + serviceRevenue(b), 0),
+      sessions: current.length,
+      trend: pctChange(
+        current.reduce((s, b) => s + serviceRevenue(b), 0),
+        rows(bounds.previous).reduce((s, b) => s + serviceRevenue(b), 0)
+      ),
+    };
+  })();
+
   const pinnedValues = {
     all_bookings: { value: loading ? '—' : formatCompact(stats.bookings), trend: monthBookingsTrend },
     pending: { value: loading ? '—' : pendingAndRequests, sub: `${stats.pending} rezerw. · ${stats.changeRequests} zmiany` },
     messages: { value: loading ? '—' : stats.messages },
     to_settle: { value: loading ? '—' : stats.toSettle },
+    shop: { value: loading ? '—' : extra.ordersNew, sub: `łącznie ${extra.ordersTotal} zam.` },
+    stats: { value: loading ? '—' : `${formatCompact(Math.round(monthRevenue.revenue))} zł`, sub: `${monthRevenue.sessions} sesji w tym mies.`, trend: monthRevenue.trend },
+    clients: { value: loading ? '—' : formatCompact(extra.clients), sub: extra.newClients > 0 ? `+${extra.newClients} nowych` : 'wszyscy przejrzeni' },
+    health_forms: { value: loading ? '—' : extra.formsToReview, sub: `łącznie ${extra.formsTotal}` },
+    promotions: { value: loading ? '—' : extra.promosActive, sub: `${extra.promosUsed} użytych` },
+    feedback: { value: loading ? '—' : extra.feedbackPending, sub: extra.avgRating ? `śr. ${extra.avgRating}` : 'brak ocen' },
+    documents: { value: loading ? '—' : extra.docs, sub: `${extra.instructions} instrukcji` },
   };
 
   const KPI = [

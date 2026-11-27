@@ -7,7 +7,7 @@ import TrendBadge from '@/components/stats/TrendBadge';
 import { tileCatalog, defaultTiles, MAX_TILES } from '@/lib/pinnedTiles';
 import PinnedTilesSettings from './PinnedTilesSettings';
 
-// Przypięte kafle pulpitu: skróty oraz podstawowe wartości z trendami.
+// Przypięte kafle pulpitu (maks. 8): wartości, trendy i krótkie opisy pod nimi.
 // values: { [klucz]: { value, trend, sub } }
 export default function PinnedTiles({ role, userEmail, values = {}, t, theme, onKeysChange }) {
   const catalog = tileCatalog(role);
@@ -82,6 +82,11 @@ export default function PinnedTiles({ role, userEmail, values = {}, t, theme, on
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: data?.value !== undefined ? '6px' : 0 }}>
                   {tile.label}
                 </p>
+                {data?.value === undefined && (
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.08em', marginTop: '4px', opacity: 0.7 }}>
+                    PRZEJDŹ →
+                  </p>
+                )}
                 {data?.sub && (
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px', opacity: 0.85 }}>
                     {data.sub}

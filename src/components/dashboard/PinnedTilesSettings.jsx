@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Check, Pin, Loader2 } from 'lucide-react';
 import { tileCatalog, defaultTiles, MAX_TILES } from '@/lib/pinnedTiles';
 
-// Wybór przypiętych kafli (maks. 6) — używany w ustawieniach i w oknie edycji z pulpitu.
+// Wybór przypiętych kafli (maks. 8) — używany w ustawieniach i w oknie edycji z pulpitu.
 export default function PinnedTilesSettings({ role, userEmail, t }) {
   const catalog = tileCatalog(role);
   const [keys, setKeys] = useState(defaultTiles(role));

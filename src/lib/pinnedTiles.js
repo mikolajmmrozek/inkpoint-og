@@ -3,20 +3,20 @@ import {
   PieChart, Gift, FolderOpen, Star, TrendingUp, Clock, User,
 } from 'lucide-react';
 
-// Katalog kafli, które można przypiąć na pulpicie (maks. 6).
-// kind: 'metric' = kafel z wartością/trendem, 'shortcut' = skrót do sekcji.
+// Katalog kafli, które można przypiąć na pulpicie (maks. 8).
+// Każdy kafel pokazuje wartość i krótki opis pod nią; kliknięcie prowadzi do sekcji.
 export const ADMIN_TILES = [
   { key: 'all_bookings', label: 'Wszystkie rezerwacje', icon: Calendar, href: '/dashboard/bookings', kind: 'metric' },
   { key: 'pending', label: 'Do weryfikacji', icon: Inbox, href: '/dashboard/bookings?view=pending', kind: 'metric' },
   { key: 'messages', label: 'Nowe wiadomości', icon: MessageSquare, href: '/dashboard/messages', kind: 'metric' },
   { key: 'to_settle', label: 'Do rozliczenia', icon: Wallet, href: '/dashboard/bookings?filter=to_settle&view=list&tab=past', kind: 'metric' },
-  { key: 'clients', label: 'Klienci', icon: Users, href: '/dashboard/clients', kind: 'shortcut' },
-  { key: 'health_forms', label: 'Ankiety zdrowotne', icon: FileText, href: '/dashboard/health-forms', kind: 'shortcut' },
-  { key: 'shop', label: 'Sklep', icon: ShoppingBag, href: '/dashboard/shop', kind: 'shortcut' },
-  { key: 'stats', label: 'Statystyki', icon: PieChart, href: '/dashboard/stats', kind: 'shortcut' },
-  { key: 'promotions', label: 'Promocje', icon: Gift, href: '/dashboard/promotions', kind: 'shortcut' },
-  { key: 'documents', label: 'Dokumenty', icon: FolderOpen, href: '/dashboard/documents', kind: 'shortcut' },
-  { key: 'feedback', label: 'Opinie klientów', icon: Star, href: '/dashboard/feedback', kind: 'shortcut' },
+  { key: 'shop', label: 'Nowe zamówienia', icon: ShoppingBag, href: '/dashboard/shop', kind: 'metric' },
+  { key: 'stats', label: 'Przychód z usług', icon: PieChart, href: '/dashboard/stats', kind: 'metric' },
+  { key: 'clients', label: 'Klienci', icon: Users, href: '/dashboard/clients', kind: 'metric' },
+  { key: 'health_forms', label: 'Ankiety do przejrzenia', icon: FileText, href: '/dashboard/health-forms', kind: 'metric' },
+  { key: 'promotions', label: 'Aktywne promocje', icon: Gift, href: '/dashboard/promotions', kind: 'metric' },
+  { key: 'feedback', label: 'Opinie do publikacji', icon: Star, href: '/dashboard/feedback', kind: 'metric' },
+  { key: 'documents', label: 'Dokumenty', icon: FolderOpen, href: '/dashboard/documents', kind: 'metric' },
 ];
 
 export const ARTIST_TILES = [
@@ -32,7 +32,7 @@ export const ARTIST_TILES = [
 
 export const DEFAULT_ADMIN_TILES = ['all_bookings', 'pending', 'messages', 'to_settle'];
 export const DEFAULT_ARTIST_TILES = ['upcoming', 'month_sessions', 'month_revenue'];
-export const MAX_TILES = 6;
+export const MAX_TILES = 8;
 
 export function tileCatalog(role) {
   return role === 'artist' ? ARTIST_TILES : ADMIN_TILES;
