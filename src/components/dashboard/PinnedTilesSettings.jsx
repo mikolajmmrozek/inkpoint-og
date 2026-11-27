@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Check, Pin, Loader2 } from 'lucide-react';
-import { tileCatalog, defaultTiles, MAX_TILES } from '@/lib/pinnedTiles';
+import { tileCatalog, tileGroups, defaultTiles, MAX_TILES } from '@/lib/pinnedTiles';
 
 // Wybór przypiętych kafli (maks. 8) — używany w ustawieniach i w oknie edycji z pulpitu.
 export default function PinnedTilesSettings({ role, userEmail, t }) {
   const catalog = tileCatalog(role);
+  const groups = tileGroups(role);
   const [keys, setKeys] = useState(defaultTiles(role));
   const [recordId, setRecordId] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -75,30 +76,39 @@ export default function PinnedTilesSettings({ role, userEmail, t }) {
         </p>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {catalog.map(tile => {
-          const Icon = tile.icon;
-          const pinned = keys.includes(tile.key);
-          return (
-            <button
-              key={tile.key}
-              onClick={() => toggle(tile.key)}
-              className="flex items-center gap-3 px-3 py-3 text-left transition-colors"
-              style={{
-                border: `0.5px solid ${pinned ? 'var(--brand)' : t.border}`,
-                background: pinned ? 'rgb(var(--brand-rgb) /0.06)' : 'transparent',
-                borderRadius: 'var(--radius)',
-                cursor: 'pointer',
-              }}
-            >
-              <Icon size={13} color={pinned ? 'var(--brand)' : t.muted} />
-              <span className="flex-1 min-w-0" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.06em', textTransform: 'uppercase', color: pinned ? t.text : t.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {tile.label}
-              </span>
-              {pinned ? <Check size={12} color="var(--brand)" /> : <Pin size={11} color={t.muted} />}
-            </button>
-          );
-        })}
+      <div className="space-y-5">
+        {groups.map(group => (
+          <div key={group.label}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.18em', textTransform: 'uppercase', opacity: 0.7, marginBottom: '8px' }}>
+              {group.label}
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {group.tiles.map(tile => {
+                const Icon = tile.icon;
+                const pinned = keys.includes(tile.key);
+                return (
+                  <button
+                    key={tile.key}
+                    onClick={() => toggle(tile.key)}
+                    className="flex items-center gap-3 px-3 py-3 text-left transition-colors"
+                    style={{
+                      border: `0.5px solid ${pinned ? 'var(--brand)' : t.border}`,
+                      background: pinned ? 'rgb(var(--brand-rgb) /0.06)' : 'transparent',
+                      borderRadius: 'var(--radius)',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <Icon size={13} color={pinned ? 'var(--brand)' : t.muted} />
+                    <span className="flex-1 min-w-0" style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.06em', textTransform: 'uppercase', color: pinned ? t.text : t.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {tile.label}
+                    </span>
+                    {pinned ? <Check size={12} color="var(--brand)" /> : <Pin size={11} color={t.muted} />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
