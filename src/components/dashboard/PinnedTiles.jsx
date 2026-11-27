@@ -89,15 +89,24 @@ export default function PinnedTiles({ role, userEmail, values = {}, t, theme, on
               <div
                 ref={dropProvided.innerRef}
                 {...dropProvided.droppableProps}
-                className={`grid gap-3 ${cols === 1 ? 'grid-cols-1' : cols === 2 ? 'grid-cols-2' : cols === 3 ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2 lg:grid-cols-4'}`}
+                className="flex flex-wrap gap-3"
               >
                 {tiles.map((tile, index) => {
                   const Icon = tile.icon;
                   const data = values[tile.key];
+                  // Szerokości jak w siatce — zawijanie w wiersze, dzięki czemu
+                  // przeciąganie pokazuje właściwe miejsce między kaflami.
+                  const itemClass = cols === 1
+                    ? 'w-full'
+                    : cols === 2
+                      ? 'w-[calc(50%-6px)]'
+                      : cols === 3
+                        ? 'w-[calc(50%-6px)] sm:w-[calc(33.333%-8px)]'
+                        : 'w-[calc(50%-6px)] lg:w-[calc(25%-9px)]';
                   return (
                     <Draggable key={tile.key} draggableId={tile.key} index={index} isDragDisabled={tiles.length < 2}>
                       {(dragProvided, snapshot) => (
-                        <div ref={dragProvided.innerRef} {...dragProvided.draggableProps} style={{ ...dragProvided.draggableProps.style, position: 'relative', height: '100%' }}>
+                        <div ref={dragProvided.innerRef} {...dragProvided.draggableProps} className={itemClass} style={{ ...dragProvided.draggableProps.style, position: 'relative', height: 'auto' }}>
                           <Link
                             to={tile.href}
                             className="block p-5 transition-colors h-full"
@@ -135,9 +144,9 @@ export default function PinnedTiles({ role, userEmail, values = {}, t, theme, on
                             <span
                               {...dragProvided.dragHandleProps}
                               title="Przeciągnij, aby zmienić kolejność"
-                              style={{ position: 'absolute', bottom: '4px', right: '4px', padding: '3px', display: 'flex', cursor: 'grab', color: t.muted, opacity: 0.5, borderRadius: 'var(--radius)' }}
+                              style={{ position: 'absolute', bottom: '2px', right: '2px', padding: '6px', display: 'flex', cursor: 'grab', color: t.muted, opacity: 0.45, borderRadius: 'var(--radius)', touchAction: 'none' }}
                             >
-                              <GripVertical size={12} />
+                              <GripVertical size={14} />
                             </span>
                           )}
                         </div>
