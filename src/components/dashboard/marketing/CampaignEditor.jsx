@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, Save, Trash2, Loader2, ShieldAlert, Bookmark } from 'lucide-react';
+import { ArrowLeft, Save, Trash2, Loader2, Bookmark } from 'lucide-react';
 import BlockEditor from '@/components/dashboard/marketing/BlockEditor';
 import AudienceFilters from '@/components/dashboard/marketing/AudienceFilters';
 import AudiencePreview from '@/components/dashboard/marketing/AudiencePreview';
@@ -177,12 +177,6 @@ export default function CampaignEditor({ campaign, templates, preferences, onPre
         </div>
 
         <div className="lg:col-span-2 lg:sticky lg:top-4">
-          <div className="flex items-start gap-2 p-3 mb-3" style={{ border: `0.5px solid ${t.border}`, background: t.notice, borderRadius: 'var(--radius)' }}>
-            <ShieldAlert size={13} color="#f59e0b" className="shrink-0 mt-0.5" />
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: '11.5px', lineHeight: 1.6, color: t.muted }}>
-              Wysyłka jest wstrzymana do ustalenia zgód marketingowych. Podgląd nie wysyła wiadomości.
-            </p>
-          </div>
           <EmailPreview campaign={form} t={t} />
         </div>
       </div>

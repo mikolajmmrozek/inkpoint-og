@@ -61,7 +61,7 @@ export default function AudiencePreview({ filters, t, onCount }) {
         <ShieldAlert size={13} color="#f59e0b" className="shrink-0 mt-0.5" />
         <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', lineHeight: 1.6, color: t.muted }}>
           {stats.excluded_no_consent > 0 && `${stats.excluded_no_consent} ${stats.excluded_no_consent === 1 ? 'osobę pominięto' : 'osób pominięto'} — brak zgody marketingowej. `}
-          Nowi klienci trafiają do odbiorców tylko po zaznaczeniu zgody w ankiecie; osoby, które się wypisały, są pomijane. Wysyłka pozostaje wyłączona.
+          Nowi klienci trafiają do odbiorców tylko po zaznaczeniu zgody w ankiecie; osoby, które się wypisały, są pomijane.
         </p>
       </div>
 

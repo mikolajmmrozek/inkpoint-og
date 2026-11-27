@@ -19,7 +19,7 @@ const NAV = [
   { path: '/artist', label: 'Przegląd', icon: BarChart2, exact: true },
   { path: '/artist/schedule', label: 'Mój Kalendarz', icon: Calendar },
   { path: '/artist/stats', label: 'Moje Wyniki', icon: BarChart2 },
-  { path: '/artist/events', label: 'Moje warsztaty', icon: GraduationCap },
+  { path: '/artist/events', label: 'Wydarzenia', icon: GraduationCap },
   { path: '/artist/profile', label: 'Mój Profil', icon: User },
   { path: '/artist/messages', label: 'Wiadomości', icon: MessageSquare },
 ];
@@ -31,10 +31,12 @@ const getBadgeForPath = (path, counts) => {
   return map[path] || null;
 };
 
-function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, artist, userEmail, onNotifClick, collapsed, onToggleCollapse }) {
+function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, artist, userEmail, onNotifClick, collapsed, onToggleCollapse, hasEvents }) {
   const location = useLocation();
   const isActive = (nav) => nav.exact ? location.pathname === nav.path : location.pathname.startsWith(nav.path);
   const counts = useBadgeCounts({ role: 'artist', userEmail });
+  // Wydarzenia pokazujemy tylko artyście, który prowadzi lub prowadził wydarzenie.
+  const items = hasEvents ? NAV : NAV.filter(nav => nav.path !== '/artist/events');
 
   const bg = theme === 'light' ? '#FFFFFF' : '#0A0A0A';
   const border = theme === 'light' ? '#E5E5E5' : '#262626';
@@ -66,7 +68,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, theme, toggleTheme, artist, user
 
         {/* Nav */}
         <nav className="flex-1 px-2 py-6 space-y-1 overflow-y-auto overflow-x-hidden">
-          {NAV.map(nav => {
+          {items.map(nav => {
             const Icon = nav.icon;
             const active = isActive(nav);
             const badge = getBadgeForPath(nav.path, counts);
@@ -154,6 +156,7 @@ export default function ArtistPanel() {
   const [artist, setArtist] = useState(null);
   const [loadingArtist, setLoadingArtist] = useState(true);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [hasEvents, setHasEvents] = useState(false);
   const location = useLocation();
   // Układ panelu zapisany na koncie — te same ustawienia na każdym urządzeniu.
   const { prefs, setPref } = useUserPrefs(user?.email);
@@ -185,6 +188,21 @@ export default function ArtistPanel() {
       }
     }
   }, [user, isLoadingAuth]);
+
+  // Czy artysta prowadzi lub prowadził wydarzenie — decyduje o pozycji w menu.
+  useEffect(() => {
+    if (!artist?.id) return;
+    let cancelled = false;
+    Promise.all([
+      base44.entities.EventSession.filter({ leader_ids: artist.id }, { limit: 1 }),
+      base44.entities.Event.filter({ leader_ids: artist.id }, { limit: 1 }),
+    ])
+      .then(([sessions, events]) => {
+        if (!cancelled) setHasEvents(sessions.items.length > 0 || events.items.length > 0);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [artist?.id]);
 
   if (isLoadingAuth || loadingArtist) return (
     <div className="h-screen flex items-center justify-center" style={{ background: '#0A0A0A' }}>
@@ -227,7 +245,7 @@ export default function ArtistPanel() {
     <ArtistThemeContext.Provider value={{ theme, toggleTheme, artist }}>
       <CreateMenuProvider role="artist" theme={theme} selfArtistId={artist?.id}>
       <div className="min-h-screen flex overflow-x-hidden" style={{ background: bg, color: textColor }}>
-        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} theme={theme} toggleTheme={toggleTheme} artist={artist} userEmail={user.email} onNotifClick={() => setNotifOpen(true)} collapsed={sidebarCollapsed} onToggleCollapse={toggleSidebarCollapse} />
+        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} theme={theme} toggleTheme={toggleTheme} artist={artist} userEmail={user.email} onNotifClick={() => setNotifOpen(true)} collapsed={sidebarCollapsed} onToggleCollapse={toggleSidebarCollapse} hasEvents={hasEvents} />
 
         <div className={`flex-1 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'} flex flex-col min-h-screen min-w-0 transition-all duration-500`}>
           {/* Top bar */}

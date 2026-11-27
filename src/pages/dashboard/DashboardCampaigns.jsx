@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from './Dashboard';
-import { Mail, LayoutTemplate, Users, Sparkles, ShieldAlert } from 'lucide-react';
+import { Mail, LayoutTemplate, Users, Sparkles } from 'lucide-react';
 import CampaignList from '@/components/dashboard/marketing/CampaignList';
 import CampaignEditor from '@/components/dashboard/marketing/CampaignEditor';
 import TemplateLibrary from '@/components/dashboard/marketing/TemplateLibrary';
@@ -135,16 +135,6 @@ export default function DashboardCampaigns() {
       <div className="mb-6">
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--brand)', marginBottom: '6px' }}>MARKETING</p>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.4rem', letterSpacing: '0.04em', lineHeight: 1, color: t.text }}>Kampanie mailowe</h1>
-      </div>
-
-      <div className="flex items-start gap-3 p-4 mb-6" style={{ border: `0.5px solid ${t.border}`, background: t.notice, borderRadius: 'var(--radius)' }}>
-        <ShieldAlert size={15} color="#f59e0b" className="shrink-0 mt-0.5" />
-        <div>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#f59e0b' }}>Wysyłka wstrzymana — tryb podglądu</p>
-          <p className="mt-1" style={{ fontFamily: 'var(--font-body)', fontSize: '12.5px', lineHeight: 1.6, color: t.muted }}>
-            Budujemy segmenty i treści, ale nic nie wychodzi do klientów. Wysyłka zostanie włączona po ustaleniu zasad zgód marketingowych i rezygnacji.
-          </p>
-        </div>
       </div>
 
       {editor ? (
