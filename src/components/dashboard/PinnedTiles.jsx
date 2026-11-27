@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Pencil, X } from 'lucide-react';
+import { Pencil, X, GripVertical } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import TrendBadge from '@/components/stats/TrendBadge';
 import { tileCatalog, defaultTiles, MAX_TILES } from '@/lib/pinnedTiles';
 import PinnedTilesSettings from './PinnedTilesSettings';
@@ -14,6 +15,7 @@ export default function PinnedTiles({ role, userEmail, values = {}, t, theme, on
   const [keys, setKeys] = useState(defaultTiles(role));
   const [editing, setEditing] = useState(false);
   const [version, setVersion] = useState(0);
+  const [recordId, setRecordId] = useState(null);
 
   // Rodzic potrzebuje listy przypiętych kluczy, żeby nie powtarzać tych samych
   // wskaźników w sekcji poniżej.
@@ -24,8 +26,11 @@ export default function PinnedTiles({ role, userEmail, values = {}, t, theme, on
     base44.entities.DashboardPinnedTiles.filter({ user_email: userEmail, role })
       .then(list => {
         const rec = list[0];
-        if (rec && Array.isArray(rec.tiles) && rec.tiles.length > 0) {
-          setKeys(rec.tiles.filter(k => catalog.some(tile => tile.key === k)).slice(0, MAX_TILES));
+        if (rec) {
+          setRecordId(rec.id);
+          if (Array.isArray(rec.tiles) && rec.tiles.length > 0) {
+            setKeys(rec.tiles.filter(k => catalog.some(tile => tile.key === k)).slice(0, MAX_TILES));
+          }
         }
       })
       .catch(() => {});
@@ -33,6 +38,25 @@ export default function PinnedTiles({ role, userEmail, values = {}, t, theme, on
 
   const tiles = keys.map(key => catalog.find(tile => tile.key === key)).filter(Boolean);
   const cols = tiles.length <= 2 ? tiles.length || 1 : tiles.length === 3 ? 3 : 4;
+
+  // Zapis kolejności kafli — po zalogowaniu na innym urządzeniu zostaje ta sama.
+  const persistOrder = async (next) => {
+    if (!userEmail) return;
+    if (recordId) await base44.entities.DashboardPinnedTiles.update(recordId, { tiles: next });
+    else {
+      const created = await base44.entities.DashboardPinnedTiles.create({ user_email: userEmail, role, tiles: next });
+      setRecordId(created.id);
+    }
+  };
+
+  const handleDragEnd = (result) => {
+    if (!result.destination || result.source.index === result.destination.index) return;
+    const next = tiles.map(tile => tile.key);
+    const [moved] = next.splice(result.source.index, 1);
+    next.splice(result.destination.index, 0, moved);
+    setKeys(next);
+    persistOrder(next);
+  };
 
   return (
     <div className="mb-10">
@@ -59,43 +83,73 @@ export default function PinnedTiles({ role, userEmail, values = {}, t, theme, on
           + PRZYPNIJ KAFLE
         </button>
       ) : (
-        <div className={`grid gap-3 ${cols === 1 ? 'grid-cols-1' : cols === 2 ? 'grid-cols-2' : cols === 3 ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2 lg:grid-cols-4'}`}>
-          {tiles.map(tile => {
-            const Icon = tile.icon;
-            const data = values[tile.key];
-            return (
-              <Link
-                key={tile.key}
-                to={tile.href}
-                className="block p-5 transition-colors"
-                style={{ border: `0.5px solid ${t.border}`, background: t.cardBg || 'transparent', borderRadius: 'var(--radius)' }}
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="pinned-tiles" direction="horizontal">
+            {(dropProvided) => (
+              <div
+                ref={dropProvided.innerRef}
+                {...dropProvided.droppableProps}
+                className={`grid gap-3 ${cols === 1 ? 'grid-cols-1' : cols === 2 ? 'grid-cols-2' : cols === 3 ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2 lg:grid-cols-4'}`}
               >
-                <div className="flex items-start justify-between gap-2 mb-3">
-                  <Icon size={15} color="var(--brand)" />
-                  {data?.trend && <TrendBadge change={data.trend} t={t} />}
-                </div>
-                {data?.value !== undefined && (
-                  <p style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 400, color: t.value || t.text, lineHeight: 1, letterSpacing: '0.04em' }}>
-                    {data.value}
-                  </p>
-                )}
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: data?.value !== undefined ? '6px' : 0 }}>
-                  {tile.label}
-                </p>
-                {data?.value === undefined && (
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.08em', marginTop: '4px', opacity: 0.7 }}>
-                    PRZEJDŹ →
-                  </p>
-                )}
-                {data?.sub && (
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px', opacity: 0.85 }}>
-                    {data.sub}
-                  </p>
-                )}
-              </Link>
-            );
-          })}
-        </div>
+                {tiles.map((tile, index) => {
+                  const Icon = tile.icon;
+                  const data = values[tile.key];
+                  return (
+                    <Draggable key={tile.key} draggableId={tile.key} index={index} isDragDisabled={tiles.length < 2}>
+                      {(dragProvided, snapshot) => (
+                        <div ref={dragProvided.innerRef} {...dragProvided.draggableProps} style={{ ...dragProvided.draggableProps.style, position: 'relative', height: '100%' }}>
+                          <Link
+                            to={tile.href}
+                            className="block p-5 transition-colors h-full"
+                            style={{
+                              border: `0.5px solid ${snapshot.isDragging ? 'var(--brand)' : t.border}`,
+                              background: t.cardBg || 'transparent',
+                              borderRadius: 'var(--radius)',
+                              boxShadow: snapshot.isDragging ? '0 12px 32px rgba(0,0,0,0.35)' : 'none',
+                            }}
+                          >
+                            <div className="flex items-start justify-between gap-2 mb-3">
+                              <Icon size={15} color="var(--brand)" />
+                              {data?.trend && <TrendBadge change={data.trend} t={t} />}
+                            </div>
+                            {data?.value !== undefined && (
+                              <p style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 400, color: t.value || t.text, lineHeight: 1, letterSpacing: '0.04em' }}>
+                                {data.value}
+                              </p>
+                            )}
+                            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: data?.value !== undefined ? '6px' : 0 }}>
+                              {tile.label}
+                            </p>
+                            {data?.value === undefined && (
+                              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.08em', marginTop: '4px', opacity: 0.7 }}>
+                                PRZEJDŹ →
+                              </p>
+                            )}
+                            {data?.sub && (
+                              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: t.muted, letterSpacing: '0.06em', marginTop: '4px', opacity: 0.85 }}>
+                                {data.sub}
+                              </p>
+                            )}
+                          </Link>
+                          {tiles.length > 1 && (
+                            <span
+                              {...dragProvided.dragHandleProps}
+                              title="Przeciągnij, aby zmienić kolejność"
+                              style={{ position: 'absolute', bottom: '4px', right: '4px', padding: '3px', display: 'flex', cursor: 'grab', color: t.muted, opacity: 0.5, borderRadius: 'var(--radius)' }}
+                            >
+                              <GripVertical size={12} />
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </Draggable>
+                  );
+                })}
+                {dropProvided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       )}
 
       {editing && (
