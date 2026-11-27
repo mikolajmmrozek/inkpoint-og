@@ -17,7 +17,7 @@ export default function usePinnedTileOrder(role, userEmail, version) {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    base44.entities.DashboardPinnedTiles.filter({ user_email: userEmail, role }, { limit: 1 })
+    base44.entities.DashboardPinnedTiles.filter({ user_email: userEmail, role }, { sort: '-created_date', limit: 1 })
       .then(({ items }) => {
         if (cancelled) return;
         const record = items[0];

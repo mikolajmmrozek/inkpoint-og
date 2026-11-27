@@ -5,7 +5,7 @@ import { bookingUpdate } from '@/lib/bookingAudit';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { useAuth } from '@/lib/AuthContext';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, TrendingUp, X, ChevronLeft, ChevronRight, Search, Zap, Wallet, Phone, Mail, QrCode, FileText, Check, Ban, RotateCcw, Loader2 } from 'lucide-react';
+import { Clock, X, ChevronLeft, ChevronRight, Search, Zap, Wallet, Phone, Mail, QrCode, FileText, Check, Ban, RotateCcw, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, isToday, isPast, parseISO, addDays, subDays } from 'date-fns';
 import { pl } from 'date-fns/locale';
@@ -18,9 +18,7 @@ import ArtistSessionRow from '@/components/artist/ArtistSessionRow';
 import ReferenceImagesGallery from '@/components/booking/ReferenceImagesGallery';
 import { buildHealthFormStatusMap } from '@/lib/healthFormStatus';
 import { pluralSesji } from '@/utils';
-import TrendBadge from '@/components/stats/TrendBadge';
 import PinnedTiles from '@/components/dashboard/PinnedTiles';
-import { defaultTiles } from '@/lib/pinnedTiles';
 import { comparePeriods, monthBounds, pctChange, serviceRevenue, upcomingMonthBounds } from '@/lib/trends';
 import { sessionAmount } from '@/lib/settlement';
 
@@ -533,7 +531,6 @@ export default function ArtistHome() {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [settlingBooking, setSettlingBooking] = useState(null);
   const [artistServices, setArtistServices] = useState([]);
-  const [pinnedKeys, setPinnedKeys] = useState(defaultTiles('artist'));
   const [healthStatusMap, setHealthStatusMap] = useState({});
 
   const t = theme === 'light'
@@ -596,15 +593,6 @@ export default function ArtistHome() {
     month_revenue: { value: loading ? '—' : `${Math.round(revenue)} zł`, sub: `Prognoza: +${forecast} zł`, trend: monthTrend.revenue },
   };
 
-  const KPI = [
-    { key: 'upcoming', label: 'Nadchodzące sesje', value: upcoming.length, trend: upcomingTrend, icon: Calendar, link: '/artist/schedule' },
-    { key: 'month_sessions', label: 'Sesje w tym miesiącu', value: thisMonth.length, trend: monthTrend.sessions, icon: TrendingUp, link: '/artist/stats' },
-    { key: 'month_revenue', label: 'Mój zarobek (mies.)', value: `${Math.round(revenue)} zł`, sub: `Prognoza: +${forecast} zł`, trend: monthTrend.revenue, icon: Clock, link: '/artist/stats' },
-  ];
-
-  // Kafle już przypięte u góry nie powtarzają się w siatce poniżej.
-  const visibleKpi = KPI.filter(k => !pinnedKeys.includes(k.key));
-
   // All active sessions sorted ascending, max 10 upcoming
   const sortedUpcoming = [...upcoming].sort((a, b) => (a.session_date || '').localeCompare(b.session_date || '') || (a.session_time || '').localeCompare(b.session_time || '')).slice(0, 10);
 
@@ -651,30 +639,7 @@ export default function ArtistHome() {
         </h1>
       </div>
 
-      <PinnedTiles role="artist" userEmail={user?.email} values={pinnedValues} t={t} theme={theme} onKeysChange={setPinnedKeys} />
-
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10" style={{ display: visibleKpi.length ? undefined : 'none' }}>
-        {visibleKpi.map((kpi, i) => {
-          const Icon = kpi.icon;
-          return (
-            <motion.div key={kpi.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
-              <Link to={kpi.link} className="block p-6 h-full relative" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
-                <div className="flex items-start justify-between gap-2 mb-4">
-                  <Icon size={16} color="var(--brand)" />
-                  {kpi.trend && !loading && <TrendBadge change={kpi.trend} t={t} />}
-                </div>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 400, color: t.value, lineHeight: 1, letterSpacing: '0.04em' }}>
-                  {loading ? '—' : kpi.value}
-                </p>
-                {kpi.sub && !loading && (
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.06em', marginTop: '6px' }}>{kpi.sub}</p>
-                )}
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px' }}>{kpi.label}</p>
-              </Link>
-            </motion.div>
-          );
-        })}
-      </div>
+      <PinnedTiles role="artist" userEmail={user?.email} values={pinnedValues} t={t} theme={theme} />
 
       {/* Rozliczenie dnia — under monthly earnings */}
       <TodayOverview

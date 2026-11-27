@@ -3,8 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { bookingUpdate, bookingDelete } from '@/lib/bookingAudit';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, MessageSquare, AlertCircle, ClipboardList, Wallet, Inbox } from 'lucide-react';
-import TrendBadge from '@/components/stats/TrendBadge';
+import { AlertCircle, ClipboardList } from 'lucide-react';
 import { monthBounds, pctChange } from '@/lib/trends';
 import { financeTotals } from '@/lib/tileFinance';
 import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
@@ -12,7 +11,6 @@ import { AnimatePresence } from 'framer-motion';
 import { useTheme } from './Dashboard';
 import { useAuth } from '@/lib/AuthContext';
 import PinnedTiles from '@/components/dashboard/PinnedTiles';
-import { defaultTiles } from '@/lib/pinnedTiles';
 import BookingDetailPanel from '@/components/dashboard/BookingDetailPanel';
 import BookingModal from '@/components/dashboard/BookingModal';
 import HealthFormBadge from '@/components/booking/HealthFormBadge';
@@ -30,7 +28,6 @@ export default function DashboardHome() {
   const [pendingByDay, setPendingByDay] = useState([]);
   const [draftForms, setDraftForms] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [pinnedKeys, setPinnedKeys] = useState(defaultTiles('admin'));
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [editingBooking, setEditingBooking] = useState(null);
   const [allBookings, setAllBookings] = useState([]);
@@ -208,16 +205,6 @@ export default function DashboardHome() {
     documents: { value: loading ? '—' : extra.docs, sub: `${extra.instructions} instrukcji` },
   };
 
-  const KPI = [
-    { key: 'all_bookings', label: 'Wszystkie rezerwacje', value: stats.bookings, icon: Calendar, link: '/dashboard/bookings', trend: monthBookingsTrend },
-    { key: 'pending', label: 'Do weryfikacji', value: pendingAndRequests, icon: Inbox, link: '/dashboard/bookings?view=pending', sublabel: `${stats.pending} rezerw. · ${stats.changeRequests} zmiany` },
-    { key: 'messages', label: 'Nowe wiadomości', value: stats.messages, icon: MessageSquare, link: '/dashboard/messages' },
-    { key: 'to_settle', label: 'Do rozliczenia', value: stats.toSettle, icon: Wallet, link: '/dashboard/bookings?filter=to_settle&view=list&tab=past' },
-  ];
-
-  // Kafle przypięte u góry nie powtarzają się w siatce poniżej.
-  const visibleKpi = KPI.filter(k => !pinnedKeys.includes(k.key));
-
   const buildPendingByDay = (bookingsArr) => {
     const todayStr = new Date().toISOString().split('T')[0];
     const needsAction = b => !b.is_settled && b.status !== 'completed' && b.status !== 'cancelled';
@@ -243,40 +230,7 @@ export default function DashboardHome() {
   return (
     <div>
       {/* Przypięte kafle */}
-      <PinnedTiles role="admin" userEmail={user?.email} values={pinnedValues} t={t} theme={theme} onKeysChange={setPinnedKeys} />
-
-      {/* KPI Cards — bez kafli już przypiętych u góry */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12" style={{ display: visibleKpi.length ? undefined : 'none' }}>
-        {visibleKpi.map((kpi, i) => {
-          const Icon = kpi.icon;
-          return (
-            <motion.div
-              key={kpi.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1, duration: 0.5 }}
-            >
-              <Link to={kpi.link} className="block p-6 transition-all duration-300 h-full" style={{ border: `0.5px solid ${t.cardBorder}`, background: t.cardBg, borderRadius: 'var(--radius)' }}>
-                <div className="flex items-start justify-between gap-2 mb-4">
-                  <Icon size={16} color="var(--brand)" />
-                  {kpi.trend && !loading && <TrendBadge change={kpi.trend} t={t} />}
-                </div>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 400, color: t.value, lineHeight: 1, letterSpacing: '0.04em' }}>
-                  {loading ? '—' : formatCompact(kpi.value)}
-                </p>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: t.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '6px' }}>
-                  {kpi.label}
-                </p>
-                {kpi.sublabel && (
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--brand)', letterSpacing: '0.08em', marginTop: '3px', opacity: 0.85 }}>
-                    {kpi.sublabel}
-                  </p>
-                )}
-              </Link>
-            </motion.div>
-          );
-        })}
-      </div>
+      <PinnedTiles role="admin" userEmail={user?.email} values={pinnedValues} t={t} theme={theme} />
 
       {/* Today's cash + settlement overview */}
       {!loading && (

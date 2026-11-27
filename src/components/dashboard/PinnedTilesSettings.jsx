@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Check, Pin, Loader2 } from 'lucide-react';
 import { tileCatalog, tileGroups, defaultTiles, MAX_TILES } from '@/lib/pinnedTiles';
@@ -8,38 +8,47 @@ export default function PinnedTilesSettings({ role, userEmail, t }) {
   const catalog = tileCatalog(role);
   const groups = tileGroups(role);
   const [keys, setKeys] = useState(defaultTiles(role));
-  const [recordId, setRecordId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [limitHit, setLimitHit] = useState(false);
+  const recordId = useRef(null);
+  const queue = useRef(Promise.resolve());
+  const pendingSaves = useRef(0);
 
   useEffect(() => {
     if (!userEmail) return;
-    base44.entities.DashboardPinnedTiles.filter({ user_email: userEmail, role })
-      .then(list => {
-        const rec = list[0];
-        if (rec) {
-          setRecordId(rec.id);
-          if (Array.isArray(rec.tiles) && rec.tiles.length > 0) {
-            setKeys(rec.tiles.filter(k => catalog.some(tile => tile.key === k)).slice(0, MAX_TILES));
-          }
+    let cancelled = false;
+    base44.entities.DashboardPinnedTiles.filter({ user_email: userEmail, role }, { sort: '-created_date', limit: 1 })
+      .then(({ items }) => {
+        if (cancelled) return;
+        const record = items[0];
+        recordId.current = record?.id || null;
+        // Pusta lista to świadoma decyzja użytkownika — nie wracamy wtedy do domyślnych kafli.
+        if (Array.isArray(record?.tiles)) {
+          setKeys(record.tiles.filter(key => catalog.some(tile => tile.key === key)).slice(0, MAX_TILES));
         }
       })
       .catch(() => {})
-      .finally(() => setLoading(false));
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [userEmail, role]);
 
-  const persist = async (next) => {
+  // Zapis serializowany — szybkie klikanie nie tworzy duplikatów ani nie nadpisuje nowszej zmiany starszą.
+  const persist = (next) => {
+    pendingSaves.current += 1;
     setSaving(true);
-    try {
-      if (recordId) await base44.entities.DashboardPinnedTiles.update(recordId, { tiles: next });
+    const job = queue.current.catch(() => {}).then(async () => {
+      if (recordId.current) await base44.entities.DashboardPinnedTiles.update(recordId.current, { tiles: next });
       else {
         const created = await base44.entities.DashboardPinnedTiles.create({ user_email: userEmail, role, tiles: next });
-        setRecordId(created.id);
+        recordId.current = created.id;
       }
-    } finally {
-      setSaving(false);
-    }
+    });
+    queue.current = job;
+    job.catch(() => {}).then(() => {
+      pendingSaves.current -= 1;
+      if (pendingSaves.current === 0) setSaving(false);
+    });
   };
 
   const toggle = (key) => {

@@ -17,6 +17,9 @@ export default function PinnedTiles({ role, userEmail, values = {}, t, theme, on
   useEffect(() => { onKeysChange?.(keys); }, [keys, onKeysChange]);
   const tiles = keys.map(key => catalog.find(tile => tile.key === key)).filter(Boolean);
 
+  // Zamknięcie okna (dowolnym sposobem) zawsze odświeża kafle z zapisanych ustawień.
+  const close = () => { setEditing(false); setVersion(v => v + 1); };
+
   return (
     <div className="mb-10">
       <div className="flex items-center justify-between gap-3 mb-3">
@@ -55,7 +58,7 @@ export default function PinnedTiles({ role, userEmail, values = {}, t, theme, on
       )}
 
       {editing && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={() => setEditing(false)}>
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={close}>
           <motion.div
             initial={{ scale: 0.96, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -68,12 +71,12 @@ export default function PinnedTiles({ role, userEmail, values = {}, t, theme, on
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>PULPIT</p>
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', color: t.text, letterSpacing: '0.04em', lineHeight: 1 }}>Przypięte kafle</h3>
               </div>
-              <button onClick={() => setEditing(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}><X size={18} /></button>
+              <button onClick={close} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.muted }}><X size={18} /></button>
             </div>
             <PinnedTilesSettings role={role} userEmail={userEmail} t={t} />
             <div className="pt-5 mt-5" style={{ borderTop: `0.5px solid ${t.border}` }}>
               <button
-                onClick={() => { setEditing(false); setVersion(v => v + 1); }}
+                onClick={close}
                 className="btn-oxblood w-full"
                 style={{ fontSize: '10px' }}
               >
