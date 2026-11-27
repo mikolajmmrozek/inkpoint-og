@@ -1,6 +1,7 @@
 import {
   Calendar, Inbox, MessageSquare, Wallet, Users, FileText, ShoppingBag,
   PieChart, Gift, FolderOpen, Star, TrendingUp, Clock, User,
+  Banknote, Coins, CalendarDays, Store, Ticket,
 } from 'lucide-react';
 
 // Katalog kafli, które można przypiąć na pulpicie (maks. 8).
@@ -11,7 +12,14 @@ export const ADMIN_TILES = [
   { key: 'messages', label: 'Nowe wiadomości', icon: MessageSquare, href: '/dashboard/messages', kind: 'metric' },
   { key: 'to_settle', label: 'Do rozliczenia', icon: Wallet, href: '/dashboard/bookings?filter=to_settle&view=list&tab=past', kind: 'metric' },
   { key: 'shop', label: 'Nowe zamówienia', icon: ShoppingBag, href: '/dashboard/shop', kind: 'metric' },
-  { key: 'stats', label: 'Przychód z usług', icon: PieChart, href: '/dashboard/stats', kind: 'metric' },
+  { key: 'stats', label: 'Przychód z usług', icon: PieChart, href: '/dashboard/stats?view=services', kind: 'metric' },
+  { key: 'services_profit', label: 'Dochód z usług', icon: Coins, href: '/dashboard/stats?view=services', kind: 'metric' },
+  { key: 'shop_revenue', label: 'Przychód ze sklepu', icon: ShoppingBag, href: '/dashboard/stats?view=shop', kind: 'metric' },
+  { key: 'shop_profit', label: 'Dochód ze sklepu', icon: Store, href: '/dashboard/stats?view=shop', kind: 'metric' },
+  { key: 'events_revenue', label: 'Przychód z warsztatów', icon: CalendarDays, href: '/dashboard/stats?view=events', kind: 'metric' },
+  { key: 'events_profit', label: 'Dochód z warsztatów', icon: Ticket, href: '/dashboard/stats?view=events', kind: 'metric' },
+  { key: 'total_revenue', label: 'Przychód całkowity', icon: TrendingUp, href: '/dashboard/stats', kind: 'metric' },
+  { key: 'total_profit', label: 'Dochód całkowity', icon: Banknote, href: '/dashboard/stats', kind: 'metric' },
   { key: 'clients', label: 'Klienci', icon: Users, href: '/dashboard/clients', kind: 'metric' },
   { key: 'health_forms', label: 'Ankiety do przejrzenia', icon: FileText, href: '/dashboard/health-forms', kind: 'metric' },
   { key: 'promotions', label: 'Aktywne promocje', icon: Gift, href: '/dashboard/promotions', kind: 'metric' },

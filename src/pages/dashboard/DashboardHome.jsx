@@ -5,7 +5,8 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Calendar, MessageSquare, AlertCircle, ClipboardList, Wallet, Inbox } from 'lucide-react';
 import TrendBadge from '@/components/stats/TrendBadge';
-import { monthBounds, pctChange, serviceRevenue } from '@/lib/trends';
+import { monthBounds, pctChange } from '@/lib/trends';
+import { financeTotals } from '@/lib/tileFinance';
 import HealthFormPreviewModal from '@/components/dashboard/HealthFormPreviewModal';
 import { AnimatePresence } from 'framer-motion';
 import { useTheme } from './Dashboard';
@@ -36,12 +37,25 @@ export default function DashboardHome() {
   const [artists, setArtists] = useState([]);
   const [healthStatusMap, setHealthStatusMap] = useState({});
   const [previewForm, setPreviewForm] = useState(null); // { id?, bookingId?, clientName }
+  // Dane finansowe kafli: zamówienia sklepu i warsztaty (oferty).
+  const [financeSource, setFinanceSource] = useState({ orders: [], events: [], sessions: [], eventBookings: [] });
   // Liczniki dla kafli przypiętych: sklep, klienci, ankiety, promocje, opinie, dokumenty.
   const [extra, setExtra] = useState({
     clients: 0, newClients: 0, ordersNew: 0, ordersTotal: 0,
     formsToReview: 0, formsTotal: 0, promosActive: 0, promosUsed: 0,
     docs: 0, instructions: 0, feedbackPending: 0, avgRating: null,
   });
+
+  useEffect(() => {
+    Promise.all([
+      base44.entities.ShopOrder.list('-created_date', 300),
+      base44.entities.Event.list('order', 200),
+      base44.entities.EventSession.list('date', 500),
+      base44.entities.EventBooking.list('-created_date', 1000),
+    ]).then(([orders, events, sessions, eventBookings]) => {
+      setFinanceSource({ orders, events, sessions, eventBookings });
+    }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     Promise.all([
@@ -153,23 +167,25 @@ export default function DashboardHome() {
     return pctChange(count(bounds.current), count(bounds.previous));
   })();
 
-  // Przychód z usług (zakończone sesje) — bieżący miesiąc do dziś vs poprzedni do tego samego dnia.
-  const monthRevenue = (() => {
+  // Przychody i dochody (usługi, sklep, warsztaty, razem) — bieżący miesiąc do dziś
+  // vs poprzedni miesiąc do tego samego dnia.
+  const monthFinance = (() => {
     const nowDate = new Date();
     const bounds = monthBounds(nowDate.getFullYear(), nowDate.getMonth(), nowDate);
-    const rows = (range) => allBookings.filter(b =>
-      b.status === 'completed' && b.session_date && b.session_date >= range.start && b.session_date <= range.end
-    );
-    const current = rows(bounds.current);
+    const source = { ...financeSource, bookings: allBookings, artists };
     return {
-      revenue: current.reduce((s, b) => s + serviceRevenue(b), 0),
-      sessions: current.length,
-      trend: pctChange(
-        current.reduce((s, b) => s + serviceRevenue(b), 0),
-        rows(bounds.previous).reduce((s, b) => s + serviceRevenue(b), 0)
-      ),
+      current: financeTotals(source, bounds.current),
+      previous: financeTotals(source, bounds.previous),
     };
   })();
+
+  const money = (n) => `${formatCompact(Math.round(Number(n) || 0))} zł`;
+  const trendOf = (key) => pctChange(monthFinance.current[key], monthFinance.previous[key]);
+  const financeTile = (key, sub) => ({
+    value: loading ? '—' : money(monthFinance.current[key]),
+    sub,
+    trend: trendOf(key),
+  });
 
   const pinnedValues = {
     all_bookings: { value: loading ? '—' : formatCompact(stats.bookings), trend: monthBookingsTrend },
@@ -177,7 +193,14 @@ export default function DashboardHome() {
     messages: { value: loading ? '—' : stats.messages },
     to_settle: { value: loading ? '—' : stats.toSettle },
     shop: { value: loading ? '—' : extra.ordersNew, sub: `łącznie ${extra.ordersTotal} zam.` },
-    stats: { value: loading ? '—' : `${formatCompact(Math.round(monthRevenue.revenue))} zł`, sub: `${monthRevenue.sessions} sesji w tym mies.`, trend: monthRevenue.trend },
+    stats: financeTile('services', `${monthFinance.current.sessions} sesji`),
+    services_profit: financeTile('servicesProfit', 'po wypłatach artystów'),
+    shop_revenue: financeTile('shopRevenue', `${monthFinance.current.orders} zam. online`),
+    shop_profit: financeTile('shopProfit', 'po koszcie zakupu'),
+    events_revenue: financeTile('eventsRevenue', `${monthFinance.current.participants} miejsc`),
+    events_profit: financeTile('eventsProfit', 'po wypłatach prowadzących'),
+    total_revenue: financeTile('totalRevenue', 'usługi + sklep + warsztaty'),
+    total_profit: financeTile('totalProfit', 'usługi + sklep + warsztaty'),
     clients: { value: loading ? '—' : formatCompact(extra.clients), sub: extra.newClients > 0 ? `+${extra.newClients} nowych` : 'wszyscy przejrzeni' },
     health_forms: { value: loading ? '—' : extra.formsToReview, sub: `łącznie ${extra.formsTotal}` },
     promotions: { value: loading ? '—' : extra.promosActive, sub: `${extra.promosUsed} użytych` },
