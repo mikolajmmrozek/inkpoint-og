@@ -7,6 +7,8 @@
 
 const MAX_SESSION_ERRORS = 10; // limity per instancja
 const MAX_ACTIONS = 20;
+const MAX_TRAIL = 8;
+const KINDS = { error: 'error', promise: 'promise', reload: 'reload', nav: 'nav' };
 
 let rateMap = null;
 
@@ -26,7 +28,7 @@ export default async function (req) {
 
     const sessionId = str(body.session_id, 64).trim();
     if (sessionId.length < 8) return Response.json({ error: 'Bad request' }, { status: 400 });
-    const kind = body.kind === 'promise' ? 'promise' : 'error';
+    const kind = KINDS[body.kind] || 'error';
 
     // Limit częstotliwości per sesja (1 h, pamięć instancji)
     rateMap = rateMap || new Map();
@@ -51,18 +53,33 @@ export default async function (req) {
           .filter(Boolean)
       : [];
 
+    const trail = Array.isArray(body.trail)
+      ? body.trail
+          .slice(-MAX_TRAIL)
+          .map((t) =>
+            t && typeof t === 'object'
+              ? { from: cleanPath(t.from), to: cleanPath(t.to), time: str(t.time, 30) }
+              : null
+          )
+          .filter(Boolean)
+      : [];
+
     const record = {
       session_id: sessionId,
       kind,
       message: redact(str(body.message, 300)),
       stack: redact(str(body.stack, 1200)),
       path: cleanPath(body.path),
+      previous_path: cleanPath(body.previous_path),
+      nav_type: str(body.nav_type, 20),
+      trail,
       actions,
       ua: str(req.headers.get('user-agent') || '', 200),
     };
 
     // Jednolinijkowy, filtrowalny wpis w logach funkcji
-    console.log('[CLIENT_ERROR] ' + JSON.stringify(record));
+    const tag = kind === 'reload' || kind === 'nav' ? '[CLIENT_NAV]' : '[CLIENT_ERROR]';
+    console.log(tag + ' ' + JSON.stringify(record));
 
     return Response.json({ ok: true });
   } catch (error) {
