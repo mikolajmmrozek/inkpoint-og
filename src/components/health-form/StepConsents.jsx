@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { useTranslatedText } from '@/hooks/useTranslatedText';
+import DocumentModal from '@/components/site/DocumentModal';
 
 function ConsentBlock({ title, text, fieldKey, form, setField, required, showErrors, t, lang, textMuted, borderColor }) {
   const translatedTitle = useTranslatedText(title, lang);
@@ -32,6 +34,7 @@ function ConsentBlock({ title, text, fieldKey, form, setField, required, showErr
 
 export default function StepConsents({ form, setField, t, showErrors, templateData, lang, textPrimary, textMuted, borderColor }) {
   const consents = templateData?.consent_fields || [];
+  const [termsOpen, setTermsOpen] = useState(false);
 
   const allChecked = consents.length > 0 && consents.every(c => !!form[c.field_key]);
   const toggleAll = () => {
@@ -40,8 +43,6 @@ export default function StepConsents({ form, setField, t, showErrors, templateDa
     consents.forEach(c => { updates[c.field_key] = newVal; });
     setField('__batch__', updates);
   };
-
-  const termsUrl = lang && lang !== 'pl' ? `/terms?lang=${lang}` : '/terms';
 
   return (
     <div>
@@ -84,17 +85,26 @@ export default function StepConsents({ form, setField, t, showErrors, templateDa
         </button>
       </div>
 
-      {/* Link to studio terms in client's language */}
+      {/* Regulamin studia otwierany w oknie — ankieta zostaje wypełniona pod spodem */}
       <div className="mt-4 pt-4" style={{ borderTop: `0.5px solid ${borderColor}` }}>
-        <a
-          href={termsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', opacity: 0.8 }}
+        <button
+          type="button"
+          onClick={() => setTermsOpen(true)}
+          style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--brand)', letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', opacity: 0.8, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
         >
           ↗ {t?.readTerms || 'PRZECZYTAJ REGULAMIN STUDIA'}
-        </a>
+        </button>
       </div>
+
+      <DocumentModal
+        open={termsOpen}
+        onClose={() => setTermsOpen(false)}
+        docKey="default"
+        fallbackTitle="Regulamin studia"
+        backLabel={t?.backToForm || 'POWRÓT DO ANKIETY'}
+        onBack={() => setTermsOpen(false)}
+        lang={lang || 'pl'}
+      />
     </div>
   );
 }

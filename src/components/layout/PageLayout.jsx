@@ -1,5 +1,6 @@
 import Navbar from './Navbar';
 import Footer from './Footer';
+import CookieConsent from '@/components/site/CookieConsent';
 
 export default function PageLayout({ children, noFooter = false }) {
   return (
@@ -7,6 +8,7 @@ export default function PageLayout({ children, noFooter = false }) {
       <Navbar />
       <main>{children}</main>
       {!noFooter && <Footer />}
+      <CookieConsent />
     </div>
   );
 }
