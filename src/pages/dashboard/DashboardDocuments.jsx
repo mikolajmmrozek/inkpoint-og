@@ -281,8 +281,8 @@ export default function DashboardDocuments() {
   const ViewModal = () => {
     if (!viewDoc) return null;
     const isInstr = viewDoc.kind === 'instr';
-    const docData = isInstr ? viewDoc.data : terms;
-    const label = isInstr ? (INSTRUCTION_TYPES.find(x => x.key === viewDoc.typeKey)?.label || 'Dokument') : 'Regulamin Studia';
+    const docData = viewDoc.data;
+    const label = viewDoc.label || (isInstr ? (INSTRUCTION_TYPES.find(x => x.key === viewDoc.typeKey)?.label || 'Dokument') : 'Dokument');
     const displayData = translatedContent || docData;
 
     return (
@@ -354,6 +354,9 @@ export default function DashboardDocuments() {
                 if (isInstr) {
                   setInstrForm(docData || { type: viewDoc.typeKey, title: '', content: '' });
                   setEditingInstr(docData?.id || viewDoc.typeKey);
+                } else if (viewDoc.legalKey) {
+                  setLegalForm(docData || { title: label, content: '' });
+                  setEditingLegal(viewDoc.legalKey);
                 } else {
                   setTermsForm(terms || { title: '', content: '' });
                   setEditingTerms(true);
@@ -454,7 +457,7 @@ export default function DashboardDocuments() {
               label="Regulamin Studia"
               title={terms?.title}
               content={terms?.content}
-              onView={() => openViewDoc({ kind: 'terms', data: terms })}
+              onView={() => openViewDoc({ kind: 'terms', data: terms, label: 'Regulamin Studia' })}
               onEdit={() => { setTermsForm(terms || { title: '', content: '' }); setEditingTerms(true); setSaveError(null); }}
               onDelete={() => setDeleteConfirmTerms(true)}
               onPrint={() => handlePrint(terms, 'Regulamin Studia', null)}
@@ -479,7 +482,7 @@ export default function DashboardDocuments() {
                 label="Polityka Cookies"
                 title={cookiesPolicy?.title}
                 content={cookiesPolicy?.content}
-                onView={() => openViewDoc({ kind: 'terms', data: cookiesPolicy })}
+                onView={() => openViewDoc({ kind: 'terms', data: cookiesPolicy, label: 'Polityka Cookies', legalKey: 'cookies' })}
                 onEdit={() => { setLegalForm(cookiesPolicy || { title: 'Polityka Cookies', content: '' }); setEditingLegal('cookies'); setSaveError(null); }}
                 onDelete={() => setDeleteConfirmLegal('cookies')}
                 onPrint={() => handlePrint(cookiesPolicy, 'Polityka Cookies', null)}
@@ -489,7 +492,7 @@ export default function DashboardDocuments() {
                 label="Polityka Prywatności"
                 title={privacyPolicy?.title}
                 content={privacyPolicy?.content}
-                onView={() => openViewDoc({ kind: 'terms', data: privacyPolicy })}
+                onView={() => openViewDoc({ kind: 'terms', data: privacyPolicy, label: 'Polityka Prywatności', legalKey: 'privacy' })}
                 onEdit={() => { setLegalForm(privacyPolicy || { title: 'Polityka Prywatności', content: '' }); setEditingLegal('privacy'); setSaveError(null); }}
                 onDelete={() => setDeleteConfirmLegal('privacy')}
                 onPrint={() => handlePrint(privacyPolicy, 'Polityka Prywatności', null)}
