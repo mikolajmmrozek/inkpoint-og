@@ -11,6 +11,7 @@ export default function DocumentModal({
   fallbackTitle = 'Dokument',
   backLabel = 'POWRÓT NA GŁÓWNĄ',
   onBack,
+  backOnly = false,
   lang = 'pl',
 }) {
   const [doc, setDoc] = useState(null);
@@ -61,9 +62,11 @@ export default function DocumentModal({
               {shown?.title || fallbackTitle}
             </h3>
           </div>
-          <button type="button" onClick={onClose} aria-label="Zamknij" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--muted-foreground))', padding: '4px' }}>
-            <X size={18} />
-          </button>
+          {!backOnly && (
+            <button type="button" onClick={onClose} aria-label="Zamknij" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--muted-foreground))', padding: '4px' }}>
+              <X size={18} />
+            </button>
+          )}
         </div>
 
         <div className="overflow-y-auto p-5 flex-1">
@@ -93,9 +96,11 @@ export default function DocumentModal({
           <button type="button" onClick={onBack || onClose} className="btn-oxblood flex items-center gap-2" style={{ padding: '11px 20px' }}>
             <ArrowLeft size={12} /> {backLabel}
           </button>
-          <button type="button" onClick={onClose} className="btn-ghost-parchment">
-            ZAMKNIJ
-          </button>
+          {!backOnly && (
+            <button type="button" onClick={onClose} className="btn-ghost-parchment">
+              ZAMKNIJ
+            </button>
+          )}
         </div>
       </div>
     </div>

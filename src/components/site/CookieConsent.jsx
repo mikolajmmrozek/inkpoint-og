@@ -127,7 +127,8 @@ export default function CookieConsent() {
         onClose={() => setDocOpen(false)}
         docKey="cookies_policy"
         fallbackTitle="Polityka cookies"
-        backLabel="POWRÓT NA GŁÓWNĄ"
+        backLabel="POWRÓT NA STRONĘ GŁÓWNĄ"
+        backOnly
         onBack={() => {
           setDocOpen(false);
           if (window.location.pathname !== '/') window.location.href = '/';
