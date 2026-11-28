@@ -56,6 +56,32 @@
         ]
       }
     },
+    "hero_image_url": {
+      "type": "string",
+      "description": "Grafika nag\u0142\u00f3wkowa wiadomo\u015bci \u2014 pe\u0142na szeroko\u015b\u0107 pod paskiem marki"
+    },
+    "font_scheme": {
+      "type": "string",
+      "enum": [
+        "original",
+        "classic",
+        "elegant",
+        "modern",
+        "fraunces"
+      ],
+      "default": "original",
+      "description": "Zestaw czcionek wiadomo\u015bci \u2014 te same pakiety, kt\u00f3rych u\u017cywa strona studia"
+    },
+    "heading_size": {
+      "type": "number",
+      "default": 34,
+      "description": "Wielko\u015b\u0107 nag\u0142\u00f3wk\u00f3w w wiadomo\u015bci (px)"
+    },
+    "body_size": {
+      "type": "number",
+      "default": 15,
+      "description": "Wielko\u015b\u0107 tekstu w wiadomo\u015bci (px)"
+    },
     "layout": {
       "type": "string",
       "enum": [
@@ -125,8 +151,25 @@
             "adult",
             "minor"
           ]
+        },
+        "account": {
+          "type": "string",
+          "enum": [
+            "any",
+            "with",
+            "without",
+            "never_login"
+          ],
+          "description": "Konto w aplikacji: with = ma konto, without = bez konta, never_login = ma konto, ale nigdy si\u0119 nie zalogowa\u0142"
         }
       }
+    },
+    "excluded_emails": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Adresy wy\u0142\u0105czone z tej kampanii pojedynczo (odznaczone w podgl\u0105dzie odbiorc\u00f3w)"
     },
     "audience_count": {
       "type": "number",
@@ -150,7 +193,7 @@
         "green",
         "gray"
       ],
-      "description": "draft = szkic, ready = gotowa do wysy\u0142ki (wysy\u0142ka nadal wstrzymana), archived = archiwum"
+      "description": "draft = szkic, ready = gotowa do wysy\u0142ki, archived = archiwum"
     },
     "notes": {
       "type": "string",

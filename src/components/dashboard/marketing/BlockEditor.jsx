@@ -1,5 +1,6 @@
 import { ArrowUp, ArrowDown, Trash2, Plus } from 'lucide-react';
 import { BLOCK_TYPES, newBlock } from '@/lib/marketing';
+import ImageUpload from '@/components/dashboard/marketing/ImageUpload';
 import { fieldStyle, labelStyle, selectStyle } from '@/lib/marketingUi';
 
 const TYPE_LABELS = Object.fromEntries(BLOCK_TYPES.map(item => [item.key, item.label]));
@@ -49,8 +50,8 @@ export default function BlockEditor({ blocks, onChange, t }) {
             )}
 
             {block.type === 'image' && (
-              <div className="space-y-1">
-                <input value={block.image_url || ''} onChange={event => patch(index, { image_url: event.target.value })} style={fieldStyle(t)} placeholder="Adres zdjęcia (https://…)" />
+              <div className="space-y-2">
+                <ImageUpload value={block.image_url || ''} onChange={url => patch(index, { image_url: url })} t={t} label="Zdjęcie w wiadomości" />
                 <input value={block.text || ''} onChange={event => patch(index, { text: event.target.value })} style={fieldStyle(t)} placeholder="Opis zdjęcia" />
               </div>
             )}

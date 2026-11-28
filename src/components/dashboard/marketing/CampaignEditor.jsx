@@ -5,7 +5,9 @@ import AudienceFilters from '@/components/dashboard/marketing/AudienceFilters';
 import AudiencePreview from '@/components/dashboard/marketing/AudiencePreview';
 import EmailPreview from '@/components/dashboard/marketing/EmailPreview';
 import AiComposer from '@/components/dashboard/marketing/AiComposer';
+import ImageUpload from '@/components/dashboard/marketing/ImageUpload';
 import { filterSummary } from '@/lib/marketing';
+import { FONT_SCHEMES } from '@/lib/emailHtml';
 import { fieldStyle, labelStyle, selectStyle } from '@/lib/marketingUi';
 
 const Section = ({ title, hint, children, t }) => (
@@ -25,6 +27,8 @@ export default function CampaignEditor({ campaign, templates, preferences, onPre
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [segmentName, setSegmentName] = useState('');
   const [savingSegment, setSavingSegment] = useState(false);
+  // Odbiorca użyty w podglądzie, żeby {{first_name}} pokazywało prawdziwe imię klienta.
+  const [sampleRecipient, setSampleRecipient] = useState(null);
 
   const setField = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
 
@@ -142,6 +146,34 @@ export default function CampaignEditor({ campaign, templates, preferences, onPre
             <BlockEditor blocks={form.blocks || []} onChange={blocks => setField('blocks', blocks)} t={t} />
           </Section>
 
+          <Section title="Wygląd i grafika" hint="Grafika nagłówkowa i typografia — cała wiadomość czytelna także bez obrazków." t={t}>
+            <div className="mb-4">
+              <ImageUpload
+                value={form.hero_image_url || ''}
+                onChange={url => setField('hero_image_url', url)}
+                t={t}
+                label="Grafika nagłówkowa"
+                hint="Zdjęcie pod paskiem marki, na całą szerokość wiadomości."
+              />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <span style={labelStyle(t)}>Czcionki — pakiet strony</span>
+                <select value={form.font_scheme || 'original'} onChange={event => setField('font_scheme', event.target.value)} style={selectStyle(t)}>
+                  {FONT_SCHEMES.map(scheme => <option key={scheme.key} value={scheme.key}>{scheme.label}</option>)}
+                </select>
+              </div>
+              <div>
+                <span style={labelStyle(t)}>Wielkość nagłówków (px)</span>
+                <input type="number" min="20" max="64" value={form.heading_size ?? 34} onChange={event => setField('heading_size', Number(event.target.value))} style={fieldStyle(t)} />
+              </div>
+              <div>
+                <span style={labelStyle(t)}>Wielkość tekstu (px)</span>
+                <input type="number" min="11" max="22" value={form.body_size ?? 15} onChange={event => setField('body_size', Number(event.target.value))} style={fieldStyle(t)} />
+              </div>
+            </div>
+          </Section>
+
           <Section title="Asystent AI" hint="AI pisze treść lub układa ją w bloki. Każda generacja trafia do historii." t={t}>
             <AiComposer
               campaign={{ ...form, audience_summary: filterSummary(form.filters) }}
@@ -162,7 +194,14 @@ export default function CampaignEditor({ campaign, templates, preferences, onPre
           <Section title="Odbiorcy" hint={filterSummary(form.filters)} t={t}>
             <AudienceFilters filters={form.filters || {}} onChange={filters => setField('filters', filters)} t={t} />
             <div className="mt-5 pt-4" style={{ borderTop: `0.5px solid ${t.border}` }}>
-              <AudiencePreview filters={form.filters || {}} t={t} onCount={count => setForm(prev => ({ ...prev, audience_count: count, audience_updated: new Date().toISOString() }))} />
+              <AudiencePreview
+                filters={form.filters || {}}
+                t={t}
+                excluded={form.excluded_emails || []}
+                onExcludedChange={emails => setField('excluded_emails', emails)}
+                onSample={setSampleRecipient}
+                onCount={count => setForm(prev => ({ ...prev, audience_count: count, audience_updated: new Date().toISOString() }))}
+              />
             </div>
             <div className="flex items-end gap-2 mt-4">
               <div className="flex-1">
@@ -177,7 +216,7 @@ export default function CampaignEditor({ campaign, templates, preferences, onPre
         </div>
 
         <div className="lg:col-span-2 lg:sticky lg:top-4">
-          <EmailPreview campaign={form} t={t} />
+          <EmailPreview campaign={form} sampleRecipient={sampleRecipient} t={t} />
         </div>
       </div>
     </div>

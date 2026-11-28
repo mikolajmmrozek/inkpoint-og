@@ -1,12 +1,17 @@
 import { buildEmailHtml } from '@/lib/emailHtml';
 import { labelStyle } from '@/lib/marketingUi';
 
-export default function EmailPreview({ campaign, t }) {
+export default function EmailPreview({ campaign, sampleRecipient, t }) {
   const html = buildEmailHtml({
     subject: campaign.subject,
     preheader: campaign.preheader,
     blocks: campaign.blocks,
     layout: campaign.layout,
+    heroImageUrl: campaign.hero_image_url,
+    fontScheme: campaign.font_scheme,
+    headingSize: campaign.heading_size,
+    bodySize: campaign.body_size,
+    sampleFirstName: sampleRecipient?.first_name,
   });
 
   return (
@@ -27,7 +32,7 @@ export default function EmailPreview({ campaign, t }) {
         style={{ height: 620, border: `0.5px solid ${t.border}`, borderRadius: 'var(--radius)', background: '#0a0a0a' }}
       />
       <p className="mt-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', letterSpacing: '0.1em', color: t.muted }}>
-        PODGLĄD Z PRZYKŁADOWYM IMIENIEM — NIC NIE ZOSTAJE WYSŁANE
+        PODGLĄD Z IMIENIEM: {sampleRecipient?.first_name ? sampleRecipient.name : 'PRZYKŁADOWY KLIENT'} — NIC NIE ZOSTAJE WYSŁANE
       </p>
     </div>
   );

@@ -7,6 +7,7 @@ export const DEFAULT_FILTERS = {
   recency: 'any',
   visits: 'any',
   adult: 'any',
+  account: 'any',
 };
 
 export const SERVICE_CATEGORIES = [
@@ -38,6 +39,13 @@ export const FILTER_ROWS = [
   {
     key: 'adult', label: 'Wiek',
     options: [{ key: 'any', label: 'Dowolnie' }, { key: 'adult', label: 'Pełnoletni' }, { key: 'minor', label: 'Niepełnoletni' }],
+  },
+  {
+    key: 'account', label: 'Konto w aplikacji',
+    options: [
+      { key: 'any', label: 'Dowolnie' }, { key: 'with', label: 'Ma konto' },
+      { key: 'without', label: 'Bez konta' }, { key: 'never_login', label: 'Nigdy się nie zalogował' },
+    ],
   },
 ];
 
@@ -72,6 +80,11 @@ export const emptyCampaign = (userName) => ({
     { type: 'button', text: 'Zarezerwuj termin', url: '{{app_url}}/booking', align: 'left' },
   ],
   layout: 'classic',
+  hero_image_url: '',
+  font_scheme: 'original',
+  heading_size: 34,
+  body_size: 15,
+  excluded_emails: [],
   filters: { ...DEFAULT_FILTERS },
   status: 'draft',
   notes: '',

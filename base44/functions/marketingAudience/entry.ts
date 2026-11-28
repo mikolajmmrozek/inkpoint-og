@@ -4,6 +4,7 @@ const DAY = 86400000;
 // Klienci obecni przed wprowadzeniem zgód marketingowych są domyślnie traktowani jako zapisani.
 // Profile powstałe później trafiają do odbiorców tylko po zaznaczeniu zgody w ankiecie.
 const CONSENT_CUTOFF = new Date('2026-11-28T00:00:00Z');
+const MAX_RECIPIENTS = 1000;
 
 const asList = (value) => (Array.isArray(value) ? value : value?.items || []);
 const norm = (value) => (typeof value === 'string' ? value.trim().toLowerCase() : '');
@@ -35,6 +36,11 @@ const toDate = (value) => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
+const firstNameOf = (name, email) => {
+  const first = String(name || '').trim().split(/\s+/)[0];
+  return first || String(email || '').split('@')[0] || '';
+};
+
 export default async function (req) {
   try {
     const base44 = createClientFromRequest(req);
@@ -48,14 +54,18 @@ export default async function (req) {
     today.setHours(0, 0, 0, 0);
 
     const db = base44.asServiceRole.entities;
-    const [bookings, services, clients, forms, eventBookings, orders] = await Promise.all([
+    const [bookings, services, clients, forms, eventBookings, orders, users] = await Promise.all([
       db.Booking.list('-session_date', 3000),
       db.Service.list(),
       db.Client.list(),
       db.HealthForm.list('-created_date', 3000),
       db.EventBooking.list('-created_date', 3000),
       db.ShopOrder.list('-created_date', 3000),
+      db.User.list('-created_date', 5000).catch(() => []),
     ]);
+
+    // Adresy z kontem w aplikacji — nawet gdy profil klienta nie ma jeszcze user_id.
+    const userEmails = new Set(asList(users).map(account => norm(account.email)).filter(Boolean));
 
     const serviceMap = {};
     asList(services).forEach((service) => { serviceMap[service.id] = service; });
@@ -66,11 +76,12 @@ export default async function (req) {
       if (!key) return null;
       if (!people.has(key)) {
         people.set(key, {
-          email: key, name: '', phone: '', client_id: null, blocked: false,
+          email: key, name: '', first_name: '', phone: '', client_id: null, blocked: false,
           visits: 0, last_service: null, categories: new Set(),
           workshop: false, shop_order: false, age: null, minor_flag: false,
           consent: 'undecided', consent_date: '', consent_source: '',
           unsubscribed: false, token: '', since: null,
+          has_account: false, last_login: '',
         });
       }
       return people.get(key);
@@ -86,8 +97,11 @@ export default async function (req) {
       if (!person) return;
       person.client_id = client.id;
       person.name = person.name || client.name || [client.first_name, client.last_name].filter(Boolean).join(' ');
+      person.first_name = person.first_name || client.first_name || '';
       person.phone = person.phone || client.phone || '';
       person.blocked = Boolean(client.is_blocked);
+      person.has_account = person.has_account || Boolean(client.user_id);
+      person.last_login = person.last_login || client.last_login || '';
       if (client.marketing_consent === 'granted' || client.marketing_consent === 'denied') {
         person.consent = client.marketing_consent;
       }
@@ -153,6 +167,12 @@ export default async function (req) {
       person.shop_order = true;
     });
 
+    // Uzupełnienie danych: imię, konto w aplikacji.
+    people.forEach((person) => {
+      if (!person.first_name) person.first_name = firstNameOf(person.name, person.email);
+      if (userEmails.has(person.email)) person.has_account = true;
+    });
+
     const wanted = Array.isArray(filters.service_categories) ? filters.service_categories : [];
     const recencyDays = { month: 31, quarter: 92, half_year: 183, year: 366 };
 
@@ -172,6 +192,10 @@ export default async function (req) {
 
       if (filters.visits === 'one_time' && person.visits !== 1) return false;
       if (filters.visits === 'returning' && person.visits < 2) return false;
+
+      if (filters.account === 'with' && !person.has_account) return false;
+      if (filters.account === 'without' && person.has_account) return false;
+      if (filters.account === 'never_login' && !(person.has_account && !person.last_login)) return false;
 
       const isMinor = person.age !== null ? person.age < 18 : person.minor_flag;
       const ageKnown = person.age !== null || person.minor_flag;
@@ -197,14 +221,14 @@ export default async function (req) {
     const count = (list, predicate) => list.filter(predicate).length;
     const ageOf = (person) => (person.age !== null ? person.age : person.minor_flag ? 0 : null);
 
-    const slice = eligible.slice(0, 300);
+    const slice = eligible.slice(0, MAX_RECIPIENTS);
 
     // Odbiorca bez profilu klienta nie mógłby się wypisać — zakładamy profil z tokenem.
-    const noProfile = slice.filter((person) => !person.client_id);
+    const noProfile = slice.slice(0, 300).filter((person) => !person.client_id);
     if (noProfile.length > 0) {
       try {
         await db.Client.bulkCreate(noProfile.map((person) => ({
-          first_name: person.name?.split(' ')[0] || '',
+          first_name: person.first_name || '',
           last_name: person.name?.split(' ').slice(1).join(' ') || '',
           name: person.name || person.email,
           email: person.email,
@@ -227,15 +251,16 @@ export default async function (req) {
 
     // Token do linku REZYGNUJĘ — generowany raz i zapisywany na profilu klienta.
     const missingTokens = slice.filter((person) => person.client_id && !person.token);
-    if (missingTokens.length > 0) {
-      const patches = missingTokens.map((person) => {
+    for (let index = 0; index < missingTokens.length; index += 400) {
+      const batch = missingTokens.slice(index, index + 400);
+      const patches = batch.map((person) => {
         person.token = crypto.randomUUID();
         return { id: person.client_id, marketing_token: person.token };
       });
       try {
         await db.Client.bulkUpdate(patches);
       } catch (error) {
-        missingTokens.forEach((person) => { person.token = ''; });
+        batch.forEach((person) => { person.token = ''; });
       }
     }
 
@@ -243,6 +268,7 @@ export default async function (req) {
       const age = ageOf(person);
       return {
         name: person.name || person.email,
+        first_name: String(person.first_name || firstNameOf(person.name, person.email)).trim(),
         email: person.email,
         phone: person.phone,
         last_service: person.last_service ? person.last_service.toISOString().slice(0, 10) : '',
@@ -254,6 +280,9 @@ export default async function (req) {
         consent: consentOf(person),
         consent_date: person.consent_date,
         consent_source: person.consent_source,
+        has_account: person.has_account,
+        last_login: person.last_login,
+        never_logged_in: person.has_account && !person.last_login,
         unsubscribe_token: person.token,
       };
     });
@@ -276,6 +305,9 @@ export default async function (req) {
         returning: count(eligible, (p) => p.visits >= 2),
         workshop: count(eligible, (p) => p.workshop),
         shop_order: count(eligible, (p) => p.shop_order),
+        with_account: count(eligible, (p) => p.has_account),
+        without_account: count(eligible, (p) => !p.has_account),
+        never_logged_in: count(eligible, (p) => p.has_account && !p.last_login),
         categories: {
           tattoo: count(eligible, (p) => p.categories.has('tattoo')),
           piercing: count(eligible, (p) => p.categories.has('piercing')),
